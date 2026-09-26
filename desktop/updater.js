@@ -28,8 +28,9 @@ function newer(a, b) {
  * @param {(title: string, body: string, onClick?: () => void) => void} o.notify
  * @param {() => void} o.onChange       state changed (tray menu, settings)
  * @param {(url: string) => void} o.openUrl
+ * @param {(key: string, vars?: object) => string} o.t  interface text (renderer/i18n-desktop.js)
  */
-function createUpdater({ version, packaged, portable, autoUpdater, fetchJson, notify, onChange, openUrl }) {
+function createUpdater({ version, packaged, portable, autoUpdater, fetchJson, notify, onChange, openUrl, t }) {
   const state = { status: "idle", version: null, error: null, checkedAt: 0 }; // idle | checking | available | downloading | ready | latest | error | dev
   let au = null, timer = null, manual = false;
   const set = patch => { Object.assign(state, patch); onChange(); };
@@ -43,16 +44,16 @@ function createUpdater({ version, packaged, portable, autoUpdater, fetchJson, no
     au.on("checking-for-update", () => set({ status: "checking", error: null }));
     au.on("update-not-available", () => {
       set({ status: "latest", checkedAt: Date.now() });
-      if (manual) notify("لديك أحدث إصدار", `الإصدار ${version} هو الأحدث.`);
+      if (manual) notify(t("d.upLatestTitle"), t("d.upLatestBody", { v: version }));
     });
     au.on("update-available", info => set({ status: "downloading", version: info.version, checkedAt: Date.now() }));
     au.on("update-downloaded", info => {
       set({ status: "ready", version: info.version });
-      notify("تحديث جديد جاهز", `الإصدار ${info.version} — أعد تشغيل لمحة لتثبيته، أو سيُثبَّت عند الخروج. اضغط هنا لإعادة التشغيل الآن.`, restart);
+      notify(t("d.upReadyTitle"), t("d.upReadyBody", { v: info.version }), restart);
     });
     au.on("error", err => {
       set({ status: "error", error: String((err && err.message) || err).slice(0, 200) });
-      if (manual) notify("تعذّر التحقق من التحديثات", "تحقق من اتصالك بالإنترنت ثم حاول مجددًا.");
+      if (manual) notify(t("d.upFailedTitle"), t("d.upFailedBody"));
     });
     return au;
   }
@@ -65,20 +66,20 @@ function createUpdater({ version, packaged, portable, autoUpdater, fetchJson, no
       const latest = String(rel.tag_name || "").replace(/^v/, "");
       if (latest && newer(latest, version)) {
         set({ status: "available", version: latest, checkedAt: Date.now() });
-        notify("إصدار جديد من لمحة", `الإصدار ${latest} متاح. نسخة Portable لا تُحدّث نفسها — اضغط لتنزيله.`, () => openUrl(rel.html_url || RELEASES));
+        notify(t("d.upNewTitle"), t("d.upNewBody", { v: latest }), () => openUrl(rel.html_url || RELEASES));
       } else {
         set({ status: "latest", checkedAt: Date.now() });
-        if (manual) notify("لديك أحدث إصدار", `الإصدار ${version} هو الأحدث.`);
+        if (manual) notify(t("d.upLatestTitle"), t("d.upLatestBody", { v: version }));
       }
     } catch (err) {
       set({ status: "error", error: String((err && err.message) || err).slice(0, 200) });
-      if (manual) notify("تعذّر التحقق من التحديثات", "تحقق من اتصالك بالإنترنت ثم حاول مجددًا.");
+      if (manual) notify(t("d.upFailedTitle"), t("d.upFailedBody"));
     }
   }
 
   /** `byUser`: from the tray or Settings, so "up to date" and errors are reported too. */
   async function check(byUser = false) {
-    if (!packaged) { set({ status: "dev" }); if (byUser) notify("التحديثات", "التحديث التلقائي يعمل في النسخة المثبّتة فقط."); return state; }
+    if (!packaged) { set({ status: "dev" }); if (byUser) notify(t("d.upTitle"), t("d.upDevBody")); return state; }
     if (["checking", "downloading"].includes(state.status)) return state;
     if (state.status === "ready") { if (byUser) restart(); return state; }
     manual = byUser;

@@ -102,6 +102,13 @@ kbd {
 .switch.sm .track { width: 36px; height: 22px; }
 .switch.sm .thumb { width: 18px; height: 18px; }
 .switch.sm input:checked + .track .thumb { transform: translateX(-14px); }
+/* English interface (left to right): the knob starts on the left and moves right */
+[dir="ltr"] .switch .thumb { right: auto; left: 2px; }
+[dir="ltr"] .switch input:checked + .track .thumb { transform: translateX(16px); }
+[dir="ltr"] .switch.sm input:checked + .track .thumb { transform: translateX(14px); }
+
+/* A page stays hidden until its interface language is applied (shared/i18n.js), so no Arabic flashes before English */
+[data-i18n-pending] body { visibility: hidden; }
 
 .banner {
   display: flex; align-items: center; gap: 12px;

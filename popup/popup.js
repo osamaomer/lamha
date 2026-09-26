@@ -1,6 +1,7 @@
 "use strict";
 
 const $ = id => document.getElementById(id);
+const { t, num } = LamhaI18n;
 const DEFAULTS = { enabled: true, targetLang: "ar", disabledSites: [] };
 let settings = { ...DEFAULTS };
 let tab = null, host = "", pageActive = false, pageSupported = false;
@@ -18,6 +19,8 @@ function h(tag, props, ...kids) {
 }
 
 async function init() {
+  await LamhaI18n.init({ onChange: () => location.reload() }); // redrawn in the new language
+  LamhaI18n.applyDom(document);
   settings = { ...DEFAULTS, ...(await browser.storage.sync.get(DEFAULTS)) };
   $("enabled").checked = settings.enabled;
 
@@ -37,11 +40,11 @@ async function init() {
       pageActive = !!(st && st.active);
     } catch (_) {
       pageSupported = false; // content script not present (e.g. tab opened before install)
-      $("pageNote").textContent = "أعد تحميل الصفحة لتفعيل لمحة عليها.";
+      $("pageNote").textContent = t("p.reloadNote");
       $("pageNote").hidden = false;
     }
   } else {
-    $("pageNote").textContent = "لا يمكن للإضافات العمل على صفحات Firefox الخاصة.";
+    $("pageNote").textContent = t("p.specialPage");
     $("pageNote").hidden = false;
   }
   refreshSiteDot();
@@ -62,7 +65,7 @@ function refreshPageBtn() {
   const btn = $("pageBtn");
   btn.disabled = !pageSupported;
   btn.classList.toggle("stop", pageActive);
-  $("pageLabel").textContent = pageActive ? "إيقاف ترجمة الصفحة" : "ترجمة هذه الصفحة إلى العربية";
+  $("pageLabel").textContent = pageActive ? t("p.stopPage") : t("p.translatePage");
 }
 
 /* ---- events ---- */
@@ -121,11 +124,11 @@ async function runQuick() {
   if (!text) { out.hidden = true; return; }
   const token = ++qToken;
   out.hidden = false;
-  out.replaceChildren(h("div", { class: "loading" }, "جارٍ الترجمة…"));
+  out.replaceChildren(h("div", { class: "loading" }, t("common.translating")));
   const res = await browser.runtime.sendMessage({ type: "lookup", text }).catch(() => null);
   if (token !== qToken) return;
   if (!res || !res.ok) {
-    const msg = res && res.error === "rate_limited" ? "خدمة الترجمة مشغولة مؤقتًا. انتظر دقيقة ثم حاول مجددًا." : "تعذّرت الترجمة. تحقق من الاتصال.";
+    const msg = res && res.error === "rate_limited" ? t("p.busy") : t("p.failed");
     out.replaceChildren(h("div", { class: "error" }, msg));
     return;
   }
@@ -136,11 +139,11 @@ async function runQuick() {
         h("div", { class: "tr" + (d.translation.length > 40 ? " long" : ""), dir: dirOf(d.tl) }, d.translation),
         d.type === "word" && d.srcTranslit && h("div", { class: "phon" }, `${d.query} · /${d.srcTranslit}/`)
       ),
-      h("button", { class: "icon-btn", title: "نسخ", "aria-label": "نسخ", onclick: () => navigator.clipboard.writeText(d.translation) }, copyIcon())
+      h("button", { class: "icon-btn", title: t("common.copy"), "aria-label": t("common.copy"), onclick: () => navigator.clipboard.writeText(d.translation) }, copyIcon())
     )
   ];
   (d.dict || []).slice(0, 3).forEach(p => kids.push(
-    h("div", { class: "pos-row" }, h("span", { class: "pos" }, p.pos), h("span", { class: "terms" }, p.terms.slice(0, 6).map(t => t.word).join("، ")))
+    h("div", { class: "pos-row" }, h("span", { class: "pos" }, p.pos), h("span", { class: "terms" }, p.terms.slice(0, 6).map(term => term.word).join(LamhaI18n.lang() === "ar" ? "، " : ", ")))
   ));
   const firstDef = d.definitions && d.definitions[0] && d.definitions[0].entries[0];
   if (firstDef) kids.push(h("div", { class: "def" }, firstDef.glossTr && h("div", null, firstDef.glossTr), h("div", { class: "en" }, firstDef.gloss)));
@@ -161,8 +164,8 @@ function copyIcon() {
 /* ---- compose: writing tools on text typed here (Claude or Ollama) ---- */
 
 const WRITE_TOOLS = [
-  ["proofread", "تدقيق لغوي"], ["improve", "تحسين"], ["formal", "رسمي"],
-  ["friendly", "ودّي"], ["concise", "أقصر"], ["toEnglish", "بالإنجليزية"]
+  ["proofread", "tool.proofread"], ["improve", "tool.improveShort"], ["formal", "tool.formal"],
+  ["friendly", "tool.friendly"], ["concise", "tool.concise"], ["toEnglish", "tool.toEnglishShort"]
 ];
 const draft = $("draft");
 let aiLocal = {}, wrToken = 0, draftTimer;
@@ -204,7 +207,7 @@ function renderTools(active) {
   $("wrTools").replaceChildren(
     ...tools.map(([id, label]) => h("button", {
       class: id === active ? "on" : null, disabled: !draft.value.trim() || null, onclick: () => runWrite(id)
-    }, label)),
+    }, t(label))),
     h("span", { class: "hint-key" }, h("span", { class: "combo" }, "Ctrl+Enter"))
   );
 }
@@ -225,8 +228,8 @@ function wrError(code, retry) {
   const [title, text, needsSettings] = LamhaAI.errorInfo(code, providerName());
   return h("div", { class: "error" }, h("b", null, title), text,
     h("div", { class: "acts" }, needsSettings
-      ? h("button", { class: "btn small", onclick: openAISettings }, "الإعدادات")
-      : retry && h("button", { class: "btn small", onclick: retry }, "إعادة المحاولة")));
+      ? h("button", { class: "btn small", onclick: openAISettings }, t("common.settings"))
+      : retry && h("button", { class: "btn small", onclick: retry }, t("common.retry"))));
 }
 
 function openAISettings() {
@@ -242,19 +245,19 @@ async function runWrite(tool, fresh = false) {
   if (!aiReady()) { out.replaceChildren(wrError(LamhaAI.provider(aiLocal).notReady)); return; }
   const token = ++wrToken;
   renderTools(tool);
-  out.replaceChildren(h("div", { class: "loading" }, h("span", { class: "spin" }), "جارٍ العمل…"));
+  out.replaceChildren(h("div", { class: "loading" }, h("span", { class: "spin" }), t("common.working")));
   const res = await browser.runtime.sendMessage({ type: "ai", tool, text, extra: fresh ? { fresh: true } : {} }).catch(e => ({ ok: false, error: String(e) }));
   if (token !== wrToken) return;
   if (!res || !res.ok) { out.replaceChildren(wrError(res && res.error, () => runWrite(tool))); return; }
 
   const useIt = result => h("button", {
-    class: "btn small", title: "ضع النتيجة في مربع الكتابة لتكمل عليها",
+    class: "btn small", title: t("write.useItTitle"),
     onclick: () => { draft.value = result; draft.dispatchEvent(new Event("input")); out.hidden = true; draft.focus(); }
-  }, "استخدمه");
+  }, t("write.useIt"));
   const actions = result => h("div", { class: "acts" },
     useIt(result),
-    h("button", { class: "btn small ghost", onclick: () => navigator.clipboard.writeText(result).then(() => flash("نُسخ ✓")) }, "نسخ"),
-    h("button", { class: "btn small ghost", title: "محاولة أخرى", onclick: () => runWrite(tool, true) }, "↻")
+    h("button", { class: "btn small ghost", onclick: () => navigator.clipboard.writeText(result).then(() => flash(t("common.copied"))) }, t("common.copy")),
+    h("button", { class: "btn small ghost", title: t("write.again"), onclick: () => runWrite(tool, true) }, "↻")
   );
 
   if (tool !== "proofread") {
@@ -264,7 +267,7 @@ async function runWrite(tool, fresh = false) {
   }
   const { corrected = "", issues = [] } = res.data;
   if (!issues.length || corrected.trim() === text) {
-    out.replaceChildren(h("div", { class: "ok" }, "✓ لا توجد أخطاء — نصّك سليم"));
+    out.replaceChildren(h("div", { class: "ok" }, t("write.noErrorsCheck")));
     return;
   }
   const fixed = corrected.trim();
@@ -273,7 +276,7 @@ async function runWrite(tool, fresh = false) {
     actions(fixed),
     h("ul", { class: "issues" }, issues.map(i => h("li", null,
       h("div", { class: "fix" }, h("del", null, i.original), " → ", h("ins", null, i.fix)),
-      i.category !== "other" && h("span", { class: "cat" }, LamhaAI.CATEGORIES[i.category].ar),
+      i.category !== "other" && h("span", { class: "cat" }, LamhaAI.catLabel(i.category)),
       i.why && h("div", { class: "why" }, i.why)
     )))
   );
@@ -294,7 +297,7 @@ async function renderWeak() {
   const btn = $("weak");
   btn.hidden = !top;
   if (!top) return;
-  btn.replaceChildren("أكثر أخطائك: ", h("b", null, LamhaAI.CATEGORIES[top[0]].ar), ` (${top[1].toLocaleString("ar-EG")}) — اعرف القاعدة ←`);
+  btn.replaceChildren(t("write.topMistake"), h("b", null, LamhaAI.catLabel(top[0])), t("write.learnRule", { n: top[1] }));
   btn.onclick = () => { browser.tabs.create({ url: browser.runtime.getURL("options/options.html#journal") }); window.close(); };
 }
 
@@ -307,20 +310,19 @@ browser.storage.onChanged.addListener((changes, area) => {
 /* ---- review: flashcards of looked-up words (scheduling lives in the background) ---- */
 
 let rv = { queue: [], counts: null, nextDue: 0 }, rvShown = false;
-const arNum = n => n.toLocaleString("ar-EG");
+const arNum = n => num(n);
 
-/** "١٠ د" / "ساعة" / "يومان" / "٥ أيام" / "٣ أشهر" … for the time until the next review. */
+/** "١٠ د" / "ساعة" / "يومان" / "٥ أيام" … or "10 min" / "1 hour" / "5 days" … until the next review. */
 function spanLabel(ms) {
   const min = Math.round(ms / 60e3);
-  if (min < 60) return `${arNum(Math.max(1, min))} د`;
+  if (min < 60) return t("span.min", { n: Math.max(1, min) });
   const hours = Math.round(min / 60);
-  if (hours < 24) return hours === 1 ? "ساعة" : hours === 2 ? "ساعتان" : `${arNum(hours)} ساعات`;
+  if (hours < 24) return t("span.hours", { n: hours });
   const days = Math.round(hours / 24);
-  if (days < 30) return days === 1 ? "يوم" : days === 2 ? "يومان" : days <= 10 ? `${arNum(days)} أيام` : `${arNum(days)} يومًا`;
+  if (days < 30) return t("span.days", { n: days });
   const months = Math.round(days / 30);
-  if (months < 12) return months === 1 ? "شهر" : months === 2 ? "شهران" : months <= 10 ? `${arNum(months)} أشهر` : `${arNum(months)} شهرًا`;
-  const years = Math.round(days / 365);
-  return years === 1 ? "سنة" : `${arNum(years)} سنوات`;
+  if (months < 12) return t("span.months", { n: months });
+  return t("span.years", { n: Math.round(days / 365) });
 }
 
 async function loadReview(render = true) {
@@ -337,41 +339,40 @@ function renderReview() {
   const { queue, counts } = rv;
   const c = queue[0];
   $("rvHead").replaceChildren(
-    h("span", { class: "pill" }, `للمراجعة ${arNum(counts.due)}`),
-    h("span", { class: "pill new" }, `جديدة ${arNum(counts.fresh)}`),
+    h("span", { class: "pill" }, t("rv.due", { n: counts.due })),
+    h("span", { class: "pill new" }, t("rv.fresh", { n: counts.fresh })),
     h("span", { class: "grow" }),
-    h("span", null, `${arNum(counts.total)} كلمة · ${arNum(counts.learned)} محفوظة`)
+    h("span", null, t("rv.totals", counts))
   );
   if (!c) {
     $("rvCard").replaceChildren(counts.total
-      ? h("div", { class: "rv-done" }, h("b", null, "أحسنت! لا توجد كلمات للمراجعة الآن 🎉"),
-        rv.nextDue ? `المراجعة القادمة بعد ${spanLabel(rv.nextDue - Date.now())}.` : "")
-      : h("div", { class: "rv-done" }, h("b", null, "لا توجد كلمات بعد"),
-        "ابحث عن كلمات إنجليزية في أي صفحة، وستظهر هنا لتراجعها وتحفظها."));
+      ? h("div", { class: "rv-done" }, h("b", null, t("rv.doneTitle")),
+        rv.nextDue ? t("rv.next", { span: spanLabel(rv.nextDue - Date.now()) }) : "")
+      : h("div", { class: "rv-done" }, h("b", null, t("rv.emptyTitle")), t("rv.emptyText")));
     return;
   }
 
   const front = h("div", { class: "rv-front" },
-    c.isNew && h("div", { class: "rv-tag" }, "كلمة جديدة"),
+    c.isNew && h("div", { class: "rv-tag" }, t("rv.newWord")),
     h("div", { class: "rv-word-row" },
       h("div", { class: "rv-word" }, c.q),
-      h("button", { class: "icon-btn", title: "استمع", "aria-label": "استمع", onclick: () => browser.runtime.sendMessage({ type: "speak", text: c.q, lang: "en" }).catch(() => {}) }, speakIcon())),
+      h("button", { class: "icon-btn", title: t("common.listen"), "aria-label": t("common.listen"), onclick: () => browser.runtime.sendMessage({ type: "speak", text: c.q, lang: "en" }).catch(() => {}) }, speakIcon())),
     c.ex && h("div", { class: "rv-ex" }, highlight(c.ex, c.form || c.q))
   );
   const kids = [front];
   if (!rvShown) {
-    kids.push(h("button", { class: "btn block rv-show", onclick: reveal }, "أظهر المعنى ", h("kbd", null, "Space")));
+    kids.push(h("button", { class: "btn block rv-show", onclick: reveal }, t("rv.show"), h("kbd", null, "Space")));
   } else {
     kids.push(
       h("div", { class: "rv-back" },
         h("div", { class: "rv-tr" }, c.tr),
         c.def && h("div", { class: "rv-def" }, c.def)),
       h("div", { class: "rv-grades" },
-        gradeBtn("again", "نسيت", c.next.again, "1"),
-        gradeBtn("hard", "صعبة", c.next.hard, "2"),
-        gradeBtn("good", "عرفتها", c.next.good, "3")),
+        gradeBtn("again", t("rv.again"), c.next.again, "1"),
+        gradeBtn("hard", t("rv.hard"), c.next.hard, "2"),
+        gradeBtn("good", t("rv.good"), c.next.good, "3")),
       h("div", { class: "rv-tools" },
-        h("button", { class: "link", onclick: () => removeCurrent(c) }, "إزالة من المراجعة"))
+        h("button", { class: "link", onclick: () => removeCurrent(c) }, t("rv.remove")))
     );
   }
   $("rvCard").replaceChildren(...kids);
@@ -385,7 +386,7 @@ function highlight(sentence, word) {
 }
 
 function gradeBtn(grade, label, ms, key) {
-  return h("button", { class: grade, title: `مفتاح ${key}`, onclick: () => grade && answer(grade) }, label, h("small", null, spanLabel(ms)));
+  return h("button", { class: grade, title: t("rv.key", { k: key }), onclick: () => grade && answer(grade) }, label, h("small", null, spanLabel(ms)));
 }
 
 function reveal() {
@@ -404,7 +405,7 @@ async function answer(grade) {
 
 async function removeCurrent(c) {
   await browser.runtime.sendMessage({ type: "cardRemove", key: c.key }).catch(() => {});
-  flash("أُزيلت الكلمة");
+  flash(t("rv.removed"));
   await loadReview(true);
 }
 
@@ -431,7 +432,7 @@ async function renderHistory() {
   const { history = [] } = await browser.storage.local.get("history");
   $("histCard").hidden = !history.length;
   $("hist").replaceChildren(...history.slice(0, 6).map(item =>
-    h("li", { title: "ترجم مجددًا", onclick: () => { q.value = item.q; q.dispatchEvent(new Event("input")); clearTimeout(qTimer); runQuick(); } },
+    h("li", { title: t("p.translateAgain"), onclick: () => { q.value = item.q; q.dispatchEvent(new Event("input")); clearTimeout(qTimer); runQuick(); } },
       h("span", { class: "w", dir: "auto" }, item.q),
       h("span", { class: "t" }, item.tr))
   ));

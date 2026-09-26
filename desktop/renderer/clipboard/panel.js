@@ -1,7 +1,10 @@
 /* Lamha desktop — quick panel (Alt+Shift+V): search the history and paste into the app that was in front.
  * The window is created hidden at startup and reused; main.js sends "open" each time it is shown. */
 "use strict";
-(() => {
+(async () => {
+  // the panel's own markup (header, key hints) in the interface language; a change reloads it (main.js injects again)
+  await LamhaI18n.init({ onChange: () => location.reload() });
+  LamhaI18n.applyDom(document);
   const body = document.getElementById("cpBody");
   const foot = document.getElementById("cpFoot");
   const listRoot = document.createElement("div");
@@ -32,8 +35,8 @@
 
   /** While paused (tray): a banner above the list with استئناف. */
   const banner = LamhaClipList.h("div", { class: "banner cp-banner", role: "status", hidden: true },
-    LamhaClipList.h("div", null, LamhaClipList.h("b", null, "الحافظة متوقفة مؤقتًا"), "لا يُسجَّل ما تنسخه الآن."),
-    LamhaClipList.h("button", { class: "btn small", type: "button", onclick: async () => { await lamhaClipboard.resume(); banner.hidden = true; list.focus(); } }, "استئناف"));
+    LamhaClipList.h("div", null, LamhaClipList.h("b", null, LamhaI18n.t("d.pausedTitle")), LamhaI18n.t("d.pausedText")),
+    LamhaClipList.h("button", { class: "btn small", type: "button", onclick: async () => { await lamhaClipboard.resume(); banner.hidden = true; list.focus(); } }, LamhaI18n.t("d.resumeBtn")));
   body.before(banner);
 
   function show(enabled, paused) {

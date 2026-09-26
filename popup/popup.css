@@ -33,7 +33,7 @@ textarea {
 }
 textarea:focus { box-shadow: inset 0 0 0 2px var(--accent); }
 textarea::placeholder { color: var(--faint); }
-#clearQ { position: absolute; top: 8px; left: 6px; }
+#clearQ { position: absolute; top: 8px; inset-inline-end: 6px; }
 
 .result { margin-top: 10px; animation: fade .18s ease both; }
 @keyframes fade { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }

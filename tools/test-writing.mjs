@@ -26,12 +26,13 @@ function storageArea(data) {
   };
 }
 
-function makeEnv({ fetchImpl, local = {}, sync = {} }) {
+function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" } }) {
   let onMessage;
+  const installed = [];
   const noopEvent = { addListener() {} };
   const browser = {
     storage: { local: storageArea(local), sync: storageArea(sync), onChanged: noopEvent },
-    runtime: { onMessage: { addListener: f => { onMessage = f; } }, onInstalled: noopEvent, onStartup: noopEvent, getURL: p => "moz-extension://x/" + p },
+    runtime: { onMessage: { addListener: f => { onMessage = f; } }, onInstalled: { addListener: f => installed.push(f) }, onStartup: noopEvent, getURL: p => "moz-extension://x/" + p },
     menus: { removeAll: async () => {}, create() {}, onClicked: noopEvent },
     commands: { onCommand: noopEvent },
     tabs: { query: async () => [], sendMessage: async () => {}, create: async () => {} },
@@ -41,9 +42,13 @@ function makeEnv({ fetchImpl, local = {}, sync = {} }) {
     browser, fetch: fetchImpl, console, setTimeout, clearTimeout, AbortController, URLSearchParams, structuredClone,
     LocalDict: {}, Audio: class {}
   });
+  vm.runInContext(src("shared/i18n.js"), ctx, { filename: "i18n.js" });
   vm.runInContext(src("shared/lamha-ai.js"), ctx, { filename: "lamha-ai.js" });
   vm.runInContext(src("background.js"), ctx, { filename: "background.js" });
-  return { ctx, browser, send: msg => onMessage(msg, {}), flush: () => vm.runInContext("journalQueue", ctx) };
+  return {
+    ctx, browser, send: msg => onMessage(msg, {}), flush: () => vm.runInContext("journalQueue", ctx),
+    installed: details => Promise.all(installed.map(f => f(details))) // what Firefox fires on install / update
+  };
 }
 
 const json = (status, body) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
@@ -436,6 +441,47 @@ test("a word lookup adds a card with its sentence and in-context meaning", async
   const off = makeEnv({ fetchImpl: google.fetchImpl, local: { cardsImported: true }, sync: { dictSource: "online", cardsAuto: false } });
   await off.send({ type: "lookup", text: "bank" });
   assert.equal(await off.send({ type: "cardHas", q: "bank" }), false, "cardsAuto off");
+});
+
+test("English interface: explanations, the explain tool and the default summary are in English", async () => {
+  const r = recorder((url, body) => claudeReply(/Proofread/.test(body.messages[0].content) ? PROOF : { text: "ok" }));
+  const env = makeEnv({ fetchImpl: r.fetchImpl, local: { aiKey: "sk-test" }, sync: { uiLang: "en" } });
+  await env.send({ type: "ai", tool: "proofread", text: "I go to market yesterday.", extra: {} });
+  await env.send({ type: "ai", tool: "explain", text: "It's raining cats and dogs.", extra: {} });
+  await env.send({ type: "ai", tool: "summarize", text: "A long report about the quarter.", extra: {} });
+  await env.send({ type: "ai", tool: "summarize", text: "A long report about the quarter.", extra: { lang: "ar" } });
+  const prompts = r.calls.map(c => c.body.messages[0].content);
+  assert.match(prompts[0], /one-sentence explanation in English/);
+  assert.match(prompts[1], /in simple English/);
+  assert.match(prompts[2], /Summarize the key points of the text in English/);
+  assert.match(prompts[3], /in Arabic/, "an explicit summary language still wins");
+  assert.equal(env.ctx.LamhaAI.errorInfo("ai_no_key")[0], "Turn on the writing tools");
+  assert.equal(env.ctx.LamhaAI.catLabel("articles"), "Articles (a / an / the)");
+});
+
+test("Arabic interface: explanations and messages stay Arabic", async () => {
+  const r = recorder(() => claudeReply(PROOF));
+  const env = makeEnv({ fetchImpl: r.fetchImpl, local: { aiKey: "sk-test" } });
+  await env.send({ type: "ai", tool: "proofread", text: "I go to market yesterday.", extra: {} });
+  assert.match(r.calls[0].body.messages[0].content, /one-sentence explanation in Arabic/);
+  assert.equal(env.ctx.LamhaAI.errorInfo("ai_no_key")[0], "فعّل أدوات الكتابة");
+});
+
+test("an update keeps Arabic for existing users; a new install follows the system", async () => {
+  const updated = makeEnv({ fetchImpl: async () => json(200, {}), sync: {} });
+  await updated.installed({ reason: "update" });
+  assert.equal(updated.browser.storage.sync.data.uiLang, "ar");
+  const kept = makeEnv({ fetchImpl: async () => json(200, {}), sync: { uiLang: "en" } });
+  await kept.installed({ reason: "update" });
+  assert.equal(kept.browser.storage.sync.data.uiLang, "en", "a chosen language is never overwritten");
+  const fresh = makeEnv({ fetchImpl: async () => json(200, {}), sync: {} });
+  await fresh.installed({ reason: "install" });
+  assert.equal(fresh.browser.storage.sync.data.uiLang, undefined, "new installs stay on automatic");
+  const resolve = (pref, sys) => vm.runInContext(`LamhaI18n.resolve(${JSON.stringify(pref)}, ${JSON.stringify(sys)})`, fresh.ctx);
+  assert.equal(resolve("auto", "ar-SA"), "ar");
+  assert.equal(resolve("auto", "en-US"), "en");
+  assert.equal(resolve("auto", "fr-FR"), "en");
+  assert.equal(resolve("ar", "en-US"), "ar");
 });
 
 /* optional: one real request to the local Ollama */

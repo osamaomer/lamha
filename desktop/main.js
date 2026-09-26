@@ -23,6 +23,8 @@ const DESKTOP_CSS = fs.readFileSync(path.join(__dirname, "renderer", "desktop.cs
 if (SMOKE) app.setPath("userData", fs.mkdtempSync(path.join(os.tmpdir(), "lamha-smoke-")));
 
 let mainWin = null, optionsWin = null, tray = null, quitting = false;
+/** Interface text (shared/i18n.js + renderer/i18n-desktop.js, loaded by startCore). */
+const T = (key, vars) => globalThis.LamhaI18n.t(key, vars);
 let stores, messageHandler = null, badgeCount = 0, lastReminder = 0;
 
 /* ---------------- the browser.* replacement for the background logic ---------------- */
@@ -77,6 +79,7 @@ ipcMain.on("lamha:audio-event", (_e, id, type) => {
 
 function installBrowserShim() {
   globalThis.browser = {
+    i18n: { getUILanguage: () => app.getLocale() }, // "auto" interface language follows Windows (shared/i18n.js)
     storage: { local: stores.local, sync: stores.sync, onChanged: { addListener: f => storageListeners.push(f) } },
     runtime: {
       onMessage: { addListener: f => { messageHandler = f; } },
@@ -116,11 +119,17 @@ function startCore() {
     sync: new Store(path.join(dir, "storage-sync.json"), "sync", broadcast)
   };
   installBrowserShim();
-  for (const f of ["local-dict.js", "shared/lamha-ai.js", "background.js"]) {
+  const flag = path.join(dir, "installed.flag");
+  const firstRun = !fs.existsSync(flag);
+  // interface language: a profile from before the setting keeps Arabic; the self-test is pinned (LAMHA_SMOKE_LANG to change)
+  if (SMOKE) stores.sync.set({ uiLang: process.env.LAMHA_SMOKE_LANG || "ar" });
+  else if (!firstRun && !("uiLang" in stores.sync.data)) stores.sync.set({ uiLang: "ar" });
+  for (const f of ["local-dict.js", "shared/i18n.js", "shared/lamha-ai.js", "background.js"]) {
     vm.runInThisContext(fs.readFileSync(path.join(EXT_DIR, f), "utf8"), { filename: path.join(EXT_DIR, f) });
   }
-  const flag = path.join(dir, "installed.flag");
-  if (!fs.existsSync(flag)) {
+  const desktopStrings = path.join(__dirname, "renderer", "i18n-desktop.js");
+  vm.runInThisContext(fs.readFileSync(desktopStrings, "utf8"), { filename: desktopStrings }); // tray, notifications, clipboard UI
+  if (firstRun) {
     fs.writeFileSync(flag, new Date().toISOString());
     listeners.installed.forEach(f => f({ reason: "install" })); // opens Settings once: choose Ollama/Claude
   } else {
@@ -132,7 +141,7 @@ function startCore() {
 
 ipcMain.on("lamha:info", e => {
   const role = cardWin && !cardWin.isDestroyed() && e.sender === cardWin.webContents ? "card" : "page";
-  e.returnValue = { base: BASE, version: app.getVersion(), role };
+  e.returnValue = { base: BASE, version: app.getVersion(), role, locale: app.getLocale() };
 });
 
 ipcMain.handle("lamha:message", async (_e, msg) => {
@@ -186,7 +195,7 @@ function prepare(win) {
 function createMain() {
   mainWin = new BrowserWindow({
     width: 480, height: 720, minWidth: 380, minHeight: 480,
-    title: "لمحة", icon: ICON, show: false, autoHideMenuBar: true,
+    title: T("common.lamha"), icon: ICON, show: false, autoHideMenuBar: true,
     backgroundColor: "#f5f5f7",
     webPreferences: webPrefs()
   });
@@ -218,7 +227,7 @@ function openOptions(suffix) {
     optionsWin.loadFile(path.join(EXT_DIR, "options", "options.html"), target);
   } else {
     optionsWin = new BrowserWindow({
-      width: 820, height: 860, minWidth: 420, title: "إعدادات لمحة", icon: ICON, show: false,
+      width: 820, height: 860, minWidth: 420, title: T("d.settingsTitle"), icon: ICON, show: false,
       autoHideMenuBar: true, backgroundColor: "#f5f5f7", webPreferences: webPrefs()
     });
     prepare(optionsWin);
@@ -249,7 +258,7 @@ function openUrl(url) {
  * "استبدال" (Replace) pastes the result back into that app. */
 
 const HOTKEYS = { "Alt+Shift+L": "lookup", "Alt+Shift+W": "write", "Alt+Shift+V": "clipboard" };
-const HOTKEY_LABELS = { lookup: "بحث وترجمة في أي برنامج", write: "أدوات الكتابة في أي برنامج", clipboard: "الحافظة: الصق من السجل" };
+const HOTKEY_LABELS = { lookup: "d.hkLookup", write: "d.hkWrite", clipboard: "d.hkClipboard" }; // keys: renderer/i18n-desktop.js
 const CARD_W = 480, CARD_H = 620;
 let cardWin = null, cardReady = null, cardSource = null, cardShownAt = 0, hotkeyBusy = false, hotkeyErrors = [];
 const selection = process.platform === "win32" ? require("./selection") : null;
@@ -432,7 +441,8 @@ async function injectClipboardUi(wc, entry, { standalone = false } = {}) {
   if (standalone) await wc.insertCSS(read(path.join(EXT_DIR, "shared", "ui.css"))); // popup.html has these already
   await wc.insertCSS(read(path.join(CLIP_UI, "clipboard.css")));
   const scripts = [
-    ...(standalone ? [path.join(EXT_DIR, "shared", "lamha-ai.js")] : []),
+    ...(standalone ? [path.join(EXT_DIR, "shared", "i18n.js"), path.join(EXT_DIR, "shared", "lamha-ai.js")] : []),
+    path.join(__dirname, "renderer", "i18n-desktop.js"),
     path.join(EXT_DIR, "shared", "arabic-normalize.js"), path.join(CLIP_UI, "clip-list.js"), path.join(CLIP_UI, "clip-actions.js"), path.join(CLIP_UI, entry)
   ];
   for (const f of scripts) {
@@ -444,15 +454,19 @@ function createPanelWin() {
   panelWin = new BrowserWindow({
     width: PANEL_W, height: PANEL_H, show: false, frame: false, resizable: false, skipTaskbar: true, alwaysOnTop: true,
     minimizable: false, maximizable: false, fullscreenable: false,
-    title: "الحافظة — لمحة", icon: ICON, backgroundColor: nativeTheme.shouldUseDarkColors ? "#2c2c2e" : "#ffffff",
+    title: T("d.panelTitle"), icon: ICON, backgroundColor: nativeTheme.shouldUseDarkColors ? "#2c2c2e" : "#ffffff",
     webPreferences: webPrefs()
   });
   prepare(panelWin);
   panelWin.setAlwaysOnTop(true, "pop-up-menu");
   const wc = panelWin.webContents;
-  panelReady = new Promise(resolve => wc.once("did-finish-load", () => {
-    injectClipboardUi(wc, "panel.js", { standalone: true }).catch(err => console.error("clipboard panel failed:", err && err.message)).then(resolve);
-  }));
+  let firstLoad;
+  panelReady = new Promise(resolve => { firstLoad = resolve; });
+  wc.on("did-finish-load", () => { // again after a reload (the interface language changed)
+    const done = injectClipboardUi(wc, "panel.js", { standalone: true }).catch(err => console.error("clipboard panel failed:", err && err.message));
+    panelReady = done;
+    firstLoad(done);
+  });
   panelWin.loadFile(path.join(CLIP_UI, "panel.html"));
   panelWin.on("blur", () => { if (Date.now() - panelShownAt > 300) hidePanel(); });
   panelWin.on("closed", () => { panelWin = null; });
@@ -508,7 +522,7 @@ async function pasteResultFromPanel(id, text) {
   hidePanel();
   const ok = await selection.pasteClip(panelTarget, { text });
   if (clipStore.get(id)) clipStore.markUsed(id);
-  if (!ok) notify("تم النسخ", "الصق يدويًا بـ Ctrl+V");
+  if (!ok) notify(T("d.copiedTitle"), T("d.pasteYourself"));
   return ok;
 }
 
@@ -519,7 +533,7 @@ async function pasteFromPanel(id, plain) {
   hidePanel();
   const ok = await selection.pasteClip(panelTarget, plain ? { text: c.text } : c);
   clipStore.markUsed(id);
-  if (!ok) notify("تم النسخ", "الصق يدويًا بـ Ctrl+V");
+  if (!ok) notify(T("d.copiedTitle"), T("d.pasteYourself"));
   return ok;
 }
 
@@ -527,14 +541,14 @@ function createCardWin() {
   cardWin = new BrowserWindow({
     width: CARD_W, height: CARD_H, show: false, frame: false, transparent: true, resizable: false,
     skipTaskbar: true, alwaysOnTop: true, hasShadow: false, backgroundColor: "#00000000",
-    title: "لمحة", icon: ICON, webPreferences: webPrefs()
+    title: T("common.lamha"), icon: ICON, webPreferences: webPrefs()
   });
   prepare(cardWin);
   cardWin.setAlwaysOnTop(true, "pop-up-menu");
   // the same scripts Firefox injects into web pages, in the same order
   const wc = cardWin.webContents;
   cardReady = new Promise(resolve => wc.once("did-finish-load", async () => {
-    for (const f of ["shared/lamha-ai.js", "content/styles.js", "content/page-translator.js", "content/content.js"]) {
+    for (const f of ["shared/i18n.js", "shared/lamha-ai.js", "content/styles.js", "content/page-translator.js", "content/content.js"]) {
       await wc.executeJavaScript(fs.readFileSync(path.join(EXT_DIR, f), "utf8") + "\n;true");
     }
     resolve();
@@ -557,7 +571,7 @@ ipcMain.handle("lamha:card-replace", async (e, text) => {
   const ok = await selection.pasteInto(cardSource.hwnd, text);
   if (!ok) { // the app went away or refused focus: leave the text on the clipboard instead
     await clipboard.writeText(text);
-    notify("تعذّر الاستبدال", "نُسخ النص — الصقه بنفسك (Ctrl+V).");
+    notify(T("d.replaceFailed"), T("d.replaceFailedBody"));
   }
   return ok;
 });
@@ -623,13 +637,13 @@ function registerHotkeys() {
       : () => onHotkey(kind);
     if (!globalShortcut.register(accel, run)) hotkeyErrors.push(accel);
   }
-  if (hotkeyErrors.length) notify("اختصار مستخدم", `برنامج آخر يستخدم ${hotkeyErrors.join(" و ")} — لن يعمل من لمحة.`);
+  if (hotkeyErrors.length) notify(T("d.hotkeyTaken"), T("d.hotkeyTakenBody", { keys: hotkeyErrors }));
   if (tray) tray.setContextMenu(trayMenu());
 }
 
 function notify(title, body, onClick) {
   if (SMOKE || !Notification.isSupported()) { console.log(`[notify] ${title}: ${body}`); return; }
-  const note = new Notification({ title: "لمحة — " + title, body, icon: ICON });
+  const note = new Notification({ title: T("d.notePrefix") + title, body, icon: ICON });
   if (onClick) note.on("click", onClick);
   note.show();
 }
@@ -647,6 +661,7 @@ const updater = require("./updater").createUpdater({
     return r.json();
   },
   notify,
+  t: (key, vars) => T(key, vars),
   onChange: () => {
     updateTray();
     for (const w of BrowserWindow.getAllWindows()) if (!w.isDestroyed()) w.webContents.send("lamha:update-changed");
@@ -657,11 +672,11 @@ const updater = require("./updater").createUpdater({
 /** Tray item: check, or install / download what was found. */
 function updateMenu() {
   const st = updater.state;
-  if (st.status === "ready") return { label: `أعد التشغيل لتثبيت الإصدار ${st.version}`, click: () => updater.restart() };
-  if (st.status === "available") return { label: `تنزيل الإصدار ${st.version}`, click: () => updater.restart() };
-  if (st.status === "downloading") return { label: `يُنزَّل الإصدار ${st.version}…`, enabled: false };
-  if (st.status === "checking") return { label: "جارٍ التحقق من التحديثات…", enabled: false };
-  return { label: "التحقق من التحديثات", click: () => updater.check(true) };
+  if (st.status === "ready") return { label: T("d.upRestart", { v: st.version }), click: () => updater.restart() };
+  if (st.status === "available") return { label: T("d.upDownload", { v: st.version }), click: () => updater.restart() };
+  if (st.status === "downloading") return { label: T("d.upDownloading", { v: st.version }), enabled: false };
+  if (st.status === "checking") return { label: T("d.upChecking"), enabled: false };
+  return { label: T("d.upCheck"), click: () => updater.check(true) };
 }
 
 function startUpdates() {
@@ -677,25 +692,25 @@ function startUpdates() {
 function trayMenu() {
   const login = app.getLoginItemSettings();
   return Menu.buildFromTemplate([
-    { label: "فتح لمحة", click: () => showMain() },
-    ...(clipboardMonitor ? [{ label: "الحافظة", click: () => openPanel({ target: 0 }).catch(() => {}) }] : []), // no app to paste into: Enter copies
-    { label: badgeCount ? `مراجعة الكلمات (${badgeCount})` : "مراجعة الكلمات", click: () => showMain("review") },
-    { label: "كتابة ✨", click: () => showMain("write") },
+    { label: T("d.trayOpen"), click: () => showMain() },
+    ...(clipboardMonitor ? [{ label: T("d.trayClipboard"), click: () => openPanel({ target: 0 }).catch(() => {}) }] : []), // no app to paste into: Enter copies
+    { label: T("d.trayReview", { n: badgeCount }), click: () => showMain("review") },
+    { label: T("d.trayWrite"), click: () => showMain("write") },
     ...pauseMenu(),
-    { label: "الإعدادات", click: () => openOptions("") },
+    { label: T("d.traySettings"), click: () => openOptions("") },
     updateMenu(),
     { type: "separator" },
     ...Object.entries(HOTKEYS).map(([accel, kind]) => ({
-      label: `${accel} — ${HOTKEY_LABELS[kind]}${hotkeyErrors.includes(accel) ? " (غير متاح)" : ""}`,
+      label: `${accel} — ${T(HOTKEY_LABELS[kind])}${hotkeyErrors.includes(accel) ? T("d.unavailable") : ""}`,
       enabled: false
     })),
     { type: "separator" },
     {
-      label: "التشغيل مع Windows", type: "checkbox", checked: login.openAtLogin,
+      label: T("d.trayLogin"), type: "checkbox", checked: login.openAtLogin,
       click: item => app.setLoginItemSettings({ openAtLogin: item.checked, args: ["--hidden"] })
     },
     { type: "separator" },
-    { label: "خروج", click: () => { quitting = true; app.quit(); } }
+    { label: T("d.trayQuit"), click: () => { quitting = true; app.quit(); } }
   ]);
 }
 
@@ -703,23 +718,24 @@ function trayMenu() {
 function pauseMenu() {
   if (!clipboardMonitor || !clipboardMonitor.enabled) return [];
   if (pausedUntil) {
-    const until = pausedUntil === Infinity ? "" : ` حتى ${new Date(pausedUntil).toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit" })}`;
-    return [{ label: `استئناف الحافظة (متوقفة${until})`, click: resumeClipboard }];
+    if (pausedUntil === Infinity) return [{ label: T("d.resume"), click: resumeClipboard }];
+    const time = new Date(pausedUntil).toLocaleTimeString(LamhaI18n.lang() === "ar" ? "ar-EG" : "en-US", { hour: "numeric", minute: "2-digit" });
+    return [{ label: T("d.resumeAt", { time }), click: resumeClipboard }];
   }
   return [{
-    label: "إيقاف الحافظة مؤقتًا",
+    label: T("d.pause"),
     submenu: [
-      { label: "١٥ دقيقة", click: () => pauseClipboard(15 * 60e3) },
-      { label: "ساعة", click: () => pauseClipboard(60 * 60e3) },
-      { label: "حتى الاستئناف", click: () => pauseClipboard(0) }
+      { label: T("d.pause15"), click: () => pauseClipboard(15 * 60e3) },
+      { label: T("d.pause60"), click: () => pauseClipboard(60 * 60e3) },
+      { label: T("d.pauseUntil"), click: () => pauseClipboard(0) }
     ]
   }];
 }
 
 function trayTooltip() {
-  const parts = ["لمحة"];
-  if (badgeCount) parts.push(`${badgeCount} للمراجعة`);
-  if (pausedUntil) parts.push("الحافظة متوقفة مؤقتًا");
+  const parts = [T("common.lamha")];
+  if (badgeCount) parts.push(T("d.tipReview", { n: badgeCount }));
+  if (pausedUntil) parts.push(T("d.tipPaused"));
   return parts.join(" — ");
 }
 
@@ -745,7 +761,7 @@ function setBadge(n) {
   const idle = !mainWin || !mainWin.isVisible() || !mainWin.isFocused();
   if (!SMOKE && n > 0 && (grew || !lastReminder) && idle && Date.now() - lastReminder > 4 * 3600e3 && Notification.isSupported()) {
     lastReminder = Date.now();
-    const note = new Notification({ title: "لمحة — وقت المراجعة", body: `${n} ${n === 1 ? "كلمة تنتظر" : "كلمات تنتظر"} المراجعة.`, icon: ICON });
+    const note = new Notification({ title: T("d.notePrefix") + T("d.reviewTime"), body: T("d.reviewWaiting", { n }), icon: ICON });
     note.on("click", () => showMain("review"));
     note.show();
   }
@@ -766,6 +782,8 @@ if (!gotLock) {
     if (selection) createCardWin(); // ready before the first shortcut, so it opens instantly
     if (clipboardMonitor) createPanelWin(); // likewise: the quick panel must show within 150 ms
     startClipboard().catch(err => console.error("clipboard history failed to start:", err && err.name)); // runs synchronously up to its await
+    // tray, notifications and window titles follow the interface language (pages redraw themselves)
+    globalThis.LamhaI18n.init({ onChange: () => { updateTray(); if (mainWin && !mainWin.isDestroyed()) mainWin.setTitle(T("common.lamha")); } });
     startUpdates();
     if (!SMOKE) { createTray(); if (selection) registerHotkeys(); }
     if (SMOKE) {

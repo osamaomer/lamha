@@ -4,7 +4,7 @@
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import assert from "node:assert/strict";
-import { JSDOM } from "jsdom";
+import { JSDOM, VirtualConsole } from "jsdom";
 import { pathToFileURL } from "node:url";
 
 // the extension folder: this file's parent, or $env:LAMHA_EXT when run from elsewhere
@@ -45,7 +45,7 @@ const local = area("local", {
   },
   mistakes: { checks: 4, counts: { articles: 6, prepositions: 3, other: 2 }, recent: [{ cat: "articles", original: "market", fix: "the market", why: "مكان معروف.", t: now }] }
 });
-const sync = area("sync", {});
+const sync = area("sync", { uiLang: "ar" }); // the English interface has its own steps below
 const onChanged = { addListener: f => listeners.push(f) };
 const ev = { addListener() {} };
 
@@ -69,13 +69,18 @@ const bgCtx = vm.createContext({
   },
   setTimeout, clearTimeout, AbortController, URLSearchParams, structuredClone, console, LocalDict: {}, Audio: class { play() { return Promise.resolve(); } }
 });
+vm.runInContext(src("shared/i18n.js"), bgCtx);
 vm.runInContext(src("shared/lamha-ai.js"), bgCtx);
 vm.runInContext(src("background.js"), bgCtx);
 
 /* ---- page loader ---- */
 async function openPage(path, scripts, { extra = {} } = {}) {
   const html = src(path).replace(/<script[\s\S]*?<\/script>/g, "").replace(/<link[^>]*>/g, "");
-  const dom = new JSDOM(html, { runScripts: "outside-only", url: "moz-extension://lamha/" + path + (extra.hash || "") });
+  // pages reload themselves when the interface language changes; jsdom can't navigate, which is fine here
+  const virtualConsole = new VirtualConsole();
+  virtualConsole.forwardTo ? virtualConsole.forwardTo(console, { jsdomErrors: "none" }) : virtualConsole.sendTo(console, { omitJSDOMErrors: true });
+  virtualConsole.on("jsdomError", e => { if (!/Not implemented: navigation/.test(e.message)) console.error(e); });
+  const dom = new JSDOM(html, { runScripts: "outside-only", url: "moz-extension://lamha/" + path + (extra.hash || ""), virtualConsole });
   const w = dom.window;
   w.browser = {
     storage: { local, sync, onChanged },
@@ -103,7 +108,7 @@ async function step(name, fn) {
 }
 
 /* ---- popup: review ---- */
-const pop = await openPage("popup/popup.html", ["shared/lamha-ai.js", "popup/popup.js"]);
+const pop = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "popup/popup.js"]);
 const $ = id => pop.document.getElementById(id);
 
 await step("popup opens on the review tab with counts and badge", async () => {
@@ -195,7 +200,7 @@ await step("compose: 'use it' puts the correction back in the box; draft saved",
 });
 
 /* ---- options: journal + review ---- */
-const opt = await openPage("options/options.html", ["shared/lamha-ai.js", "options/options.js"]);
+const opt = await openPage("options/options.html", ["shared/i18n.js", "options/i18n-options.js", "shared/lamha-ai.js", "options/options.js"]);
 const o = id => opt.document.getElementById(id);
 await sleep(200);
 
@@ -223,6 +228,46 @@ await step("options: review section shows deck stats; clearing the deck works", 
   o("rvClear").click();
   await sleep(100);
   assert.deepEqual(local.data.cards, {});
+});
+
+/* ---- the English interface ---- */
+await sync.set({ uiLang: "en" });
+await sleep(50);
+const enPop = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "popup/popup.js"]);
+const ep = id => enPop.document.getElementById(id);
+
+await step("English: popup left to right, English labels, Western digits", async () => {
+  assert.equal(enPop.document.documentElement.dir, "ltr");
+  assert.equal(enPop.document.documentElement.lang, "en");
+  assert.equal(enPop.document.documentElement.hasAttribute("data-i18n-pending"), false, "page left hidden");
+  assert.deepEqual([...enPop.document.querySelectorAll(".tabs button")].map(b => text(b).replace(/\s*\d+$/, "")), ["Translate", "Write ✨", "Review"]);
+  assert.equal(ep("q").placeholder, "Type a word or sentence to translate…");
+  assert.equal(text(ep("openOptions")), "Settings");
+  assert.ok(!/[\u0600-\u06FF]/.test(text(ep("rvHead"))), "Arabic left in the review header: " + text(ep("rvHead")));
+});
+
+const enOpt = await openPage("options/options.html", ["shared/i18n.js", "options/i18n-options.js", "shared/lamha-ai.js", "options/options.js"]);
+const eo = id => enOpt.document.getElementById(id);
+await sleep(200);
+
+await step("English: settings page translated, language menu shows the choice", async () => {
+  assert.equal(enOpt.document.documentElement.dir, "ltr");
+  assert.equal(eo("uiLang").value, "en");
+  const headings = [...enOpt.document.querySelectorAll(".panel h2")].map(text);
+  assert.ok(headings.includes("Dictionary") && headings.includes("Writing tools ✨") && headings.includes("Appearance"), headings.join(" | "));
+  assert.match(text(eo("jSummary")), /^You proofread 5 texts and 13 mistakes were found\. Most frequent: Articles/);
+  // no visible Arabic, except the native name of Arabic in the language menu
+  const visible = [...enOpt.document.querySelectorAll("h1, h2, h3, b, small, p, button, label, option, li, span, footer")]
+    .filter(el => !el.children.length && /[\u0600-\u06FF]/.test(el.textContent) && el.textContent.trim() !== "العربية")
+    .map(el => el.textContent.trim().slice(0, 40));
+  assert.deepEqual(visible, []);
+});
+
+await step("switching back to Arabic: a new page is right to left again", async () => {
+  await sync.set({ uiLang: "ar" });
+  const arPop = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "popup/popup.js"]);
+  assert.equal(arPop.document.documentElement.dir, "rtl");
+  assert.equal(text(arPop.document.getElementById("openOptions")), "الإعدادات");
 });
 
 console.log(results.join("\n"));

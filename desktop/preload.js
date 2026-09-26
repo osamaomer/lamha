@@ -42,6 +42,7 @@ contextBridge.exposeInMainWorld("browser", {
     create: ({ url }) => call("openUrl", url)
   },
   permissions: { contains: async () => true, request: async () => true },
+  i18n: { getUILanguage: () => info.locale }, // "auto" interface language follows Windows (shared/i18n.js)
   commands: { getAll: () => call("commands") }
 });
 

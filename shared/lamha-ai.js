@@ -49,6 +49,27 @@ var LamhaAI = (() => {
     other: { en: "other", ar: "أخرى", tip: "" }
   };
 
+  /** The same, for the English interface: label and tip. */
+  const CATEGORIES_EN = {
+    articles: ["Articles (a / an / the)", "Use a/an with a singular countable noun the first time you mention it, and the for something known or already mentioned. Don't put the before general nouns: Life is short, not The life is short."],
+    prepositions: ["Prepositions (in / on / at …)", "Prepositions often don't translate word for word: in for months, years and cities; on for days and dates; at for times and exact places. Some verbs take no preposition: discuss the plan, not discuss about the plan."],
+    verb_tense: ["Verb tenses", "Use the past simple for something finished at a known time (I finished yesterday), and the present perfect for something with an effect now or no set time (I have finished). Don't use the continuous with state verbs: I know, not I am knowing."],
+    agreement: ["Subject–verb agreement", "With he / she / it or a singular noun, the present-tense verb takes s: She works, The team is. With plurals it doesn't: They work, The results are."],
+    plurals: ["Singular and plural nouns", "Use the plural after numbers and words like many / several / one of the: three days, one of the best places. Some nouns have no plural: information, advice, equipment."],
+    word_choice: ["Word choice", "Literal translations give words that are correct but unnatural. Learn common combinations as a whole: make a decision, not do a decision; take a photo, not make a photo."],
+    spelling: ["Spelling", "Watch words that sound alike: their / there / they're, your / you're, its / it's."],
+    punctuation: ["Punctuation and capitals", "Start sentences, names, days, months and I with a capital letter. Put a space after commas and full stops, not before them."],
+    word_order: ["Word order", "Adjectives come before the noun (a big house), and indirect questions use statement order: Can you tell me where the station is, not where is the station."],
+    sentence_structure: ["Sentence structure", "English sentences are shorter than Arabic ones. Don't join two full sentences with just a comma; use a full stop or and / but / so / because."],
+    other: ["Other", ""]
+  };
+
+  const uiLang = () => (typeof LamhaI18n !== "undefined" ? LamhaI18n.lang() : "ar");
+  /** A category's name in the interface language. */
+  const catLabel = (c, lang = uiLang()) => (lang === "en" ? (CATEGORIES_EN[c] || CATEGORIES_EN.other)[0] : (CATEGORIES[c] || CATEGORIES.other).ar);
+  /** A category's rule in the interface language ("" for other). */
+  const catTip = (c, lang = uiLang()) => (lang === "en" ? (CATEGORIES_EN[c] || CATEGORIES_EN.other)[1] : (CATEGORIES[c] || CATEGORIES.other).tip);
+
   /** error code → [title, explanation, fixed in Settings?] */
   const ERRORS = {
     ai_no_key: ["فعّل أدوات الكتابة", "اختر من الإعدادات Ollama (مجاني على جهازك) أو Claude (بمفتاح API).", true],
@@ -72,12 +93,36 @@ var LamhaAI = (() => {
     gemini_region: ["Gemini غير متاح في بلدك", "خدمة Gemini API لا تعمل من موقعك الحالي. استخدم Ollama أو Claude.", true],
     network: ["لا يوجد اتصال بالإنترنت", "تحقق من اتصالك ثم حاول مجددًا."]
   };
+  const ERRORS_EN = {
+    ai_no_key: ["Turn on the writing tools", "In Settings, choose Ollama (free, on your PC) or Claude (with an API key).", true],
+    ai_bad_key: ["The Claude key isn't valid", "Check the key in Settings, or create a new one.", true],
+    ai_no_credit: ["The Claude API account is out of credit", "Add credit at console.anthropic.com, then try again.", true],
+    ai_forbidden: ["The key isn't allowed to do this", "Check the key's permissions on the service's website (Anthropic or Google AI Studio).", true],
+    ai_model: ["The chosen model isn't available to your account", "Choose another model in Settings.", true],
+    ai_rate_limited: ["Too many requests in a short time", "Wait a little and try again."],
+    ai_busy: ["The AI service is busy right now", "Try again in a moment."],
+    ai_timeout: ["The reply took too long", "Try again, or use a shorter text."],
+    ai_too_long: ["The text is too long", "Use a shorter part of the text."],
+    ai_refused: ["This text couldn't be processed", "The AI couldn't work on this text."],
+    ollama_no_model: ["Choose an Ollama model", "Choose a model in Settings to turn on the writing tools.", true],
+    ollama_offline: ["Ollama isn't running", "Start Ollama from the Start menu, then try again.", true],
+    ollama_origin: ["Ollama refuses the extension's connection", "Add the OLLAMA_ORIGINS environment variable as in the Settings steps, then restart Ollama.", true],
+    ollama_model: ["The model isn't in Ollama", "Download it first (ollama pull …) or choose another model in Settings.", true],
+    gemini_no_key: ["Add a Gemini key", "Create a free key at aistudio.google.com and add it in Settings.", true],
+    gemini_bad_key: ["The Gemini key isn't valid", "Check the key in Settings, or create a new one at aistudio.google.com.", true],
+    gemini_quota: ["Gemini's free limit is used up for now", "The free tier has per-minute and daily limits. Wait a little, try the Flash-Lite model, or use Ollama."],
+    gemini_busy: ["Gemini's models are busy right now", "Google's servers are busy (common with new models on the free tier). Try again in a minute, or use Ollama."],
+    gemini_region: ["Gemini isn't available in your country", "The Gemini API doesn't work from your location. Use Ollama or Claude.", true],
+    network: ["No internet connection", "Check your connection and try again."]
+  };
 
-  function errorInfo(code, providerName = "Claude") {
+  function errorInfo(code, providerName = "Claude", lang = uiLang()) {
     code = String(code || "");
-    if (ERRORS[code]) return ERRORS[code];
-    if (code.startsWith("ai_error:")) return ["تعذّر الاتصال بـ " + providerName, code.slice(9)];
-    return ["حدث خطأ", "أعد المحاولة."];
+    const en = lang === "en";
+    const table = en ? ERRORS_EN : ERRORS;
+    if (table[code]) return table[code];
+    if (code.startsWith("ai_error:")) return [(en ? "Couldn't reach " : "تعذّر الاتصال بـ ") + providerName, code.slice(9)];
+    return en ? ["Something went wrong", "Try again."] : ["حدث خطأ", "أعد المحاولة."];
   }
 
   /** Word-level diff of `a` → `b` as [{ tag: "" | "del" | "ins", t }], adjacent pieces merged.
@@ -128,5 +173,5 @@ var LamhaAI = (() => {
   }
   const PROVIDER_KEYS = ["aiProvider", "aiKey", "ollamaModel", "geminiKey"];
 
-  return { CATEGORIES, ERRORS, errorInfo, diffParts, diffNodes, isArabicText, provider, PROVIDER_KEYS };
+  return { CATEGORIES, ERRORS, errorInfo, catLabel, catTip, diffParts, diffNodes, isArabicText, provider, PROVIDER_KEYS };
 })();

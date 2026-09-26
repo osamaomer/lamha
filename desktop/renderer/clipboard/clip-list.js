@@ -4,6 +4,7 @@
 "use strict";
 // eslint-disable-next-line no-unused-vars
 var LamhaClipList = (() => {
+  const L = (key, vars) => LamhaI18n.t(key, vars); // interface text: shared/i18n.js + renderer/i18n-desktop.js
   const PAGE = 100;
   const UNDO_MS = 5000;
 
@@ -31,25 +32,24 @@ var LamhaClipList = (() => {
   };
   const icon = name => svg(ICONS[name]);
 
-  /** Numbers in the app's convention: Arabic-Indic digits (as popup.js does with toLocaleString("ar-EG")). */
-  const arNum = n => Number(n).toLocaleString("ar-EG");
+  /** Numbers as the interface writes them (Arabic-Indic digits in Arabic). */
+  const arNum = n => LamhaI18n.num(n);
 
-  /** "قبل ٥ دقائق" — Arabic counting: 1, 2 (dual), 3–10 plural, 11+ singular with tanween. */
+  /** "قبل ٥ دقائق" / "5 minutes ago" (Arabic counting rules in i18n-desktop.js). */
   function relTime(ts, now = Date.now()) {
     const s = Math.max(0, Math.round((now - ts) / 1000));
-    const unit = (n, one, two, few, many) => (n === 1 ? one : n === 2 ? two : n <= 10 ? `${arNum(n)} ${few}` : `${arNum(n)} ${many}`);
-    if (s < 60) return "الآن";
+    if (s < 60) return L("d.now");
     const m = Math.floor(s / 60);
-    if (m < 60) return "قبل " + unit(m, "دقيقة", "دقيقتين", "دقائق", "دقيقة");
+    if (m < 60) return L("d.minAgo", { n: m });
     const hr = Math.floor(m / 60);
-    if (hr < 24) return "قبل " + unit(hr, "ساعة", "ساعتين", "ساعات", "ساعة");
+    if (hr < 24) return L("d.hourAgo", { n: hr });
     const d = Math.floor(hr / 24);
-    if (d === 1) return "أمس";
-    if (d < 30) return "قبل " + unit(d, "يوم", "يومين", "أيام", "يومًا");
-    return new Date(ts).toLocaleDateString("ar-EG", { day: "numeric", month: "long", year: "numeric" });
+    if (d === 1) return L("d.yesterday");
+    if (d < 30) return L("d.dayAgo", { n: d });
+    return new Date(ts).toLocaleDateString(LamhaI18n.lang() === "ar" ? "ar-EG" : "en-US", { day: "numeric", month: "long", year: "numeric" });
   }
 
-  const appName = app => (app === "lamha" ? "لمحة" : app === "unknown" ? "برنامج غير معروف" : app.replace(/\.exe$/i, ""));
+  const appName = app => (app === "lamha" ? L("d.appLamha") : app === "unknown" ? L("d.appUnknown") : app.replace(/\.exe$/i, ""));
 
   /** Text with <mark> around what the query matched (same Arabic-aware rules as the search). */
   function highlight(text, query) {
@@ -82,17 +82,17 @@ var LamhaClipList = (() => {
     let query = "", filter = "all", shown = PAGE, items = [], total = 0, sel = 0, loading = null, reloadAgain = false;
 
     const search = h("input", {
-      class: "lc-search", type: "search", dir: "auto", placeholder: "ابحث في الحافظة…", "aria-label": "ابحث في الحافظة",
+      class: "lc-search", type: "search", dir: "auto", placeholder: L("d.search"), "aria-label": L("d.searchLabel"),
       role: "combobox", "aria-controls": id + "-list", "aria-expanded": "true", "aria-autocomplete": "list", spellcheck: "false"
     });
-    const chips = ["all", "pinned"].map(f => h("button", { class: "lc-chip", type: "button", "aria-pressed": String(f === filter), onclick: () => setFilter(f) }, f === "all" ? "الكل" : "المثبتة"));
-    const list = h("ul", { class: "lc-list", id: id + "-list", role: "listbox", "aria-label": "سجل الحافظة" });
-    const more = h("button", { class: "btn small ghost lc-more", type: "button", hidden: true, onclick: () => { shown += PAGE; reload(); } }, "عرض المزيد");
+    const chips = ["all", "pinned"].map(f => h("button", { class: "lc-chip", type: "button", "aria-pressed": String(f === filter), onclick: () => setFilter(f) }, f === "all" ? L("d.all") : L("d.pinnedFilter")));
+    const list = h("ul", { class: "lc-list", id: id + "-list", role: "listbox", "aria-label": L("d.historyLabel") });
+    const more = h("button", { class: "btn small ghost lc-more", type: "button", hidden: true, onclick: () => { shown += PAGE; reload(); } }, L("d.showMore"));
     const empty = h("p", { class: "lc-empty", hidden: true, role: "status" });
     const toastBox = h("div", { class: "lc-toasts", "aria-live": "polite" });
     root.classList.add("lc", "lc-" + mode);
     root.replaceChildren(
-      h("div", { class: "lc-bar" }, search, h("div", { class: "lc-chips", role: "group", "aria-label": "تصفية" }, chips)),
+      h("div", { class: "lc-bar" }, search, h("div", { class: "lc-chips", role: "group", "aria-label": L("d.filter") }, chips)),
       list, more, empty, toastBox
     );
 
@@ -130,9 +130,7 @@ var LamhaClipList = (() => {
       list.replaceChildren(...items.map((it, i) => row(it, i)));
       more.hidden = items.length >= total;
       empty.hidden = items.length > 0;
-      empty.textContent = query ? "لا نتائج"
-        : filter === "pinned" ? "لا توجد عناصر مثبّتة بعد — ثبّت ما تحتاجه كثيرًا بـ Ctrl+P"
-        : "لا يوجد شيء في الحافظة بعد — انسخ أي نص وسيظهر هنا";
+      empty.textContent = query ? L("d.noResults") : filter === "pinned" ? L("d.noPinned") : L("d.empty");
       markSelected();
     }
 
@@ -142,7 +140,7 @@ var LamhaClipList = (() => {
         h("span", { class: "lc-app", dir: "auto" }, appName(it.sourceApp)),
         h("span", { "aria-hidden": "true" }, "·"),
         h("span", null, relTime(Math.max(it.lastCopiedAt, it.lastUsedAt))),
-        it.pinned && h("span", { class: "lc-pin", title: "مثبّت", "aria-label": "مثبّت" }, "📌")
+        it.pinned && h("span", { class: "lc-pin", title: L("d.pinned"), "aria-label": L("d.pinned") }, "📌")
       );
       const li = h("li", { class: "lc-row", role: "option", id: `${id}-o${i}`, "aria-selected": "false", "data-id": it.id },
         h("div", { class: "lc-main" },
@@ -152,8 +150,8 @@ var LamhaClipList = (() => {
           meta
         ),
         h("div", { class: "lc-tools" },
-          h("button", { class: "icon-btn", type: "button", tabindex: "-1", title: it.pinned ? "إلغاء التثبيت (Ctrl+P)" : "تثبيت (Ctrl+P)", "aria-label": it.pinned ? "إلغاء التثبيت" : "تثبيت", "aria-pressed": String(it.pinned), onclick: e => { e.stopPropagation(); togglePin(it); } }, icon("pin")),
-          h("button", { class: "icon-btn", type: "button", tabindex: "-1", title: "حذف (Delete)", "aria-label": "حذف", onclick: e => { e.stopPropagation(); remove(it); } }, icon("trash"))
+          h("button", { class: "icon-btn", type: "button", tabindex: "-1", title: it.pinned ? L("d.unpinKey") : L("d.pinKey"), "aria-label": it.pinned ? L("d.unpin") : L("d.pin"), "aria-pressed": String(it.pinned), onclick: e => { e.stopPropagation(); togglePin(it); } }, icon("pin")),
+          h("button", { class: "icon-btn", type: "button", tabindex: "-1", title: L("d.deleteKey"), "aria-label": L("d.delete"), onclick: e => { e.stopPropagation(); remove(it); } }, icon("trash"))
         )
       );
       li.addEventListener("mousemove", () => { if (sel !== i) { sel = i; markSelected(false); } });
@@ -180,15 +178,15 @@ var LamhaClipList = (() => {
 
     async function togglePin(it) {
       const r = await lamhaClipboard.setPinned(it.id, !it.pinned);
-      if (!r.ok) toast(r.error === "pin_limit" ? "وصلت إلى الحد الأقصى للعناصر المثبتة (٣٠٠)" : "تعذّر التثبيت");
-      else toast(it.pinned ? "أُلغي التثبيت" : "تم التثبيت 📌");
+      if (!r.ok) toast(r.error === "pin_limit" ? L("d.pinLimit") : L("d.pinFailed"));
+      else toast(it.pinned ? L("d.unpinned") : L("d.pinnedToast"));
       reload();
     }
 
     async function remove(it) {
       const r = await lamhaClipboard.remove(it.id);
       if (!r.ok) return;
-      toast("حُذف العنصر", { label: "تراجع", run: () => lamhaClipboard.restore(it.id).then(reload) });
+      toast(L("d.deleted"), { label: L("d.undo"), run: () => lamhaClipboard.restore(it.id).then(reload) });
       reload();
     }
 
@@ -244,11 +242,11 @@ var LamhaClipList = (() => {
         btn.disabled = false;
         if (r.ok) onEnabled();
       }
-    }, "تفعيل سجل الحافظة");
+    }, L("d.enable"));
     const card = h("div", { class: "lc-optin" },
       h("div", { class: "lc-optin-icon", "aria-hidden": "true" }, "📋"),
-      h("h2", null, "سجل الحافظة"),
-      h("p", null, "يحفظ لمحة ما تنسخه على جهازك فقط، مشفّرًا، لتجده وتلصقه لاحقًا. لا يُرسل أي شيء إلا عند ضغطك على أداة."),
+      h("h2", null, L("d.optInTitle")),
+      h("p", null, L("d.optInText")),
       btn
     );
     card.focusButton = () => btn.focus();

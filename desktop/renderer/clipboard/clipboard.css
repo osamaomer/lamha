@@ -160,7 +160,9 @@ html.cp-page, .cp-page body { height: 100%; overflow: hidden; }
 .btn.lc-danger { background: var(--danger); color: #fff; }
 .btn.lc-danger-text { color: var(--danger); background: rgba(220, 38, 38, .08); }
 .cp-banner { border-radius: 10px; margin: 0 0 8px; padding: 8px 12px; }
-.cb-settings { display: block; margin: 12px auto 0; }
+.cb-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
+.cb-settings { display: block; }
+.cb-foot .btn[disabled] { opacity: .45; }
 .cb-enc.banner { border-radius: 10px; margin-bottom: 8px; }
 .cb-seen { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0 4px; }
 .cb-seen .muted { margin: 0; }

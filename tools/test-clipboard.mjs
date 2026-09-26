@@ -313,7 +313,7 @@ function bgEnv({ local = {}, sync = {} } = {}) {
   let onMessage;
   const noop = { addListener() {} };
   const browser = {
-    storage: { local: area({ cardsImported: true, ...local }), sync: area({ dictSource: "online", translateDefinitions: false, ...sync }), onChanged: noop },
+    storage: { local: area({ cardsImported: true, ...local }), sync: area({ uiLang: "ar", dictSource: "online", translateDefinitions: false, ...sync }), onChanged: noop },
     runtime: { onMessage: { addListener: f => { onMessage = f; } }, onInstalled: noop, onStartup: noop, getURL: p => "moz-extension://x/" + p },
     menus: { removeAll: async () => {}, create() {}, onClicked: noop },
     commands: { onCommand: noop },
@@ -324,6 +324,7 @@ function bgEnv({ local = {}, sync = {} } = {}) {
     browser, fetch: net.fetchImpl, console, setTimeout, clearTimeout, AbortController, URLSearchParams, URL, structuredClone,
     LocalDict: { lookupEn: async () => null, lookupAr: async () => null }, Audio: class {}
   });
+  vm.runInContext(bgSrc("shared/i18n.js"), bg);
   vm.runInContext(bgSrc("shared/lamha-ai.js"), bg);
   vm.runInContext(bgSrc("background.js"), bg);
   const send = msg => onMessage(msg, {});

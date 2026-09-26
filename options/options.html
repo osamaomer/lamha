@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-i18n-pending>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>إعدادات لمحة</title>
+  <title data-i18n="o.title">إعدادات لمحة</title>
   <link rel="stylesheet" href="../shared/ui.css">
   <link rel="stylesheet" href="options.css">
 </head>
@@ -12,231 +12,231 @@
     <header class="hero">
       <img src="../icons/icon.svg" alt="" width="56" height="56">
       <div>
-        <h1>لمحة</h1>
-        <p>ابحث عن معاني الكلمات الإنجليزية وترجم أي نص إلى العربية بلمسة واحدة.</p>
+        <h1 data-i18n="common.lamha">لمحة</h1>
+        <p data-i18n="o.heroText">ابحث عن معاني الكلمات الإنجليزية وترجم أي نص إلى العربية بلمسة واحدة.</p>
       </div>
     </header>
 
     <section id="welcome" class="panel welcome" hidden>
-      <h2>أهلًا بك 👋 إليك طريقة الاستخدام</h2>
+      <h2 data-i18n="o.welcome">أهلًا بك 👋 إليك طريقة الاستخدام</h2>
       <ol class="steps">
-        <li><span class="n">1</span><div><b>حدّد كلمة أو جملة</b> في أي صفحة، سيظهر زر صغير <span class="mini-pill">بحث</span> فوقها.</div></li>
-        <li><span class="n">2</span><div><b>اضغط الزر</b> لتظهر لك الترجمة والمعاني والتعريف والنطق — مثل ميزة «البحث» في iOS و macOS.</div></li>
-        <li><span class="n">3</span><div><b>لترجمة صفحة كاملة</b> اضغط أيقونة لمحة في شريط الأدوات أو <span class="combo"><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd></span>.</div></li>
+        <li><span class="n">1</span><div data-i18n-html="o.step1"><b>حدّد كلمة أو جملة</b> في أي صفحة، سيظهر زر صغير <span class="mini-pill" data-i18n="c.lookupBtn">بحث</span> فوقها.</div></li>
+        <li><span class="n">2</span><div data-i18n-html="o.step2"><b>اضغط الزر</b> لتظهر لك الترجمة والمعاني والتعريف والنطق — مثل ميزة «البحث» في iOS و macOS.</div></li>
+        <li><span class="n">3</span><div data-i18n-html="o.step3"><b>لترجمة صفحة كاملة</b> اضغط أيقونة لمحة في شريط الأدوات أو <span class="combo"><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd></span>.</div></li>
       </ol>
       <div id="permBox" class="perm" hidden>
-        <p>يحتاج لمحة إلى إذن الوصول إلى المواقع ليعمل على الصفحات التي تزورها.</p>
-        <button id="grant" class="btn">منح الإذن</button>
+        <p data-i18n="o.permText">يحتاج لمحة إلى إذن الوصول إلى المواقع ليعمل على الصفحات التي تزورها.</p>
+        <button id="grant" class="btn" data-i18n="p.grant">منح الإذن</button>
       </div>
       <div class="try">
-        <span>جرّبه الآن — حدّد هذه الكلمة:</span>
+        <span data-i18n="o.tryIt">جرّبه الآن — حدّد هذه الكلمة:</span>
         <span class="sample" dir="ltr">serendipity</span>
       </div>
     </section>
 
     <section class="panel" id="triggerPanel">
-      <h2>طريقة الظهور</h2>
-      <div class="choices" role="radiogroup" aria-label="طريقة الظهور">
+      <h2 data-i18n="o.trigger">طريقة الظهور</h2>
+      <div class="choices" role="radiogroup" aria-label="طريقة الظهور" data-i18n-attr="aria-label:o.trigger">
         <label class="choice">
           <input type="radio" name="triggerMode" value="button">
           <span class="c">
-            <span class="ill"><span class="mini-pill">بحث</span></span>
-            <b>زر عائم</b>
-            <small>يظهر زر عند تحديد النص (مستحسن)</small>
+            <span class="ill"><span class="mini-pill" data-i18n="c.lookupBtn">بحث</span></span>
+            <b data-i18n="o.floating">زر عائم</b>
+            <small data-i18n="o.floatingHint">يظهر زر عند تحديد النص (مستحسن)</small>
           </span>
         </label>
         <label class="choice">
           <input type="radio" name="triggerMode" value="instant">
           <span class="c">
             <span class="ill"><span class="mini-card"></span></span>
-            <b>فوري</b>
-            <small>تظهر الترجمة مباشرة عند التحديد</small>
+            <b data-i18n="o.instant">فوري</b>
+            <small data-i18n="o.instantHint">تظهر الترجمة مباشرة عند التحديد</small>
           </span>
         </label>
         <label class="choice">
           <input type="radio" name="triggerMode" value="modifier">
           <span class="c">
             <span class="ill"><kbd>Alt</kbd></span>
-            <b>مع مفتاح Alt</b>
-            <small>حدّد النص مع الضغط على Alt</small>
+            <b data-i18n="o.withAlt">مع مفتاح Alt</b>
+            <small data-i18n="o.withAltHint">حدّد النص مع الضغط على Alt</small>
           </span>
         </label>
       </div>
-      <p class="tip">نصيحة: في وضع «الزر العائم» يمكنك التحديد مع الضغط على <kbd>Alt</kbd> لفتح الترجمة مباشرة.</p>
+      <p class="tip" data-i18n-html="o.altTip">نصيحة: في وضع «الزر العائم» يمكنك التحديد مع الضغط على <kbd>Alt</kbd> لفتح الترجمة مباشرة.</p>
     </section>
 
     <section class="panel">
-      <h2>القاموس</h2>
-      <div class="choices" role="radiogroup" aria-label="مصدر القاموس">
+      <h2 data-i18n="o.dictionary">القاموس</h2>
+      <div class="choices" role="radiogroup" aria-label="مصدر القاموس" data-i18n-attr="aria-label:o.dictSource">
         <label class="choice">
           <input type="radio" name="dictSource" value="local">
           <span class="c">
             <span class="ill"><span class="src-ill">📖<small>+</small>🌐</span></span>
-            <b>المحلي أولًا</b>
-            <small>القاموس المدمج للكلمات، والإنترنت فقط لما ليس فيه (مستحسن)</small>
+            <b data-i18n="o.localFirst">المحلي أولًا</b>
+            <small data-i18n="o.localFirstHint">القاموس المدمج للكلمات، والإنترنت فقط لما ليس فيه (مستحسن)</small>
           </span>
         </label>
         <label class="choice">
           <input type="radio" name="dictSource" value="offline">
           <span class="c">
             <span class="ill"><span class="src-ill">📖</span></span>
-            <b>المحلي فقط</b>
-            <small>بدون أي اتصال بالإنترنت للكلمات. ترجمة الجمل لا تعمل.</small>
+            <b data-i18n="o.localOnly">المحلي فقط</b>
+            <small data-i18n="o.localOnlyHint">بدون أي اتصال بالإنترنت للكلمات. ترجمة الجمل لا تعمل.</small>
           </span>
         </label>
         <label class="choice">
           <input type="radio" name="dictSource" value="online">
           <span class="c">
             <span class="ill"><span class="src-ill">🌐</span></span>
-            <b>الإنترنت أولًا</b>
-            <small>نتائج Google، والقاموس المحلي عند انقطاع الاتصال</small>
+            <b data-i18n="o.onlineFirst">الإنترنت أولًا</b>
+            <small data-i18n="o.onlineFirstHint">نتائج Google، والقاموس المحلي عند انقطاع الاتصال</small>
           </span>
         </label>
       </div>
-      <p class="tip" id="dictInfo">القاموس المحلي مدمج في الإضافة ويعمل دون إنترنت.</p>
+      <p class="tip" id="dictInfo" data-i18n="o.dictInfo">القاموس المحلي مدمج في الإضافة ويعمل دون إنترنت.</p>
     </section>
 
     <section class="panel">
-      <h2>الترجمة</h2>
+      <h2 data-i18n="o.translation">الترجمة</h2>
       <div class="opt">
-        <div><b>لغة الترجمة</b><small>اللغة التي تُترجم إليها النصوص</small></div>
+        <div><b data-i18n="o.targetLang">لغة الترجمة</b><small data-i18n="o.targetLangHint">اللغة التي تُترجم إليها النصوص</small></div>
         <select id="targetLang">
-          <option value="ar">العربية</option>
-          <option value="en">الإنجليزية</option>
-          <option value="fr">الفرنسية</option>
-          <option value="tr">التركية</option>
-          <option value="ur">الأردية</option>
-          <option value="fa">الفارسية</option>
-          <option value="es">الإسبانية</option>
-          <option value="de">الألمانية</option>
+          <option value="ar" data-i18n="lang.ar">العربية</option>
+          <option value="en" data-i18n="lang.en">الإنجليزية</option>
+          <option value="fr" data-i18n="lang.fr">الفرنسية</option>
+          <option value="tr" data-i18n="lang.tr">التركية</option>
+          <option value="ur" data-i18n="lang.ur">الأردية</option>
+          <option value="fa" data-i18n="lang.fa">الفارسية</option>
+          <option value="es" data-i18n="lang.es">الإسبانية</option>
+          <option value="de" data-i18n="lang.de">الألمانية</option>
         </select>
       </div>
       <label class="opt">
-        <div><b>ترجمة النص العربي إلى الإنجليزية</b><small>عند تحديد نص عربي تُعرض ترجمته الإنجليزية</small></div>
+        <div><b data-i18n="o.reverse">ترجمة النص العربي إلى الإنجليزية</b><small data-i18n="o.reverseHint">عند تحديد نص عربي تُعرض ترجمته الإنجليزية</small></div>
         <span class="switch"><input type="checkbox" id="reverseForArabic"><span class="track"><span class="thumb"></span></span></span>
       </label>
       <label class="opt">
-        <div><b>فهم الكلمة من سياق الجملة</b><small>تُرسَل الجملة المحيطة بالكلمة (وليس الصفحة) لاختيار المعنى المناسب. أوقفه لإرسال الكلمة فقط.</small></div>
+        <div><b data-i18n="o.context">فهم الكلمة من سياق الجملة</b><small data-i18n="o.contextHint">تُرسَل الجملة المحيطة بالكلمة (وليس الصفحة) لاختيار المعنى المناسب. أوقفه لإرسال الكلمة فقط.</small></div>
         <span class="switch"><input type="checkbox" id="useContext"><span class="track"><span class="thumb"></span></span></span>
       </label>
       <label class="opt">
-        <div><b>ترجمة التعريفات</b><small>عرض التعريفات الإنجليزية مترجمة إلى العربية</small></div>
+        <div><b data-i18n="o.translateDefs">ترجمة التعريفات</b><small data-i18n="o.translateDefsHint">عرض التعريفات الإنجليزية مترجمة إلى العربية</small></div>
         <span class="switch"><input type="checkbox" id="translateDefinitions"><span class="track"><span class="thumb"></span></span></span>
       </label>
       <label class="opt">
-        <div><b>نبذة من ويكيبيديا</b><small>عرض ملخص المقالة للمصطلحات والأسماء (بالعربية إن وُجدت)</small></div>
+        <div><b data-i18n="o.wiki">نبذة من ويكيبيديا</b><small data-i18n="o.wikiHint">عرض ملخص المقالة للمصطلحات والأسماء (بالعربية إن وُجدت)</small></div>
         <span class="switch"><input type="checkbox" id="showWikipedia"><span class="track"><span class="thumb"></span></span></span>
       </label>
       <label class="opt">
-        <div><b>النطق التلقائي</b><small>نطق الكلمة تلقائيًا عند البحث عنها</small></div>
+        <div><b data-i18n="o.autoSpeak">النطق التلقائي</b><small data-i18n="o.autoSpeakHint">نطق الكلمة تلقائيًا عند البحث عنها</small></div>
         <span class="switch"><input type="checkbox" id="autoSpeak"><span class="track"><span class="thumb"></span></span></span>
       </label>
       <label class="opt">
-        <div><b>العمل داخل حقول الكتابة</b><small>إظهار الزر عند التحديد داخل مربعات النص والمحررات</small></div>
+        <div><b data-i18n="o.inInputs">العمل داخل حقول الكتابة</b><small data-i18n="o.inInputsHint">إظهار الزر عند التحديد داخل مربعات النص والمحررات</small></div>
         <span class="switch"><input type="checkbox" id="showInInputs"><span class="track"><span class="thumb"></span></span></span>
       </label>
     </section>
 
     <section class="panel" id="ai">
-      <h2>أدوات الكتابة ✨</h2>
-      <p class="muted">حدّد أي نص — أو اكتب في أي مربع نص — واضغط <span class="mini-pill">✨ كتابة</span> لتدقيقه لغويًا مع شرح الأخطاء بالعربية، أو تحسين أسلوبه، أو جعله رسميًا أو ودّيًا أو أقصر، أو كتابة فكرتك العربية بإنجليزية طبيعية، أو تلخيصه، أو شرحه، أو كتابة ردٍّ عليه.</p>
-      <div class="choices providers" role="radiogroup" aria-label="مصدر الذكاء الاصطناعي">
+      <h2 data-i18n="o.writingTools">أدوات الكتابة ✨</h2>
+      <p class="muted" data-i18n-html="o.aiIntro">حدّد أي نص — أو اكتب في أي مربع نص — واضغط <span class="mini-pill">✨ كتابة</span> لتدقيقه لغويًا مع شرح الأخطاء بالعربية، أو تحسين أسلوبه، أو جعله رسميًا أو ودّيًا أو أقصر، أو كتابة فكرتك العربية بإنجليزية طبيعية، أو تلخيصه، أو شرحه، أو كتابة ردٍّ عليه.</p>
+      <div class="choices providers" role="radiogroup" aria-label="مصدر الذكاء الاصطناعي" data-i18n-attr="aria-label:o.aiProvider">
         <label class="choice">
           <input type="radio" name="aiProvider" value="ollama">
           <span class="c">
             <span class="ill"><span class="src-ill">💻</span></span>
-            <b>Ollama — مجاني</b>
-            <small>نموذج يعمل على جهازك: دون تكلفة، ودون إنترنت، ولا يغادر نصّك جهازك</small>
+            <b data-i18n="o.ollamaFree">Ollama — مجاني</b>
+            <small data-i18n="o.ollamaHint">نموذج يعمل على جهازك: دون تكلفة، ودون إنترنت، ولا يغادر نصّك جهازك</small>
           </span>
         </label>
         <label class="choice">
           <input type="radio" name="aiProvider" value="gemini">
           <span class="c">
             <span class="ill"><span class="src-ill">🌐</span></span>
-            <b>Gemini — مجاني</b>
-            <small>من Google عبر الإنترنت، بحدّ يومي مجاني. يعمل على أي جهاز</small>
+            <b data-i18n="o.geminiFree">Gemini — مجاني</b>
+            <small data-i18n="o.geminiHint">من Google عبر الإنترنت، بحدّ يومي مجاني. يعمل على أي جهاز</small>
           </span>
         </label>
         <label class="choice">
           <input type="radio" name="aiProvider" value="claude">
           <span class="c">
             <span class="ill"><span class="src-ill">✨</span></span>
-            <b>Claude — الأدق</b>
-            <small>عبر الإنترنت بمفتاح Claude API، مدفوع حسب الاستخدام</small>
+            <b data-i18n="o.claudeBest">Claude — الأدق</b>
+            <small data-i18n="o.claudeHint">عبر الإنترنت بمفتاح Claude API، مدفوع حسب الاستخدام</small>
           </span>
         </label>
       </div>
 
       <div id="ollamaBox" class="provider" hidden>
         <ol class="setup">
-          <li>ثبّت Ollama من <a href="https://ollama.com/download" target="_blank" rel="noopener noreferrer">ollama.com/download</a>.</li>
-          <li class="ext-only">اسمح لإضافات Firefox بالاتصال به: أغلق Ollama من أيقونته بجوار الساعة، ثم نفّذ في PowerShell:<code dir="ltr">setx OLLAMA_ORIGINS "moz-extension://*"</code>ثم افتح Ollama من قائمة ابدأ.</li>
-          <li>حمّل نموذجًا، مثلًا <b>qwen3.5:4b</b> (سريع، 3.4 GB — مناسب لبطاقة رسوميات 6 GB):<code dir="ltr">ollama pull qwen3.5:4b</code>أو <b>qwen3.5:9b</b> لجودة أعلى لكنه أبطأ على هذه البطاقة.</li>
+          <li data-i18n-html="o.ollama1">ثبّت Ollama من <a href="https://ollama.com/download" target="_blank" rel="noopener noreferrer">ollama.com/download</a>.</li>
+          <li class="ext-only" data-i18n-html="o.ollama2">اسمح لإضافات Firefox بالاتصال به: أغلق Ollama من أيقونته بجوار الساعة، ثم نفّذ في PowerShell:<code dir="ltr">setx OLLAMA_ORIGINS "moz-extension://*"</code>ثم افتح Ollama من قائمة ابدأ.</li>
+          <li data-i18n-html="o.ollama3">حمّل نموذجًا، مثلًا <b>qwen3.5:4b</b> (سريع، 3.4 GB — مناسب لبطاقة رسوميات 6 GB):<code dir="ltr">ollama pull qwen3.5:4b</code>أو <b>qwen3.5:9b</b> لجودة أعلى لكنه أبطأ على هذه البطاقة.</li>
         </ol>
         <div class="opt">
-          <div><b>النموذج</b><small>النماذج المحمّلة في Ollama على هذا الجهاز</small></div>
+          <div><b data-i18n="o.model">النموذج</b><small data-i18n="o.ollamaModelsHint">النماذج المحمّلة في Ollama على هذا الجهاز</small></div>
           <select id="ollamaModel"><option value="">—</option></select>
         </div>
         <div class="key-row">
-          <input id="ollamaUrl" type="url" dir="ltr" placeholder="http://localhost:11434" spellcheck="false" aria-label="عنوان Ollama">
-          <button id="ollamaRefresh" class="btn small ghost">تحديث القائمة</button>
-          <button id="ollamaTest" class="btn small">اختبار</button>
+          <input id="ollamaUrl" type="url" dir="ltr" placeholder="http://localhost:11434" spellcheck="false" aria-label="عنوان Ollama" data-i18n-attr="aria-label:o.ollamaUrl">
+          <button id="ollamaRefresh" class="btn small ghost" data-i18n="o.refreshList">تحديث القائمة</button>
+          <button id="ollamaTest" class="btn small" data-i18n="o.test">اختبار</button>
         </div>
         <p id="ollamaStatus" class="ai-status" role="status"></p>
       </div>
 
       <div id="geminiBox" class="provider" hidden>
         <div class="key-row">
-          <input id="geminiKey" type="password" dir="ltr" placeholder="AIza…" autocomplete="off" spellcheck="false" aria-label="مفتاح Gemini API">
-          <button id="geminiSave" class="btn small">حفظ وتحقق</button>
-          <button id="geminiRemove" class="btn small ghost" hidden>إزالة</button>
+          <input id="geminiKey" type="password" dir="ltr" placeholder="AIza…" autocomplete="off" spellcheck="false" aria-label="مفتاح Gemini API" data-i18n-attr="aria-label:o.geminiKey">
+          <button id="geminiSave" class="btn small" data-i18n="o.saveVerify">حفظ وتحقق</button>
+          <button id="geminiRemove" class="btn small ghost" hidden data-i18n="common.remove">إزالة</button>
         </div>
         <p id="geminiStatus" class="ai-status" role="status"></p>
-        <p class="tip">أنشئ مفتاحًا مجانيًا من <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> بحساب Google — دون بطاقة دفع. للخطة المجانية حد للطلبات في الدقيقة وفي اليوم، تجده في AI Studio.</p>
-        <p class="tip warn">⚠️ في الخطة المجانية قد تستخدم Google النصوص المرسلة لتحسين منتجاتها. مناسب للتدرّب، لا للرسائل الخاصة أو مستندات العمل.</p>
+        <p class="tip" data-i18n-html="o.geminiTip">أنشئ مفتاحًا مجانيًا من <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> بحساب Google — دون بطاقة دفع. للخطة المجانية حد للطلبات في الدقيقة وفي اليوم، تجده في AI Studio.</p>
+        <p class="tip warn" data-i18n="o.geminiWarn">⚠️ في الخطة المجانية قد تستخدم Google النصوص المرسلة لتحسين منتجاتها. مناسب للتدرّب، لا للرسائل الخاصة أو مستندات العمل.</p>
         <div class="opt">
-          <div><b>النموذج</b><small>Flash أدق، و Flash-Lite أسرع ويسمح بطلبات أكثر</small></div>
+          <div><b data-i18n="o.model">النموذج</b><small data-i18n="o.geminiModelsHint">Flash أدق، و Flash-Lite أسرع ويسمح بطلبات أكثر</small></div>
           <select id="geminiModel">
-            <option value="gemini-3.8-flash">Gemini 3.8 Flash — الأدق</option>
-            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite — الأسرع</option>
+            <option value="gemini-3.8-flash" data-i18n="o.gemFlash">Gemini 3.8 Flash — الأدق</option>
+            <option value="gemini-3.5-flash-lite" data-i18n="o.gemLite">Gemini 3.5 Flash-Lite — الأسرع</option>
           </select>
         </div>
       </div>
 
       <div id="claudeBox" class="provider" hidden>
       <div class="key-row">
-        <input id="aiKey" type="password" dir="ltr" placeholder="sk-ant-api…" autocomplete="off" spellcheck="false" aria-label="مفتاح Claude API">
-        <button id="aiSave" class="btn small">حفظ وتحقق</button>
-        <button id="aiRemove" class="btn small ghost" hidden>إزالة</button>
+        <input id="aiKey" type="password" dir="ltr" placeholder="sk-ant-api…" autocomplete="off" spellcheck="false" aria-label="مفتاح Claude API" data-i18n-attr="aria-label:o.claudeKey">
+        <button id="aiSave" class="btn small" data-i18n="o.saveVerify">حفظ وتحقق</button>
+        <button id="aiRemove" class="btn small ghost" hidden data-i18n="common.remove">إزالة</button>
       </div>
       <p id="aiStatus" class="ai-status" role="status"></p>
-      <p class="tip">تحتاج إلى <b>مفتاح Claude API</b> من <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com</a>. هذا حساب منفصل عن اشتراك Claude.ai (Pro/Max)، ويُحتسب حسب الاستخدام — تدقيق رسالة عادية يكلّف نحو سنت إلى سنتين مع Opus، وأقل بكثير مع Haiku.</p>
+      <p class="tip" data-i18n-html="o.claudeTip">تحتاج إلى <b>مفتاح Claude API</b> من <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com</a>. هذا حساب منفصل عن اشتراك Claude.ai (Pro/Max)، ويُحتسب حسب الاستخدام — تدقيق رسالة عادية يكلّف نحو سنت إلى سنتين مع Opus، وأقل بكثير مع Haiku.</p>
       <div class="opt">
-        <div><b>النموذج</b><small>Opus أدق، و Sonnet و Haiku أسرع وأرخص</small></div>
+        <div><b data-i18n="o.model">النموذج</b><small data-i18n="o.claudeModelsHint">Opus أدق، و Sonnet و Haiku أسرع وأرخص</small></div>
         <select id="aiModel">
-          <option value="claude-opus-5">Claude Opus 5 — الأدق</option>
-          <option value="claude-sonnet-5">Claude Sonnet 5 — متوازن</option>
-          <option value="claude-haiku-4-5">Claude Haiku 4.5 — الأسرع والأرخص</option>
+          <option value="claude-opus-5" data-i18n="o.opus">Claude Opus 5 — الأدق</option>
+          <option value="claude-sonnet-5" data-i18n="o.sonnet">Claude Sonnet 5 — متوازن</option>
+          <option value="claude-haiku-4-5" data-i18n="o.haiku">Claude Haiku 4.5 — الأسرع والأرخص</option>
         </select>
       </div>
       </div>
 
       <label class="opt">
-        <div><b>الزر داخل حقول الكتابة</b><small>إظهار زر «كتابة» عند تحديد نص داخل مربعات النص والمحررات (البريد، الرسائل…)</small></div>
+        <div><b data-i18n="o.aiInInputs">الزر داخل حقول الكتابة</b><small data-i18n="o.aiInInputsHint">إظهار زر «كتابة» عند تحديد نص داخل مربعات النص والمحررات (البريد، الرسائل…)</small></div>
         <span class="switch"><input type="checkbox" id="aiInInputs"><span class="track"><span class="thumb"></span></span></span>
       </label>
-      <p class="muted small">تُحفظ هذه الإعدادات والمفتاح على هذا الجهاز فقط ولا تُزامَن. مع Ollama لا يغادر النص جهازك. مع Gemini أو Claude لا يُرسَل أي نص إلى Google أو Anthropic إلا عندما تضغط إحدى أدوات الكتابة، ويُرسَل حينها النص المحدد (أو نص الصفحة عند طلب تلخيصها).</p>
+      <p class="muted small" data-i18n="o.aiPrivacy">تُحفظ هذه الإعدادات والمفتاح على هذا الجهاز فقط ولا تُزامَن. مع Ollama لا يغادر النص جهازك. مع Gemini أو Claude لا يُرسَل أي نص إلى Google أو Anthropic إلا عندما تضغط إحدى أدوات الكتابة، ويُرسَل حينها النص المحدد (أو نص الصفحة عند طلب تلخيصها).</p>
     </section>
 
     <section class="panel" id="review">
-      <h2>مراجعة الكلمات 🗂️</h2>
-      <p class="muted" id="rvSummary">الكلمات الإنجليزية التي تبحث عنها تُضاف إلى بطاقات المراجعة مع الجملة التي وجدتها فيها. راجعها من تبويب «مراجعة» في نافذة لمحة، وستعود كل كلمة في الوقت المناسب قبل أن تنساها.</p>
+      <h2 data-i18n="o.review">مراجعة الكلمات 🗂️</h2>
+      <p class="muted" id="rvSummary" data-i18n="o.reviewIntro">الكلمات الإنجليزية التي تبحث عنها تُضاف إلى بطاقات المراجعة مع الجملة التي وجدتها فيها. راجعها من تبويب «مراجعة» في نافذة لمحة، وستعود كل كلمة في الوقت المناسب قبل أن تنساها.</p>
       <label class="opt">
-        <div><b>إضافة الكلمات تلقائيًا</b><small>كل كلمة إنجليزية تبحث عنها تُضاف للمراجعة. إن أوقفته، أضف الكلمات بزر 🔖 في بطاقة البحث.</small></div>
+        <div><b data-i18n="o.cardsAuto">إضافة الكلمات تلقائيًا</b><small data-i18n="o.cardsAutoHint">كل كلمة إنجليزية تبحث عنها تُضاف للمراجعة. إن أوقفته، أضف الكلمات بزر 🔖 في بطاقة البحث.</small></div>
         <span class="switch"><input type="checkbox" id="cardsAuto"><span class="track"><span class="thumb"></span></span></span>
       </label>
       <div class="opt">
-        <div><b>كلمات جديدة في اليوم</b><small>عدد الكلمات الجديدة التي تظهر للمراجعة كل يوم</small></div>
+        <div><b data-i18n="o.newPerDay">كلمات جديدة في اليوم</b><small data-i18n="o.newPerDayHint">عدد الكلمات الجديدة التي تظهر للمراجعة كل يوم</small></div>
         <select id="cardsNewPerDay">
           <option value="5">٥</option>
           <option value="10">١٠</option>
@@ -245,72 +245,80 @@
         </select>
       </div>
       <div class="opt">
-        <div><b>حذف كل البطاقات</b><small>يحذف الكلمات وتقدّمك في حفظها</small></div>
-        <button id="rvClear" class="btn small ghost">حذف</button>
+        <div><b data-i18n="o.deleteCards">حذف كل البطاقات</b><small data-i18n="o.deleteCardsHint">يحذف الكلمات وتقدّمك في حفظها</small></div>
+        <button id="rvClear" class="btn small ghost" data-i18n="o.delete">حذف</button>
       </div>
     </section>
 
     <section class="panel" id="journal">
-      <h2>سجل أخطائي ✍️</h2>
-      <p class="muted" id="jSummary">يُسجَّل هنا ما يجده «التدقيق اللغوي» في كتابتك، لتعرف نقاط ضعفك وتتحسّن.</p>
+      <h2 data-i18n="o.journal">سجل أخطائي ✍️</h2>
+      <p class="muted" id="jSummary" data-i18n="o.journalIntro">يُسجَّل هنا ما يجده «التدقيق اللغوي» في كتابتك، لتعرف نقاط ضعفك وتتحسّن.</p>
       <div id="jBars" class="bars"></div>
       <div id="jTip" class="jtip" hidden></div>
       <div id="jRecentBox" hidden>
-        <h3 class="sub" id="jRecentTitle">آخر الأخطاء</h3>
+        <h3 class="sub" id="jRecentTitle" data-i18n="o.recentMistakes">آخر الأخطاء</h3>
         <ul id="jRecent" class="jlist"></ul>
       </div>
       <label class="opt">
-        <div><b>تسجيل أخطائي</b><small>يُحفظ على جهازك فقط. تُرسَل أكثر ٣ أنواع تكرارًا مع طلب التدقيق ليشرحها الذكاء الاصطناعي بوضوح أكبر.</small></div>
+        <div><b data-i18n="o.saveMistakes">تسجيل أخطائي</b><small data-i18n="o.saveMistakesHint">يُحفظ على جهازك فقط. تُرسَل أكثر ٣ أنواع تكرارًا مع طلب التدقيق ليشرحها الذكاء الاصطناعي بوضوح أكبر.</small></div>
         <span class="switch"><input type="checkbox" id="saveMistakes"><span class="track"><span class="thumb"></span></span></span>
       </label>
       <div class="opt">
-        <div><b>مسح السجل</b><small>البدء من جديد</small></div>
-        <button id="jClear" class="btn small ghost">مسح</button>
+        <div><b data-i18n="o.clearJournal">مسح السجل</b><small data-i18n="o.startOver">البدء من جديد</small></div>
+        <button id="jClear" class="btn small ghost" data-i18n="common.clear">مسح</button>
       </div>
     </section>
 
     <section class="panel">
-      <h2>المظهر</h2>
+      <h2 data-i18n="o.appearance">المظهر</h2>
       <div class="opt">
-        <div><b>السمة</b><small>مظهر بطاقة الترجمة</small></div>
+        <div><b data-i18n="o.uiLang">لغة الواجهة</b><small data-i18n="o.uiLangHint">لغة القوائم والأزرار والشروح في لمحة</small></div>
+        <select id="uiLang" data-i18n-attr="aria-label:o.uiLang" aria-label="لغة الواجهة">
+          <option value="auto" data-i18n="o.uiLangAuto">تلقائي (حسب النظام)</option>
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div class="opt">
+        <div><b data-i18n="o.theme">السمة</b><small data-i18n="o.themeHint">مظهر بطاقة الترجمة</small></div>
         <select id="theme">
-          <option value="auto">تلقائي (حسب النظام)</option>
-          <option value="light">فاتح</option>
-          <option value="dark">داكن</option>
+          <option value="auto" data-i18n="o.themeAuto">تلقائي (حسب النظام)</option>
+          <option value="light" data-i18n="o.themeLight">فاتح</option>
+          <option value="dark" data-i18n="o.themeDark">داكن</option>
         </select>
       </div>
     </section>
 
     <section class="panel" id="keysPanel">
-      <h2>اختصارات لوحة المفاتيح</h2>
-      <div class="opt"><div><b>بحث / ترجمة النص المحدد</b></div><span id="k-lookup" class="keys"></span></div>
-      <div class="opt"><div><b>ترجمة الصفحة كاملة</b></div><span id="k-page" class="keys"></span></div>
-      <div class="opt"><div><b>أدوات الكتابة (للنص المحدد أو لمربع النص كله)</b></div><span id="k-write" class="keys"></span></div>
-      <div class="opt"><div><b>إغلاق البطاقة</b></div><span class="keys"><kbd>Esc</kbd></span></div>
-      <button id="shortcuts" class="link" hidden>تخصيص الاختصارات</button>
+      <h2 data-i18n="o.keys">اختصارات لوحة المفاتيح</h2>
+      <div class="opt"><div><b data-i18n="o.keyLookup">بحث / ترجمة النص المحدد</b></div><span id="k-lookup" class="keys"></span></div>
+      <div class="opt"><div><b data-i18n="o.keyPage">ترجمة الصفحة كاملة</b></div><span id="k-page" class="keys"></span></div>
+      <div class="opt"><div><b data-i18n="o.keyWrite">أدوات الكتابة (للنص المحدد أو لمربع النص كله)</b></div><span id="k-write" class="keys"></span></div>
+      <div class="opt"><div><b data-i18n="o.keyClose">إغلاق البطاقة</b></div><span class="keys"><kbd>Esc</kbd></span></div>
+      <button id="shortcuts" class="link" hidden data-i18n="o.customize">تخصيص الاختصارات</button>
     </section>
 
     <section class="panel" id="sitesPanel">
-      <h2>المواقع المستثناة</h2>
-      <p class="muted">لن يظهر لمحة على هذه المواقع. يمكنك إضافة موقع من نافذة الإضافة في شريط الأدوات.</p>
+      <h2 data-i18n="o.sites">المواقع المستثناة</h2>
+      <p class="muted" data-i18n="o.sitesIntro">لن يظهر لمحة على هذه المواقع. يمكنك إضافة موقع من نافذة الإضافة في شريط الأدوات.</p>
       <ul id="sites" class="sites"></ul>
     </section>
 
     <section class="panel">
-      <h2>الخصوصية والسجل</h2>
+      <h2 data-i18n="o.privacy">الخصوصية والسجل</h2>
       <label class="opt">
-        <div><b>حفظ سجل الكلمات</b><small>يُحفظ محليًا على جهازك فقط</small></div>
+        <div><b data-i18n="o.saveHistory">حفظ سجل الكلمات</b><small data-i18n="o.saveHistoryHint">يُحفظ محليًا على جهازك فقط</small></div>
         <span class="switch"><input type="checkbox" id="saveHistory"><span class="track"><span class="thumb"></span></span></span>
       </label>
       <div class="opt">
-        <div><b>مسح السجل</b><small id="histCount"></small></div>
-        <button id="clearHist" class="btn small ghost">مسح</button>
+        <div><b data-i18n="o.clearHistory">مسح السجل</b><small id="histCount"></small></div>
+        <button id="clearHist" class="btn small ghost" data-i18n="common.clear">مسح</button>
       </div>
-      <p class="muted small">يُرسَل إلى خدمة Google للترجمة: النص الذي تختاره، والجملة المحيطة به (إن كان «فهم السياق» مفعّلًا)، ونص الصفحة عندما تطلب ترجمتها. تُرسَل الكلمة إلى ويكيبيديا للنبذة. في وضع «القاموس المحلي» تُبحث الكلمات دون إرسال. عند استخدام أدوات الكتابة يُرسَل النص إلى Anthropic (Claude) بمفتاحك. لا تُجمع أي بيانات أخرى.</p>
+      <p class="muted small" data-i18n="o.privacyText">يُرسَل إلى خدمة Google للترجمة: النص الذي تختاره، والجملة المحيطة به (إن كان «فهم السياق» مفعّلًا)، ونص الصفحة عندما تطلب ترجمتها. تُرسَل الكلمة إلى ويكيبيديا للنبذة. في وضع «القاموس المحلي» تُبحث الكلمات دون إرسال. عند استخدام أدوات الكتابة يُرسَل النص إلى Anthropic (Claude) بمفتاحك. لا تُجمع أي بيانات أخرى.</p>
     </section>
 
     <section class="panel credits">
-      <h2>مصادر القاموس المحلي</h2>
+      <h2 data-i18n="o.credits">مصادر القاموس المحلي</h2>
       <ul dir="ltr">
         <li><b>WordNet 3.0</b> — Princeton University (WordNet License)</li>
         <li><b>Arabic WordNet v2</b> — Abouenour, Bouzoubaa &amp; Rosso, via Open Multilingual Wordnet (CC BY-SA 3.0)</li>
@@ -318,13 +326,15 @@
         <li><b>CMU Pronouncing Dictionary</b> — Carnegie Mellon University (BSD)</li>
         <li><b>wordfreq</b> — Robyn Speer (word frequencies, CC BY-SA 4.0)</li>
       </ul>
-      <p class="muted small">بيانات القاموس (مجلد dict) مُتاحة بموجب CC BY-SA 4.0. التفاصيل في dict/LICENSES.md.</p>
+      <p class="muted small" data-i18n="o.creditsLicense">بيانات القاموس (مجلد dict) مُتاحة بموجب CC BY-SA 4.0. التفاصيل في dict/LICENSES.md.</p>
     </section>
 
-    <footer class="end">لمحة · الإصدار <span id="ver"></span></footer>
+    <footer class="end" data-i18n-html="o.version">لمحة · الإصدار <span id="ver"></span></footer>
   </div>
 
-  <div id="saved" class="saved" role="status" aria-live="polite">تم الحفظ ✓</div>
+  <div id="saved" class="saved" role="status" aria-live="polite" data-i18n="common.saved">تم الحفظ ✓</div>
+  <script src="../shared/i18n.js"></script>
+  <script src="i18n-options.js"></script>
   <script src="../shared/lamha-ai.js"></script>
   <script src="options.js"></script>
   <!-- load the in-page UI here too so the "try it now" demo works on this page -->

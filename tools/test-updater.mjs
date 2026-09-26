@@ -3,8 +3,15 @@
 import { createRequire } from "node:module";
 import { EventEmitter } from "node:events";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import vm from "node:vm";
 
 const { createUpdater, newer } = createRequire(import.meta.url)("../desktop/updater.js");
+
+// the real interface strings (shared/i18n.js + the desktop's), Arabic unless a test switches
+const i18n = vm.createContext({});
+for (const f of ["../shared/i18n.js", "../desktop/renderer/i18n-desktop.js"]) vm.runInContext(readFileSync(new URL(f, import.meta.url), "utf8"), i18n);
+const L = vm.runInContext("LamhaI18n", i18n);
 
 const queue = [];
 const test = (name, fn) => queue.push({ name, fn });
@@ -43,7 +50,8 @@ function setup({ packaged = true, portable = false, result = "none", release = n
     },
     notify: (title, body, onClick) => notes.push({ title, body, onClick }),
     onChange: () => { changes++; },
-    openUrl: url => opened.push(url)
+    openUrl: url => opened.push(url),
+    t: (key, vars) => L.t(key, vars)
   });
   return { up, au, notes, opened, get changes() { return changes; }, get fetched() { return fetched; } };
 }
@@ -109,6 +117,22 @@ test("Portable: same or older release → up to date; network error → error", 
   const down = setup({ portable: true, release: new Error("offline") });
   await down.up.check(true);
   assert.equal(down.up.state.status, "error");
+});
+
+test("English interface: the notices are in English", async () => {
+  L.setLang("en");
+  try {
+    const t = setup({ result: "1.6.0" });
+    await t.up.check(false);
+    await tick();
+    assert.equal(t.notes[0].title, "Update ready");
+    assert.match(t.notes[0].body, /^Version 1\.6\.0 — restart Lamha to install it/);
+    const byUser = setup({ result: "none" });
+    await byUser.up.check(true);
+    assert.equal(byUser.notes[0].title, "You're up to date");
+  } finally {
+    L.setLang("ar");
+  }
 });
 
 test("development (not packaged): never checks", async () => {

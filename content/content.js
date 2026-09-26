@@ -2,6 +2,8 @@
 /* global LAMHA_CSS, LamhaPage, LamhaAI */
 (() => {
   "use strict";
+  const L = (key, vars) => LamhaI18n.t(key, vars); // interface text (shared/i18n.js)
+  const arrow = () => (LamhaI18n.lang() === "ar" ? "←" : "→");
   if (window.__lamhaLoaded) return;
   window.__lamhaLoaded = true;
 
@@ -22,6 +24,8 @@
   const aiProvider = () => LamhaAI.provider(aiLocal);
   const updateAiReady = () => { aiReady = aiProvider().ready; };
   browser.storage.sync.get(settings).then(s => { settings = { ...settings, ...s }; applyTheme(); }).catch(() => {});
+  // interface language: the card's labels follow it; an open card closes so the next one is in the new language
+  LamhaI18n.init({ onChange: () => { if (root) root.classList.toggle("en", LamhaI18n.lang() === "en"); closeCard(); hidePill(); } }).catch(() => {});
   browser.storage.local.get(AI_LOCAL_KEYS).then(r => { aiLocal = r || {}; updateAiReady(); }).catch(() => {});
   browser.storage.onChanged.addListener((changes, area) => {
     if (area === "local") {
@@ -79,18 +83,20 @@
     return svg;
   }
 
-  let langNames;
+  let langNames = null, langNamesIn = "";
   function langName(code) {
-    const fixed = { ar: "العربية", en: "الإنجليزية" };
-    if (fixed[code]) return fixed[code];
-    try { langNames = langNames || new Intl.DisplayNames(["ar"], { type: "language" }); return langNames.of(code) || code; }
-    catch (_) { return code; }
+    if (code === "ar" || code === "en") return L("lang." + code);
+    const ui = LamhaI18n.lang();
+    try {
+      if (!langNames || langNamesIn !== ui) { langNames = new Intl.DisplayNames([ui], { type: "language" }); langNamesIn = ui; }
+      return langNames.of(code) || code;
+    } catch (_) { return code; }
   }
   const dirOf = lang => (["ar", "fa", "ur", "he", "iw", "ps", "yi", "ku", "sd"].includes((lang || "").split("-")[0]) ? "rtl" : "ltr");
 
   async function copyText(text) {
-    try { await navigator.clipboard.writeText(text); toast("تم النسخ"); }
-    catch (_) { toast("تعذّر النسخ"); }
+    try { await navigator.clipboard.writeText(text); toast(L("c.copiedToast")); }
+    catch (_) { toast(L("common.copyFailed")); }
   }
 
   function speak(text, lang, btn) {
@@ -126,7 +132,7 @@
     shadow = host.attachShadow({ mode: "closed" });
     const style = document.createElement("style");
     style.textContent = LAMHA_CSS;
-    root = h("div", { class: "root" });
+    root = h("div", { class: "root" + (LamhaI18n.lang() === "en" ? " en" : "") });
     shadow.append(style, root);
     (document.documentElement || document.body).appendChild(host);
     applyTheme();
@@ -312,16 +318,16 @@
     const showAI = aiReady && (info.aiOnly || !!info.editable || !word);
     const open = fn => e => { e.preventDefault(); e.stopPropagation(); const i = pillInfo; hidePill(); fn(i, { focus: e.detail === 0 }); };
     pill = h("div", {
-      class: "pill", role: "toolbar", "aria-label": "لمحة",
+      class: "pill", role: "toolbar", "aria-label": L("c.pill"),
       onpointerdown: e => { e.preventDefault(); e.stopPropagation(); } // keep the page selection
     },
       !info.aiOnly && h("button", {
-        class: "pill-btn", type: "button", "aria-label": word ? "ابحث عن الكلمة" : "ترجم النص", title: "Alt+Shift+L", onclick: open(openCard)
-      }, icon(word ? "search" : "translate", 15, 2.2), word ? "بحث" : "ترجمة"),
+        class: "pill-btn", type: "button", "aria-label": word ? L("c.lookupWord") : L("c.translateText"), title: "Alt+Shift+L", onclick: open(openCard)
+      }, icon(word ? "search" : "translate", 15, 2.2), word ? L("c.lookupBtn") : L("c.translateBtn")),
       !info.aiOnly && showAI && h("span", { class: "pill-sep" }),
       showAI && h("button", {
-        class: "pill-btn", type: "button", "aria-label": "أدوات الكتابة", title: "Alt+Shift+W", onclick: open(openWriteCard)
-      }, icon("sparkle", 15, 2), "كتابة")
+        class: "pill-btn", type: "button", "aria-label": L("p.writeTools"), title: "Alt+Shift+W", onclick: open(openWriteCard)
+      }, icon("sparkle", 15, 2), L("c.writeBtn"))
     );
     root.append(pill);
     placePill();
@@ -362,7 +368,7 @@
     if (info.context === undefined) info.context = info.range && isWordish(info.text) ? contextOf(info.range) : null;
     cardInfo = info;
     stack = [info.text];
-    card = h("div", { class: "card", role: "dialog", "aria-label": "لمحة — ترجمة", tabindex: "-1" });
+    card = h("div", { class: "card", role: "dialog", "aria-label": L("c.cardLabel"), tabindex: "-1" });
     root.append(card);
     decideSide();
     load(info.text, info.context);
@@ -411,15 +417,15 @@
 
   function frame(data, title) {
     card.textContent = "";
-    const langLabel = title || (data ? `${langName(data.src)} ← ${langName(data.tl)}` : "");
+    const langLabel = title || (data ? `${langName(data.src)} ${arrow()} ${langName(data.tl)}` : "");
     const bar = h("div", { class: "bar" },
-      h("div", { class: "brand" }, h("span", { class: "dot" }, icon("translate", 11, 2.6)), "لمحة"),
+      h("div", { class: "brand" }, h("span", { class: "dot" }, icon("translate", 11, 2.6)), L("common.lamha")),
       langLabel && h("span", { class: "lang" }, langLabel),
-      data && data.source === "local" && h("span", { class: "badge", title: "النتيجة من القاموس المدمج — تعمل دون إنترنت" }, icon("book", 11, 2.4), "قاموس محلي"),
+      data && data.source === "local" && h("span", { class: "badge", title: L("c.localBadgeTitle") }, icon("book", 11, 2.4), L("c.localBadge")),
       h("div", { class: "spacer" }),
-      stack.length > 1 && h("button", { class: "icon-btn", title: "رجوع", "aria-label": "رجوع", onclick: goBack }, icon("back")),
-      h("button", { class: "icon-btn", title: "الإعدادات", "aria-label": "الإعدادات", onclick: () => send({ type: "openOptions" }) }, icon("settings")),
-      h("button", { class: "icon-btn", title: "إغلاق (Esc)", "aria-label": "إغلاق", onclick: closeCard }, icon("close"))
+      stack.length > 1 && h("button", { class: "icon-btn", title: L("common.back"), "aria-label": L("common.back"), onclick: goBack }, icon("back")),
+      h("button", { class: "icon-btn", title: L("common.settings"), "aria-label": L("common.settings"), onclick: () => send({ type: "openOptions" }) }, icon("settings")),
+      h("button", { class: "icon-btn", title: L("c.closeEsc"), "aria-label": L("common.close"), onclick: closeCard }, icon("close"))
     );
     bodyEl = h("div", { class: "body" });
     card.append(bar, bodyEl);
@@ -429,14 +435,14 @@
   function footer(data) {
     const q = encodeURIComponent(data.query);
     const links = [
-      h("a", { href: `https://translate.google.com/?sl=${encodeURIComponent(data.src || "auto")}&tl=${encodeURIComponent(data.tl)}&text=${q}&op=translate`, target: "_blank", rel: "noopener noreferrer" }, icon("external", 13), "ترجمة Google")
+      h("a", { href: `https://translate.google.com/?sl=${encodeURIComponent(data.src || "auto")}&tl=${encodeURIComponent(data.tl)}&text=${q}&op=translate`, target: "_blank", rel: "noopener noreferrer" }, icon("external", 13), L("c.google"))
     ];
     if (data.type === "word" && data.src === "en" && data.tl === "ar") {
-      links.push(h("a", { href: `https://dictionary.cambridge.org/dictionary/english-arabic/${encodeURIComponent(data.query.toLowerCase().replace(/ /g, "-"))}`, target: "_blank", rel: "noopener noreferrer" }, icon("external", 13), "قاموس كامبريدج"));
+      links.push(h("a", { href: `https://dictionary.cambridge.org/dictionary/english-arabic/${encodeURIComponent(data.query.toLowerCase().replace(/ /g, "-"))}`, target: "_blank", rel: "noopener noreferrer" }, icon("external", 13), L("c.cambridge")));
     }
     if (aiReady && data.type === "text" && cardInfo) {
       const info = cardInfo;
-      links.push(h("a", { href: "#", role: "button", onclick: e => { e.preventDefault(); openWriteCard(info); } }, icon("sparkle", 13), "أدوات الكتابة"));
+      links.push(h("a", { href: "#", role: "button", onclick: e => { e.preventDefault(); openWriteCard(info); } }, icon("sparkle", 13), L("p.writeTools")));
     }
     card.append(h("div", { class: "foot" }, links));
   }
@@ -463,13 +469,13 @@
     const busy = err === "rate_limited";
     const notFound = err === "not_found_offline", offlineMode = err === "offline_mode";
     b.append(h("div", { class: "err" },
-      h("b", null, notFound ? "الكلمة غير موجودة في القاموس المحلي" : offlineMode ? "ترجمة الجمل تحتاج إلى الإنترنت"
-        : offline ? "لا يوجد اتصال بالإنترنت" : busy ? "خدمة الترجمة مشغولة مؤقتًا" : "تعذّرت الترجمة"),
-      notFound || offlineMode ? "أنت في وضع «القاموس المحلي فقط». غيّر مصدر القاموس من الإعدادات للبحث عبر الإنترنت."
-        : offline ? "تحقق من اتصالك ثم حاول مجددًا."
-        : busy ? "أُرسلت طلبات كثيرة في وقت قصير. انتظر دقيقة ثم أعد المحاولة."
-        : "حدث خطأ أثناء الاتصال بخدمة الترجمة.",
-      h("div", null, h("button", { class: "btn", onclick: () => load(text, stack.length < 2 && cardInfo ? cardInfo.context : null) }, icon("retry", 14), "إعادة المحاولة"))
+      h("b", null, notFound ? L("c.errNotFound") : offlineMode ? L("c.errOfflineMode")
+        : offline ? L("c.errOffline") : busy ? L("c.errBusy") : L("c.errFailed")),
+      notFound || offlineMode ? L("c.errLocalOnly")
+        : offline ? L("c.errCheckConn")
+        : busy ? L("c.errTooMany")
+        : L("c.errService"),
+      h("div", null, h("button", { class: "btn", onclick: () => load(text, stack.length < 2 && cardInfo ? cardInfo.context : null) }, icon("retry", 14), L("common.retry")))
     ));
   }
 
@@ -519,27 +525,27 @@
     const tDir = dirOf(d.tl), sDir = dirOf(d.src);
 
     if (d.type === "word") {
-      const speakBtn = h("button", { class: "speak", title: "استمع للنطق", "aria-label": "استمع للنطق", onclick: e => speak(d.query, d.src, e.currentTarget) }, icon("speak", 17));
+      const speakBtn = h("button", { class: "speak", title: L("c.listenPron"), "aria-label": L("c.listenPron"), onclick: e => speak(d.query, d.src, e.currentTarget) }, icon("speak", 17));
       b.append(h("div", { class: "head", dir: sDir },
         h("div", { class: "w" },
           h("div", { class: "headword" + (sDir === "rtl" ? " ar" : "") }, d.query),
           d.srcTranslit && h("div", { class: "phon" }, `/${d.srcTranslit}/`),
-          d.inflected && h("div", { class: "form-of" }, h("span", { dir: "ltr" }, d.inflected), " ← صيغة من ", h("b", { dir: "ltr" }, d.query)),
-          !d.inflected && d.formOf && h("div", { class: "form-of" }, "صيغة من ",
-            h("button", { class: "link", dir: "ltr", title: `ابحث عن ${d.formOf}`, onclick: () => navigate(d.formOf) }, d.formOf))
+          d.inflected && h("div", { class: "form-of" }, h("span", { dir: "ltr" }, d.inflected), L("c.formOf"), h("b", { dir: "ltr" }, d.query)),
+          !d.inflected && d.formOf && h("div", { class: "form-of" }, L("c.formOfPlain"),
+            h("button", { class: "link", dir: "ltr", title: L("c.lookUpX", { w: d.formOf }), onclick: () => navigate(d.formOf) }, d.formOf))
         ),
         d.src === "en" && d.translation && reviewBtn(d),
         speakBtn
       ));
     } else {
       b.append(h("div", { class: "src-row", dir: sDir },
-        h("div", { class: "source", dir: sDir, title: "اضغط لعرض النص كاملًا", onclick: e => e.currentTarget.classList.toggle("open") }, d.query),
-        h("button", { class: "icon-btn", title: "استمع للنص الأصلي", "aria-label": "استمع للنص الأصلي", onclick: e => speak(d.query, d.src, e.currentTarget) }, icon("speak", 15))
+        h("div", { class: "source", dir: sDir, title: L("c.showAll"), onclick: e => e.currentTarget.classList.toggle("open") }, d.query),
+        h("button", { class: "icon-btn", title: L("c.listenOrig"), "aria-label": L("c.listenOrig"), onclick: e => speak(d.query, d.src, e.currentTarget) }, icon("speak", 15))
       ));
     }
 
     if (d.spell) {
-      b.append(h("div", { class: "spell" }, "هل تقصد: ", h("button", { onclick: () => navigate(d.spell) }, d.spell), "؟"));
+      b.append(h("div", { class: "spell" }, L("c.didYouMean"), h("button", { onclick: () => navigate(d.spell) }, d.spell), L("c.didYouMeanEnd")));
     }
 
     // hero translation — the meaning in this sentence when we know it
@@ -548,30 +554,30 @@
     const long = main.length > 40;
     b.append(h("div", { class: "hero", dir: "rtl" },
       h("div", { style: { flex: "1", minWidth: "0" } },
-        (ctx || d.contextSense) && h("div", { class: "ctx-label" }, "في هذا السياق"),
+        (ctx || d.contextSense) && h("div", { class: "ctx-label" }, L("c.inContext")),
         main
           ? h("div", { class: "t" + (long ? " long" : ""), dir: tDir }, main)
           : h("div", { class: "t none" }, d.bestGloss
-              ? ["لا يوجد معنى عربي لهذا الاستخدام في القاموس المحلي. المعنى المقصود هنا:", h("span", { class: "gloss", dir: "ltr" }, d.bestGloss)]
-              : "لا يوجد معنى عربي مباشر في القاموس المحلي — راجع التعريف أدناه."),
+              ? [L("c.noArSense"), h("span", { class: "gloss", dir: "ltr" }, d.bestGloss)]
+              : L("c.noArDirect")),
         !ctx && d.type === "word" && d.translit && tDir === "rtl" && h("div", { class: "tr" }, d.translit),
         ctx && (ctx.pre || ctx.post) && h("div", { class: "ctx", dir: tDir }, ctx.pre, h("mark", null, ctx.word), ctx.post)
       ),
       !!main && h("div", { class: "actions" },
-        h("button", { class: "icon-btn", title: "استمع", "aria-label": "استمع للترجمة", onclick: e => speak(main, d.tl, e.currentTarget) }, icon("speak", 15)),
-        h("button", { class: "icon-btn", title: "نسخ", "aria-label": "نسخ الترجمة", onclick: () => copyText(main) }, icon("copy", 15))
+        h("button", { class: "icon-btn", title: L("common.listen"), "aria-label": L("c.listenTr"), onclick: e => speak(main, d.tl, e.currentTarget) }, icon("speak", 15)),
+        h("button", { class: "icon-btn", title: L("common.copy"), "aria-label": L("c.copyTr"), onclick: () => copyText(main) }, icon("copy", 15))
       )
     ));
 
     // alternative meanings by part of speech
     if (d.dict && d.dict.length) {
-      const sec = h("div", { class: "sec" }, h("div", { class: "sec-h" }, "معانٍ أخرى"));
+      const sec = h("div", { class: "sec" }, h("div", { class: "sec-h" }, L("c.otherMeanings")));
       for (const p of d.dict.slice(0, 5)) {
         if (p.terms.some(t => t.hint)) { sec.append(senseGroups(p, d)); continue; }
         const shown = p.terms.slice(0, 7), rest = p.terms.slice(7);
         const chips = h("span", { class: "chips" }, shown.map(t => termChip(t, d)));
         if (rest.length) {
-          const more = h("button", { class: "chip more", dir: "ltr", title: "عرض المزيد", onclick: () => { more.remove(); chips.append(...rest.map(t => termChip(t, d))); } }, `+${rest.length}`);
+          const more = h("button", { class: "chip more", dir: "ltr", title: L("c.showMore"), onclick: () => { more.remove(); chips.append(...rest.map(t => termChip(t, d))); } }, `+${rest.length}`);
           chips.append(more);
         }
         sec.append(h("div", { class: "pos-row" }, h("span", { class: "pos" }, p.pos), chips));
@@ -581,22 +587,22 @@
 
     // definitions
     if (d.definitions && d.definitions.length) {
-      const sec = h("div", { class: "sec" }, h("div", { class: "sec-h" }, "التعريف"));
+      const sec = h("div", { class: "sec" }, h("div", { class: "sec-h" }, L("c.definition")));
       for (const p of d.definitions) {
         sec.append(h("div", { class: "pos-row", style: { marginBottom: "6px" } }, h("span", { class: "pos" }, p.pos)));
-        sec.append(h("ol", { class: "defs" }, p.entries.map(e => h("li", { class: "def" + (e.best ? " best" : ""), title: e.best ? "المعنى الأقرب لسياق الجملة" : null },
+        sec.append(h("ol", { class: "defs" }, p.entries.map(e => h("li", { class: "def" + (e.best ? " best" : ""), title: e.best ? L("c.bestSense") : null },
           e.ar && e.ar.length > 0 && h("div", { class: "ar-w", dir: "rtl" }, e.ar.join(" · ")),
           e.glossTr && h("div", { class: "ar-g", dir: tDir }, e.glossTr),
           !e.glossTr && d.source === "local" && tDir === "rtl" && settings.translateDefinitions && settings.dictSource !== "offline" && pendingGloss(pending, e.gloss),
           h("div", { class: "en-g", dir: "ltr" }, e.gloss),
           e.example && h("div", { class: "ex", dir: "ltr" }, `“${e.example}”`),
           e.synonyms && e.synonyms.length > 0 && h("div", { class: "syn" }, e.synonyms.map(s =>
-            h("button", { class: "chip en", title: `ابحث عن ${s}`, onclick: () => navigate(s) }, s)))
+            h("button", { class: "chip en", title: L("c.lookUpX", { w: s }), onclick: () => navigate(s) }, s)))
         ))));
       }
       b.append(sec);
     } else if (d.examples && d.examples.length) {
-      b.append(h("div", { class: "sec" }, h("div", { class: "sec-h" }, "أمثلة"),
+      b.append(h("div", { class: "sec" }, h("div", { class: "sec-h" }, L("c.examples")),
         h("ul", { class: "examples" }, d.examples.map(x => h("li", null, x)))));
     }
 
@@ -610,7 +616,7 @@
     const show = on => {
       btn.classList.toggle("on", on);
       btn.setAttribute("aria-pressed", String(on));
-      btn.title = on ? "في قائمة المراجعة — اضغط للإزالة" : "أضف إلى المراجعة";
+      btn.title = on ? L("c.inReview") : L("c.addReview");
       btn.setAttribute("aria-label", btn.title);
     };
     show(false);
@@ -627,7 +633,7 @@
         }
       });
       show(on === true);
-      toast(on === true ? "أُضيفت إلى المراجعة" : "أُزيلت من المراجعة");
+      toast(on === true ? L("c.addedReview") : L("c.removedReview"));
     });
     return btn;
   }
@@ -655,7 +661,7 @@
     const rest = rows.splice(4);
     wrap.append(...rows);
     if (rest.length) {
-      const more = h("button", { class: "chip more", onclick: () => { more.remove(); wrap.append(...rest); } }, `معانٍ أخرى (${rest.length})`);
+      const more = h("button", { class: "chip more", onclick: () => { more.remove(); wrap.append(...rest); } }, L("c.moreMeanings", { n: rest.length }));
       wrap.append(more);
     }
     return wrap;
@@ -664,7 +670,7 @@
   function termChip(t, d) {
     return h("button", {
       class: "chip" + (dirOf(d.tl) === "ltr" ? " en" : ""),
-      title: t.back && t.back.length ? t.back.join("، ") : t.hint || "نسخ",
+      title: t.back && t.back.length ? t.back.join(LamhaI18n.lang() === "ar" ? "، " : ", ") : t.hint || L("common.copy"),
       onclick: () => (dirOf(d.tl) === "ltr" ? navigate(t.word) : copyText(t.word))
     }, t.word);
   }
@@ -672,12 +678,12 @@
   function wikiSection(w) {
     const xDir = dirOf(w.lang);
     return h("div", { class: "sec" },
-      h("div", { class: "sec-h" }, "ويكيبيديا"),
+      h("div", { class: "sec-h" }, L("c.wikipedia")),
       h("div", { class: "wiki", dir: "rtl" },
         w.thumb && h("img", { src: w.thumb, alt: "", loading: "lazy", referrerpolicy: "no-referrer", onerror: e => e.currentTarget.remove() }),
         h("div", { style: { minWidth: "0" } },
           h("div", { class: "x", dir: xDir }, w.extract),
-          w.url && h("a", { href: w.url, target: "_blank", rel: "noopener noreferrer" }, "اقرأ المزيد في ويكيبيديا", icon("external", 12))
+          w.url && h("a", { href: w.url, target: "_blank", rel: "noopener noreferrer" }, L("c.readWiki"), icon("external", 12))
         )
       )
     );
@@ -685,10 +691,7 @@
 
   /* ---------------- writing tools (Claude) ---------------- */
 
-  const TOOL_LABELS = {
-    proofread: "تدقيق لغوي", improve: "تحسين الأسلوب", formal: "رسمي", friendly: "ودّي", concise: "أقصر",
-    toEnglish: "اكتبه بالإنجليزية", summarize: "تلخيص", explain: "اشرح بالعربية", reply: "اكتب ردًّا"
-  };
+  const toolLabel = id => L("tool." + id); // proofread, improve, formal, friendly, concise, toEnglish, summarize, explain, reply
   const REPLACEABLE = new Set(["proofread", "improve", "formal", "friendly", "concise", "toEnglish"]);
   const { isArabicText } = LamhaAI;
 
@@ -701,7 +704,7 @@
     closeCard();
     if (!info.raw) info.raw = info.text;
     cardInfo = info;
-    card = h("div", { class: "card write", role: "dialog", "aria-label": "لمحة — أدوات الكتابة", tabindex: "-1" });
+    card = h("div", { class: "card write", role: "dialog", "aria-label": L("c.writeLabel"), tabindex: "-1" });
     root.append(card);
     decideSide();
     renderWrite(info, tool);
@@ -714,16 +717,16 @@
   const notReadyCode = () => aiProvider().notReady;
 
   function renderWrite(info, active) {
-    const b = frame(null, "أدوات الكتابة · " + aiProvider().name);
+    const b = frame(null, L("c.writeTitle", { p: aiProvider().name }));
     const src = info.raw.trim();
     const tools = info.page ? ["summarize"]
       : isArabicText(src) ? ["toEnglish", "reply", "summarize"]
       : ["proofread", "improve", "formal", "friendly", "concise", "summarize", "explain", "reply"];
     b.append(
-      h("div", { class: "source w-src", dir: isArabicText(src) ? "rtl" : "ltr", title: "اضغط لعرض النص كاملًا", onclick: e => e.currentTarget.classList.toggle("open") },
+      h("div", { class: "source w-src", dir: isArabicText(src) ? "rtl" : "ltr", title: L("c.showAll"), onclick: e => e.currentTarget.classList.toggle("open") },
         info.page ? document.title || location.hostname : src),
-      h("div", { class: "tools", role: "toolbar", "aria-label": "أدوات الكتابة" }, tools.map(id =>
-        h("button", { class: "chip tool" + (id === active ? " on" : ""), "data-tool": id, "aria-pressed": String(id === active), onclick: () => pickTool(id) }, TOOL_LABELS[id])))
+      h("div", { class: "tools", role: "toolbar", "aria-label": L("p.writeTools") }, tools.map(id =>
+        h("button", { class: "chip tool" + (id === active ? " on" : ""), "data-tool": id, "aria-pressed": String(id === active), onclick: () => pickTool(id) }, toolLabel(id))))
     );
     writeOut = h("div", { class: "w-out", "aria-live": "polite" });
     b.append(writeOut);
@@ -767,21 +770,21 @@
       h("b", null, title), text,
       h("div", null,
         needsSettings
-          ? h("button", { class: "btn", onclick: () => send({ type: "openOptions", section: "ai" }) }, icon("settings", 14), "الإعدادات")
-          : retry && h("button", { class: "btn", onclick: retry }, icon("retry", 14), "إعادة المحاولة"))
+          ? h("button", { class: "btn", onclick: () => send({ type: "openOptions", section: "ai" }) }, icon("settings", 14), L("common.settings"))
+          : retry && h("button", { class: "btn", onclick: retry }, icon("retry", 14), L("common.retry")))
     );
   }
 
   function resultActions(text, tool, extra) {
     const canReplace = REPLACEABLE.has(tool) && cardInfo && cardInfo.editable;
     return h("div", { class: "w-actions" },
-      canReplace && h("button", { class: "btn", onclick: () => doReplace(text) }, icon("check", 14), "استبدال"),
-      h("button", { class: "btn" + (canReplace ? " ghost" : ""), onclick: () => copyText(text) }, icon("copy", 14), "نسخ"),
+      canReplace && h("button", { class: "btn", onclick: () => doReplace(text) }, icon("check", 14), L("c.replace")),
+      h("button", { class: "btn" + (canReplace ? " ghost" : ""), onclick: () => copyText(text) }, icon("copy", 14), L("common.copy")),
       h("div", { class: "spacer" }),
       tool === "summarize" && h("button", { class: "btn ghost", onclick: () => runTool(tool, { lang: extra.lang === "en" ? "ar" : "en" }) },
-        extra.lang === "en" ? "بالعربية" : "بالإنجليزية"),
-      tool === "reply" && h("button", { class: "btn ghost", onclick: () => replyForm(extra) }, "تعديل الطلب"),
-      h("button", { class: "icon-btn", title: "محاولة أخرى", "aria-label": "محاولة أخرى", onclick: () => runTool(tool, { ...extra, fresh: true }) }, icon("retry", 15))
+        extra.lang === "en" ? L("c.inArabic") : L("c.inEnglish")),
+      tool === "reply" && h("button", { class: "btn ghost", onclick: () => replyForm(extra) }, L("c.editRequest")),
+      h("button", { class: "icon-btn", title: L("write.again"), "aria-label": L("write.again"), onclick: () => runTool(tool, { ...extra, fresh: true }) }, icon("retry", 15))
     );
   }
 
@@ -797,18 +800,18 @@
     const issues = Array.isArray(data.issues) ? data.issues : [];
     const corrected = String(data.corrected || "").trim();
     if (!issues.length || !corrected || corrected === src) {
-      writeOut.replaceChildren(h("div", { class: "w-ok" }, icon("check", 16, 2.6), "لا توجد أخطاء — نصّك سليم"));
+      writeOut.replaceChildren(h("div", { class: "w-ok" }, icon("check", 16, 2.6), L("write.noErrors")));
       return;
     }
     writeOut.replaceChildren(
       h("div", { class: "w-text", dir: "ltr" }, LamhaAI.diffNodes(h, src, corrected)),
       resultActions(corrected, "proofread", {}),
       h("div", { class: "sec" },
-        h("div", { class: "sec-h" }, `التصحيحات (${issues.length.toLocaleString("ar-EG")})`),
+        h("div", { class: "sec-h" }, L("c.corrections", { n: issues.length })),
         h("ul", { class: "issues" }, issues.map(i => h("li", null,
           h("div", { class: "fix", dir: "ltr" }, h("del", null, i.original), " → ", h("ins", null, i.fix)),
-          i.category !== "other" && h("span", { class: "cat" }, LamhaAI.CATEGORIES[i.category].ar),
-          h("div", { class: "why", dir: "rtl" }, i.why)
+          i.category !== "other" && h("span", { class: "cat" }, LamhaAI.catLabel(i.category)),
+          h("div", { class: "why", dir: "auto" }, i.why)
         ))))
     );
   }
@@ -818,13 +821,13 @@
     markTool("reply");
     const input = h("textarea", {
       class: "w-input", rows: "2", dir: "auto",
-      placeholder: "ماذا تريد أن تقول؟ اكتب فكرتك بالعربية أو الإنجليزية (اختياري)"
+      placeholder: L("c.replyPlaceholder")
     });
     input.value = prev.intent || "";
     // keep site shortcuts (Gmail, Slack…) from reacting to what is typed here
     ["keydown", "keyup", "keypress"].forEach(t => input.addEventListener(t, e => { if (e.key !== "Escape") e.stopPropagation(); }));
     let tone = prev.tone || "";
-    const tones = h("div", { class: "tools" }, [["", "تلقائي"], ["friendly", "ودّي"], ["formal", "رسمي"], ["short", "مختصر"]].map(([v, label]) =>
+    const tones = h("div", { class: "tools" }, [["", L("c.toneAuto")], ["friendly", L("tool.friendly")], ["formal", L("tool.formal")], ["short", L("c.toneShort")]].map(([v, label]) =>
       h("button", {
         class: "chip" + (v === tone ? " on" : ""),
         onclick: e => { tone = v; tones.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === e.currentTarget)); }
@@ -833,9 +836,9 @@
     input.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); go(); } });
     writeOut.replaceChildren(
       input,
-      h("div", { class: "w-note" }, "النبرة:"),
+      h("div", { class: "w-note" }, L("c.tone")),
       tones,
-      h("button", { class: "btn", onclick: go }, icon("sparkle", 14), "اكتب الرد")
+      h("button", { class: "btn", onclick: go }, icon("sparkle", 14), L("c.writeReply"))
     );
     input.focus({ preventScroll: true });
     placeCard();
@@ -876,14 +879,14 @@
     const raw = info.raw || "";
     const full = raw.match(/^\s*/)[0] + text + raw.match(/\s*$/)[0]; // keep the spaces around the selection
     closeCard();
-    if (replaceIn(info.editable, full)) toast("تم الاستبدال");
-    else copyText(text).then(() => toast("تعذّر الاستبدال — نُسخ النص، الصقه بنفسك"));
+    if (replaceIn(info.editable, full)) toast(L("c.replaced"));
+    else copyText(text).then(() => toast(L("c.replaceFailed")));
   }
 
   function summarizePage() {
     const main = document.querySelector("article, main, [role=main]") || document.body;
     const text = (main.innerText || "").replace(/\n{3,}/g, "\n\n").trim().slice(0, 45000);
-    if (!LETTER_RE.test(text)) { toast("لا يوجد نص لتلخيصه"); return; }
+    if (!LETTER_RE.test(text)) { toast(L("c.nothingToSummarize")); return; }
     openWriteCard({ text: document.title, raw: text, page: true, point: { x: innerWidth / 2, y: 40 } }, { focus: true, tool: "summarize" });
   }
 
@@ -897,20 +900,20 @@
     pbarKey = key;
     if (!state.active) { if (pbar) pbar.remove(); pbar = null; return; }
     ensureHost();
-    if (!pbar) { pbar = h("div", { class: "pbar", role: "toolbar", "aria-label": "ترجمة الصفحة" }); root.append(pbar); }
+    if (!pbar) { pbar = h("div", { class: "pbar", role: "toolbar", "aria-label": L("c.pageBar") }); root.append(pbar); }
     pbar.textContent = "";
     const busy = state.loading;
     const relay = action => send({ type: "relayPage", action });
     pbar.append(
       h("div", { class: "status" },
         busy ? h("span", { class: "spin" }) : h("span", { class: "ok" }, icon("check", 15, 2.6)),
-        busy ? "جارٍ الترجمة…" : "تُرجمت الصفحة"
+        busy ? L("common.translating") : L("c.pageDone")
       ),
       h("div", { class: "seg" },
         h("button", { class: state.showingOriginal ? "" : "on", onclick: () => relay("translated") }, langName(settings.targetLang)),
-        h("button", { class: state.showingOriginal ? "on" : "", onclick: () => relay("original") }, "الأصل")
+        h("button", { class: state.showingOriginal ? "on" : "", onclick: () => relay("original") }, L("c.original"))
       ),
-      h("button", { class: "icon-btn", title: "إيقاف الترجمة", "aria-label": "إيقاف الترجمة", onclick: () => relay("stop") }, icon("close", 15))
+      h("button", { class: "icon-btn", title: L("c.stopTranslation"), "aria-label": L("c.stopTranslation"), onclick: () => relay("stop") }, icon("close", 15))
     );
     pbar.classList.remove("mini");
     clearTimeout(pbarIdle);
@@ -1002,13 +1005,13 @@
       const info = !msg.external && getSelectionInfo(true);
       if (info) { openCard(info, { focus: true }); return; }
       if (msg.text) { openCard(textInfo(msg), { focus: true }); return; }
-      toast("حدّد نصًّا أولًا");
+      toast(L("c.selectFirst"));
     } else if (msg.type === "showWrite") {
       if (!msg.external && !document.hasFocus()) return;
       const info = !msg.external && (getSelectionInfo(true) || wholeEditable());
       if (info) { openWriteCard(info, { focus: true }); return; }
       if (msg.text) { openWriteCard(textInfo(msg), { focus: true }); return; }
-      toast("حدّد نصًّا أولًا");
+      toast(L("c.selectFirst"));
     } else if (msg.type === "summarizePage") {
       if (IS_TOP) summarizePage();
     } else if (msg.type === "togglePage") {

@@ -88,7 +88,8 @@ Other features:
   - Page translation.
   - Recent lookups.
 - **Three trigger modes**: floating button (default), instant, or Alt+select only.
-- Light and dark themes that follow the system, a right-to-left Arabic UI, reduced-motion support and keyboard focus styles.
+- **Arabic or English interface:** Settings → المظهر → لغة الواجهة (Appearance → Interface language). *Automatic* uses Arabic on an Arabic system and English otherwise. In English, the layout runs left to right, and proofreading explanations, mistake tips and summaries are in English too; translations still go to your chosen translation language. Existing users keep Arabic when they update.
+- Light and dark themes that follow the system, right-to-left (Arabic) and left-to-right (English) layouts, reduced-motion support and keyboard focus styles.
 - Works inside iframes. The UI lives in a closed Shadow DOM, so websites can't break its styling.
 
 ## Install
@@ -141,7 +142,7 @@ A history of what you copy in any program, with Lamha's language tools on every 
 - **Off until you turn it on.** Enable it in Settings → الحافظة, or from the card that <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> shows the first time.
 - <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> opens a small panel at the mouse. Type to search, then press <kbd>Enter</kbd> to paste into the program you were in, or <kbd>Shift</kbd>+<kbd>Enter</kbd> to paste as plain text. <kbd>Ctrl</kbd>+<kbd>P</kbd> pins an item, <kbd>Delete</kbd> removes it (with undo), and <kbd>Ctrl</kbd>+<kbd>1</kbd>…<kbd>9</kbd> pastes one of the first nine.
 - <kbd>Tab</kbd> on an item opens Lamha's tools for it: translate, write in English, proofread, summarize (in Arabic or English), look up, or add a word to review. You always see the result before pasting it.
-- The **الحافظة** tab in the main window lists everything, with the full text, labels, pins and the same tools.
+- The **الحافظة** tab in the main window lists everything, with the full text, labels, pins and the same tools. **مسح غير المثبّت** (Clear unpinned) at the bottom empties the history in one step and keeps pinned items.
 - **Local and encrypted:** the history is saved in `%APPDATA%\Lamha\clipboard.json`, encrypted with Windows (DPAPI) for your user account. Nothing is sent anywhere unless you press one of the tools on an item.
 - **Excluded programs:** copies from password managers (KeePass, KeePassXC, 1Password, Bitwarden, Enpass, Dashlane, NordPass) are never recorded. Add more in Settings → الحافظة, or with **تجاهل هذا البرنامج** on an item. Lamha also honours the signals password managers put on the clipboard for Windows' own history.
 - **Also in Settings:** how many items to keep (500 by default), automatic deletion of unpinned items (after 30 days by default), skipping bank-card numbers (on by default), and clearing the history.
@@ -187,6 +188,8 @@ popup/                   Toolbar popup
 options/                 Settings + welcome page
 shared/ui.css            Design tokens shared by popup and options
 shared/lamha-ai.js       Mistake categories, AI error messages, word diff (background, content, popup, options)
+shared/i18n.js           Interface language (Arabic / English): the setting, and the strings shared by every page
+options/i18n-options.js  The settings page's strings (desktop/renderer/i18n-desktop.js has the Windows app's)
 desktop/                 Windows app (Electron): main.js, preload.js, storage.js,
                          native.js + selection.js (any-app shortcuts),
                          clipboard-*.js (clipboard history), renderer/, scripts/

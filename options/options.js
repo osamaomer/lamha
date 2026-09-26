@@ -6,22 +6,11 @@ const DEFAULTS = {
   theme: "auto", saveHistory: true, aiModel: "claude-opus-5", aiInInputs: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, disabledSites: []
 };
 const BOOLS = ["useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "saveMistakes", "cardsAuto"];
-const AI_ERRORS = {
-  ai_bad_key: "المفتاح غير صالح. تأكد من نسخه كاملًا.",
-  ai_no_credit: "المفتاح صحيح لكن رصيد الحساب نفد. أضف رصيدًا من console.anthropic.com.",
-  ai_forbidden: "المفتاح لا يملك صلاحية استخدام الـ API.",
-  ai_model: "النموذج المختار غير متاح لهذا الحساب. جرّب نموذجًا آخر.",
-  ai_rate_limited: "طلبات كثيرة، انتظر دقيقة ثم أعد المحاولة.",
-  ai_busy: "خدمة الذكاء الاصطناعي مشغولة الآن، أعد المحاولة بعد لحظات.",
-  ai_timeout: "انتهت مهلة الاتصال، أعد المحاولة.",
-  network: "تعذّر الاتصال بالإنترنت.",
-  ollama_offline: "Ollama لا يعمل على هذا العنوان. شغّله من قائمة ابدأ (أو ثبّته من ollama.com).",
-  ollama_origin: "Ollama يرفض اتصال الإضافة: نفّذ أمر OLLAMA_ORIGINS في الخطوة 2 ثم أعد تشغيل Ollama.",
-  ollama_model: "النموذج غير موجود. حمّله بالأمر ollama pull ثم اضغط «تحديث القائمة»."
-};
-const aiErrorText = code => AI_ERRORS[code]
-  || (LamhaAI.ERRORS[code] && LamhaAI.ERRORS[code].slice(0, 2).join(" — "))
-  || "تعذّر الاتصال: " + String(code || "").replace(/^ai_error:/, "");
+const { t, num } = LamhaI18n;
+const OWN_ERRORS = ["ai_bad_key", "ai_no_credit", "ai_forbidden", "ai_model", "ai_rate_limited", "ai_busy", "ai_timeout", "network", "ollama_offline", "ollama_origin", "ollama_model"];
+const aiErrorText = code => (OWN_ERRORS.includes(code) ? t("oerr." + code) : null)
+  || (LamhaAI.ERRORS[code] && LamhaAI.errorInfo(code).slice(0, 2).join(" — "))
+  || t("o.connectFailed") + String(code || "").replace(/^ai_error:/, "");
 const $ = id => document.getElementById(id);
 
 let savedTimer;
@@ -42,6 +31,12 @@ function kbd(combo) {
 }
 
 async function init() {
+  await LamhaI18n.init({ onChange: () => location.reload() }); // the whole page is redrawn in the new language
+  LamhaI18n.applyDom(document);
+  document.querySelectorAll("#cardsNewPerDay option").forEach(o => { o.textContent = num(Number(o.value)); });
+  const { uiLang = "auto" } = await browser.storage.sync.get("uiLang");
+  $("uiLang").value = uiLang;
+  $("uiLang").addEventListener("change", e => save({ uiLang: e.target.value }));
   const s = { ...DEFAULTS, ...(await browser.storage.sync.get(DEFAULTS)) };
 
   document.querySelectorAll('input[name="triggerMode"]').forEach(r => {
@@ -54,8 +49,7 @@ async function init() {
   });
   browser.runtime.sendMessage({ type: "dictMeta" }).then(m => {
     if (!m || !m.entries) return;
-    const n = x => x.toLocaleString("ar-EG");
-    $("dictInfo").textContent = `القاموس المحلي: ${n(m.entries)} كلمة إنجليزية، منها ${n(m.withArabic)} بمعانٍ عربية، و${n(m.arabicIndex)} كلمة عربية — يعمل دون إنترنت.`;
+    $("dictInfo").textContent = t("o.dictCounts", m);
   }).catch(() => {});
 
   BOOLS.forEach(k => {
@@ -75,7 +69,7 @@ async function init() {
   $("cardsNewPerDay").value = String(s.cardsNewPerDay);
   $("cardsNewPerDay").addEventListener("change", e => save({ cardsNewPerDay: Number(e.target.value) }));
   $("rvClear").addEventListener("click", async () => {
-    if (!confirm("حذف كل بطاقات المراجعة وتقدّمك في حفظها؟")) return;
+    if (!confirm(t("o.confirmDeleteCards"))) return;
     await browser.storage.local.set({ cards: {}, cardStats: {}, cardsImported: true });
     saved();
   });
@@ -151,13 +145,13 @@ async function renderReviewStats() {
   const res = await browser.runtime.sendMessage({ type: "reviewQueue" }).catch(() => null);
   if (!res || !res.counts.total) return;
   const { due, fresh, total, learned } = res.counts;
-  $("rvSummary").textContent = `في قائمة مراجعتك ${arNum(total)} كلمة، حفظتَ منها ${arNum(learned)}. ينتظرك اليوم ${arNum(due)} للمراجعة و${arNum(fresh)} جديدة — افتح تبويب «مراجعة» في نافذة لمحة.`;
+  $("rvSummary").textContent = t("o.rvSummary", { total, learned, due, fresh });
 }
 
 /* ---- mistake journal ---- */
 
 let journalCat = ""; // category whose tip and mistakes are shown ("" = all recent)
-const arNum = n => n.toLocaleString("ar-EG");
+const arNum = n => num(n);
 
 function el(tag, cls, ...kids) {
   const e = document.createElement(tag);
@@ -169,15 +163,15 @@ function el(tag, cls, ...kids) {
 async function renderJournal() {
   const { mistakes } = await browser.storage.local.get("mistakes");
   const j = mistakes || { checks: 0, counts: {}, recent: [] };
-  const cats = LamhaAI.CATEGORIES;
+  const cats = LamhaAI.CATEGORIES; // keys; names and rules come from LamhaAI.catLabel / catTip
   const total = Object.values(j.counts).reduce((a, b) => a + b, 0);
   const rows = Object.entries(j.counts).filter(([c, n]) => cats[c] && n > 0).sort((a, b) => b[1] - a[1]);
 
   if (!j.checks) {
-    $("jSummary").textContent = "يُسجَّل هنا ما يجده «التدقيق اللغوي» في كتابتك، لتعرف نقاط ضعفك وتتحسّن. لم تدقّق أي نص بعد.";
+    $("jSummary").textContent = t("o.jEmpty");
   } else {
-    const top = rows[0] && rows[0][0] !== "other" ? ` أكثر أخطائك: ${cats[rows[0][0]].ar}.` : "";
-    $("jSummary").textContent = `دقّقت ${arNum(j.checks)} نصًّا ووُجد فيها ${arNum(total)} خطأ.${top} اضغط نوعًا لترى قاعدته وأمثلة من كتابتك.`;
+    const top = rows[0] && rows[0][0] !== "other" ? t("o.jTop", { cat: LamhaAI.catLabel(rows[0][0]) }) : "";
+    $("jSummary").textContent = t("o.jSummary", { checks: j.checks, total, top });
   }
 
   if (journalCat && !j.counts[journalCat]) journalCat = "";
@@ -185,19 +179,19 @@ async function renderJournal() {
   $("jBars").replaceChildren(...rows.map(([c, n]) => {
     const fill = el("span", "fill");
     fill.style.width = Math.max(4, Math.round((n / max) * 100)) + "%";
-    const b = el("button", "bar" + (c === journalCat ? " on" : ""), el("span", null, cats[c].ar), el("span", "meter", fill), el("span", "n", arNum(n)));
+    const b = el("button", "bar" + (c === journalCat ? " on" : ""), el("span", null, LamhaAI.catLabel(c)), el("span", "meter", fill), el("span", "n", arNum(n)));
     b.setAttribute("aria-pressed", String(c === journalCat));
     b.addEventListener("click", () => { journalCat = journalCat === c ? "" : c; renderJournal(); });
     return b;
   }));
 
-  const tip = journalCat && cats[journalCat].tip;
+  const tip = journalCat && LamhaAI.catTip(journalCat);
   $("jTip").hidden = !tip;
-  if (tip) $("jTip").replaceChildren(el("b", null, "القاعدة: "), tip);
+  if (tip) $("jTip").replaceChildren(el("b", null, t("o.rule")), tip);
 
   const list = j.recent.filter(r => !journalCat || r.cat === journalCat).slice(0, 30);
   $("jRecentBox").hidden = !list.length;
-  $("jRecentTitle").textContent = journalCat ? `أمثلة من كتابتك — ${cats[journalCat].ar}` : "آخر الأخطاء";
+  $("jRecentTitle").textContent = journalCat ? t("o.examplesOf", { cat: LamhaAI.catLabel(journalCat) }) : t("o.recentMistakes");
   $("jRecent").replaceChildren(...list.map(r => el("li", null,
     el("div", "fix", el("del", null, r.original), " → ", el("ins", null, r.fix)),
     r.why && el("div", "why", r.why)
@@ -220,7 +214,7 @@ function initOllama() {
 }
 
 async function refreshOllama() {
-  setStatus("ollamaStatus", "جارٍ الاتصال بـ Ollama…");
+  setStatus("ollamaStatus", t("o.ollamaConnecting"));
   const res = await bg({ type: "ollamaModels", url: $("ollamaUrl").value.trim() });
   const sel = $("ollamaModel");
   if (!res || !res.ok) { setStatus("ollamaStatus", aiErrorText(res && res.error), "bad"); return; }
@@ -229,11 +223,11 @@ async function refreshOllama() {
   sel.replaceChildren(...[{ name: "", size: 0 }, ...models].map(m => {
     const o = document.createElement("option");
     o.value = m.name;
-    o.textContent = m.name ? `${m.name} (${(m.size / 1e9).toFixed(1)} GB)` : "— اختر نموذجًا —";
+    o.textContent = m.name ? `${m.name} (${(m.size / 1e9).toFixed(1)} GB)` : t("o.pickModel");
     return o;
   }));
   if (!models.length) {
-    setStatus("ollamaStatus", "Ollama يعمل لكن لا توجد نماذج بعد — نفّذ الأمر في الخطوة 3 ثم اضغط «تحديث القائمة».", "bad");
+    setStatus("ollamaStatus", t("o.ollamaNoModels"), "bad");
     return;
   }
   let pick = models.some(m => m.name === ollamaModel) ? ollamaModel : "";
@@ -242,20 +236,20 @@ async function refreshOllama() {
     await browser.storage.local.set({ ollamaModel: pick });
   }
   sel.value = pick;
-  setStatus("ollamaStatus", `✓ Ollama متصل — ${models.length} نموذج. اضغط «اختبار» للتأكد من أن الإضافة تستطيع استخدامه.`, "ok");
+  setStatus("ollamaStatus", t("o.ollamaOk", { n: models.length }), "ok");
 }
 
 async function testOllama() {
   const model = $("ollamaModel").value;
-  if (!model) { setStatus("ollamaStatus", "اختر نموذجًا أولًا.", "bad"); return; }
+  if (!model) { setStatus("ollamaStatus", t("o.pickModelFirst"), "bad"); return; }
   $("ollamaTest").disabled = true;
-  setStatus("ollamaStatus", `جارٍ اختبار ${model}… (أول تشغيل قد يستغرق دقيقة لتحميل النموذج في الذاكرة)`);
+  setStatus("ollamaStatus", t("o.ollamaTesting", { model }));
   const t0 = performance.now();
   const res = await bg({ type: "aiTest", provider: "ollama", model, url: $("ollamaUrl").value.trim() });
   $("ollamaTest").disabled = false;
   if (!res || !res.ok) { setStatus("ollamaStatus", aiErrorText(res && res.error), "bad"); return; }
-  const secs = ((performance.now() - t0) / 1000).toLocaleString("ar-EG", { maximumFractionDigits: 1 });
-  setStatus("ollamaStatus", `✓ يعمل (${secs} ث) — أدوات الكتابة جاهزة مجانًا على جهازك.`, "ok");
+  const secs = num((performance.now() - t0) / 1000, { maximumFractionDigits: 1 });
+  setStatus("ollamaStatus", t("o.ollamaWorks", { secs }), "ok");
 }
 
 /** An API-key box (Claude or Gemini): checked with a tiny request, then kept in storage.local. */
@@ -263,9 +257,9 @@ function initKeyBox({ provider, storageKey, input, save, remove, status: statusI
   const status = (text, cls) => setStatus(statusId, text, cls);
   const showSaved = has => {
     $(input).value = "";
-    $(input).placeholder = has ? "•••••••• (محفوظ) — الصق مفتاحًا جديدًا لتغييره" : placeholder;
+    $(input).placeholder = has ? t("o.keySavedPlaceholder") : placeholder;
     $(remove).hidden = !has;
-    status(has ? "✓ المفتاح محفوظ." : "لم يُضف مفتاح بعد.", has ? "ok" : "");
+    status(has ? t("o.keySaved") : t("o.noKey"), has ? "ok" : "");
   };
   showSaved(hasKey);
 
@@ -273,7 +267,7 @@ function initKeyBox({ provider, storageKey, input, save, remove, status: statusI
     const key = $(input).value.trim();
     if (!key) { $(input).focus(); return; }
     $(save).disabled = true;
-    status("جارٍ التحقق من المفتاح…");
+    status(t("o.checkingKey"));
     const res = await bg({ type: "aiTest", provider, key, model: $(model).value });
     $(save).disabled = false;
     if (!res || !res.ok) {
@@ -283,7 +277,7 @@ function initKeyBox({ provider, storageKey, input, save, remove, status: statusI
     }
     await browser.storage.local.set({ [storageKey]: key });
     showSaved(true);
-    if (res.note === "gemini_busy") status("✓ المفتاح صحيح وحُفظ — لكن نماذج Gemini مزدحمة الآن، فجرّب أدوات الكتابة بعد قليل.", "ok");
+    if (res.note === "gemini_busy") status(t("o.geminiBusySaved"), "ok");
     saved();
   });
   $(input).addEventListener("keydown", e => { if (e.key === "Enter") $(save).click(); });
@@ -299,7 +293,7 @@ function renderSites(list) {
   if (!list.length) {
     const li = document.createElement("li");
     li.className = "empty";
-    li.textContent = "لا توجد مواقع مستثناة.";
+    li.textContent = t("o.noSites");
     ul.replaceChildren(li);
     return;
   }
@@ -309,7 +303,7 @@ function renderSites(list) {
     name.textContent = site;
     const btn = document.createElement("button");
     btn.className = "link";
-    btn.textContent = "إزالة";
+    btn.textContent = t("common.remove");
     btn.addEventListener("click", async () => {
       const { disabledSites = [] } = await browser.storage.sync.get("disabledSites");
       const next = disabledSites.filter(x => x !== site);
@@ -323,7 +317,7 @@ function renderSites(list) {
 
 async function renderHistCount() {
   const { history = [] } = await browser.storage.local.get("history");
-  $("histCount").textContent = history.length ? `${history.length} كلمة محفوظة` : "السجل فارغ";
+  $("histCount").textContent = history.length ? t("o.histCount", { n: history.length }) : t("o.histEmpty");
 }
 
 browser.storage.onChanged.addListener((changes, area) => {

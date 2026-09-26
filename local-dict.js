@@ -15,6 +15,12 @@ const LocalDict = (() => {
     n: "اسم", v: "فعل", a: "صفة", r: "ظرف", p: "حرف جر", o: "ضمير", c: "حرف عطف",
     i: "تعجّب", d: "أداة", u: "عدد", h: "عبارة", m: "اسم علم", t: "أداة"
   };
+  const POS_EN = {
+    n: "noun", v: "verb", a: "adjective", r: "adverb", p: "preposition", o: "pronoun", c: "conjunction",
+    i: "interjection", d: "determiner", u: "number", h: "phrase", m: "proper noun", t: "article"
+  };
+  /** Part-of-speech label in the interface language (shared/i18n.js, when loaded). */
+  const posName = p => ((typeof LamhaI18n !== "undefined" && LamhaI18n.lang() === "en" ? POS_EN : POS_AR)[p] || p);
   const cache = new Map(); // path → Promise<object>
 
   function load(path) {
@@ -121,7 +127,7 @@ const LocalDict = (() => {
     };
     // Wiktionary translations, grouped by sense
     for (const [p, groups] of Object.entries(e.t || {})) {
-      const g = groupFor(POS_AR[p] || p);
+      const g = groupFor(posName(p));
       for (const [hint, ars] of groups) for (const a of ars) {
         const k = normAr(a);
         if (!g.seen.has(k)) { g.seen.add(k); g.terms.push({ word: a, back: [], hint }); }
@@ -130,7 +136,7 @@ const LocalDict = (() => {
     // Arabic WordNet lemmas per sense
     for (const [p, gloss, , , ars] of e.s || []) {
       if (!ars || !ars.length) continue;
-      const g = groupFor(POS_AR[p] || p);
+      const g = groupFor(posName(p));
       for (const a of ars) {
         const k = normAr(a);
         if (!g.seen.has(k)) { g.seen.add(k); g.terms.push({ word: a, back: [], hint: gloss.length > 60 ? gloss.slice(0, 57) + "…" : gloss }); }
@@ -148,7 +154,7 @@ const LocalDict = (() => {
       }
       for (const [p, gloss, example, synonyms, ar] of e.s || []) {
         const sc = score(`${gloss} ${example} ${(synonyms || []).join(" ")}`);
-        if (sc > 0 && (!best || sc > best.score)) best = { score: sc, ar: ar && ar[0], gloss, pos: POS_AR[p] || p };
+        if (sc > 0 && (!best || sc > best.score)) best = { score: sc, ar: ar && ar[0], gloss, pos: posName(p) };
       }
       if (best) {
         for (const g of dict) {
@@ -161,7 +167,7 @@ const LocalDict = (() => {
 
     const definitions = [];
     for (const [p, gloss, example, synonyms, ar] of e.s || []) {
-      const pos = POS_AR[p] || p;
+      const pos = posName(p);
       let d = definitions.find(x => x.pos === pos);
       if (!d) { d = { pos, entries: [] }; definitions.push(d); }
       if (d.entries.length < 5) d.entries.push({ gloss, example, synonyms, ar, best: !!(best && best.gloss === gloss) });

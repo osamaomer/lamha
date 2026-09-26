@@ -889,6 +889,7 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
   if (monitor) {
     const { clipboard } = require("electron");
     const store = desktop.getClipStore();
+    const panel = desktop.getPanelWin();
 
     await check("Settings → الحافظة: defaults, encryption line, and changes reach the app", async () => {
       openOptions("#clipboard"); // the window is already open: only the hash changes (no new load)
@@ -976,6 +977,33 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       await js(mainWin, `lamhaClipboard.includeApp("wordpad.exe")`);
     });
 
+    await check("tab: مسح غير المثبّت asks, clears everything unpinned in one step, keeps pinned items", async () => {
+      for (const t of ["lamha-clear-1", "lamha-clear-2", "lamha-clear-3"]) await capturesDuring(() => clipboard.writeText(t), 400);
+      const pinned = store.list({ filter: "pinned" }).total;
+      const unpinned = store.list().total - pinned;
+      assert(pinned >= 1 && unpinned >= 3, `pinned ${pinned}, unpinned ${unpinned}`);
+      const r = await js(mainWin, `(async () => {
+        document.getElementById("tabTr").click();
+        document.getElementById("tabCb").click();
+        await new Promise(r => setTimeout(r, 400));
+        const btn = document.getElementById("cbClear");
+        const label = btn.textContent, disabledBefore = btn.disabled;
+        btn.click();
+        await new Promise(r => setTimeout(r, 300));
+        const dlg = document.querySelector(".lc-dialog");
+        const question = dlg ? dlg.textContent : "";
+        if (dlg) dlg.querySelector("button").click(); // مسح
+        await new Promise(r => setTimeout(r, 500));
+        return { label, disabledBefore, question, disabledAfter: btn.disabled, toast: (document.querySelector("#cbPane .lc-toast") || {}).textContent || "" };
+      })()`);
+      assert(!r.disabledBefore && r.label.includes("مسح غير المثبّت"), JSON.stringify(r));
+      assert(r.question.includes("تبقى العناصر المثبّتة"), "question: " + r.question);
+      assert(store.list().total === pinned && store.list({ filter: "pinned" }).total === pinned, "left: " + store.list().total);
+      assert(r.disabledAfter, "button still active with nothing to clear");
+      assert(r.toast.includes("حُذف"), "toast: " + r.toast);
+      return `${unpinned} cleared, ${pinned} pinned kept — ${r.label}`;
+    });
+
     await check("turning the feature off with «حذف» empties the history on disk", async () => {
       const win = getOptionsWin();
       assert(store.list().total > 0, "nothing to delete");
@@ -1002,10 +1030,48 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       await stores.local.set({ clipboardEnabled: false });
       assert(shown === true, "the settings switch did not follow the change");
     });
+
+    await check("English interface: main window, الحافظة tab, quick panel and settings switch at once, left to right", async () => {
+      /** Polls `code` in `win` until it returns true (pages reload themselves when the language changes). */
+      const until = async (win, code, what) => {
+        for (let i = 0; i < 60; i++) {
+          if (await js(win, code).catch(() => false)) return;
+          await wait(100);
+        }
+        throw new Error("timed out waiting for " + what);
+      };
+      await stores.local.set({ clipboardEnabled: true });
+      await stores.sync.set({ uiLang: "en" });
+      await until(mainWin, `document.documentElement.dir === "ltr" && (document.getElementById("tabCb") || {}).textContent === "Clipboard"`, "the main window in English");
+      const main = await js(mainWin, `({ tabs: [...document.querySelectorAll(".tabs button")].map(b => b.textContent.replace(/\\s*[0-9]+$/, "").trim()), settings: document.getElementById("openOptions").textContent })`);
+      assert(JSON.stringify(main.tabs) === JSON.stringify(["Translate", "Write ✨", "Review", "Clipboard"]) && main.settings === "Settings", JSON.stringify(main));
+
+      const win = getOptionsWin();
+      await until(win, `document.documentElement.dir === "ltr" && !!document.getElementById("clipPanel") && document.querySelector("#clipPanel h2").textContent === "Clipboard 📋"`, "settings in English");
+      const updates = await js(win, `document.querySelector("#updatesPanel h2").textContent`);
+      assert(updates === "Updates", "updates section: " + updates);
+
+      await desktop.panelReady();
+      await desktop.openPanel({ target: 0 });
+      await until(panel, `document.documentElement.dir === "ltr" && (document.querySelector(".cp-head strong") || {}).textContent === "Clipboard" && !!document.querySelector("#cpBody .lc-search")`, "the quick panel in English");
+      const ph = await js(panel, `document.querySelector("#cpBody .lc-search").placeholder`);
+      desktop.hidePanel();
+      assert(ph === "Search the clipboard…", "placeholder " + ph);
+      assert(/^Lamha( — [0-9]+ to review)?$/.test(desktop.trayTooltip()), "tray: " + desktop.trayTooltip());
+
+      await stores.sync.set({ uiLang: "ar" });
+      await until(mainWin, `document.documentElement.dir === "rtl" && (document.getElementById("tabCb") || {}).textContent === "الحافظة"`, "the main window back in Arabic");
+      assert(/^لمحة( — [٠-٩]+ للمراجعة)?$/.test(desktop.trayTooltip()), "tray: " + desktop.trayTooltip());
+      return main.tabs.join(" · ");
+    });
   }
 
   // optional screenshots for a visual check: $env:LAMHA_SHOTS = "C:\some\folder"
   if (process.env.LAMHA_SHOTS) {
+    if (process.env.LAMHA_SMOKE_LANG) { // pictures in that language (the checks above switch it back and forth)
+      await stores.sync.set({ uiLang: process.env.LAMHA_SMOKE_LANG });
+      await wait(2000);
+    }
     const shot = async (win, name) => {
       win.show();
       await wait(700);

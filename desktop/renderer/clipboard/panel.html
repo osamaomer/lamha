@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <!-- Lamha desktop: the clipboard history quick panel (Alt+Shift+V). main.js injects shared/ui.css, clipboard.css,
      shared/arabic-normalize.js, clip-list.js and panel.js into it, and reuses the window (created hidden at startup). -->
-<html lang="ar" dir="rtl" class="cp-page">
+<html lang="ar" dir="rtl" class="cp-page" data-i18n-pending>
 <head>
   <meta charset="utf-8">
-  <title>الحافظة — لمحة</title>
+  <title data-i18n="d.panelTitle">الحافظة — لمحة</title>
 </head>
 <body>
-  <main class="cp" aria-label="الحافظة">
-    <header class="cp-head"><strong>الحافظة</strong><span>اختر نصًا لتلصقه</span></header>
+  <main class="cp" aria-label="الحافظة" data-i18n-attr="aria-label:d.panelLabel">
+    <header class="cp-head"><strong data-i18n="d.panelLabel">الحافظة</strong><span data-i18n="d.panelHint">اختر نصًا لتلصقه</span></header>
     <section id="cpBody" class="cp-body"></section>
     <footer class="cp-foot" id="cpFoot">
-      <span><kbd>Enter</kbd> لصق</span>
-      <span><span class="combo"><kbd>Shift</kbd>+<kbd>Enter</kbd></span> نص عادي</span>
-      <span><span class="combo"><kbd>Ctrl</kbd>+<kbd>P</kbd></span> تثبيت</span>
-      <span><kbd>Tab</kbd> أدوات</span>
-      <span><kbd>Delete</kbd> حذف</span>
-      <span><kbd>Esc</kbd> إغلاق</span>
+      <span><kbd>Enter</kbd> <span data-i18n="d.kPaste">لصق</span></span>
+      <span><span class="combo"><kbd>Shift</kbd>+<kbd>Enter</kbd></span> <span data-i18n="d.kPlain">نص عادي</span></span>
+      <span><span class="combo"><kbd>Ctrl</kbd>+<kbd>P</kbd></span> <span data-i18n="d.kPin">تثبيت</span></span>
+      <span><kbd>Tab</kbd> <span data-i18n="d.kTools">أدوات</span></span>
+      <span><kbd>Delete</kbd> <span data-i18n="d.kDelete">حذف</span></span>
+      <span><kbd>Esc</kbd> <span data-i18n="d.kClose">إغلاق</span></span>
     </footer>
   </main>
 </body>

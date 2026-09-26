@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-i18n-pending>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>لمحة</title>
+  <title data-i18n="common.lamha">لمحة</title>
   <link rel="stylesheet" href="../shared/ui.css">
   <link rel="stylesheet" href="popup.css">
 </head>
@@ -11,10 +11,10 @@
   <header class="top">
     <div class="logo"><img src="../icons/icon.svg" alt="" width="28" height="28"></div>
     <div class="title">
-      <strong>لمحة</strong>
-      <span>ترجمة وبحث فوري</span>
+      <strong data-i18n="common.lamha">لمحة</strong>
+      <span data-i18n="p.subtitle">ترجمة وبحث فوري</span>
     </div>
-    <label class="switch" title="تشغيل / إيقاف">
+    <label class="switch" title="تشغيل / إيقاف" data-i18n-attr="title:p.onOff">
       <input type="checkbox" id="enabled">
       <span class="track"><span class="thumb"></span></span>
     </label>
@@ -22,10 +22,10 @@
 
   <div id="perm" class="banner" hidden>
     <div>
-      <b>مطلوب إذن الوصول للمواقع</b>
-      <span>ليتمكن لمحة من العمل على الصفحات التي تزورها.</span>
+      <b data-i18n="p.permTitle">مطلوب إذن الوصول للمواقع</b>
+      <span data-i18n="p.permText">ليتمكن لمحة من العمل على الصفحات التي تزورها.</span>
     </div>
-    <button id="grant" class="btn small">منح الإذن</button>
+    <button id="grant" class="btn small" data-i18n="p.grant">منح الإذن</button>
   </div>
 
   <main>
@@ -35,29 +35,29 @@
           <span class="site-dot"></span>
           <span id="host" dir="ltr">—</span>
         </div>
-        <label class="switch sm" title="تفعيل على هذا الموقع">
+        <label class="switch sm" title="تفعيل على هذا الموقع" data-i18n-attr="title:p.siteToggle">
           <input type="checkbox" id="siteEnabled">
           <span class="track"><span class="thumb"></span></span>
         </label>
       </div>
       <button id="pageBtn" class="btn block">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
-        <span id="pageLabel">ترجمة هذه الصفحة إلى العربية</span>
+        <span id="pageLabel">ترجمة هذه الصفحة</span>
       </button>
       <p id="pageNote" class="note" hidden></p>
     </section>
 
     <section class="card">
-      <div class="tabs" role="tablist" aria-label="الوضع">
-        <button id="tabTr" role="tab" aria-selected="true" aria-controls="trPane">ترجمة</button>
-        <button id="tabWr" role="tab" aria-selected="false" aria-controls="wrPane">كتابة ✨</button>
-        <button id="tabRv" role="tab" aria-selected="false" aria-controls="rvPane">مراجعة <span id="rvBadge" class="count" hidden></span></button>
+      <div class="tabs" role="tablist" aria-label="الوضع" data-i18n-attr="aria-label:p.modes">
+        <button id="tabTr" role="tab" aria-selected="true" aria-controls="trPane" data-i18n="p.tabTranslate">ترجمة</button>
+        <button id="tabWr" role="tab" aria-selected="false" aria-controls="wrPane" data-i18n="p.tabWrite">كتابة ✨</button>
+        <button id="tabRv" role="tab" aria-selected="false" aria-controls="rvPane"><span data-i18n="p.tabReview">مراجعة</span> <span id="rvBadge" class="count" hidden></span></button>
       </div>
 
       <div id="trPane" role="tabpanel">
         <div class="field">
-          <textarea id="q" rows="2" dir="auto" placeholder="اكتب كلمة أو جملة للترجمة…" spellcheck="false"></textarea>
-          <button id="clearQ" class="icon-btn" title="مسح" aria-label="مسح" hidden>
+          <textarea id="q" rows="2" dir="auto" placeholder="اكتب كلمة أو جملة للترجمة…" data-i18n-attr="placeholder:p.qPlaceholder" spellcheck="false"></textarea>
+          <button id="clearQ" class="icon-btn" title="مسح" aria-label="مسح" data-i18n-attr="title:common.clear; aria-label:common.clear" hidden>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
           </button>
         </div>
@@ -65,8 +65,8 @@
       </div>
 
       <div id="wrPane" role="tabpanel" hidden>
-        <textarea id="draft" class="draft" rows="5" dir="auto" placeholder="اكتب رسالتك هنا بالإنجليزية — أو بالعربية لتحويلها إلى إنجليزية طبيعية…"></textarea>
-        <div id="wrTools" class="wtools" role="toolbar" aria-label="أدوات الكتابة"></div>
+        <textarea id="draft" class="draft" rows="5" dir="auto" placeholder="اكتب رسالتك هنا بالإنجليزية — أو بالعربية لتحويلها إلى إنجليزية طبيعية…" data-i18n-attr="placeholder:p.draftPlaceholder"></textarea>
+        <div id="wrTools" class="wtools" role="toolbar" aria-label="أدوات الكتابة" data-i18n-attr="aria-label:p.writeTools"></div>
         <div id="wrOut" class="wout" aria-live="polite" hidden></div>
         <button id="weak" class="weak" hidden></button>
       </div>
@@ -78,17 +78,18 @@
     </section>
 
     <section class="card" id="histCard" hidden>
-      <div class="sec-h"><span>آخر عمليات البحث</span><button id="clearHist" class="link">مسح</button></div>
+      <div class="sec-h"><span data-i18n="p.recent">آخر عمليات البحث</span><button id="clearHist" class="link" data-i18n="common.clear">مسح</button></div>
       <ul id="hist" class="hist"></ul>
     </section>
   </main>
 
   <footer class="foot">
-    <button id="openOptions" class="link">الإعدادات</button>
+    <button id="openOptions" class="link" data-i18n="common.settings">الإعدادات</button>
     <span class="dotsep">·</span>
-    <span class="hint">بحث سريع <span class="combo"><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></span></span>
+    <span class="hint"><span data-i18n="p.quickLookup">بحث سريع</span> <span class="combo"><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></span></span>
   </footer>
 
+  <script src="../shared/i18n.js"></script>
   <script src="../shared/lamha-ai.js"></script>
   <script src="popup.js"></script>
 </body>

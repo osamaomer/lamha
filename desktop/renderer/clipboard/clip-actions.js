@@ -5,6 +5,7 @@
 // eslint-disable-next-line no-unused-vars
 var LamhaClipActions = (() => {
   const { h } = LamhaClipList;
+  const L = (key, vars) => LamhaI18n.t(key, vars);
   const REVIEW_WORD = /^[A-Za-z][A-Za-z'-]{1,40}$/;
   const AI = new Set(["english", "proofread", "summary"]);
 
@@ -15,14 +16,14 @@ var LamhaClipActions = (() => {
     const lang = clip.lang;
     const length = clip.length != null ? clip.length : clip.text.length;
     return [
-      ["translate", "ترجم", ["en", "mixed", "other"].includes(lang)],
-      ["english", "اكتبه بالإنجليزية", ["ar", "mixed"].includes(lang)],
-      ["proofread", "دقّق لغويًا", lang === "en"],
-      ["summary", "لخّص", length > 400],
-      ["lookup", "ابحث", lang === "en" && words >= 1 && words <= 4],
-      ["review", "أضف للمراجعة 🔖", REVIEW_WORD.test(t)],
-      ["plain", "الصق كنص عادي", mode === "panel"]
-    ].filter(a => a[2]).map(([id, label]) => ({ id, label }));
+      ["translate", "d.aTranslate", ["en", "mixed", "other"].includes(lang)],
+      ["english", "d.aEnglish", ["ar", "mixed"].includes(lang)],
+      ["proofread", "d.aProofread", lang === "en"],
+      ["summary", "d.aSummary", length > 400],
+      ["lookup", "d.aLookup", lang === "en" && words >= 1 && words <= 4],
+      ["review", "d.aReview", REVIEW_WORD.test(t)],
+      ["plain", "d.aPlain", mode === "panel"]
+    ].filter(a => a[2]).map(([id, key]) => ({ id, label: L(key) }));
   }
 
   /** Arabic title, explanation and whether the fix is in Settings — the same wording as the rest of Lamha. */
@@ -34,14 +35,14 @@ var LamhaClipActions = (() => {
     }
     if (code === "not_found_offline" || code === "offline_mode") {
       return {
-        title: code === "offline_mode" ? "ترجمة الجمل تحتاج إلى الإنترنت" : "الكلمة غير موجودة في القاموس المحلي",
-        text: "أنت في وضع «القاموس المحلي فقط». غيّر مصدر القاموس من الإعدادات للبحث عبر الإنترنت.",
+        title: code === "offline_mode" ? L("c.errOfflineMode") : L("c.errNotFound"),
+        text: L("c.errLocalOnly"),
         settings: ""
       };
     }
-    if (code === "rate_limited") return { title: "خدمة الترجمة مشغولة مؤقتًا", text: "أُرسلت طلبات كثيرة في وقت قصير. انتظر دقيقة ثم أعد المحاولة." };
-    if (code === "no_translation" || code === "empty_result") return { title: "لا توجد ترجمة لهذا النص", text: "جرّب البحث عنه بدل ذلك." };
-    return { title: "تعذّرت الترجمة", text: "حدث خطأ أثناء الاتصال بخدمة الترجمة. تحقق من اتصالك ثم حاول مجددًا." };
+    if (code === "rate_limited") return { title: L("c.errBusy"), text: L("c.errTooMany") };
+    if (code === "no_translation" || code === "empty_result") return { title: L("d.errNoTranslation"), text: L("d.errNoTranslationHint") };
+    return { title: L("c.errFailed"), text: L("d.errTranslate") };
   }
 
   const openSettings = hash => browser.tabs.create({ url: browser.runtime.getURL("options/options.html" + hash) });
@@ -56,10 +57,10 @@ var LamhaClipActions = (() => {
     const acts = available(clip, mode);
     let token = 0;
     const items = acts.map(a => h("button", { class: "ca-item", type: "button", role: "menuitem", "data-act": a.id, onclick: () => run(a.id) }, a.label));
-    const menu = h("div", { class: "ca-menu", role: "menu", "aria-label": "أدوات لمحة", "aria-orientation": mode === "panel" ? "vertical" : "horizontal" }, items);
+    const menu = h("div", { class: "ca-menu", role: "menu", "aria-label": L("d.toolsLabel"), "aria-orientation": mode === "panel" ? "vertical" : "horizontal" }, items);
     const out = h("div", { class: "ca-out", "aria-live": "polite" });
     const head = mode === "panel" && h("div", { class: "ca-head" },
-      h("button", { class: "link", type: "button", onclick: () => onBack && onBack() }, "→ رجوع"),
+      h("button", { class: "link", type: "button", onclick: () => onBack && onBack() }, L("d.backArrow")),
       h("div", { class: "ca-clip", dir: "auto" }, clip.label || clip.text.trim().slice(0, 200)));
     root.classList.add("ca", "ca-" + mode);
     root.replaceChildren(...[head, menu, out].filter(Boolean));
@@ -80,10 +81,10 @@ var LamhaClipActions = (() => {
     async function run(action, fresh = false, lang) {
       if (action === "plain") return lamhaClipboard.paste(clip.id, true);
       if (action === "lookup") return lamhaClipboard.lookup(clip.id);
-      if (action === "summary" && !lang) lang = (await browser.storage.local.get({ clipboardSummaryLang: "ar" })).clipboardSummaryLang;
+      if (action === "summary" && !lang) lang = (await browser.storage.local.get({ clipboardSummaryLang: LamhaI18n.lang() })).clipboardSummaryLang;
       const my = ++token;
       items.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.act === action)));
-      out.replaceChildren(h("div", { class: "ca-loading", role: "status" }, h("span", { class: "ca-spin", "aria-hidden": "true" }), "جارٍ العمل…"));
+      out.replaceChildren(h("div", { class: "ca-loading", role: "status" }, h("span", { class: "ca-spin", "aria-hidden": "true" }), L("common.working")));
       const r = await lamhaClipboard.action(clip.id, action, fresh, lang);
       if (my !== token) return; // another action was chosen meanwhile
       if (!r.ok) return showError(action, r.error);
@@ -94,14 +95,14 @@ var LamhaClipActions = (() => {
       const e = await errorFor(action, code);
       out.replaceChildren(h("div", { class: "ca-error", role: "alert" }, h("b", null, e.title), h("div", null, e.text),
         h("div", { class: "ca-acts" }, e.settings != null
-          ? h("button", { class: "btn small", type: "button", onclick: () => openSettings(e.settings) }, e.settings === "#ai" ? "الإعدادات ← أدوات الكتابة" : "الإعدادات")
-          : h("button", { class: "btn small", type: "button", onclick: () => run(action) }, "إعادة المحاولة"))));
+          ? h("button", { class: "btn small", type: "button", onclick: () => openSettings(e.settings) }, e.settings === "#ai" ? L("d.settingsWriting") : L("common.settings"))
+          : h("button", { class: "btn small", type: "button", onclick: () => run(action) }, L("common.retry")))));
     }
 
     function show(action, data) {
       if (action === "review") {
         out.replaceChildren(h("div", { class: "ca-ok", role: "status" },
-          data.inDeck ? `أُضيفت «${data.word}» إلى المراجعة 🔖` : `أُزيلت «${data.word}» من المراجعة`,
+          data.inDeck ? L("d.addedReview", { w: data.word }) : L("d.removedReview", { w: data.word }),
           data.tr && h("div", { class: "ca-muted", dir: "auto" }, data.tr)));
         return;
       }
@@ -109,32 +110,32 @@ var LamhaClipActions = (() => {
       if (action === "proofread") {
         result = data.corrected.trim();
         if (!data.issues.length || result === clip.text.trim()) {
-          out.replaceChildren(h("div", { class: "ca-ok", role: "status" }, "✓ لا توجد أخطاء — نصّك سليم"),
-            h("div", { class: "ca-acts" }, h("button", { class: "btn small ghost", type: "button", onclick: () => run(action, true) }, "إعادة")));
+          out.replaceChildren(h("div", { class: "ca-ok", role: "status" }, L("write.noErrorsCheck")),
+            h("div", { class: "ca-acts" }, h("button", { class: "btn small ghost", type: "button", onclick: () => run(action, true) }, L("d.redo"))));
           return;
         }
         body = [
           h("div", { class: "ca-text", dir: "ltr" }, LamhaAI.diffNodes(h, clip.text.trim(), result)),
           h("ul", { class: "ca-issues" }, data.issues.map(i => h("li", null,
             h("div", { class: "ca-fix", dir: "ltr" }, h("del", null, i.original), " → ", h("ins", null, i.fix)),
-            i.category !== "other" && LamhaAI.CATEGORIES[i.category] && h("span", { class: "ca-cat" }, LamhaAI.CATEGORIES[i.category].ar),
-            i.why && h("div", { class: "ca-why" }, i.why))))
+            i.category !== "other" && LamhaAI.CATEGORIES[i.category] && h("span", { class: "ca-cat" }, LamhaAI.catLabel(i.category)),
+            i.why && h("div", { class: "ca-why", dir: "auto" }, i.why))))
         ];
       } else {
         result = data.text;
         body = [h("div", { class: "ca-text", dir: "auto" }, result)];
       }
       if (action === "summary") body.unshift(summaryLangSwitch(data.lang));
-      const paste = mode === "panel" && h("button", { class: "btn small", type: "button", onclick: () => lamhaClipboard.pasteResult(clip.id, result) }, "لصق");
+      const paste = mode === "panel" && h("button", { class: "btn small", type: "button", onclick: () => lamhaClipboard.pasteResult(clip.id, result) }, L("d.paste"));
       const copy = h("button", {
         class: "btn small" + (paste ? " ghost" : ""), type: "button",
-        onclick: async () => { const r = await lamhaClipboard.copyText(result); copy.textContent = r.ok ? "نُسخ ✓" : "تعذّر النسخ"; }
-      }, "نسخ");
+        onclick: async () => { const r = await lamhaClipboard.copyText(result); copy.textContent = r.ok ? L("d.copied") : L("d.copyFailed"); }
+      }, L("common.copy"));
       out.replaceChildren(...[
         ...body,
         h("div", { class: "ca-acts" }, paste, copy,
-          h("button", { class: "btn small ghost", type: "button", title: "نتيجة جديدة", onclick: () => run(action, true, data.lang) }, "إعادة")),
-        data.cached && h("div", { class: "ca-muted" }, "نتيجة محفوظة من قبل — «إعادة» تطلب نتيجة جديدة")
+          h("button", { class: "btn small ghost", type: "button", title: L("d.newResult"), onclick: () => run(action, true, data.lang) }, L("d.redo"))),
+        data.cached && h("div", { class: "ca-muted" }, L("d.cached"))
       ].filter(Boolean));
       (paste || copy).focus(); // Enter pastes (panel)
     }
@@ -145,8 +146,8 @@ var LamhaClipActions = (() => {
         browser.storage.local.set({ clipboardSummaryLang: lang });
         if (lang !== current) run("summary", false, lang);
       };
-      return h("div", { class: "ca-lang", role: "group", "aria-label": "لغة الملخص" },
-        h("span", null, "لغة الملخص:"),
+      return h("div", { class: "ca-lang", role: "group", "aria-label": L("d.summaryLang") },
+        h("span", null, L("d.summaryLangColon")),
         [["ar", "العربية"], ["en", "English"]].map(([lang, label]) =>
           h("button", { type: "button", class: "lc-chip", lang, "aria-pressed": String(lang === current), onclick: () => pick(lang) }, label)));
     }

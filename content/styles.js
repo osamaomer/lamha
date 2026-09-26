@@ -379,6 +379,12 @@ div.pos { display: block; margin-bottom: 6px; }
 .pbar .seg button { padding: 4px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--muted); font-family: var(--font-ar); }
 .pbar .seg button.on { background: var(--bg-solid); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
 
+/* English interface: Lamha's own labels run left to right (Arabic meanings and definitions keep their direction) */
+.root.en .bar, .root.en .foot, .root.en .sec-h, .root.en .spell, .root.en .form-of, .root.en .err, .root.en .tools,
+.root.en .w-actions, .root.en .w-ok, .root.en .issues li, .root.en .w-note, .root.en .pill, .root.en .pbar {
+  direction: ltr; font-family: var(--font-ui);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }

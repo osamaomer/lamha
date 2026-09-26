@@ -3,7 +3,7 @@
  * settings, history, the context menu and keyboard commands.
  */
 "use strict";
-/* global LocalDict, LamhaAI */
+/* global LocalDict, LamhaAI, LamhaI18n */
 
 const DEFAULT_SETTINGS = {
   enabled: true,
@@ -23,6 +23,7 @@ const DEFAULT_SETTINGS = {
   saveMistakes: true, // mistake journal: keep what proofreading finds (storage.local) and personalize explanations
   cardsAuto: true, // add looked-up English words to the review deck
   cardsNewPerDay: 10, // new words introduced per day in review
+  uiLang: "auto", // interface language: "auto" (the system's: Arabic or English) | "ar" | "en" — see shared/i18n.js
   disabledSites: []
 };
 
@@ -192,7 +193,7 @@ async function lookup(rawText, opts = {}) {
   const context = settings.useContext && word && opts.context && typeof opts.context.before === "string" ? {
     before: String(opts.context.before).slice(-300), after: String(opts.context.after || "").slice(0, 300)
   } : null;
-  const key = [text.toLowerCase(), sl, tl, word, settings.translateDefinitions, mode,
+  const key = [text.toLowerCase(), sl, tl, word, settings.translateDefinitions, mode, LamhaI18n.lang(),
     context ? context.before + "¦" + context.after : ""].join("|");
   const cached = lookupCache.get(key);
   if (cached) return cached;
@@ -255,7 +256,7 @@ async function contextTranslate(text, ctx, tl, sl) {
 
 async function onlineLookup(text, sl, tl, word, settings) {
   const dt = word ? ["t", "bd", "md", "ss", "ex", "rm", "qca"] : ["t", "rm"];
-  const params = new URLSearchParams({ sl, tl, hl: "ar", dj: "1", ie: "UTF-8", oe: "UTF-8" });
+  const params = new URLSearchParams({ sl, tl, hl: LamhaI18n.lang(), dj: "1", ie: "UTF-8", oe: "UTF-8" }); // labels (noun, verb…) in the interface language
   dt.forEach(d => params.append("dt", d));
 
   let data;
@@ -462,7 +463,7 @@ const AI_TOOLS = {
     effort: "medium",
     schema: PROOFREAD_SCHEMA,
     task: x => `Proofread the text. Fix grammar, spelling, punctuation, word choice and unnatural phrasing — including mistakes common for Arabic speakers (a/an/the, prepositions, verb tenses, subject–verb agreement, plurals, sentences joined with commas). Change as little as possible; don't rewrite for style.
-Put the full corrected text in \`corrected\`. List every change in \`issues\`: \`original\` is the exact wrong fragment, \`fix\` its replacement, \`category\` the kind of mistake, \`why\` a one-sentence explanation in Arabic. If nothing needs fixing, return the text unchanged and an empty list.${x.weak ? `
+Put the full corrected text in \`corrected\`. List every change in \`issues\`: \`original\` is the exact wrong fragment, \`fix\` its replacement, \`category\` the kind of mistake, \`why\` a one-sentence explanation in ${x.ui === "en" ? "English" : "Arabic"}. If nothing needs fixing, return the text unchanged and an empty list.${x.weak ? `
 This user often makes mistakes with: ${x.weak}. When one of those appears, explain the rule behind it especially clearly.` : ""}`
   },
   improve: { task: () => `Rewrite the text so it reads clearly and fluently, like a skilled native writer. Keep the tone and roughly the same length, and fix any errors. ${REWRITE_RULE}` },
@@ -474,7 +475,7 @@ This user often makes mistakes with: ${x.weak}. When one of those appears, expla
     task: x => `Summarize the key points of the text in ${x.lang === "en" ? "English" : "Arabic"}. Use 3–6 short bullet points, each on its own line starting with "• ", most important first. If the text is only a few sentences, write one or two sentences instead. Put the summary in \`text\`.`
   },
   explain: {
-    task: () => `Explain the text to the user in simple Arabic: what it says and what it implies, then the meaning of any idioms, phrasal verbs, slang or difficult words in it (write the English expression, then its explanation in Arabic). Keep it brief. Put the explanation in \`text\`.`
+    task: x => `Explain the text to the user in simple ${x.ui === "en" ? "English" : "Arabic"}: what it says and what it implies, then the meaning of any idioms, phrasal verbs, slang or difficult words in it (write the English expression, then its explanation${x.ui === "en" ? " in plain words" : " in Arabic"}). Keep it brief. Put the explanation in \`text\`.`
   },
   reply: {
     task: x => {
@@ -486,7 +487,7 @@ ${intent}Tone: ${tone}. Match the channel: short for chat messages; greeting and
   }
 };
 
-/** Maps a failed Claude API response to an error code the UI can explain in Arabic. */
+/** Maps a failed Claude API response to an error code the UI can explain (shared/lamha-ai.js). */
 async function claudeError(res) {
   let e = {};
   try { e = (await res.json()).error || {}; } catch (_) { /* no JSON body */ }
@@ -703,7 +704,10 @@ async function aiRun(tool, rawText, extra = {}) {
   const text = String(rawText || "").trim();
   if (!text) throw new Error("empty");
   if (text.length > AI_MAX_TEXT) throw new Error("ai_too_long");
-  const x = { lang: extra.lang === "en" ? "en" : "ar", tone: String(extra.tone || ""), intent: String(extra.intent || "").trim().slice(0, 2000) };
+  await i18nReady; // the setting is read asynchronously at startup
+  const ui = LamhaI18n.lang(); // explanations (proofreading, explain) and the default summary language follow the interface
+  const lang = extra.lang === "en" || extra.lang === "ar" ? extra.lang : ui;
+  const x = { lang, ui, tone: String(extra.tone || ""), intent: String(extra.intent || "").trim().slice(0, 2000) };
 
   const [local, settings] = await Promise.all([browser.storage.local.get(["aiKey", "aiProvider", "ollamaUrl", "ollamaModel", "geminiKey", "geminiModel"]), getSettings()]);
   const provider = ["ollama", "gemini"].includes(local.aiProvider) ? local.aiProvider : "claude";
@@ -715,7 +719,7 @@ async function aiRun(tool, rawText, extra = {}) {
     : provider === "gemini" ? "gemini:" + geminiModel
     : AI_MODELS.includes(settings.aiModel) ? settings.aiModel : AI_MODELS[0];
 
-  const cacheKey = [tool, model, x.lang, x.tone, x.intent, text].join("\u0001");
+  const cacheKey = [tool, model, x.lang, x.ui, x.tone, x.intent, text].join("\u0001");
   const hit = !extra.fresh && aiCache.get(cacheKey);
   if (hit) return hit;
 
@@ -1001,10 +1005,10 @@ browser.runtime.onMessage.addListener((msg, sender) => {
 function setupMenus() {
   if (!browser.menus) return; // not available on Firefox for Android
   browser.menus.removeAll().then(() => {
-    browser.menus.create({ id: "lamha-lookup", title: "لمحة: ترجمة «%s»", contexts: ["selection"] });
-    browser.menus.create({ id: "lamha-write", title: "لمحة: أدوات الكتابة ✨", contexts: ["selection", "editable"] });
-    browser.menus.create({ id: "lamha-page", title: "لمحة: ترجمة الصفحة إلى العربية", contexts: ["page"] });
-    browser.menus.create({ id: "lamha-summary", title: "لمحة: تلخيص الصفحة ✨", contexts: ["page"] });
+    browser.menus.create({ id: "lamha-lookup", title: LamhaI18n.t("menu.lookup"), contexts: ["selection"] });
+    browser.menus.create({ id: "lamha-write", title: LamhaI18n.t("menu.write"), contexts: ["selection", "editable"] });
+    browser.menus.create({ id: "lamha-page", title: LamhaI18n.t("menu.page"), contexts: ["page"] });
+    browser.menus.create({ id: "lamha-summary", title: LamhaI18n.t("menu.summary"), contexts: ["page"] });
   });
 }
 
@@ -1029,7 +1033,16 @@ if (browser.commands) browser.commands.onCommand.addListener(async command => {
   if (command === "writing-tools") browser.tabs.sendMessage(tab.id, { type: "showWrite" }).catch(() => {});
 });
 
+/* Interface language: known before the menus are built; they follow changes. */
+const i18nReady = LamhaI18n.init({ onChange: () => setupMenus() }).catch(() => {});
+
 browser.runtime.onInstalled.addListener(async details => {
+  // an update keeps the interface people already have (Arabic); "auto" is for new installs
+  if (details.reason === "update") {
+    const { uiLang } = await browser.storage.sync.get("uiLang");
+    if (uiLang === undefined) await browser.storage.sync.set({ uiLang: "ar" });
+  }
+  await i18nReady;
   setupMenus();
   updateBadge();
   if (details.reason === "install") {
@@ -1037,4 +1050,4 @@ browser.runtime.onInstalled.addListener(async details => {
     browser.tabs.create({ url: browser.runtime.getURL("options/options.html") + (has ? "?welcome=1" : "?welcome=1&perm=1") });
   }
 });
-browser.runtime.onStartup.addListener(() => { setupMenus(); updateBadge(); });
+browser.runtime.onStartup.addListener(async () => { await i18nReady; setupMenus(); updateBadge(); });
