@@ -12,8 +12,8 @@ var LAMHA_CSS = `
   --bg: #fcfcfd;
   --bg-solid: #fcfcfd;
   --fg: #1d1d1f;
-  --muted: #6e6e73;
-  --faint: #8e8e93;
+  --muted: #5f5f64; /* 4.5:1 also on the tinted meaning box */
+  --faint: #707075;
   --line: rgba(0, 0, 0, 0.08);
   --hover: rgba(0, 0, 0, 0.05);
   --accent: #4f46e5;
@@ -24,13 +24,17 @@ var LAMHA_CSS = `
   --pill-bg: rgba(28, 28, 30, 0.92);
   --pill-fg: #ffffff;
   --skeleton: rgba(0, 0, 0, 0.06);
+  --ok: #166534;
+  --danger: #c81e1e;
 
   font-family: var(--font-ui);
   font-size: 14px;
   line-height: 1.5;
   color: var(--fg);
   -webkit-font-smoothing: antialiased;
+  direction: rtl; /* the interface's own direction: \`all: initial\` doesn't reset it, so it would follow the web page */
 }
+.root.en { direction: ltr; }
 .root.dark {
   --bg: #242426;
   --bg-solid: #242426;
@@ -47,10 +51,12 @@ var LAMHA_CSS = `
   --pill-bg: rgba(242, 242, 247, 0.95);
   --pill-fg: #1c1c1e;
   --skeleton: rgba(255, 255, 255, 0.08);
+  --ok: #5ee0a8;
+  --danger: #f87171;
 }
 
 button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; margin: 0; }
-button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+button:focus-visible, a:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
 svg { display: block; flex: none; }
 [dir="rtl"], .ar { font-family: var(--font-ar); }
 
@@ -123,10 +129,10 @@ svg { display: block; flex: none; }
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
   font-family: var(--font-ar); font-size: 10.5px; font-weight: 700;
-  color: #0f8a5f; background: rgba(16, 185, 129, .12);
+  color: var(--ok); background: rgba(16, 185, 129, .12);
   padding: 2px 7px; border-radius: 999px; margin-inline-start: 6px;
 }
-.root.dark .badge { color: #5ee0a8; background: rgba(16, 185, 129, .16); }
+.root.dark .badge { background: rgba(16, 185, 129, .16); }
 .icon-btn {
   width: 28px; height: 28px; border-radius: 7px;
   display: grid; place-items: center;
@@ -307,26 +313,23 @@ div.pos { display: block; margin-bottom: 6px; }
 }
 .w-text[dir="ltr"] { font-family: var(--font-ui); }
 .w-text ins { text-decoration: none; background: rgba(16, 185, 129, .2); border-radius: 3px; }
-.w-text del { color: #dc2626; opacity: .8; }
+.w-text del { color: var(--danger); }
 .w-text del + ins { margin-left: .3em; }
-.root.dark .w-text del { color: #f87171; }
 .w-actions { display: flex; align-items: center; gap: 6px; direction: rtl; margin-top: 10px; }
 .w-actions .btn { margin-top: 0; padding: 6px 12px; }
 .w-ok {
   display: flex; align-items: center; gap: 8px; direction: rtl;
   font-family: var(--font-ar); font-weight: 600;
-  color: #0f8a5f; background: rgba(16, 185, 129, .12);
+  color: var(--ok); background: rgba(16, 185, 129, .12);
   padding: 12px 14px; border-radius: 11px;
 }
-.root.dark .w-ok { color: #5ee0a8; background: rgba(16, 185, 129, .16); }
+.root.dark .w-ok { background: rgba(16, 185, 129, .16); }
 .issues { list-style: none; margin: 0; padding: 0; }
 .issues li { padding: 8px 0; border-top: 1px solid var(--line); }
 .issues li:first-child { border-top: 0; padding-top: 0; }
 .issues .fix { direction: ltr; text-align: left; font-size: 13.5px; }
-.issues del { color: #dc2626; }
-.issues ins { text-decoration: none; color: #0f8a5f; font-weight: 600; }
-.root.dark .issues del { color: #f87171; }
-.root.dark .issues ins { color: #5ee0a8; }
+.issues del { color: var(--danger); }
+.issues ins { text-decoration: none; color: var(--ok); font-weight: 600; }
 .issues .cat {
   display: inline-block; margin-top: 4px;
   font-family: var(--font-ar); font-size: 11px; font-weight: 700;
@@ -355,8 +358,8 @@ div.pos { display: block; margin-bottom: 6px; }
 }
 
 /* ---------------- page-translation bar ---------------- */
-.pbar {
-  position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+.pbar { /* bottom centre: the top of a page is where sites keep their navigation and search */
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
   display: flex; align-items: center; gap: 4px;
   padding: 5px 5px 5px 12px;
   border-radius: 999px;
@@ -368,13 +371,13 @@ div.pos { display: block; margin-bottom: 6px; }
   animation: pbar-in .25s cubic-bezier(.2,.8,.2,1) both;
   transition: opacity .2s, transform .2s;
 }
-.pbar.mini { opacity: .5; }
-.pbar:hover { opacity: 1; }
-@keyframes pbar-in { from { opacity: 0; transform: translate(-50%, -16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.pbar.mini .status { display: none; } /* idle: just the switch and ✕, still fully readable */
+.pbar.mini:hover .status, .pbar.mini:focus-within .status { display: flex; }
+@keyframes pbar-in { from { opacity: 0; transform: translate(-50%, 16px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .pbar .status { display: flex; align-items: center; gap: 8px; padding-inline: 4px 8px; font-weight: 600; white-space: nowrap; }
 .pbar .spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent-soft); border-top-color: var(--accent); animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.pbar .ok { color: #16a34a; }
+.pbar .ok { color: var(--ok); }
 .pbar .seg { display: flex; background: var(--chip); border-radius: 999px; padding: 2px; }
 .pbar .seg button { padding: 4px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--muted); font-family: var(--font-ar); }
 .pbar .seg button.on { background: var(--bg-solid); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
@@ -384,6 +387,11 @@ div.pos { display: block; margin-bottom: 6px; }
 .root.en .w-actions, .root.en .w-ok, .root.en .issues li, .root.en .w-note, .root.en .pill, .root.en .pbar {
   direction: ltr; font-family: var(--font-ui);
 }
+/* …and meanings and definitions line up under their English headings: labels and numbers on the left, Arabic text
+   keeps its right-to-left shaping but starts at the same edge */
+.root.en .pos-row, .root.en .def { direction: ltr; }
+.root.en .pos { font-family: var(--font-ui); }
+.root.en .def [dir="rtl"] { text-align: left; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }

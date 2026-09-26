@@ -9,7 +9,21 @@
   background: var(--surface); border-radius: 14px; box-shadow: var(--shadow);
   padding: 18px 20px; margin-bottom: 16px;
 }
-.panel h2 { font-size: 13px; font-weight: 700; color: var(--faint); margin: 0 0 12px; letter-spacing: .02em; }
+.panel { scroll-margin-top: 64px; } /* below the sticky section links */
+.panel h2 { font-size: 16px; font-weight: 700; color: var(--fg); margin: 0 0 12px; }
+
+/* section links: always at hand on a long page; the section in view is marked */
+.toc {
+  position: sticky; top: 0; z-index: 5; margin: -8px -20px 16px; padding: 10px 20px;
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+  background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(12px);
+}
+.toc a {
+  flex: none; padding: 4px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+  color: var(--muted); text-decoration: none; box-shadow: inset 0 0 0 1px var(--line); background: var(--surface);
+}
+.toc a:hover { color: var(--fg); }
+.toc a[aria-current="true"] { background: var(--accent-soft); color: var(--accent); box-shadow: none; }
 .muted { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
 .small { font-size: 12px; margin-top: 12px; }
 
@@ -62,7 +76,7 @@ select:focus-visible { outline: 2px solid var(--accent); }
 .credits ul { margin: 0 0 8px; padding: 0 0 0 18px; font-family: var(--font-en); font-size: 12.5px; color: var(--muted); line-height: 1.8; text-align: left; }
 .credits b { color: var(--fg); font-weight: 600; }
 
-.keys { display: flex; gap: 4px; direction: ltr; }
+.keys { display: flex; align-items: center; gap: 4px; direction: ltr; color: var(--muted); }
 
 /* Claude writing tools */
 .key-row { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
@@ -74,21 +88,29 @@ select:focus-visible { outline: 2px solid var(--accent); }
 }
 .key-row input:focus-visible { outline: 2px solid var(--accent); }
 .ai-status { font-size: 12.5px; margin: 8px 0 0; min-height: 1.5em; color: var(--muted); }
-.ai-status.ok { color: #16a34a; }
+.key-row .ai-status { margin: 0; flex: 1; }
+.field-label { display: block; margin-top: 14px; }
+.field-label b { display: block; font-weight: 600; }
+.field-label small, .opt label small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 1px; }
+.opt label b { display: block; font-weight: 600; }
+.field-label + .key-row { margin-top: 8px; }
+.ai-status.ok { color: var(--ok); }
 .ai-status.bad { color: var(--danger); }
 .tip a { color: var(--accent); font-weight: 600; }
 /* mistake journal */
-.bars { display: grid; gap: 4px; margin: 4px 0 8px; }
+/* the label column fits the longest label; every row shares it (subgrid), so the bars stay aligned */
+.bars { display: grid; grid-template-columns: max-content 1fr 36px; gap: 4px 10px; margin: 4px 0 8px; }
 .bar {
-  display: grid; grid-template-columns: 170px 1fr 36px; align-items: center; gap: 10px;
+  grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center;
   padding: 6px 8px; margin: 0 -8px; border-radius: 8px; text-align: start; font-size: 13px;
 }
+.bar bdi { white-space: nowrap; } /* "(a / an / the)" never splits across lines */
 .bar:hover, .bar.on { background: var(--hover); }
 .bar.on { box-shadow: inset 0 0 0 1px var(--accent); }
 .bar .meter { height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; }
 .bar .fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #6366f1, #06b6d4); }
 .bar .n { font-weight: 700; color: var(--muted); text-align: end; font-variant-numeric: tabular-nums; }
-@media (max-width: 560px) { .bar { grid-template-columns: 120px 1fr 30px; } }
+@media (max-width: 560px) { .bars { grid-template-columns: minmax(0, 150px) 1fr 30px; } }
 .jtip { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.8; margin-bottom: 8px; }
 .jtip b { color: var(--accent); }
 .sub { font-size: 12.5px; font-weight: 700; color: var(--faint); margin: 12px 0 6px; }
@@ -97,7 +119,7 @@ select:focus-visible { outline: 2px solid var(--accent); }
 .jlist li:first-child { border-top: 0; }
 .jlist .fix { direction: ltr; text-align: left; font-family: var(--font-en); }
 .jlist del { color: var(--danger); }
-.jlist ins { text-decoration: none; color: #16a34a; font-weight: 600; }
+.jlist ins { text-decoration: none; color: var(--ok); font-weight: 600; }
 .jlist .why { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
 
 .choices.providers { margin-top: 12px; }

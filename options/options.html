@@ -17,6 +17,8 @@
       </div>
     </header>
 
+    <nav id="toc" class="toc" aria-label="أقسام الإعدادات" data-i18n-attr="aria-label:o.sections"></nav>
+
     <section id="welcome" class="panel welcome" hidden>
       <h2 data-i18n="o.welcome">أهلًا بك 👋 إليك طريقة الاستخدام</h2>
       <ol class="steps">
@@ -65,7 +67,7 @@
       <p class="tip" data-i18n-html="o.altTip">نصيحة: في وضع «الزر العائم» يمكنك التحديد مع الضغط على <kbd>Alt</kbd> لفتح الترجمة مباشرة.</p>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="dictionary">
       <h2 data-i18n="o.dictionary">القاموس</h2>
       <div class="choices" role="radiogroup" aria-label="مصدر القاموس" data-i18n-attr="aria-label:o.dictSource">
         <label class="choice">
@@ -96,7 +98,7 @@
       <p class="tip" id="dictInfo" data-i18n="o.dictInfo">القاموس المحلي مدمج في الإضافة ويعمل دون إنترنت.</p>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="translation">
       <h2 data-i18n="o.translation">الترجمة</h2>
       <div class="opt">
         <div><b data-i18n="o.targetLang">لغة الترجمة</b><small data-i18n="o.targetLangHint">اللغة التي تُترجم إليها النصوص</small></div>
@@ -173,16 +175,20 @@
           <li class="ext-only" data-i18n-html="o.ollama2">اسمح لإضافات Firefox بالاتصال به: أغلق Ollama من أيقونته بجوار الساعة، ثم نفّذ في PowerShell:<code dir="ltr">setx OLLAMA_ORIGINS "moz-extension://*"</code>ثم افتح Ollama من قائمة ابدأ.</li>
           <li data-i18n-html="o.ollama3">حمّل نموذجًا، مثلًا <b>qwen3.5:4b</b> (سريع، 3.4 GB — مناسب لبطاقة رسوميات 6 GB):<code dir="ltr">ollama pull qwen3.5:4b</code>أو <b>qwen3.5:9b</b> لجودة أعلى لكنه أبطأ على هذه البطاقة.</li>
         </ol>
+        <!-- in setup order: where Ollama is → which model → does it work -->
+        <label class="field-label" for="ollamaUrl"><b data-i18n="o.ollamaUrl">عنوان Ollama</b><small data-i18n="o.ollamaUrlHint">اتركه فارغًا إن كان Ollama على هذا الجهاز</small></label>
+        <div class="key-row">
+          <input id="ollamaUrl" type="url" dir="ltr" placeholder="http://localhost:11434" spellcheck="false">
+          <button id="ollamaRefresh" class="btn small ghost" data-i18n="o.refreshList">تحديث القائمة</button>
+        </div>
         <div class="opt">
-          <div><b data-i18n="o.model">النموذج</b><small data-i18n="o.ollamaModelsHint">النماذج المحمّلة في Ollama على هذا الجهاز</small></div>
+          <label for="ollamaModel"><b data-i18n="o.model">النموذج</b><small data-i18n="o.ollamaModelsHint">النماذج المحمّلة في Ollama على هذا الجهاز</small></label>
           <select id="ollamaModel"><option value="">—</option></select>
         </div>
         <div class="key-row">
-          <input id="ollamaUrl" type="url" dir="ltr" placeholder="http://localhost:11434" spellcheck="false" aria-label="عنوان Ollama" data-i18n-attr="aria-label:o.ollamaUrl">
-          <button id="ollamaRefresh" class="btn small ghost" data-i18n="o.refreshList">تحديث القائمة</button>
           <button id="ollamaTest" class="btn small" data-i18n="o.test">اختبار</button>
+          <p id="ollamaStatus" class="ai-status" role="status"></p>
         </div>
-        <p id="ollamaStatus" class="ai-status" role="status"></p>
       </div>
 
       <div id="geminiBox" class="provider" hidden>
@@ -246,7 +252,7 @@
       </div>
       <div class="opt">
         <div><b data-i18n="o.deleteCards">حذف كل البطاقات</b><small data-i18n="o.deleteCardsHint">يحذف الكلمات وتقدّمك في حفظها</small></div>
-        <button id="rvClear" class="btn small ghost" data-i18n="o.delete">حذف</button>
+        <button id="rvClear" class="btn small danger" data-i18n="o.delete">حذف</button>
       </div>
     </section>
 
@@ -265,11 +271,11 @@
       </label>
       <div class="opt">
         <div><b data-i18n="o.clearJournal">مسح السجل</b><small data-i18n="o.startOver">البدء من جديد</small></div>
-        <button id="jClear" class="btn small ghost" data-i18n="common.clear">مسح</button>
+        <button id="jClear" class="btn small danger" data-i18n="common.clear">مسح</button>
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="appearance">
       <h2 data-i18n="o.appearance">المظهر</h2>
       <div class="opt">
         <div><b data-i18n="o.uiLang">لغة الواجهة</b><small data-i18n="o.uiLangHint">لغة القوائم والأزرار والشروح في لمحة</small></div>
@@ -304,7 +310,7 @@
       <ul id="sites" class="sites"></ul>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="privacy">
       <h2 data-i18n="o.privacy">الخصوصية والسجل</h2>
       <label class="opt">
         <div><b data-i18n="o.saveHistory">حفظ سجل الكلمات</b><small data-i18n="o.saveHistoryHint">يُحفظ محليًا على جهازك فقط. إن أوقفته، لا تُضاف الكلمات التي تبحث عنها إلى المراجعة تلقائيًا أيضًا.</small></div>
@@ -312,7 +318,7 @@
       </label>
       <div class="opt">
         <div><b data-i18n="o.clearHistory">مسح السجل</b><small id="histCount"></small></div>
-        <button id="clearHist" class="btn small ghost" data-i18n="common.clear">مسح</button>
+        <button id="clearHist" class="btn small danger" data-i18n="common.clear">مسح</button>
       </div>
       <p class="muted small" data-i18n="o.privacyText">يُرسَل إلى خدمة Google للترجمة: النص الذي تختاره، والجملة المحيطة به (إن كان «فهم السياق» مفعّلًا)، ونص الصفحة عندما تطلب ترجمتها. تُرسَل الكلمة إلى ويكيبيديا للنبذة. في وضع «القاموس المحلي» تُبحث الكلمات دون إرسال. عند استخدام أدوات الكتابة يُرسَل النص إلى المزوّد الذي اخترته: Claude أو Gemini بمفتاحك، أما Ollama فيبقى النص على جهازك. لا تُجمع أي بيانات أخرى.</p>
     </section>

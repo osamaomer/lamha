@@ -22,11 +22,12 @@ function saved() {
 }
 const save = patch => browser.storage.sync.set(patch).then(saved);
 
+/** "Alt+Shift+L" → <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd>, written as the popup shows it. */
 function kbd(combo) {
-  return (combo || "—").split("+").map(k => {
+  return (combo || "—").split("+").flatMap((k, i) => {
     const el = document.createElement("kbd");
     el.textContent = k;
-    return el;
+    return i ? ["+", el] : [el];
   });
 }
 
@@ -74,9 +75,13 @@ async function init() {
     saved();
   });
   $("jClear").addEventListener("click", async () => {
+    if (!confirm(t("o.confirmClearJournal"))) return;
     await browser.storage.local.remove("mistakes");
     saved();
   });
+  buildToc();
+  // the desktop app adds its own sections (clipboard, updates) after the page loads
+  new MutationObserver(buildToc).observe(document.querySelector(".wrap"), { childList: true });
   if (location.hash) { const target = document.getElementById(location.hash.slice(1)); if (target) target.scrollIntoView({ block: "start" }); }
 
   // shortcuts
@@ -102,9 +107,35 @@ async function init() {
   });
 
   $("clearHist").addEventListener("click", async () => {
+    if (!confirm(t("o.confirmClearHistory"))) return;
     await browser.storage.local.set({ history: [] });
     renderHistCount(); saved();
   });
+}
+
+/** Links to the page's sections, named by their headings (so they follow the interface language). */
+let tocObserver = null;
+function buildToc() {
+  if (tocObserver) tocObserver.disconnect();
+  const sections = [...document.querySelectorAll("section.panel[id]:not(#welcome)")].filter(s => !s.hidden && s.querySelector("h2"));
+  const links = sections.map(s => {
+    const a = document.createElement("a");
+    a.href = "#" + s.id;
+    a.textContent = s.querySelector("h2").textContent.replace(/[^\p{L}\p{N}\s()/-]/gu, "").trim(); // without the emoji
+    return a;
+  });
+  $("toc").replaceChildren(...links);
+  const mark = id => links.forEach(a => {
+    const on = a.hash === "#" + id;
+    a.setAttribute("aria-current", String(on));
+    if (on) a.scrollIntoView({ block: "nearest", inline: "nearest" });
+  });
+  if (typeof IntersectionObserver !== "function") return;
+  const io = tocObserver = new IntersectionObserver(entries => {
+    const top = entries.filter(e => e.isIntersecting).sort((x, y) => x.boundingClientRect.top - y.boundingClientRect.top)[0];
+    if (top) mark(top.target.id);
+  }, { rootMargin: "-64px 0px -60% 0px" });
+  sections.forEach(s => io.observe(s));
 }
 
 /* Writing tools. Provider, Claude API key and Ollama model are kept in storage.local
@@ -178,7 +209,7 @@ async function renderJournal() {
   $("jBars").replaceChildren(...rows.map(([c, n]) => {
     const fill = el("span", "fill");
     fill.style.width = Math.max(4, Math.round((n / max) * 100)) + "%";
-    const b = el("button", "bar" + (c === journalCat ? " on" : ""), el("span", null, LamhaAI.catLabel(c)), el("span", "meter", fill), el("span", "n", arNum(n)));
+    const b = el("button", "bar" + (c === journalCat ? " on" : ""), el("span", null, ...labelParts(LamhaAI.catLabel(c))), el("span", "meter", fill), el("span", "n", arNum(n)));
     b.setAttribute("aria-pressed", String(c === journalCat));
     b.addEventListener("click", () => { journalCat = journalCat === c ? "" : c; renderJournal(); });
     return b;
@@ -195,6 +226,15 @@ async function renderJournal() {
     el("div", "fix", el("del", null, r.original), " → ", el("ins", null, r.fix)),
     r.why && el("div", "why", r.why)
   )));
+}
+
+/** "أدوات التعريف والتنكير (a / an / the)" → the Arabic name, then the English part isolated and unbroken. */
+function labelParts(label) {
+  const m = /^(.*?)\s*(\([^)]*[A-Za-z][^)]*\))$/.exec(label);
+  if (!m) return [label];
+  const bdi = document.createElement("bdi");
+  bdi.textContent = m[2];
+  return [m[1] + " ", bdi];
 }
 
 function initOllama() {

@@ -467,6 +467,18 @@ test("a word lookup adds a card with its sentence and in-context meaning", async
   await off.send({ type: "lookup", text: "bank" });
   assert.equal(await off.send({ type: "cardHas", q: "bank" }), false, "cardsAuto off");
 
+  // a name the sentence's translation keeps as it is: flagged, not the meaning, not a review card
+  const names = recorder(url => {
+    if (url.includes("/translate_a/single")) return json(200, { src: "en", sentences: [{ trans: "الجوزاء", orig: "gemini" }] });
+    if (url.includes("/translate_a/t")) return json(200, ["استخدم <a i=0>Gemini</a> أو Claude."]);
+    return json(404, {});
+  });
+  const nameEnv = makeEnv({ fetchImpl: names.fetchImpl, local: { cardsImported: true }, sync: { dictSource: "online", translateDefinitions: false } });
+  const named = await nameEnv.send({ type: "lookup", text: "gemini", context: { before: "Use ", after: " or Claude." } });
+  assert.equal(named.data.context.untranslated, true);
+  assert.equal(named.data.translation, "الجوزاء", "the dictionary meaning is kept");
+  assert.equal(await nameEnv.send({ type: "cardHas", q: "gemini" }), false, "a name isn't added to review");
+
   const noHistory = makeEnv({ fetchImpl: google.fetchImpl, local: { cardsImported: true }, sync: { dictSource: "online", saveHistory: false } });
   await noHistory.send({ type: "lookup", text: "bank" });
   assert.equal(await noHistory.send({ type: "cardHas", q: "bank" }), false, "history off: no automatic card");

@@ -38,6 +38,28 @@ $timer.Start()
   return { proc, hwnd, state };
 }
 
+/** A WPF window with a sentence and one word selected in it: WPF text boxes expose their text to UI Automation,
+ *  as Word, browsers and Chromium apps (VS Code, Teams…) do; the Windows Forms target above doesn't. */
+function startWpfApp(text, word) {
+  const { spawn } = require("node:child_process");
+  const script = `
+Add-Type -AssemblyName PresentationFramework
+$w = New-Object Windows.Window; $w.Title = "Lamha self-test (sentence)"; $w.Topmost = $true; $w.Width = 620; $w.Height = 160
+$t = New-Object Windows.Controls.TextBox; $t.TextWrapping = "Wrap"; $t.FontSize = 18; $t.Text = ${JSON.stringify(text)}
+$w.Content = $t
+$w.Add_ContentRendered({ $w.Activate(); [void]$t.Focus(); $t.Select($t.Text.IndexOf(${JSON.stringify(word)}), ${word.length})
+  [Console]::Out.WriteLine("HWND " + (New-Object Windows.Interop.WindowInteropHelper $w).Handle.ToInt64()); [Console]::Out.Flush() })
+[void]$w.ShowDialog()`;
+  const proc = spawn("powershell.exe", ["-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")], { windowsHide: true });
+  const hwnd = new Promise((resolve, reject) => {
+    proc.stdout.setEncoding("utf8");
+    proc.stdout.on("data", d => { const m = /HWND (\d+)/.exec(String(d)); if (m) resolve(Number(m[1])); });
+    proc.on("exit", () => reject(new Error("test window closed")));
+    setTimeout(() => reject(new Error("test window did not open")), 15000);
+  });
+  return { proc, hwnd };
+}
+
 module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin, stores, send, desktop }) {
   const results = [];
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -700,6 +722,36 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       await js(mainWin, `document.querySelector("#cbPane .cb-dhead .link").click(); document.getElementById("tabTr").click(); true`);
       return added.split("\n")[0];
     });
+  }
+
+  /* ---- any app: the sentence around the selected word (UI Automation), for «فهم الكلمة من سياق الجملة» ---- */
+  if (desktop && desktop.selection && desktop.uiaContext) {
+    const { selection, native, uiaContext } = desktop;
+    const app = startWpfApp("Install the Lamha extension in Firefox, then open its settings.", "extension");
+    try {
+      await check("lookup in another app reads the sentence around the word", async () => {
+        uiaContext.start(); // the self-test doesn't start it with the app
+        const hwnd = await app.hwnd;
+        await wait(1500); // the window and the helper start
+        for (let i = 0; i < 5 && native.foreground() !== hwnd; i++) { native.forceForeground(hwnd); await wait(200); }
+        assert(native.foreground() === hwnd, "test app not in front: " + native.className(native.foreground()));
+        const cap = await selection.captureSelection();
+        assert(cap.text === "extension", "copied " + JSON.stringify(cap.text));
+        const ctx = await uiaContext.around(cap.hwnd, cap.text, 5000);
+        assert(ctx && ctx.before === "Install the Lamha " && ctx.after.startsWith(" in Firefox"), "context " + JSON.stringify(ctx));
+        const r = await send({ type: "lookup", text: cap.text, context: ctx });
+        assert(r.ok, "lookup failed: " + r.error);
+        assert(r.data.context || r.data.contextSense, "the lookup didn't use the sentence");
+        return `"${ctx.before}[extension]${ctx.after.slice(0, 20)}…"`;
+      });
+      await check("the sentence is not read when the app's selection is other text", async () => {
+        const hwnd = await app.hwnd;
+        assert((await uiaContext.around(hwnd, "Firefox", 3000)) === null, "read text around a word that isn't selected");
+      });
+    } finally {
+      app.proc.kill();
+      uiaContext.stop();
+    }
   }
 
   /* ---- any app: global shortcut flow against a real Windows text box ---- */

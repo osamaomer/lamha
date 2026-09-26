@@ -297,6 +297,19 @@ const CARD_W = 480, CARD_H = 620;
 let cardWin = null, cardReady = null, cardSource = null, cardShownAt = 0, hotkeyBusy = false, hotkeyErrors = [];
 const selection = process.platform === "win32" ? require("./selection") : null;
 const native = process.platform === "win32" ? require("./native") : null;
+/** The sentence around a word selected in another app (Settings → «فهم الكلمة من سياق الجملة»), see uia-context.js. */
+const uiaContext = process.platform === "win32" ? new (require("./uia-context").UiaContext)() : null;
+const isWordish = t => t.split(/\s+/).length <= 3 && t.length <= 40 && !/[.!?;:]\s|[\n\r]/.test(t); // as background.js decides
+
+/** Keeps the context helper running while the setting is on (it takes about a second to start). */
+function startContextHelper() {
+  if (!uiaContext || SMOKE) return;
+  const apply = on => (on ? uiaContext.start() : uiaContext.stop());
+  stores.sync.get({ useContext: true }).then(s => apply(s.useContext !== false));
+  storageListeners.push((changes, area) => {
+    if (area === "sync" && changes.useContext) apply(changes.useContext.newValue !== false);
+  });
+}
 
 /* ---------------- clipboard history (الحافظة) ----------------
  * clipboard-monitor.js notices copies (only while storage.local.clipboardEnabled is on — off by default),
@@ -629,6 +642,10 @@ async function onHotkey(kind) {
   try {
     if (!cardWin || cardWin.isDestroyed()) createCardWin();
     const cap = await selection.captureSelection(); // first: the user's app must still be in front
+    const text = cap.text.trim();
+    if (kind === "lookup" && uiaContext && text && isWordish(text) && (await stores.sync.get({ useContext: true })).useContext !== false) {
+      cap.context = await uiaContext.around(cap.hwnd, text); // still before the card takes the focus; null after 700 ms
+    }
     await showCard(kind, cap);
   } catch (err) {
     console.error("shortcut failed:", err);
@@ -659,7 +676,8 @@ async function showCard(kind, cap) {
   native.forceForeground(native.hwndOf(cardWin)); // so Esc and typing work at once
   wc.send("lamha:page-message", {
     type: kind === "write" ? "showWrite" : "showLookup",
-    text: cap.text, external: true, replaceable: !cap.terminal && !!cap.hwnd, point
+    text: cap.text, external: true, replaceable: !cap.terminal && !!cap.hwnd, point,
+    context: cap.context || null // { before, after } from the app, when it could be read
   });
 }
 
@@ -819,11 +837,12 @@ if (!gotLock) {
     // tray, notifications and window titles follow the interface language (pages redraw themselves)
     globalThis.LamhaI18n.init({ onChange: () => { updateTray(); if (mainWin && !mainWin.isDestroyed()) mainWin.setTitle(T("common.lamha")); } });
     startUpdates();
+    startContextHelper();
     if (!SMOKE) { createTray(); if (selection) registerHotkeys(); }
     if (SMOKE) {
       return require("./scripts/smoke-test")({
         app, mainWin, openOptions, getOptionsWin: () => optionsWin, stores, send: msg => messageHandler(msg, {}),
-        desktop: { onHotkey, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
+        desktop: { onHotkey, uiaContext, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
           openPanel, hidePanel, getPanelWin: () => panelWin, panelReady: () => panelReady,
           pauseClipboard, resumeClipboard, runClipExpiry, trayTooltip }
       });
@@ -839,5 +858,6 @@ if (!gotLock) {
     if (stores) { stores.local.flush(); stores.sync.flush(); }
     if (clipboardMonitor) clipboardMonitor.stop();
     if (clipStore) clipStore.flush();
+    if (uiaContext) uiaContext.stop();
   });
 }

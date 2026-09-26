@@ -205,7 +205,7 @@ const o = id => opt.document.getElementById(id);
 await sleep(200);
 
 await step("options: journal bars sorted by count, summary names the top weakness", async () => {
-  assert.match(text(o("jSummary")), /دقّقت ٥ نصًّا ووُجد فيها ١٣ خطأ/);
+  assert.match(text(o("jSummary")), /دقّقت ٥ نصوص ووُجد فيها ١٣ خطأً/);
   assert.match(text(o("jSummary")), /أكثر أخطائك: أدوات التعريف/);
   const bars = [...o("jBars").querySelectorAll(".bar")].map(b => text(b));
   assert.equal(bars.length, 4);
@@ -222,7 +222,7 @@ await step("options: clicking a bar shows its rule and only its examples", async
 });
 
 await step("options: review section shows deck stats; clearing the deck works", async () => {
-  assert.match(text(o("rvSummary")), /في قائمة مراجعتك ٢ كلمة/);
+  assert.match(text(o("rvSummary")), /في قائمة مراجعتك كلمتان/);
   assert.equal(o("cardsAuto").checked, true);
   assert.equal(o("cardsNewPerDay").value, "10");
   o("rvClear").click();

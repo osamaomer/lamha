@@ -226,14 +226,18 @@ async function lookup(rawText, opts = {}) {
     try {
       const ctx = await contextTranslate(text, context, tl, sl);
       if (ctx) {
+        // the sentence's translation kept the word as it is (a name: "Gemini", "Firefox"): say so, don't call it the meaning
+        const same = s => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+        if (same(ctx.word) === same(text)) ctx.untranslated = true;
         result = { ...result, context: ctx };
-        if (!result.translation) result.translation = ctx.word;
+        if (!result.translation && !ctx.untranslated) result.translation = ctx.word;
       }
     } catch (_) { /* dictionary result is still shown */ }
   }
 
   lookupCache.set(key, result);
-  const learnable = word && result.translation && result.translation.toLowerCase() !== text.toLowerCase();
+  const learnable = word && result.translation && result.translation.toLowerCase() !== text.toLowerCase() &&
+    !(result.context && result.context.untranslated); // a name here: not a word to learn
   if (settings.saveHistory && learnable) {
     addHistory({ q: result.query, tr: result.translation, src: result.src });
   }
@@ -849,7 +853,8 @@ function withDeck(fn) {
 function cardFromLookup(result, selected, context) {
   const def = (result.definitions && result.definitions[0] && result.definitions[0].entries[0]) || null;
   const ex = context ? (context.before + selected + context.after).replace(/\s+/g, " ").trim().slice(0, 300) : "";
-  return { q: result.query, tr: (result.context && result.context.word) || result.translation, ex, form: selected, def: def ? def.gloss : "" };
+  const ctxWord = result.context && !result.context.untranslated ? result.context.word : "";
+  return { q: result.query, tr: ctxWord || result.translation, ex, form: selected, def: def ? def.gloss : "" };
 }
 
 function putCard(deck, c) {

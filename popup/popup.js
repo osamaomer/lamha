@@ -143,7 +143,7 @@ async function runQuick() {
     )
   ];
   (d.dict || []).slice(0, 3).forEach(p => kids.push(
-    h("div", { class: "pos-row" }, h("span", { class: "pos" }, p.pos), h("span", { class: "terms" }, p.terms.slice(0, 6).map(term => term.word).join(LamhaI18n.lang() === "ar" ? "، " : ", ")))
+    h("div", { class: "pos-row" }, h("span", { class: "pos" }, p.pos), h("span", { class: "terms" }, p.terms.slice(0, 6).map(term => term.word).join(dirOf(d.tl) === "rtl" ? "، " : ", ")))
   ));
   const firstDef = d.definitions && d.definitions[0] && d.definitions[0].entries[0];
   if (firstDef) kids.push(h("div", { class: "def" }, firstDef.glossTr && h("div", null, firstDef.glossTr), h("div", { class: "en" }, firstDef.gloss)));
@@ -193,6 +193,7 @@ function setMode(m) {
     $(paneId).hidden = key !== m;
   }
   browser.storage.local.set({ popupMode: m });
+  refreshHistVisibility();
   if (m === "review") loadReview(true);
   else (m === "write" ? draft : q).focus();
 }
@@ -282,10 +283,13 @@ async function runWrite(tool, fresh = false) {
   );
 }
 
-function flash(text) {
-  const t = h("div", { class: "flash", role: "status" }, text);
+/** A short message at the bottom; with `action` ({ label, run }) it stays 5 s and offers that button (e.g. Undo). */
+function flash(text, action) {
+  document.querySelectorAll(".flash").forEach(f => f.remove());
+  const t = h("div", { class: "flash", role: "status" }, text,
+    action && h("button", { class: "flash-act", type: "button", onclick: () => { t.remove(); action.run(); } }, action.label));
   document.body.append(t);
-  setTimeout(() => t.remove(), 1200);
+  setTimeout(() => t.remove(), action ? 5000 : 1200);
 }
 
 /** One line under the compose box: the user's most frequent mistake type → the journal. */
@@ -428,18 +432,29 @@ function speakIcon() {
 
 /* ---- history ---- */
 
+let histCount = 0;
+/** Recent lookups belong to the Translate tab: elsewhere they only make the popup taller. */
+function refreshHistVisibility() { $("histCard").hidden = !histCount || mode !== "translate"; }
+
 async function renderHistory() {
   const { history = [] } = await browser.storage.local.get("history");
-  $("histCard").hidden = !history.length;
+  histCount = history.length;
+  refreshHistVisibility();
   $("hist").replaceChildren(...history.slice(0, 6).map(item =>
-    h("li", { title: t("p.translateAgain"), onclick: () => { q.value = item.q; q.dispatchEvent(new Event("input")); clearTimeout(qTimer); runQuick(); } },
+    h("li", null, h("button", {
+      class: "hist-btn", type: "button", title: t("p.translateAgain"),
+      onclick: () => { q.value = item.q; q.dispatchEvent(new Event("input")); clearTimeout(qTimer); runQuick(); }
+    },
       h("span", { class: "w", dir: "auto" }, item.q),
-      h("span", { class: "t" }, item.tr))
+      h("span", { class: "t" }, item.tr)))
   ));
 }
 $("clearHist").addEventListener("click", async () => {
+  const { history = [] } = await browser.storage.local.get("history");
   await browser.storage.local.set({ history: [] });
   renderHistory();
+  // no confirm() in the toolbar popup: an undo instead
+  flash(t("p.histCleared"), { label: t("common.undo"), run: async () => { await browser.storage.local.set({ history }); renderHistory(); } });
 });
 
 init();

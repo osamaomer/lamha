@@ -364,7 +364,8 @@
     if (!info) return;
     ensureHost();
     hidePill();
-    closeCard();
+    closeCard({ restore: false });
+    if (focus) returnFocus = document.activeElement;
     if (info.context === undefined) info.context = info.range && isWordish(info.text) ? contextOf(info.range) : null;
     cardInfo = info;
     stack = [info.text];
@@ -403,10 +404,17 @@
     }
   }
 
-  function closeCard() {
+  let returnFocus = null; // where the keyboard was before a card opened from the keyboard
+  /** `restore`: give the focus back to the page if it was in the card (Esc, ✕); not when another card replaces it
+   *  or a click elsewhere closed it. */
+  function closeCard({ restore = true } = {}) {
     reqId++;
     const had = !!card;
+    const back = returnFocus;
+    const focusedInCard = had && shadow && !!shadow.activeElement;
+    if (restore) returnFocus = null;
     if (card) card.remove();
+    if (restore && focusedInCard && back && back.isConnected) { try { back.focus({ preventScroll: true }); } catch (_) { /* not focusable any more */ } }
     card = null; cardInfo = null; bodyEl = null; stack = [];
     // desktop app: tell it when the card is really gone (not replaced by another one) so it hides its window
     if (had && window.lamhaDesktop) setTimeout(() => { if (!card) window.lamhaDesktop.closed(); }, 0);
@@ -517,6 +525,15 @@
     load(stack[stack.length - 1], stack.length === 1 && cardInfo ? cardInfo.context : null);
   }
 
+  /** Text clamped to a few lines that opens fully on click, Enter or Space. */
+  function expandable(props, ...kids) {
+    const el = h("div", { ...props, role: "button", tabindex: "0", "aria-expanded": "false", title: L("c.showAll") }, ...kids);
+    const toggle = () => el.setAttribute("aria-expanded", String(el.classList.toggle("open")));
+    el.addEventListener("click", toggle);
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+    return el;
+  }
+
   /* ----- result rendering ----- */
 
   function render(d) {
@@ -539,7 +556,7 @@
       ));
     } else {
       b.append(h("div", { class: "src-row", dir: sDir },
-        h("div", { class: "source", dir: sDir, title: L("c.showAll"), onclick: e => e.currentTarget.classList.toggle("open") }, d.query),
+        expandable({ class: "source", dir: sDir }, d.query),
         h("button", { class: "icon-btn", title: L("c.listenOrig"), "aria-label": L("c.listenOrig"), onclick: e => speak(d.query, d.src, e.currentTarget) }, icon("speak", 15))
       ));
     }
@@ -554,9 +571,9 @@
     const long = main.length > 40;
     b.append(h("div", { class: "hero", dir: "rtl" },
       h("div", { style: { flex: "1", minWidth: "0" } },
-        (ctx || d.contextSense) && h("div", { class: "ctx-label" }, L("c.inContext")),
+        (ctx || d.contextSense) && h("div", { class: "ctx-label" }, ctx && ctx.untranslated ? L("c.inContextName") : L("c.inContext")),
         main
-          ? h("div", { class: "t" + (long ? " long" : ""), dir: tDir }, main)
+          ? h("div", { class: "t" + (long ? " long" : ""), dir: ctx && ctx.untranslated ? "auto" : tDir }, main)
           : h("div", { class: "t none" }, d.bestGloss
               ? [L("c.noArSense"), h("span", { class: "gloss", dir: "ltr" }, d.bestGloss)]
               : L("c.noArDirect")),
@@ -628,7 +645,7 @@
       const on = await send({
         type: "cardToggle",
         card: {
-          q: d.query, tr: (d.context && d.context.word) || d.translation, form: stack.length === 1 && cardInfo ? cardInfo.text : "",
+          q: d.query, tr: (d.context && !d.context.untranslated && d.context.word) || d.translation, form: stack.length === 1 && cardInfo ? cardInfo.text : "",
           ex: c ? (c.before + cardInfo.text + c.after).replace(/\s+/g, " ").trim().slice(0, 300) : "", def: def ? def.gloss : ""
         }
       });
@@ -670,7 +687,7 @@
   function termChip(t, d) {
     return h("button", {
       class: "chip" + (dirOf(d.tl) === "ltr" ? " en" : ""),
-      title: t.back && t.back.length ? t.back.join(LamhaI18n.lang() === "ar" ? "، " : ", ") : t.hint || L("common.copy"),
+      title: t.back && t.back.length ? t.back.join(dirOf(d.src) === "rtl" ? "، " : ", ") : t.hint || L("common.copy"), // back-translations: source language
       onclick: () => (dirOf(d.tl) === "ltr" ? navigate(t.word) : copyText(t.word))
     }, t.word);
   }
@@ -701,7 +718,8 @@
     if (!info) return;
     ensureHost();
     hidePill();
-    closeCard();
+    closeCard({ restore: false });
+    if (focus) returnFocus = document.activeElement;
     if (!info.raw) info.raw = info.text;
     cardInfo = info;
     card = h("div", { class: "card write", role: "dialog", "aria-label": L("c.writeLabel"), tabindex: "-1" });
@@ -723,7 +741,7 @@
       : isArabicText(src) ? ["toEnglish", "reply", "summarize"]
       : ["proofread", "improve", "formal", "friendly", "concise", "summarize", "explain", "reply"];
     b.append(
-      h("div", { class: "source w-src", dir: isArabicText(src) ? "rtl" : "ltr", title: L("c.showAll"), onclick: e => e.currentTarget.classList.toggle("open") },
+      expandable({ class: "source w-src", dir: isArabicText(src) ? "rtl" : "ltr" },
         info.page ? document.title || location.hostname : src),
       h("div", { class: "tools", role: "toolbar", "aria-label": L("p.writeTools") }, tools.map(id =>
         h("button", { class: "chip tool" + (id === active ? " on" : ""), "data-tool": id, "aria-pressed": String(id === active), onclick: () => pickTool(id) }, toolLabel(id))))
@@ -952,7 +970,7 @@
   document.addEventListener("pointerdown", e => {
     if (fromUs(e)) return;
     hidePill();
-    if (card) closeCard();
+    if (card) closeCard({ restore: false });
   }, true);
 
   document.addEventListener("keydown", e => {
@@ -988,10 +1006,14 @@
   /** Text handed over by the context menu, or by the desktop app from another program (`external`):
    *  there Replace pastes back into that program. */
   function textInfo(msg) {
+    const text = msg.text.replace(/\s+/g, " ").trim();
+    const ctx = msg.context && typeof msg.context.before === "string" && typeof msg.context.after === "string" && isWordish(text)
+      ? sentenceAround(msg.context.before, msg.context.after) : null; // the desktop app read the sentence from the other program
     return {
-      text: msg.text.replace(/\s+/g, " ").trim(),
+      text,
       raw: msg.text,
       point: msg.point || lastPointer || { x: innerWidth / 2, y: 90 },
+      context: ctx,
       editable: msg.external && msg.replaceable ? { kind: "external" } : undefined
     };
   }

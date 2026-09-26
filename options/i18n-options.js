@@ -1,9 +1,10 @@
 /* Lamha — Settings page strings (Arabic, English). Generated with the settings markup; see shared/i18n.js. */
 "use strict";
 (() => {
-  const { num, enCount } = LamhaI18n;
+  const { num, arCount, enCount } = LamhaI18n;
   LamhaI18n.add({
     "o.title": ["إعدادات لمحة", "Lamha settings"],
+    "o.sections": ["أقسام الإعدادات", "Settings sections"],
     "o.heroText": ["ابحث عن معاني الكلمات الإنجليزية وترجم أي نص إلى العربية بلمسة واحدة.", "Look up English words and translate any text in one click."],
     "o.welcome": ["أهلًا بك 👋 إليك طريقة الاستخدام", "Welcome 👋 Here's how it works"],
     "o.step1": ["<b>حدّد كلمة أو جملة</b> في أي صفحة، سيظهر زر صغير <span class=\"mini-pill\">بحث</span> فوقها.", "<b>Select a word or sentence</b> on any page, and a small <span class=\"mini-pill\">Look up</span> button appears above it."],
@@ -58,6 +59,7 @@
     "o.model": ["النموذج", "Model"],
     "o.ollamaModelsHint": ["النماذج المحمّلة في Ollama على هذا الجهاز", "The models downloaded in Ollama on this PC"],
     "o.ollamaUrl": ["عنوان Ollama", "Ollama address"],
+    "o.ollamaUrlHint": ["اتركه فارغًا إن كان Ollama على هذا الجهاز", "Leave it empty if Ollama runs on this PC"],
     "o.refreshList": ["تحديث القائمة", "Refresh list"],
     "o.test": ["اختبار", "Test"],
     "o.geminiKey": ["مفتاح Gemini API", "Gemini API key"],
@@ -119,9 +121,11 @@
     "o.clearJournal": ["مسح السجل", "Clear the journal"],
     "o.dictCounts": [v => `القاموس المحلي: ${num(v.entries)} كلمة إنجليزية، منها ${num(v.withArabic)} بمعانٍ عربية، و${num(v.arabicIndex)} كلمة عربية — يعمل دون إنترنت.`, v => `Offline dictionary: ${num(v.entries)} English words, ${num(v.withArabic)} of them with Arabic meanings, and ${num(v.arabicIndex)} Arabic words — works without internet.`],
     "o.confirmDeleteCards": ["حذف كل بطاقات المراجعة وتقدّمك في حفظها؟", "Delete all review cards and your progress?"],
-    "o.rvSummary": [v => `في قائمة مراجعتك ${num(v.total)} كلمة، حفظتَ منها ${num(v.learned)}. ينتظرك اليوم ${num(v.due)} للمراجعة و${num(v.fresh)} جديدة — افتح تبويب «مراجعة» في نافذة لمحة.`, v => `Your review list has ${enCount(v.total, "word", "words")}, ${num(v.learned)} learned. Today: ${num(v.due)} to review and ${num(v.fresh)} new — open the “Review” tab in Lamha's window.`],
+    "o.confirmClearJournal": ["مسح سجل أخطائك كله؟ ستبدأ الإحصاءات من جديد.", "Clear your whole mistake journal? The statistics start again from zero."],
+    "o.confirmClearHistory": ["مسح سجل الكلمات التي بحثت عنها؟ بطاقات المراجعة تبقى كما هي.", "Clear the history of words you looked up? Your review cards stay."],
+    "o.rvSummary": [v => `في قائمة مراجعتك ${arCount(v.total, "كلمة واحدة", "كلمتان", "كلمات", "كلمة")}، حفظتَ منها ${num(v.learned)}. ينتظرك اليوم ${num(v.due)} للمراجعة و${num(v.fresh)} جديدة — افتح تبويب «مراجعة» في نافذة لمحة.`, v => `Your review list has ${enCount(v.total, "word", "words")}, ${num(v.learned)} learned. Today: ${num(v.due)} to review and ${num(v.fresh)} new — open the “Review” tab in Lamha's window.`],
     "o.jEmpty": ["يُسجَّل هنا ما يجده «التدقيق اللغوي» في كتابتك، لتعرف نقاط ضعفك وتتحسّن. لم تدقّق أي نص بعد.", "What Proofread finds in your writing is recorded here, so you can see your weak points and improve. You haven't proofread anything yet."],
-    "o.jSummary": [v => `دقّقت ${num(v.checks)} نصًّا ووُجد فيها ${num(v.total)} خطأ.${v.top} اضغط نوعًا لترى قاعدته وأمثلة من كتابتك.`, v => `You proofread ${enCount(v.checks, "text", "texts")} and ${enCount(v.total, "mistake was", "mistakes were")} found.${v.top} Click a type to see its rule and examples from your writing.`],
+    "o.jSummary": [v => `دقّقت ${arCount(v.checks, "نصًّا واحدًا", "نصّين", "نصوص", "نصًّا")} ووُجد فيها ${arCount(v.total, "خطأ واحد", "خطآن", "أخطاء", "خطأً")}.${v.top} اضغط نوعًا لترى قاعدته وأمثلة من كتابتك.`, v => `You proofread ${enCount(v.checks, "text", "texts")} and ${enCount(v.total, "mistake was", "mistakes were")} found.${v.top} Click a type to see its rule and examples from your writing.`],
     "o.jTop": [v => ` أكثر أخطائك: ${v.cat}.`, v => ` Most frequent: ${v.cat}.`],
     "o.rule": ["القاعدة: ", "The rule: "],
     "o.examplesOf": [v => `أمثلة من كتابتك — ${v.cat}`, v => `Examples from your writing — ${v.cat}`],
@@ -129,7 +133,7 @@
     "o.pickModel": ["— اختر نموذجًا —", "— choose a model —"],
     "o.ollamaNoModels": ["Ollama يعمل لكن لا توجد نماذج بعد — نفّذ الأمر في الخطوة 3 ثم اضغط «تحديث القائمة».", "Ollama is running but has no models yet — run the command in step 3, then click “Refresh list”."],
     "o.ollamaPlainHttp": [" ⚠️ هذا العنوان على جهاز آخر عبر http، فيمرّ نصك على الشبكة دون تشفير.", " ⚠️ This address is another computer over http, so your text crosses the network unencrypted."],
-    "o.ollamaOk": [v => `✓ Ollama متصل — ${num(v.n)} نموذج. اضغط «اختبار» للتأكد من أن الإضافة تستطيع استخدامه.`, v => `✓ Ollama connected — ${enCount(v.n, "model", "models")}. Click “Test” to make sure Lamha can use it.`],
+    "o.ollamaOk": [v => `✓ Ollama متصل — ${arCount(v.n, "نموذج واحد", "نموذجان", "نماذج", "نموذجًا")}. اضغط «اختبار» للتأكد من أن الإضافة تستطيع استخدامه.`, v => `✓ Ollama connected — ${enCount(v.n, "model", "models")}. Click “Test” to make sure Lamha can use it.`],
     "o.pickModelFirst": ["اختر نموذجًا أولًا.", "Choose a model first."],
     "o.ollamaTesting": [v => `جارٍ اختبار ${v.model}… (أول تشغيل قد يستغرق دقيقة لتحميل النموذج في الذاكرة)`, v => `Testing ${v.model}… (the first run can take a minute to load the model into memory)`],
     "o.ollamaWorks": [v => `✓ يعمل (${v.secs} ث) — أدوات الكتابة جاهزة مجانًا على جهازك.`, v => `✓ Works (${v.secs} s) — the writing tools are ready, free, on your PC.`],
@@ -139,7 +143,7 @@
     "o.checkingKey": ["جارٍ التحقق من المفتاح…", "Checking the key…"],
     "o.geminiBusySaved": ["✓ المفتاح صحيح وحُفظ — لكن نماذج Gemini مزدحمة الآن، فجرّب أدوات الكتابة بعد قليل.", "✓ The key works and is saved — but Gemini's models are busy right now, so try the writing tools in a little while."],
     "o.noSites": ["لا توجد مواقع مستثناة.", "No excluded websites."],
-    "o.histCount": [v => `${num(v.n)} كلمة محفوظة`, v => `${enCount(v.n, "word", "words")} saved`],
+    "o.histCount": [v => arCount(v.n, "كلمة واحدة محفوظة", "كلمتان محفوظتان", "كلمات محفوظة", "كلمة محفوظة"), v => `${enCount(v.n, "word", "words")} saved`],
     "o.histEmpty": ["السجل فارغ", "History is empty"],
     "o.connectFailed": ["تعذّر الاتصال: ", "Couldn't connect: "],
     "oerr.ai_bad_key": ["المفتاح غير صالح. تأكد من نسخه كاملًا.", "The key isn't valid. Make sure you copied all of it."],

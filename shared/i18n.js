@@ -90,6 +90,8 @@ var LamhaI18n = (() => {
     "common.retry": ["إعادة المحاولة", "Try again"],
     "common.remove": ["إزالة", "Remove"],
     "common.clear": ["مسح", "Clear"],
+    "common.undo": ["تراجع", "Undo"],
+    "p.histCleared": ["مُسح السجل", "History cleared"],
     "common.close": ["إغلاق", "Close"],
     "common.back": ["رجوع", "Back"],
     "common.listen": ["استمع", "Listen"],
@@ -134,6 +136,7 @@ var LamhaI18n = (() => {
     // popup
     "p.subtitle": ["ترجمة وبحث فوري", "Instant lookup & translation"],
     "p.onOff": ["تشغيل / إيقاف", "On / off"],
+    "p.enableLamha": ["تفعيل لمحة", "Enable Lamha"],
     "p.permTitle": ["مطلوب إذن الوصول للمواقع", "Site access permission needed"],
     "p.permText": ["ليتمكن لمحة من العمل على الصفحات التي تزورها.", "So Lamha can work on the pages you visit."],
     "p.grant": ["منح الإذن", "Grant permission"],
@@ -158,7 +161,7 @@ var LamhaI18n = (() => {
     // review (popup)
     "rv.due": [v => `للمراجعة ${num(v.n)}`, v => `${num(v.n)} due`],
     "rv.fresh": [v => `جديدة ${num(v.n)}`, v => `${num(v.n)} new`],
-    "rv.totals": [v => `${num(v.total)} كلمة · ${num(v.learned)} محفوظة`, v => `${enCount(v.total, "word", "words")} · ${num(v.learned)} learned`],
+    "rv.totals": [v => `${arCount(v.total, "كلمة واحدة", "كلمتان", "كلمات", "كلمة")} · ${num(v.learned)} محفوظة`, v => `${enCount(v.total, "word", "words")} · ${num(v.learned)} learned`],
     "rv.doneTitle": ["أحسنت! لا توجد كلمات للمراجعة الآن 🎉", "Well done! Nothing to review right now 🎉"],
     "rv.next": [v => `المراجعة القادمة بعد ${v.span}.`, v => `Next review in ${v.span}.`],
     "rv.emptyTitle": ["لا توجد كلمات بعد", "No words yet"],
@@ -208,6 +211,7 @@ var LamhaI18n = (() => {
     "c.didYouMean": ["هل تقصد: ", "Did you mean: "],
     "c.didYouMeanEnd": ["؟", "?"],
     "c.inContext": ["في هذا السياق", "In this context"],
+    "c.inContextName": ["في هذا السياق: اسم يبقى كما هو", "In this context: a name, kept as is"],
     "c.noArSense": ["لا يوجد معنى عربي لهذا الاستخدام في القاموس المحلي. المعنى المقصود هنا:", "The offline dictionary has no Arabic meaning for this use. The meaning here:"],
     "c.noArDirect": ["لا يوجد معنى عربي مباشر في القاموس المحلي — راجع التعريف أدناه.", "No direct Arabic meaning in the offline dictionary — see the definition below."],
     "c.listenTr": ["استمع للترجمة", "Listen to the translation"],
