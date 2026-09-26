@@ -14,6 +14,8 @@ permissions:
 jobs:
   release:
     runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -36,10 +38,29 @@ jobs:
           npm test
           npx --yes web-ext lint --warnings-as-errors
 
-      - name: Build and publish the installers
+      # One draft release up front: electron-builder's parallel uploads would otherwise each create their own
+      # release for the tag, and GitHub would serve downloads from one that lacks the installer / latest.yml.
+      - name: Create the draft release
+        shell: bash
+        run: gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "Lamha ${GITHUB_REF_NAME#v}" --generate-notes
+
+      - name: Build and upload the installers
         working-directory: desktop
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm ci
           npm run release
+
+      - name: Publish the release
+        shell: bash
+        run: gh release edit "$GITHUB_REF_NAME" --draft=false --latest
+
+      - name: Installed copies can see it
+        shell: bash
+        run: |
+          url="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/latest.yml"
+          for i in 1 2 3 4 5 6; do
+            if curl -sfL "$url" | grep -q "version: ${GITHUB_REF_NAME#v}"; then echo "OK: $url"; exit 0; fi
+            sleep 10
+          done
+          echo "::error::$url does not serve version ${GITHUB_REF_NAME#v}"
+          exit 1
