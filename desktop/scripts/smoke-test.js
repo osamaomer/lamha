@@ -91,13 +91,15 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
     const r = await js(mainWin, `({
       desktop: document.documentElement.classList.contains("desktop"),
       tabs: [...document.querySelectorAll(".tabs button")].map(b => b.textContent.trim()),
-      siteCard: getComputedStyle(document.querySelector("main > section.card")).display,
+      siteCard: getComputedStyle(document.getElementById("siteCard")).display,
+      toolsCard: getComputedStyle(document.getElementById("toolsCard")).display,
       api: typeof browser.runtime.sendMessage
     })`);
     assert(r.desktop, "desktop class missing");
     const want = desktop && desktop.clipboardMonitor ? 4 : 3; // + الحافظة on Windows
     assert(r.tabs.length === want, "tabs: " + r.tabs.join(", "));
     assert(r.siteCard === "none", "site card visible");
+    assert(r.toolsCard !== "none", "the Translate / Write / Review card is hidden");
     assert(r.api === "function", "browser API missing");
     return r.tabs.join(" · ");
   });
