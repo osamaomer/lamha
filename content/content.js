@@ -709,10 +709,22 @@
   /* ---------------- writing tools (Claude, Gemini or Ollama) ---------------- */
 
   const toolLabel = id => L("tool." + id); // proofread, improve, formal, friendly, concise, toEnglish, summarize, explain, reply
-  const REPLACEABLE = new Set(["proofread", "improve", "formal", "friendly", "concise", "toEnglish"]);
+  const REPLACEABLE = new Set(["proofread", "improve", "formal", "friendly", "concise", "toEnglish", "compose"]);
   const { isArabicText } = LamhaAI;
 
   let writeOut = null;
+  let writeTools = []; // the card's tools in order: 1…n on the keyboard runs one
+
+  /** 1–9 (or ١–٩) in the writing card runs that tool: Alt+Shift+W, then 1 = proofread. */
+  function onWriteKey(e) {
+    if (e.ctrlKey || e.altKey || e.metaKey || !writeTools.length || /^(TEXTAREA|INPUT)$/.test(e.target.tagName)) return;
+    const latin = "123456789".indexOf(e.key), arabic = "١٢٣٤٥٦٧٨٩".indexOf(e.key);
+    const i = latin >= 0 ? latin : arabic;
+    if (i < 0 || i >= writeTools.length) return;
+    e.preventDefault();
+    e.stopPropagation(); // the page never sees the number
+    pickTool(writeTools[i]);
+  }
 
   function openWriteCard(info, { focus = false, tool = null } = {}) {
     if (!info) return;
@@ -722,12 +734,13 @@
     if (focus) returnFocus = document.activeElement;
     if (!info.raw) info.raw = info.text;
     cardInfo = info;
-    card = h("div", { class: "card write", role: "dialog", "aria-label": L("c.writeLabel"), tabindex: "-1" });
+    card = h("div", { class: "card write", role: "dialog", "aria-label": L("c.writeLabel"), tabindex: "-1", onkeydown: onWriteKey });
     root.append(card);
     decideSide();
-    renderWrite(info, tool);
+    if (info.compose) renderCompose();
+    else renderWrite(info, tool);
     placeCard();
-    if (focus) card.focus({ preventScroll: true });
+    if (focus && !info.compose) card.focus({ preventScroll: true }); // compose focuses its own text box
     if (!aiReady) writeOut.replaceChildren(aiError(notReadyCode()));
     else if (tool) pickTool(tool);
   }
@@ -740,11 +753,15 @@
     const tools = info.page ? ["summarize"]
       : isArabicText(src) ? ["toEnglish", "reply", "summarize"]
       : ["proofread", "improve", "formal", "friendly", "concise", "summarize", "explain", "reply"];
+    writeTools = tools;
     b.append(
       expandable({ class: "source w-src", dir: isArabicText(src) ? "rtl" : "ltr" },
         info.page ? document.title || location.hostname : src),
-      h("div", { class: "tools", role: "toolbar", "aria-label": L("p.writeTools") }, tools.map(id =>
-        h("button", { class: "chip tool" + (id === active ? " on" : ""), "data-tool": id, "aria-pressed": String(id === active), onclick: () => pickTool(id) }, toolLabel(id))))
+      h("div", { class: "tools", role: "toolbar", "aria-label": L("p.writeTools") }, tools.map((id, i) =>
+        h("button", {
+          class: "chip tool" + (id === active ? " on" : ""), "data-tool": id, "aria-pressed": String(id === active),
+          "aria-keyshortcuts": String(i + 1), title: L("c.toolKey", { n: i + 1 }), onclick: () => pickTool(id)
+        }, h("span", { class: "num", "aria-hidden": "true" }, LamhaI18n.num(i + 1)), toolLabel(id))))
     );
     writeOut = h("div", { class: "w-out", "aria-live": "polite" });
     b.append(writeOut);
@@ -774,7 +791,7 @@
       h("div", { class: "sk", style: { height: "14px", width: "80%", marginTop: "8px" } }),
       h("div", { class: "sk", style: { height: "14px", width: "60%", marginTop: "8px" } })
     );
-    const res = await send({ type: "ai", tool, text: info.raw, extra });
+    const res = await send({ type: "ai", tool, text: tool === "compose" ? extra.intent : info.raw, extra });
     if (token !== reqId || !card) return;
     if (!res || !res.ok) { writeOut.replaceChildren(aiError(res && res.error, () => runTool(tool, extra))); return; }
     if (tool === "proofread") renderProofread(res.data, info);
@@ -796,12 +813,13 @@
   function resultActions(text, tool, extra) {
     const canReplace = REPLACEABLE.has(tool) && cardInfo && cardInfo.editable;
     return h("div", { class: "w-actions" },
-      canReplace && h("button", { class: "btn", onclick: () => doReplace(text) }, icon("check", 14), L("c.replace")),
+      canReplace && h("button", { class: "btn", onclick: () => doReplace(text, tool === "compose") }, icon("check", 14), tool === "compose" ? L("c.insert") : L("c.replace")),
       h("button", { class: "btn" + (canReplace ? " ghost" : ""), onclick: () => copyText(text) }, icon("copy", 14), L("common.copy")),
       h("div", { class: "spacer" }),
       tool === "summarize" && h("button", { class: "btn ghost", onclick: () => runTool(tool, { lang: extra.lang === "en" ? "ar" : "en" }) },
         extra.lang === "en" ? L("c.inArabic") : L("c.inEnglish")),
       tool === "reply" && h("button", { class: "btn ghost", onclick: () => replyForm(extra) }, L("c.editRequest")),
+      tool === "compose" && h("button", { class: "btn ghost", onclick: () => composeForm(extra) }, L("c.editRequest")),
       h("button", { class: "icon-btn", title: L("write.again"), "aria-label": L("write.again"), onclick: () => runTool(tool, { ...extra, fresh: true }) }, icon("retry", 15))
     );
   }
@@ -862,6 +880,74 @@
     placeCard();
   }
 
+  /* ----- write new: nothing selected, the user describes what to write ----- */
+
+  function renderCompose() {
+    const b = frame(null, L("c.composeTitle", { p: aiProvider().name }));
+    writeTools = [];
+    writeOut = h("div", { class: "w-out", "aria-live": "polite" });
+    b.append(writeOut);
+    if (aiReady) composeForm();
+  }
+
+  function composeForm(prev = {}) {
+    ++reqId; // cancel a request still running
+    const input = h("textarea", { class: "w-input", rows: "3", dir: "auto", placeholder: L("c.composePlaceholder"), "aria-label": L("c.composeLabel") });
+    input.value = prev.intent || "";
+    // keep site shortcuts (Gmail, Slack…) from reacting to what is typed here
+    ["keydown", "keyup", "keypress"].forEach(t => input.addEventListener(t, e => { if (e.key !== "Escape") e.stopPropagation(); }));
+    let kind = prev.kind || "message", tone = prev.tone || "";
+    const choice = (options, value, set) => {
+      const row = h("div", { class: "tools", role: "group" }, options.map(([v, label]) =>
+        h("button", {
+          class: "chip" + (v === value ? " on" : ""), "aria-pressed": String(v === value),
+          onclick: e => { set(v); row.querySelectorAll(".chip").forEach(c => { const on = c === e.currentTarget; c.classList.toggle("on", on); c.setAttribute("aria-pressed", String(on)); }); }
+        }, label)));
+      return row;
+    };
+    const go = () => {
+      if (!input.value.trim()) { input.focus(); return; }
+      runTool("compose", { intent: input.value.trim(), kind, tone });
+    };
+    input.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); go(); } });
+    writeOut.replaceChildren(
+      input,
+      h("div", { class: "w-note" }, L("c.kind")),
+      choice([["message", L("c.kindMessage")], ["email", L("c.kindEmail")]], kind, v => { kind = v; }),
+      h("div", { class: "w-note" }, L("c.tone")),
+      choice([["", L("c.toneAuto")], ["friendly", L("tool.friendly")], ["formal", L("tool.formal")], ["short", L("c.toneShort")]], tone, v => { tone = v; }),
+      h("button", { class: "btn", onclick: go }, icon("sparkle", 14), L("c.composeGo"), h("span", { class: "kbd" }, "Ctrl+Enter"))
+    );
+    input.focus({ preventScroll: true });
+    placeCard();
+  }
+
+  /** Where "Write new" inserts its text: the caret in the focused text box or editor, if there is one. */
+  function composeTarget() {
+    const ae = document.activeElement;
+    if (isTextField(ae)) {
+      const s = ae.selectionStart ?? ae.value.length, e = ae.selectionEnd ?? s;
+      return { kind: "field", el: ae, start: s, end: e, original: ae.value.slice(s, e) };
+    }
+    if (ae && ae.isContentEditable) {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount) {
+        const range = sel.getRangeAt(0).cloneRange();
+        return { kind: "rich", el: editingHost(ae), range, original: range.toString() };
+      }
+    }
+    return undefined;
+  }
+
+  function composeInfo(msg) {
+    const ae = document.activeElement;
+    return {
+      compose: true, text: "", raw: "",
+      point: msg.point || (isTextField(ae) ? fieldPoint(ae) : lastPointer) || { x: innerWidth / 2, y: 90 },
+      editable: msg.external ? (msg.replaceable ? { kind: "external" } : undefined) : composeTarget()
+    };
+  }
+
   /** Puts `text` back where the selection was, keeping the editor's undo history when possible. */
   function replaceIn(ed, text) {
     try {
@@ -892,12 +978,12 @@
     } catch (_) { return false; }
   }
 
-  function doReplace(text) {
+  function doReplace(text, inserting = false) {
     const info = cardInfo;
     const raw = info.raw || "";
     const full = raw.match(/^\s*/)[0] + text + raw.match(/\s*$/)[0]; // keep the spaces around the selection
     closeCard();
-    if (replaceIn(info.editable, full)) toast(L("c.replaced"));
+    if (replaceIn(info.editable, full)) toast(inserting ? L("c.inserted") : L("c.replaced"));
     else copyText(text).then(() => toast(L("c.replaceFailed")));
   }
 
@@ -1033,7 +1119,7 @@
       const info = !msg.external && (getSelectionInfo(true) || wholeEditable());
       if (info) { openWriteCard(info, { focus: true }); return; }
       if (msg.text) { openWriteCard(textInfo(msg), { focus: true }); return; }
-      toast(L("c.selectFirst"));
+      openWriteCard(composeInfo(msg), { focus: true }); // nothing selected: write something new
     } else if (msg.type === "summarizePage") {
       if (IS_TOP) summarizePage();
     } else if (msg.type === "togglePage") {

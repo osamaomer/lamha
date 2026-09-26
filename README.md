@@ -41,7 +41,9 @@ Once one is set up, a **✨ كتابة** button appears next to بحث/ترجم�
 | اكتب ردًّا | Drafts an English reply to a message. You can say what you want to answer, in Arabic. |
 
 - **استبدال (Replace)** writes the result back into the text box, and the editor's undo still works. **نسخ** copies it.
-- With the caret in a text box and nothing selected, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> (or right-click → *أدوات الكتابة*) works on the whole box.
+- **Tool numbers:** each tool in the card has a number. Select text, press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>, then <kbd>1</kbd> to proofread, <kbd>2</kbd> to improve and so on (Arabic digits work too).
+- With the caret in a text box that has text and nothing selected, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> (or right-click → *أدوات الكتابة*) works on the whole box.
+- **Write new:** with nothing selected (or in an empty text box), <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> opens *كتابة جديدة*. Describe what you want in Arabic or English, choose **Email** or **Message** and a tone, and Lamha writes it in English. **إدراج (Insert)** puts it at your cursor.
 - Right-click a page → *تلخيص الصفحة* summarizes the article.
 - **Compose box**: the toolbar popup has a **كتابة ✨** tab. Write or paste a message there, then proofread it, improve it, or turn Arabic into natural English, then copy the result. The draft is kept if the popup closes.
 - **Mistake journal** (Settings → سجل أخطائي):
@@ -124,7 +126,7 @@ Test the writing tools with `node tools/test-writing.mjs`. The test runs the bac
 
 - **Works in any program:** select text in WhatsApp, Word, Outlook, Teams or any other app, then press a shortcut:
   - <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> opens the lookup/translation card next to the mouse.
-  - <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> opens the writing tools.
+  - <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> opens the writing tools; a number key then runs a tool. With nothing selected it opens *Write new*, and Insert pastes the result where your cursor is in that program.
   - **استبدال (Replace)** pastes the result back into that program.
   - How it works: Lamha sends Ctrl+C to read your selection and Ctrl+V to paste the result, and restores your clipboard afterwards, including formatting. The Windows calls go through [koffi](https://koffi.dev), so nothing needs compiling.
   - Clipboard history (<kbd>Win</kbd>+<kbd>V</kbd>) may briefly show these copies.

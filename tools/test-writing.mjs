@@ -110,6 +110,23 @@ test("ttsChunks keeps every word and stays under the voice limit", () => {
   assert.equal(chunks.join(" "), text.replace(/\s+/g, " "));
 });
 
+test("Write new (compose): an email or a message from a description, no selected text", async () => {
+  const r = recorder(() => claudeReply({ text: "Subject: Day off on Sunday\n\nHi Sam, …\n\n[Your name]" }));
+  const env = makeEnv({ fetchImpl: r.fetchImpl, local: { aiKey: "sk-test" } });
+  const idea = "بريد لمديري أطلب إجازة يوم الأحد";
+  const email = await env.send({ type: "ai", tool: "compose", text: idea, extra: { kind: "email", tone: "formal" } });
+  assert.equal(email.ok, true, email.error);
+  assert.match(email.data.text, /^Subject:/);
+  const prompt = r.calls[0].body.messages[0].content;
+  assert.match(prompt, /"Subject: …"/);
+  assert.match(prompt, /professional and polite/);
+  assert.ok(prompt.includes("<text>\n" + idea + "\n</text>"), "the description is the material");
+  const message = await env.send({ type: "ai", tool: "compose", text: idea, extra: { kind: "message" } });
+  assert.equal(message.ok, true, message.error);
+  assert.equal(r.calls.length, 2, "Email and Message aren't served from the same cache entry");
+  assert.match(r.calls[1].body.messages[0].content, /no subject line and no sign-off/);
+});
+
 test("Claude proofread: request shape, cleaned issues, journal recorded", async () => {
   const r = recorder(() => claudeReply(PROOF));
   const env = makeEnv({ fetchImpl: r.fetchImpl, local: { aiKey: "sk-test" } });

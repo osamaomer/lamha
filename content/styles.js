@@ -302,6 +302,8 @@ div.pos { display: block; margin-bottom: 6px; }
 .w-src { -webkit-line-clamp: 2; }
 .tools { display: flex; flex-wrap: wrap; gap: 6px; direction: rtl; margin-top: 12px; }
 .chip.on, .chip.on:hover { background: var(--accent); color: var(--accent-fg); }
+.chip.tool .num { font-family: var(--font-ui); font-size: 10.5px; font-weight: 700; opacity: .65; margin-inline-end: 5px; } /* press it to run the tool */
+.w-out > .btn .kbd { font-family: var(--font-ui); font-size: 11px; font-weight: 500; opacity: .7; margin-inline-start: 4px; }
 .w-out { margin-top: 14px; }
 .w-out:empty { display: none; }
 .w-text {

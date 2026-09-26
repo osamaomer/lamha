@@ -483,6 +483,16 @@ This user often makes mistakes with: ${x.weak}. When one of those appears, expla
   explain: {
     task: x => `Explain the text to the user in simple ${x.ui === "en" ? "English" : "Arabic"}: what it says and what it implies, then the meaning of any idioms, phrasal verbs, slang or difficult words in it (write the English expression, then its explanation${x.ui === "en" ? " in plain words" : " in Arabic"}). Keep it brief. Put the explanation in \`text\`.`
   },
+  compose: { // "Write new": nothing selected; <text> is what the user wants to say
+    task: x => {
+      const tone = { formal: "professional and polite", friendly: "warm and friendly", short: "short and to the point" }[x.tone] || "natural and appropriate to the situation";
+      const shape = x.kind === "email"
+        ? `an email. Start with a line "Subject: …", then a greeting, the body and a sign-off with [Your name] as a placeholder`
+        : "a short message for chat, SMS or a comment: no subject line and no sign-off";
+      return `The text inside <text> describes something the user wants to write (it may be in Arabic). Write it for them in English as ${shape}.
+Use the facts, names and details they gave; don't invent specifics they didn't give — put a placeholder in square brackets such as [date] instead. Tone: ${tone}. Put only the ${x.kind === "email" ? "email" : "message"} in \`text\`.`;
+    }
+  },
   reply: {
     task: x => {
       const tone = { formal: "professional and polite", friendly: "warm and friendly", short: "short and to the point" }[x.tone] || "natural and appropriate to the message";
@@ -714,7 +724,7 @@ async function aiRun(tool, rawText, extra) {
   await i18nReady; // the setting is read asynchronously at startup
   const ui = LamhaI18n.lang(); // explanations (proofreading, explain) and the default summary language follow the interface
   const lang = extra.lang === "en" || extra.lang === "ar" ? extra.lang : ui;
-  const x = { lang, ui, tone: String(extra.tone || ""), intent: String(extra.intent || "").trim().slice(0, 2000) };
+  const x = { lang, ui, tone: String(extra.tone || ""), intent: String(extra.intent || "").trim().slice(0, 2000), kind: extra.kind === "email" ? "email" : "message" };
 
   const [local, settings] = await Promise.all([browser.storage.local.get(["aiKey", "aiProvider", "ollamaUrl", "ollamaModel", "geminiKey", "geminiModel"]), getSettings()]);
   const provider = ["ollama", "gemini"].includes(local.aiProvider) ? local.aiProvider : "claude";
@@ -726,7 +736,7 @@ async function aiRun(tool, rawText, extra) {
     : provider === "gemini" ? "gemini:" + geminiModel
     : AI_MODELS.includes(settings.aiModel) ? settings.aiModel : AI_MODELS[0];
 
-  const cacheKey = [tool, model, x.lang, x.ui, x.tone, x.intent, text].join("\u0001");
+  const cacheKey = [tool, model, x.lang, x.ui, x.tone, x.intent, x.kind, text].join("\u0001");
   const hit = !extra.fresh && aiCache.get(cacheKey);
   if (hit) return hit;
 

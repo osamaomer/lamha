@@ -660,7 +660,8 @@ async function showCard(kind, cap) {
   const wc = cardWin.webContents;
   await cardReady;
   cardSource = cap;
-  if (!cap.text) { // nothing selected: a short hint next to the mouse
+  // nothing selected: the writing shortcut opens "Write new" (Insert pastes at the app's cursor); lookup shows a hint
+  if (!cap.text && kind !== "write") { // a short hint next to the mouse
     placeCardWin({ toast: true });
     cardWin.setIgnoreMouseEvents(true);
     cardWin.showInactive();
