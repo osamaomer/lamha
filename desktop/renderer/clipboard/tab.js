@@ -56,6 +56,7 @@
     if (!pane.contains(listRoot)) pane.replaceChildren(listRoot, detail, foot);
     updateClear();
     if (openId) return openDetail(openId);
+    if (focus) list.enter(); // the tab was just opened: rows come in one after another
     await list.reload();
     if (focus) list.focus();
   }
@@ -155,7 +156,15 @@
       labelEdit,
       tools
     );
-    if (first) backBtn.focus();
+    if (first) {
+      backBtn.focus();
+      slideIn(detail, 1); // the item's page comes in from the end side, the list returns from the start side
+    }
+  }
+
+  function slideIn(el, sign) {
+    const rtl = getComputedStyle(el).direction === "rtl";
+    LamhaMotion.play(el, [{ opacity: 0, transform: `translateX(${sign * (rtl ? -18 : 18)}px)` }, { opacity: 1, transform: "none" }], { duration: 200 });
   }
 
   /** تجاهل هذا البرنامج: add it to the excluded programs, then offer to delete what was already copied from it. */
@@ -179,6 +188,7 @@
     clearBtn.hidden = false;
     detail.hidden = true;
     listRoot.hidden = false;
+    slideIn(listRoot, -1);
     list.reload();
     list.focus();
   }

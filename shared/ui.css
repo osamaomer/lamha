@@ -122,7 +122,8 @@ kbd {
 .banner b { display: block; font-size: 13px; }
 .banner > div { flex: 1; }
 
-/* the switch slide, fades and spinners: off when the system asks for less motion (as on the card) */
+/* the switch slide, fades and spinners: off when the system asks for less motion (as on the card) — until
+   shared/motion.js has applied the Animations setting, which decides from then on (data-motion) */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  :root:not([data-motion]) *, :root:not([data-motion]) *::before, :root:not([data-motion]) *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }

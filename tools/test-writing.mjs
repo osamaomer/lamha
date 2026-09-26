@@ -456,6 +456,36 @@ test("words named like Object's properties (constructor, __proto__) are ordinary
   assert.equal(env.ctx.LamhaAI.isCategory("articles"), true);
 });
 
+test("review streak: days in a row count up once a day, a missed day starts again", async () => {
+  const cards = {};
+  for (const q of ["a", "b"]) cards[q] = { ...newCard, q, tr: "x" };
+  const yesterday = new Date(Date.now() - DAYMS).toDateString();
+  const env = makeEnv({ fetchImpl: async () => json(200, {}), local: { cards, cardsImported: true, cardStats: { reviewDay: yesterday, streak: 4 } } });
+  assert.equal((await env.send({ type: "reviewQueue" })).streak, 0, "nothing reviewed today yet");
+  await env.send({ type: "reviewGrade", key: "a", grade: "good" });
+  assert.equal((await env.send({ type: "reviewQueue" })).streak, 5);
+  await env.send({ type: "reviewGrade", key: "b", grade: "good" });
+  assert.equal((await env.send({ type: "reviewQueue" })).streak, 5, "once per day");
+  assert.equal(env.browser.storage.local.data.cardStats.newSeen, 2, "the daily new-word count is kept alongside");
+
+  const gap = makeEnv({ fetchImpl: async () => json(200, {}), local: { cards: { a: { ...newCard, q: "a" } }, cardsImported: true, cardStats: { reviewDay: new Date(Date.now() - 3 * DAYMS).toDateString(), streak: 9 } } });
+  await gap.send({ type: "reviewGrade", key: "a", grade: "again" });
+  assert.equal((await gap.send({ type: "reviewQueue" })).streak, 1);
+});
+
+test("lookup milestones: the 10th word looked up says so (once), the cached result stays clean", async () => {
+  const google = recorder(() => json(200, { src: "en", sentences: [{ trans: "مرن", orig: "resilient" }] }));
+  const env = makeEnv({ fetchImpl: google.fetchImpl, local: { cardsImported: true, lookupCount: 9 }, sync: { dictSource: "online", translateDefinitions: false } });
+  const first = await env.send({ type: "lookup", text: "resilient" });
+  assert.equal(first.data.milestone, 10);
+  const again = await env.send({ type: "lookup", text: "resilient" });
+  assert.equal(again.data.milestone, undefined, "the cached result has no milestone");
+  assert.equal(env.browser.storage.local.data.lookupCount, 10, "cached lookups aren't counted again");
+  const noHistory = makeEnv({ fetchImpl: google.fetchImpl, local: { lookupCount: 9 }, sync: { dictSource: "online", saveHistory: false } });
+  assert.equal((await noHistory.send({ type: "lookup", text: "resilient" })).data.milestone, undefined, "history off: not counted");
+  assert.equal(noHistory.browser.storage.local.data.lookupCount, 9);
+});
+
 test("a word lookup adds a card with its sentence and in-context meaning", async () => {
   const google = recorder(url => {
     if (url.includes("/translate_a/single")) {

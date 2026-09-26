@@ -133,6 +133,7 @@
     const style = document.createElement("style");
     style.textContent = LAMHA_CSS;
     root = h("div", { class: "root" + (LamhaI18n.lang() === "en" ? " en" : "") });
+    LamhaMotion.attach(root); // data-motion: the Animations setting (never on the page's own elements)
     shadow.append(style, root);
     (document.documentElement || document.body).appendChild(host);
     applyTheme();
@@ -150,10 +151,11 @@
   const fromUs = e => host && e.composedPath && e.composedPath().includes(host);
 
   let toastTimer;
-  function toast(text) {
+  /** `ok`: a done-with-success message (replaced, inserted) gets a check mark. */
+  function toast(text, ok = false) {
     ensureHost();
     const old = root.querySelector(".toast"); if (old) old.remove();
-    const t = h("div", { class: "toast", role: "status" }, text);
+    const t = h("div", { class: "toast", role: "status" }, ok && h("span", { class: "ok-i" }, icon("check", 15, 2.6)), text);
     root.append(t);
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.remove(), 1400);
@@ -364,7 +366,7 @@
     if (!info) return;
     ensureHost();
     hidePill();
-    closeCard({ restore: false });
+    closeCard({ restore: false, animate: false });
     if (focus) returnFocus = document.activeElement;
     if (info.context === undefined) info.context = info.range && isWordish(info.text) ? contextOf(info.range) : null;
     cardInfo = info;
@@ -393,6 +395,9 @@
     const cx = multiLine && lastPointer ? lastPointer.x : box.left + box.width / 2;
     const left = Math.max(8, Math.min(Math.round(cx - w / 2), innerWidth - w - 8));
     card.style.left = left + "px";
+    // it grows out of (and, when sent off, back into) the point it was asked for
+    const px = cardInfo.point ? cardInfo.point.x : lastPointer ? lastPointer.x : cx;
+    card.style.transformOrigin = `${Math.round(Math.max(0, Math.min(w, px - left)))}px ${side === "below" ? "0" : "100%"}`;
     if (side === "below") {
       const top = Math.max(8, Math.min(box.bottom + 10, innerHeight - 180));
       card.style.top = top + "px"; card.style.bottom = "auto";
@@ -406,18 +411,31 @@
 
   let returnFocus = null; // where the keyboard was before a card opened from the keyboard
   /** `restore`: give the focus back to the page if it was in the card (Esc, ✕); not when another card replaces it
-   *  or a click elsewhere closed it. */
-  function closeCard({ restore = true } = {}) {
+   *  or a click elsewhere closed it. `animate`: a short exit (not when another card takes its place); `send`: the
+   *  card shrinks back into its point (Replace / Insert). Returns a promise that settles once the card is gone. */
+  function closeCard({ restore = true, animate = true, send = false } = {}) {
     reqId++;
-    const had = !!card;
+    const old = card;
     const back = returnFocus;
-    const focusedInCard = had && shadow && !!shadow.activeElement;
+    const focusedInCard = !!old && shadow && !!shadow.activeElement;
     if (restore) returnFocus = null;
-    if (card) card.remove();
     if (restore && focusedInCard && back && back.isConnected) { try { back.focus({ preventScroll: true }); } catch (_) { /* not focusable any more */ } }
     card = null; cardInfo = null; bodyEl = null; stack = [];
+    if (!old) return Promise.resolve();
+    let gone = Promise.resolve();
+    if (animate && LamhaMotion.any()) {
+      old.style.pointerEvents = "none";
+      old.setAttribute("aria-hidden", "true");
+      const up = old.classList.contains("above");
+      gone = LamhaMotion.exit(old, send
+        ? [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(.55)" }]
+        : [{ opacity: 1, transform: "none" }, { opacity: 0, transform: `translateY(${up ? 4 : -4}px) scale(.97)` }],
+      { duration: send ? 150 : 110 });
+    }
+    gone = gone.then(() => old.remove());
     // desktop app: tell it when the card is really gone (not replaced by another one) so it hides its window
-    if (had && window.lamhaDesktop) setTimeout(() => { if (!card) window.lamhaDesktop.closed(); }, 0);
+    if (window.lamhaDesktop) gone.then(() => { if (!card) window.lamhaDesktop.closed(); });
+    return gone;
   }
   function closeAll() { hidePill(); closeCard(); }
 
@@ -489,13 +507,24 @@
 
   /* ----- lookup ----- */
 
+  /** Runs `fn` (which redraws the card) so the card glides to its new height instead of jumping. */
+  function morph(fn) {
+    const c = card, before = c ? c.getBoundingClientRect().height : 0;
+    const out = fn();
+    if (c && card === c) LamhaMotion.resize(c, before, { duration: 220 });
+    return out;
+  }
+
   async function load(text, context = null) {
     const token = ++reqId;
     renderSkeleton(text);
+    card.classList.add("thinking"); // the Lamha mark blinks until the answer is here
     const res = await send({ type: "lookup", text, context });
     if (token !== reqId || !card) return;
-    if (!res || !res.ok) { renderError(text, res && res.error); return; }
-    const pending = render(res.data);
+    card.classList.remove("thinking");
+    if (!res || !res.ok) { morph(() => renderError(text, res && res.error)); return; }
+    const pending = morph(() => render(res.data));
+    if (res.data.milestone) LamhaMotion.burst(card.querySelector(".milestone"), { layer: root });
     if (settings.autoSpeak && res.data.type === "word") speak(res.data.query, res.data.src, null);
     if (pending.length) fillGlosses(pending, token);
     if (settings.dictSource !== "offline" && settings.showWikipedia && res.data.type === "word" && res.data.src === "en" && res.data.query.length > 2) {
@@ -540,6 +569,7 @@
     const b = frame(d);
     const pending = [];
     const tDir = dirOf(d.tl), sDir = dirOf(d.src);
+    if (d.milestone) b.append(h("div", { class: "milestone", role: "status" }, L("ms.lookups", { n: d.milestone })));
 
     if (d.type === "word") {
       const speakBtn = h("button", { class: "speak", title: L("c.listenPron"), "aria-label": L("c.listenPron"), onclick: e => speak(d.query, d.src, e.currentTarget) }, icon("speak", 17));
@@ -723,14 +753,24 @@
     if (i < 0 || i >= writeTools.length) return;
     e.preventDefault();
     e.stopPropagation(); // the page never sees the number
+    flashChip(writeTools[i]);
     pickTool(writeTools[i]);
+  }
+
+  /** The chip whose number was pressed lights up for a moment, so it's clear which tool the key picked. */
+  function flashChip(tool) {
+    const chip = card && card.querySelector(`.chip.tool[data-tool="${tool}"]`);
+    if (!chip) return;
+    chip.classList.add("hit");
+    setTimeout(() => chip.classList.remove("hit"), 380);
+    LamhaMotion.play(chip, [{ transform: "none" }, { transform: "scale(1.14)", offset: 0.35 }, { transform: "none" }], { duration: 280, easing: "ease-out", fill: "none" });
   }
 
   function openWriteCard(info, { focus = false, tool = null } = {}) {
     if (!info) return;
     ensureHost();
     hidePill();
-    closeCard({ restore: false });
+    closeCard({ restore: false, animate: false });
     if (focus) returnFocus = document.activeElement;
     if (!info.raw) info.raw = info.text;
     cardInfo = info;
@@ -791,12 +831,16 @@
       h("div", { class: "sk", style: { height: "14px", width: "80%", marginTop: "8px" } }),
       h("div", { class: "sk", style: { height: "14px", width: "60%", marginTop: "8px" } })
     );
+    card.classList.add("thinking");
     const res = await send({ type: "ai", tool, text: tool === "compose" ? extra.intent : info.raw, extra });
     if (token !== reqId || !card) return;
-    if (!res || !res.ok) { writeOut.replaceChildren(aiError(res && res.error, () => runTool(tool, extra))); return; }
-    if (tool === "proofread") renderProofread(res.data, info);
-    else renderAiText(res.data.text || "", tool, extra);
-    placeCard();
+    card.classList.remove("thinking");
+    morph(() => {
+      if (!res || !res.ok) writeOut.replaceChildren(aiError(res && res.error, () => runTool(tool, extra)));
+      else if (tool === "proofread") renderProofread(res.data, info);
+      else renderAiText(res.data.text || "", tool, extra);
+      placeCard();
+    });
   }
 
   function aiError(code, retry) {
@@ -825,10 +869,9 @@
   }
 
   function renderAiText(text, tool, extra) {
-    writeOut.replaceChildren(
-      h("div", { class: "w-text", dir: "auto" }, text),
-      resultActions(text, tool, extra)
-    );
+    const box = h("div", { class: "w-text", dir: "auto" }, text);
+    writeOut.replaceChildren(box, resultActions(text, tool, extra));
+    LamhaMotion.typeIn(box); // word by word, full animations only
   }
 
   function renderProofread(data, info) {
@@ -836,11 +879,15 @@
     const issues = Array.isArray(data.issues) ? data.issues : [];
     const corrected = String(data.corrected || "").trim();
     if (!issues.length || !corrected || corrected === src) {
-      writeOut.replaceChildren(h("div", { class: "w-ok" }, icon("check", 16, 2.6), L("write.noErrors")));
+      const ok = h("div", { class: "w-ok" }, icon("check", 16, 2.6), L("write.noErrors"));
+      writeOut.replaceChildren(ok);
+      requestAnimationFrame(() => LamhaMotion.burst(ok, { layer: root, count: 10, glyphs: ["✓", "✦", "•"] }));
       return;
     }
+    const diff = h("div", { class: "w-text", dir: "ltr" }, LamhaAI.diffNodes(h, src, corrected));
+    LamhaMotion.sequence(diff, "del, ins"); // each mistake struck through, then its fix
     writeOut.replaceChildren(
-      h("div", { class: "w-text", dir: "ltr" }, LamhaAI.diffNodes(h, src, corrected)),
+      diff,
       resultActions(corrected, "proofread", {}),
       h("div", { class: "sec" },
         h("div", { class: "sec-h" }, L("c.corrections", { n: issues.length })),
@@ -982,9 +1029,13 @@
     const info = cardInfo;
     const raw = info.raw || "";
     const full = raw.match(/^\s*/)[0] + text + raw.match(/\s*$/)[0]; // keep the spaces around the selection
-    closeCard();
-    if (replaceIn(info.editable, full)) toast(inserting ? L("c.inserted") : L("c.replaced"));
-    else copyText(text).then(() => toast(L("c.replaceFailed")));
+    const gone = closeCard({ send: true }); // the card shrinks back into the text it came from
+    // desktop app: its window hides for the paste, so the card finishes leaving first (≤150 ms, none when animations are off)
+    const ready = info.editable && info.editable.kind === "external" ? gone : Promise.resolve();
+    ready.then(() => {
+      if (replaceIn(info.editable, full)) toast(inserting ? L("c.inserted") : L("c.replaced"), true);
+      else copyText(text).then(() => toast(L("c.replaceFailed")));
+    });
   }
 
   function summarizePage() {

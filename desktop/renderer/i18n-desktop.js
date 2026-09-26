@@ -19,6 +19,7 @@
     "d.trayWrite": ["كتابة ✨", "Write ✨"],
     "d.traySettings": ["الإعدادات", "Settings"],
     "d.trayLogin": ["التشغيل مع Windows", "Start with Windows"],
+    "d.trayMotion": ["الحركة", "Animations"],
     "d.trayQuit": ["خروج", "Quit"],
     "d.pause": ["إيقاف الحافظة مؤقتًا", "Pause clipboard history"],
     "d.pause15": ["١٥ دقيقة", "15 minutes"],

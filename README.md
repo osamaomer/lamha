@@ -91,7 +91,13 @@ Other features:
   - Recent lookups.
 - **Three trigger modes**: floating button (default), instant, or Alt+select only.
 - **Arabic or English interface:** Settings → المظهر → لغة الواجهة (Appearance → Interface language). *Automatic* uses Arabic on an Arabic system and English otherwise. In English, the layout runs left to right, and proofreading explanations, mistake tips and summaries are in English too; translations still go to your chosen translation language. Existing users keep Arabic when they update.
-- Light and dark themes that follow the system, right-to-left (Arabic) and left-to-right (English) layouts, reduced-motion support and keyboard focus styles.
+- **Animations you can switch:** Settings → المظهر → الحركة (Appearance → Animations), or the tray menu in the Windows app.
+  - **Full:** the card grows out of the word you picked and leaves smoothly. Proofreading strikes each mistake before showing its fix, and AI answers appear word by word. Tabs slide, and review cards flip and fly off the way you graded them. There are also small celebrations: a finished deck, a review streak, your 100th word.
+  - **Subtle:** short, calm fades and slides only.
+  - **Off:** nothing moves.
+  - **Automatic** (default): Full, but Subtle on a slower PC (no graphics acceleration, 4 GB of memory or less, or 2 cores or fewer), and Off when Windows' *Animation effects* is off.
+  - Every animation uses only movement and fading, never makes you wait for a result, and keys work during it. A preview in Settings shows each level.
+- Light and dark themes that follow the system, right-to-left (Arabic) and left-to-right (English) layouts, and keyboard focus styles.
 - Works inside iframes. The UI lives in a closed Shadow DOM, so websites can't break its styling.
 
 ## Install
@@ -189,6 +195,7 @@ content/page-translator.js  Whole-page translation engine
 popup/                   Toolbar popup
 options/                 Settings + welcome page
 shared/ui.css            Design tokens shared by popup and options
+shared/motion.js, motion.css  The Animations setting (full / subtle / off) and the helpers and page animations it drives
 shared/lamha-ai.js       Mistake categories, AI error messages, word diff (background, content, popup, options)
 shared/i18n.js           Interface language (Arabic / English): the setting, and the strings shared by every page
 options/i18n-options.js  The settings page's strings (desktop/renderer/i18n-desktop.js has the Windows app's)

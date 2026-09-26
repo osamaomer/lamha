@@ -33,6 +33,7 @@ const SECRET_KEYS = ["aiKey", "geminiKey"];
 
 function broadcast(changes, areaName) {
   for (const f of storageListeners) { try { f(changes, areaName); } catch (err) { console.error(err); } }
+  if (areaName === "sync" && changes.motion) updateTray(); // the Animations choice is also in the tray menu
   const forCard = withoutSecrets(changes);
   for (const w of BrowserWindow.getAllWindows()) {
     if (w.isDestroyed()) continue;
@@ -145,6 +146,30 @@ function startCore() {
   } else {
     listeners.startup.forEach(f => f());
   }
+}
+
+/**
+ * What "Automatic" animations means on this PC (shared/motion.js reads it): "subtle" without graphics acceleration
+ * or on a weak machine (4 GB of memory or less, 2 cores or fewer), "full" otherwise. Windows' own "Animation effects"
+ * switch is seen by the pages directly (prefers-reduced-motion) and turns animations off.
+ * Checked a few seconds after startup: until the GPU process is up, Electron reports every PC as software-only.
+ * Until then the hint saved last time applies.
+ */
+function updateMotionHint() {
+  let hint = "full";
+  try {
+    const gpu = app.getGPUFeatureStatus() || {};
+    const software = !/^enabled/.test(String(gpu.gpu_compositing || "enabled"));
+    const weak = os.totalmem() <= 4.5 * 1024 ** 3 || os.cpus().length <= 2;
+    if (software || weak) hint = "subtle";
+  } catch (_) { /* keep full */ }
+  if (stores.local.data.motionHint !== hint) stores.local.set({ motionHint: hint });
+  return hint;
+}
+function watchMotionHint() {
+  setTimeout(updateMotionHint, 6000).unref();
+  // the GPU process can crash and come back without acceleration
+  app.on("child-process-gone", (_e, d) => { if (d && d.type === "GPU") setTimeout(updateMotionHint, 4000).unref(); });
 }
 
 /* ---------------- IPC from the pages ---------------- */
@@ -485,10 +510,13 @@ let panelWin = null, panelReady = null, panelTarget = 0, panelShownAt = 0;
 /** Styles and scripts of the clipboard UI; the shared/ ones come from the extension folder, like the card's. */
 async function injectClipboardUi(wc, entry, { standalone = false } = {}) {
   const read = f => fs.readFileSync(f, "utf8");
-  if (standalone) await wc.insertCSS(read(path.join(EXT_DIR, "shared", "ui.css"))); // popup.html has these already
+  if (standalone) { // popup.html has these already
+    await wc.insertCSS(read(path.join(EXT_DIR, "shared", "ui.css")));
+    await wc.insertCSS(read(path.join(EXT_DIR, "shared", "motion.css")));
+  }
   await wc.insertCSS(read(path.join(CLIP_UI, "clipboard.css")));
   const scripts = [
-    ...(standalone ? [path.join(EXT_DIR, "shared", "i18n.js"), path.join(EXT_DIR, "shared", "lamha-ai.js")] : []),
+    ...(standalone ? ["i18n.js", "lamha-ai.js", "motion.js"].map(f => path.join(EXT_DIR, "shared", f)) : []),
     path.join(__dirname, "renderer", "i18n-desktop.js"),
     path.join(EXT_DIR, "shared", "arabic-normalize.js"), path.join(CLIP_UI, "clip-list.js"), path.join(CLIP_UI, "clip-actions.js"), path.join(CLIP_UI, entry)
   ];
@@ -595,7 +623,7 @@ function createCardWin() {
   // the same scripts Firefox injects into web pages, in the same order
   const wc = cardWin.webContents;
   cardReady = new Promise(resolve => wc.once("did-finish-load", async () => {
-    for (const f of ["shared/i18n.js", "shared/lamha-ai.js", "content/styles.js", "content/page-translator.js", "content/content.js"]) {
+    for (const f of ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "content/styles.js", "content/page-translator.js", "content/content.js"]) {
       await wc.executeJavaScript(fs.readFileSync(path.join(EXT_DIR, f), "utf8") + "\n;true");
     }
     resolve();
@@ -750,6 +778,7 @@ function trayMenu() {
     { label: T("d.trayReview", { n: badgeCount }), click: () => showMain("review") },
     { label: T("d.trayWrite"), click: () => showMain("write") },
     ...pauseMenu(),
+    motionMenu(),
     { label: T("d.traySettings"), click: () => openOptions("") },
     updateMenu(),
     { type: "separator" },
@@ -765,6 +794,18 @@ function trayMenu() {
     { type: "separator" },
     { label: T("d.trayQuit"), click: () => { quitting = true; app.quit(); } }
   ]);
+}
+
+/** الحركة ▸ تلقائية / كاملة / خفيفة / متوقفة: the same choice as Settings → Appearance → Animations. */
+function motionMenu() {
+  const current = stores.sync.data.motion || "auto";
+  return {
+    label: T("d.trayMotion"),
+    submenu: ["auto", "full", "subtle", "off"].map(v => ({
+      label: T("motion." + v), type: "radio", checked: current === v,
+      click: () => stores.sync.set({ motion: v })
+    }))
+  };
 }
 
 /** إيقاف الحافظة مؤقتًا ▸ ١٥ دقيقة / ساعة / حتى الاستئناف — or استئناف while paused. */
@@ -839,13 +880,14 @@ if (!gotLock) {
     globalThis.LamhaI18n.init({ onChange: () => { updateTray(); if (mainWin && !mainWin.isDestroyed()) mainWin.setTitle(T("common.lamha")); } });
     startUpdates();
     startContextHelper();
+    watchMotionHint();
     if (!SMOKE) { createTray(); if (selection) registerHotkeys(); }
     if (SMOKE) {
       return require("./scripts/smoke-test")({
         app, mainWin, openOptions, getOptionsWin: () => optionsWin, stores, send: msg => messageHandler(msg, {}),
         desktop: { onHotkey, uiaContext, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
           openPanel, hidePanel, getPanelWin: () => panelWin, panelReady: () => panelReady,
-          pauseClipboard, resumeClipboard, runClipExpiry, trayTooltip }
+          pauseClipboard, resumeClipboard, runClipExpiry, trayTooltip, updateMotionHint }
       });
     }
   }).catch(err => {

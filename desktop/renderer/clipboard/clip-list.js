@@ -80,6 +80,7 @@ var LamhaClipList = (() => {
   function create({ root, mode, onActivate, onActions, onEscape }) {
     const id = "lc" + ++uid;
     let query = "", filter = "all", shown = PAGE, items = [], total = 0, sel = 0, loading = null, reloadAgain = false;
+    let entrance = false, pinnedNow = null; // motion: rows come in one after another on opening; a new pin drops in
 
     const search = h("input", {
       class: "lc-search", type: "search", dir: "auto", placeholder: L("d.search"), "aria-label": L("d.searchLabel"),
@@ -127,7 +128,15 @@ var LamhaClipList = (() => {
     }
 
     function render() {
-      list.replaceChildren(...items.map((it, i) => row(it, i)));
+      const rows = items.map((it, i) => row(it, i));
+      if (entrance) { list.replaceChildren(...rows); LamhaMotion.stagger(rows, { each: 15, max: 8, duration: 180 }); }
+      else LamhaMotion.flip(list, () => list.replaceChildren(...rows)); // rows glide to their new places (search, pin)
+      entrance = false;
+      if (pinnedNow) {
+        const pin = list.querySelector(`[data-id="${CSS.escape(pinnedNow)}"] .lc-pin`);
+        if (pin) LamhaMotion.play(pin, [{ opacity: 0, transform: "translateY(-10px) rotate(-25deg) scale(1.3)" }, { opacity: 1, transform: "none" }], { duration: 360, easing: "cubic-bezier(.3,1.5,.5,1)", fullOnly: true });
+        pinnedNow = null;
+      }
       more.hidden = items.length >= total;
       empty.hidden = items.length > 0;
       empty.textContent = query ? L("d.noResults") : filter === "pinned" ? L("d.noPinned") : L("d.empty");
@@ -155,8 +164,15 @@ var LamhaClipList = (() => {
         )
       );
       li.addEventListener("mousemove", () => { if (sel !== i) { sel = i; markSelected(false); } });
-      li.addEventListener("click", () => { sel = i; markSelected(false); onActivate(it, { plain: false }); });
+      li.addEventListener("click", () => { sel = i; markSelected(false); activate(it, { plain: false }); });
       return li;
+    }
+
+    /** Panel: the chosen row flashes before the panel closes to paste it (full animations; ~110 ms). */
+    async function activate(it, opts) {
+      const li = mode === "panel" && list.querySelector(`[data-id="${CSS.escape(it.id)}"]`);
+      if (li) await LamhaMotion.exit(li, [{ transform: "none", filter: "none" }, { transform: "scale(.97)", filter: "brightness(1.12)" }], { duration: 110, easing: "ease-out", fullOnly: true });
+      onActivate(it, opts);
     }
 
     function markSelected(scroll = true) {
@@ -179,23 +195,34 @@ var LamhaClipList = (() => {
     async function togglePin(it) {
       const r = await lamhaClipboard.setPinned(it.id, !it.pinned);
       if (!r.ok) toast(r.error === "pin_limit" ? L("d.pinLimit") : L("d.pinFailed"));
-      else toast(it.pinned ? L("d.unpinned") : L("d.pinnedToast"));
+      else { toast(it.pinned ? L("d.unpinned") : L("d.pinnedToast")); if (!it.pinned) pinnedNow = it.id; }
       reload();
     }
 
     async function remove(it) {
-      const r = await lamhaClipboard.remove(it.id);
-      if (!r.ok) return;
+      // the row slides away while the request runs; the rows below then glide up (flip in render)
+      const li = list.querySelector(`[data-id="${CSS.escape(it.id)}"]`);
+      const end = li && getComputedStyle(li).direction === "rtl" ? -1 : 1;
+      const [r] = await Promise.all([
+        lamhaClipboard.remove(it.id),
+        li ? LamhaMotion.exit(li, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: `translateX(${24 * end}px)` }], { duration: 140 }) : null
+      ]);
+      if (!r.ok) { if (li) li.getAnimations().forEach(a => a.cancel()); return; }
       toast(L("d.deleted"), { label: L("d.undo"), run: () => lamhaClipboard.restore(it.id).then(reload) });
       reload();
     }
 
-    /** A short message at the bottom; with an action (undo) it stays 5 s. */
+    /** A short message at the bottom; with an action (undo) it stays 5 s, with a bar showing the time left. */
     function toast(text, action) {
+      const ms = action ? UNDO_MS : 1600;
       const t = h("div", { class: "lc-toast", role: "status" }, h("span", null, text),
-        action && h("button", { type: "button", class: "lc-undo", onclick: () => { t.remove(); action.run(); search.focus(); } }, action.label));
+        action && h("button", { type: "button", class: "lc-undo", onclick: () => { t.remove(); action.run(); search.focus(); } }, action.label),
+        action && h("span", { class: "flash-bar", "aria-hidden": "true", style: `--undo:${ms}ms` }));
       toastBox.replaceChildren(t);
-      setTimeout(() => t.remove(), action ? UNDO_MS : 1600);
+      setTimeout(() => {
+        if (!t.isConnected) return;
+        LamhaMotion.exit(t, [{ opacity: 1 }, { opacity: 0, transform: "translateY(6px)" }], { duration: 140 }).then(() => t.remove());
+      }, ms);
     }
 
     function onKey(e) {
@@ -205,12 +232,12 @@ var LamhaClipList = (() => {
       const ctrl = e.ctrlKey && !e.altKey && !e.metaKey;
       if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); move(e.key === "ArrowDown" ? 1 : -1); }
       else if (e.key === "PageDown" || e.key === "PageUp") { e.preventDefault(); move(e.key === "PageDown" ? 6 : -6); }
-      else if (e.key === "Enter" && !ctrl) { if (it) { e.preventDefault(); onActivate(it, { plain: e.shiftKey }); } }
+      else if (e.key === "Enter" && !ctrl) { if (it) { e.preventDefault(); activate(it, { plain: e.shiftKey }); } }
       else if (ctrl && (e.code === "KeyP" || e.key === "p" || e.key === "P")) { e.preventDefault(); if (it) togglePin(it); }
       else if (ctrl && /^Digit[1-9]$/.test(e.code) && mode === "panel") {
         e.preventDefault();
         const n = Number(e.code.slice(5)) - 1;
-        if (items[n]) { sel = n; markSelected(); onActivate(items[n], { plain: e.shiftKey }); }
+        if (items[n]) { sel = n; markSelected(); activate(items[n], { plain: e.shiftKey }); }
       }
       else if (e.key === "Delete" && it && (!inSearch || search.selectionStart === search.value.length)) { e.preventDefault(); remove(it); }
       else if (onActions && it && ((e.key === "Tab" && !e.shiftKey) || (e.key === "ArrowRight" && !search.value))) { e.preventDefault(); onActions(it); }
@@ -227,7 +254,9 @@ var LamhaClipList = (() => {
       toast,
       focus: () => search.focus(),
       /** Fresh state for a new opening of the panel. */
-      reset() { search.value = ""; query = ""; shown = PAGE; sel = 0; setFilter("all"); },
+      reset() { search.value = ""; query = ""; shown = PAGE; sel = 0; entrance = true; setFilter("all"); },
+      /** The next redraw brings the rows in one after another instead of gliding them (a fresh opening). */
+      enter() { entrance = true; },
       get selected() { return items[sel] || null; }
     };
   }

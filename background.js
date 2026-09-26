@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS = {
   translateDefinitions: true,
   autoSpeak: false,
   theme: "auto", // "auto" | "light" | "dark"
+  motion: "auto", // animations: "auto" | "full" | "subtle" | "off" — see shared/motion.js
   dictSource: "local", // "local" (offline dictionary first) | "offline" (never go online for words) | "online"
   useContext: true, // send the sentence around a selected word so the right meaning is chosen
   saveHistory: true,
@@ -243,7 +244,25 @@ async function lookup(rawText, opts = {}) {
   }
   // automatic cards are a record of lookups too: "Keep a history" off means none (🔖 still adds one by hand)
   if (settings.saveHistory && settings.cardsAuto && learnable && result.src === "en") addCard(cardFromLookup(result, text, context));
+  if (settings.saveHistory && learnable) {
+    const milestone = await countLookup();
+    if (milestone) return { ...result, milestone }; // a copy: the cached result stays without it
+  }
   return result;
+}
+
+/** Words looked up so far (storage.local lookupCount); returns the count when it just reached a milestone. */
+const MILESTONES = [10, 50, 100, 250, 500, 1000, 2000, 5000, 10000];
+let countQueue = Promise.resolve();
+function countLookup() {
+  const run = countQueue.then(async () => {
+    const { lookupCount = 0 } = await browser.storage.local.get("lookupCount");
+    const n = lookupCount + 1;
+    await browser.storage.local.set({ lookupCount: n });
+    return MILESTONES.includes(n) ? n : 0;
+  });
+  countQueue = run.catch(() => {});
+  return run.catch(() => 0);
 }
 
 const escHTML = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -936,7 +955,8 @@ async function reviewQueue() {
     return {
       queue,
       counts: { due: due.length, fresh: fresh.length, total: all.length, learned: all.filter(c => c.interval >= 21).length },
-      nextDue: later.length ? Math.min(...later) : 0
+      nextDue: later.length ? Math.min(...later) : 0,
+      streak: deck.stats.reviewDay === today() ? deck.stats.streak || 1 : 0 // days in a row with a review, counting today
     };
   });
 }
@@ -947,8 +967,12 @@ async function reviewGrade(key, grade) {
     const c = deck.cards[key];
     if (!c) return;
     if (!c.last) { // first review of a new card counts toward today's new words
-      if (deck.stats.day !== today()) deck.stats = { day: today(), newSeen: 0 };
+      if (deck.stats.day !== today()) deck.stats = { ...deck.stats, day: today(), newSeen: 0 };
       deck.stats.newSeen = (deck.stats.newSeen || 0) + 1;
+    }
+    if (deck.stats.reviewDay !== today()) { // the review streak: yesterday too → one more day, otherwise it starts again
+      const yesterday = new Date(Date.now() - DAY).toDateString();
+      deck.stats = { ...deck.stats, streak: deck.stats.reviewDay === yesterday ? (deck.stats.streak || 0) + 1 : 1, reviewDay: today() };
     }
     deck.cards[key] = schedule(c, grade);
     deck.dirty = true;

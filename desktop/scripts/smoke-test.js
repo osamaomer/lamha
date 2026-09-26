@@ -104,6 +104,27 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
     return r.tabs.join(" · ");
   });
 
+  await check("animations: the windows follow the setting; Automatic uses this PC's hint", async () => {
+    await wait(Math.max(0, 3000 - process.uptime() * 1000)); // the GPU process reports its real state after startup
+    const hint = desktop.updateMotionHint();
+    assert(["full", "subtle"].includes(hint) && stores.local.data.motionHint === hint, "motionHint not written: " + hint);
+    const panel = desktop && desktop.getPanelWin && desktop.getPanelWin();
+    if (panel) await desktop.panelReady();
+    const levels = () => Promise.all([mainWin, ...(panel ? [panel] : [])].map(w => js(w, "document.documentElement.dataset.motion")));
+    for (const v of ["off", "subtle", "full"]) {
+      await stores.sync.set({ motion: v });
+      await wait(150);
+      const got = await levels();
+      assert(got.every(x => x === v), `${v}: windows have ${got.join(", ")}`);
+    }
+    assert(await js(mainWin, `!!document.querySelector(".tabs .tab-ink")`), "no tab highlight");
+    await stores.sync.set({ motion: "auto" });
+    await wait(150);
+    const auto = (await levels())[0];
+    assert(auto === hint || auto === "off", `auto: ${auto}, hint ${hint}`); // off when Windows' animation effects are off
+    return `hint ${hint}, Automatic → ${auto}`;
+  });
+
   await check("offline dictionary read from disk", async () => {
     await stores.sync.set({ dictSource: "offline" });
     const r = await send({ type: "lookup", text: "serendipity" });

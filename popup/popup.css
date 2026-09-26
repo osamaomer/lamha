@@ -49,6 +49,7 @@ textarea::placeholder { color: var(--faint); }
 .result .def .en { direction: ltr; text-align: left; font-family: var(--font-en); font-size: 12.5px; }
 .result .loading { color: var(--muted); font-size: 13px; }
 .result .error { color: var(--danger); font-size: 13px; }
+.milestone { margin-bottom: 8px; padding: 6px 10px; border-radius: 9px; background: rgba(245, 158, 11, .12); font-size: 12.5px; font-weight: 600; }
 
 /* mode tabs */
 .tabs { display: flex; background: var(--bg); border-radius: 9px; padding: 3px; margin-bottom: 10px; }

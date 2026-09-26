@@ -3,7 +3,8 @@
 "use strict";
 (async () => {
   // the panel's own markup (header, key hints) in the interface language; a change reloads it (main.js injects again)
-  await LamhaI18n.init({ onChange: () => location.reload() });
+  await Promise.all([LamhaI18n.init({ onChange: () => location.reload() }), LamhaMotion.ready]);
+  LamhaMotion.attach(document.documentElement);
   LamhaI18n.applyDom(document);
   const body = document.getElementById("cpBody");
   const foot = document.getElementById("cpFoot");
@@ -43,7 +44,7 @@
     banner.hidden = !(enabled && paused);
     foot.hidden = !enabled;
     body.replaceChildren(enabled ? listRoot : optIn);
-    if (enabled) { list.reset(); list.reload(); list.focus(); } else optIn.focusButton();
+    if (enabled) { list.reset(); list.focus(); } else optIn.focusButton(); // reset() reloads, with the rows coming in one by one
   }
 
   lamhaClipboard.onPanelOpen(state => show(state.enabled, state.paused));

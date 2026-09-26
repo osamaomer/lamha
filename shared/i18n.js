@@ -164,6 +164,16 @@ var LamhaI18n = (() => {
     "rv.totals": [v => `${arCount(v.total, "كلمة واحدة", "كلمتان", "كلمات", "كلمة")} · ${num(v.learned)} محفوظة`, v => `${enCount(v.total, "word", "words")} · ${num(v.learned)} learned`],
     "rv.doneTitle": ["أحسنت! لا توجد كلمات للمراجعة الآن 🎉", "Well done! Nothing to review right now 🎉"],
     "rv.next": [v => `المراجعة القادمة بعد ${v.span}.`, v => `Next review in ${v.span}.`],
+    "rv.streak": [
+      v => (v.n === 2 ? "🔥 يومان متتاليان من المراجعة" : v.n <= 10 ? `🔥 ${num(v.n)} أيام متتالية من المراجعة` : `🔥 ${num(v.n)} يومًا متتاليًا من المراجعة`),
+      v => `🔥 ${num(v.n)}-day review streak`
+    ],
+    "ms.lookups": [v => `🎉 هذه الكلمة رقم ${num(v.n)} تبحث عنها مع لمحة!`, v => `🎉 That's word number ${num(v.n)} you've looked up with Lamha!`],
+    // the Animations setting (Settings → Appearance, and the tray menu in the desktop app)
+    "motion.auto": ["تلقائية", "Automatic"],
+    "motion.full": ["كاملة", "Full"],
+    "motion.subtle": ["خفيفة", "Subtle"],
+    "motion.off": ["متوقفة", "Off"],
     "rv.emptyTitle": ["لا توجد كلمات بعد", "No words yet"],
     "rv.emptyText": ["ابحث عن كلمات إنجليزية في أي صفحة، وستظهر هنا لتراجعها وتحفظها.", "Look up English words on any page, and they'll show up here to review and learn."],
     "rv.newWord": ["كلمة جديدة", "New word"],

@@ -395,7 +395,63 @@ div.pos { display: block; margin-bottom: 6px; }
 .root.en .pos { font-family: var(--font-ui); }
 .root.en .def [dir="rtl"] { text-align: left; }
 
+/* a milestone ("word number 100") at the top of the card */
+.milestone {
+  margin: -2px 0 10px; padding: 7px 12px; border-radius: 10px;
+  background: rgba(245, 158, 11, .13); font-family: var(--font-ar); font-size: 12.5px; font-weight: 600; direction: rtl;
+}
+.root.en .milestone { direction: ltr; font-family: var(--font-ui); }
+.toast .ok-i { display: inline-block; vertical-align: -3px; margin-inline-end: 6px; color: #4ade80; }
+.root.dark .toast .ok-i { color: var(--ok); }
+
+/* ---------------- motion (shared/motion.js sets data-motion on .root: full | subtle | off) ---------------- */
+/* off: nothing moves, including the pill, the card, shimmer and spinners */
+.root[data-motion="off"] *, .root[data-motion="off"] *::before, .root[data-motion="off"] *::after { animation: none !important; transition: none !important; }
+
+/* full: the card grows out of the point where it was asked for (content.js sets transform-origin) */
+.root[data-motion="full"] .card { animation: lm-card-grow .24s cubic-bezier(.2,.9,.3,1.12) both; }
+@keyframes lm-card-grow { from { opacity: 0; transform: scale(.9); } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
+.root[data-motion="full"] .hero { animation: lm-rise .3s .04s cubic-bezier(.2,.9,.3,1.2) both; }
+.root[data-motion="full"] .body > .sec { animation: lm-rise .28s cubic-bezier(.2,.8,.2,1) both; }
+.root[data-motion="full"] .body > .sec:nth-of-type(1) { animation-delay: .08s; }
+.root[data-motion="full"] .body > .sec:nth-of-type(2) { animation-delay: .13s; }
+.root[data-motion="full"] .body > .sec:nth-of-type(n+3) { animation-delay: .18s; }
+.root[data-motion="full"] .w-out > * { animation: lm-rise .24s cubic-bezier(.2,.8,.2,1) both; }
+.root[data-motion="full"] .milestone { animation: lm-rise .3s cubic-bezier(.2,.9,.3,1.25) both; }
+@keyframes lm-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* the word in its sentence gets a highlighter stroke */
+.root[data-motion="full"] .hero .ctx mark, .root[data-motion="subtle"] .hero .ctx mark {
+  box-shadow: none; background: linear-gradient(var(--accent-soft), var(--accent-soft)) 0 100% / 0 .5em no-repeat;
+  animation: lm-marker .45s .28s cubic-bezier(.3,.7,.3,1) forwards;
+}
+.root[data-motion] .hero .ctx[dir="rtl"] mark { background-position: 100% 100%; }
+@keyframes lm-marker { to { background-size: 100% .5em; } }
+
+/* proofreading: each mistake struck through, then its fix (motion.js sequence()) */
+.root[data-motion="full"] .lm-seq del {
+  text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 58% / 0 1.5px no-repeat;
+  animation: lm-strike .22s ease-out calc(160ms + var(--i, 0) * 70ms) forwards;
+}
+.root[data-motion="full"] .lm-seq ins { display: inline-block; animation: lm-pop .26s cubic-bezier(.2,.9,.3,1.25) calc(160ms + var(--i, 0) * 70ms) both; }
+@keyframes lm-strike { to { background-size: 100% 1.5px; } }
+@keyframes lm-pop { from { opacity: 0; transform: translateY(4px) scale(.9); } to { opacity: 1; transform: none; } }
+
+/* AI answers word by word (motion.js typeIn()) */
+.lm-word { display: inline-block; animation: lm-word .22s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes lm-word { from { opacity: 0; transform: translateY(3px); filter: blur(2px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* the Lamha mark blinks while waiting for an answer */
+.root[data-motion="full"] .card.thinking .brand .dot { animation: lm-blink 1.4s ease-in-out infinite; }
+@keyframes lm-blink { 0%, 44%, 56%, 100% { transform: none; } 50% { transform: scaleY(.15); } }
+
+/* a tool picked with its number key lights up */
+.chip.tool.hit { box-shadow: 0 0 0 3px var(--accent-soft); }
+.root[data-motion] .chip.tool { transition: background .12s, box-shadow .25s; }
+.root[data-motion="full"] .btn:active, .root[data-motion="full"] .chip:active { transform: scale(.96); }
+
+/* before shared/motion.js has read the setting, follow the system's "less motion" wish */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .root:not([data-motion]) *, .root:not([data-motion]) *::before, .root:not([data-motion]) *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
 `;

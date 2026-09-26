@@ -3,7 +3,7 @@
 const DEFAULTS = {
   enabled: true, targetLang: "ar", triggerMode: "button", reverseForArabic: true, dictSource: "local", useContext: true,
   showInInputs: false, showWikipedia: true, translateDefinitions: true, autoSpeak: false,
-  theme: "auto", saveHistory: true, aiModel: "claude-opus-5", aiInInputs: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, disabledSites: []
+  theme: "auto", motion: "auto", saveHistory: true, aiModel: "claude-opus-5", aiInInputs: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, disabledSites: []
 };
 const BOOLS = ["useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "saveMistakes", "cardsAuto"];
 const { t, num } = LamhaI18n;
@@ -57,6 +57,9 @@ async function init() {
     $(k).checked = !!s[k];
     $(k).addEventListener("change", e => save({ [k]: e.target.checked }));
   });
+  await LamhaMotion.ready;
+  LamhaMotion.attach(document.documentElement);
+  initMotionSetting(s.motion);
   ["targetLang", "theme", "aiModel"].forEach(k => {
     $(k).value = s[k];
     $(k).addEventListener("change", e => save({ [k]: e.target.value }));
@@ -124,11 +127,22 @@ function buildToc() {
     a.textContent = s.querySelector("h2").textContent.replace(/[^\p{L}\p{N}\s()/-]/gu, "").trim(); // without the emoji
     return a;
   });
-  $("toc").replaceChildren(...links);
+  const ink = document.createElement("span"); // the highlight that slides to the section in view (shared/motion.css)
+  ink.className = "toc-ink";
+  ink.hidden = true;
+  $("toc").replaceChildren(ink, ...links);
+  $("toc").classList.add("has-ink");
+  const moveInk = a => {
+    const first = ink.hidden;
+    if (first) ink.style.transition = "none"; // appears in place, then slides from there
+    ink.hidden = false;
+    Object.assign(ink.style, { width: a.offsetWidth + "px", height: a.offsetHeight + "px", transform: `translate(${a.offsetLeft}px, ${a.offsetTop}px)` });
+    if (first) requestAnimationFrame(() => { ink.style.transition = ""; });
+  };
   const mark = id => links.forEach(a => {
     const on = a.hash === "#" + id;
     a.setAttribute("aria-current", String(on));
-    if (on) a.scrollIntoView({ block: "nearest", inline: "nearest" });
+    if (on) { a.scrollIntoView({ block: "nearest", inline: "nearest" }); moveInk(a); }
   });
   if (typeof IntersectionObserver !== "function") return;
   const io = tocObserver = new IntersectionObserver(entries => {
@@ -136,6 +150,34 @@ function buildToc() {
     if (top) mark(top.target.id);
   }, { rootMargin: "-64px 0px -60% 0px" });
   sections.forEach(s => io.observe(s));
+}
+
+/** Settings → Appearance → Animations, with a small card that shows what the chosen level looks like. */
+function initMotionSetting(value) {
+  const sel = $("motion");
+  sel.value = LamhaMotion.SETTINGS.includes(value) ? value : "auto";
+  const note = () => {
+    const lv = LamhaMotion.level();
+    $("mdNote").textContent = (sel.value === "auto" ? t("o.motionAutoIs", { level: t("motion." + lv) }) + " — " : "") + t("o.motionNote_" + lv);
+  };
+  const demo = () => {
+    const card = $("mdCard"), word = card.querySelector(".md-t");
+    if (LamhaMotion.full()) {
+      LamhaMotion.play(card, [{ opacity: 0, transform: "scale(.86) translateY(-6px)" }, { opacity: 1, transform: "none" }], { duration: 280, easing: "cubic-bezier(.2,.9,.3,1.25)" });
+    } else {
+      LamhaMotion.play(card, [{ opacity: 0, transform: "translateY(-3px)" }, { opacity: 1, transform: "none" }], { duration: 180 });
+    }
+    LamhaMotion.play(word, [{ opacity: 0, transform: "translateY(6px) scale(.95)" }, { opacity: 1, transform: "none" }], { duration: 260, delay: 120, fullOnly: true });
+  };
+  sel.addEventListener("change", () => {
+    LamhaMotion.use(sel.value); // at once on this page; the others follow the saved setting
+    save({ motion: sel.value });
+    note();
+    demo();
+  });
+  $("mdPlay").addEventListener("click", demo);
+  LamhaMotion.onChange(note); // e.g. Windows' animation effects switched meanwhile
+  LamhaMotion.ready.then(note);
 }
 
 /* Writing tools. Provider, Claude API key and Ollama model are kept in storage.local
@@ -182,6 +224,7 @@ async function renderReviewStats() {
 /* ---- mistake journal ---- */
 
 let journalCat = ""; // category whose tip and mistakes are shown ("" = all recent)
+let journalShown = false;
 const arNum = n => num(n);
 
 function el(tag, cls, ...kids) {
@@ -206,10 +249,15 @@ async function renderJournal() {
 
   if (journalCat && !j.counts[journalCat]) journalCat = "";
   const max = rows.length ? rows[0][1] : 1;
+  $("jBars").classList.toggle("lm-first", !journalShown && rows.length > 0); // bars grow and count up the first time only
+  const counting = !journalShown;
+  if (rows.length) journalShown = true;
   $("jBars").replaceChildren(...rows.map(([c, n]) => {
     const fill = el("span", "fill");
     fill.style.width = Math.max(4, Math.round((n / max) * 100)) + "%";
-    const b = el("button", "bar" + (c === journalCat ? " on" : ""), el("span", null, ...labelParts(LamhaAI.catLabel(c))), el("span", "meter", fill), el("span", "n", arNum(n)));
+    const count = el("span", "n", arNum(n));
+    if (counting) LamhaMotion.countUp(count, n, { format: arNum, duration: 700 });
+    const b = el("button", "bar" + (c === journalCat ? " on" : ""), el("span", null, ...labelParts(LamhaAI.catLabel(c))), el("span", "meter", fill), count);
     b.setAttribute("aria-pressed", String(c === journalCat));
     b.addEventListener("click", () => { journalCat = journalCat === c ? "" : c; renderJournal(); });
     return b;

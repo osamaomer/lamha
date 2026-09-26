@@ -1,0 +1,113 @@
+/* Lamha — motion for the extension's pages and the desktop windows (popup / main window, settings, clipboard).
+ * shared/motion.js sets data-motion="full|subtle|off" on <html>. Only transform and opacity move; nothing here
+ * delays content: every animation starts from a visible, usable state or finishes within ~250 ms. */
+
+:root { --m-ease: cubic-bezier(.2, .8, .2, 1); --m-spring: cubic-bezier(.2, .9, .3, 1.25); }
+
+/* off: no motion at all, including the small transitions in ui.css */
+[data-motion="off"] *, [data-motion="off"] *::before, [data-motion="off"] *::after {
+  animation: none !important; transition: none !important;
+}
+
+/* ---------- mode tabs: a sliding highlight (popup.js adds .tab-ink) ---------- */
+.tabs.has-ink { position: relative; isolation: isolate; }
+.tabs.has-ink button { position: relative; z-index: 1; }
+.tabs.has-ink button[aria-selected="true"] { background: transparent; box-shadow: none; }
+.tab-ink {
+  position: absolute; top: 3px; bottom: 3px; left: 0; z-index: 0;
+  border-radius: 7px; background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+  pointer-events: none;
+}
+[data-motion="full"] .tab-ink { transition: transform .26s var(--m-spring), width .26s var(--m-ease); }
+[data-motion="subtle"] .tab-ink { transition: transform .18s var(--m-ease), width .18s var(--m-ease); }
+[data-motion="full"] .tabs button, [data-motion="subtle"] .tabs button { transition: color .18s; }
+
+/* ---------- buttons: a little press ---------- */
+[data-motion="full"] .btn:active, [data-motion="full"] .wtools button:active, [data-motion="full"] .rv-grades button:active {
+  transform: scale(.96);
+}
+
+/* ---------- toasts (.flash) ---------- */
+[data-motion="full"] .flash, [data-motion="subtle"] .flash { animation: lm-toast-in .2s var(--m-spring) both; }
+@keyframes lm-toast-in { from { opacity: 0; transform: translate(-50%, 10px) scale(.96); } to { opacity: 1; transform: translate(-50%, 0); } }
+.flash { overflow: hidden; }
+.flash-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #a5b4fc; opacity: .8;
+  transform-origin: left; animation: lm-shrink var(--undo, 5s) linear forwards;
+}
+[dir="rtl"] .flash-bar { transform-origin: right; }
+[data-motion="off"] .flash-bar { display: none; }
+@keyframes lm-shrink { to { transform: scaleX(0); } }
+
+/* ---------- translate: the meaning settles in ---------- */
+[data-motion="full"] .result .tr { animation: lm-settle .28s var(--m-spring) both; }
+@keyframes lm-settle { from { opacity: 0; transform: translateY(6px) scale(.97); } to { opacity: 1; transform: none; } }
+
+/* ---------- writing: proofreading marks one after another (motion.js sequence()) ---------- */
+[data-motion="full"] .lm-seq del {
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 58% / 0 1.5px no-repeat;
+  animation: lm-strike .22s ease-out calc(120ms + var(--i, 0) * 70ms) forwards;
+}
+[dir="rtl"] [data-motion="full"] .lm-seq del, [data-motion="full"] [dir="rtl"] .lm-seq del { background-position: 100% 58%; }
+[data-motion="full"] .lm-seq ins { animation: lm-pop .26s var(--m-spring) calc(120ms + var(--i, 0) * 70ms) both; display: inline-block; }
+@keyframes lm-strike { to { background-size: 100% 1.5px; } }
+@keyframes lm-pop { from { opacity: 0; transform: translateY(4px) scale(.9); } to { opacity: 1; transform: none; } }
+
+/* word-by-word AI answers (motion.js typeIn()) */
+.lm-word { display: inline-block; animation: lm-word .22s var(--m-ease) both; }
+@keyframes lm-word { from { opacity: 0; transform: translateY(3px); filter: blur(2px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* ---------- the Lamha logo blinks while the AI is thinking ---------- */
+[data-motion="full"] .logo.thinking img { animation: lm-blink 1.4s ease-in-out infinite; transform-origin: 50% 50%; }
+@keyframes lm-blink { 0%, 44%, 56%, 100% { transform: none; } 50% { transform: scaleY(.12); } }
+
+/* ---------- review: the answer flips in ---------- */
+.rv-card { perspective: 900px; }
+[data-motion="full"] .rv-back { animation: lm-flip .34s var(--m-ease) both; transform-origin: 50% 0; }
+@keyframes lm-flip { from { opacity: 0; transform: rotateX(-70deg); } to { opacity: 1; transform: none; } }
+.rv-streak { display: inline-block; margin-top: 8px; padding: 2px 10px; border-radius: 999px; background: rgba(245, 158, 11, .14); color: #92400e; font-weight: 700; font-size: 12.5px; }
+@media (prefers-color-scheme: dark) { .rv-streak { color: #fbbf24; } }
+
+/* ---------- clipboard list ---------- */
+[data-motion="full"] .lc-toast, [data-motion="subtle"] .lc-toast { animation: lm-toast-up .2s var(--m-spring) both; }
+@keyframes lm-toast-up { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
+.lc-toast { position: relative; overflow: hidden; }
+.lc-toast .flash-bar { background: #a5b4fc; }
+[data-motion="full"] .lc-row, [data-motion="subtle"] .lc-row { transition: background .1s; }
+
+/* ---------- settings ---------- */
+/* section links: the highlight slides to the section in view (options.js adds .toc-ink) */
+.toc.has-ink a { position: relative; z-index: 1; }
+.toc.has-ink a[aria-current="true"] { background: transparent; }
+.toc-ink { position: absolute; left: 0; top: 0; border-radius: 999px; background: var(--accent-soft); pointer-events: none; z-index: 0; }
+[data-motion="full"] .toc-ink { transition: transform .32s var(--m-spring), width .24s var(--m-ease); }
+[data-motion="subtle"] .toc-ink { transition: transform .18s var(--m-ease), width .18s var(--m-ease); }
+[data-motion="full"] .toc a, [data-motion="subtle"] .toc a { transition: color .2s; }
+
+/* "saved ✓": a small pop */
+[data-motion="full"] .saved.show { transition: opacity .2s, transform .28s var(--m-spring); }
+
+/* mistake journal: bars grow on first view */
+.bars .fill { transform-origin: left; }
+[dir="rtl"] .bars .fill { transform-origin: right; }
+[data-motion="full"] .bars.lm-first .fill { animation: lm-grow .6s var(--m-ease) both; }
+[data-motion="full"] .bars.lm-first > :nth-child(2) .fill { animation-delay: 60ms; }
+[data-motion="full"] .bars.lm-first > :nth-child(3) .fill { animation-delay: 120ms; }
+[data-motion="full"] .bars.lm-first > :nth-child(4) .fill { animation-delay: 180ms; }
+[data-motion="full"] .bars.lm-first > :nth-child(n+5) .fill { animation-delay: 240ms; }
+@keyframes lm-grow { from { transform: scaleX(0); } to { transform: none; } }
+
+/* the Animations setting's preview */
+.motion-demo {
+  display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 12px; border-radius: 12px;
+  background: var(--bg); min-height: 76px;
+}
+.motion-demo .md-card {
+  flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px;
+  background: var(--surface); box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .25); transform-origin: 0 0;
+}
+[dir="rtl"] .motion-demo .md-card { transform-origin: 100% 0; }
+.motion-demo .md-w { font: 700 16px/1.2 var(--font-en); direction: ltr; text-align: left; }
+.motion-demo .md-t { font-size: 18px; font-weight: 700; color: var(--accent); }
+.motion-demo .md-note { font-size: 12px; color: var(--muted); max-width: 11em; }

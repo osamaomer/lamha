@@ -137,6 +137,10 @@ var LamhaClipActions = (() => {
           h("button", { class: "btn small ghost", type: "button", title: L("d.newResult"), onclick: () => run(action, true, data.lang) }, L("d.redo"))),
         data.cached && h("div", { class: "ca-muted" }, L("d.cached"))
       ].filter(Boolean));
+      // motion: proofreading marks one after another; other answers word by word (a cached one is already known: no show)
+      const text = out.querySelector(".ca-text");
+      if (text && action === "proofread") LamhaMotion.sequence(text, "del, ins");
+      else if (text && !data.cached) LamhaMotion.typeIn(text);
       (paste || copy).focus(); // Enter pastes (panel)
     }
 

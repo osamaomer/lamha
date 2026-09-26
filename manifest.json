@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Lamha — لمحة",
   "short_name": "Lamha",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Look up English words and translate anything to Arabic — select text and tap the button. قاموس ومترجم فوري للعربية.",
   "browser_specific_settings": {
     "gecko": {
@@ -29,7 +29,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["shared/i18n.js", "shared/lamha-ai.js", "content/styles.js", "content/page-translator.js", "content/content.js"],
+      "js": ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "content/styles.js", "content/page-translator.js", "content/content.js"],
       "all_frames": true,
       "run_at": "document_idle"
     }

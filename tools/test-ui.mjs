@@ -108,7 +108,7 @@ async function step(name, fn) {
 }
 
 /* ---- popup: review ---- */
-const pop = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "popup/popup.js"]);
+const pop = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
 const $ = id => pop.document.getElementById(id);
 
 await step("popup opens on the review tab with counts and badge", async () => {
@@ -200,7 +200,7 @@ await step("compose: 'use it' puts the correction back in the box; draft saved",
 });
 
 /* ---- options: journal + review ---- */
-const opt = await openPage("options/options.html", ["shared/i18n.js", "options/i18n-options.js", "shared/lamha-ai.js", "options/options.js"]);
+const opt = await openPage("options/options.html", ["shared/i18n.js", "options/i18n-options.js", "shared/lamha-ai.js", "shared/motion.js", "options/options.js"]);
 const o = id => opt.document.getElementById(id);
 await sleep(200);
 
@@ -233,7 +233,7 @@ await step("options: review section shows deck stats; clearing the deck works", 
 /* ---- the English interface ---- */
 await sync.set({ uiLang: "en" });
 await sleep(50);
-const enPop = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "popup/popup.js"]);
+const enPop = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
 const ep = id => enPop.document.getElementById(id);
 
 await step("English: popup left to right, English labels, Western digits", async () => {
@@ -246,7 +246,7 @@ await step("English: popup left to right, English labels, Western digits", async
   assert.ok(!/[\u0600-\u06FF]/.test(text(ep("rvHead"))), "Arabic left in the review header: " + text(ep("rvHead")));
 });
 
-const enOpt = await openPage("options/options.html", ["shared/i18n.js", "options/i18n-options.js", "shared/lamha-ai.js", "options/options.js"]);
+const enOpt = await openPage("options/options.html", ["shared/i18n.js", "options/i18n-options.js", "shared/lamha-ai.js", "shared/motion.js", "options/options.js"]);
 const eo = id => enOpt.document.getElementById(id);
 await sleep(200);
 
@@ -259,15 +259,51 @@ await step("English: settings page translated, language menu shows the choice", 
   // no visible Arabic, except the native name of Arabic in the language menu
   const visible = [...enOpt.document.querySelectorAll("h1, h2, h3, b, small, p, button, label, option, li, span, footer")]
     .filter(el => !el.children.length && /[\u0600-\u06FF]/.test(el.textContent) && el.textContent.trim() !== "العربية")
+    .filter(el => !el.closest('[aria-hidden="true"]')) // decoration: the Animations preview shows a sample translation
     .map(el => el.textContent.trim().slice(0, 40));
   assert.deepEqual(visible, []);
 });
 
 await step("switching back to Arabic: a new page is right to left again", async () => {
   await sync.set({ uiLang: "ar" });
-  const arPop = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "popup/popup.js"]);
+  const arPop = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
   assert.equal(arPop.document.documentElement.dir, "rtl");
   assert.equal(text(arPop.document.getElementById("openOptions")), "الإعدادات");
+});
+
+await step("Animations: data-motion follows the setting (off / subtle / full) and, on Automatic, the device hint", async () => {
+  await sync.set({ motion: "auto" });
+  const w = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
+  const level = () => w.document.documentElement.getAttribute("data-motion");
+  assert.equal(level(), "full", "Automatic on a capable device");
+  await local.set({ motionHint: "subtle" }); // the desktop app on a weak PC
+  assert.equal(level(), "subtle");
+  await sync.set({ motion: "off" });
+  assert.equal(level(), "off");
+  assert.equal(w.LamhaMotion.play(w.document.body, [{ opacity: 0 }, { opacity: 1 }]), null, "off: nothing is animated");
+  let settled = false;
+  await w.LamhaMotion.exit(w.document.body, [{ opacity: 1 }, { opacity: 0 }]).then(() => { settled = true; });
+  assert.ok(settled, "exit() settles at once when off");
+  await sync.set({ motion: "full" });
+  assert.equal(level(), "full", "an explicit choice wins over the hint");
+  assert.ok(w.document.querySelector(".tabs .tab-ink"), "the tab highlight");
+  await sync.set({ motion: "auto" });
+  await local.set({ motionHint: "" });
+  assert.equal(level(), "full");
+});
+
+await step("Settings: the Animations menu saves the choice", async () => {
+  const o = await openPage("options/options.html", ["shared/i18n.js", "options/i18n-options.js", "shared/lamha-ai.js", "shared/motion.js", "options/options.js"]);
+  await sleep(100);
+  const sel = o.document.getElementById("motion");
+  assert.equal(sel.value, "auto");
+  sel.value = "subtle";
+  sel.dispatchEvent(new o.Event("change"));
+  await sleep(20);
+  assert.equal(sync.data.motion, "subtle");
+  assert.equal(o.document.documentElement.getAttribute("data-motion"), "subtle");
+  assert.ok(o.document.getElementById("mdNote").textContent.length > 0, "the preview explains the level");
+  await sync.set({ motion: "auto" });
 });
 
 console.log(results.join("\n"));

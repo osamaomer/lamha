@@ -6,6 +6,7 @@
   <title data-i18n="o.title">إعدادات لمحة</title>
   <link rel="stylesheet" href="../shared/ui.css">
   <link rel="stylesheet" href="options.css">
+  <link rel="stylesheet" href="../shared/motion.css">
 </head>
 <body>
   <div class="wrap">
@@ -293,6 +294,19 @@
           <option value="dark" data-i18n="o.themeDark">داكن</option>
         </select>
       </div>
+      <div class="opt opt-motion">
+        <div><b data-i18n="o.motion">الحركة</b><small data-i18n="o.motionHint"></small></div>
+        <select id="motion" data-i18n-attr="aria-label:o.motion" aria-label="الحركة">
+          <option value="auto" data-i18n="motion.auto">تلقائية</option>
+          <option value="full" data-i18n="motion.full">كاملة</option>
+          <option value="subtle" data-i18n="motion.subtle">خفيفة</option>
+          <option value="off" data-i18n="motion.off">متوقفة</option>
+        </select>
+      </div>
+      <div class="motion-demo" id="motionDemo">
+        <div class="md-card" id="mdCard" aria-hidden="true"><span class="md-w">glance</span><span class="md-t">لمحة</span></div>
+        <div><div class="md-note" id="mdNote"></div><button id="mdPlay" class="btn small ghost" type="button" data-i18n="o.motionPlay">شاهد</button></div>
+      </div>
     </section>
 
     <section class="panel" id="keysPanel">
@@ -342,6 +356,7 @@
   <script src="../shared/i18n.js"></script>
   <script src="i18n-options.js"></script>
   <script src="../shared/lamha-ai.js"></script>
+  <script src="../shared/motion.js"></script>
   <script src="options.js"></script>
   <!-- load the in-page UI here too so the "try it now" demo works on this page -->
   <script src="../content/styles.js"></script>

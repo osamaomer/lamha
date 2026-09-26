@@ -19,7 +19,8 @@ function h(tag, props, ...kids) {
 }
 
 async function init() {
-  await LamhaI18n.init({ onChange: () => location.reload() }); // redrawn in the new language
+  await Promise.all([LamhaI18n.init({ onChange: () => location.reload() }), LamhaMotion.ready]); // redrawn in the new language
+  LamhaMotion.attach(document.documentElement);
   LamhaI18n.applyDom(document);
   settings = { ...DEFAULTS, ...(await browser.storage.sync.get(DEFAULTS)) };
   $("enabled").checked = settings.enabled;
@@ -55,6 +56,39 @@ async function init() {
 
   renderHistory();
   await initCompose();
+  initTabMotion();
+}
+
+/**
+ * The mode tabs: a highlight that slides to the selected tab, and the new pane coming in from that side (mirrored in
+ * Arabic). Watches aria-selected, so the desktop app's الحافظة tab (added by its own script) moves the same way.
+ */
+function initTabMotion() {
+  const tabs = document.querySelector(".tabs");
+  if (!tabs || typeof MutationObserver !== "function") return;
+  const ink = h("span", { class: "tab-ink", "aria-hidden": "true" });
+  tabs.prepend(ink);
+  tabs.classList.add("has-ink");
+  let current = null;
+  const place = animate => {
+    const sel = tabs.querySelector('[role="tab"][aria-selected="true"]');
+    if (!sel) return;
+    if (!animate) ink.style.transition = "none";
+    Object.assign(ink.style, { width: sel.offsetWidth + "px", transform: `translateX(${sel.offsetLeft}px)` });
+    if (!animate) { void ink.offsetWidth; ink.style.transition = ""; }
+    if (animate && current && current !== sel) {
+      const all = [...tabs.querySelectorAll('[role="tab"]')];
+      const forward = all.indexOf(sel) > all.indexOf(current);
+      const rtl = getComputedStyle(tabs).direction === "rtl";
+      const pane = document.getElementById(sel.getAttribute("aria-controls"));
+      const dx = (forward ? 1 : -1) * (rtl ? -1 : 1) * 16;
+      LamhaMotion.play(pane, [{ opacity: 0, transform: `translateX(${dx}px)` }, { opacity: 1, transform: "none" }], { duration: 220 });
+    }
+    current = sel;
+  };
+  new MutationObserver(() => place(true)).observe(tabs, { subtree: true, childList: true, attributes: true, attributeFilter: ["aria-selected"] });
+  if (typeof ResizeObserver === "function") new ResizeObserver(() => place(false)).observe(tabs);
+  place(false);
 }
 
 function refreshSiteDot() {
@@ -142,12 +176,15 @@ async function runQuick() {
       h("button", { class: "icon-btn", title: t("common.copy"), "aria-label": t("common.copy"), onclick: () => navigator.clipboard.writeText(d.translation) }, copyIcon())
     )
   ];
+  if (d.milestone) kids.unshift(h("div", { class: "milestone" }, t("ms.lookups", { n: d.milestone })));
   (d.dict || []).slice(0, 3).forEach(p => kids.push(
     h("div", { class: "pos-row" }, h("span", { class: "pos" }, p.pos), h("span", { class: "terms" }, p.terms.slice(0, 6).map(term => term.word).join(dirOf(d.tl) === "rtl" ? "، " : ", ")))
   ));
   const firstDef = d.definitions && d.definitions[0] && d.definitions[0].entries[0];
   if (firstDef) kids.push(h("div", { class: "def" }, firstDef.glossTr && h("div", null, firstDef.glossTr), h("div", { class: "en" }, firstDef.gloss)));
   out.replaceChildren(...kids);
+  LamhaMotion.stagger([...out.children].filter(k => !k.classList.contains("main")), { each: 45, distance: 4 });
+  if (d.milestone) LamhaMotion.burst(out.querySelector(".milestone"));
   renderHistory();
 }
 
@@ -247,8 +284,11 @@ async function runWrite(tool, fresh = false) {
   const token = ++wrToken;
   renderTools(tool);
   out.replaceChildren(h("div", { class: "loading" }, h("span", { class: "spin" }), t("common.working")));
+  const logo = document.querySelector(".logo");
+  logo.classList.add("thinking"); // the Lamha logo blinks while the AI works (full animations)
   const res = await browser.runtime.sendMessage({ type: "ai", tool, text, extra: fresh ? { fresh: true } : {} }).catch(e => ({ ok: false, error: String(e) }));
   if (token !== wrToken) return;
+  logo.classList.remove("thinking");
   if (!res || !res.ok) { out.replaceChildren(wrError(res && res.error, () => runWrite(tool))); return; }
 
   const useIt = result => h("button", {
@@ -263,17 +303,23 @@ async function runWrite(tool, fresh = false) {
 
   if (tool !== "proofread") {
     const result = res.data.text || "";
-    out.replaceChildren(h("div", { class: "text", dir: "auto" }, result), actions(result));
+    const box = h("div", { class: "text", dir: "auto" }, result);
+    out.replaceChildren(box, actions(result));
+    LamhaMotion.typeIn(box);
     return;
   }
   const { corrected = "", issues = [] } = res.data;
   if (!issues.length || corrected.trim() === text) {
-    out.replaceChildren(h("div", { class: "ok" }, t("write.noErrorsCheck")));
+    const ok = h("div", { class: "ok" }, t("write.noErrorsCheck"));
+    out.replaceChildren(ok);
+    LamhaMotion.burst(ok, { count: 10, glyphs: ["✓", "✦", "•"] });
     return;
   }
   const fixed = corrected.trim();
+  const diff = h("div", { class: "text", dir: "ltr" }, LamhaAI.diffNodes(h, text, fixed));
+  LamhaMotion.sequence(diff, "del, ins"); // each mistake struck through, then its fix
   out.replaceChildren(
-    h("div", { class: "text", dir: "ltr" }, LamhaAI.diffNodes(h, text, fixed)),
+    diff,
     actions(fixed),
     h("ul", { class: "issues" }, issues.map(i => h("li", null,
       h("div", { class: "fix" }, h("del", null, i.original), " → ", h("ins", null, i.fix)),
@@ -286,10 +332,15 @@ async function runWrite(tool, fresh = false) {
 /** A short message at the bottom; with `action` ({ label, run }) it stays 5 s and offers that button (e.g. Undo). */
 function flash(text, action) {
   document.querySelectorAll(".flash").forEach(f => f.remove());
+  const ms = action ? 5000 : 1200;
   const t = h("div", { class: "flash", role: "status" }, text,
-    action && h("button", { class: "flash-act", type: "button", onclick: () => { t.remove(); action.run(); } }, action.label));
+    action && h("button", { class: "flash-act", type: "button", onclick: () => { t.remove(); action.run(); } }, action.label),
+    action && h("span", { class: "flash-bar", "aria-hidden": "true", style: `--undo:${ms}ms` })); // the time left to undo
   document.body.append(t);
-  setTimeout(() => t.remove(), action ? 5000 : 1200);
+  setTimeout(() => {
+    if (!t.isConnected) return;
+    LamhaMotion.exit(t, [{ opacity: 1 }, { opacity: 0, transform: "translate(-50%, 6px)" }], { duration: 140 }).then(() => t.remove());
+  }, ms);
 }
 
 /** One line under the compose box: the user's most frequent mistake type → the journal. */
@@ -313,7 +364,7 @@ browser.storage.onChanged.addListener((changes, area) => {
 
 /* ---- review: flashcards of looked-up words (scheduling lives in the background) ---- */
 
-let rv = { queue: [], counts: null, nextDue: 0 }, rvShown = false;
+let rv = { queue: [], counts: null, nextDue: 0 }, rvShown = false, rvEnter = false, rvHad = false;
 const arNum = n => num(n);
 
 /** "١٠ د" / "ساعة" / "يومان" / "٥ أيام" … or "10 min" / "1 hour" / "5 days" … until the next review. */
@@ -348,13 +399,23 @@ function renderReview() {
     h("span", { class: "grow" }),
     h("span", null, t("rv.totals", counts))
   );
+  const enter = rvEnter;
+  rvEnter = false;
   if (!c) {
-    $("rvCard").replaceChildren(counts.total
+    const done = counts.total
       ? h("div", { class: "rv-done" }, h("b", null, t("rv.doneTitle")),
-        rv.nextDue ? t("rv.next", { span: spanLabel(rv.nextDue - Date.now()) }) : "")
-      : h("div", { class: "rv-done" }, h("b", null, t("rv.emptyTitle")), t("rv.emptyText")));
+        rv.nextDue ? t("rv.next", { span: spanLabel(rv.nextDue - Date.now()) }) : "",
+        rv.streak >= 2 && h("div", null, h("span", { class: "rv-streak" }, t("rv.streak", { n: rv.streak }))))
+      : h("div", { class: "rv-done" }, h("b", null, t("rv.emptyTitle")), t("rv.emptyText"));
+    $("rvCard").replaceChildren(done);
+    if (enter && rvHad && counts.total) { // the last card was just answered: a small celebration
+      LamhaMotion.play(done, [{ opacity: 0, transform: "scale(.94)" }, { opacity: 1, transform: "none" }], { duration: 300, easing: "cubic-bezier(.2,.9,.3,1.25)" });
+      LamhaMotion.burst(done.querySelector("b"), { count: 18 });
+    }
+    rvHad = false;
     return;
   }
+  rvHad = true;
 
   const front = h("div", { class: "rv-front" },
     c.isNew && h("div", { class: "rv-tag" }, t("rv.newWord")),
@@ -380,6 +441,34 @@ function renderReview() {
     );
   }
   $("rvCard").replaceChildren(...kids);
+  // the next card rises once the answered one is on its way
+  if (enter) LamhaMotion.play($("rvCard"), [{ opacity: 0, transform: "translateY(14px) scale(.98)" }, { opacity: 1, transform: "none" }], { duration: 240, delay: LamhaMotion.full() ? 110 : 0 });
+}
+
+/**
+ * The answered card leaves the way it was graded: "again" back toward the start of the line, "good" on toward its
+ * end, "hard" drops a little. A copy of the card animates while the next one is already in place (full only).
+ */
+function flyOff(grade) {
+  if (!LamhaMotion.full()) return;
+  const front = $("rvCard").querySelector(".rv-front");
+  if (!front) return;
+  const box = $("rvCard"), r = box.getBoundingClientRect();
+  // the word and its meaning fly; the buttons stay behind
+  const ghost = h("div", { class: "rv-card rv-ghost", "aria-hidden": "true" }, front.cloneNode(true), ...[...box.querySelectorAll(".rv-back")].map(b => b.cloneNode(true)));
+  Object.assign(ghost.style, {
+    position: "fixed", left: r.left + "px", top: r.top + "px", width: r.width + "px", minHeight: "0",
+    margin: "0", pointerEvents: "none", zIndex: "20", background: "var(--surface)", borderRadius: "12px", boxShadow: "0 12px 30px -10px rgba(0,0,0,.35)"
+  });
+  document.body.append(ghost);
+  const end = getComputedStyle(box).direction === "rtl" ? -1 : 1; // toward the end of the line
+  const dx = grade === "good" ? 170 * end : grade === "again" ? -170 * end : 0;
+  const to = grade === "hard" ? "translateY(46px) scale(.92)" : `translateX(${dx}px) rotate(${dx > 0 ? 9 : -9}deg)`;
+  LamhaMotion.exit(ghost, [
+    { opacity: 1, transform: "none" },
+    { opacity: 0.9, transform: grade === "hard" ? "translateY(10px) scale(.98)" : `translateX(${dx * 0.25}px) rotate(${dx > 0 ? 2 : -2}deg)`, offset: 0.3 },
+    { opacity: 0, transform: to }
+  ], { duration: 280, easing: "cubic-bezier(.5,0,.75,0)", fullOnly: true }).then(() => ghost.remove());
 }
 
 /** The example sentence with the looked-up form of the word marked. */
@@ -403,6 +492,8 @@ async function answer(grade) {
   const c = rv.queue[0];
   if (!c || !rvShown) return;
   rvShown = false;
+  flyOff(grade);
+  rvEnter = true;
   await browser.runtime.sendMessage({ type: "reviewGrade", key: c.key, grade }).catch(() => {});
   await loadReview(true);
 }
