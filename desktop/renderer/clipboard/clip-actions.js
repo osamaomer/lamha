@@ -118,7 +118,7 @@ var LamhaClipActions = (() => {
           h("div", { class: "ca-text", dir: "ltr" }, LamhaAI.diffNodes(h, clip.text.trim(), result)),
           h("ul", { class: "ca-issues" }, data.issues.map(i => h("li", null,
             h("div", { class: "ca-fix", dir: "ltr" }, h("del", null, i.original), " → ", h("ins", null, i.fix)),
-            i.category !== "other" && LamhaAI.CATEGORIES[i.category] && h("span", { class: "ca-cat" }, LamhaAI.catLabel(i.category)),
+            i.category !== "other" && LamhaAI.isCategory(i.category) && h("span", { class: "ca-cat" }, LamhaAI.catLabel(i.category)),
             i.why && h("div", { class: "ca-why", dir: "auto" }, i.why))))
         ];
       } else {

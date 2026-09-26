@@ -1,7 +1,7 @@
 {
   "name": "lamha-desktop",
   "productName": "Lamha",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Lamha — لمحة: Arabic-first dictionary, translator, writing tools and word review for Windows",
   "author": "Artwork Lab",
   "license": "MIT",
@@ -36,7 +36,6 @@
       "renderer/**",
       "assets/**",
       "ext/**",
-      "scripts/smoke-test.js",
       "package.json"
     ],
     "publish": [
@@ -47,6 +46,11 @@
         "releaseType": "draft"
       }
     ],
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false
+    },
     "win": {
       "target": [
         "nsis",

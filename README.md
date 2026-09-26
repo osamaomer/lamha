@@ -14,7 +14,7 @@ Select text on any page and a small **بحث** (Look Up) / **ترجمة** (Trans
 | Spelling suggestions ("هل تقصد: receive؟") | |
 | Wikipedia summary (Arabic article when one exists) | |
 
-### ✨ Writing tools (Ollama or Claude)
+### ✨ Writing tools (Ollama, Gemini or Claude)
 
 Choose a provider in Settings → أدوات الكتابة:
 
@@ -213,7 +213,11 @@ python tools/build_dict.py --kaikki kaikki.org-dictionary-English.jsonl.gz
 
 - **Translation, dictionary, definitions, synonyms, pronunciation:** Google Translate's public web endpoints (`translate.googleapis.com`, with automatic failover to `clients5.google.com` when one is rate-limited). Nothing is sent until you select text and open the card, or start page translation.
 - **Encyclopedia:** Wikipedia's REST API.
-- **Writing tools:** either Ollama on your own computer (`localhost:11434` by default, where nothing leaves the PC), or the Claude API (`api.anthropic.com`) called with your own key. Text is sent only when you press a tool. The selected text is sent, or the page's text when you ask for a page summary.
+- **Writing tools:** the provider you choose in Settings. Text is sent only when you press a tool: the selected text, or the page's text when you ask for a page summary.
+  - **Ollama** runs on your own computer (`localhost:11434` by default), so nothing leaves the PC. If you point it at another computer over `http://`, the text crosses the network unencrypted.
+  - **Gemini** (`generativelanguage.googleapis.com`) is called with your own key. ⚠️ On the free tier Google may use what you send to improve its products.
+  - **Claude** (`api.anthropic.com`) is called with your own key.
+  - API keys stay on your device and are never synced. In the Windows app they are encrypted with Windows (DPAPI) for your user account.
 - The history of looked-up words stays in local storage on your device. Settings sync through your Firefox account.
 - **Clipboard history (Windows app):** copied text stays on your PC, encrypted. A clip is sent only when you press one of Lamha's tools on it (ترجم، دقّق، اكتبه بالإنجليزية…), to the same service that tool uses everywhere else.
 - Sent to Google Translate: the text you select, the **sentence around a selected word** (used to pick the right meaning; turn off with *فهم الكلمة من سياق الجملة*), and page text when you choose to translate a page.

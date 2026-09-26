@@ -326,6 +326,16 @@ test("provider helper: which one is set up", () => {
   assert.equal(p({ aiProvider: "gemini", geminiKey: "k" }).ready, true);
   assert.equal(p({ aiProvider: "gemini", aiKey: "k" }).ready, false, "a Claude key doesn't make Gemini ready");
   assert.equal(p({ aiProvider: "ollama", ollamaModel: "q" }).name, "Ollama");
+  assert.equal(p({ aiKeySet: true }).ready, true, "the flag alone is enough");
+  assert.equal(p({ aiProvider: "gemini", geminiKeySet: true }).ready, true);
+  assert.ok(!ctx.LamhaAI.PROVIDER_KEYS.some(k => /Key$/.test(k)), "pages never read the keys");
+});
+
+test("background keeps the key-saved flags in step with the keys", async () => {
+  const env = makeEnv({ fetchImpl: async () => json(200, {}), local: { aiKey: "sk-ant-x", geminiKeySet: true } });
+  await new Promise(r => setTimeout(r, 10));
+  assert.equal(env.browser.storage.local.data.aiKeySet, true);
+  assert.equal(env.browser.storage.local.data.geminiKeySet, false, "flag without a key is cleared");
 });
 
 /* ---------- flashcards ---------- */
@@ -414,6 +424,21 @@ test("bookmark toggles a card; hasCard sees it", async () => {
   assert.equal(await env.send({ type: "cardHas", q: "resilient" }), false);
 });
 
+test("words named like Object's properties (constructor, __proto__) are ordinary cards", async () => {
+  const env = makeEnv({ fetchImpl: async () => json(200, {}), local: { cardsImported: true } });
+  for (const q of ["constructor", "__proto__", "toString"]) {
+    assert.equal(await env.send({ type: "cardHas", q }), false, q);
+    assert.equal(await env.send({ type: "cardToggle", card: { q, tr: "x", ex: "a " + q } }), true, q);
+    assert.equal(await env.send({ type: "cardHas", q }), true, q);
+  }
+  assert.deepEqual(Object.keys(env.browser.storage.local.data.cards).sort(), ["__proto__", "constructor", "tostring"]);
+  assert.equal(vm.runInContext("({}).ex", env.ctx), undefined); // Object.prototype untouched
+  assert.equal(await env.send({ type: "cardToggle", card: { q: "constructor", tr: "x" } }), false);
+  assert.equal(await env.send({ type: "cardHas", q: "constructor" }), false);
+  assert.equal(env.ctx.LamhaAI.isCategory("constructor"), false);
+  assert.equal(env.ctx.LamhaAI.isCategory("articles"), true);
+});
+
 test("a word lookup adds a card with its sentence and in-context meaning", async () => {
   const google = recorder(url => {
     if (url.includes("/translate_a/single")) {
@@ -441,6 +466,11 @@ test("a word lookup adds a card with its sentence and in-context meaning", async
   const off = makeEnv({ fetchImpl: google.fetchImpl, local: { cardsImported: true }, sync: { dictSource: "online", cardsAuto: false } });
   await off.send({ type: "lookup", text: "bank" });
   assert.equal(await off.send({ type: "cardHas", q: "bank" }), false, "cardsAuto off");
+
+  const noHistory = makeEnv({ fetchImpl: google.fetchImpl, local: { cardsImported: true }, sync: { dictSource: "online", saveHistory: false } });
+  await noHistory.send({ type: "lookup", text: "bank" });
+  assert.equal(await noHistory.send({ type: "cardHas", q: "bank" }), false, "history off: no automatic card");
+  assert.equal(noHistory.browser.storage.local.data.history, undefined, "history off: no history");
 });
 
 test("English interface: explanations, the explain tool and the default summary are in English", async () => {

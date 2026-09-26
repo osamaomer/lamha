@@ -689,7 +689,7 @@
     );
   }
 
-  /* ---------------- writing tools (Claude) ---------------- */
+  /* ---------------- writing tools (Claude, Gemini or Ollama) ---------------- */
 
   const toolLabel = id => L("tool." + id); // proofread, improve, formal, friendly, concise, toEnglish, summarize, explain, reply
   const REPLACEABLE = new Set(["proofread", "improve", "formal", "friendly", "concise", "toEnglish"]);

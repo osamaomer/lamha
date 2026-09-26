@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Lamha — لمحة",
   "short_name": "Lamha",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Look up English words and translate anything to Arabic — select text and tap the button. قاموس ومترجم فوري للعربية.",
   "browser_specific_settings": {
     "gecko": {
@@ -54,7 +54,7 @@
     },
     "writing-tools": {
       "suggested_key": { "default": "Alt+Shift+W" },
-      "description": "Writing tools (Claude) for the selected text"
+      "description": "Writing tools (AI) for the selected text"
     }
   }
 }

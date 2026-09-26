@@ -118,6 +118,16 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
     return path.basename(file);
   });
 
+  await check("API keys are encrypted on disk (DPAPI)", async () => {
+    const { aiKey: before } = await stores.local.get("aiKey");
+    await stores.local.set({ aiKey: "sk-ant-smoke-secret" });
+    stores.local.flush();
+    const raw = fs.readFileSync(path.join(app.getPath("userData"), "storage-local.json"), "utf8");
+    if (before === undefined) await stores.local.remove("aiKey"); else await stores.local.set({ aiKey: before });
+    assert(!raw.includes("sk-ant-smoke-secret") && JSON.parse(raw).aiKey.$enc, "key in plain text");
+    return "aiKey stored as $enc";
+  });
+
   await check("speech plays through the window", async () => {
     const r = await send({ type: "speak", text: "hello", lang: "en" });
     assert(r.ok, r.error);

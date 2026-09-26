@@ -163,9 +163,8 @@ function el(tag, cls, ...kids) {
 async function renderJournal() {
   const { mistakes } = await browser.storage.local.get("mistakes");
   const j = mistakes || { checks: 0, counts: {}, recent: [] };
-  const cats = LamhaAI.CATEGORIES; // keys; names and rules come from LamhaAI.catLabel / catTip
   const total = Object.values(j.counts).reduce((a, b) => a + b, 0);
-  const rows = Object.entries(j.counts).filter(([c, n]) => cats[c] && n > 0).sort((a, b) => b[1] - a[1]);
+  const rows = Object.entries(j.counts).filter(([c, n]) => LamhaAI.isCategory(c) && n > 0) // names and rules: LamhaAI.catLabel / catTip.sort((a, b) => b[1] - a[1]);
 
   if (!j.checks) {
     $("jSummary").textContent = t("o.jEmpty");
@@ -236,7 +235,15 @@ async function refreshOllama() {
     await browser.storage.local.set({ ollamaModel: pick });
   }
   sel.value = pick;
-  setStatus("ollamaStatus", t("o.ollamaOk", { n: models.length }), "ok");
+  setStatus("ollamaStatus", t("o.ollamaOk", { n: models.length }) + (plainHttpRemote($("ollamaUrl").value) ? t("o.ollamaPlainHttp") : ""), "ok");
+}
+
+/** http:// to a machine other than this one: the text travels unencrypted. */
+function plainHttpRemote(url) {
+  try {
+    const u = new URL(String(url).trim());
+    return u.protocol === "http:" && !/^(localhost|127(\.\d+){3}|\[::1\])$/i.test(u.hostname);
+  } catch (_) { return false; }
 }
 
 async function testOllama() {

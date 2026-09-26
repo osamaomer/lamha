@@ -64,15 +64,18 @@ var LamhaAI = (() => {
     other: ["Other", ""]
   };
 
+  /** A known mistake type (own key only: "constructor" or "__proto__" from a model's reply are not). */
+  const isCategory = c => typeof c === "string" && Object.hasOwn(CATEGORIES, c);
+
   const uiLang = () => (typeof LamhaI18n !== "undefined" ? LamhaI18n.lang() : "ar");
   /** A category's name in the interface language. */
-  const catLabel = (c, lang = uiLang()) => (lang === "en" ? (CATEGORIES_EN[c] || CATEGORIES_EN.other)[0] : (CATEGORIES[c] || CATEGORIES.other).ar);
+  const catLabel = (c, lang = uiLang()) => { c = isCategory(c) ? c : "other"; return lang === "en" ? CATEGORIES_EN[c][0] : CATEGORIES[c].ar; };
   /** A category's rule in the interface language ("" for other). */
-  const catTip = (c, lang = uiLang()) => (lang === "en" ? (CATEGORIES_EN[c] || CATEGORIES_EN.other)[1] : (CATEGORIES[c] || CATEGORIES.other).tip);
+  const catTip = (c, lang = uiLang()) => { c = isCategory(c) ? c : "other"; return lang === "en" ? CATEGORIES_EN[c][1] : CATEGORIES[c].tip; };
 
   /** error code → [title, explanation, fixed in Settings?] */
   const ERRORS = {
-    ai_no_key: ["فعّل أدوات الكتابة", "اختر من الإعدادات Ollama (مجاني على جهازك) أو Claude (بمفتاح API).", true],
+    ai_no_key: ["فعّل أدوات الكتابة", "اختر من الإعدادات Ollama (مجاني على جهازك) أو Gemini (مجاني بمفتاح) أو Claude (بمفتاح API).", true],
     ai_bad_key: ["مفتاح Claude غير صالح", "تحقق من المفتاح في الإعدادات أو أنشئ مفتاحًا جديدًا.", true],
     ai_no_credit: ["نفد رصيد حساب Claude API", "أضف رصيدًا من console.anthropic.com ثم أعد المحاولة.", true],
     ai_forbidden: ["المفتاح لا يملك صلاحية الاستخدام", "تحقق من صلاحيات المفتاح في موقع الخدمة (Anthropic أو Google AI Studio).", true],
@@ -94,7 +97,7 @@ var LamhaAI = (() => {
     network: ["لا يوجد اتصال بالإنترنت", "تحقق من اتصالك ثم حاول مجددًا."]
   };
   const ERRORS_EN = {
-    ai_no_key: ["Turn on the writing tools", "In Settings, choose Ollama (free, on your PC) or Claude (with an API key).", true],
+    ai_no_key: ["Turn on the writing tools", "In Settings, choose Ollama (free, on your PC), Gemini (free, with a key) or Claude (with an API key).", true],
     ai_bad_key: ["The Claude key isn't valid", "Check the key in Settings, or create a new one.", true],
     ai_no_credit: ["The Claude API account is out of credit", "Add credit at console.anthropic.com, then try again.", true],
     ai_forbidden: ["The key isn't allowed to do this", "Check the key's permissions on the service's website (Anthropic or Google AI Studio).", true],
@@ -161,17 +164,19 @@ var LamhaAI = (() => {
   const ARABIC_ALL = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/g;
   const isArabicText = t => (t.match(ARABIC_ALL) || []).length > (t.match(/[A-Za-z]/g) || []).length;
 
-  /** Writing-tools provider from storage.local values: which one, is it set up, its name, the "not set up" error. */
+  /** Writing-tools provider from storage.local values: which one, is it set up, its name, the "not set up" error.
+   *  Takes the keys themselves or just the flags that say a key is saved (aiKeySet / geminiKeySet, kept by background.js). */
   function provider(local = {}) {
     const id = ["ollama", "gemini"].includes(local.aiProvider) ? local.aiProvider : "claude";
     return {
       id,
       name: { ollama: "Ollama", gemini: "Gemini", claude: "Claude" }[id],
-      ready: id === "ollama" ? !!local.ollamaModel : id === "gemini" ? !!local.geminiKey : !!local.aiKey,
+      ready: id === "ollama" ? !!local.ollamaModel : id === "gemini" ? !!(local.geminiKey || local.geminiKeySet) : !!(local.aiKey || local.aiKeySet),
       notReady: { ollama: "ollama_no_model", gemini: "gemini_no_key", claude: "ai_no_key" }[id]
     };
   }
-  const PROVIDER_KEYS = ["aiProvider", "aiKey", "ollamaModel", "geminiKey"];
+  /** What pages (web pages, popup) read to know whether the writing tools are set up — never the API keys. */
+  const PROVIDER_KEYS = ["aiProvider", "ollamaModel", "aiKeySet", "geminiKeySet"];
 
-  return { CATEGORIES, ERRORS, errorInfo, catLabel, catTip, diffParts, diffNodes, isArabicText, provider, PROVIDER_KEYS };
+  return { CATEGORIES, isCategory, ERRORS, errorInfo, catLabel, catTip, diffParts, diffNodes, isArabicText, provider, PROVIDER_KEYS };
 })();

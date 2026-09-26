@@ -237,7 +237,8 @@ async function lookup(rawText, opts = {}) {
   if (settings.saveHistory && learnable) {
     addHistory({ q: result.query, tr: result.translation, src: result.src });
   }
-  if (settings.cardsAuto && learnable && result.src === "en") addCard(cardFromLookup(result, text, context));
+  // automatic cards are a record of lookups too: "Keep a history" off means none (🔖 still adds one by hand)
+  if (settings.saveHistory && settings.cardsAuto && learnable && result.src === "en") addCard(cardFromLookup(result, text, context));
   return result;
 }
 
@@ -331,6 +332,7 @@ async function onlineLookup(text, sl, tl, word, settings) {
 const httpsOnly = u => (typeof u === "string" && /^https:\/\/[a-z0-9.-]+\.(wikipedia|wikimedia)\.org\//i.test(u) ? u : "");
 
 async function wikiSummary(title, preferLang = "ar") {
+  if (!/^[a-z]{2,3}(-[a-z]{2,8})?$/.test(preferLang)) preferLang = "en"; // it becomes part of a hostname
   const key = title.toLowerCase() + "|" + preferLang;
   const hit = wikiCache.get(key);
   if (hit !== undefined) return hit;
@@ -698,8 +700,9 @@ async function geminiWithFallback(opts) {
 }
 
 /** Runs one writing tool on `text`. Returns { text } or, for proofread, { corrected, issues }. */
-async function aiRun(tool, rawText, extra = {}) {
-  const spec = AI_TOOLS[tool];
+async function aiRun(tool, rawText, extra) {
+  extra = extra && typeof extra === "object" ? extra : {};
+  const spec = Object.hasOwn(AI_TOOLS, tool) ? AI_TOOLS[tool] : null;
   if (!spec) throw new Error("ai_error:unknown tool");
   const text = String(rawText || "").trim();
   if (!text) throw new Error("empty");
@@ -737,12 +740,26 @@ async function aiRun(tool, rawText, extra = {}) {
   if (tool === "proofread") {
     out.issues = (Array.isArray(out.issues) ? out.issues : [])
       .filter(i => i && typeof i.original === "string" && typeof i.fix === "string" && i.original !== i.fix)
-      .map(i => ({ ...i, category: LamhaAI.CATEGORIES[i.category] ? i.category : "other", why: String(i.why || "") }));
+      .map(i => ({ ...i, category: LamhaAI.isCategory(i.category) ? i.category : "other", why: String(i.why || "") }));
     if (journal && !extra.fresh) recordMistakes(out.issues); // a retry of the same text isn't counted twice
   }
   aiCache.set(cacheKey, out);
   return out;
 }
+
+/* ----- "is a key saved?" flags: content scripts run in every page, so they read these instead of the keys ----- */
+
+const KEY_FLAGS = { aiKey: "aiKeySet", geminiKey: "geminiKeySet" };
+async function syncKeyFlags() {
+  const st = await browser.storage.local.get([...Object.keys(KEY_FLAGS), ...Object.values(KEY_FLAGS)]);
+  const patch = {};
+  for (const [key, flag] of Object.entries(KEY_FLAGS)) if (!!st[key] !== !!st[flag]) patch[flag] = !!st[key];
+  if (Object.keys(patch).length) await browser.storage.local.set(patch);
+}
+browser.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && Object.keys(KEY_FLAGS).some(k => changes[k])) syncKeyFlags().catch(() => {});
+});
+syncKeyFlags().catch(() => {}); // keys saved before the flags existed
 
 /* ----- mistake journal: what proofreading found, so the user can see their weak points ----- */
 
@@ -766,7 +783,7 @@ function recordMistakes(issues) {
 async function weakPoints() {
   const { mistakes } = await browser.storage.local.get("mistakes");
   return Object.entries((mistakes && mistakes.counts) || {})
-    .filter(([cat, n]) => cat !== "other" && LamhaAI.CATEGORIES[cat] && n >= 3)
+    .filter(([cat, n]) => cat !== "other" && LamhaAI.isCategory(cat) && n >= 3)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(([cat]) => LamhaAI.CATEGORIES[cat].en)
@@ -817,7 +834,9 @@ let deckQueue = Promise.resolve();
 function withDeck(fn) {
   const run = deckQueue.then(async () => {
     const st = await browser.storage.local.get(["cards", "cardStats", "cardsImported"]);
-    const deck = { cards: st.cards || {}, stats: st.cardStats || {}, imported: !!st.cardsImported, dirty: false };
+    // no prototype: words like "constructor" or "__proto__" are ordinary keys, not Object's own properties
+    const cards = Object.assign(Object.create(null), st.cards || {});
+    const deck = { cards, stats: st.cardStats || {}, imported: !!st.cardsImported, dirty: false };
     const out = await fn(deck);
     if (deck.dirty) await browser.storage.local.set({ cards: deck.cards, cardStats: deck.stats, cardsImported: deck.imported });
     return out;

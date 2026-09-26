@@ -14,7 +14,7 @@ const { Store } = require("./storage");
 // the extension files: the repository root while developing, a copy (ext/) inside the packaged app
 const EXT_DIR = app.isPackaged ? path.join(__dirname, "ext") : path.join(__dirname, "..");
 const BASE = "lamha://app/"; // what browser.runtime.getURL() returns
-const SMOKE = process.argv.includes("--smoke-test");
+const SMOKE = process.argv.includes("--smoke-test") && !app.isPackaged; // the self-test runs from source only (npm run smoke)
 const START_HIDDEN = process.argv.includes("--hidden"); // started with Windows
 const ICON = path.join(__dirname, "assets", "icon-256.png");
 const TRAY_ICON = path.join(__dirname, "assets", "tray-32.png");
@@ -26,13 +26,23 @@ let mainWin = null, optionsWin = null, tray = null, quitting = false;
 /** Interface text (shared/i18n.js + renderer/i18n-desktop.js, loaded by startCore). */
 const T = (key, vars) => globalThis.LamhaI18n.t(key, vars);
 let stores, messageHandler = null, badgeCount = 0, lastReminder = 0;
+/** storage.local keys that hold API keys: encrypted on disk, and never given to the floating card. */
+const SECRET_KEYS = ["aiKey", "geminiKey"];
 
 /* ---------------- the browser.* replacement for the background logic ---------------- */
 
 function broadcast(changes, areaName) {
   for (const f of storageListeners) { try { f(changes, areaName); } catch (err) { console.error(err); } }
-  for (const w of BrowserWindow.getAllWindows()) if (!w.isDestroyed()) w.webContents.send("lamha:storage-changed", changes, areaName);
+  const forCard = withoutSecrets(changes);
+  for (const w of BrowserWindow.getAllWindows()) {
+    if (w.isDestroyed()) continue;
+    const card = w === cardWin;
+    if (card && !Object.keys(forCard).length) continue;
+    w.webContents.send("lamha:storage-changed", card ? forCard : changes, areaName);
+  }
 }
+/** The floating card shows text from other apps and the web: it never gets the API keys (it has aiKeySet / geminiKeySet). */
+const withoutSecrets = obj => Object.fromEntries(Object.entries(obj || {}).filter(([k]) => !SECRET_KEYS.includes(k)));
 const storageListeners = [];
 const listeners = { installed: [], startup: [], alarm: [] };
 
@@ -43,7 +53,7 @@ async function extFetch(url, init) {
   if (!u.startsWith(BASE)) return netFetch(u, init);
   const rel = decodeURIComponent(u.slice(BASE.length).split(/[?#]/)[0]);
   const file = path.join(EXT_DIR, rel);
-  if (!file.startsWith(EXT_DIR)) return { ok: false, status: 403, json: async () => ({}), text: async () => "" };
+  if (!isInside(EXT_DIR, file)) return { ok: false, status: 403, json: async () => ({}), text: async () => "" };
   try {
     const buf = await fs.promises.readFile(file, "utf8");
     return { ok: true, status: 200, json: async () => JSON.parse(buf), text: async () => buf };
@@ -115,7 +125,7 @@ function installBrowserShim() {
 function startCore() {
   const dir = app.getPath("userData");
   stores = {
-    local: new Store(path.join(dir, "storage-local.json"), "local", broadcast),
+    local: new Store(path.join(dir, "storage-local.json"), "local", broadcast, { secrets: SECRET_KEYS, safeStorage }), // API keys: DPAPI-encrypted on disk
     sync: new Store(path.join(dir, "storage-sync.json"), "sync", broadcast)
   };
   installBrowserShim();
@@ -150,9 +160,18 @@ ipcMain.handle("lamha:message", async (_e, msg) => {
   return res === undefined ? undefined : JSON.parse(JSON.stringify(res));
 });
 
-ipcMain.handle("lamha:call", async (_e, method, args) => {
+/** What the floating card may call: it reads settings and opens Settings, nothing else. */
+const CARD_CALLS = new Set(["storage.get", "openOptions"]);
+ipcMain.handle("lamha:call", async (e, method, args) => {
+  args = Array.isArray(args) ? args : [];
+  const card = fromCard(e);
+  if (card && !CARD_CALLS.has(method)) throw new Error("not allowed from the card: " + method);
+  if (String(method).startsWith("storage.") && !["local", "sync"].includes(args[0])) throw new Error("unknown storage area");
   switch (method) {
-    case "storage.get": return stores[args[0]].get(args[1]);
+    case "storage.get": {
+      const got = await stores[args[0]].get(args[1]);
+      return card ? withoutSecrets(got) : got;
+    }
     case "storage.set": return stores[args[0]].set(args[1]);
     case "storage.remove": return stores[args[0]].remove(args[1]);
     case "openOptions": openOptions(args[0] || ""); return true;
@@ -188,8 +207,23 @@ function prepare(win) {
   });
   wc.setWindowOpenHandler(({ url }) => { openUrl(url); return { action: "deny" }; });
   wc.on("will-navigate", (e, url) => {
-    if (!url.startsWith("file:")) { e.preventDefault(); openUrl(url); }
+    if (isAppPage(url)) return; // e.g. a page reloading itself when the interface language changes
+    e.preventDefault();
+    if (!url.startsWith("file:")) openUrl(url); // other local files never load here: they would get the preload's bridge
   });
+}
+
+/** A file: URL of Lamha's own pages (the extension folder or renderer/). */
+function isAppPage(url) {
+  let file;
+  try { file = require("node:url").fileURLToPath(url); } catch (_) { return false; }
+  return [EXT_DIR, path.join(__dirname, "renderer")].some(dir => isInside(dir, file));
+}
+
+/** `file` is `dir` itself or somewhere below it (not a sibling that merely starts with the same name). */
+function isInside(dir, file) {
+  const rel = path.relative(dir, file);
+  return rel === "" || (!!rel && !rel.startsWith("..") && !path.isAbsolute(rel));
 }
 
 function createMain() {

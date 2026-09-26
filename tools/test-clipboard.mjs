@@ -508,6 +508,59 @@ test("apps() lists programs by count; removeApp deletes that program's clips", (
   assert.deepEqual(texts(s), ["b1"]);
 });
 
+section("settings store (storage-local.json)");
+
+const { Store } = createRequire(import.meta.url)("../desktop/storage.js");
+const quiet = fn => { const warn = console.warn; console.warn = () => {}; try { return fn(); } finally { console.warn = warn; } };
+
+test("API keys are encrypted on disk and plain in memory; other settings stay readable", async () => {
+  const file = path.join(dir, "local-keys.json");
+  const a = new Store(file, "local", () => {}, { secrets: ["aiKey"], safeStorage: fakeSafe });
+  await a.set({ aiKey: "sk-ant-secret", targetLang: "ar" });
+  a.flush();
+  const raw = readFileSync(file, "utf8");
+  assert.ok(!raw.includes("sk-ant-secret"), "key in plain text");
+  assert.equal(JSON.parse(raw).targetLang, "ar");
+  const b = new Store(file, "local", () => {}, { secrets: ["aiKey"], safeStorage: fakeSafe });
+  assert.deepEqual(await b.get(["aiKey", "targetLang"]), { aiKey: "sk-ant-secret", targetLang: "ar" });
+});
+
+test("a key saved in plain text by an older version is encrypted when the app starts", async () => {
+  const file = path.join(dir, "local-old.json");
+  writeFileSync(file, JSON.stringify({ geminiKey: "AIza-old", cards: { river: {} } }));
+  const s = new Store(file, "local", () => {}, { secrets: ["geminiKey"], safeStorage: fakeSafe });
+  assert.equal((await s.get("geminiKey")).geminiKey, "AIza-old");
+  const raw = readFileSync(file, "utf8");
+  assert.ok(!raw.includes("AIza-old") && raw.includes("river"));
+});
+
+test("a key that can't be decrypted (another Windows account) is dropped, the rest is kept", async () => {
+  const file = path.join(dir, "local-foreign.json");
+  writeFileSync(file, JSON.stringify({ aiKey: { $enc: "AAAA" }, saveHistory: false }));
+  const broken = { ...fakeSafe, decryptString: () => { throw new Error("DPAPI failed"); } };
+  const s = quiet(() => new Store(file, "local", () => {}, { secrets: ["aiKey"], safeStorage: broken }));
+  assert.deepEqual(await s.get(null), { saveHistory: false });
+});
+
+test("an unreadable settings file is kept aside, not overwritten", async () => {
+  const sub = mkdtempSync(path.join(dir, "corrupt-"));
+  const file = path.join(sub, "storage-local.json");
+  writeFileSync(file, "{ half a file");
+  const s = quiet(() => new Store(file, "local", () => {}));
+  assert.deepEqual(await s.get(null), {});
+  await s.set({ enabled: true });
+  s.flush();
+  const kept = readdirSync(sub).filter(f => f.startsWith("storage-local.corrupt-"));
+  assert.equal(kept.length, 1);
+  assert.equal(readFileSync(path.join(sub, kept[0]), "utf8"), "{ half a file");
+});
+
+test("get() only reads own keys (\"constructor\" is not a setting)", async () => {
+  const s = new Store(path.join(dir, "local-proto.json"), "local", () => {});
+  assert.deepEqual(await s.get(["constructor", "toString"]), {});
+  assert.deepEqual(await s.get({ constructor: 1 }), { constructor: 1 });
+});
+
 let passed = 0, failed = 0;
 for (const { name, fn, title } of queue) {
   if (title) { console.log(title); continue; }

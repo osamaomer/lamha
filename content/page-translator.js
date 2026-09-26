@@ -224,8 +224,21 @@ var LamhaPage = (() => {
         moTimer = null;
         const buf = moBuffer; moBuffer = [];
         buf.forEach(n => n.isConnected && collect(n));
+        if (Date.now() - lastSweep > SWEEP_MS) sweep();
       }, 250);
     }
+  }
+
+  /* Pages that replace their content (feeds, infinite scroll, single-page apps) would otherwise keep every
+   * translated node they ever removed alive in these maps until translation stops. A node the site puts back
+   * later is collected again like any new content. */
+  const SWEEP_MS = 10000;
+  let lastSweep = 0;
+  function sweep() {
+    lastSweep = Date.now();
+    for (const t of orig.keys()) if (!t.isConnected) { orig.delete(t); trans.delete(t); }
+    for (const block of byEl.keys()) if (!block.isConnected) { io.unobserve(block); byEl.delete(block); }
+    for (const el of dirs.keys()) if (!el.isConnected) dirs.delete(el);
   }
 
   async function translateTitle() {

@@ -292,7 +292,7 @@ function flash(text) {
 async function renderWeak() {
   const { mistakes } = await browser.storage.local.get("mistakes");
   const top = Object.entries((mistakes && mistakes.counts) || {})
-    .filter(([c]) => c !== "other" && LamhaAI.CATEGORIES[c])
+    .filter(([c]) => c !== "other" && LamhaAI.isCategory(c))
     .sort((a, b) => b[1] - a[1])[0];
   const btn = $("weak");
   btn.hidden = !top;
