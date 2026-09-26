@@ -1,0 +1,13 @@
+# dependencies
+node_modules/
+
+# build output (extension packages, desktop installers, the extension copy made by `npm run sync`)
+web-ext-artifacts/
+desktop/dist/
+desktop/ext/
+
+# local files
+*.log
+*.tmp
+Thumbs.db
+desktop.ini

@@ -1,0 +1,18 @@
+/* Lamha desktop — injected into the extension's pages (html.desktop): hide browser-only controls. */
+
+/* main window (popup.html): a normal window, not a 360px popup */
+.desktop body:has(> header.top) { width: auto; max-width: 600px; margin: 0 auto; }
+.desktop .top .switch,               /* on/off for web pages */
+.desktop #perm,                      /* site permission banner */
+.desktop main > section.card:first-child, /* this site / translate this page */
+.desktop .foot .dotsep,
+.desktop .foot .hint { display: none !important; }
+.desktop textarea.draft { min-height: 180px; max-height: 45vh; }
+.desktop .wout .text, .desktop .issues { max-height: none; }
+
+/* settings (options.html) */
+.desktop #welcome,
+.desktop #triggerPanel,  /* floating button on web pages */
+.desktop #sitesPanel,    /* excluded websites */
+.desktop #keysPanel,     /* Firefox shortcuts */
+.desktop .ext-only { display: none !important; }

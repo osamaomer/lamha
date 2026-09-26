@@ -1,0 +1,13 @@
+{
+  "name": "lamha-extension-dev",
+  "private": true,
+  "license": "MIT",
+  "description": "Development tools for the Lamha Firefox extension (not part of the add-on). The desktop app has its own package in desktop/.",
+  "scripts": {
+    "test": "node tools/test-writing.mjs && node tools/test-ui.mjs && node tools/test-clipboard.mjs",
+    "lint": "npx web-ext lint"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.1"
+  }
+}

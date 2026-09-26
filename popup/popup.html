@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>لمحة</title>
+  <link rel="stylesheet" href="../shared/ui.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="top">
+    <div class="logo"><img src="../icons/icon.svg" alt="" width="28" height="28"></div>
+    <div class="title">
+      <strong>لمحة</strong>
+      <span>ترجمة وبحث فوري</span>
+    </div>
+    <label class="switch" title="تشغيل / إيقاف">
+      <input type="checkbox" id="enabled">
+      <span class="track"><span class="thumb"></span></span>
+    </label>
+  </header>
+
+  <div id="perm" class="banner" hidden>
+    <div>
+      <b>مطلوب إذن الوصول للمواقع</b>
+      <span>ليتمكن لمحة من العمل على الصفحات التي تزورها.</span>
+    </div>
+    <button id="grant" class="btn small">منح الإذن</button>
+  </div>
+
+  <main>
+    <section class="card">
+      <div class="row">
+        <div class="site">
+          <span class="site-dot"></span>
+          <span id="host" dir="ltr">—</span>
+        </div>
+        <label class="switch sm" title="تفعيل على هذا الموقع">
+          <input type="checkbox" id="siteEnabled">
+          <span class="track"><span class="thumb"></span></span>
+        </label>
+      </div>
+      <button id="pageBtn" class="btn block">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+        <span id="pageLabel">ترجمة هذه الصفحة إلى العربية</span>
+      </button>
+      <p id="pageNote" class="note" hidden></p>
+    </section>
+
+    <section class="card">
+      <div class="tabs" role="tablist" aria-label="الوضع">
+        <button id="tabTr" role="tab" aria-selected="true" aria-controls="trPane">ترجمة</button>
+        <button id="tabWr" role="tab" aria-selected="false" aria-controls="wrPane">كتابة ✨</button>
+        <button id="tabRv" role="tab" aria-selected="false" aria-controls="rvPane">مراجعة <span id="rvBadge" class="count" hidden></span></button>
+      </div>
+
+      <div id="trPane" role="tabpanel">
+        <div class="field">
+          <textarea id="q" rows="2" dir="auto" placeholder="اكتب كلمة أو جملة للترجمة…" spellcheck="false"></textarea>
+          <button id="clearQ" class="icon-btn" title="مسح" aria-label="مسح" hidden>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="result" class="result" hidden></div>
+      </div>
+
+      <div id="wrPane" role="tabpanel" hidden>
+        <textarea id="draft" class="draft" rows="5" dir="auto" placeholder="اكتب رسالتك هنا بالإنجليزية — أو بالعربية لتحويلها إلى إنجليزية طبيعية…"></textarea>
+        <div id="wrTools" class="wtools" role="toolbar" aria-label="أدوات الكتابة"></div>
+        <div id="wrOut" class="wout" aria-live="polite" hidden></div>
+        <button id="weak" class="weak" hidden></button>
+      </div>
+
+      <div id="rvPane" role="tabpanel" hidden>
+        <div id="rvHead" class="rv-head"></div>
+        <div id="rvCard" class="rv-card"></div>
+      </div>
+    </section>
+
+    <section class="card" id="histCard" hidden>
+      <div class="sec-h"><span>آخر عمليات البحث</span><button id="clearHist" class="link">مسح</button></div>
+      <ul id="hist" class="hist"></ul>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <button id="openOptions" class="link">الإعدادات</button>
+    <span class="dotsep">·</span>
+    <span class="hint">بحث سريع <span class="combo"><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></span></span>
+  </footer>
+
+  <script src="../shared/lamha-ai.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

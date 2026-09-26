@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Lamha — لمحة",
+  "short_name": "Lamha",
+  "version": "1.4.0",
+  "description": "Look up English words and translate anything to Arabic — select text and tap the button. قاموس ومترجم فوري للعربية.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "lamha@artwork-lab",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["websiteContent"]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  },
+  "icons": {
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg",
+    "128": "icons/icon.svg"
+  },
+  "permissions": ["storage", "menus", "clipboardWrite", "alarms"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "scripts": ["local-dict.js", "shared/lamha-ai.js", "background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["shared/lamha-ai.js", "content/styles.js", "content/page-translator.js", "content/content.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": "icons/icon.svg",
+    "default_title": "لمحة — ترجمة وبحث"
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "commands": {
+    "lookup-selection": {
+      "suggested_key": { "default": "Alt+Shift+L" },
+      "description": "Look up / translate the selected text"
+    },
+    "translate-page": {
+      "suggested_key": { "default": "Alt+Shift+T" },
+      "description": "Translate the whole page to Arabic (toggle)"
+    },
+    "writing-tools": {
+      "suggested_key": { "default": "Alt+Shift+W" },
+      "description": "Writing tools (Claude) for the selected text"
+    }
+  }
+}
