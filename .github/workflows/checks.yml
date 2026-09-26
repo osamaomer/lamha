@@ -1,0 +1,23 @@
+# Runs the tests and the extension lint on every push and pull request.
+# (The desktop self-test, npm run smoke, needs a real Windows desktop: run it on your PC before a release.)
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+      - run: npx --yes web-ext lint --warnings-as-errors

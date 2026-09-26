@@ -167,6 +167,7 @@ html.cp-page, .cp-page body { height: 100%; overflow: hidden; }
 .cb-set-msg { font-size: 12px; color: var(--danger); }
 .cb-set-acts { display: flex; gap: 6px; flex-wrap: wrap; }
 #cbApps li span { font-family: var(--font-en); direction: ltr; }
+.cb-up-status { display: block; color: var(--muted); font-size: 12.5px; margin-top: 1px; }
 
 @media (prefers-reduced-motion: no-preference) {
   .ca-spin { animation: ca-spin .7s linear infinite; }

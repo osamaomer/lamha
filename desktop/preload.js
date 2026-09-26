@@ -45,6 +45,20 @@ contextBridge.exposeInMainWorld("browser", {
   commands: { getAll: () => call("commands") }
 });
 
+/* ---- updates (Settings → التحديثات): the app's own pages ---- */
+if (info.role === "page") {
+  const updateListeners = [];
+  ipcRenderer.on("lamha:update-changed", () => {
+    for (const f of updateListeners) { try { f(); } catch (err) { console.error(err); } }
+  });
+  contextBridge.exposeInMainWorld("lamhaUpdates", {
+    state: () => call("update.state"), // { status, version, current, packaged, portable, releases, checkedAt }
+    check: () => call("update.check"),
+    restart: () => call("update.restart"), // install the downloaded update (or open the download page: Portable)
+    onChanged: f => { updateListeners.push(f); }
+  });
+}
+
 /* ---- clipboard history (الحافظة): the app's own pages, not the card ---- */
 if (info.role === "page") {
   const clip = (method, ...args) => ipcRenderer.invoke("lamha:clip", method, args); // → { ok, data } | { ok: false, error }

@@ -916,6 +916,24 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       return r.enc;
     });
 
+    await check("Settings → التحديثات: current version, automatic updates on by default, the switch is saved", async () => {
+      const win = getOptionsWin();
+      const r = await js(win, `({
+        panel: !!document.getElementById("updatesPanel"),
+        version: document.getElementById("upVersion").textContent,
+        auto: document.getElementById("updatesAuto").checked,
+        button: document.getElementById("upCheck").textContent
+      })`);
+      assert(r.panel && r.version.includes(app.getVersion()) && r.auto && r.button === "التحقق الآن", JSON.stringify(r));
+      await js(win, `document.getElementById("updatesAuto").click(); true`);
+      await wait(200);
+      const off = (await stores.local.get({ updatesAuto: true })).updatesAuto;
+      await stores.local.set({ updatesAuto: true });
+      assert(off === false, "switch not saved");
+      assert(desktop.updater.state.status === "idle", "the self-test must not contact GitHub: " + desktop.updater.state.status);
+      return r.version;
+    });
+
     await check("expiry (mocked clock): old unpinned clips deleted, pinned kept; runs hourly and at startup", async () => {
       const before = store.list({ limit: 1000 });
       const pinned = before.items.filter(i => i.pinned).length;

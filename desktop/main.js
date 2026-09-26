@@ -149,6 +149,9 @@ ipcMain.handle("lamha:call", async (_e, method, args) => {
     case "openOptions": openOptions(args[0] || ""); return true;
     case "openUrl": openUrl(args[0]); return true;
     case "commands": return [];
+    case "update.state": return { ...updater.state, current: app.getVersion(), packaged: app.isPackaged, portable: !!process.env.PORTABLE_EXECUTABLE_DIR, releases: updater.releasesUrl };
+    case "update.check": await updater.check(true); return { ...updater.state };
+    case "update.restart": updater.restart(); return true;
     default: throw new Error("unknown call " + method);
   }
 });
@@ -624,9 +627,49 @@ function registerHotkeys() {
   if (tray) tray.setContextMenu(trayMenu());
 }
 
-function notify(title, body) {
+function notify(title, body, onClick) {
   if (SMOKE || !Notification.isSupported()) { console.log(`[notify] ${title}: ${body}`); return; }
-  new Notification({ title: "لمحة — " + title, body, icon: ICON }).show();
+  const note = new Notification({ title: "لمحة — " + title, body, icon: ICON });
+  if (onClick) note.on("click", onClick);
+  note.show();
+}
+
+/* ---------------- updates (GitHub Releases, see updater.js) ---------------- */
+
+const updater = require("./updater").createUpdater({
+  version: app.getVersion(),
+  packaged: app.isPackaged,
+  portable: !!process.env.PORTABLE_EXECUTABLE_DIR, // set by the Portable build's launcher
+  autoUpdater: () => require("electron-updater").autoUpdater,
+  fetchJson: async url => {
+    const r = await netFetch(url, { headers: { Accept: "application/vnd.github+json", "User-Agent": "Lamha/" + app.getVersion() } });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  },
+  notify,
+  onChange: () => {
+    updateTray();
+    for (const w of BrowserWindow.getAllWindows()) if (!w.isDestroyed()) w.webContents.send("lamha:update-changed");
+  },
+  openUrl
+});
+
+/** Tray item: check, or install / download what was found. */
+function updateMenu() {
+  const st = updater.state;
+  if (st.status === "ready") return { label: `أعد التشغيل لتثبيت الإصدار ${st.version}`, click: () => updater.restart() };
+  if (st.status === "available") return { label: `تنزيل الإصدار ${st.version}`, click: () => updater.restart() };
+  if (st.status === "downloading") return { label: `يُنزَّل الإصدار ${st.version}…`, enabled: false };
+  if (st.status === "checking") return { label: "جارٍ التحقق من التحديثات…", enabled: false };
+  return { label: "التحقق من التحديثات", click: () => updater.check(true) };
+}
+
+function startUpdates() {
+  if (SMOKE) return; // the self-test never goes to GitHub
+  stores.local.get({ updatesAuto: true }).then(s => updater.schedule(s.updatesAuto !== false));
+  storageListeners.push((changes, area) => {
+    if (area === "local" && changes.updatesAuto) updater.schedule(changes.updatesAuto.newValue !== false);
+  });
 }
 
 /* ---------------- tray, badge, reminders ---------------- */
@@ -640,6 +683,7 @@ function trayMenu() {
     { label: "كتابة ✨", click: () => showMain("write") },
     ...pauseMenu(),
     { label: "الإعدادات", click: () => openOptions("") },
+    updateMenu(),
     { type: "separator" },
     ...Object.entries(HOTKEYS).map(([accel, kind]) => ({
       label: `${accel} — ${HOTKEY_LABELS[kind]}${hotkeyErrors.includes(accel) ? " (غير متاح)" : ""}`,
@@ -722,11 +766,12 @@ if (!gotLock) {
     if (selection) createCardWin(); // ready before the first shortcut, so it opens instantly
     if (clipboardMonitor) createPanelWin(); // likewise: the quick panel must show within 150 ms
     startClipboard().catch(err => console.error("clipboard history failed to start:", err && err.name)); // runs synchronously up to its await
+    startUpdates();
     if (!SMOKE) { createTray(); if (selection) registerHotkeys(); }
     if (SMOKE) {
       return require("./scripts/smoke-test")({
         app, mainWin, openOptions, getOptionsWin: () => optionsWin, stores, send: msg => messageHandler(msg, {}),
-        desktop: { onHotkey, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore,
+        desktop: { onHotkey, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
           openPanel, hidePanel, getPanelWin: () => panelWin, panelReady: () => panelReady,
           pauseClipboard, resumeClipboard, runClipExpiry, trayTooltip }
       });

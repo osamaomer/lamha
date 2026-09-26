@@ -1,0 +1,45 @@
+# Builds the Windows app and publishes it as a GitHub Release when a version tag is pushed:
+#   npm version 1.5.1 --no-git-tag-version --prefix desktop
+#   git commit -am "Lamha 1.5.1" && git tag v1.5.1 && git push && git push origin v1.5.1
+# Installed copies of Lamha find the new release through latest.yml (electron-updater).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write # create the release and upload the installers (this run's own, temporary token)
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22 # npm 10: runs packages' install scripts (npm 11 skips them)
+
+      - name: The tag matches the app's version
+        shell: bash
+        run: |
+          version=$(node -p "require('./desktop/package.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match desktop/package.json version $version"
+            exit 1
+          fi
+
+      - name: Tests and extension lint
+        run: |
+          npm ci
+          npm test
+          npx --yes web-ext lint --warnings-as-errors
+
+      - name: Build and publish the installers
+        working-directory: desktop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm ci
+          npm run release

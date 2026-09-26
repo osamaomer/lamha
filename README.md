@@ -132,6 +132,7 @@ Test the writing tools with `node tools/test-writing.mjs`. The test runs the bac
 - **Review reminders:** a Windows notification when cards are waiting, at most every 4 hours.
 - **Ollama:** works without the `OLLAMA_ORIGINS` step, which is only needed for browser extensions.
 - **Your data:** settings, cards and the mistake journal are saved in `%APPDATA%\Lamha`.
+- **Updates:** the installed app checks [GitHub Releases](https://github.com/osamaomer/lamha/releases) at startup and every 6 hours, downloads a new version in the background and installs it when Lamha restarts. The tray has **التحقق من التحديثات**, and Settings → التحديثات can turn automatic updates off. The Portable version can't replace itself: it tells you when a new version is out and links to the download.
 
 ### الحافظة (Clipboard history)
 
@@ -156,6 +157,23 @@ npm run dist       # builds dist/Lamha-Setup-<version>.exe and dist/Lamha-Portab
 ```
 
 The app is not code-signed. The first time it runs, Windows SmartScreen shows "Windows protected your PC". Choose *More info → Run anyway*.
+
+### Releasing a new version
+
+Releases are built by GitHub Actions ([.github/workflows/release.yml](.github/workflows/release.yml)), so no token or build tools are needed on your PC, and it works the same from any PC with the repository.
+
+1. Run the full self-test on Windows: `cd desktop && npm run smoke`. The cloud build runs the unit tests and the lint, but not this test, which needs a real desktop.
+2. Raise the version, commit it, and push a matching tag (from the repository folder):
+   ```bash
+   npm version 1.5.1 --no-git-tag-version --prefix desktop   # updates desktop/package.json and its lockfile
+   git commit -am "Lamha 1.5.1"
+   git tag v1.5.1
+   git push && git push origin v1.5.1
+   ```
+3. The **Release** workflow checks that the tag matches the version, runs the tests, builds `Lamha-Setup-<version>.exe` and `Lamha-Portable-<version>.exe`, and publishes them with `latest.yml` as a GitHub Release. Follow it in the repository's **Actions** tab.
+4. Installed copies pick it up on their next check. Add release notes by editing the release on GitHub.
+
+Share the **Setup** installer: only installed copies update themselves.
 
 ## Project layout
 

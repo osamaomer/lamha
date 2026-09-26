@@ -1,5 +1,5 @@
-/* Lamha desktop — Settings → الحافظة. The settings window shows the extension's options.html, which this app
- * doesn't modify: main.js injects this script to add the section, built from the page's own components
+/* Lamha desktop — Settings → الحافظة and التحديثات. The settings window shows the extension's options.html, which
+ * this app doesn't modify: main.js injects this script to add the sections, built from the page's own components
  * (.panel, .opt, .switch, select, .sites). Values live in storage.local (read by main.js). */
 "use strict";
 (() => {
@@ -127,7 +127,57 @@
   });
 
   load();
-  const toSection = () => { if (location.hash === "#clipboard") panel.scrollIntoView({ block: "start" }); };
+
+  /* ---- التحديثات: from the GitHub Releases (updater.js) ---- */
+  if (window.lamhaUpdates) {
+    const upStatus = h("span", { class: "cb-up-status", role: "status" });
+    const upBtn = h("button", { class: "btn small", type: "button", id: "upCheck" }, "التحقق الآن");
+    const upPanel = h("section", { class: "panel", id: "updatesPanel" },
+      h("h2", null, "التحديثات"),
+      h("p", { class: "muted", id: "upVersion" }),
+      h("label", { class: "opt" },
+        h("div", null, h("b", null, "التحديثات التلقائية"), h("small", null, "يتحقق لمحة من وجود إصدار جديد عند التشغيل وكل ٦ ساعات، وينزّله في الخلفية، ويثبّته عند إعادة التشغيل.")),
+        sw("updatesAuto", "التحديثات التلقائية")),
+      h("div", { class: "opt" },
+        h("div", null, h("b", null, "التحقق من وجود تحديث"), upStatus),
+        upBtn),
+      h("button", { class: "link", type: "button", id: "upReleases" }, "ما الجديد في كل إصدار")
+    );
+    panel.after(upPanel);
+    const STATUS = {
+      checking: () => "جارٍ التحقق…",
+      downloading: st => `يُنزَّل الإصدار ${st.version}…`,
+      ready: st => `الإصدار ${st.version} جاهز — أعد التشغيل لتثبيته`,
+      available: st => `الإصدار ${st.version} متاح — نسخة Portable تُحدَّث بتنزيل الإصدار الجديد`,
+      latest: () => "لديك أحدث إصدار ✓",
+      error: () => "تعذّر التحقق من التحديثات. تحقق من اتصالك.",
+      dev: () => "التحديث التلقائي يعمل في النسخة المثبّتة فقط."
+    };
+    let releases = "";
+    const renderUpdates = async () => {
+      const st = await lamhaUpdates.state();
+      releases = st.releases;
+      $("upVersion").textContent = `الإصدار الحالي: ${st.current}` + (st.portable ? " (Portable)" : "");
+      upStatus.textContent = STATUS[st.status] ? STATUS[st.status](st) : "";
+      upBtn.textContent = st.status === "ready" ? "أعد التشغيل الآن" : st.status === "available" ? "تنزيل" : "التحقق الآن";
+      upBtn.disabled = ["checking", "downloading"].includes(st.status);
+      const { updatesAuto } = await local.get({ updatesAuto: true });
+      $("updatesAuto").checked = updatesAuto !== false;
+    };
+    upBtn.addEventListener("click", async () => {
+      const st = await lamhaUpdates.state();
+      if (["ready", "available"].includes(st.status)) lamhaUpdates.restart(); else { await lamhaUpdates.check(); renderUpdates(); }
+    });
+    $("updatesAuto").addEventListener("change", e => local.set({ updatesAuto: e.target.checked }));
+    $("upReleases").addEventListener("click", () => browser.tabs.create({ url: releases }));
+    lamhaUpdates.onChanged(renderUpdates);
+    renderUpdates();
+  }
+
+  const toSection = () => {
+    const target = { "#clipboard": panel, "#updates": document.getElementById("updatesPanel") }[location.hash];
+    if (target) target.scrollIntoView({ block: "start" });
+  };
   window.addEventListener("hashchange", toSection); // Settings already open: only the hash changes
   toSection();
 })();

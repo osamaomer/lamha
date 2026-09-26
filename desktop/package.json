@@ -12,7 +12,8 @@
     "smoke": "node scripts/run.mjs --smoke-test",
     "icons": "node scripts/run.mjs scripts/make-icons.js",
     "sync": "node scripts/sync-ext.mjs",
-    "dist": "npm run sync && electron-builder --win"
+    "dist": "npm run sync && electron-builder --win",
+    "release": "npm run sync && electron-builder --win --publish always"
   },
   "devDependencies": {
     "electron": "^44.4.5",
@@ -31,11 +32,20 @@
       "clipboard-store.js",
       "clipboard-actions.js",
       "clipboard-privacy.js",
+      "updater.js",
       "renderer/**",
       "assets/**",
       "ext/**",
       "scripts/smoke-test.js",
       "package.json"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "osamaomer",
+        "repo": "lamha",
+        "releaseType": "release"
+      }
     ],
     "win": {
       "target": [
@@ -55,6 +65,7 @@
     }
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "koffi": "^3.3.1"
   }
 }
