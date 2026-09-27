@@ -28,8 +28,25 @@ var LamhaPage = (() => {
   let listener = () => {};
   let rewrites = new WeakMap(); // Text → how often the site rewrote it (live tickers, clocks…)
   const MAX_REWRITES = 3;
+  /* A batch that fails (rate limit, network) is tried again after these delays; after the last one its text is set
+   * aside in `failed` and the bar offers to try again (retry()). */
+  const RETRY_MS = [5000, 20000, 60000];
+  let waiting = new Map(); // block → Set<Text> to try again when retryTimer fires
+  let failed = new Map();  // block → Set<Text> given up on until retry()
+  let attempts = new WeakMap(); // block → failed tries so far
+  let retryTimer = null;
 
-  const emit = () => listener({ active, showingOriginal, loading: active && (inflight > 0 || queue.size > 0) });
+  const emit = () => listener({
+    active, showingOriginal,
+    loading: active && (inflight > 0 || queue.size > 0 || waiting.size > 0),
+    failed: active && failed.size > 0
+  });
+
+  function addTo(map, block, texts) {
+    let set = map.get(block);
+    if (!set) { set = new Set(); map.set(block, set); }
+    texts.forEach(t => set.add(t));
+  }
 
   function skipElement(el) {
     if (SKIP.has(el.tagName)) return true;
@@ -138,15 +155,46 @@ var LamhaPage = (() => {
       }
       if (!qs.length) continue;
       inflight++;
-      browser.runtime.sendMessage({ type: "translateBatch", texts: qs, tl, format: "html" })
+      browser.runtime.sendMessage({ type: "translateBatch", texts: qs, tl, format: "html", kind: "page" })
         .then(res => {
-          if (!active || !res || !res.ok) return;
-          for (const u of units) apply(u, res.data[index.get(u.q)]);
+          if (!active) return;
+          if (!res || !res.ok) { retryLater(units); return; }
+          for (const u of units) { attempts.delete(u.block); apply(u, res.data[index.get(u.q)]); }
         })
-        .catch(() => {})
+        .catch(() => retryLater(units))
         .finally(() => { inflight--; if (queue.size) scheduleFlush(); emit(); });
     }
     emit();
+  }
+
+  /** A failed batch: its blocks wait for the next retry, or are set aside once they have used up RETRY_MS. */
+  function retryLater(units) {
+    if (!active) return;
+    let delay = 0;
+    for (const u of units) {
+      const n = (attempts.get(u.block) || 0) + 1;
+      attempts.set(u.block, n);
+      const texts = u.nodes.map(x => x.t);
+      if (n > RETRY_MS.length) { addTo(failed, u.block, texts); continue; }
+      addTo(waiting, u.block, texts);
+      delay = Math.max(delay, RETRY_MS[n - 1]);
+    }
+    if (delay && !retryTimer) {
+      retryTimer = setTimeout(() => {
+        retryTimer = null;
+        for (const [block, set] of waiting) addTo(queue, block, set);
+        waiting = new Map();
+        scheduleFlush();
+      }, delay);
+    }
+  }
+
+  /** The bar's "try again": what was set aside goes back in the queue, with a fresh set of retries. */
+  function retry() {
+    if (!active || !failed.size) return;
+    for (const [block, set] of failed) { attempts.delete(block); addTo(queue, block, set); }
+    failed = new Map();
+    scheduleFlush();
   }
 
   const parser = new DOMParser();
@@ -198,7 +246,7 @@ var LamhaPage = (() => {
   }
 
   function setDir(el) {
-    if (!el || tl !== "ar") return;
+    if (!el || LamhaI18n.textDir(tl) !== "rtl") return; // Arabic, Persian, Urdu… read right to left
     const block = el.closest("p,li,h1,h2,h3,h4,h5,h6,blockquote,dd,dt,td,th,figcaption,caption,summary,legend");
     if (!block || dirs.has(block) || !DIR_TAGS.has(block.tagName)) return;
     dirs.set(block, block.getAttribute("dir"));
@@ -239,13 +287,14 @@ var LamhaPage = (() => {
     for (const t of orig.keys()) if (!t.isConnected) { orig.delete(t); trans.delete(t); }
     for (const block of byEl.keys()) if (!block.isConnected) { io.unobserve(block); byEl.delete(block); }
     for (const el of dirs.keys()) if (!el.isConnected) dirs.delete(el);
+    for (const m of [waiting, failed]) for (const block of m.keys()) if (!block.isConnected) m.delete(block);
   }
 
   async function translateTitle() {
     const t = document.title;
     if (!t || (ARABIC_RE.test(t) && !LATIN_RE.test(t))) return;
     try {
-      const res = await browser.runtime.sendMessage({ type: "translateBatch", texts: [t], tl });
+      const res = await browser.runtime.sendMessage({ type: "translateBatch", texts: [t], tl, kind: "page" });
       if (active && res && res.ok && res.data[0]) {
         titleOrig = t; titleTrans = res.data[0];
         if (!showingOriginal) document.title = titleTrans;
@@ -270,10 +319,12 @@ var LamhaPage = (() => {
     io && io.disconnect(); mo && mo.disconnect();
     clearTimeout(flushTimer); flushTimer = null;
     clearTimeout(moTimer); moTimer = null; moBuffer = [];
+    clearTimeout(retryTimer); retryTimer = null;
     for (const [t, v] of orig) if (t.isConnected && t.nodeValue === trans.get(t)) t.nodeValue = v;
     for (const [el, d] of dirs) d == null ? el.removeAttribute("dir") : el.setAttribute("dir", d);
     if (titleOrig && document.title === titleTrans) document.title = titleOrig;
     orig = new Map(); trans = new Map(); dirs = new Map(); byEl = new Map(); queue = new Map(); rewrites = new WeakMap();
+    waiting = new Map(); failed = new Map(); attempts = new WeakMap();
     titleOrig = titleTrans = null; showingOriginal = false;
     emit();
   }
@@ -292,7 +343,7 @@ var LamhaPage = (() => {
   }
 
   return {
-    start, stop, showOriginal,
+    start, stop, showOriginal, retry,
     isActive: () => active,
     onState: fn => { listener = fn; }
   };

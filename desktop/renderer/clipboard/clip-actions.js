@@ -41,6 +41,7 @@ var LamhaClipActions = (() => {
       };
     }
     if (code === "rate_limited") return { title: L("c.errBusy"), text: L("c.errTooMany") };
+    if (code === "too_long") { const [title, text] = LamhaAI.errorInfo("ai_too_long"); return { title, text }; }
     if (code === "no_translation" || code === "empty_result") return { title: L("d.errNoTranslation"), text: L("d.errNoTranslationHint") };
     return { title: L("c.errFailed"), text: L("d.errTranslate") };
   }

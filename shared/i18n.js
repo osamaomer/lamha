@@ -35,6 +35,9 @@ var LamhaI18n = (() => {
   }
   const setLang = l => { lang = l === "en" ? "en" : "ar"; return lang; };
   const dir = () => (lang === "ar" ? "rtl" : "ltr");
+  /** The writing direction of a language code ("ar", "fa", "ur-PK" …): "rtl" or "ltr". */
+  const RTL = new Set(["ar", "fa", "ur", "he", "iw", "ps", "yi", "ku", "sd"]);
+  const textDir = code => (RTL.has(String(code || "").split("-")[0].toLowerCase()) ? "rtl" : "ltr");
 
   /**
    * Reads the setting and follows its changes. `onChange(lang)` runs when the language changes
@@ -265,6 +268,10 @@ var LamhaI18n = (() => {
     "c.nothingToSummarize": ["لا يوجد نص لتلخيصه", "No text to summarize"],
     "c.pageBar": ["ترجمة الصفحة", "Page translation"],
     "c.pageDone": ["تُرجمت الصفحة", "Page translated"],
+    "c.betterTr": ["ترجمة أدق", "Better translation"],
+    "c.betterTrTitle": [v => `ترجمة النص مجددًا بـ ${v.p}: أدق في التعابير والعامية، وأبطأ`, v => `Translate again with ${v.p}: better with idioms and slang, but slower`],
+    "c.aiBadgeTitle": [v => `ترجمها الذكاء الاصطناعي (${v.p})`, v => `Translated by AI (${v.p})`],
+    "c.pagePartial": ["تعذّرت ترجمة بعض الأجزاء", "Some parts couldn't be translated"],
     "c.original": ["الأصل", "Original"],
     "c.stopTranslation": ["إيقاف الترجمة", "Stop translating"],
     "c.selectFirst": ["حدّد نصًّا أولًا", "Select some text first"],
@@ -276,5 +283,5 @@ var LamhaI18n = (() => {
     setTimeout(() => document.documentElement.removeAttribute("data-i18n-pending"), 1500);
   }
 
-  return { add, t, num, arCount, enCount, resolve, systemLang, setLang, lang: () => lang, dir, init, applyDom };
+  return { add, t, num, arCount, enCount, resolve, systemLang, setLang, lang: () => lang, dir, textDir, init, applyDom };
 })();

@@ -150,7 +150,7 @@ $("clearQ").addEventListener("click", () => {
   q.value = ""; q.dispatchEvent(new Event("input")); $("result").hidden = true; q.focus();
 });
 
-const dirOf = l => (["ar", "fa", "ur", "he", "iw"].includes(l) ? "rtl" : "ltr");
+const dirOf = LamhaI18n.textDir;
 
 async function runQuick() {
   const text = q.value.trim();
@@ -162,7 +162,9 @@ async function runQuick() {
   const res = await browser.runtime.sendMessage({ type: "lookup", text }).catch(() => null);
   if (token !== qToken) return;
   if (!res || !res.ok) {
-    const msg = res && res.error === "rate_limited" ? t("p.busy") : t("p.failed");
+    const msg = res && res.error === "rate_limited" ? t("p.busy")
+      : res && res.error === "too_long" ? LamhaAI.errorInfo("ai_too_long").join(" — ")
+      : t("p.failed");
     out.replaceChildren(h("div", { class: "error" }, msg));
     return;
   }

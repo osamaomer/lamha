@@ -68,6 +68,7 @@ async function init() {
   renderSites(s.disabledSites);
   renderHistCount();
   initAI();
+  initTranslation();
   renderJournal();
   renderReviewStats();
   $("cardsNewPerDay").value = String(s.cardsNewPerDay);
@@ -212,13 +213,73 @@ async function initAI() {
   showProvider(provider);
 }
 
+/* ---- translation service (Settings → Translation): per device in storage.local, like the AI keys ---- */
+
+const TR_MODELS = { // the first one is what background.js translates with by default
+  gemini: [["gemini-3.5-flash-lite", "o.gemLite"], ["gemini-3.8-flash", "o.gemFlash"]],
+  claude: [["claude-haiku-4-5", "o.haiku"], ["claude-sonnet-5", "o.sonnet"], ["claude-opus-5", "o.opus"]]
+};
+const TR_WATCH = ["trService", "trProvider", "trModels", "aiProvider", "ollamaModel", "ollamaUrl", "aiKey", "geminiKey", "aiKeySet", "geminiKeySet"];
+
+async function initTranslation() {
+  const st = await browser.storage.local.get([...TR_WATCH, "trPages"]);
+  document.querySelectorAll('input[name="trService"]').forEach(r => {
+    r.checked = r.value === LamhaAI.translator(st).service;
+    r.addEventListener("change", async () => { if (r.checked) { await browser.storage.local.set({ trService: r.value }); saved(); } });
+  });
+  $("trProvider").value = ["ollama", "gemini", "claude"].includes(st.trProvider) ? st.trProvider : "writing";
+  $("trProvider").addEventListener("change", async e => { await browser.storage.local.set({ trProvider: e.target.value }); saved(); });
+  $("trPages").checked = st.trPages === true;
+  $("trPages").addEventListener("change", async e => { await browser.storage.local.set({ trPages: e.target.checked }); saved(); });
+  $("trModel").addEventListener("change", async e => {
+    const { trModels = {} } = await browser.storage.local.get("trModels");
+    await browser.storage.local.set({ trModels: { ...trModels, [LamhaAI.translator(st).id]: e.target.value } });
+    saved();
+  });
+
+  let modelsFor = "";
+  const render = () => {
+    const tr = LamhaAI.translator(st);
+    $("trAiBox").hidden = tr.service === "google";
+    const key = [tr.id, st.ollamaModel, st.ollamaUrl].join("|");
+    if (key !== modelsFor) { modelsFor = key; fillTrModels(tr.id, st); }
+    setStatus("trStatus", tr.ready ? t("o.trUses", { p: tr.name }) : t("o.trNotReady", { p: tr.name }), tr.ready ? "ok" : "bad");
+  };
+  // a key saved or a provider picked under "Writing tools" changes what translation can use
+  browser.storage.onChanged.addListener((changes, area) => {
+    if (area !== "local" || !TR_WATCH.some(k => changes[k])) return;
+    TR_WATCH.forEach(k => { if (changes[k]) st[k] = changes[k].newValue; });
+    render();
+  });
+  render();
+}
+
+/** The model menu for the translating provider; for Ollama, the models installed there (after "same as writing"). */
+async function fillTrModels(id, st) {
+  const sel = $("trModel");
+  const chosen = (st.trModels && typeof st.trModels === "object" ? st.trModels : {})[id];
+  const opt = (value, label) => { const o = document.createElement("option"); o.value = value; o.textContent = label; return o; };
+  $("trModelHint").textContent = t({ gemini: "o.trModelHintGemini", claude: "o.trModelHintClaude", ollama: "o.trModelHintOllama" }[id]);
+  if (id !== "ollama") {
+    sel.replaceChildren(...TR_MODELS[id].map(([v, k]) => opt(v, t(k))));
+    sel.value = TR_MODELS[id].some(([v]) => v === chosen) ? chosen : TR_MODELS[id][0][0];
+    return;
+  }
+  sel.replaceChildren(opt("", t("o.trOllamaSame", { m: st.ollamaModel || "—" })));
+  const res = await bg({ type: "ollamaModels", url: st.ollamaUrl || "" });
+  if (res && res.ok) sel.append(...res.data.map(m => opt(m.name, m.name)));
+  if (chosen && ![...sel.options].some(o => o.value === chosen)) sel.append(opt(chosen, chosen)); // installed on another PC, or Ollama is off
+  sel.value = chosen || "";
+}
+
 /* ---- review deck ---- */
 
 async function renderReviewStats() {
   const res = await browser.runtime.sendMessage({ type: "reviewQueue" }).catch(() => null);
-  if (!res || !res.counts.total) return;
+  if (!res) return;
   const { due, fresh, total, learned } = res.counts;
-  $("rvSummary").textContent = t("o.rvSummary", { total, learned, due, fresh });
+  // an empty deck (e.g. just cleared) shows the introduction again, not the old counts
+  $("rvSummary").textContent = total ? t("o.rvSummary", { total, learned, due, fresh }) : t("o.reviewIntro");
 }
 
 /* ---- mistake journal ---- */
@@ -238,7 +299,8 @@ async function renderJournal() {
   const { mistakes } = await browser.storage.local.get("mistakes");
   const j = mistakes || { checks: 0, counts: {}, recent: [] };
   const total = Object.values(j.counts).reduce((a, b) => a + b, 0);
-  const rows = Object.entries(j.counts).filter(([c, n]) => LamhaAI.isCategory(c) && n > 0) // names and rules: LamhaAI.catLabel / catTip.sort((a, b) => b[1] - a[1]);
+  // most frequent first: the summary's "top" and the bar widths are both measured against rows[0]
+  const rows = Object.entries(j.counts).filter(([c, n]) => LamhaAI.isCategory(c) && n > 0).sort((a, b) => b[1] - a[1]);
 
   if (!j.checks) {
     $("jSummary").textContent = t("o.jEmpty");

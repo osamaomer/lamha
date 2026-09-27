@@ -178,7 +178,7 @@ svg { display: block; flex: none; }
   background: var(--accent-soft);
   display: flex; align-items: center; gap: 10px;
 }
-.hero .t { flex: 1; min-width: 0; font-size: 22px; font-weight: 700; line-height: 1.35; color: var(--fg); word-break: break-word; }
+.hero .t { flex: 1; min-width: 0; font-size: 22px; font-weight: 700; line-height: 1.35; color: var(--fg); word-break: break-word; white-space: pre-line; }
 .hero .t.none { font-size: 13.5px; font-weight: 500; color: var(--muted); line-height: 1.6; }
 .hero .t.none .gloss { display: block; margin-top: 4px; color: var(--fg); font-family: var(--font-ui); font-size: 13px; text-align: left; }
 .ctx-label { display: inline-block; font-family: var(--font-ar); font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
@@ -196,7 +196,7 @@ svg { display: block; flex: none; }
 .source {
   direction: ltr; text-align: left;
   font-size: 13px; color: var(--muted);
-  line-height: 1.55;
+  line-height: 1.55; white-space: pre-line;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
   cursor: pointer;
 }
@@ -380,6 +380,7 @@ div.pos { display: block; margin-bottom: 6px; }
 .pbar .spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent-soft); border-top-color: var(--accent); animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .pbar .ok { color: var(--ok); }
+.pbar .warn { color: var(--danger); }
 .pbar .seg { display: flex; background: var(--chip); border-radius: 999px; padding: 2px; }
 .pbar .seg button { padding: 4px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--muted); font-family: var(--font-ar); }
 .pbar .seg button.on { background: var(--bg-solid); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.12); }

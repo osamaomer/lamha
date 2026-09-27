@@ -101,6 +101,53 @@
 
     <section class="panel" id="translation">
       <h2 data-i18n="o.translation">الترجمة</h2>
+      <p class="muted" data-i18n="o.trIntro">من يترجم الجمل والفقرات: Google سريع ويحتاج إلى الإنترنت، والذكاء الاصطناعي أدق في التعابير والعامية وأبطأ، ومع Ollama يعمل دون إنترنت.</p>
+      <div class="choices" role="radiogroup" aria-label="خدمة الترجمة" data-i18n-attr="aria-label:o.trService">
+        <label class="choice">
+          <input type="radio" name="trService" value="auto">
+          <span class="c">
+            <span class="ill"><span class="src-ill">🌐<small>+</small>✨</span></span>
+            <b data-i18n="o.trAuto">تلقائي</b>
+            <small data-i18n="o.trAutoHint">Google، والذكاء الاصطناعي حين لا يتوفر الإنترنت أو يتعذّر Google (مستحسن)</small>
+          </span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="trService" value="google">
+          <span class="c">
+            <span class="ill"><span class="src-ill">🌐</span></span>
+            <b data-i18n="o.trGoogle">Google فقط</b>
+            <small data-i18n="o.trGoogleHint">سريع ومجاني، ولا يعمل دون إنترنت</small>
+          </span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="trService" value="ai">
+          <span class="c">
+            <span class="ill"><span class="src-ill">✨</span></span>
+            <b data-i18n="o.trAi">الذكاء الاصطناعي</b>
+            <small data-i18n="o.trAiHint">ترجمة أكثر طبيعية للجمل، وأبطأ. Google عند تعذّره</small>
+          </span>
+        </label>
+      </div>
+      <div id="trAiBox">
+        <div class="opt">
+          <label for="trProvider"><b data-i18n="o.trProvider">مَن يترجم</b><small data-i18n="o.trProviderHint">يمكن أن يختلف عن أدوات الكتابة، مثلًا Gemini للكتابة و Ollama للترجمة</small></label>
+          <select id="trProvider">
+            <option value="writing" data-i18n="o.trSameAsWriting">مثل أدوات الكتابة</option>
+            <option value="ollama">Ollama</option>
+            <option value="gemini">Gemini</option>
+            <option value="claude">Claude</option>
+          </select>
+        </div>
+        <div class="opt">
+          <label for="trModel"><b data-i18n="o.model">النموذج</b><small id="trModelHint"></small></label>
+          <select id="trModel"></select>
+        </div>
+        <p id="trStatus" class="ai-status" role="status"></p>
+        <label class="opt">
+          <div><b data-i18n="o.trPages">ترجمة الصفحات بالذكاء الاصطناعي أيضًا</b><small data-i18n="o.trPagesHint">الصفحة الكاملة نص كثير: مع Gemini المجاني قد ينفد الحد اليومي سريعًا، ومع Ollama تكون أبطأ بكثير.</small></div>
+          <span class="switch"><input type="checkbox" id="trPages"><span class="track"><span class="thumb"></span></span></span>
+        </label>
+      </div>
       <div class="opt">
         <div><b data-i18n="o.targetLang">لغة الترجمة</b><small data-i18n="o.targetLangHint">اللغة التي تُترجم إليها النصوص</small></div>
         <select id="targetLang">

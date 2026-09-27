@@ -43,7 +43,7 @@ const local = area("local", {
     resilient: card("resilient", "مرن", { ex: "Kids are resilient.", form: "resilient", added: now - 5 }),
     thrive: card("thrive", "يزدهر", { added: now - 10 })
   },
-  mistakes: { checks: 4, counts: { articles: 6, prepositions: 3, other: 2 }, recent: [{ cat: "articles", original: "market", fix: "the market", why: "مكان معروف.", t: now }] }
+  mistakes: { checks: 4, counts: { other: 2, prepositions: 3, articles: 6 }, recent: [{ cat: "articles", original: "market", fix: "the market", why: "مكان معروف.", t: now }] }
 });
 const sync = area("sync", { uiLang: "ar" }); // the English interface has its own steps below
 const onChanged = { addListener: f => listeners.push(f) };
@@ -210,6 +210,9 @@ await step("options: journal bars sorted by count, summary names the top weaknes
   const bars = [...o("jBars").querySelectorAll(".bar")].map(b => text(b));
   assert.equal(bars.length, 4);
   assert.match(bars[0], /^أدوات التعريف.*٧$/);
+  // the seed lists "other" first: the bars must still come out most frequent first
+  const counts = bars.map(b => Number(b.match(/[٠-٩]+$/)[0].replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d))));
+  assert.deepEqual(counts, [...counts].sort((a, b) => b - a));
 });
 
 await step("options: clicking a bar shows its rule and only its examples", async () => {
@@ -226,8 +229,41 @@ await step("options: review section shows deck stats; clearing the deck works", 
   assert.equal(o("cardsAuto").checked, true);
   assert.equal(o("cardsNewPerDay").value, "10");
   o("rvClear").click();
-  await sleep(100);
+  await sleep(400); // the background's badge refresh and the page's re-render
   assert.deepEqual(local.data.cards, {});
+  assert.doesNotMatch(text(o("rvSummary")), /كلمتان/, "the old counts are gone");
+  assert.match(text(o("rvSummary")), /تُضاف إلى بطاقات المراجعة/, "back to the introduction");
+});
+
+await step("options: translation service saves per device; model menu and status follow the translator", async () => {
+  const radio = v => o("translation").querySelector(`input[name="trService"][value="${v}"]`);
+  assert.equal(radio("auto").checked, true, "Automatic by default");
+  assert.equal(o("trAiBox").hidden, false);
+  assert.match(text(o("trStatus")), /Ollama/, "the writing tools' Ollama model translates");
+  radio("google").checked = true;
+  radio("google").dispatchEvent(new opt.Event("change"));
+  await sleep(50);
+  assert.equal(local.data.trService, "google");
+  assert.equal(o("trAiBox").hidden, true, "nothing to choose for Google only");
+  radio("ai").checked = true;
+  radio("ai").dispatchEvent(new opt.Event("change"));
+  o("trProvider").value = "gemini";
+  o("trProvider").dispatchEvent(new opt.Event("change"));
+  await sleep(50);
+  assert.equal(local.data.trProvider, "gemini");
+  assert.deepEqual([...o("trModel").options].map(x => x.value), ["gemini-3.5-flash-lite", "gemini-3.8-flash"], "Flash-Lite first: the translation default");
+  assert.match(o("trStatus").className, /bad/, "no Gemini key yet");
+  o("trModel").value = "gemini-3.8-flash";
+  o("trModel").dispatchEvent(new opt.Event("change"));
+  o("trPages").checked = true;
+  o("trPages").dispatchEvent(new opt.Event("change"));
+  await sleep(50);
+  assert.deepEqual(local.data.trModels, { gemini: "gemini-3.8-flash" });
+  assert.equal(local.data.trPages, true);
+  await local.set({ geminiKey: "AIza-test" });
+  await sleep(50);
+  assert.match(o("trStatus").className, /ok/, "a key saved under Writing tools is picked up at once");
+  for (const k of ["trService", "trProvider", "trModels", "trPages", "geminiKey"]) delete local.data[k];
 });
 
 /* ---- the English interface ---- */
@@ -304,6 +340,120 @@ await step("Settings: the Animations menu saves the choice", async () => {
   assert.equal(o.document.documentElement.getAttribute("data-motion"), "subtle");
   assert.ok(o.document.getElementById("mdNote").textContent.length > 0, "the preview explains the level");
   await sync.set({ motion: "auto" });
+});
+
+/* ---- page translation: failed batches are tried again, then reported ---- */
+
+/** A page with the real page-translator.js; Google answers from `reply(texts)`, and every wait is shortened to ≤5 ms. */
+function translatorPage(reply) {
+  const dom = new JSDOM("<body><p>Hello <b>world</b>.</p><p>Good morning.</p></body>", { runScripts: "outside-only", url: "https://example.com/" });
+  const w = dom.window;
+  const realTimeout = w.setTimeout.bind(w);
+  w.setTimeout = (fn, ms) => realTimeout(fn, Math.min(ms || 0, 5));
+  w.IntersectionObserver = class { constructor(cb) { this.cb = cb; } observe(el) { this.cb([{ isIntersecting: true, target: el }]); } unobserve() {} disconnect() {} };
+  const calls = [];
+  w.browser = { runtime: { sendMessage: async msg => { calls.push(msg.texts); return reply(msg.texts, calls.length); } } };
+  w.eval(src("shared/i18n.js")); // loaded before it everywhere (manifest, desktop card)
+  w.eval(src("content/page-translator.js"));
+  const states = [];
+  w.eval("LamhaPage").onState(s => states.push(s));
+  return { w, calls, states, page: w.eval("LamhaPage") };
+}
+const ok = texts => ({ ok: true, data: texts.map(t => t.replace(/Hello/, "مرحبا").replace(/world/, "عالم").replace(/Good morning\./, "صباح الخير.")) });
+
+await step("page translation: a failed batch is tried again and the page ends up translated", async () => {
+  const { w, calls, states, page } = translatorPage((texts, n) => (n === 1 ? { ok: false, error: "rate_limited" } : ok(texts)));
+  page.start("ar");
+  await sleep(200);
+  assert.ok(calls.length >= 2, "retried");
+  assert.match(w.document.body.textContent, /صباح الخير/);
+  const last = states[states.length - 1];
+  assert.equal(last.loading, false);
+  assert.equal(last.failed, false);
+  page.stop();
+});
+
+await step("page translation: after the retries run out the bar is told, and 'try again' finishes the job", async () => {
+  let down = true;
+  const { w, calls, states, page } = translatorPage(texts => (down ? { ok: false, error: "network" } : ok(texts)));
+  page.start("ar");
+  await sleep(300);
+  assert.equal(calls.length, 4, "the first try and 3 retries, then it stops");
+  assert.deepEqual({ ...states[states.length - 1], showingOriginal: undefined }, { active: true, showingOriginal: undefined, loading: false, failed: true });
+  assert.match(w.document.body.textContent, /Good morning/, "untranslated text stays as it was");
+  down = false;
+  page.retry();
+  await sleep(200);
+  assert.match(w.document.body.textContent, /صباح الخير/);
+  assert.equal(states[states.length - 1].failed, false);
+  page.stop();
+  assert.match(w.document.body.textContent, /Good morning/, "stop restores the original");
+});
+
+await step("page translation: right-to-left targets (Persian too, not only Arabic) set the paragraph's direction", async () => {
+  const { w, page } = translatorPage(ok);
+  page.start("fa");
+  await sleep(100);
+  assert.deepEqual([...w.document.querySelectorAll("p")].map(p => p.getAttribute("dir")), ["auto", "auto"]);
+  page.stop();
+  assert.deepEqual([...w.document.querySelectorAll("p")].map(p => p.getAttribute("dir")), [null, null], "stop puts it back");
+  const fr = translatorPage(ok);
+  fr.page.start("fr");
+  await sleep(100);
+  assert.equal(fr.w.document.querySelector("p").getAttribute("dir"), null, "left-to-right targets leave it alone");
+  fr.page.stop();
+});
+
+/* ---- the card on a web page: AI translation ---- */
+
+/** The real content scripts on a page; the background is `reply(msg)`. The card's shadow root is opened for the test. */
+async function cardPage(reply, localData) {
+  const dom = new JSDOM("<body><p>Some text.</p></body>", { runScripts: "outside-only", url: "https://example.com/", pretendToBeVisual: true });
+  const w = dom.window;
+  const attach = w.Element.prototype.attachShadow;
+  w.Element.prototype.attachShadow = function () { return (this.__root = attach.call(this, { mode: "open" })); };
+  w.matchMedia = () => ({ matches: false, addEventListener() {} });
+  const sent = [];
+  let onMessage;
+  const store = data => ({ get: async k => (k && typeof k === "object" && !Array.isArray(k) ? { ...k, ...data } : { ...data }), set: async () => {} });
+  w.browser = {
+    storage: { sync: store({ uiLang: "ar" }), local: store(localData), onChanged: { addListener() {} } },
+    runtime: { sendMessage: async msg => { sent.push(msg); return reply(msg); }, onMessage: { addListener: f => { onMessage = f; } } }
+  };
+  for (const s of ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "content/styles.js", "content/page-translator.js", "content/content.js"]) w.eval(src(s));
+  await sleep(50);
+  const root = () => w.document.querySelector("lamha-ui").__root;
+  return { w, sent, root, show: text => onMessage({ type: "showLookup", external: true, text }) };
+}
+const trResult = (engine, extra = {}) => ({ ok: true, data: { query: "It's a piece of cake.", type: "text", src: "en", tl: "ar", translation: engine === "ai" ? "الأمر في غاية السهولة." : "إنها قطعة من الكعكة.", dict: [], definitions: [], examples: [], source: engine === "ai" ? "ai" : "online", ai: engine === "ai" ? "Gemini" : undefined, ...extra } });
+
+await step("card: Google's translation offers 'Better translation'; the AI's answer carries its badge", async () => {
+  const c = await cardPage(msg => (msg.type === "lookup" ? trResult(msg.engine) : { ok: true }), { trProvider: "gemini", geminiKeySet: true });
+  c.show("It's a piece of cake.");
+  await sleep(100);
+  const link = [...c.root().querySelectorAll(".foot a")].find(a => /ترجمة أدق/.test(a.textContent));
+  assert.ok(link, "the link is there");
+  assert.match(link.title, /Gemini/);
+  link.click();
+  await sleep(100);
+  assert.equal(c.sent[c.sent.length - 1].engine, "ai");
+  assert.match(text(c.root().querySelector(".hero")), /في غاية السهولة/);
+  assert.match(text(c.root().querySelector(".bar .badge")), /Gemini/);
+  assert.ok(![...c.root().querySelectorAll(".foot a")].some(a => /ترجمة أدق/.test(a.textContent)), "no second 'better' on the AI's own answer");
+});
+
+await step("card: no 'Better translation' without an AI translator; an AI quota error says so and links to Settings", async () => {
+  const none = await cardPage(() => trResult("google"), {});
+  none.show("It's a piece of cake.");
+  await sleep(100);
+  assert.ok(![...none.root().querySelectorAll(".foot a")].some(a => /ترجمة أدق/.test(a.textContent)));
+  const quota = await cardPage(msg => (msg.engine === "ai" ? { ok: false, error: "gemini_quota" } : trResult("google")), { trProvider: "gemini", geminiKeySet: true });
+  quota.show("It's a piece of cake.");
+  await sleep(100);
+  [...quota.root().querySelectorAll(".foot a")].find(a => /ترجمة أدق/.test(a.textContent)).click();
+  await sleep(100);
+  assert.match(text(quota.root().querySelector(".err")), /انتهى الحد المجاني من Gemini/);
+  assert.ok(quota.root().querySelector(".err .btn"), "a way forward: try again");
 });
 
 console.log(results.join("\n"));

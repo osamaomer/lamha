@@ -474,13 +474,17 @@ test("review streak: days in a row count up once a day, a missed day starts agai
 });
 
 test("lookup milestones: the 10th word looked up says so (once), the cached result stays clean", async () => {
-  const google = recorder(() => json(200, { src: "en", sentences: [{ trans: "مرن", orig: "resilient" }] }));
+  const google = recorder(url => (url.includes("/translate_a/t") // the word in its sentence
+    ? json(200, [["الأطفال <a i=0>مرنون</a> جدًا.", "en"]])
+    : json(200, { src: "en", sentences: [{ trans: "مرن", orig: "resilient" }] })));
   const env = makeEnv({ fetchImpl: google.fetchImpl, local: { cardsImported: true, lookupCount: 9 }, sync: { dictSource: "online", translateDefinitions: false } });
   const first = await env.send({ type: "lookup", text: "resilient" });
   assert.equal(first.data.milestone, 10);
   const again = await env.send({ type: "lookup", text: "resilient" });
   assert.equal(again.data.milestone, undefined, "the cached result has no milestone");
   assert.equal(env.browser.storage.local.data.lookupCount, 10, "cached lookups aren't counted again");
+  await env.send({ type: "lookup", text: "Resilient", context: { before: "Kids are very ", after: " after all." } });
+  assert.equal(env.browser.storage.local.data.lookupCount, 10, "the same word in another sentence isn't a new word");
   const noHistory = makeEnv({ fetchImpl: google.fetchImpl, local: { lookupCount: 9 }, sync: { dictSource: "online", saveHistory: false } });
   assert.equal((await noHistory.send({ type: "lookup", text: "resilient" })).data.milestone, undefined, "history off: not counted");
   assert.equal(noHistory.browser.storage.local.data.lookupCount, 9);
@@ -546,6 +550,196 @@ test("English interface: explanations, the explain tool and the default summary 
   assert.match(prompts[3], /in Arabic/, "an explicit summary language still wins");
   assert.equal(env.ctx.LamhaAI.errorInfo("ai_no_key")[0], "Turn on the writing tools");
   assert.equal(env.ctx.LamhaAI.catLabel("articles"), "Articles (a / an / the)");
+});
+
+/** Google, faked: `single` translates its whole q (split into sentence pieces), `t` translates each q. */
+function fakeGoogle() {
+  return recorder((url, body) => {
+    const params = new URLSearchParams(typeof body === "string" ? body : "");
+    const q = new URL(url).searchParams.get("q") ?? params.get("q");
+    if (url.includes("/translate_a/single")) {
+      const sentences = q.split(/(?<=\n)(?!\n)/).map(s => ({ trans: "AR<" + s.replace(/\n+$/, "") + ">" + (s.match(/\n+$/) || [""])[0], orig: s }));
+      return json(200, { src: "en", sentences });
+    }
+    if (url.includes("/translate_a/t")) return json(200, params.getAll("q").map(x => ["AR<" + x + ">", "en"]));
+    return json(404, {});
+  });
+}
+
+test("translations keep paragraph breaks; spaces inside lines are tidied", async () => {
+  const g = fakeGoogle();
+  const env = makeEnv({ fetchImpl: g.fetchImpl });
+  const res = await env.send({ type: "lookup", text: "Hello   there.\r\n\n\n\nGood morning.  " });
+  assert.equal(res.ok, true, res.error);
+  assert.equal(res.data.query, "Hello there.\n\nGood morning.");
+  assert.equal(res.data.translation, "AR<Hello there.>\n\nAR<Good morning.>");
+});
+
+test("long text is translated in pieces and joined back whole; too long is refused, not cut", async () => {
+  const g = fakeGoogle();
+  const env = makeEnv({ fetchImpl: g.fetchImpl });
+  const paras = Array.from({ length: 12 }, (_, i) => `Paragraph ${i}. ` + "Some words here. ".repeat(50).trim());
+  const text = paras.join("\n\n");
+  assert.ok(text.length > 9000);
+  const res = await env.send({ type: "lookup", text });
+  assert.equal(res.ok, true, res.error);
+  assert.ok(g.calls.length >= 2, "more than one request");
+  const back = res.data.translation.split("\n\n");
+  assert.equal(back.length, 12, "every paragraph break survives");
+  back.forEach((p, i) => assert.match(p, new RegExp(`Paragraph ${i}\\. `)));
+  const long = await env.send({ type: "lookup", text: "word ".repeat(7000) });
+  assert.deepEqual({ ok: long.ok, error: long.error }, { ok: false, error: "too_long" });
+});
+
+test("splitLong cuts at line breaks, then sentence ends, then spaces, and loses nothing", () => {
+  const { ctx } = makeEnv({ fetchImpl: async () => json(200, {}) });
+  const join = ps => ps.map(p => p.t + p.sep).join("");
+  const sentences = "One sentence here. ".repeat(40).trim();
+  const bySentence = ctx.splitLong(sentences, 100);
+  assert.equal(join(bySentence), sentences);
+  bySentence.forEach(p => { assert.ok(p.t.length <= 100); assert.ok(p.t.endsWith("."), p.t); });
+  const noPunct = "word ".repeat(100).trim();
+  assert.equal(join(ctx.splitLong(noPunct, 64)), noPunct);
+});
+
+/* ---- translation service: Google, the AI, or both ---- */
+
+/** A fake network: Google either works (fakeGoogle's replies) or is rate-limited; Gemini and Ollama translate with
+ *  `aiReply(texts, n)` → the list of translations (n counts AI requests). Records which service answered what. */
+function trNet({ googleUp = true, aiReply = texts => texts.map(t => "AI<" + t + ">") } = {}) {
+  const g = fakeGoogle();
+  let aiN = 0;
+  const textsOf = content => JSON.parse(/<texts>\n([\s\S]*)\n<\/texts>/.exec(content)[1]);
+  return recorder((url, body, n) => {
+    if (url.includes("translate_a")) return googleUp ? g.fetchImpl(url, { method: "POST", body: typeof body === "string" ? body : undefined }) : json(429, {});
+    if (url.includes("generativelanguage")) {
+      const translations = aiReply(textsOf(body.contents[0].parts[0].text), ++aiN);
+      if (!translations) return json(429, { error: { message: "quota" } });
+      return json(200, { candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify({ translations }) }] } }] });
+    }
+    if (url.endsWith("/api/chat")) return json(200, { done_reason: "stop", message: { content: JSON.stringify({ translations: aiReply(textsOf(body.messages[1].content), ++aiN) }) } });
+    return json(404, {});
+  });
+}
+const who = calls => calls.map(c => (c.url.includes("translate_a") ? "google" : c.url.includes("generativelanguage") ? "gemini" : c.url.includes("/api/chat") ? "ollama" : "other"));
+const SENTENCE = "It's a piece of cake, honestly.";
+
+test("translation, Automatic: Google first; the AI (Flash-Lite, a translator's prompt) when Google can't", async () => {
+  const up = trNet();
+  const env = makeEnv({ fetchImpl: up.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini" } });
+  const a = await env.send({ type: "lookup", text: SENTENCE });
+  assert.deepEqual(who(up.calls), ["google"]);
+  assert.equal(a.data.source, "online");
+
+  const down = trNet({ googleUp: false });
+  const env2 = makeEnv({ fetchImpl: down.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini" } });
+  const b = await env2.send({ type: "lookup", text: SENTENCE });
+  assert.equal(b.ok, true, b.error);
+  assert.equal(b.data.translation, "AI<" + SENTENCE + ">");
+  assert.deepEqual({ source: b.data.source, ai: b.data.ai }, { source: "ai", ai: "Gemini" });
+  const ai = down.calls.find(c => c.url.includes("generativelanguage"));
+  assert.match(ai.url, /gemini-3\.5-flash-lite/, "translation defaults to the quick model");
+  assert.match(ai.body.systemInstruction.parts[0].text, /professional translator/);
+  assert.match(ai.body.contents[0].parts[0].text, /Idioms and slang become their natural equivalent/);
+});
+
+test("translation, Google only: no AI even when Google fails; AI: the AI first, Google when it fails", async () => {
+  const down = trNet({ googleUp: false });
+  const g = makeEnv({ fetchImpl: down.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini", trService: "google" } });
+  assert.equal((await g.send({ type: "lookup", text: SENTENCE })).ok, false);
+  assert.ok(!who(down.calls).includes("gemini"));
+
+  const quota = trNet({ aiReply: () => null }); // Gemini's free quota is used up
+  const a = makeEnv({ fetchImpl: quota.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini", trService: "ai" } });
+  const res = await a.send({ type: "lookup", text: SENTENCE });
+  assert.equal(res.ok, true, res.error);
+  assert.equal(res.data.source, "online", "Google stepped in");
+  assert.deepEqual([...new Set(who(quota.calls))], ["gemini", "google"]);
+});
+
+test("translation: words keep Google's dictionary first, even with the AI chosen", async () => {
+  const net = trNet();
+  const env = makeEnv({ fetchImpl: net.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini", trService: "ai" }, sync: { uiLang: "ar", dictSource: "online", useContext: false, translateDefinitions: false } });
+  await env.send({ type: "lookup", text: "resilient" });
+  assert.deepEqual(who(net.calls), ["google"]);
+});
+
+test("translation: stray letters from another script are asked again, then Google, and shown only if nothing else works", async () => {
+  const korean = t => t.replace(/cake/, "캐시");
+  // once wrong, then right: the second answer is used
+  const retry = trNet({ aiReply: (texts, n) => texts.map(t => "AI<" + (n === 1 ? korean(t) : t) + ">") });
+  const e1 = makeEnv({ fetchImpl: retry.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini", trService: "ai" } });
+  assert.equal((await e1.send({ type: "lookup", text: SENTENCE })).data.translation, "AI<" + SENTENCE + ">");
+  // always wrong, Google up: Google's answer
+  const bad = trNet({ aiReply: texts => texts.map(t => korean(t)) });
+  const e2 = makeEnv({ fetchImpl: bad.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini", trService: "ai" } });
+  const r2 = await e2.send({ type: "lookup", text: SENTENCE });
+  assert.equal(r2.data.source, "online");
+  // always wrong and Google down: the rough answer beats nothing, and isn't cached
+  const alone = trNet({ googleUp: false, aiReply: texts => texts.map(t => korean(t)) });
+  const e3 = makeEnv({ fetchImpl: alone.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini" } });
+  const r3 = await e3.send({ type: "lookup", text: SENTENCE });
+  assert.match(r3.data.translation, /캐시/);
+  const before = alone.calls.length;
+  await e3.send({ type: "lookup", text: SENTENCE });
+  assert.ok(alone.calls.length > before, "asked again next time");
+  // letters that were in the source may stay
+  assert.equal(e3.ctx.strayLetters("Σωκράτης said", "قال Σωκράτης", "ar"), false);
+  assert.equal(e3.ctx.strayLetters("I saw her duck", "رأיתها تنحني", "ar"), true);
+});
+
+test("translation: pages use the AI only when allowed; the card's 'Better translation' asks the AI whatever the setting", async () => {
+  const net = trNet();
+  const off = makeEnv({ fetchImpl: net.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini", trService: "ai" } });
+  await off.send({ type: "translateBatch", texts: ["Hello <a i=0>world</a>"], tl: "ar", format: "html", kind: "page" });
+  assert.deepEqual(who(net.calls), ["google"], "trPages off: Google");
+  const on = makeEnv({ fetchImpl: net.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini", trService: "ai", trPages: true } });
+  const page = await on.send({ type: "translateBatch", texts: ["Hello <a i=0>world</a>"], tl: "ar", format: "html", kind: "page" });
+  assert.equal(page.data[0], "AI<Hello <a i=0>world</a>>");
+  assert.match(net.calls[net.calls.length - 1].body.contents[0].parts[0].text, /keep every tag/);
+
+  const g = trNet();
+  const googleOnly = makeEnv({ fetchImpl: g.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini", trService: "google" } });
+  const better = await googleOnly.send({ type: "lookup", text: SENTENCE, engine: "ai" });
+  assert.equal(better.data.source, "ai");
+  assert.deepEqual(who(g.calls), ["gemini"]);
+});
+
+test("translation offline: 'Local only' translates sentences with a local AI (Ollama), never with an online one", async () => {
+  const net = trNet();
+  const local = makeEnv({ fetchImpl: net.fetchImpl, local: { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" }, sync: { uiLang: "ar", dictSource: "offline" } });
+  const res = await local.send({ type: "lookup", text: SENTENCE });
+  assert.equal(res.ok, true, res.error);
+  assert.deepEqual({ source: res.data.source, ai: res.data.ai }, { source: "ai", ai: "Ollama" });
+  assert.deepEqual(who(net.calls), ["ollama"]);
+
+  const online = makeEnv({ fetchImpl: net.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini" }, sync: { uiLang: "ar", dictSource: "offline" } });
+  assert.equal((await online.send({ type: "lookup", text: SENTENCE })).error, "offline_mode");
+});
+
+test("translation: its own provider and model, separate from the writing tools", async () => {
+  const net = trNet({ googleUp: false });
+  const env = makeEnv({ fetchImpl: net.fetchImpl, local: {
+    aiProvider: "ollama", ollamaModel: "qwen3.5:4b", geminiKey: "AIza-test", // writing on Ollama…
+    trProvider: "gemini", trModels: { gemini: "gemini-3.8-flash" } // …translation on Gemini Flash
+  } });
+  await env.send({ type: "lookup", text: SENTENCE });
+  assert.match(net.calls.find(c => c.url.includes("generativelanguage")).url, /gemini-3\.8-flash/);
+  const claude = makeEnv({ fetchImpl: async () => json(429, {}), local: { aiKey: "sk-test", trProvider: "claude" } });
+  assert.equal((await claude.ctx.trSettings()).ai.model, "claude-haiku-4-5", "Claude translates with Haiku unless told otherwise");
+});
+
+test("offline Arabic → English results label their word list in the interface language", async () => {
+  const ctx = vm.createContext({
+    browser: { runtime: { getURL: p => "moz-extension://x/" + p } },
+    fetch: async url => json(200, /\/dict\/ar\//.test(url) ? { "كتاب": ["book", "volume"] } : {})
+  });
+  vm.runInContext(src("shared/i18n.js"), ctx, { filename: "i18n.js" });
+  vm.runInContext(src("local-dict.js") + "\n;globalThis.LocalDict = LocalDict;", ctx, { filename: "local-dict.js" });
+  ctx.LamhaI18n.setLang("en");
+  assert.equal((await ctx.LocalDict.lookupAr("كتاب")).dict[0].pos, "in English");
+  ctx.LamhaI18n.setLang("ar");
+  assert.equal((await ctx.LocalDict.lookupAr("كتاب")).dict[0].pos, "بالإنجليزية");
 });
 
 test("Arabic interface: explanations and messages stay Arabic", async () => {

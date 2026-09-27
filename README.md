@@ -1,216 +1,357 @@
-# Lamha — لمحة
+# لمحة · Lamha
 
-An Arabic-first Firefox extension for looking up English words and translating anything on the web, inspired by the **Look Up** feature in iOS and macOS.
+**Select a word. Get it at a glance.**
 
-Select text on any page and a small **بحث** (Look Up) / **ترجمة** (Translate) button appears above it. Tap it to open a card with:
+Lamha is an Arabic-first dictionary, translator and English writing coach, inspired by the **Look Up** feature on iPhone and Mac. Select any English word and a small card shows what it means, in Arabic, in *this* sentence. Select a paragraph and it's translated. Select your own clumsy email and Lamha polishes it and explains, in Arabic, what you got wrong.
 
-| For a word or short phrase | For a sentence or paragraph |
+It comes in two versions that share one brain:
+
+| | 🦊 **Firefox extension** | 🪟 **Windows app** |
+|---|---|---|
+| Works in | Web pages | Any program: WhatsApp, Word, Outlook, Teams… |
+| How you start it | Select text → tap the button | Select text → press a shortcut |
+| Page translation | ✅ | — |
+| Clipboard history | — | ✅ |
+| Lookups, writing tools, word review | ✅ | ✅ |
+
+---
+
+**Contents**
+
+1. [✨ What Lamha does](#-what-lamha-does): features both versions share
+2. [🦊 The Firefox extension](#-the-firefox-extension)
+3. [🪟 The Windows app](#-the-windows-app)
+4. [🛠️ For developers](#️-for-developers)
+5. [🔒 Privacy and data sources](#-privacy-and-data-sources)
+
+---
+
+## ✨ What Lamha does
+
+Everything in this part works the same in the extension and the Windows app.
+
+### 🔎 Look up a word, translate a sentence
+
+| Select a word or short phrase | Select a sentence or paragraph |
 |---|---|
-| Headword with pronunciation (IPA-style) and 🔊 audio | Original text (tap to expand) |
-| Main Arabic meaning and transliteration | Full Arabic translation |
-| Other meanings grouped by part of speech (اسم، فعل، صفة…) | Listen / copy |
-| Oxford-style definitions **translated to Arabic**, with the English original and an example | |
-| Synonyms: tap one to look it up; a back button returns you | |
-| Spelling suggestions ("هل تقصد: receive؟") | |
-| Wikipedia summary (Arabic article when one exists) | |
+| The word, its pronunciation and a 🔊 button | The original text (tap to expand) |
+| **Its meaning in this sentence**: Lamha reads the sentence around it | The full Arabic translation |
+| Other meanings by part of speech (اسم، فعل، صفة…) | Listen and copy buttons |
+| Definitions **translated to Arabic**, with the English original and an example | |
+| Synonyms: tap one to look it up, and ← takes you back | |
+| Spelling help: "هل تقصد: receive؟" | |
+| A Wikipedia summary, from the Arabic article when there is one | |
 
-### ✨ Writing tools (Ollama, Gemini or Claude)
+- **Arabic → English too:** select Arabic text and it's translated to English. This can be turned off.
+- **Other languages:** Settings → لغة الترجمة. Arabic is the default; English, French, Turkish, Urdu, Persian, Spanish and German are there too.
 
-Choose a provider in Settings → أدوات الكتابة:
+### 🌐 Google or AI: you choose who translates
 
-- **Ollama (free):** runs an open model such as `qwen3.5:4b` on your own computer. It costs nothing, works offline, and your text never leaves the PC. Setup:
-  1. Install Ollama.
-  2. Allow extensions to connect with `setx OLLAMA_ORIGINS "moz-extension://*"`, then restart Ollama.
-  3. Download a model with `ollama pull qwen3.5:4b`, then pick it in Settings.
-- **Gemini (free, online):** uses Google's Gemini API with a free key from <https://aistudio.google.com/apikey>, and no card is needed.
-  - Models: `gemini-3.8-flash`, the default and most accurate, or `gemini-3.5-flash-lite`, faster with more requests allowed.
-  - The free tier has per-minute and daily limits. Your current limits are shown in AI Studio.
-  - ⚠️ On the free tier Google may use what you send to improve its products. Good for practice, not for private or work text.
-  - Works on any PC, including ones without a strong graphics card.
-- **Claude (most accurate):** uses your own Claude API key.
+Settings → الترجمة decides who translates sentences, paragraphs and the meaning of a word in its sentence:
 
-Once one is set up, a **✨ كتابة** button appears next to بحث/ترجمة, including inside text boxes and editors such as email or chat. Pick a tool:
+| Choice | What happens |
+|---|---|
+| **تلقائي · Automatic** (default) | Google, fast and free. When there's no internet or Google refuses, the AI takes over. |
+| **Google فقط · Google only** | Google, and nothing else. |
+| **الذكاء الاصطناعي · AI** | The AI first: more natural with idioms, slang and tone, but slower. Google steps in if the AI fails. |
+
+- **✨ ترجمة أدق · Better translation:** a link under Google's translation asks the AI for a second opinion. Google turns *"it's a piece of cake"* into "a piece of the cake"; the AI says «الأمر في غاية السهولة».
+- **Its own translator:** translation can use a different AI from the writing tools, for example Gemini for writing and Ollama for translating. Each provider translates with its quickest model unless you pick another: Gemini Flash-Lite, Claude Haiku, or your Ollama model.
+- **Offline:** with **Ollama** as the translator, sentences translate with no internet at all, even with the dictionary on *Local only*.
+- **Pages:** whole-page translation stays on Google unless you allow the AI (a page is a lot of text for a free quota or a small local model).
+- **A safety net:** AI models sometimes slip letters from another alphabet into a translation (we saw Korean and Hebrew in Arabic). Lamha checks every AI answer, asks again, and uses Google instead if it still looks wrong.
+- Words keep the offline dictionary and Google's dictionary data first: for a single word, those beat a translation.
+
+### 📚 An offline dictionary built in
+
+About **86,000 English words** and **20,000 Arabic words** ship with Lamha, so word lookups don't need the internet:
+
+- Arabic meanings grouped by sense: *bank* → مَصْرِف (the institution) · ضِفَّة (the side of a river).
+- Definitions, examples, synonyms and IPA pronunciation.
+- It knows inflected forms: *went → go*, *mice → mouse*, *studied → study*.
+- Choose **Local first** (the default), **Local only** (never goes online) or **Online first** in Settings.
+
+### ✍️ Writing tools
+
+Your personal English editor. Pick an AI provider in Settings → أدوات الكتابة (see [choosing a provider](#-choosing-an-ai-provider)), select some text, and choose a tool:
 
 | Tool | What it does |
 |---|---|
-| تدقيق لغوي — Proofread | Fixes grammar, spelling and word choice with minimal changes. It shows the changes inline and explains each mistake **in Arabic**. |
-| تحسين الأسلوب / رسمي / ودّي / أقصر | Improve, make formal, make friendly, make shorter |
-| اكتبه بالإنجليزية | Turns an Arabic draft into natural, fluent English (not a literal translation) |
-| تلخيص | Bullet-point summary in Arabic or English |
-| اشرح بالعربية | Explains the text, its idioms and slang in Arabic |
-| اكتب ردًّا | Drafts an English reply to a message. You can say what you want to answer, in Arabic. |
+| تدقيق لغوي · Proofread | Fixes grammar, spelling and word choice with as few changes as possible. Each mistake is struck through, its fix appears, and it's explained **in Arabic**. |
+| تحسين · رسمي · ودّي · أقصر | Improve, make formal, make friendly, make shorter |
+| اكتبه بالإنجليزية | Turns an Arabic draft into natural English, not a word-for-word translation |
+| تلخيص | Bullet-point summary, in Arabic or English |
+| اشرح بالعربية | Explains the text, its idioms and its slang in Arabic |
+| اكتب ردًّا | Drafts an English reply to a message. Tell it what you want to say, in Arabic if you like. |
 
-- **استبدال (Replace)** writes the result back into the text box, and the editor's undo still works. **نسخ** copies it.
-- **Tool numbers:** each tool in the card has a number. Select text, press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>, then <kbd>1</kbd> to proofread, <kbd>2</kbd> to improve and so on (Arabic digits work too).
-- With the caret in a text box that has text and nothing selected, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> (or right-click → *أدوات الكتابة*) works on the whole box.
-- **Write new:** with nothing selected (or in an empty text box), <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> opens *كتابة جديدة*. Describe what you want in Arabic or English, choose **Email** or **Message** and a tone, and Lamha writes it in English. **إدراج (Insert)** puts it at your cursor.
-- Right-click a page → *تلخيص الصفحة* summarizes the article.
-- **Compose box**: the toolbar popup has a **كتابة ✨** tab. Write or paste a message there, then proofread it, improve it, or turn Arabic into natural English, then copy the result. The draft is kept if the popup closes.
-- **Mistake journal** (Settings → سجل أخطائي):
-  - Proofreading records the type of each mistake: articles, prepositions, verb tenses and so on.
-  - Settings shows your most frequent types, with a short Arabic rule and examples from your own writing.
-  - Your top 3 types are passed to the AI, so it explains those points especially clearly.
-  - The journal is stored only on your device, and it can be turned off.
-- The model can be changed in Settings: Opus 5 (default, most accurate), Sonnet 5, or Haiku 4.5 (fastest and cheapest).
+Lamha offers the tools that fit the text: English text gets the editing tools, and Arabic text gets *write it in English*, *reply* and *summarize*.
 
-The API key comes from <https://console.anthropic.com/settings/keys>. It is billed per use, separately from a Claude.ai subscription. The key is stored in `storage.local` on your device and is never synced.
+- **Tool numbers:** each tool on the card has a number. Select text, press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>, then <kbd>1</kbd> to proofread, <kbd>2</kbd> to improve, and so on. Arabic digits work too.
+- **استبدال (Replace)** puts the result back where the text was. **نسخ** copies it.
+- **Write new:** with nothing selected, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> opens *كتابة جديدة*. Describe what you want in Arabic or English, choose **Email** or **Message** and a tone, and Lamha writes it in English. **إدراج (Insert)** puts it at your cursor.
+- **Mistake journal** (Settings → سجل أخطائي): proofreading notes the *type* of each mistake (articles, prepositions, verb tenses…). Settings shows your most frequent types, with a short rule and examples from your own writing. Your top 3 are passed to the AI so it explains those especially clearly. The journal stays on your device and can be turned off.
+
+#### 🤖 Choosing an AI provider
+
+| | Cost | Privacy | Setup |
+|---|---|---|---|
+| **Ollama** | Free | Your text never leaves your PC | Install Ollama, then `ollama pull qwen3.5:4b` and pick the model in Settings |
+| **Gemini** | Free tier | ⚠️ On the free tier Google may use what you send to improve its products: fine for practice, not for private or work text | A free key from <https://aistudio.google.com/apikey>, no card needed |
+| **Claude** | Pay per use | Sent to Anthropic with your own key | A key from <https://console.anthropic.com/settings/keys> (billed separately from a Claude.ai subscription) |
+
+- **Gemini models:** `gemini-3.8-flash` (the default, most accurate) or `gemini-3.5-flash-lite` (faster, with more requests allowed). The free tier has per-minute and daily limits; AI Studio shows yours. It runs on any PC, even one without a strong graphics card.
+- **Claude models:** Opus 5 (default, most accurate), Sonnet 5, or Haiku 4.5 (fastest and cheapest).
+- **Ollama in Firefox** needs one extra step. See [the extension's setup](#setting-up-ollama-for-the-extension).
+- Keys are stored only on your device and never synced.
 
 ### 🗂️ Word review (flashcards)
 
-Every English word you look up becomes a review card. The card keeps the sentence you found the word in, its meaning in that sentence, and a short definition. Words already in your history are imported the first time.
+Every English word you look up becomes a review card, with the sentence you found it in, its meaning in that sentence and a short definition. Words already in your history are imported the first time.
 
-- **Where:** open the toolbar popup → **مراجعة** (Review). The toolbar icon shows how many cards are waiting.
-- **Front of the card:** the word, a 🔊 button, and your sentence with the word highlighted.
-- **Answering:** <kbd>Space</kbd> shows the meaning. Then choose **نسيت / صعبة / عرفتها** (forgot / hard / knew it) with <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>.
-- **Scheduling:** a simplified SM-2, the same idea as Anki.
+- **Where:** the **مراجعة** (Review) tab. A badge shows how many cards are waiting.
+- **The front** shows the word, a 🔊 button, and your sentence with the word highlighted.
+- **Answering:** <kbd>Space</kbd> shows the meaning. Then press **نسيت / صعبة / عرفتها** (forgot / hard / knew it), or <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>.
+- **Scheduling** is a simplified SM-2, the idea behind Anki:
   - *Forgot* brings the card back in 10 minutes.
-  - *Knew it* waits 2 days, then 5 days, then roughly 2.5× longer each time.
+  - *Knew it* waits 2 days, then 5 days, then about 2.5× longer each time.
   - A word counts as learned once its gap reaches 3 weeks.
 - **Adding and removing:** the 🔖 button on a lookup card adds or removes a word.
-- **Settings:** turn automatic adding on or off, choose how many new words per day (5–30), or delete all cards.
+- **Settings:** turn automatic adding on or off, choose 5–30 new words a day, or delete all cards.
 
-Other features:
+### 🎨 Language, looks and motion
 
-- **Whole-page translation** (toolbar popup, right-click menu, or <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>)
-  - Translates lazily as you scroll and follows content that loads later.
-  - Translates whole sentences even when they're split across links or bold text, so context is kept.
-  - Keeps page elements intact, so links and site scripts still work.
-  - A floating bar switches **العربية ⇄ الأصل** (Arabic ⇄ Original) instantly.
-- **Offline dictionary built in**: about 86,000 English words and 20,000 Arabic words. Word lookups need no internet:
-  - Arabic meanings grouped by sense, e.g. *bank* → مَصْرِف (institution) · ضِفَّة (edge of river).
-  - Definitions, examples, synonyms and IPA pronunciation.
-  - Inflected forms are understood: *went → go*, *mice → mouse*, *studied → study*.
-  - Choose **Local first** (default), **Local only** (fully offline) or **Online first** in Settings.
-- **Selected Arabic text is translated to English** (this can be turned off).
-- **Keyboard**: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> looks up the selection and <kbd>Esc</kbd> closes the card. <kbd>Alt</kbd> + select opens the card directly.
-- **Right-click menu**: "لمحة: ترجمة «…»" (translate the selection).
-- **Toolbar popup** with:
-  - A quick-translate box.
-  - An on/off switch for this site.
-  - Page translation.
-  - Recent lookups.
-- **Three trigger modes**: floating button (default), instant, or Alt+select only.
-- **Arabic or English interface:** Settings → المظهر → لغة الواجهة (Appearance → Interface language). *Automatic* uses Arabic on an Arabic system and English otherwise. In English, the layout runs left to right, and proofreading explanations, mistake tips and summaries are in English too; translations still go to your chosen translation language. Existing users keep Arabic when they update.
-- **Animations you can switch:** Settings → المظهر → الحركة (Appearance → Animations), or the tray menu in the Windows app.
-  - **Full:** the card grows out of the word you picked and leaves smoothly. Proofreading strikes each mistake before showing its fix, and AI answers appear word by word. Tabs slide, and review cards flip and fly off the way you graded them. There are also small celebrations: a finished deck, a review streak, your 100th word.
-  - **Subtle:** short, calm fades and slides only.
+- **Arabic or English interface:** Settings → المظهر → لغة الواجهة. *Automatic* uses Arabic on an Arabic system and English otherwise. In English the layout runs left to right, and proofreading explanations, mistake tips and summaries are in English too. Translations still go to your chosen translation language. Existing users keep Arabic when they update.
+- **Light and dark themes** that follow the system, plus keyboard focus styles.
+- **Animations you can switch:** Settings → المظهر → الحركة.
+  - **Full:** the card grows out of the word you picked. Proofreading strikes each mistake before showing its fix, and AI answers appear word by word. Review cards flip and fly off the way you graded them. There are small celebrations too: a finished deck, a review streak, your 100th word. 🎉
+  - **Subtle:** short, calm fades and slides.
   - **Off:** nothing moves.
-  - **Automatic** (default): Full, but Subtle on a slower PC (no graphics acceleration, 4 GB of memory or less, or 2 cores or fewer), and Off when Windows' *Animation effects* is off.
-  - Every animation uses only movement and fading, never makes you wait for a result, and keys work during it. A preview in Settings shows each level.
-- Light and dark themes that follow the system, right-to-left (Arabic) and left-to-right (English) layouts, and keyboard focus styles.
-- Works inside iframes. The UI lives in a closed Shadow DOM, so websites can't break its styling.
+  - **Automatic** (default): Full, but Subtle on a slower PC and Off when Windows' *Animation effects* is off.
+  - Animations never make you wait for a result, and keys work during them. A preview in Settings shows each level.
 
-## Install
+---
 
-### For development (temporary, until Firefox restarts)
-1. Open `about:debugging#/runtime/this-firefox` in Firefox.
+## 🦊 The Firefox extension
+
+*Needs Firefox 140 or later.*
+
+### How it feels
+
+Select text on any page and a small **بحث** (Look Up) / **ترجمة** (Translate) button appears above it. Tap it and the card opens. With a writing provider set up, a **✨ كتابة** button appears beside it, including inside text boxes and editors such as email or chat.
+
+**Three trigger modes** (Settings): the floating button (default), instant (the card opens as soon as you select), or <kbd>Alt</kbd>+select only.
+
+### Extension-only features
+
+- **🌍 Whole-page translation** (toolbar popup, right-click menu, or <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>)
+  - Translates as you scroll and follows content that loads later.
+  - Translates whole sentences even when they're split across links or bold text, so the meaning survives.
+  - Keeps the page working: links and site scripts are untouched.
+  - A floating bar switches **العربية ⇄ الأصل** (Arabic ⇄ Original) instantly.
+  - If Google is busy, Lamha quietly tries again. If some parts still fail, the bar says so and offers a retry button.
+- **Right-click menu:** "لمحة: ترجمة «…»", *أدوات الكتابة* and *تلخيص الصفحة* (summarize the article).
+- **Whole text box:** with the caret in a text box and nothing selected, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> works on all of its text. Replace keeps the editor's undo working.
+- **Toolbar popup** with:
+  - **ترجمة:** a quick-translate box and your recent lookups.
+  - **كتابة ✨:** write or paste a message, proofread it, improve it or turn Arabic into English, then copy the result. The draft is kept if the popup closes.
+  - **مراجعة:** word review.
+  - An on/off switch for the current site, and page translation.
+- Works inside iframes. The card lives in a closed Shadow DOM, so websites can't break its styling.
+
+### ⌨️ Shortcuts
+
+| Keys | What they do |
+|---|---|
+| <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> | Look up / translate the selection |
+| <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> | Writing tools (then <kbd>1</kbd>–<kbd>9</kbd> to run one), or *Write new* with nothing selected |
+| <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd> | Translate the whole page (again to stop) |
+| <kbd>Alt</kbd> + select | Open the card directly |
+| <kbd>Esc</kbd> | Close the card |
+
+Change them in Settings → تخصيص الاختصارات, or `about:addons` → ⚙ → Manage Extension Shortcuts.
+
+### Installing
+
+**To try it (until Firefox restarts):**
+
+1. Open `about:debugging#/runtime/this-firefox`.
 2. Click **Load Temporary Add-on…** and choose `manifest.json` in this folder.
-3. The welcome page opens. Select the word *serendipity* on it to try the extension.
+3. The welcome page opens. Select the word *serendipity* on it. ✨
 
-Or, with Node installed:
+Or, with Node installed: `npx web-ext run` launches a clean Firefox with Lamha loaded.
+
+**To keep it:** release versions of Firefox only install **signed** extensions.
+
+1. Run `npx web-ext build`. It makes a `.zip` in `web-ext-artifacts/`. [web-ext-config.mjs](web-ext-config.mjs) leaves out the desktop app, tools and docs.
+2. Upload it at <https://addons.mozilla.org/developers/>. Choose **On your own** (unlisted) for a private signed `.xpi`, or list it publicly.
+3. Or use Firefox Developer Edition / Nightly with `xpinstall.signatures.required` set to `false` in `about:config`.
+
+### Setting up Ollama for the extension
+
+Firefox extensions need Ollama's permission to connect:
+
 ```bash
-npx web-ext run          # launches a clean Firefox with the extension loaded
+setx OLLAMA_ORIGINS "moz-extension://*"
 ```
 
-### Permanent install
-Release versions of Firefox only install **signed** extensions:
-1. Build the package with `npx web-ext build`, which creates a `.zip` in `web-ext-artifacts/`. [web-ext-config.mjs](web-ext-config.mjs) leaves out `desktop/`, `tools/`, `store-assets/` and this README.
-2. Upload it at <https://addons.mozilla.org/developers/>. Choose **"On your own"** (unlisted) for a private signed `.xpi`, or list it publicly on the store.
-3. Alternatively, use Firefox Developer Edition or Nightly and set `xpinstall.signatures.required` to `false` in `about:config`.
+Then restart Ollama. (The Windows app doesn't need this step.)
 
-Validate with `npx web-ext lint`. It currently reports 0 errors and 0 warnings.
+### 🎛️ Customising
 
-Test the writing tools with `node tools/test-writing.mjs`. The test runs the background code with a fake browser and a fake network, so it needs no key. Add `--ollama` to also run one real proofread through your local Ollama. Add `--gemini`, with `GEMINI_API_KEY` set, for a real proofread through both Gemini models. The same file also tests the flashcard scheduling.
+- **Colours and fonts:** the tokens at the top of `content/styles.js` and `shared/ui.css`.
+- **Translation service:** see the note in [Privacy](#-privacy-and-data-sources).
 
-`node tools/test-ui.mjs` renders the real popup and settings pages in jsdom and clicks through the review, compose and journal screens. It needs jsdom, a development dependency at the repository root: run `npm install` once.
+---
 
-`node tools/test-clipboard.mjs` tests the desktop app's clipboard history: Arabic-aware search, the encrypted store, the tools on clips (against the real `background.js` with a fake network) and the privacy rules. `npm test` runs all three test files.
+## 🪟 The Windows app
 
-## Windows desktop app
+`desktop/` is Lamha as a standalone Windows app built with Electron. It runs the extension's own `background.js`, `local-dict.js` and `shared/` files unchanged, so the lookups, writing tools and review behave exactly the same. The main window has four tabs: **ترجمة · كتابة ✨ · مراجعة · الحافظة**.
 
-`desktop/` contains Lamha as a standalone Windows app built with Electron. It runs the extension's own `background.js`, `local-dict.js` and `shared/` unchanged, on top of a small `browser.*` replacement. The popup becomes the main window: **ترجمة · كتابة ✨ · مراجعة · الحافظة**.
+### 🌐 Works in any program
 
-- **Works in any program:** select text in WhatsApp, Word, Outlook, Teams or any other app, then press a shortcut:
-  - <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> opens the lookup/translation card next to the mouse.
-  - <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> opens the writing tools; a number key then runs a tool. With nothing selected it opens *Write new*, and Insert pastes the result where your cursor is in that program.
-  - **استبدال (Replace)** pastes the result back into that program.
-  - How it works: Lamha sends Ctrl+C to read your selection and Ctrl+V to paste the result, and restores your clipboard afterwards, including formatting. The Windows calls go through [koffi](https://koffi.dev), so nothing needs compiling.
-  - Clipboard history (<kbd>Win</kbd>+<kbd>V</kbd>) may briefly show these copies.
-  - In terminals Lamha doesn't send Ctrl+C, because there it would stop the running program.
-- **Tray icon:** closing the window keeps Lamha in the tray, next to the clock. The tray menu opens the app, the clipboard history, the review tab, the writing tab or Settings, pauses the clipboard history, has a **Start with Windows** option, and quits.
-- **Review reminders:** a Windows notification when cards are waiting, at most every 4 hours.
-- **Ollama:** works without the `OLLAMA_ORIGINS` step, which is only needed for browser extensions.
-- **Your data:** settings, cards and the mistake journal are saved in `%APPDATA%\Lamha`.
-- **Updates:** the installed app checks [GitHub Releases](https://github.com/osamaomer/lamha/releases) at startup and every 6 hours, downloads a new version in the background and installs it when Lamha restarts. The tray has **التحقق من التحديثات**, and Settings → التحديثات can turn automatic updates off. The Portable version can't replace itself: it tells you when a new version is out and links to the download.
+Select text in WhatsApp, Word, Outlook, Teams or anything else, then:
 
-### الحافظة (Clipboard history)
+| Keys | What they do |
+|---|---|
+| <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> | The lookup / translation card, next to the mouse |
+| <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> | Writing tools (a number key runs one). With nothing selected: *Write new*, and Insert pastes where your cursor is |
+| <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> | Clipboard history panel |
+
+**استبدال (Replace)** pastes the result straight back into that program.
+
+<details>
+<summary>How does it read another program's selection?</summary>
+
+Lamha presses Ctrl+C for you to read the selection and Ctrl+V to paste the result, then puts your clipboard back the way it was, formatting included. The Windows calls go through [koffi](https://koffi.dev), so nothing needs compiling.
+
+- Windows' own clipboard history (<kbd>Win</kbd>+<kbd>V</kbd>) may briefly show these copies.
+- In terminals Lamha doesn't press Ctrl+C, because there it would stop the running program.
+- With *فهم الكلمة من سياق الجملة* on, Lamha also reads the sentence around a word through Windows UI Automation, so it can pick the right meaning.
+</details>
+
+### 📋 الحافظة: clipboard history
 
 A history of what you copy in any program, with Lamha's language tools on every item. Search understands Arabic: it ignores diacritics and letter variants, so `مصرف` finds `مَصْرِف` and `احمد` finds `أحمد`.
 
-- **Off until you turn it on.** Enable it in Settings → الحافظة, or from the card that <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> shows the first time.
-- <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> opens a small panel at the mouse. Type to search, then press <kbd>Enter</kbd> to paste into the program you were in, or <kbd>Shift</kbd>+<kbd>Enter</kbd> to paste as plain text. <kbd>Ctrl</kbd>+<kbd>P</kbd> pins an item, <kbd>Delete</kbd> removes it (with undo), and <kbd>Ctrl</kbd>+<kbd>1</kbd>…<kbd>9</kbd> pastes one of the first nine.
-- <kbd>Tab</kbd> on an item opens Lamha's tools for it: translate, write in English, proofread, summarize (in Arabic or English), look up, or add a word to review. You always see the result before pasting it.
-- The **الحافظة** tab in the main window lists everything, with the full text, labels, pins and the same tools. **مسح غير المثبّت** (Clear unpinned) at the bottom empties the history in one step and keeps pinned items.
-- **Local and encrypted:** the history is saved in `%APPDATA%\Lamha\clipboard.json`, encrypted with Windows (DPAPI) for your user account. Nothing is sent anywhere unless you press one of the tools on an item.
-- **Excluded programs:** copies from password managers (KeePass, KeePassXC, 1Password, Bitwarden, Enpass, Dashlane, NordPass) are never recorded. Add more in Settings → الحافظة, or with **تجاهل هذا البرنامج** on an item. Lamha also honours the signals password managers put on the clipboard for Windows' own history.
-- **Also in Settings:** how many items to keep (500 by default), automatic deletion of unpinned items (after 30 days by default), skipping bank-card numbers (on by default), and clearing the history.
+- **Off until you turn it on:** Settings → الحافظة, or the card <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> shows the first time.
+- **The quick panel** (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) opens at the mouse:
+
+  | Keys | Action |
+  |---|---|
+  | type | Search |
+  | <kbd>Enter</kbd> / <kbd>Shift</kbd>+<kbd>Enter</kbd> | Paste into the program you were in / paste as plain text |
+  | <kbd>Ctrl</kbd>+<kbd>1</kbd>…<kbd>9</kbd> | Paste one of the first nine |
+  | <kbd>Ctrl</kbd>+<kbd>P</kbd> | Pin |
+  | <kbd>Delete</kbd> | Remove (with undo) |
+  | <kbd>Tab</kbd> | Lamha's tools for the item: translate, write in English, proofread, summarize, look up, add to review. You always see the result before pasting it. |
+
+- **The الحافظة tab** in the main window lists everything, with the full text, labels, pins and the same tools. **مسح غير المثبّت** empties the history but keeps pinned items.
+- **Private by design:**
+  - Saved in `%APPDATA%\Lamha\clipboard.json`, encrypted with Windows (DPAPI) for your user account.
+  - Nothing is sent anywhere unless you press a tool on an item.
+  - Copies from password managers (KeePass, KeePassXC, 1Password, Bitwarden, Enpass, Dashlane, NordPass) are never recorded. Add more programs in Settings, or with **تجاهل هذا البرنامج** on an item. Lamha also honours the signals password managers put on the clipboard for Windows' own history.
+  - Bank-card numbers are skipped (on by default).
+- **Also in Settings:** how many items to keep (500 by default) and automatic deletion of unpinned items (after 30 days by default).
 - **Pause** from the tray: 15 minutes, 1 hour, or until you resume.
-- **Windows' own clipboard history** (<kbd>Win</kbd>+<kbd>V</kbd>) is separate and may still record your copies. Turn it off in Windows Settings → System → Clipboard if you only want Lamha's.
+- Windows' own history (<kbd>Win</kbd>+<kbd>V</kbd>) is separate and may still record your copies. Turn it off in Windows Settings → System → Clipboard if you only want Lamha's.
+
+### 🧰 Living in the tray
+
+- Closing the window keeps Lamha in the tray, next to the clock. The tray menu opens the app, the clipboard panel, Review, Writing or Settings. It can also pause the clipboard, switch animations, **Start with Windows**, and quit.
+- **Review reminders:** a Windows notification when cards are waiting, at most every 4 hours.
+- **Ollama** works without the `OLLAMA_ORIGINS` step.
+- **Your data** (settings, cards, the mistake journal) is saved in `%APPDATA%\Lamha`. API keys are encrypted with DPAPI.
+- **Updates:** the installed app checks [GitHub Releases](https://github.com/osamaomer/lamha/releases) at startup and every 6 hours, downloads new versions in the background and installs them when Lamha restarts. The tray has **التحقق من التحديثات**, and Settings → التحديثات can turn automatic updates off. The Portable version can't replace itself: it tells you a new version is out and links to the download.
+
+### Installing
+
+Download **Lamha-Setup-&lt;version&gt;.exe** from [Releases](https://github.com/osamaomer/lamha/releases). Only the Setup version updates itself; the Portable one doesn't.
+
+The app isn't code-signed, so the first time it runs Windows SmartScreen says "Windows protected your PC". Choose *More info → Run anyway*.
+
+### Building from source
 
 ```bash
 cd desktop
 npm install
 npm start          # run from source
-npm run smoke      # self-test: starts the app with a temporary profile, checks everything, quits
+npm run smoke      # self-test: starts with a temporary profile, checks everything, quits
 npm run dist       # builds dist/Lamha-Setup-<version>.exe and dist/Lamha-Portable-<version>.exe
 ```
 
-The app is not code-signed. The first time it runs, Windows SmartScreen shows "Windows protected your PC". Choose *More info → Run anyway*.
+### 🚀 Releasing a new version
 
-### Releasing a new version
+GitHub Actions builds releases ([release.yml](.github/workflows/release.yml)), so no token or build tools are needed on your PC.
 
-Releases are built by GitHub Actions ([.github/workflows/release.yml](.github/workflows/release.yml)), so no token or build tools are needed on your PC, and it works the same from any PC with the repository.
-
-1. Run the full self-test on Windows: `cd desktop && npm run smoke`. The cloud build runs the unit tests and the lint, but not this test, which needs a real desktop.
-2. Raise the version, commit it, and push a matching tag (from the repository folder):
+1. Run the full self-test on Windows: `cd desktop && npm run smoke`. The cloud build runs the unit tests and the lint, but not this one, because it needs a real desktop.
+2. Raise the version, commit, and push a matching tag from the repository folder:
    ```bash
-   npm version 1.5.1 --no-git-tag-version --prefix desktop   # updates desktop/package.json and its lockfile
-   git commit -am "Lamha 1.5.1"
-   git tag v1.5.1
-   git push && git push origin v1.5.1
+   npm version 1.8.1 --no-git-tag-version --prefix desktop   # updates desktop/package.json and its lockfile
+   git commit -am "Lamha 1.8.1"
+   git tag v1.8.1
+   git push && git push origin v1.8.1
    ```
-3. The **Release** workflow checks that the tag matches the version, runs the tests, builds `Lamha-Setup-<version>.exe` and `Lamha-Portable-<version>.exe`, and publishes them with `latest.yml` as a GitHub Release. Follow it in the repository's **Actions** tab.
+   Keep `manifest.json`'s `version` in step with it.
+3. The **Release** workflow checks the tag matches the version, runs the tests, builds both installers, and publishes them with `latest.yml` as a GitHub Release. Follow it in the **Actions** tab.
 4. Installed copies pick it up on their next check. Add release notes by editing the release on GitHub.
 
-Share the **Setup** installer: only installed copies update themselves.
+---
 
-## Project layout
+## 🛠️ For developers
+
+> Starting a new session with Claude Code? [CLAUDE.md](CLAUDE.md) has the architecture, the conventions and where the work stands. Claude Code reads it automatically.
+
+### Project layout
 
 ```
-manifest.json            MV3 manifest (Firefox 140+)
-background.js            All network calls, caching, settings, history, menu, shortcuts
-content/styles.js        CSS for the in-page UI (injected into a closed shadow root)
-content/content.js       Selection detection, floating button, lookup card, page-translation bar
-content/page-translator.js  Whole-page translation engine
-popup/                   Toolbar popup
-options/                 Settings + welcome page
-shared/ui.css            Design tokens shared by popup and options
-shared/motion.js, motion.css  The Animations setting (full / subtle / off) and the helpers and page animations it drives
-shared/lamha-ai.js       Mistake categories, AI error messages, word diff (background, content, popup, options)
-shared/i18n.js           Interface language (Arabic / English): the setting, and the strings shared by every page
-options/i18n-options.js  The settings page's strings (desktop/renderer/i18n-desktop.js has the Windows app's)
-desktop/                 Windows app (Electron): main.js, preload.js, storage.js,
-                         native.js + selection.js (any-app shortcuts),
-                         clipboard-*.js (clipboard history), renderer/, scripts/
-shared/arabic-normalize.js  Arabic-aware search normalization and language detection (desktop clipboard history)
-icons/icon.svg
+manifest.json               MV3 manifest (Firefox 140+)
+background.js               The brain: network calls, caching, settings, history, AI tools, flashcards, menu, shortcuts
+local-dict.js               The offline dictionary (reads dict/)
+content/
+  content.js                Selection, floating button, lookup and writing card, page-translation bar
+  page-translator.js        Whole-page translation engine
+  styles.js                 CSS for the card (injected into a closed shadow root)
+popup/                      Toolbar popup (the main window in the Windows app)
+options/                    Settings + welcome page (i18n-options.js has its strings)
+shared/
+  i18n.js                   Interface language (Arabic / English) and the shared strings
+  lamha-ai.js               Mistake categories, AI error messages, word diff
+  motion.js, motion.css     The Animations setting and its helpers
+  ui.css                    Design tokens for popup and options
+  arabic-normalize.js       Arabic-aware search and language detection (clipboard history)
+desktop/                    Windows app (Electron)
+  main.js                   Main process: runs background.js with a browser.* stand-in, windows, tray, shortcuts
+  preload.js, storage.js    The browser.* API for pages; storage in JSON files
+  native.js, selection.js   Windows calls; reading and pasting selections in other apps
+  uia-context.js            The sentence around a word in other apps
+  clipboard-*.js            Clipboard history: capture, store, privacy, tools
+  updater.js                Updates from GitHub Releases
+  renderer/                 Card window, clipboard UI, desktop strings and styles
+  scripts/                  run, smoke test, icons, copying the extension files in
+dict/                       Offline dictionary data (generated)
+tools/                      Tests and the dictionary builder
 ```
 
-## Offline dictionary
+### Tests
 
-The data in `dict/` is generated by `tools/build_dict.py` from WordNet 3.0, Arabic WordNet, English Wiktionary (via kaikki.org) and CMUdict. See the script's docstring for rebuild steps and [dict/LICENSES.md](dict/LICENSES.md) for attribution. The data is **CC BY-SA 4.0**.
+```bash
+npm install     # once: installs jsdom for the UI test
+npm test        # all four test files
+npm run lint    # web-ext lint (0 errors, 0 warnings expected)
+```
 
-Rebuild it with:
+| File | What it covers |
+|---|---|
+| `tools/test-writing.mjs` | The writing tools and flashcard scheduling, running the real background code with a fake browser and a fake network (no key needed). Add `--ollama` for one real proofread through local Ollama, or `--gemini` with `GEMINI_API_KEY` set for both Gemini models. |
+| `tools/test-ui.mjs` | Renders the real popup and settings pages in jsdom and clicks through review, compose and the journal |
+| `tools/test-clipboard.mjs` | Clipboard history: Arabic search, the encrypted store, tools on clips, privacy rules |
+| `tools/test-updater.mjs` | The desktop updater |
+| `tools/compare-translation.mjs` | Not a test: runs the same sentences through Google, Gemini and Ollama and writes `translation-report.md`, to judge AI translation quality. Needs `GEMINI_API_KEY` and/or `--ollama <url>`. |
+
+### Rebuilding the offline dictionary
+
+`dict/` is generated by `tools/build_dict.py` from WordNet 3.0, Arabic WordNet, English Wiktionary (via kaikki.org) and CMUdict. See the script's docstring for details.
+
 ```bash
 pip install nltk wordfreq
 python -c "import nltk; [nltk.download(p) for p in ('wordnet','omw-1.4','cmudict')]"
@@ -218,28 +359,30 @@ curl -LO https://kaikki.org/dictionary/English/kaikki.org-dictionary-English.jso
 python tools/build_dict.py --kaikki kaikki.org-dictionary-English.jsonl.gz
 ```
 
-## Data sources and privacy
+---
 
-- **Translation, dictionary, definitions, synonyms, pronunciation:** Google Translate's public web endpoints (`translate.googleapis.com`, with automatic failover to `clients5.google.com` when one is rate-limited). Nothing is sent until you select text and open the card, or start page translation.
-- **Encyclopedia:** Wikipedia's REST API.
-- **Writing tools:** the provider you choose in Settings. Text is sent only when you press a tool: the selected text, or the page's text when you ask for a page summary.
-  - **Ollama** runs on your own computer (`localhost:11434` by default), so nothing leaves the PC. If you point it at another computer over `http://`, the text crosses the network unencrypted.
-  - **Gemini** (`generativelanguage.googleapis.com`) is called with your own key. ⚠️ On the free tier Google may use what you send to improve its products.
-  - **Claude** (`api.anthropic.com`) is called with your own key.
-  - API keys stay on your device and are never synced. In the Windows app they are encrypted with Windows (DPAPI) for your user account.
-- The history of looked-up words stays in local storage on your device. Settings sync through your Firefox account.
-- **Clipboard history (Windows app):** copied text stays on your PC, encrypted. A clip is sent only when you press one of Lamha's tools on it (ترجم، دقّق، اكتبه بالإنجليزية…), to the same service that tool uses everywhere else.
-- Sent to Google Translate: the text you select, the **sentence around a selected word** (used to pick the right meaning; turn off with *فهم الكلمة من سياق الجملة*), and page text when you choose to translate a page.
-- In **Local first** and **Local only** modes, single words are looked up in the built-in dictionary without sending them anywhere (the context sentence is still sent in Local first unless disabled).
+## 🔒 Privacy and data sources
 
-> **Note:** Google's `gtx` endpoints are free and need no API key, but they are unofficial. For heavy or commercial use, switch `translateBatch()` and `lookup()` in `background.js` to an official API such as Google Cloud Translation, DeepL or Azure. Everything else stays the same.
+Lamha sends nothing until you ask it to.
 
-## Customising
+| What | Where it goes | When |
+|---|---|---|
+| Translations, dictionary, pronunciation | Google Translate's public endpoints (`translate.googleapis.com`, failing over to `clients5.google.com` when one is rate-limited) | When you open a card or translate a page |
+| Sentences, paragraphs and pages, with AI translation | Your chosen translator: Ollama (your PC), Gemini or Claude | When the translation service uses the AI (Settings → الترجمة), or you press ✨ Better translation |
+| The sentence around a selected word (the word included) | The translation service, to pick the right meaning | With *فهم الكلمة من سياق الجملة* on (the default). On Local only, only a local AI (Ollama) gets it. |
+| Encyclopedia summaries | Wikipedia's REST API | For word lookups, when enabled |
+| Writing tools | The provider you chose: Ollama (your PC, `localhost:11434`), Gemini (`generativelanguage.googleapis.com`) or Claude (`api.anthropic.com`) | Only when you press a tool |
+| Clipboard items (Windows app) | The same service the tool uses anywhere else | Only when you press a tool on an item |
 
-- **Default target language:** Settings → لغة الترجمة (Translation language). Arabic is the default; English, French, Turkish, Urdu, Persian, Spanish and German are also available.
-- **Keyboard shortcuts:** Settings → تخصيص الاختصارات (Customise shortcuts), or `about:addons` → ⚙ → Manage Extension Shortcuts.
-- **Colours and fonts:** edit the tokens at the top of `content/styles.js` and `shared/ui.css`.
+- **Local first** looks single words up in the built-in dictionary. Nothing about the word is sent, unless the sentence context is on or the dictionary has definitions but no Arabic word (then one small request fetches the main meaning).
+- **Local only** never goes online for words at all.
+- Pointing Ollama at another computer over `http://` sends your text across the network unencrypted.
+- Lookup history, review cards and the mistake journal stay on your device. In Firefox, settings sync through your Firefox account; API keys never do.
+
+> **A note on Google Translate:** the `gtx` endpoints are free and need no key, but they're unofficial. For heavy or commercial use, switch `translateBatch()` and `lookup()` in `background.js` to an official API (Google Cloud Translation, DeepL, Azure). Nothing else needs to change.
+
+---
 
 ## License
 
-The code is released under the [MIT License](LICENSE). The offline dictionary data in `dict/` is licensed under CC BY-SA 4.0; see [dict/LICENSES.md](dict/LICENSES.md).
+The code is under the [MIT License](LICENSE). The dictionary data in `dict/` is CC BY-SA 4.0; see [dict/LICENSES.md](dict/LICENSES.md).

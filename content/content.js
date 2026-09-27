@@ -22,6 +22,7 @@
   const AI_LOCAL_KEYS = LamhaAI.PROVIDER_KEYS;
   let aiLocal = {}, aiReady = false;
   const aiProvider = () => LamhaAI.provider(aiLocal);
+  const aiTranslator = () => LamhaAI.translator(aiLocal); // Settings → Translation service
   const updateAiReady = () => { aiReady = aiProvider().ready; };
   browser.storage.sync.get(settings).then(s => { settings = { ...settings, ...s }; applyTheme(); }).catch(() => {});
   // interface language: the card's labels follow it; an open card closes so the next one is in the new language
@@ -92,7 +93,7 @@
       return langNames.of(code) || code;
     } catch (_) { return code; }
   }
-  const dirOf = lang => (["ar", "fa", "ur", "he", "iw", "ps", "yi", "ku", "sd"].includes((lang || "").split("-")[0]) ? "rtl" : "ltr");
+  const dirOf = LamhaI18n.textDir;
 
   async function copyText(text) {
     try { await navigator.clipboard.writeText(text); toast(L("c.copiedToast")); }
@@ -370,11 +371,12 @@
     if (focus) returnFocus = document.activeElement;
     if (info.context === undefined) info.context = info.range && isWordish(info.text) ? contextOf(info.range) : null;
     cardInfo = info;
-    stack = [info.text];
+    const q = isWordish(info.text) ? info.text : (info.raw || info.text).trim(); // sentences keep their line breaks
+    stack = [q];
     card = h("div", { class: "card", role: "dialog", "aria-label": L("c.cardLabel"), tabindex: "-1" });
     root.append(card);
     decideSide();
-    load(info.text, info.context);
+    load(q, info.context);
     placeCard();
     if (focus) card.focus({ preventScroll: true });
   }
@@ -448,6 +450,7 @@
       h("div", { class: "brand" }, h("span", { class: "dot" }, icon("translate", 11, 2.6)), L("common.lamha")),
       langLabel && h("span", { class: "lang" }, langLabel),
       data && data.source === "local" && h("span", { class: "badge", title: L("c.localBadgeTitle") }, icon("book", 11, 2.4), L("c.localBadge")),
+      data && data.source === "ai" && h("span", { class: "badge", title: L("c.aiBadgeTitle", { p: data.ai }) }, icon("sparkle", 11, 2.4), data.ai),
       h("div", { class: "spacer" }),
       stack.length > 1 && h("button", { class: "icon-btn", title: L("common.back"), "aria-label": L("common.back"), onclick: goBack }, icon("back")),
       h("button", { class: "icon-btn", title: L("common.settings"), "aria-label": L("common.settings"), onclick: () => send({ type: "openOptions" }) }, icon("settings")),
@@ -465,6 +468,12 @@
     ];
     if (data.type === "word" && data.src === "en" && data.tl === "ar") {
       links.push(h("a", { href: `https://dictionary.cambridge.org/dictionary/english-arabic/${encodeURIComponent(data.query.toLowerCase().replace(/ /g, "-"))}`, target: "_blank", rel: "noopener noreferrer" }, icon("external", 13), L("c.cambridge")));
+    }
+    const tr = aiTranslator();
+    if (tr.ready && data.type === "text" && data.source !== "ai") { // Google's answer: the AI can do idioms and slang better
+      const text = data.query;
+      links.push(h("a", { href: "#", role: "button", title: L("c.betterTrTitle", { p: tr.name }), onclick: e => { e.preventDefault(); load(text, null, { engine: "ai" }); } },
+        icon("sparkle", 13), L("c.betterTr")));
     }
     if (aiReady && data.type === "text" && cardInfo) {
       const info = cardInfo;
@@ -489,8 +498,21 @@
     );
   }
 
-  function renderError(text, err) {
+  function renderError(text, err, opts = {}) {
     const b = frame(null);
+    if (err === "too_long") { // no retry: the same text would fail again
+      const [title, hint] = LamhaAI.errorInfo("ai_too_long");
+      b.append(h("div", { class: "err" }, h("b", null, title), hint));
+      return;
+    }
+    const code = String(err || "");
+    if ((Object.hasOwn(LamhaAI.ERRORS, code) && code !== "network") || code.startsWith("ai_error:")) { // the AI translator failed (quota, key…)
+      const [title, hint, needsSettings] = LamhaAI.errorInfo(code, aiTranslator().name);
+      b.append(h("div", { class: "err" }, h("b", null, title), hint, h("div", null, needsSettings
+        ? h("button", { class: "btn", onclick: () => send({ type: "openOptions", section: "translation" }) }, icon("settings", 14), L("common.settings"))
+        : h("button", { class: "btn", onclick: () => load(text, null, opts) }, icon("retry", 14), L("common.retry")))));
+      return;
+    }
     const offline = !navigator.onLine;
     const busy = err === "rate_limited";
     const notFound = err === "not_found_offline", offlineMode = err === "offline_mode";
@@ -515,14 +537,15 @@
     return out;
   }
 
-  async function load(text, context = null) {
+  /** `opts.engine: "ai"`: the "Better translation" link, which asks the AI whatever the translation setting is. */
+  async function load(text, context = null, opts = {}) {
     const token = ++reqId;
     renderSkeleton(text);
     card.classList.add("thinking"); // the Lamha mark blinks until the answer is here
-    const res = await send({ type: "lookup", text, context });
+    const res = await send({ type: "lookup", text, context, engine: opts.engine });
     if (token !== reqId || !card) return;
     card.classList.remove("thinking");
-    if (!res || !res.ok) { morph(() => renderError(text, res && res.error)); return; }
+    if (!res || !res.ok) { morph(() => renderError(text, res && res.error, opts)); return; }
     const pending = morph(() => render(res.data));
     if (res.data.milestone) LamhaMotion.burst(card.querySelector(".milestone"), { layer: root });
     if (settings.autoSpeak && res.data.type === "word") speak(res.data.query, res.data.src, null);
@@ -536,7 +559,7 @@
 
   /** Local results show English definitions at once; Arabic versions are filled in when they arrive. */
   async function fillGlosses(pending, token) {
-    const res = await send({ type: "translateBatch", texts: pending.map(p => p.gloss), tl: "ar", sl: "en" });
+    const res = await send({ type: "translateBatch", texts: pending.map(p => p.gloss), tl: "ar", sl: "en", kind: "gloss" });
     if (token !== reqId || !res || !res.ok) { pending.forEach(p => p.el.remove()); return; }
     pending.forEach((p, i) => {
       if (res.data[i]) { p.el.textContent = res.data[i]; p.el.classList.remove("sk-line"); }
@@ -819,7 +842,7 @@
   function pickTool(tool) {
     if (!aiReady) { writeOut.replaceChildren(aiError(notReadyCode())); return; }
     if (tool === "reply") replyForm();
-    else runTool(tool, tool === "summarize" ? { lang: "ar" } : {});
+    else runTool(tool, tool === "summarize" ? { lang: LamhaI18n.lang() } : {}); // in the interface language; the card offers the other one
   }
 
   async function runTool(tool, extra = {}) {
@@ -1050,7 +1073,7 @@
   let pbar = null, pbarIdle, pbarKey = "";
   function renderPageBar(state) {
     if (!IS_TOP) return;
-    const key = `${state.active}|${state.loading}|${state.showingOriginal}`;
+    const key = `${state.active}|${state.loading}|${state.showingOriginal}|${state.failed}`;
     if (key === pbarKey && (pbar || !state.active)) return;
     pbarKey = key;
     if (!state.active) { if (pbar) pbar.remove(); pbar = null; return; }
@@ -1058,12 +1081,14 @@
     if (!pbar) { pbar = h("div", { class: "pbar", role: "toolbar", "aria-label": L("c.pageBar") }); root.append(pbar); }
     pbar.textContent = "";
     const busy = state.loading;
+    const partial = !busy && state.failed; // some batches failed even after the retries
     const relay = action => send({ type: "relayPage", action });
     pbar.append(
-      h("div", { class: "status" },
-        busy ? h("span", { class: "spin" }) : h("span", { class: "ok" }, icon("check", 15, 2.6)),
-        busy ? L("common.translating") : L("c.pageDone")
+      h("div", { class: "status", role: "status" },
+        busy ? h("span", { class: "spin" }) : partial ? h("span", { class: "warn" }, icon("close", 15, 2.6)) : h("span", { class: "ok" }, icon("check", 15, 2.6)),
+        busy ? L("common.translating") : partial ? L("c.pagePartial") : L("c.pageDone")
       ),
+      partial && h("button", { class: "icon-btn", title: L("common.retry"), "aria-label": L("common.retry"), onclick: () => relay("retry") }, icon("retry", 15)),
       h("div", { class: "seg" },
         h("button", { class: state.showingOriginal ? "" : "on", onclick: () => relay("translated") }, langName(settings.targetLang)),
         h("button", { class: state.showingOriginal ? "on" : "", onclick: () => relay("original") }, L("c.original"))
@@ -1072,7 +1097,7 @@
     );
     pbar.classList.remove("mini");
     clearTimeout(pbarIdle);
-    if (!busy) pbarIdle = setTimeout(() => pbar && pbar.classList.add("mini"), 2500);
+    if (!busy && !partial) pbarIdle = setTimeout(() => pbar && pbar.classList.add("mini"), 2500); // a failure stays readable
   }
   LamhaPage.onState(renderPageBar);
 
@@ -1082,6 +1107,7 @@
     else if (action === "toggle") LamhaPage.isActive() ? LamhaPage.stop() : LamhaPage.start(settings.targetLang);
     else if (action === "original") LamhaPage.showOriginal(true);
     else if (action === "translated") LamhaPage.showOriginal(false);
+    else if (action === "retry") LamhaPage.retry();
   }
 
   /* ---------------- events ---------------- */

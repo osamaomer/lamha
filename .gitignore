@@ -11,3 +11,6 @@ desktop/ext/
 *.tmp
 Thumbs.db
 desktop.ini
+
+# tools/compare-translation.mjs output
+translation-report.md

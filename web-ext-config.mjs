@@ -6,6 +6,6 @@ export default {
     "tools", "tools/**",
     "web-ext-artifacts", "web-ext-artifacts/**",
     "node_modules", "node_modules/**",
-    "README.md", "web-ext-config.mjs", "package.json", "package-lock.json"
+    "README.md", "CLAUDE.md", "web-ext-config.mjs", "package.json", "package-lock.json"
   ]
 };

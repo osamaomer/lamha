@@ -175,8 +175,20 @@ var LamhaAI = (() => {
       notReady: { ollama: "ollama_no_model", gemini: "gemini_no_key", claude: "ai_no_key" }[id]
     };
   }
-  /** What pages (web pages, popup) read to know whether the writing tools are set up — never the API keys. */
-  const PROVIDER_KEYS = ["aiProvider", "ollamaModel", "aiKeySet", "geminiKeySet"];
+  /** The AI that translates (Settings → Translation service), from the same storage.local values plus trService /
+   *  trProvider / trModels: { id, name, ready, service }. `service` is "auto" | "google" | "ai". */
+  function translator(local = {}) {
+    const id = ["ollama", "gemini", "claude"].includes(local.trProvider) ? local.trProvider : provider(local).id;
+    const models = local.trModels && typeof local.trModels === "object" ? local.trModels : {};
+    return {
+      id,
+      name: { ollama: "Ollama", gemini: "Gemini", claude: "Claude" }[id],
+      ready: id === "ollama" ? !!(models.ollama || local.ollamaModel) : id === "gemini" ? !!(local.geminiKey || local.geminiKeySet) : !!(local.aiKey || local.aiKeySet),
+      service: ["auto", "google", "ai"].includes(local.trService) ? local.trService : "auto"
+    };
+  }
+  /** What pages (web pages, popup) read to know whether the writing tools and AI translation are set up — never the API keys. */
+  const PROVIDER_KEYS = ["aiProvider", "ollamaModel", "aiKeySet", "geminiKeySet", "trService", "trProvider", "trModels"];
 
-  return { CATEGORIES, isCategory, ERRORS, errorInfo, catLabel, catTip, diffParts, diffNodes, isArabicText, provider, PROVIDER_KEYS };
+  return { CATEGORIES, isCategory, ERRORS, errorInfo, catLabel, catTip, diffParts, diffNodes, isArabicText, provider, translator, PROVIDER_KEYS };
 })();

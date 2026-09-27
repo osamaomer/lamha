@@ -13,11 +13,13 @@
 const LocalDict = (() => {
   const POS_AR = {
     n: "اسم", v: "فعل", a: "صفة", r: "ظرف", p: "حرف جر", o: "ضمير", c: "حرف عطف",
-    i: "تعجّب", d: "أداة", u: "عدد", h: "عبارة", m: "اسم علم", t: "أداة"
+    i: "تعجّب", d: "أداة", u: "عدد", h: "عبارة", m: "اسم علم", t: "أداة",
+    e: "بالإنجليزية" // Arabic → English results: the list of English words
   };
   const POS_EN = {
     n: "noun", v: "verb", a: "adjective", r: "adverb", p: "preposition", o: "pronoun", c: "conjunction",
-    i: "interjection", d: "determiner", u: "number", h: "phrase", m: "proper noun", t: "article"
+    i: "interjection", d: "determiner", u: "number", h: "phrase", m: "proper noun", t: "article",
+    e: "in English"
   };
   /** Part-of-speech label in the interface language (shared/i18n.js, when loaded). */
   const posName = p => ((typeof LamhaI18n !== "undefined" && LamhaI18n.lang() === "en" ? POS_EN : POS_AR)[p] || p);
@@ -240,7 +242,7 @@ const LocalDict = (() => {
         return {
           query: text.trim(), inflected: "", type: "word", src: "ar", tl: "en",
           translation: en[0], translit: "", srcTranslit: "", spell: "",
-          dict: [{ pos: "بالإنجليزية", terms: en.slice(0, 12).map(w => ({ word: w, back: [] })) }],
+          dict: [{ pos: posName("e"), terms: en.slice(0, 12).map(w => ({ word: w, back: [] })) }],
           definitions: [], examples: [], source: "local"
         };
       }
