@@ -56,7 +56,7 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-09-27 (version 1.9.1 released)_
+_Last updated: 2026-09-28 (version 1.9.2 released)_
 
 ### Done (2026-09-27, released in 1.8.1 with the translation service below)
 
@@ -209,6 +209,18 @@ The user asked for a thorough design audit to make the interface consistent and 
 5. **Filled buttons' keyboard focus** is a soft halo (`.btn:focus-visible`, 45% of `--btn`), not a second ring: the clipboard tools focus لصق so Enter pastes.
 - `npm run smoke` passed 64/64 before the release.
 6. **`npm run shots` uses Ollama** when it's running (the user asked, so the pictures show the writing tools working): it picks a qwen model like the self-test, warms it up, then captures the card's Proofread and Improve (real key presses: `sendInputEvent`), an AI sentence translation, the Write tab's Proofread and Improve, and the clipboard panel's Proofread. The card can't be read from outside (closed shadow root), so it waits a measured time; the pages are polled. The corrections come in one after another, so it waits 1.8 s before each picture.
+
+### After 1.9.1: alignment and Longer, from the user's screenshots (2026-09-28, released in 1.9.2)
+
+The user cares a lot about alignment ("it feels off if something isn't aligned"). Check spacing and edges in every new screen.
+1. **Write new and Reply: a "Longer" tone** (`long`, مفصّل) next to Short. background.js has one `TONES` table (`toneOf()`, checked with `Object.hasOwn`); a message is "short" in the prompt unless Longer is picked.
+2. **The Settings section bar slid sideways under the mouse** (the user's GIF): as the page passed each section, the bar scrolled to keep the marked link in view, so the link under the pointer kept changing. Now the row only scrolls when the pointer isn't on it (`bringIntoView`, the row itself via `scrollBy`, never the page), and a clicked link stays marked for 1.2 s while the page gets there.
+3. **Dividers glued to what's above them**: `.opt` draws its line at its top edge, so after choice cards or a text box row it touched them. `.panel :not(.opt):not(h2) + .opt` (and the first row of a box after `.choices`) gets 14 px above the line. Hidden siblings count too, so the Writing tools row after the Ollama box isn't glued either.
+4. **Updates is the last section** (desktop), after Privacy & history; only the dictionary credits follow. The self-test checks it.
+5. **Animations → Preview** sits under its note in a column with an 8 px gap (`.md-side`); it had relied on the stray `.small` margin removed in 1.9.1.
+- Tests: compose tones in test-writing; Longer on the card and the section bar's click in test-ui (each fails on the old code). `npm run smoke` passed 64/64 before the release.
+6. **Longer (`expand`, أطول) for selected text**, right after Shorter: on the card (key 6: Summarize, Explain and Reply moved to 7–9) and in the popup's Write tab. Replace works (in `REPLACEABLE`). Tests in test-writing and test-ui.
+   - Tried with Ollama qwen3.5:4b: it lengthens messages well ("cant make sunday meeting" became a polite note asking for another time), but leaves a plain statement ("I went to the store…") almost as it was, and sometimes adds a vague reason ("a prior commitment") despite the prompt. Naming such phrases in the prompt made it *use* them and invent a story, so the prompt only asks for [placeholders] instead of facts. Gemini and Claude should follow it better; check when one is at hand.
 
 ### Ideas for later
 

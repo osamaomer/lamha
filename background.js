@@ -729,6 +729,9 @@ const PROOFREAD_SCHEMA = {
 };
 
 const REWRITE_RULE = "Put only the rewritten text in `text`, with no preamble or quotes.";
+/** Write new and Reply: the tone the user picked ("" = let the AI choose). */
+const TONES = { formal: "professional and polite", friendly: "warm and friendly", short: "short and to the point", long: "detailed and complete: give the fuller explanation, context and courtesies a longer message would have, without padding" };
+const toneOf = (t, fallback) => (Object.hasOwn(TONES, t) ? TONES[t] : fallback);
 const AI_TOOLS = {
   proofread: {
     effort: "medium",
@@ -741,6 +744,7 @@ This user often makes mistakes with: ${x.weak}. When one of those appears, expla
   formal: { task: () => `Rewrite the text in a polite, professional tone suitable for work email or official messages. Fix any errors. ${REWRITE_RULE}` },
   friendly: { task: () => `Rewrite the text in a warm, friendly, natural conversational tone. Fix any errors. ${REWRITE_RULE}` },
   concise: { task: () => `Make the text shorter and more direct: remove repetition and filler but keep every important point. Fix any errors. ${REWRITE_RULE}` },
+  expand: { task: () => `Make the text longer and more complete — clearly longer than the original (about twice as long for a short text): develop each point with the context, explanation or courtesy it needs, the way a thoughtful native writer would, keeping the meaning, tone and format. Don't pad or repeat. Never add reasons, events, names, dates or other facts that aren't in the text: where one would help, write a placeholder in square brackets such as [reason] or [date] for the author to fill in. Fix any errors. ${REWRITE_RULE}` },
   toEnglish: { task: () => `The text is written in Arabic (possibly mixed with English). Write what the author means as natural, fluent English — the way a native speaker would say it, not a word-for-word translation. Keep the same tone and format. ${REWRITE_RULE}` },
   summarize: {
     task: x => `Summarize the key points of the text in ${x.lang === "en" ? "English" : "Arabic"}. Use 3–6 short bullet points, each on its own line starting with "• ", most important first. If the text is only a few sentences, write one or two sentences instead. Put the summary in \`text\`.`
@@ -750,17 +754,17 @@ This user often makes mistakes with: ${x.weak}. When one of those appears, expla
   },
   compose: { // "Write new": nothing selected; <text> is what the user wants to say
     task: x => {
-      const tone = { formal: "professional and polite", friendly: "warm and friendly", short: "short and to the point" }[x.tone] || "natural and appropriate to the situation";
+      const tone = toneOf(x.tone, "natural and appropriate to the situation");
       const shape = x.kind === "email"
         ? `an email. Start with a line "Subject: …", then a greeting, the body and a sign-off with [Your name] as a placeholder`
-        : "a short message for chat, SMS or a comment: no subject line and no sign-off";
+        : `a ${x.tone === "long" ? "" : "short "}message for chat, SMS or a comment: no subject line and no sign-off`;
       return `The text inside <text> describes something the user wants to write (it may be in Arabic). Write it for them in English as ${shape}.
 Use the facts, names and details they gave; don't invent specifics they didn't give — put a placeholder in square brackets such as [date] instead. Tone: ${tone}. Put only the ${x.kind === "email" ? "email" : "message"} in \`text\`.`;
     }
   },
   reply: {
     task: x => {
-      const tone = { formal: "professional and polite", friendly: "warm and friendly", short: "short and to the point" }[x.tone] || "natural and appropriate to the message";
+      const tone = toneOf(x.tone, "natural and appropriate to the message");
       const intent = x.intent ? `What the user wants to say (may be written in Arabic):\n<intent>\n${x.intent}\n</intent>\n` : "The user didn't say what to answer, so write a sensible, natural reply.\n";
       return `The text is a message the user received. Write a reply in English for the user to send.
 ${intent}Tone: ${tone}. Match the channel: short for chat messages; greeting and sign-off for emails (use [Your name] as a placeholder). Put only the reply in \`text\`.`;

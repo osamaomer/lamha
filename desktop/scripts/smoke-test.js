@@ -1021,11 +1021,12 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       const win = getOptionsWin();
       const r = await js(win, `({
         panel: !!document.getElementById("updatesPanel"),
+        last: document.getElementById("updatesPanel").previousElementSibling.id === "privacy", // the last section, easy to reach
         version: document.getElementById("upVersion").textContent,
         auto: document.getElementById("updatesAuto").checked,
         button: document.getElementById("upCheck").textContent
       })`);
-      assert(r.panel && r.version.includes(app.getVersion()) && r.auto && r.button === "التحقق الآن", JSON.stringify(r));
+      assert(r.panel && r.last && r.version.includes(app.getVersion()) && r.auto && r.button === "التحقق الآن", JSON.stringify(r));
       await js(win, `document.getElementById("updatesAuto").click(); true`);
       await wait(200);
       const off = (await stores.local.get({ updatesAuto: true })).updatesAuto;

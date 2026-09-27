@@ -180,7 +180,7 @@ await step("compose: Arabic draft offers only 'to English'; English offers the e
   assert.deepEqual([...$("wrTools").querySelectorAll("button")].map(text), ["بالإنجليزية"]);
   d.value = "I go to market.";
   d.dispatchEvent(new pop.Event("input"));
-  assert.deepEqual([...$("wrTools").querySelectorAll("button")].map(text), ["تدقيق لغوي", "تحسين", "رسمي", "ودّي", "أقصر"]);
+  assert.deepEqual([...$("wrTools").querySelectorAll("button")].map(text), ["تدقيق لغوي", "تحسين", "رسمي", "ودّي", "أقصر", "أطول"]);
 });
 
 await step("compose: Ctrl+Enter proofreads; diff, issues with type chips; journal updated", async () => {
@@ -323,7 +323,13 @@ await step("English: settings page translated, language menu shows the choice", 
   assert.equal(eo("uiLang").value, "en");
   const headings = [...enOpt.document.querySelectorAll(".panel h2")].map(text);
   assert.ok(headings.includes("Dictionary") && headings.includes("Writing tools") && headings.includes("Appearance"), headings.join(" | "));
-  const links = [...enOpt.document.querySelectorAll("#toc a")].map(text);
+  const tocLinks = [...enOpt.document.querySelectorAll("#toc a")];
+  const journalLink = tocLinks.find(a => a.hash === "#journal");
+  enOpt.requestAnimationFrame = f => setTimeout(f, 16); // jsdom has none; the highlight uses it once
+  journalLink.click(); // a clicked link is marked at once, and stays marked while the page scrolls there
+  assert.equal(journalLink.getAttribute("aria-current"), "true");
+  assert.equal(tocLinks.filter(a => a.getAttribute("aria-current") === "true").length, 1);
+  const links = tocLinks.map(text);
   assert.ok(links.includes("Privacy & history") && links.includes("Writing tools"), "section links keep their punctuation: " + links.join(" | "));
   assert.match(text(eo("jSummary")), /^You proofread 5 texts and 13 mistakes were found\. Most frequent: Articles/);
   // no visible Arabic, except the native name of Arabic in the language menu
@@ -457,7 +463,7 @@ async function cardPage(reply, localData) {
   for (const s of ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "content/styles.js", "content/page-translator.js", "content/content.js"]) w.eval(src(s));
   await sleep(50);
   const root = () => w.document.querySelector("lamha-ui").__root;
-  return { w, sent, root, show: text => onMessage({ type: "showLookup", external: true, text }) };
+  return { w, sent, root, show: text => onMessage({ type: "showLookup", external: true, text }), write: text => onMessage({ type: "showWrite", external: true, text }) };
 }
 const trResult = (engine, extra = {}) => ({ ok: true, data: { query: "It's a piece of cake.", type: "text", src: "en", tl: "ar", translation: engine === "ai" ? "الأمر في غاية السهولة." : "إنها قطعة من الكعكة.", dict: [], definitions: [], examples: [], source: engine === "ai" ? "ai" : "online", ai: engine === "ai" ? "Gemini" : undefined, ...extra } });
 
@@ -504,6 +510,34 @@ await step("card: copy turns its icon into a check mark for a moment; a goal rea
   await sleep(20);
   assert.equal(copied, "إنها قطعة من الكعكة.");
   assert.ok(btn.classList.contains("copied") && btn.querySelector('path[d="M20 6 9 17l-5-5"]'), "a check mark");
+});
+
+await step("card: selected English text gets Longer right after Shorter; its number key runs it", async () => {
+  const c = await cardPage(msg => (msg.type === "ai" ? { ok: true, data: { text: "A longer version." } } : { ok: true }), { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" });
+  c.write("cant make sunday meeting");
+  await sleep(50);
+  const chips = [...c.root().querySelectorAll(".chip.tool")];
+  assert.deepEqual(chips.map(ch => ch.dataset.tool), ["proofread", "improve", "formal", "friendly", "concise", "expand", "summarize", "explain", "reply"]);
+  assert.match(text(chips[5]), /^٦\s*أطول$/);
+  c.root().querySelector(".card").dispatchEvent(new c.w.KeyboardEvent("keydown", { key: "6", bubbles: true }));
+  await sleep(50);
+  assert.equal(c.sent.find(m => m.type === "ai").tool, "expand");
+});
+
+await step("card: Write new offers Longer next to Short, for the message it writes", async () => {
+  const c = await cardPage(msg => (msg.type === "ai" ? { ok: true, data: { text: "Hi! I can't make it on Sunday." } } : { ok: true }), { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" });
+  c.write(""); // nothing selected: Write new
+  await sleep(50);
+  const rows = [...c.root().querySelectorAll(".w-out .tools")];
+  const tones = [...rows[1].querySelectorAll(".chip")];
+  assert.deepEqual(tones.map(text), ["تلقائي", "ودّي", "رسمي", "مختصر", "مفصّل"]);
+  tones[4].click();
+  c.root().querySelector(".w-input").value = "أعتذر عن اجتماع الأحد";
+  c.root().querySelector(".w-out > .btn").click();
+  await sleep(50);
+  const ai = c.sent.find(m => m.type === "ai");
+  assert.equal(ai.tool, "compose");
+  assert.equal(ai.extra.tone, "long");
 });
 
 await step("card: no stray 'false' text in a sentence's loading state or in the finished page bar", async () => {

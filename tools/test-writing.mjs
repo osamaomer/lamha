@@ -134,6 +134,26 @@ test("Write new (compose): an email or a message from a description, no selected
   assert.equal(message.ok, true, message.error);
   assert.equal(r.calls.length, 2, "Email and Message aren't served from the same cache entry");
   assert.match(r.calls[1].body.messages[0].content, /no subject line and no sign-off/);
+  assert.match(r.calls[1].body.messages[0].content, /a short message/, "a message is short unless asked otherwise");
+  await env.send({ type: "ai", tool: "compose", text: idea, extra: { kind: "message", tone: "long" } }); // Longer
+  const long = r.calls[2].body.messages[0].content;
+  assert.match(long, /Tone: detailed and complete/);
+  assert.doesNotMatch(long, /a short message/, "Longer isn't asked for a short message");
+  await env.send({ type: "ai", tool: "compose", text: idea, extra: { kind: "message", tone: "constructor" } }); // not a tone
+  assert.match(r.calls[3].body.messages[0].content, /Tone: natural and appropriate/);
+});
+
+test("Longer (expand): develops the text without inventing facts, like Shorter in reverse", async () => {
+  const r = recorder(() => claudeReply({ text: "Hi Sam, could we move Sunday's meeting to [day]? Something came up on my side." }));
+  const env = makeEnv({ fetchImpl: r.fetchImpl, local: { aiKey: "sk-test" } });
+  const res = await env.send({ type: "ai", tool: "expand", text: "cant make sunday meeting", extra: {} });
+  assert.equal(res.ok, true, res.error);
+  const prompt = r.calls[0].body.messages[0].content;
+  assert.match(prompt, /longer and more complete/);
+  assert.match(prompt, /clearly longer than the original/);
+  assert.match(prompt, /Never add reasons, events, names, dates/, "no invented facts");
+  assert.match(prompt, /\[reason\]/, "a placeholder instead");
+  assert.match(prompt, /Put only the rewritten text/);
 });
 
 test("Claude proofread: request shape, cleaned issues, journal recorded", async () => {

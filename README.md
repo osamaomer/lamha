@@ -79,7 +79,7 @@ Your personal English editor. Pick an AI provider in Settings → أدوات ا�
 | Tool | What it does |
 |---|---|
 | تدقيق لغوي · Proofread | Fixes grammar, spelling and word choice with as few changes as possible. Each mistake is struck through, its fix appears, and it's explained **in Arabic**. |
-| تحسين · رسمي · ودّي · أقصر | Improve, make formal, make friendly, make shorter |
+| تحسين · رسمي · ودّي · أقصر · أطول | Improve, make formal, make friendly, make shorter, make longer (develops each point with the context it needs; details only you know become [placeholders]) |
 | اكتبه بالإنجليزية | Turns an Arabic draft into natural English, not a word-for-word translation |
 | تلخيص | Bullet-point summary, in Arabic or English |
 | اشرح بالعربية | Explains the text, its idioms and its slang in Arabic |
@@ -89,7 +89,7 @@ Lamha offers the tools that fit the text: English text gets the editing tools, a
 
 - **Tool numbers:** each tool on the card has a number. Select text, press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>, then <kbd>1</kbd> to proofread, <kbd>2</kbd> to improve, and so on. Arabic digits work too.
 - **استبدال (Replace)** puts the result back where the text was. **نسخ** copies it.
-- **Write new:** with nothing selected, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> opens *كتابة جديدة*. Describe what you want in Arabic or English, choose **Email** or **Message** and a tone, and Lamha writes it in English. **إدراج (Insert)** puts it at your cursor.
+- **Write new:** with nothing selected, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> opens *كتابة جديدة*. Describe what you want in Arabic or English, choose **Email** or **Message** and a tone (automatic, friendly, formal, **short** or **longer**), and Lamha writes it in English. **إدراج (Insert)** puts it at your cursor.
 - **Mistake journal** (Settings → سجل أخطائي): proofreading notes the *type* of each mistake (articles, prepositions, verb tenses…). Settings shows your most frequent types, with a short rule and examples from your own writing. Your top 3 are passed to the AI so it explains those especially clearly. The journal stays on your device and can be turned off.
 
 #### 🤖 Choosing an AI provider

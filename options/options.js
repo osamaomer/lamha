@@ -146,11 +146,25 @@ function buildToc() {
     Object.assign(ink.style, { width: a.offsetWidth + "px", height: a.offsetHeight + "px", transform: `translate(${a.offsetLeft}px, ${a.offsetTop}px)` });
     if (first) requestAnimationFrame(() => { ink.style.transition = ""; });
   };
-  const mark = id => links.forEach(a => {
-    const on = a.hash === "#" + id;
-    a.setAttribute("aria-current", String(on));
-    if (on) { a.scrollIntoView({ block: "nearest", inline: "nearest" }); moveInk(a); }
-  });
+  // The row only slides to show the marked link when the mouse isn't on it: moving links under the pointer made it
+  // jump from one to the next while the user was aiming. A clicked link stays marked while the page settles.
+  let pointerIn = false, held = "", heldUntil = 0;
+  row.addEventListener("pointerenter", () => { pointerIn = true; });
+  row.addEventListener("pointerleave", () => { pointerIn = false; });
+  const bringIntoView = a => {
+    const r = row.getBoundingClientRect(), b = a.getBoundingClientRect();
+    if (pointerIn || (b.left >= r.left && b.right <= r.right)) return;
+    row.scrollBy({ left: b.left < r.left ? b.left - r.left - 32 : b.right - r.right + 32, behavior: LamhaMotion.any() ? "smooth" : "auto" }); // the row only, never the page
+  };
+  const mark = id => {
+    if (Date.now() < heldUntil && id !== held) return;
+    links.forEach(a => {
+      const on = a.hash === "#" + id;
+      a.setAttribute("aria-current", String(on));
+      if (on) { bringIntoView(a); moveInk(a); }
+    });
+  };
+  links.forEach(a => a.addEventListener("click", () => { held = a.hash.slice(1); heldUntil = Date.now() + 1200; mark(held); }));
   setTimeout(tocEdges, 0); // once laid out
   if (typeof IntersectionObserver !== "function") return;
   const io = tocObserver = new IntersectionObserver(entries => {

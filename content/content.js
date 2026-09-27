@@ -801,8 +801,8 @@
 
   /* ---------------- writing tools (Claude, Gemini or Ollama) ---------------- */
 
-  const toolLabel = id => L("tool." + id); // proofread, improve, formal, friendly, concise, toEnglish, summarize, explain, reply
-  const REPLACEABLE = new Set(["proofread", "improve", "formal", "friendly", "concise", "toEnglish", "compose"]);
+  const toolLabel = id => L("tool." + id); // proofread, improve, formal, friendly, concise, expand, toEnglish, summarize, explain, reply
+  const REPLACEABLE = new Set(["proofread", "improve", "formal", "friendly", "concise", "expand", "toEnglish", "compose"]);
   const { isArabicText } = LamhaAI;
 
   let writeOut = null;
@@ -855,7 +855,7 @@
     const src = info.raw.trim();
     const tools = info.page ? ["summarize"]
       : isArabicText(src) ? ["toEnglish", "reply", "summarize"]
-      : ["proofread", "improve", "formal", "friendly", "concise", "summarize", "explain", "reply"];
+      : ["proofread", "improve", "formal", "friendly", "concise", "expand", "summarize", "explain", "reply"]; // Shorter and Longer side by side
     writeTools = tools;
     b.append(
       expandable({ class: "source w-src", dir: isArabicText(src) ? "rtl" : "ltr" },
@@ -973,7 +973,7 @@
     // keep site shortcuts (Gmail, Slack…) from reacting to what is typed here
     ["keydown", "keyup", "keypress"].forEach(t => input.addEventListener(t, e => { if (e.key !== "Escape") e.stopPropagation(); }));
     let tone = prev.tone || "";
-    const tones = h("div", { class: "tools" }, [["", L("c.toneAuto")], ["friendly", L("tool.friendly")], ["formal", L("tool.formal")], ["short", L("c.toneShort")]].map(([v, label]) =>
+    const tones = h("div", { class: "tools" }, [["", L("c.toneAuto")], ["friendly", L("tool.friendly")], ["formal", L("tool.formal")], ["short", L("c.toneShort")], ["long", L("c.toneLong")]].map(([v, label]) =>
       h("button", {
         class: "chip" + (v === tone ? " on" : ""),
         onclick: e => { tone = v; tones.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === e.currentTarget)); }
@@ -1025,7 +1025,7 @@
       h("div", { class: "w-note" }, L("c.kind")),
       choice([["message", L("c.kindMessage")], ["email", L("c.kindEmail")]], kind, v => { kind = v; }),
       h("div", { class: "w-note" }, L("c.tone")),
-      choice([["", L("c.toneAuto")], ["friendly", L("tool.friendly")], ["formal", L("tool.formal")], ["short", L("c.toneShort")]], tone, v => { tone = v; }),
+      choice([["", L("c.toneAuto")], ["friendly", L("tool.friendly")], ["formal", L("tool.formal")], ["short", L("c.toneShort")], ["long", L("c.toneLong")]], tone, v => { tone = v; }),
       h("button", { class: "btn", onclick: go }, icon("sparkle", 14), L("c.composeGo"), h("span", { class: "kbd" }, "Ctrl+Enter"))
     );
     input.focus({ preventScroll: true });

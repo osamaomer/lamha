@@ -128,6 +128,9 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
         cardKey("2"); // Improve
         await wait(aiWait);
         await save(cw, "card-write-improve");
+        cardKey("6"); // Longer
+        await wait(aiWait * 2); // a longer answer
+        await save(cw, "card-write-longer");
       }
       await card("card-write-new", { type: "showWrite", text: "" }, 1500);
       await closeCard();

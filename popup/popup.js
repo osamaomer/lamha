@@ -228,7 +228,7 @@ function copyIcon() {
 
 const WRITE_TOOLS = [
   ["proofread", "tool.proofread"], ["improve", "tool.improveShort"], ["formal", "tool.formal"],
-  ["friendly", "tool.friendly"], ["concise", "tool.concise"], ["toEnglish", "tool.toEnglishShort"]
+  ["friendly", "tool.friendly"], ["concise", "tool.concise"], ["expand", "tool.expand"], ["toEnglish", "tool.toEnglishShort"]
 ];
 const draft = $("draft");
 let aiLocal = {}, wrToken = 0, draftTimer;

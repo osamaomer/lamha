@@ -146,7 +146,7 @@
         upBtn),
       h("button", { class: "link", type: "button", id: "upReleases" }, L("d.upWhatsNew"))
     );
-    panel.after(upPanel);
+    (document.getElementById("privacy") || panel).after(upPanel); // the last section, easy to find (only the credits follow)
     const STATUS = {
       checking: () => L("d.upSChecking"),
       downloading: st => L("d.upSDownloading", { v: st.version }),
