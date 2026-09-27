@@ -323,6 +323,8 @@ await step("English: settings page translated, language menu shows the choice", 
   assert.equal(eo("uiLang").value, "en");
   const headings = [...enOpt.document.querySelectorAll(".panel h2")].map(text);
   assert.ok(headings.includes("Dictionary") && headings.includes("Writing tools") && headings.includes("Appearance"), headings.join(" | "));
+  const links = [...enOpt.document.querySelectorAll("#toc a")].map(text);
+  assert.ok(links.includes("Privacy & history") && links.includes("Writing tools"), "section links keep their punctuation: " + links.join(" | "));
   assert.match(text(eo("jSummary")), /^You proofread 5 texts and 13 mistakes were found\. Most frequent: Articles/);
   // no visible Arabic, except the native name of Arabic in the language menu
   const visible = [...enOpt.document.querySelectorAll("h1, h2, h3, b, small, p, button, label, option, li, span, footer")]

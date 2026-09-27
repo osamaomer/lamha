@@ -1,7 +1,9 @@
 /* Lamha desktop — every screen as a picture (npm run shots), for design reviews and before/after checks.
  * Runs like the self-test: from source, with a temporary profile (no API keys, no history of the user's own),
  * light and dark × Arabic and English. The system clipboard is never read or written: sample clips go straight
- * into the store. Pictures go to $LAMHA_SHOTS (default: %TEMP%\lamha-shots), one folder per theme and language. */
+ * into the store. Pictures go to $LAMHA_SHOTS (default: %TEMP%\lamha-shots), one folder per theme and language.
+ * With Ollama running on this PC, the writing tools and AI translation use it, so their results are in the pictures
+ * too ($LAMHA_SHOTS_AI=0: no AI, the setup screens instead). */
 "use strict";
 const fs = require("node:fs");
 const os = require("node:os");
@@ -18,7 +20,7 @@ const CLIPS = [
   { text: "https://github.com/lamha/lamha/releases", sourceApp: "Firefox" }
 ];
 
-module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin, stores, desktop }) {
+module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin, stores, send, desktop }) {
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const js = (win, code) => win.webContents.executeJavaScript(code);
   const loaded = win => (win.webContents.isLoading() ? new Promise(r => win.webContents.once("did-finish-load", r)) : Promise.resolve());
@@ -49,6 +51,30 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
   const cardMsg = msg => cw.webContents.send("lamha:page-message", { external: true, replaceable: true, point: { x: 240, y: 12 }, ...msg });
   const closeCard = () => js(cw, `document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); true`);
   const card = async (name, msg, ms = 3000) => { cardMsg(msg); await wait(ms); await save(cw, name); };
+  /** A real key press on the card (its tools listen on the card itself, inside a closed shadow root). */
+  const cardKey = k => { cw.focus(); cw.webContents.focus(); for (const type of ["keyDown", "char", "keyUp"]) cw.webContents.sendInputEvent({ type, keyCode: k }); };
+  /** Waits until `expr` is true in `win` (a page whose DOM we can read), at most `ms`. */
+  const until = async (win, expr, ms = 90000) => { for (const end = Date.now() + ms; Date.now() < end; await wait(400)) if (await js(win, expr)) return true; return false; };
+
+  /* ---- AI: Ollama on this PC, when it's running ---- */
+  let ai = null, aiWait = 0;
+  if (process.env.LAMHA_SHOTS_AI !== "0") {
+    try {
+      const tags = await (await fetch("http://localhost:11434/api/tags", { signal: AbortSignal.timeout(3000) })).json();
+      const names = (tags.models || []).map(m => m.name);
+      ai = names.find(x => /qwen.*4b/i.test(x)) || names.find(x => /qwen/i.test(x)) || names[0] || null;
+    } catch (_) { /* not running: pictures without AI */ }
+  }
+  if (ai) {
+    await stores.local.set({ aiProvider: "ollama", ollamaModel: ai, trProvider: "writing" });
+    await send({ type: "ai", tool: "proofread", text: DRAFT, extra: {} }); // loads the model into memory first
+    const t0 = Date.now();
+    await send({ type: "ai", tool: "improve", text: DRAFT, extra: {} });
+    aiWait = Math.min(60000, Math.max(5000, (Date.now() - t0) * 1.6 + 1500)); // the card's answers can't be watched: wait this long
+    console.log(`AI: Ollama ${ai}, an answer in ${((Date.now() - t0) / 1000).toFixed(1)} s`);
+  } else {
+    console.log("AI: none (the writing tools show their setup screen)");
+  }
 
   /* ---- sample data for the review deck and the clipboard (never the real clipboard) ---- */
   const clipStore = desktop.getClipStore && desktop.getClipStore();
@@ -80,6 +106,11 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       await stores.sync.set({ enDict: false });
       await card("card-arabic-word", { type: "showLookup", text: "كتاب" });
       await card("card-sentence", { type: "showLookup", text: SENTENCE });
+      if (ai) { // the same sentence translated by the AI (Settings → Translation → AI), with its badge
+        await stores.local.set({ trService: "ai" });
+        await card("card-sentence-ai", { type: "showLookup", text: SENTENCE + " " }, aiWait); // a space: not the cached answer
+        await stores.local.set({ trService: "auto" });
+      }
       await card("card-paragraphs", { type: "showLookup", text: PARAGRAPHS });
       cardMsg({ type: "showLookup", text: "The quick brown fox " + theme + lang + " jumps over the lazy dog." });
       await wait(60);
@@ -90,6 +121,14 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       await card("card-error-not-found", { type: "showLookup", text: "blorptastic" }, 1500);
       await stores.sync.set({ dictSource: "local" });
       await card("card-write-selection", { type: "showWrite", text: DRAFT }, 1500);
+      if (ai) {
+        cardKey("1"); // Proofread
+        await wait(aiWait);
+        await save(cw, "card-write-proofread");
+        cardKey("2"); // Improve
+        await wait(aiWait);
+        await save(cw, "card-write-improve");
+      }
       await card("card-write-new", { type: "showWrite", text: "" }, 1500);
       await closeCard();
       // the pill (Firefox: selecting text on a web page) and the page-translation bar, on a stand-in page
@@ -130,9 +169,20 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       await tab("tabWr");
       await wait(400);
       await save(mainWin, "main-write-empty");
-      await js(mainWin, `(() => { const d = document.getElementById("draft"); d.value = ${JSON.stringify(DRAFT)}; d.dispatchEvent(new Event("input", { bubbles: true })); const b = document.querySelector("#wrTools button"); if (b) b.click(); return true; })()`);
-      await wait(1500);
-      await save(mainWin, "main-write-no-ai");
+      const wrTool = i => js(mainWin, `(() => { const d = document.getElementById("draft"); d.value = ${JSON.stringify(DRAFT)}; d.dispatchEvent(new Event("input", { bubbles: true })); const b = document.querySelectorAll("#wrTools button")[${i}]; if (b) b.click(); return true; })()`);
+      await wrTool(0); // Proofread
+      if (ai) {
+        await until(mainWin, `!!document.querySelector("#wrOut .text, #wrOut .ok, #wrOut .error")`);
+        await wait(1800); // the marks come in one after another (~1.2 s for six)
+        await save(mainWin, "main-write-proofread");
+        await wrTool(1); // Improve
+        await until(mainWin, `!!document.querySelector("#wrOut .text:not(:empty), #wrOut .error")`);
+        await wait(1800);
+        await save(mainWin, "main-write-improve");
+      } else {
+        await wait(1500);
+        await save(mainWin, "main-write-no-ai");
+      }
       await js(mainWin, `(() => { const d = document.getElementById("draft"); d.value = ""; d.dispatchEvent(new Event("input", { bubbles: true })); return true; })()`);
       await tab("tabRv");
       await wait(600);
@@ -158,7 +208,7 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       ow.setPosition(600, 40);
       ow.showInactive();
       await wait(1200);
-      for (const id of [null, "dictionary", "translation", "ai", "review", "journal", "appearance", "privacy", "clipPanel"]) {
+      for (const id of [null, "dictionary", "translation", "ai", "review", "journal", "appearance", "privacy", "clipPanel", "cbAppForm"]) {
         const found = await js(ow, id ? `(() => { const s = document.getElementById("${id}"); if (!s || s.offsetParent === null) return false; s.scrollIntoView({ block: "start" }); return true; })()` : "scrollTo(0, 0); true");
         if (!found) continue;
         await wait(700);
@@ -173,9 +223,21 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
         pw.webContents.send("lamha:clip-panel", { enabled: true, paused: false });
         await wait(900);
         await save(pw, "panel-list");
-        await js(pw, `(() => { const s = document.querySelector("#cpBody .lc-search"); s.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true })); return true; })()`);
+        await js(pw, `(async () => {
+          const s = document.querySelector("#cpBody .lc-search");
+          s.value = "She dont"; s.dispatchEvent(new Event("input")); // a clip worth proofreading
+          await new Promise(r => setTimeout(r, 300));
+          s.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+          return true;
+        })()`);
         await wait(700);
         await save(pw, "panel-tools");
+        if (ai) {
+          await js(pw, `(() => { const b = document.querySelector('#cpBody .ca-item[data-act="proofread"]'); if (b) b.click(); return !!b; })()`);
+          await until(pw, `!!document.querySelector("#cpBody .ca-text, #cpBody .ca-ok, #cpBody .ca-error")`);
+          await wait(1800);
+          await save(pw, "panel-proofread");
+        }
         desktop.hidePanel();
       }
     }

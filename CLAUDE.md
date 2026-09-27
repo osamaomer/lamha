@@ -48,14 +48,15 @@ npm install && npm test           # root: all four test files (tools/test-*.mjs)
 npm run lint                      # web-ext lint, expected 0 errors / 0 warnings (CI uses --warnings-as-errors)
 cd desktop && npm install && npm start   # run the Windows app from source
 cd desktop && npm run smoke       # full desktop self-test (needs a real Windows desktop; run before a release)
-cd desktop && npm run shots       # every screen as a PNG, light/dark × ar/en (~5 min; LAMHA_SHOTS_ONLY=dark-ar for one set, LAMHA_SHOTS=folder)
+cd desktop && npm run shots       # every screen as a PNG, light/dark × ar/en (~5 min; LAMHA_SHOTS_ONLY=dark-ar for one set, LAMHA_SHOTS=folder).
+                                  # Uses Ollama when it runs on this PC (real proofread / improve / AI translation); LAMHA_SHOTS_AI=0 skips it
 ```
 
 CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. Tagging `vX.Y.Z` runs the release workflow.
 
 ## Where we left off
 
-_Last updated: 2026-09-27 (version 1.9.0 committed: the design audit; not yet pushed or tagged)_
+_Last updated: 2026-09-27 (version 1.9.1 released)_
 
 ### Done (2026-09-27, released in 1.8.1 with the translation service below)
 
@@ -196,7 +197,18 @@ The user asked for a thorough design audit to make the interface consistent and 
 **Before 1.9.0 goes out** (the version is bumped and committed, but not pushed or tagged):
 - ✅ `npm run smoke` passed 64/64 on the home PC (2026-09-27), after the version bump.
 - Check by hand in Firefox: the Today card in the 360 px popup, the card's dark scrollbar, and Arabic placeholders on the right.
-- Then push and tag `v1.9.0` (the tag runs the release workflow).
+- ✅ Pushed, and `v1.9.0` tagged on the release commit (2026-09-27), before the Firefox check (the user's call).
+
+### After 1.9.0: Settings alignment, from the user's screenshots (2026-09-27, released in 1.9.1)
+
+1. **Buttons next to text boxes sat 12 px low** (Save & verify, Refresh list, Add, Test): options.css had a generic `.small { margin-top: 12px }` meant for `p.muted.small` notes, which also hit every `.btn.small`. Now `.muted.small`. Text boxes, dropdowns and the buttons beside them share `--control-h` (36 px, ui.css).
+2. **Clipboard → Clear unpinned / Clear all** look like deleting now (`.btn.small.danger` with a trash icon), like Settings' other clear buttons.
+3. **The desktop section bar listed Firefox-only sections** ("How it appears"): desktop.css hides those sections, so it now hides their links too (`.desktop .toc a[href="#triggerPanel"]`…). `tocEdges` ignores hidden links (they faded the first real link).
+4. **"Privacy & history" read "Privacy history"** in the section bar: the link text removed every non-letter to drop emoji; now it removes only emoji (`\p{Extended_Pictographic}`). Test in test-ui (fails on the old code).
+- `npm run shots` also stops at the clipboard's excluded programs and clear buttons (`cbAppForm`).
+5. **Filled buttons' keyboard focus** is a soft halo (`.btn:focus-visible`, 45% of `--btn`), not a second ring: the clipboard tools focus لصق so Enter pastes.
+- `npm run smoke` passed 64/64 before the release.
+6. **`npm run shots` uses Ollama** when it's running (the user asked, so the pictures show the writing tools working): it picks a qwen model like the self-test, warms it up, then captures the card's Proofread and Improve (real key presses: `sendInputEvent`), an AI sentence translation, the Write tab's Proofread and Improve, and the clipboard panel's Proofread. The card can't be read from outside (closed shadow root), so it waits a measured time; the pages are polled. The corrections come in one after another, so it waits 1.8 s before each picture.
 
 ### Ideas for later
 

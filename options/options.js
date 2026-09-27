@@ -127,7 +127,7 @@ function buildToc() {
   const links = sections.map(s => {
     const a = document.createElement("a");
     a.href = "#" + s.id;
-    a.textContent = s.querySelector("h2").textContent.replace(/[^\p{L}\p{N}\s()/-]/gu, "").trim(); // without the emoji
+    a.textContent = s.querySelector("h2").textContent.replace(/\p{Extended_Pictographic}\uFE0F?/gu, "").trim(); // without any emoji (keeps "&")
     return a;
   });
   const ink = document.createElement("span"); // the highlight that slides to the section in view (shared/motion.css)
@@ -166,7 +166,8 @@ function tocEdges() {
   const links = row ? row.querySelectorAll("a") : [];
   if (!links.length) return;
   const box = row.getBoundingClientRect();
-  const rects = [...links].map(a => a.getBoundingClientRect());
+  const rects = [...links].map(a => a.getBoundingClientRect()).filter(r => r.width > 0); // links hidden in the desktop app don't count
+  if (!rects.length) return;
   row.style.setProperty("--fade-l", Math.min(...rects.map(r => r.left)) < box.left - 1 ? "48px" : "0px");
   row.style.setProperty("--fade-r", Math.max(...rects.map(r => r.right)) > box.right + 1 ? "48px" : "0px");
 }

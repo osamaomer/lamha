@@ -285,7 +285,7 @@ cd desktop
 npm install
 npm start          # run from source
 npm run smoke      # self-test: starts with a temporary profile, checks everything, quits
-npm run shots      # a picture of every screen (light/dark × Arabic/English) in %TEMP%\lamha-shots
+npm run shots      # a picture of every screen (light/dark × Arabic/English) in %TEMP%\lamha-shots; with Ollama running, the writing tools' results too
 npm run dist       # builds dist/Lamha-Setup-<version>.exe and dist/Lamha-Portable-<version>.exe
 ```
 

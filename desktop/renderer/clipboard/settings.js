@@ -45,8 +45,9 @@
     h("div", { class: "opt" },
       h("div", null, h("b", null, L("d.sClear")), h("small", null, L("d.sClearHint"))),
       h("div", { class: "cb-set-acts" },
-        h("button", { class: "btn small ghost", type: "button", id: "cbClearUnpinned" }, L("d.clearUnpinned")),
-        h("button", { class: "btn small ghost lc-danger-text", type: "button", id: "cbClearAll" }, L("d.sClearAll"))))
+        // both delete: they look like it (Settings' own clear buttons: danger tint, trash icon)
+        h("button", { class: "btn small danger", type: "button", id: "cbClearUnpinned" }, LamhaClipList.icon("trash"), L("d.clearUnpinned")),
+        h("button", { class: "btn small danger", type: "button", id: "cbClearAll" }, LamhaClipList.icon("trash"), L("d.sClearAll"))))
   );
   document.getElementById("review").before(panel);
   const $ = id => document.getElementById(id);

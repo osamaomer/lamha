@@ -18,3 +18,7 @@
 .desktop #sitesPanel,    /* excluded websites */
 .desktop #keysPanel,     /* Firefox shortcuts */
 .desktop .ext-only { display: none !important; }
+/* …and their links in the section bar (options.js builds it from the page's sections) */
+.desktop .toc a[href="#triggerPanel"],
+.desktop .toc a[href="#sitesPanel"],
+.desktop .toc a[href="#keysPanel"] { display: none !important; }
