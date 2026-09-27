@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS = {
   dictSource: "local", // "local" (offline dictionary first) | "offline" (never go online for words) | "online"
   useContext: true, // send the sentence around a selected word so the right meaning is chosen
   saveHistory: true,
+  enDict: false, // English words get an English–English dictionary view instead of a translation (the card's switch)
   aiModel: "claude-opus-5", // writing tools; the provider, API key and Ollama model live in storage.local (per device, never synced)
   aiInInputs: true, // show the writing-tools button when text is selected inside text fields
   saveMistakes: true, // mistake journal: keep what proofreading finds (storage.local) and personalize explanations
@@ -382,11 +383,13 @@ async function lookup(rawText, opts = {}) {
   const mode = settings.dictSource;
   const tr = await trSettings();
   const force = opts.engine === "ai" ? "ai" : ""; // the card's "Better translation"
+  // English–English: an English word, with the switch (setting enDict) on or English as the translation language
+  const english = word && !force && /^[A-Za-z][A-Za-z'’ -]*$/.test(text) && (settings.enDict || tl === "en");
   const context = settings.useContext && word && opts.context && typeof opts.context.before === "string" ? {
     before: String(opts.context.before).slice(-300), after: String(opts.context.after || "").slice(0, 300)
   } : null;
   const key = [text.toLowerCase(), sl, tl, word, settings.translateDefinitions, mode, LamhaI18n.lang(),
-    context ? context.before + "¦" + context.after : "", tr.key, force].join("|");
+    context ? context.before + "¦" + context.after : "", tr.key, force, english].join("|");
   const cached = lookupCache.get(key);
   if (cached) return cached;
 
@@ -395,8 +398,8 @@ async function lookup(rawText, opts = {}) {
   const arLocal = word && sl === "ar" && tl === "en" && text.split(" ").length <= 2;
   const local = () => (enLocal ? LocalDict.lookupEn(text, context) : arLocal ? LocalDict.lookupAr(text) : null);
 
-  let result = null;
-  if ((enLocal || arLocal) && mode !== "online" && !force) {
+  let result = english ? await englishLookup(text, context, settings, mode) : null;
+  if (!english && (enLocal || arLocal) && mode !== "online" && !force) {
     result = await local();
     if (result && !result.translation && mode === "local" && !context) {
       // dictionary has definitions but no Arabic word: one small request for the main meaning
@@ -416,7 +419,7 @@ async function lookup(rawText, opts = {}) {
   }
 
   // The meaning of the word in *this* sentence: translate the sentence with the word marked.
-  if (context && result.type === "word") { // on "Local only", only a local AI may read the sentence (trPlan)
+  if (context && result.type === "word" && result.mode !== "en") { // on "Local only", only a local AI may read the sentence (trPlan)
     try {
       const ctx = await contextTranslate(text, context, tl, sl, { tr, offline: mode === "offline" });
       if (ctx) {
@@ -432,7 +435,7 @@ async function lookup(rawText, opts = {}) {
   if (!result.rough) lookupCache.set(key, result); // an AI answer with stray letters is asked again next time
   const learnable = word && result.translation && result.translation.toLowerCase() !== text.toLowerCase() &&
     !(result.context && result.context.untranslated); // a name here: not a word to learn
-  const newWord = settings.saveHistory && learnable && addHistory({ q: result.query, tr: result.translation, src: result.src });
+  const newWord = settings.saveHistory && learnable && addHistory({ q: result.query, tr: (result.mode === "en" && result.ar) || result.translation, src: result.src });
   // automatic cards are a record of lookups too: "Keep a history" off means none (🔖 still adds one by hand)
   if (settings.saveHistory && settings.cardsAuto && learnable && result.src === "en") addCard(cardFromLookup(result, text, context));
   // milestones count words: one already in the recent history (last 100), e.g. looked up in another sentence, isn't counted again
@@ -441,6 +444,35 @@ async function lookup(rawText, opts = {}) {
     if (milestone) return { ...result, milestone }; // a copy: the cached result stays without it
   }
   return result;
+}
+
+/**
+ * An English word in the English–English dictionary: the offline dictionary first (it picks the definition that fits
+ * the sentence), Google's English definitions for what it lacks. `ar` keeps the meaning in the translation language
+ * for the review card. Always a result (`translation` "" when no definition was found) or an error.
+ */
+async function englishLookup(text, context, settings, mode) {
+  const local = () => LocalDict.lookupEnglish(text, context);
+  if (mode !== "online") {
+    const r = await local();
+    if (r) return r;
+    if (mode === "offline") throw new Error("not_found_offline");
+  }
+  const other = settings.targetLang !== "en" ? settings.targetLang : "ar";
+  let online;
+  try {
+    online = await onlineLookup(text, "en", other, true, { ...settings, translateDefinitions: false }); // Google's definitions are English
+  } catch (err) {
+    const r = mode === "online" ? await local() : null; // offline or rate-limited: the dictionary after all
+    if (r) return r;
+    throw err;
+  }
+  const entries = online.definitions.flatMap(d => d.entries);
+  if (!entries.length && mode === "online") { const r = await local(); if (r) return r; }
+  return {
+    ...online, mode: "en", tl: "en", dict: [], ar: online.translation,
+    translation: entries.length ? entries[0].gloss : "", heroExample: entries.length ? entries[0].example : ""
+  };
 }
 
 /** Words looked up so far (storage.local lookupCount); returns the count when it just reached a milestone. */
@@ -1108,20 +1140,22 @@ function withDeck(fn) {
 function cardFromLookup(result, selected, context) {
   const def = (result.definitions && result.definitions[0] && result.definitions[0].entries[0]) || null;
   const ex = context ? (context.before + selected + context.after).replace(/\s+/g, " ").trim().slice(0, 300) : "";
+  if (result.mode === "en") return { q: result.query, tr: result.ar || "", ex, form: selected, def: result.translation, en: true }; // the definition that fits the sentence
   const ctxWord = result.context && !result.context.untranslated ? result.context.word : "";
   return { q: result.query, tr: ctxWord || result.translation, ex, form: selected, def: def ? def.gloss : "" };
 }
 
 function putCard(deck, c) {
   const k = cardKey(c.q);
-  if (!k || !c.tr) return false;
+  if (!k || !(c.tr || (c.en && c.def))) return false; // English–English cards may have only the definition
   const old = deck.cards[k];
   if (old) { // keep progress, fill in anything missing
-    for (const f of ["ex", "form", "def"]) if (c[f] && !old[f]) { old[f] = c[f]; deck.dirty = true; }
+    for (const f of ["tr", "ex", "form", "def"]) if (c[f] && !old[f]) { old[f] = c[f]; deck.dirty = true; }
     return false;
   }
   deck.cards[k] = {
-    q: c.q, tr: String(c.tr).slice(0, 200), ex: c.ex || "", form: c.form || "", def: String(c.def || "").slice(0, 300),
+    q: c.q, tr: String(c.tr || "").slice(0, 200), ex: c.ex || "", form: c.form || "", def: String(c.def || "").slice(0, 300),
+    ...(c.en ? { en: true } : {}), // review shows the English definition first, the meaning under it
     added: Date.now(), due: 0, interval: 0, ease: 2.5, reps: 0, lapses: 0
   };
   deck.dirty = true;
@@ -1277,6 +1311,7 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       return Promise.resolve({ ok: true });
     case "dictMeta": return LocalDict.meta();
     case "getSettings": return getSettings();
+    case "setWordDict": return browser.storage.sync.set({ enDict: !!msg.en }).then(() => ({ ok: true })); // the card's العربية ⇄ English switch
     case "openOptions":
       if (msg.section) return browser.tabs.create({ url: browser.runtime.getURL("options/options.html") + "#" + encodeURIComponent(msg.section) });
       return browser.runtime.openOptionsPage();

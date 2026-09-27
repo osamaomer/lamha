@@ -126,6 +126,10 @@ svg { display: block; flex: none; }
 .brand .dot { width: 18px; height: 18px; border-radius: 5px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; }
 .lang { font-size: 11.5px; color: var(--faint); font-family: var(--font-ar); margin-inline-start: 4px; }
 .spacer { flex: 1; }
+/* العربية ⇄ English on word cards: the meaning translated, or an English–English dictionary */
+.dsw { display: flex; background: var(--chip); border-radius: 999px; padding: 2px; margin-inline-start: 6px; }
+.dsw button { padding: 2px 9px; border-radius: 999px; font-family: var(--font-ar); font-size: 11px; font-weight: 600; color: var(--muted); }
+.dsw button.on { background: var(--bg-solid); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
   font-family: var(--font-ar); font-size: 10.5px; font-weight: 700;

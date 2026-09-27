@@ -3,9 +3,9 @@
 const DEFAULTS = {
   enabled: true, targetLang: "ar", triggerMode: "button", reverseForArabic: true, dictSource: "local", useContext: true,
   showInInputs: false, showWikipedia: true, translateDefinitions: true, autoSpeak: false,
-  theme: "auto", motion: "auto", saveHistory: true, aiModel: "claude-opus-5", aiInInputs: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, disabledSites: []
+  theme: "auto", motion: "auto", saveHistory: true, enDict: false, aiModel: "claude-opus-5", aiInInputs: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, disabledSites: []
 };
-const BOOLS = ["useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "saveMistakes", "cardsAuto"];
+const BOOLS = ["enDict", "useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "saveMistakes", "cardsAuto"];
 const { t, num } = LamhaI18n;
 const OWN_ERRORS = ["ai_bad_key", "ai_no_credit", "ai_forbidden", "ai_model", "ai_rate_limited", "ai_busy", "ai_timeout", "network", "ollama_offline", "ollama_origin", "ollama_model"];
 const aiErrorText = code => (OWN_ERRORS.includes(code) ? t("oerr." + code) : null)

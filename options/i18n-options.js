@@ -28,6 +28,8 @@
     "o.localOnlyHint": ["بدون أي اتصال بالإنترنت للكلمات. الجمل تُترجم فقط إن كان المترجم Ollama على جهازك.", "No internet at all for words. Sentences are translated only when the translator is Ollama on your PC."],
     "o.onlineFirst": ["الإنترنت أولًا", "Online first"],
     "o.onlineFirstHint": ["نتائج Google، والقاموس المحلي عند انقطاع الاتصال", "Google's results, with the offline dictionary when you're offline"],
+    "o.enDict": ["قاموس إنجليزي–إنجليزي", "English–English dictionary"],
+    "o.enDictHint": ["معاني الكلمات الإنجليزية بتعريفات إنجليزية وأمثلة ومرادفات بدل الترجمة، ويعمل دون إنترنت. بدّل من زر «العربية | إنجليزي» في بطاقة البحث أيضًا.", "English words get English definitions, examples and synonyms instead of a translation, offline too. Switch it from the card's “Arabic | English” button as well."],
     "o.dictInfo": ["القاموس المحلي مدمج في الإضافة ويعمل دون إنترنت.", "The offline dictionary is built in and works without internet."],
     "o.translation": ["الترجمة", "Translation"],
     "o.trIntro": ["من يترجم الجمل والفقرات: Google سريع ويحتاج إلى الإنترنت، والذكاء الاصطناعي أدق في التعابير والعامية وأبطأ، ومع Ollama يعمل دون إنترنت.", "Who translates sentences and paragraphs: Google is fast and needs the internet; AI is better with idioms and slang but slower, and with Ollama it works offline."],

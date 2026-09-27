@@ -26,7 +26,15 @@ function storageArea(data) {
   };
 }
 
-function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" } }) {
+/** `realDict`: the real local-dict.js, reading the dictionary files from dict/ (other requests go to `fetchImpl`). */
+function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = false }) {
+  if (realDict) {
+    const net = fetchImpl;
+    fetchImpl = async (url, init) => {
+      if (!String(url).startsWith("moz-extension://x/dict/")) return net(url, init);
+      try { return json(200, JSON.parse(src(String(url).slice("moz-extension://x/".length)))); } catch (_) { return json(404, {}); }
+    };
+  }
   let onMessage;
   const installed = [];
   const noopEvent = { addListener() {} };
@@ -40,9 +48,10 @@ function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" } }) {
   };
   const ctx = vm.createContext({
     browser, fetch: fetchImpl, console, setTimeout, clearTimeout, AbortController, URLSearchParams, structuredClone,
-    LocalDict: {}, Audio: class {}
+    ...(realDict ? {} : { LocalDict: {} }), Audio: class {}
   });
   vm.runInContext(src("shared/i18n.js"), ctx, { filename: "i18n.js" });
+  if (realDict) vm.runInContext(src("local-dict.js"), ctx, { filename: "local-dict.js" });
   vm.runInContext(src("shared/lamha-ai.js"), ctx, { filename: "lamha-ai.js" });
   vm.runInContext(src("background.js"), ctx, { filename: "background.js" });
   return {
@@ -727,6 +736,54 @@ test("translation: its own provider and model, separate from the writing tools",
   assert.match(net.calls.find(c => c.url.includes("generativelanguage")).url, /gemini-3\.8-flash/);
   const claude = makeEnv({ fetchImpl: async () => json(429, {}), local: { aiKey: "sk-test", trProvider: "claude" } });
   assert.equal((await claude.ctx.trSettings()).ai.model, "claude-haiku-4-5", "Claude translates with Haiku unless told otherwise");
+});
+
+/* ---- English–English dictionary ---- */
+
+test("English–English: offline definitions, the one that fits the sentence first, the Arabic kept for review", async () => {
+  const net = recorder(() => json(429, {}));
+  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, local: { cardsImported: true }, sync: { uiLang: "ar", enDict: true } });
+  const plain = await env.send({ type: "lookup", text: "resilient" });
+  assert.equal(plain.ok, true, plain.error);
+  const d = plain.data;
+  assert.deepEqual({ mode: d.mode, tl: d.tl, source: d.source, ar: d.ar, ipa: d.srcTranslit, dict: d.dict.length }, { mode: "en", tl: "en", source: "local", ar: "مَرِن", ipa: "rɪˈzɪljənt", dict: 0 });
+  assert.match(d.translation, /^recovering readily from adversity/);
+  assert.equal(d.contextSense, false);
+  assert.ok(d.definitions.every(p => p.entries.every(e => !e.ar)), "no Arabic in the English view");
+  const inSentence = await env.send({ type: "lookup", text: "resilient", context: { before: "Her hair was soft, bouncy and ", after: "." } });
+  assert.deepEqual({ t: inSentence.data.translation, fits: inSentence.data.contextSense, ex: inSentence.data.heroExample },
+    { t: "elastic; rebounds readily", fits: true, ex: "clean bouncy hair" }, "the sense that fits the sentence leads");
+  assert.equal(net.calls.length, 0, "no internet needed");
+  const card = env.browser.storage.local.data.cards.resilient;
+  assert.deepEqual({ en: card.en, tr: card.tr }, { en: true, tr: "مَرِن" });
+  assert.match(card.def, /^recovering readily/, "review: the English definition, with the Arabic under it");
+  assert.equal(env.browser.storage.local.data.history[0].tr, "مَرِن", "recent lookups list the short meaning");
+  assert.equal(inSentence.data.ar, "مَرِن", "a sense without its own Arabic word keeps the word's usual meaning");
+});
+
+test("English–English: automatic when English is the translation language; the card's switch is remembered", async () => {
+  const net = recorder(() => json(429, {}));
+  const toEnglish = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, sync: { uiLang: "en", targetLang: "en" } });
+  assert.equal((await toEnglish.send({ type: "lookup", text: "resilient" })).data.mode, "en", "no more 'resilient → resilient'");
+  const env = makeEnv({ fetchImpl: fakeGoogle().fetchImpl, realDict: true, sync: { uiLang: "ar", useContext: false } });
+  assert.equal((await env.send({ type: "lookup", text: "resilient" })).data.translation, "مَرِن", "Arabic by default");
+  await env.send({ type: "setWordDict", en: true });
+  assert.equal(env.browser.storage.sync.data.enDict, true);
+  assert.equal((await env.send({ type: "lookup", text: "resilient" })).data.mode, "en");
+  await env.send({ type: "setWordDict", en: false });
+  assert.equal((await env.send({ type: "lookup", text: "resilient" })).data.translation, "مَرِن");
+  assert.equal((await env.send({ type: "lookup", text: "Can we talk tomorrow?" })).data.mode, undefined, "sentences still translate");
+});
+
+test("English–English online: Google's English definitions, the meaning kept; unknown words offline say so", async () => {
+  const google = recorder(() => json(200, { src: "en", sentences: [{ trans: "مرن", orig: "resilient" }],
+    definitions: [{ pos: "adjective", entry: [{ gloss: "able to recover quickly from difficult conditions.", example: "a <b>resilient</b> economy" }] }] }));
+  const env = makeEnv({ fetchImpl: google.fetchImpl, sync: { uiLang: "ar", enDict: true, dictSource: "online" } });
+  const d = (await env.send({ type: "lookup", text: "resilient" })).data;
+  assert.deepEqual({ mode: d.mode, t: d.translation, ex: d.heroExample, ar: d.ar, source: d.source },
+    { mode: "en", t: "able to recover quickly from difficult conditions.", ex: "a resilient economy", ar: "مرن", source: "online" });
+  const offline = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", enDict: true, dictSource: "offline" } });
+  assert.equal((await offline.send({ type: "lookup", text: "qwxzyv" })).error, "not_found_offline");
 });
 
 test("offline Arabic → English results label their word list in the interface language", async () => {

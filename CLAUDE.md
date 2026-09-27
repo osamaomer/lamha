@@ -54,7 +54,7 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-09-27 (version 1.8.1 released)_
+_Last updated: 2026-09-27 (version 1.8.1 released; English–English dictionary built since, not committed)_
 
 ### Done (2026-09-27, released in 1.8.1 with the translation service below)
 
@@ -76,6 +76,14 @@ _Last updated: 2026-09-27 (version 1.8.1 released)_
 - Check by hand in Firefox:
   - Translate a multi-paragraph selection and confirm the paragraphs survive. Google's `single` endpoint couldn't be checked from the command line (it showed a bot page); the batch endpoint was confirmed to keep `\n`.
   - Look at the page bar's "partial" state, e.g. by going offline during a page translation.
+
+### English–English dictionary (2026-09-27, not committed yet)
+
+The user asked for English–English word lookups. They chose a switch on the card, remembered, plus a setting; and review cards showing both meanings.
+- **Setting:** `enDict` (storage.sync, default false). The card's **العربية ⇄ English** switch (`dictSwitch` in content.js, shown on English word cards when the translation language isn't English) sends `setWordDict` to the background, because the desktop card can't write settings itself. Settings → Dictionary has the same switch.
+- **Lookup:** `lookup()` computes `english` (an English word, and `enDict` on or translation language English) → `englishLookup()`: `LocalDict.lookupEnglish()` first (definitions without Arabic, the sense that fits the sentence as `translation`, `heroExample`, `contextSense`, `ar` = the Arabic meaning with a fallback to the word's usual one), then Google's English definitions (`onlineLookup` with `tl` = the translation language, so `ar` comes from it). Results carry `mode: "en"`. No sentence is sent anywhere for English lookups (no `contextTranslate`).
+- **Cards:** `cardFromLookup` / the card's bookmark / the clipboard's review tool make `{ tr: ar, def: definition, en: true }`. `putCard` accepts an English card with only a definition. The popup's review shows `def` first for `en` cards.
+- **Tests:** 3 in test-writing (with the real dictionary: `makeEnv({ realDict: true })`) and 2 in test-ui. All fail on 1.8.1.
 
 ### Current project: translation that works without internet
 

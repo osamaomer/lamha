@@ -448,7 +448,7 @@
     const langLabel = title || (data ? `${langName(data.src)} ${arrow()} ${langName(data.tl)}` : "");
     const bar = h("div", { class: "bar" },
       h("div", { class: "brand" }, h("span", { class: "dot" }, icon("translate", 11, 2.6)), L("common.lamha")),
-      langLabel && h("span", { class: "lang" }, langLabel),
+      data && hasDictSwitch(data) ? dictSwitch(data) : langLabel && h("span", { class: "lang" }, langLabel),
       data && data.source === "local" && h("span", { class: "badge", title: L("c.localBadgeTitle") }, icon("book", 11, 2.4), L("c.localBadge")),
       data && data.source === "ai" && h("span", { class: "badge", title: L("c.aiBadgeTitle", { p: data.ai }) }, icon("sparkle", 11, 2.4), data.ai),
       h("div", { class: "spacer" }),
@@ -461,13 +461,31 @@
     return bodyEl;
   }
 
+  /** English words, when the translation language isn't English: the meaning in it, or an English–English dictionary. */
+  const hasDictSwitch = d => d.type === "word" && d.src === "en" && settings.targetLang !== "en";
+
+  /** العربية ⇄ English in the card's bar; the choice is remembered (setting enDict) for the next words too. */
+  function dictSwitch(d) {
+    const en = d.mode === "en";
+    const pick = async wantEn => {
+      if (wantEn === en) return;
+      await send({ type: "setWordDict", en: wantEn }); // through the background: the desktop card can't write settings itself
+      settings.enDict = wantEn;
+      load(stack[stack.length - 1], stack.length === 1 && cardInfo ? cardInfo.context : null);
+    };
+    return h("div", { class: "dsw", role: "group", "aria-label": L("c.dictSwitch"), title: L("c.dictSwitch") },
+      [[false, langName(settings.targetLang)], [true, L("c.dictEn")]].map(([v, label]) =>
+        h("button", { type: "button", class: v === en ? "on" : null, "aria-pressed": String(v === en), onclick: () => pick(v) }, label)));
+  }
+
   function footer(data) {
     const q = encodeURIComponent(data.query);
     const links = [
       h("a", { href: `https://translate.google.com/?sl=${encodeURIComponent(data.src || "auto")}&tl=${encodeURIComponent(data.tl)}&text=${q}&op=translate`, target: "_blank", rel: "noopener noreferrer" }, icon("external", 13), L("c.google"))
     ];
-    if (data.type === "word" && data.src === "en" && data.tl === "ar") {
-      links.push(h("a", { href: `https://dictionary.cambridge.org/dictionary/english-arabic/${encodeURIComponent(data.query.toLowerCase().replace(/ /g, "-"))}`, target: "_blank", rel: "noopener noreferrer" }, icon("external", 13), L("c.cambridge")));
+    if (data.type === "word" && data.src === "en" && (data.tl === "ar" || data.mode === "en")) {
+      const book = data.mode === "en" ? "english" : "english-arabic";
+      links.push(h("a", { href: `https://dictionary.cambridge.org/dictionary/${book}/${encodeURIComponent(data.query.toLowerCase().replace(/ /g, "-"))}`, target: "_blank", rel: "noopener noreferrer" }, icon("external", 13), L("c.cambridge")));
     }
     const tr = aiTranslator();
     if (tr.ready && data.type === "text" && data.source !== "ai") { // Google's answer: the AI can do idioms and slang better
@@ -629,7 +647,8 @@
           ? h("div", { class: "t" + (long ? " long" : ""), dir: ctx && ctx.untranslated ? "auto" : tDir }, main)
           : h("div", { class: "t none" }, d.bestGloss
               ? [L("c.noArSense"), h("span", { class: "gloss", dir: "ltr" }, d.bestGloss)]
-              : L("c.noArDirect")),
+              : d.mode === "en" ? L("c.noEnDef") : L("c.noArDirect")),
+        d.mode === "en" && main && d.heroExample && h("div", { class: "ctx", dir: "ltr" }, `“${d.heroExample}”`),
         !ctx && d.type === "word" && d.translit && tDir === "rtl" && h("div", { class: "tr" }, d.translit),
         ctx && (ctx.pre || ctx.post) && h("div", { class: "ctx", dir: tDir }, ctx.pre, h("mark", null, ctx.word), ctx.post)
       ),
@@ -695,12 +714,13 @@
     btn.addEventListener("click", async () => {
       const c = stack.length === 1 && cardInfo && cardInfo.context ? cardInfo.context : null;
       const def = d.definitions && d.definitions[0] && d.definitions[0].entries[0];
+      const form = stack.length === 1 && cardInfo ? cardInfo.text : "";
+      const ex = c ? (c.before + cardInfo.text + c.after).replace(/\s+/g, " ").trim().slice(0, 300) : "";
       const on = await send({
         type: "cardToggle",
-        card: {
-          q: d.query, tr: (d.context && !d.context.untranslated && d.context.word) || d.translation, form: stack.length === 1 && cardInfo ? cardInfo.text : "",
-          ex: c ? (c.before + cardInfo.text + c.after).replace(/\s+/g, " ").trim().slice(0, 300) : "", def: def ? def.gloss : ""
-        }
+        card: d.mode === "en"
+          ? { q: d.query, tr: d.ar || "", def: d.translation, en: true, form, ex } // English–English: the definition first on review
+          : { q: d.query, tr: (d.context && !d.context.untranslated && d.context.word) || d.translation, form, ex, def: def ? def.gloss : "" }
       });
       show(on === true);
       toast(on === true ? L("c.addedReview") : L("c.removedReview"));

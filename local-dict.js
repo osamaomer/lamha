@@ -227,6 +227,26 @@ const LocalDict = (() => {
     return hit ? toResult(text.toLowerCase().trim(), hit.lemma, hit.e, hit.formOf, context) : null;
   }
 
+  /**
+   * English word → an English–English dictionary result, or null when the word has no English definition here.
+   * The main meaning (`translation`) is the definition that fits the sentence (`contextSense`), else the first one;
+   * `ar` keeps the Arabic meaning for the review card, which shows both.
+   */
+  async function lookupEnglish(text, context) {
+    const hit = await find(text);
+    if (!hit) return null;
+    const r = toResult(text.toLowerCase().trim(), hit.lemma, hit.e, hit.formOf, context);
+    const entries = r.definitions.flatMap(d => d.entries);
+    if (!entries.length) return null;
+    const top = entries.find(e => e.best) || entries[0];
+    return {
+      ...r, mode: "en", tl: "en", dict: [], bestGloss: "",
+      translation: top.gloss, heroExample: top.example || "", contextSense: !!top.best,
+      ar: r.translation || (context ? toResult(r.query, hit.lemma, hit.e, hit.formOf, null).translation : ""), // the sense's Arabic, else the word's usual one
+      definitions: r.definitions.map(d => ({ ...d, entries: d.entries.map(e => ({ ...e, ar: undefined })) })) // no Arabic in this view
+    };
+  }
+
   /** Arabic word → English words, or null. */
   async function lookupAr(text) {
     const base = normAr(text);
@@ -252,5 +272,5 @@ const LocalDict = (() => {
 
   const meta = () => load("meta.json");
 
-  return { lookupEn, lookupAr, meta };
+  return { lookupEn, lookupEnglish, lookupAr, meta };
 })();

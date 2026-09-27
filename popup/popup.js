@@ -183,7 +183,8 @@ async function runQuick() {
     h("div", { class: "pos-row" }, h("span", { class: "pos" }, p.pos), h("span", { class: "terms" }, p.terms.slice(0, 6).map(term => term.word).join(dirOf(d.tl) === "rtl" ? "، " : ", ")))
   ));
   const firstDef = d.definitions && d.definitions[0] && d.definitions[0].entries[0];
-  if (firstDef) kids.push(h("div", { class: "def" }, firstDef.glossTr && h("div", null, firstDef.glossTr), h("div", { class: "en" }, firstDef.gloss)));
+  if (firstDef && d.mode !== "en") kids.push( // English–English: the definition is already the main line
+    h("div", { class: "def" }, firstDef.glossTr && h("div", null, firstDef.glossTr), h("div", { class: "en" }, firstDef.gloss)));
   out.replaceChildren(...kids);
   LamhaMotion.stagger([...out.children].filter(k => !k.classList.contains("main")), { each: 45, distance: 4 });
   if (d.milestone) LamhaMotion.burst(out.querySelector(".milestone"));
@@ -431,9 +432,9 @@ function renderReview() {
     kids.push(h("button", { class: "btn block rv-show", onclick: reveal }, t("rv.show"), h("kbd", null, "Space")));
   } else {
     kids.push(
-      h("div", { class: "rv-back" },
-        h("div", { class: "rv-tr" }, c.tr),
-        c.def && h("div", { class: "rv-def" }, c.def)),
+      c.en // looked up in the English–English dictionary: its definition first, the meaning under it
+        ? h("div", { class: "rv-back" }, h("div", { class: "rv-tr en", dir: "ltr" }, c.def), c.tr && h("div", { class: "rv-def" }, c.tr))
+        : h("div", { class: "rv-back" }, h("div", { class: "rv-tr" }, c.tr), c.def && h("div", { class: "rv-def" }, c.def)),
       h("div", { class: "rv-grades" },
         gradeBtn("again", t("rv.again"), c.next.again, "1"),
         gradeBtn("hard", t("rv.hard"), c.next.hard, "2"),

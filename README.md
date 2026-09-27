@@ -42,6 +42,7 @@ Everything in this part works the same in the extension and the Windows app.
 | Spelling help: "هل تقصد: receive؟" | |
 | A Wikipedia summary, from the Arabic article when there is one | |
 
+- **📘 English–English dictionary:** a switch on every English word card, **العربية ⇄ English**, turns it into a monolingual dictionary: the pronunciation, the definition that fits your sentence, then every sense with examples and synonyms. It works offline with the built-in dictionary and falls back to Google's English definitions for words it lacks. Lamha remembers your choice (also in Settings → القاموس). Review cards made this way show the English definition first and the Arabic meaning under it. With English as the translation language, words always use it.
 - **Arabic → English too:** select Arabic text and it's translated to English. This can be turned off.
 - **Other languages:** Settings → لغة الترجمة. Arabic is the default; English, French, Turkish, Urdu, Persian, Spanish and German are there too.
 

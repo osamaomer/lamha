@@ -456,6 +456,44 @@ await step("card: no 'Better translation' without an AI translator; an AI quota 
   assert.ok(quota.root().querySelector(".err .btn"), "a way forward: try again");
 });
 
+await step("card: العربية ⇄ English switch flips a word to the English–English dictionary and back", async () => {
+  let en = false;
+  const word = () => ({ ok: true, data: en
+    ? { query: "resilient", type: "word", src: "en", tl: "en", mode: "en", translation: "elastic; rebounds readily", heroExample: "clean bouncy hair", contextSense: true, ar: "مَرِن", srcTranslit: "rɪˈzɪljənt", dict: [], definitions: [{ pos: "صفة", entries: [{ gloss: "recovering readily from adversity" }, { gloss: "elastic; rebounds readily", best: true }] }], examples: [], source: "local" }
+    : { query: "resilient", type: "word", src: "en", tl: "ar", translation: "مَرِن", srcTranslit: "rɪˈzɪljənt", dict: [], definitions: [], examples: [], source: "local" } });
+  const c = await cardPage(msg => {
+    if (msg.type === "setWordDict") { en = msg.en; return { ok: true }; }
+    if (msg.type === "cardToggle") return true;
+    return msg.type === "lookup" ? word() : undefined;
+  }, {});
+  c.show("resilient");
+  await sleep(100);
+  const sw = () => [...c.root().querySelectorAll(".bar .dsw button")];
+  assert.deepEqual(sw().map(b => [text(b), b.getAttribute("aria-pressed")]), [["العربية", "true"], ["إنجليزي", "false"]]);
+  assert.match(text(c.root().querySelector(".hero")), /مَرِن/);
+  sw()[1].click();
+  await sleep(150);
+  assert.deepEqual(c.sent.filter(m => m.type === "setWordDict").map(m => m.en), [true], "remembered through the background");
+  assert.match(text(c.root().querySelector(".hero")), /elastic; rebounds readily.*clean bouncy hair/, "the definition that fits, with its example");
+  assert.match(text(c.root().querySelector(".hero")), /في هذا السياق/);
+  assert.equal(sw()[1].getAttribute("aria-pressed"), "true");
+  assert.ok([...c.root().querySelectorAll(".foot a")].some(a => a.href.includes("/dictionary/english/resilient")), "Cambridge's English dictionary");
+  c.root().querySelector(".mark").click();
+  await sleep(50);
+  assert.deepEqual(JSON.parse(JSON.stringify(c.sent.find(m => m.type === "cardToggle").card)), { q: "resilient", tr: "مَرِن", def: "elastic; rebounds readily", en: true, form: "resilient", ex: "" });
+});
+
+await step("popup review: an English–English card shows its definition first and the Arabic under it", async () => {
+  await local.set({ popupMode: "review", cards: { resilient: card("resilient", "مَرِن", { def: "elastic; rebounds readily", en: true, added: now }) } });
+  const p = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
+  await sleep(100);
+  key(p, " ");
+  await sleep(50);
+  const back = p.document.querySelector(".rv-back");
+  assert.equal(text(back.querySelector(".rv-tr.en")), "elastic; rebounds readily");
+  assert.equal(text(back.querySelector(".rv-def")), "مَرِن");
+});
+
 console.log(results.join("\n"));
 const failed = results.filter(r => r.includes("✗")).length;
 console.log(`\n${results.length - failed}/${results.length} passed`);
