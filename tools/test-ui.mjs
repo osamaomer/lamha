@@ -438,7 +438,9 @@ await step("card: Google's translation offers 'Better translation'; the AI's ans
   await sleep(100);
   assert.equal(c.sent[c.sent.length - 1].engine, "ai");
   assert.match(text(c.root().querySelector(".hero")), /في غاية السهولة/);
-  assert.match(text(c.root().querySelector(".bar .badge")), /Gemini/);
+  const badge = c.root().querySelector(".bar .badge.ai");
+  assert.equal(text(badge), "", "just the icon in the bar");
+  assert.match(badge.title, /Gemini/, "who translated, on hover");
   assert.ok(![...c.root().querySelectorAll(".foot a")].some(a => /ترجمة أدق/.test(a.textContent)), "no second 'better' on the AI's own answer");
 });
 
@@ -459,7 +461,7 @@ await step("card: no 'Better translation' without an AI translator; an AI quota 
 await step("card: العربية ⇄ English switch flips a word to the English–English dictionary and back", async () => {
   let en = false;
   const word = () => ({ ok: true, data: en
-    ? { query: "resilient", type: "word", src: "en", tl: "en", mode: "en", translation: "elastic; rebounds readily", heroExample: "clean bouncy hair", contextSense: true, ar: "مَرِن", srcTranslit: "rɪˈzɪljənt", dict: [], definitions: [{ pos: "صفة", entries: [{ gloss: "recovering readily from adversity" }, { gloss: "elastic; rebounds readily", best: true }] }], examples: [], source: "local" }
+    ? { query: "resilient", type: "word", src: "en", tl: "en", mode: "en", translation: "elastic; rebounds readily", heroExample: "clean bouncy hair", contextSense: true, heroPos: "صفة", ar: "مَرِن", srcTranslit: "rɪˈzɪljənt", dict: [], definitions: [{ pos: "صفة", entries: [{ gloss: "recovering readily from adversity" }, { gloss: "elastic; rebounds readily", best: true }] }], examples: [], source: "local" }
     : { query: "resilient", type: "word", src: "en", tl: "ar", translation: "مَرِن", srcTranslit: "rɪˈzɪljənt", dict: [], definitions: [], examples: [], source: "local" } });
   const c = await cardPage(msg => {
     if (msg.type === "setWordDict") { en = msg.en; return { ok: true }; }
@@ -470,12 +472,15 @@ await step("card: العربية ⇄ English switch flips a word to the English�
   await sleep(100);
   const sw = () => [...c.root().querySelectorAll(".bar .dsw button")];
   assert.deepEqual(sw().map(b => [text(b), b.getAttribute("aria-pressed")]), [["العربية", "true"], ["إنجليزي", "false"]]);
+  const local = c.root().querySelector(".bar .badge.local");
+  assert.ok(local && text(local) === "" && /قاموس محلي/.test(local.title), "offline dictionary: an icon, named on hover");
+  assert.equal(text(c.root().querySelector(".bar .brand")), "", "with the switch, the logo alone");
   assert.match(text(c.root().querySelector(".hero")), /مَرِن/);
   sw()[1].click();
   await sleep(150);
   assert.deepEqual(c.sent.filter(m => m.type === "setWordDict").map(m => m.en), [true], "remembered through the background");
   assert.match(text(c.root().querySelector(".hero")), /elastic; rebounds readily.*clean bouncy hair/, "the definition that fits, with its example");
-  assert.match(text(c.root().querySelector(".hero")), /في هذا السياق/);
+  assert.match(text(c.root().querySelector(".hero .ctx-label")), /^صفة · في هذا السياق$/, "part of speech, then 'in this context'");
   assert.equal(sw()[1].getAttribute("aria-pressed"), "true");
   assert.ok([...c.root().querySelectorAll(".foot a")].some(a => a.href.includes("/dictionary/english/resilient")), "Cambridge's English dictionary");
   c.root().querySelector(".mark").click();
@@ -492,6 +497,55 @@ await step("popup review: an English–English card shows its definition first a
   const back = p.document.querySelector(".rv-back");
   assert.equal(text(back.querySelector(".rv-tr.en")), "elastic; rebounds readily");
   assert.equal(text(back.querySelector(".rv-def")), "مَرِن");
+});
+
+/* ---- desktop: the tools on a clip in the quick panel (Alt+Shift+V → Tab) ---- */
+
+await step("clipboard tools: numbered rows with icons and hints, one lit row, number keys, Esc steps back", async () => {
+  const dom = new JSDOM(`<html dir="rtl"><body><section id="root"></section></body></html>`, { runScripts: "outside-only", url: "https://lamha.test/", pretendToBeVisual: true });
+  const w = dom.window;
+  const store = data => ({ get: async k => ({ ...(k && typeof k === "object" && !Array.isArray(k) ? k : {}), ...data }), set: async () => {} });
+  w.browser = { storage: { sync: store({ uiLang: "ar", targetLang: "ar" }), local: store({}), onChanged: { addListener() {} } }, tabs: { create() {} }, runtime: { getURL: p => p } };
+  const calls = [];
+  w.lamhaClipboard = {
+    action: async (id, act) => { calls.push(act); return { ok: true, data: { text: "حافظ على وعدك." } }; },
+    paste: async () => ({ ok: true }), lookup: async () => ({ ok: true }), pasteResult: async () => ({ ok: true }), copyText: async () => ({ ok: true })
+  };
+  // one script, as the desktop's injected scripts share one global scope (a separate eval each would not)
+  w.eval(["shared/i18n.js", "desktop/renderer/i18n-desktop.js", "shared/lamha-ai.js", "shared/motion.js", "desktop/renderer/clipboard/clip-list.js", "desktop/renderer/clipboard/clip-actions.js"]
+    .map(f => readFileSync(new URL(f, EXT), "utf8")).join("\n;\n") + "\n;window.LamhaClipActions = LamhaClipActions;");
+  await sleep(30);
+  let back = 0;
+  const root = w.document.getElementById("root");
+  const clip = { id: "c1", text: "Keep your promise.", lang: "en", sourceApp: "code.exe", createdAt: Date.now() - 120e3, lastCopiedAt: Date.now() - 120e3, cache: { translation: {} } };
+  w.LamhaClipActions.mount(root, clip, { mode: "panel", onBack: () => back++ }).focus();
+  await sleep(30);
+  const rows = [...root.querySelectorAll(".ca-item")];
+  assert.deepEqual(rows.map(r => r.dataset.act), ["translate", "proofread", "lookup", "plain"]);
+  assert.deepEqual(rows.map(r => text(r.querySelector(".ca-num"))), ["١", "٢", "٣", "٤"]);
+  assert.ok(rows.every(r => r.querySelector(".ca-ico svg")), "an icon on every row");
+  assert.equal(text(rows[0].querySelector(".ca-hint")), "إلى العربية");
+  assert.equal(text(root.querySelector(".ca-title strong")), "أدوات النص");
+  assert.match(text(root.querySelector(".ca-clip-meta")), /^code · .+ · الإنجليزية$/, "where it came from, when, its language");
+  assert.match(text(root.querySelector(".ca-keys")), /Enter تشغيل.*١–٤ اختصار.*Esc رجوع/);
+  rows[1].dispatchEvent(new w.MouseEvent("mouseenter"));
+  assert.equal(w.document.activeElement, rows[1], "the mouse moves the keyboard's choice: one lit row");
+  w.document.activeElement.dispatchEvent(new w.KeyboardEvent("keydown", { key: "1", bubbles: true }));
+  await sleep(50);
+  assert.deepEqual(calls, ["translate"], "1 runs the first tool");
+  assert.equal(root.querySelector(".ca-menu").hidden, true, "the answer takes the tools' place");
+  assert.equal(text(root.querySelector(".ca-text")), "حافظ على وعدك.");
+  assert.match(text(root.querySelector(".ca-keys")), /Enter لصق.*Esc الأدوات/);
+  w.document.activeElement.dispatchEvent(new w.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  assert.equal(root.querySelector(".ca-menu").hidden, false, "Esc: back to the tools");
+  assert.equal(w.document.activeElement, rows[0], "on the tool that ran");
+  assert.equal(back, 0);
+  w.document.activeElement.dispatchEvent(new w.KeyboardEvent("keydown", { key: "٣", bubbles: true }));
+  assert.equal(root.querySelector(".ca-menu").hidden, false, "٣ = look up: opens the card, no answer here");
+  w.document.activeElement.dispatchEvent(new w.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  assert.equal(back, 1, "Esc again: back to the list");
+  root.querySelector(".ca-back").click();
+  assert.equal(back, 2, "the arrow goes back to the list");
 });
 
 console.log(results.join("\n"));

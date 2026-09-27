@@ -42,7 +42,7 @@ Everything in this part works the same in the extension and the Windows app.
 | Spelling help: "هل تقصد: receive؟" | |
 | A Wikipedia summary, from the Arabic article when there is one | |
 
-- **📘 English–English dictionary:** a switch on every English word card, **العربية ⇄ English**, turns it into a monolingual dictionary: the pronunciation, the definition that fits your sentence, then every sense with examples and synonyms. It works offline with the built-in dictionary and falls back to Google's English definitions for words it lacks. Lamha remembers your choice (also in Settings → القاموس). Review cards made this way show the English definition first and the Arabic meaning under it. With English as the translation language, words always use it.
+- **📘 English–English dictionary:** a switch on every English word card, **العربية ⇄ English**, turns it into a monolingual dictionary: the pronunciation, the definition that fits your sentence (with its part of speech: *I mentioned* is the verb, *a mention* the noun), then every sense with examples and synonyms. Online, it agrees with the Arabic view: the sense whose Arabic matches Google's translation of your sentence leads. It works offline with the built-in dictionary and falls back to Google's English definitions for words it lacks. Lamha remembers your choice (also in Settings → القاموس). Review cards made this way show the English definition first and the Arabic meaning under it. With English as the translation language, words always use it.
 - **Arabic → English too:** select Arabic text and it's translated to English. This can be turned off.
 - **Other languages:** Settings → لغة الترجمة. Arabic is the default; English, French, Turkish, Urdu, Persian, Spanish and German are there too.
 
@@ -244,7 +244,7 @@ A history of what you copy in any program, with Lamha's language tools on every 
   | <kbd>Ctrl</kbd>+<kbd>1</kbd>…<kbd>9</kbd> | Paste one of the first nine |
   | <kbd>Ctrl</kbd>+<kbd>P</kbd> | Pin |
   | <kbd>Delete</kbd> | Remove (with undo) |
-  | <kbd>Tab</kbd> | Lamha's tools for the item: translate, write in English, proofread, summarize, look up, add to review. You always see the result before pasting it. |
+  | <kbd>Tab</kbd> | Lamha's tools for the item, numbered: translate, write in English, proofread, summarize, look up, add to review. <kbd>1</kbd>–<kbd>9</kbd> runs one. You always see the result before pasting it; <kbd>Esc</kbd> goes back a step. |
 
 - **The الحافظة tab** in the main window lists everything, with the full text, labels, pins and the same tools. **مسح غير المثبّت** empties the history but keeps pinned items.
 - **Private by design:**

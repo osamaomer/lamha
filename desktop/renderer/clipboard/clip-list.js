@@ -28,7 +28,16 @@ var LamhaClipList = (() => {
   };
   const ICONS = {
     pin: '<path d="M12 17v5"/><path d="M9 10.76V6h6v4.76l2.5 3.24h-11z"/><path d="M8 3h8"/>',
-    trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/>'
+    trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/>',
+    // Lamha's tools on a clip (clip-actions.js)
+    translate: '<path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/>',
+    english: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/>',
+    proofread: '<path d="M20 6 9 17l-5-5"/>',
+    summary: '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>',
+    lookup: '<path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/><path d="M20 20l-3.5-3.5"/>',
+    review: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+    plain: '<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',
+    back: '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>' // points right: "back" in Arabic; mirrored in English (clipboard.css)
   };
   const icon = name => svg(ICONS[name]);
 

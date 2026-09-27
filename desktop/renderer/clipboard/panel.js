@@ -8,6 +8,7 @@
   LamhaI18n.applyDom(document);
   const body = document.getElementById("cpBody");
   const foot = document.getElementById("cpFoot");
+  const head = document.querySelector(".cp-head");
   const listRoot = document.createElement("div");
   const list = LamhaClipList.create({
     root: listRoot,
@@ -24,11 +25,13 @@
     if (!r.ok || !r.data) return;
     const actionsRoot = document.createElement("section"); // fresh each time: mount() adds its own key handling
     foot.hidden = true;
+    head.hidden = true; // the tools have their own header (back, title, the clip)
     body.replaceChildren(actionsRoot);
     LamhaClipActions.mount(actionsRoot, r.data, { mode: "panel", onBack: backToList }).focus();
   }
   function backToList() {
     foot.hidden = false;
+    head.hidden = false;
     body.replaceChildren(listRoot);
     list.reload();
     list.focus();

@@ -742,7 +742,7 @@ test("translation: its own provider and model, separate from the writing tools",
 
 test("English–English: offline definitions, the one that fits the sentence first, the Arabic kept for review", async () => {
   const net = recorder(() => json(429, {}));
-  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, local: { cardsImported: true }, sync: { uiLang: "ar", enDict: true } });
+  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, local: { cardsImported: true }, sync: { uiLang: "ar", enDict: true, dictSource: "offline" } });
   const plain = await env.send({ type: "lookup", text: "resilient" });
   assert.equal(plain.ok, true, plain.error);
   const d = plain.data;
@@ -778,12 +778,48 @@ test("English–English: automatic when English is the translation language; the
 test("English–English online: Google's English definitions, the meaning kept; unknown words offline say so", async () => {
   const google = recorder(() => json(200, { src: "en", sentences: [{ trans: "مرن", orig: "resilient" }],
     definitions: [{ pos: "adjective", entry: [{ gloss: "able to recover quickly from difficult conditions.", example: "a <b>resilient</b> economy" }] }] }));
-  const env = makeEnv({ fetchImpl: google.fetchImpl, sync: { uiLang: "ar", enDict: true, dictSource: "online" } });
+  const env = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", enDict: true, dictSource: "online" } });
   const d = (await env.send({ type: "lookup", text: "resilient" })).data;
   assert.deepEqual({ mode: d.mode, t: d.translation, ex: d.heroExample, ar: d.ar, source: d.source },
     { mode: "en", t: "able to recover quickly from difficult conditions.", ex: "a resilient economy", ar: "مرن", source: "online" });
   const offline = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", enDict: true, dictSource: "offline" } });
   assert.equal((await offline.send({ type: "lookup", text: "qwxzyv" })).error, "not_found_offline");
+});
+
+test("the sense follows the grammar: 'I mentioned' is the verb in both views, 'a mention' the noun (offline)", async () => {
+  const net = recorder(() => json(429, {}));
+  const ctx = { before: "As promised here is the summary of everything I ", after: ", your 3 options for the validation." };
+  const en = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, sync: { uiLang: "ar", enDict: true, dictSource: "offline" } });
+  const verb = (await en.send({ type: "lookup", text: "mentioned", context: ctx })).data;
+  assert.deepEqual({ t: verb.translation, pos: verb.heroPos, fits: verb.contextSense }, { t: "make reference to", pos: "فعل", fits: true });
+  assert.equal(verb.definitions[0].pos, "فعل", "the verb senses come first in the list too");
+  const ar = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, sync: { uiLang: "ar", dictSource: "offline" } });
+  assert.equal((await ar.send({ type: "lookup", text: "mentioned", context: ctx })).data.translation, "ذَكَرَ", "the Arabic view agrees");
+  const noun = (await en.send({ type: "lookup", text: "mention", context: { before: "It was only a ", after: " in passing." } })).data;
+  assert.deepEqual({ t: noun.translation, pos: noun.heroPos }, { t: "a remark that calls attention to something or someone", pos: "اسم" });
+  assert.equal(net.calls.length, 0);
+});
+
+test("online, Google's Arabic for the word in its sentence picks the same sense in the English view (bank / البنك / الضفة)", async () => {
+  const withWord = ar => recorder(url => (url.includes("/translate_a/t") ? json(200, [[`التقينا قرب <a i=0>${ar}</a> صباحًا.`, "en"]]) : json(429, {})));
+  const ctx = { before: "We met near the ", after: " this morning." };
+  for (const [ar, lead] of [["البنك", /financial institution/], ["الضفة", /sloping land/]]) {
+    const net = withWord(ar);
+    const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, sync: { uiLang: "ar", enDict: true } });
+    const d = (await env.send({ type: "lookup", text: "bank", context: ctx })).data;
+    assert.match(d.translation, lead, ar);
+    assert.equal(d.contextSense, true);
+    assert.ok(net.calls.some(c => c.url.includes("/translate_a/t")), "the sentence was translated, as in the Arabic view");
+  }
+});
+
+test("online English definitions from Google lead with the part of speech the sentence suggests", async () => {
+  const google = recorder(() => json(200, { src: "en", sentences: [{ trans: "ذكر", orig: "mentioned" }], definitions: [
+    { pos: "noun", base_form: "mention", entry: [{ gloss: "a reference to someone or something." }] },
+    { pos: "verb", base_form: "mention", entry: [{ gloss: "refer to something briefly.", example: "I mentioned it to her" }] }] }));
+  const env = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", enDict: true, dictSource: "online", useContext: true } });
+  const d = (await env.send({ type: "lookup", text: "mentioned", context: { before: "Everything I ", after: " yesterday." } })).data;
+  assert.deepEqual({ t: d.translation, pos: d.heroPos, fits: d.contextSense }, { t: "refer to something briefly.", pos: "verb", fits: true });
 });
 
 test("offline Arabic → English results label their word list in the interface language", async () => {

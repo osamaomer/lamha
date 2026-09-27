@@ -398,7 +398,7 @@ async function lookup(rawText, opts = {}) {
   const arLocal = word && sl === "ar" && tl === "en" && text.split(" ").length <= 2;
   const local = () => (enLocal ? LocalDict.lookupEn(text, context) : arLocal ? LocalDict.lookupAr(text) : null);
 
-  let result = english ? await englishLookup(text, context, settings, mode) : null;
+  let result = english ? await englishLookup(text, context, settings, mode, tr) : null;
   if (!english && (enLocal || arLocal) && mode !== "online" && !force) {
     result = await local();
     if (result && !result.translation && mode === "local" && !context) {
@@ -451,10 +451,11 @@ async function lookup(rawText, opts = {}) {
  * the sentence), Google's English definitions for what it lacks. `ar` keeps the meaning in the translation language
  * for the review card. Always a result (`translation` "" when no definition was found) or an error.
  */
-async function englishLookup(text, context, settings, mode) {
-  const local = () => LocalDict.lookupEnglish(text, context);
+async function englishLookup(text, context, settings, mode, tr) {
+  const local = (ctxAr = "") => LocalDict.lookupEnglish(text, context, { ctxAr });
   if (mode !== "online") {
-    const r = await local();
+    // online, the word's Arabic in its sentence (the Arabic view's answer) helps pick the same sense here
+    const r = await local(context && mode !== "offline" && settings.targetLang === "ar" ? await contextArabic(text, context, tr) : "");
     if (r) return r;
     if (mode === "offline") throw new Error("not_found_offline");
   }
@@ -467,12 +468,22 @@ async function englishLookup(text, context, settings, mode) {
     if (r) return r;
     throw err;
   }
-  const entries = online.definitions.flatMap(d => d.entries);
+  const entries = online.definitions.flatMap(d => d.entries.map(e => ({ ...e, pos: d.pos })));
   if (!entries.length && mode === "online") { const r = await local(); if (r) return r; }
+  // Google groups its definitions by part of speech (labels in the interface language): lead with the one the sentence suggests
+  const hint = LocalDict.posHint(text.toLowerCase(), String(online.definitions[0] && online.definitions[0].base || text).toLowerCase(), context);
+  const names = hint ? LocalDict.posNames(hint) : [];
+  const top = entries.find(e => names.includes(String(e.pos).toLowerCase())) || entries[0];
   return {
     ...online, mode: "en", tl: "en", dict: [], ar: online.translation,
-    translation: entries.length ? entries[0].gloss : "", heroExample: entries.length ? entries[0].example : ""
+    translation: top ? top.gloss : "", heroExample: top ? top.example : "", heroPos: top ? top.pos : "", contextSense: !!(top && hint && top !== entries[0])
   };
+}
+
+/** How the word reads in Arabic inside its sentence (as the Arabic view shows it), or "" — at most ~2.5 s, never an error. */
+async function contextArabic(text, context, tr) {
+  const ask = contextTranslate(text, context, "ar", "en", { tr }).then(c => (c && !c.untranslated ? c.word : ""), () => "");
+  return Promise.race([ask, new Promise(done => setTimeout(() => done(""), 2500))]);
 }
 
 /** Words looked up so far (storage.local lookupCount); returns the count when it just reached a milestone. */

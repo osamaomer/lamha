@@ -137,6 +137,10 @@ svg { display: block; flex: none; }
   padding: 2px 7px; border-radius: 999px; margin-inline-start: 6px;
 }
 .root.dark .badge { background: rgba(16, 185, 129, .16); }
+.badge.icon { padding: 4px; margin-inline-start: 4px; cursor: help; } /* the name is in its tooltip */
+.badge.ai { color: var(--accent); background: var(--accent-soft); }
+.bar > * { white-space: nowrap; flex-shrink: 0; } /* one line, whatever the interface language */
+.bar > .spacer { flex-shrink: 1; }
 .icon-btn {
   width: 28px; height: 28px; border-radius: 7px;
   display: grid; place-items: center;

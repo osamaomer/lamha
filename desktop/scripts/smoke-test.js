@@ -610,7 +610,7 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       const again = await runAction("translate");
       assert(again.cached && again.text === "حافظ على وعدك.", "not from the cache");
       assert(net.google === before + 1, "the second open went to the network");
-      await js(panel, `document.querySelector("#cpBody .ca-head .link").click(); true`);
+      await js(panel, `document.querySelector("#cpBody .ca-back").click(); true`);
       await wait(300);
       const line = await js(panel, `(document.querySelector("#cpBody .lc-tr") || {}).textContent || ""`);
       assert(line === "حافظ على وعدك.", "list line: " + line);

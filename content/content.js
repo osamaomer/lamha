@@ -446,11 +446,14 @@
   function frame(data, title) {
     card.textContent = "";
     const langLabel = title || (data ? `${langName(data.src)} ${arrow()} ${langName(data.tl)}` : "");
+    const withSwitch = !!data && hasDictSwitch(data);
+    // where the answer came from: a small icon, its explanation on hover (a text badge crowded the bar, and wrapped in English)
+    const source = (cls, iconName, label) => h("span", { class: "badge icon " + cls, title: label, "aria-label": label, role: "img" }, icon(iconName, 12, 2.4));
     const bar = h("div", { class: "bar" },
-      h("div", { class: "brand" }, h("span", { class: "dot" }, icon("translate", 11, 2.6)), L("common.lamha")),
-      data && hasDictSwitch(data) ? dictSwitch(data) : langLabel && h("span", { class: "lang" }, langLabel),
-      data && data.source === "local" && h("span", { class: "badge", title: L("c.localBadgeTitle") }, icon("book", 11, 2.4), L("c.localBadge")),
-      data && data.source === "ai" && h("span", { class: "badge", title: L("c.aiBadgeTitle", { p: data.ai }) }, icon("sparkle", 11, 2.4), data.ai),
+      h("div", { class: "brand", title: L("common.lamha") }, h("span", { class: "dot" }, icon("translate", 11, 2.6)), !withSwitch && L("common.lamha")), // the switch needs the room
+      withSwitch ? dictSwitch(data) : langLabel && h("span", { class: "lang" }, langLabel),
+      data && data.source === "local" && source("local", "book", L("c.localBadgeTitle")),
+      data && data.source === "ai" && source("ai", "sparkle", L("c.aiBadgeTitle", { p: data.ai })),
       h("div", { class: "spacer" }),
       stack.length > 1 && h("button", { class: "icon-btn", title: L("common.back"), "aria-label": L("common.back"), onclick: goBack }, icon("back")),
       h("button", { class: "icon-btn", title: L("common.settings"), "aria-label": L("common.settings"), onclick: () => send({ type: "openOptions" }) }, icon("settings")),
@@ -642,7 +645,7 @@
     const long = main.length > 40;
     b.append(h("div", { class: "hero", dir: "rtl" },
       h("div", { style: { flex: "1", minWidth: "0" } },
-        (ctx || d.contextSense) && h("div", { class: "ctx-label" }, ctx && ctx.untranslated ? L("c.inContextName") : L("c.inContext")),
+        heroLabel(d, ctx) && h("div", { class: "ctx-label" }, heroLabel(d, ctx)),
         main
           ? h("div", { class: "t" + (long ? " long" : ""), dir: ctx && ctx.untranslated ? "auto" : tDir }, main)
           : h("div", { class: "t none" }, d.bestGloss
@@ -697,6 +700,12 @@
 
     footer(d);
     return pending;
+  }
+
+  /** Above the main meaning: "in this context"; in the English view also the part of speech ("فعل · في هذا السياق"). */
+  function heroLabel(d, ctx) {
+    if (d.mode === "en") return [d.heroPos, d.contextSense && L("c.inContext")].filter(Boolean).join(" · ");
+    return ctx || d.contextSense ? (ctx && ctx.untranslated ? L("c.inContextName") : L("c.inContext")) : "";
   }
 
   /** Bookmark: is this word in the review deck? Looked-up words are usually added automatically. */

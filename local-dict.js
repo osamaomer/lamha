@@ -70,6 +70,29 @@ const LocalDict = (() => {
     };
   }
 
+  /* ---- part of speech from the sentence: "I mentioned" is a verb, "a mention" a noun ---- */
+  const DETERMINERS = new Set("a an the my your his its our their this that these those every each another no some any".split(" "));
+  const BEFORE_VERB = new Set("i you we they he she to will would can could should must may might shall did do does didn't don't doesn't won't can't cannot never always often also just please".split(" "));
+  const AUXILIARY = new Set("have has had having am is are was were be been being".split(" "));
+
+  /** "n" / "v" / "" from the word before (a determiner, a pronoun or "to", a helping verb) and the form (-ed, -ing). */
+  function posHint(form, lemma, context) {
+    const prev = (((context && context.before) || "").toLowerCase().match(/([a-z']+)[^a-z']*$/) || [])[1] || "";
+    const inflected = form !== lemma;
+    if (DETERMINERS.has(prev)) return inflected && /ed$/.test(form) ? "" : "n"; // "the mentioned item": an adjective, not a noun
+    if (BEFORE_VERB.has(prev)) return "v";
+    if (inflected && /ing$/.test(form) && AUXILIARY.has(prev)) return "v"; // "is running" (a bare -ing may be a noun)
+    if (inflected && /ed$/.test(form)) return "v";
+    return "";
+  }
+
+  /** Does the Arabic of the whole sentence's translation (Google's word for it) match a dictionary Arabic word? */
+  const arStem = s => normAr(s).replace(/^(وال|فال|بال|لل|ال)/, "");
+  function arMatch(ctxAr, candidate) {
+    const a = arStem(ctxAr).replace(/\s+/g, ""), b = arStem(candidate).split(" ")[0]; // "أشار إلى" → أشار
+    return b.length >= 3 && a.length >= 3 && (a.includes(b) || b.includes(a));
+  }
+
   async function entry(word) {
     const shard = await load(`en/${shardEn(word)}.json`);
     return Object.prototype.hasOwnProperty.call(shard, word) ? shard[word] : null;
@@ -119,8 +142,21 @@ const LocalDict = (() => {
     return null;
   }
 
-  function toResult(query, lemma, e, formOf, context) {
+  /** `ctxAr`: how Google translated the word inside its sentence (when online), to pick the sense with that meaning. */
+  function toResult(query, lemma, e, formOf, context, { ctxAr = "" } = {}) {
     const score = scorer(context, lemma);
+    const hint = posHint(query, lemma, context);
+    // parts of speech whose Arabic matches Google's word; one alone decides ("ذكرته": ذِكْر the noun and ذَكَرَ the verb both match, so no)
+    const arPos = new Set(), arHints = new Set();
+    if (ctxAr) {
+      for (const [p, groups] of Object.entries(e.t || {})) for (const [h, ars] of groups) {
+        if (ars.some(a => arMatch(ctxAr, a))) { arPos.add(p); tokens(h).forEach(w => arHints.add(w)); }
+      }
+      for (const [p, , , , ars] of e.s || []) if ((ars || []).some(a => arMatch(ctxAr, a))) arPos.add(p);
+    }
+    const onlyPos = arPos.size === 1 ? [...arPos][0] : "";
+    const bonus = (p, ars) => (hint && p === hint ? 2 : 0) + (onlyPos && p === onlyPos ? 2 : 0) + (ctxAr && (ars || []).some(a => arMatch(ctxAr, a)) ? 3 : 0);
+    const choosing = !!(score || hint || ctxAr);
     const dict = [];
     const groupFor = pos => {
       let g = dict.find(d => d.pos === pos);
@@ -132,7 +168,7 @@ const LocalDict = (() => {
       const g = groupFor(posName(p));
       for (const [hint, ars] of groups) for (const a of ars) {
         const k = normAr(a);
-        if (!g.seen.has(k)) { g.seen.add(k); g.terms.push({ word: a, back: [], hint }); }
+        if (!g.seen.has(k)) { g.seen.add(k); g.terms.push({ word: a, back: [], hint, p }); }
       }
     }
     // Arabic WordNet lemmas per sense
@@ -141,22 +177,28 @@ const LocalDict = (() => {
       const g = groupFor(posName(p));
       for (const a of ars) {
         const k = normAr(a);
-        if (!g.seen.has(k)) { g.seen.add(k); g.terms.push({ word: a, back: [], hint: gloss.length > 60 ? gloss.slice(0, 57) + "…" : gloss }); }
+        if (!g.seen.has(k)) { g.seen.add(k); g.terms.push({ word: a, back: [], hint: gloss.length > 60 ? gloss.slice(0, 57) + "…" : gloss, p }); }
       }
     }
     dict.forEach(g => delete g.seen);
 
     // best sense for this sentence (Wiktionary sense hints and WordNet definitions compete)
-    let best = null;
-    if (score) {
+    let best = null, bestDef = null;
+    if (choosing) {
       for (const g of dict) for (const t of g.terms) {
-        const sc = score(t.hint || "");
+        const sc = (score ? score(t.hint || "") : 0) + bonus(t.p, [t.word]);
         t.score = sc;
         if (sc > 0 && (!best || sc > best.score)) best = { score: sc, ar: t.word, hint: t.hint, pos: g.pos };
       }
       for (const [p, gloss, example, synonyms, ar] of e.s || []) {
-        const sc = score(`${gloss} ${example} ${(synonyms || []).join(" ")}`);
+        const text = `${gloss} ${example} ${(synonyms || []).join(" ")}`;
+        const sc = (score ? score(text) : 0) + bonus(p, ar);
         if (sc > 0 && (!best || sc > best.score)) best = { score: sc, ar: ar && ar[0], gloss, pos: posName(p) };
+        // the definition to lead with: also helped by the label of the Arabic sense that matched ("institution" → "a financial institution")
+        let shared = 0;
+        for (const w of tokens(gloss)) if (arHints.has(w)) shared++;
+        const dsc = sc + shared * 1.5;
+        if (dsc > 0 && (!bestDef || dsc > bestDef.score)) bestDef = { score: dsc, gloss };
       }
       if (best) {
         for (const g of dict) {
@@ -172,9 +214,9 @@ const LocalDict = (() => {
       const pos = posName(p);
       let d = definitions.find(x => x.pos === pos);
       if (!d) { d = { pos, entries: [] }; definitions.push(d); }
-      if (d.entries.length < 5) d.entries.push({ gloss, example, synonyms, ar, best: !!(best && best.gloss === gloss) });
+      if (d.entries.length < 5) d.entries.push({ gloss, example, synonyms, ar, best: !!(bestDef && bestDef.gloss === gloss) });
     }
-    if (best && best.gloss) {
+    if (bestDef) {
       for (const d of definitions) d.entries.sort((x, y) => y.best - x.best);
       definitions.sort((x, y) => (y.entries[0].best ? 1 : 0) - (x.entries[0].best ? 1 : 0));
     }
@@ -232,16 +274,17 @@ const LocalDict = (() => {
    * The main meaning (`translation`) is the definition that fits the sentence (`contextSense`), else the first one;
    * `ar` keeps the Arabic meaning for the review card, which shows both.
    */
-  async function lookupEnglish(text, context) {
+  async function lookupEnglish(text, context, { ctxAr = "" } = {}) {
     const hit = await find(text);
     if (!hit) return null;
-    const r = toResult(text.toLowerCase().trim(), hit.lemma, hit.e, hit.formOf, context);
+    const r = toResult(text.toLowerCase().trim(), hit.lemma, hit.e, hit.formOf, context, { ctxAr });
     const entries = r.definitions.flatMap(d => d.entries);
     if (!entries.length) return null;
     const top = entries.find(e => e.best) || entries[0];
+    const heroPos = (r.definitions.find(d => d.entries.includes(top)) || {}).pos || "";
     return {
       ...r, mode: "en", tl: "en", dict: [], bestGloss: "",
-      translation: top.gloss, heroExample: top.example || "", contextSense: !!top.best,
+      translation: top.gloss, heroExample: top.example || "", contextSense: !!top.best, heroPos,
       ar: r.translation || (context ? toResult(r.query, hit.lemma, hit.e, hit.formOf, null).translation : ""), // the sense's Arabic, else the word's usual one
       definitions: r.definitions.map(d => ({ ...d, entries: d.entries.map(e => ({ ...e, ar: undefined })) })) // no Arabic in this view
     };
@@ -272,5 +315,8 @@ const LocalDict = (() => {
 
   const meta = () => load("meta.json");
 
-  return { lookupEn, lookupEnglish, lookupAr, meta };
+  /** The part-of-speech guess, and its names in both interface languages (to find it among Google's labels). */
+  const posNames = p => [POS_AR[p], POS_EN[p]].filter(Boolean);
+
+  return { lookupEn, lookupEnglish, lookupAr, meta, posHint, posNames };
 })();

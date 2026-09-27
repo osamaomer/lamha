@@ -54,7 +54,7 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-09-27 (version 1.8.2 released)_
+_Last updated: 2026-09-27 (version 1.8.2 released; card and clipboard fixes built since, not committed)_
 
 ### Done (2026-09-27, released in 1.8.1 with the translation service below)
 
@@ -84,6 +84,23 @@ The user asked for English–English word lookups. They chose a switch on the ca
 - **Lookup:** `lookup()` computes `english` (an English word, and `enDict` on or translation language English) → `englishLookup()`: `LocalDict.lookupEnglish()` first (definitions without Arabic, the sense that fits the sentence as `translation`, `heroExample`, `contextSense`, `ar` = the Arabic meaning with a fallback to the word's usual one), then Google's English definitions (`onlineLookup` with `tl` = the translation language, so `ar` comes from it). Results carry `mode: "en"`. No sentence is sent anywhere for English lookups (no `contextTranslate`).
 - **Cards:** `cardFromLookup` / the card's bookmark / the clipboard's review tool make `{ tr: ar, def: definition, en: true }`. `putCard` accepts an English card with only a definition. The popup's review shows `def` first for `en` cards.
 - **Tests:** 3 in test-writing (with the real dictionary: `makeEnv({ realDict: true })`) and 2 in test-ui. All fail on 1.8.1.
+
+### After 1.8.2: fixes from the user's screenshots (2026-09-27, not committed yet)
+
+1. **The English view picked the noun for "I mentioned"** while the Arabic view (Google's in-sentence translation) had the verb. `local-dict.js` `toResult` now chooses with three signals:
+   - words shared with the sentence (as before);
+   - `posHint()`: the grammar of the word and the word before it (a determiner → noun; a pronoun, "to" or a modal → verb; -ed, and -ing after a helping verb → verb);
+   - online, `ctxAr` (Google's Arabic for the word in its sentence, from `contextArabic()` in background.js, at most 2.5 s) matched to the senses' Arabic with `arMatch()`. The labels of matching Wiktionary senses also favour WordNet definitions that share their words (البنك → "institution" → "a financial institution").
+   - The leading definition is `bestDef`; the English view shows its part of speech (`heroPos`) above it. Google's own English definitions follow `posHint` too.
+2. **The card's top bar:** the "Offline dictionary" / AI badges are icons with the name in a tooltip (`.badge.icon`); the bar stays on one line; with the العربية ⇄ English switch, only the Lamha logo shows.
+3. **The clipboard tools view** (Alt+Shift+V → Tab), redesigned in `clip-actions.js` / `clipboard.css`:
+   - a header with a back arrow, "أدوات النص" and a clip card (3 lines; source · time · language);
+   - numbered rows with an icon and a short hint; 1–9 (or ١–٩) run a tool;
+   - the mouse moves the keyboard focus, so only one row is lit;
+   - an answer takes the menu's place; Esc steps back (answer → tools → list), and the arrow goes straight to the list;
+   - a key-hint bar at the bottom; the panel's own header is hidden while the tools show.
+   - The self-test now clicks `.ca-back`.
+- **Tests:** 3 in test-writing, 1 new and 2 extended in test-ui. All fail on 1.8.2. The desktop self-test hasn't been run on these changes.
 
 ### Current project: translation that works without internet
 
