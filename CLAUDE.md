@@ -194,7 +194,7 @@ The user asked for a thorough design audit to make the interface consistent and 
 - Tests: 3 in test-writing, 4 new plus 3 extended in test-ui.
 
 **Before 1.9.0 goes out** (the version is bumped and committed, but not pushed or tagged):
-- Run `cd desktop && npm run smoke`: the tab names changed ("Write" without ✨) and the clipboard panel's key hints were trimmed. It wasn't run during the audit.
+- ✅ `npm run smoke` passed 64/64 on the home PC (2026-09-27), after the version bump.
 - Check by hand in Firefox: the Today card in the 360 px popup, the card's dark scrollbar, and Arabic placeholders on the right.
 - Then push and tag `v1.9.0` (the tag runs the release workflow).
 
