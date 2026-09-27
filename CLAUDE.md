@@ -54,9 +54,9 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-09-27 (version 1.8.0)_
+_Last updated: 2026-09-27 (version 1.8.1 released)_
 
-### Done (2026-09-27, committed and pushed; not released yet)
+### Done (2026-09-27, released in 1.8.1 with the translation service below)
 
 - README rewritten: shared features first, then separate **Firefox extension** and **Windows app** parts, then developer notes and privacy.
 - This file added (and kept out of the extension package in `web-ext-config.mjs`).
@@ -71,7 +71,8 @@ _Last updated: 2026-09-27 (version 1.8.0)_
 
 ### Next steps
 
-- Release this work as **1.8.1**: bump `manifest.json` and `desktop/package.json` together, and run `cd desktop && npm run smoke` on Windows first. The desktop smoke test was **not** run in this session.
+- 1.8.1 was released after `npm run smoke` passed 63/63 on the work PC (the Ollama check is optional and skipped there).
+- Desktop dependencies on a PC with npm 11: `npm ci` skips install scripts, so afterwards run `node node_modules/electron/install.js` and, in `node_modules/koffi`, `node ./cnoke.cjs -P . -D src/koffi --prebuild --release`. CI uses Node 22 (npm 10), which doesn't need this.
 - Check by hand in Firefox:
   - Translate a multi-paragraph selection and confirm the paragraphs survive. Google's `single` endpoint couldn't be checked from the command line (it showed a bot page); the batch endpoint was confirmed to keep `\n`.
   - Look at the page bar's "partial" state, e.g. by going offline during a page translation.
