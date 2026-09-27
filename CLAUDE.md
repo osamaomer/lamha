@@ -54,7 +54,7 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-09-27 (version 1.8.1 released; English–English dictionary built since, not committed)_
+_Last updated: 2026-09-27 (version 1.8.2 released)_
 
 ### Done (2026-09-27, released in 1.8.1 with the translation service below)
 
@@ -77,7 +77,7 @@ _Last updated: 2026-09-27 (version 1.8.1 released; English–English dictionary 
   - Translate a multi-paragraph selection and confirm the paragraphs survive. Google's `single` endpoint couldn't be checked from the command line (it showed a bot page); the batch endpoint was confirmed to keep `\n`.
   - Look at the page bar's "partial" state, e.g. by going offline during a page translation.
 
-### English–English dictionary (2026-09-27, not committed yet)
+### English–English dictionary (2026-09-27, released in 1.8.2)
 
 The user asked for English–English word lookups. They chose a switch on the card, remembered, plus a setting; and review cards showing both meanings.
 - **Setting:** `enDict` (storage.sync, default false). The card's **العربية ⇄ English** switch (`dictSwitch` in content.js, shown on English word cards when the translation language isn't English) sends `setWordDict` to the background, because the desktop card can't write settings itself. Settings → Dictionary has the same switch.
