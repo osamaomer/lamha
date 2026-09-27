@@ -67,7 +67,8 @@
 [data-motion="full"] .rv-back { animation: lm-flip .34s var(--m-ease) both; transform-origin: 50% 0; }
 @keyframes lm-flip { from { opacity: 0; transform: rotateX(-70deg); } to { opacity: 1; transform: none; } }
 .rv-streak { display: inline-block; margin-top: 8px; padding: 2px 10px; border-radius: 999px; background: rgba(245, 158, 11, .14); color: #92400e; font-weight: 700; font-size: 12.5px; }
-@media (prefers-color-scheme: dark) { .rv-streak { color: #fbbf24; } }
+:root[data-theme="dark"] .rv-streak { color: #fbbf24; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .rv-streak { color: #fbbf24; } }
 
 /* ---------- clipboard list ---------- */
 [data-motion="full"] .lc-toast, [data-motion="subtle"] .lc-toast { animation: lm-toast-up .2s var(--m-spring) both; }

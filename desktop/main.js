@@ -34,6 +34,7 @@ const SECRET_KEYS = ["aiKey", "geminiKey"];
 function broadcast(changes, areaName) {
   for (const f of storageListeners) { try { f(changes, areaName); } catch (err) { console.error(err); } }
   if (areaName === "sync" && changes.motion) updateTray(); // the Animations choice is also in the tray menu
+  if (areaName === "sync" && changes.theme) applyThemeSetting();
   const forCard = withoutSecrets(changes);
   for (const w of BrowserWindow.getAllWindows()) {
     if (w.isDestroyed()) continue;
@@ -146,6 +147,13 @@ function startCore() {
   } else {
     listeners.startup.forEach(f => f());
   }
+}
+
+/** Settings → Theme for every window: Electron's own light / dark, which the pages' prefers-color-scheme then follows
+ *  (the card, the clipboard panel, window backgrounds). "auto" is the system's. */
+function applyThemeSetting() {
+  const t = stores.sync.data.theme;
+  nativeTheme.themeSource = t === "light" || t === "dark" ? t : "system";
 }
 
 /**
@@ -516,7 +524,7 @@ async function injectClipboardUi(wc, entry, { standalone = false } = {}) {
   }
   await wc.insertCSS(read(path.join(CLIP_UI, "clipboard.css")));
   const scripts = [
-    ...(standalone ? ["i18n.js", "lamha-ai.js", "motion.js"].map(f => path.join(EXT_DIR, "shared", f)) : []),
+    ...(standalone ? ["theme.js", "i18n.js", "lamha-ai.js", "motion.js"].map(f => path.join(EXT_DIR, "shared", f)) : []),
     path.join(__dirname, "renderer", "i18n-desktop.js"),
     path.join(EXT_DIR, "shared", "arabic-normalize.js"), path.join(CLIP_UI, "clip-list.js"), path.join(CLIP_UI, "clip-actions.js"), path.join(CLIP_UI, entry)
   ];
@@ -872,6 +880,7 @@ if (!gotLock) {
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null);
     startCore();
+    applyThemeSetting(); // before the windows open, so they start in the right colours
     createMain();
     if (selection) createCardWin(); // ready before the first shortcut, so it opens instantly
     if (clipboardMonitor) createPanelWin(); // likewise: the quick panel must show within 150 ms

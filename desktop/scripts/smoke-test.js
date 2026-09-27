@@ -104,6 +104,21 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
     return r.tabs.join(" · ");
   });
 
+  await check("theme: Settings → Theme recolours every window (not only the card); Automatic is the system's", async () => {
+    const { nativeTheme } = require("electron");
+    const dark = () => js(mainWin, `JSON.stringify([document.documentElement.dataset.theme || "", matchMedia("(prefers-color-scheme: dark)").matches])`);
+    await stores.sync.set({ theme: "light" });
+    await wait(200);
+    assert(nativeTheme.themeSource === "light" && await dark() === '["light",false]', "light: " + nativeTheme.themeSource + " " + await dark());
+    await stores.sync.set({ theme: "dark" });
+    await wait(200);
+    assert(nativeTheme.themeSource === "dark" && await dark() === '["dark",true]', "dark: " + nativeTheme.themeSource + " " + await dark());
+    await stores.sync.set({ theme: "auto" });
+    await wait(200);
+    assert(nativeTheme.themeSource === "system", "auto: " + nativeTheme.themeSource);
+    return "light · dark · system";
+  });
+
   await check("animations: the windows follow the setting; Automatic uses this PC's hint", async () => {
     await wait(Math.max(0, 3000 - process.uptime() * 1000)); // the GPU process reports its real state after startup
     const hint = desktop.updateMotionHint();

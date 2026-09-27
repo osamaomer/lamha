@@ -54,7 +54,7 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-09-27 (version 1.8.3 released)_
+_Last updated: 2026-09-27 (version 1.8.4 released)_
 
 ### Done (2026-09-27, released in 1.8.1 with the translation service below)
 
@@ -101,6 +101,14 @@ The user asked for English–English word lookups. They chose a switch on the ca
    - a key-hint bar at the bottom; the panel's own header is hidden while the tools show.
    - The self-test now clicks `.ca-back`.
 - **Tests:** 3 in test-writing, 1 new and 2 extended in test-ui. All fail on 1.8.2. The desktop self-test passed 63/63 before the release.
+
+### After 1.8.3: the Theme setting everywhere (2026-09-27, released in 1.8.4)
+
+The user reported that Settings stayed dark after choosing Light: the Theme setting only reached the card, and every page followed the system. Now:
+- `shared/theme.js` (loaded in `<head>` of popup.html and options.html, and injected into the clipboard panel) sets `data-theme` on `<html>`, with a localStorage copy for the first paint.
+- `shared/ui.css`, `popup.css` and `motion.css` use their dark rules for `[data-theme="dark"]`, or `:not([data-theme="light"])` inside `prefers-color-scheme: dark`.
+- The desktop app sets `nativeTheme.themeSource` (`applyThemeSetting` in main.js), so every window follows.
+- Tests: 1 in test-ui (fails without the CSS change), plus a desktop self-test check (passed: 64/64 before the release).
 
 ### Current project: translation that works without internet
 

@@ -117,7 +117,7 @@
     "o.startOver": ["البدء من جديد", "Start over"],
     "o.appearance": ["المظهر", "Appearance"],
     "o.theme": ["السمة", "Theme"],
-    "o.themeHint": ["مظهر بطاقة الترجمة", "The look of the translation card"],
+    "o.themeHint": ["مظهر لمحة: البطاقة والنافذة والإعدادات", "The look of Lamha: the card, its window and these settings"],
     "o.themeAuto": ["تلقائي (حسب النظام)", "Automatic (system)"],
     "o.themeLight": ["فاتح", "Light"],
     "o.themeDark": ["داكن", "Dark"],

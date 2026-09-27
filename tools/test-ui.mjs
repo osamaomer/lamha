@@ -499,6 +499,33 @@ await step("popup review: an English–English card shows its definition first a
   assert.equal(text(back.querySelector(".rv-def")), "مَرِن");
 });
 
+await step("Theme: Settings and the popup follow the choice (not only the card); Automatic leaves it to the system", async () => {
+  const o = await openPage("options/options.html", ["shared/theme.js", "shared/i18n.js", "options/i18n-options.js", "shared/lamha-ai.js", "shared/motion.js", "options/options.js"]);
+  await sleep(100);
+  const html = o.document.documentElement;
+  assert.equal(html.dataset.theme, undefined, "Automatic: the system decides");
+  const sel = o.document.getElementById("theme");
+  sel.value = "light";
+  sel.dispatchEvent(new o.Event("change"));
+  await sleep(50);
+  assert.equal(sync.data.theme, "light");
+  assert.equal(html.dataset.theme, "light", "the settings page itself turns light, even on a dark system");
+  sel.value = "dark";
+  sel.dispatchEvent(new o.Event("change"));
+  await sleep(50);
+  assert.equal(html.dataset.theme, "dark");
+  const p = await openPage("popup/popup.html", ["shared/theme.js", "shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
+  assert.equal(p.document.documentElement.dataset.theme, "dark", "a page opened later starts in the chosen theme");
+  sel.value = "auto";
+  sel.dispatchEvent(new o.Event("change"));
+  await sleep(50);
+  assert.equal(html.dataset.theme, undefined);
+  assert.equal(p.document.documentElement.dataset.theme, undefined, "open pages follow the change");
+  const css = readFileSync(new URL("shared/ui.css", EXT), "utf8");
+  assert.match(css, /:root\[data-theme="dark"\] \{/);
+  assert.match(css, /:root:not\(\[data-theme="light"\]\) \{/, "a dark system no longer overrides Light");
+});
+
 /* ---- desktop: the tools on a clip in the quick panel (Alt+Shift+V → Tab) ---- */
 
 await step("clipboard tools: numbered rows with icons and hints, one lit row, number keys, Esc steps back", async () => {
