@@ -54,7 +54,7 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-09-27 (version 1.8.2 released; card and clipboard fixes built since, not committed)_
+_Last updated: 2026-09-27 (version 1.8.3 released)_
 
 ### Done (2026-09-27, released in 1.8.1 with the translation service below)
 
@@ -85,7 +85,7 @@ The user asked for English–English word lookups. They chose a switch on the ca
 - **Cards:** `cardFromLookup` / the card's bookmark / the clipboard's review tool make `{ tr: ar, def: definition, en: true }`. `putCard` accepts an English card with only a definition. The popup's review shows `def` first for `en` cards.
 - **Tests:** 3 in test-writing (with the real dictionary: `makeEnv({ realDict: true })`) and 2 in test-ui. All fail on 1.8.1.
 
-### After 1.8.2: fixes from the user's screenshots (2026-09-27, not committed yet)
+### After 1.8.2: fixes from the user's screenshots (2026-09-27, released in 1.8.3)
 
 1. **The English view picked the noun for "I mentioned"** while the Arabic view (Google's in-sentence translation) had the verb. `local-dict.js` `toResult` now chooses with three signals:
    - words shared with the sentence (as before);
@@ -100,7 +100,7 @@ The user asked for English–English word lookups. They chose a switch on the ca
    - an answer takes the menu's place; Esc steps back (answer → tools → list), and the arrow goes straight to the list;
    - a key-hint bar at the bottom; the panel's own header is hidden while the tools show.
    - The self-test now clicks `.ca-back`.
-- **Tests:** 3 in test-writing, 1 new and 2 extended in test-ui. All fail on 1.8.2. The desktop self-test hasn't been run on these changes.
+- **Tests:** 3 in test-writing, 1 new and 2 extended in test-ui. All fail on 1.8.2. The desktop self-test passed 63/63 before the release.
 
 ### Current project: translation that works without internet
 
