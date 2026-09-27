@@ -499,6 +499,49 @@ test("lookup milestones: the 10th word looked up says so (once), the cached resu
   assert.equal(noHistory.browser.storage.local.data.lookupCount, 9);
 });
 
+test("today's goal: new words and review answers count; the one that reaches the goal says so, once", async () => {
+  const google = recorder((url, body) => json(200, { src: "en", sentences: [{ trans: "كلمة", orig: "x" }] }));
+  const cards = { a: { ...newCard, q: "a", tr: "أ" } };
+  const env = makeEnv({ fetchImpl: google.fetchImpl, local: { cards, cardsImported: true }, sync: { dictSource: "online", translateDefinitions: false, dailyGoal: 3, cardsAuto: false } });
+  assert.equal((await env.send({ type: "lookup", text: "resilient" })).data.goal, undefined);
+  await env.send({ type: "lookup", text: "resilient" }); // the same word again: not counted
+  assert.equal((await env.send({ type: "reviewGrade", key: "a", grade: "good" })).goal, 0, "a review answer counts too");
+  const third = await env.send({ type: "lookup", text: "tenacious" });
+  assert.equal(third.data.goal, 3, "the answer that reached the goal");
+  assert.equal((await env.send({ type: "lookup", text: "candid" })).data.goal, undefined, "past the goal: no second celebration");
+  const t = await env.send({ type: "today" });
+  assert.deepEqual([t.done, t.goal, t.streak], [4, 3, 1]);
+});
+
+test("today's streak: days in a row with practice; not practised yet today keeps yesterday's", async () => {
+  const day = back => new Date(Date.now() - back * DAYMS).toDateString();
+  const activity = { [day(1)]: 4, [day(2)]: 1, [day(4)]: 7 };
+  const env = makeEnv({ fetchImpl: async () => json(200, {}), local: { activity, cards: { a: { ...newCard, q: "a" } }, cardsImported: true } });
+  assert.equal((await env.send({ type: "today" })).streak, 2, "yesterday and the day before; day 4 is past a gap");
+  await env.send({ type: "reviewGrade", key: "a", grade: "good" });
+  const t = await env.send({ type: "today" });
+  assert.deepEqual([t.done, t.streak], [1, 3]);
+  assert.ok(Object.keys(env.browser.storage.local.data.activity).length <= 60);
+});
+
+test("word of the day: a word of yours that's due soon, else a new one from the dictionary; the same all day", async () => {
+  const soon = { ...newCard, q: "bank", tr: "ضفة", last: Date.now() - 5 * DAYMS, due: Date.now() + DAYMS, reps: 2, interval: 6 };
+  const later = { ...newCard, q: "river", tr: "نهر", last: Date.now(), due: Date.now() + 30 * DAYMS, reps: 4, interval: 30 };
+  const env = makeEnv({ fetchImpl: async () => json(200, {}), local: { cards: { bank: soon, river: later }, cardsImported: true } });
+  const w = (await env.send({ type: "today" })).word;
+  assert.deepEqual([w.q, w.tr, w.from], ["bank", "ضفة", "deck"]);
+
+  const history = [{ q: "menace", tr: "تهديد", src: "en" }];
+  const fresh = makeEnv({ fetchImpl: async () => json(200, {}), local: { cards: { river: later }, cardsImported: true, history }, realDict: true });
+  const d = (await fresh.send({ type: "today" })).word;
+  assert.equal(d.from, "dict");
+  assert.match(d.q, /^[a-z]{5,12}$/);
+  assert.ok(d.tr && d.def, "its meaning and definition");
+  assert.ok(!d.ex || d.ex.toLowerCase().includes(d.q.slice(0, 4)), "an example only when it uses the word");
+  assert.ok(!["river", "menace"].includes(d.q), "not a word the user already has");
+  assert.equal((await fresh.send({ type: "today" })).word.q, d.q, "the same word all day");
+});
+
 test("a word lookup adds a card with its sentence and in-context meaning", async () => {
   const google = recorder(url => {
     if (url.includes("/translate_a/single")) {

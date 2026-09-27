@@ -15,7 +15,7 @@
 .tabs.has-ink button[aria-selected="true"] { background: transparent; box-shadow: none; }
 .tab-ink {
   position: absolute; top: 3px; bottom: 3px; left: 0; z-index: 0;
-  border-radius: 7px; background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+  border-radius: var(--r-sm); background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
   pointer-events: none;
 }
 [data-motion="full"] .tab-ink { transition: transform .26s var(--m-spring), width .26s var(--m-ease); }
@@ -32,7 +32,7 @@
 @keyframes lm-toast-in { from { opacity: 0; transform: translate(-50%, 10px) scale(.96); } to { opacity: 1; transform: translate(-50%, 0); } }
 .flash { overflow: hidden; }
 .flash-bar {
-  position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #a5b4fc; opacity: .8;
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--toast-act); opacity: .8;
   transform-origin: left; animation: lm-shrink var(--undo, 5s) linear forwards;
 }
 [dir="rtl"] .flash-bar { transform-origin: right; }
@@ -74,7 +74,7 @@
 [data-motion="full"] .lc-toast, [data-motion="subtle"] .lc-toast { animation: lm-toast-up .2s var(--m-spring) both; }
 @keyframes lm-toast-up { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
 .lc-toast { position: relative; overflow: hidden; }
-.lc-toast .flash-bar { background: #a5b4fc; }
+.lc-toast .flash-bar { background: var(--toast-act); }
 [data-motion="full"] .lc-row, [data-motion="subtle"] .lc-row { transition: background .1s; }
 
 /* ---------- settings ---------- */
@@ -101,14 +101,27 @@
 
 /* the Animations setting's preview */
 .motion-demo {
-  display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 12px; border-radius: 12px;
+  display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 12px; border-radius: var(--r-lg);
   background: var(--bg); min-height: 76px;
 }
 .motion-demo .md-card {
-  flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px;
+  flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: var(--r-md);
   background: var(--surface); box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .25); transform-origin: 0 0;
 }
 [dir="rtl"] .motion-demo .md-card { transform-origin: 100% 0; }
 .motion-demo .md-w { font: 700 16px/1.2 var(--font-en); direction: ltr; text-align: left; }
 .motion-demo .md-t { font-size: 18px; font-weight: 700; color: var(--accent); }
 .motion-demo .md-note { font-size: 12px; color: var(--muted); max-width: 11em; }
+
+/* ---------- speaking: the speaker's sound waves pulse until it's done ---------- */
+[data-motion="full"] .playing svg path:nth-child(n+2), [data-motion="subtle"] .playing svg path:nth-child(n+2) { animation: lm-wave .9s ease-in-out infinite; }
+[data-motion="full"] .playing svg path:nth-child(3), [data-motion="subtle"] .playing svg path:nth-child(3) { animation-delay: .22s; }
+.playing { color: var(--accent); }
+@keyframes lm-wave { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+
+/* ---------- review: the progress bar glides; the goal ring's number pops when the goal is reached ---------- */
+[data-motion="full"] .rv-progress span, [data-motion="subtle"] .rv-progress span { transition: transform .35s var(--m-ease); }
+[data-motion="full"] .td-goal.met .td-n { animation: lm-pop .4s var(--m-spring) both; }
+
+/* ---------- copy → ✓ and the bookmark filling in (popup / card: see motion.js play()) ---------- */
+.copied { color: var(--ok) !important; }

@@ -120,7 +120,7 @@
       toolsFor = id;
     }
     detail.replaceChildren(
-      h("div", { class: "cb-dhead" }, backBtn, h("span", { class: "grow" }), c.pinned && h("span", { title: L("d.pinned"), "aria-label": L("d.pinned") }, "📌")),
+      h("div", { class: "cb-dhead" }, backBtn, h("span", { class: "grow" }), c.pinned && h("span", { class: "lc-pin", title: L("d.pinned"), "aria-label": L("d.pinned"), role: "img" }, LamhaClipList.icon("pin"))),
       c.label && h("h3", { class: "cb-dlabel", dir: "auto" }, c.label),
       h("pre", { class: "cb-full", dir: "auto", tabindex: "0", "aria-label": L("d.fullText") }, c.text),
       h("dl", { class: "cb-facts" },

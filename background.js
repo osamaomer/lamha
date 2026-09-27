@@ -25,6 +25,7 @@ const DEFAULT_SETTINGS = {
   saveMistakes: true, // mistake journal: keep what proofreading finds (storage.local) and personalize explanations
   cardsAuto: true, // add looked-up English words to the review deck
   cardsNewPerDay: 10, // new words introduced per day in review
+  dailyGoal: 10, // the day's goal (the popup's ring): words looked up + review answers; 0 = no goal
   uiLang: "auto", // interface language: "auto" (the system's: Arabic or English) | "ar" | "en" — see shared/i18n.js
   disabledSites: []
 };
@@ -440,8 +441,8 @@ async function lookup(rawText, opts = {}) {
   if (settings.saveHistory && settings.cardsAuto && learnable && result.src === "en") addCard(cardFromLookup(result, text, context));
   // milestones count words: one already in the recent history (last 100), e.g. looked up in another sentence, isn't counted again
   if (newWord && (await newWord)) {
-    const milestone = await countLookup();
-    if (milestone) return { ...result, milestone }; // a copy: the cached result stays without it
+    const [milestone, goal] = await Promise.all([countLookup(), countActivity()]); // today's goal counts the same words
+    if (milestone || goal) return { ...result, ...(milestone && { milestone }), ...(goal && { goal }) }; // a copy: the cached result stays without them
   }
   return result;
 }
@@ -1249,6 +1250,71 @@ async function reviewGrade(key, grade) {
     deck.dirty = true;
   });
   updateBadge();
+  return countActivity(); // the goal when this answer reached it, else 0
+}
+
+/* ---------------- today: the daily goal, the streak and the word of the day ----------------
+ * storage.local activity: { [day]: count } for the last 60 days — words new to the history plus review answers.
+ * wotd: { day, q, tr, def, ex, pos, from: "deck" | "dict" } keeps the word of the day the same until midnight. */
+
+const dayKey = (back = 0) => new Date(Date.now() - back * DAY).toDateString();
+let activityQueue = Promise.resolve();
+/** Counts one looked-up word or review answer for today; resolves to the goal when this one reached it, else 0. */
+function countActivity() {
+  const run = activityQueue.then(async () => {
+    const [{ activity = {} }, { dailyGoal }] = await Promise.all([browser.storage.local.get("activity"), getSettings()]);
+    const keep = new Set(Array.from({ length: 60 }, (_, i) => dayKey(i)));
+    const days = Object.fromEntries(Object.entries(activity).filter(([k]) => keep.has(k)));
+    const n = (Object.hasOwn(days, today()) ? days[today()] : 0) + 1;
+    days[today()] = n;
+    await browser.storage.local.set({ activity: days });
+    return dailyGoal > 0 && n === dailyGoal ? dailyGoal : 0;
+  });
+  activityQueue = run.catch(() => {});
+  return run.catch(() => 0);
+}
+
+/** Days in a row with some practice. Today not started yet doesn't break it: yesterday's streak is still there to keep. */
+function streakOf(count) {
+  let n = 0;
+  for (let back = count(today()) ? 0 : 1; count(dayKey(back)) > 0; back++) n++;
+  return n;
+}
+
+/** What the popup's Today card shows: { done, goal, streak, word }. */
+async function todayInfo() {
+  const [{ activity = {}, wotd = null }, settings] = await Promise.all([browser.storage.local.get(["activity", "wotd"]), getSettings()]);
+  const count = k => (Object.hasOwn(activity, k) ? Number(activity[k]) || 0 : 0);
+  let word = null;
+  try { word = await wordOfDay(wotd); } catch (_) { /* the goal still shows */ }
+  return { done: count(today()), goal: settings.dailyGoal, streak: streakOf(count), word };
+}
+
+/** One word a day: a word from the deck that is due (or nearly), to refresh it; otherwise a new one from the dictionary. */
+async function wordOfDay(saved) {
+  if (saved && saved.day === today() && saved.q) return saved;
+  const prev = saved ? cardKey(saved.q) : "";
+  const soon = Date.now() + 3 * DAY;
+  const { word, known } = await withDeck(deck => {
+    const due = Object.entries(deck.cards).filter(([k, c]) => c.last && c.due <= soon && k !== prev && (c.tr || c.def)).sort((a, b) => a[1].due - b[1].due);
+    const c = due.length ? due[0][1] : null;
+    return {
+      word: c && { q: c.q, tr: c.tr || "", def: c.en ? c.def : "", ex: c.ex || "", from: "deck" },
+      known: new Set(Object.keys(deck.cards))
+    };
+  });
+  let w = word;
+  if (!w) {
+    const { history = [] } = await browser.storage.local.get("history");
+    history.forEach(h => known.add(cardKey(h.q)));
+    if (prev) known.add(prev);
+    const d = await LocalDict.wordOfDay(Math.floor(Date.now() / DAY), known);
+    w = d && { ...d, from: "dict" };
+  }
+  if (!w) return null;
+  w = { ...w, day: today() };
+  await browser.storage.local.set({ wotd: w });
+  return w;
 }
 
 function removeCard(key) {
@@ -1308,7 +1374,8 @@ browser.runtime.onMessage.addListener((msg, sender) => {
     case "speak": return speak(msg.text, msg.lang).then(() => ({ ok: true }), e => ({ ok: false, error: String(e.message || e) }));
     case "stopSpeak": stopSpeaking(); return Promise.resolve({ ok: true });
     case "reviewQueue": return reviewQueue();
-    case "reviewGrade": return reviewGrade(msg.key, msg.grade).then(() => ({ ok: true }));
+    case "reviewGrade": return reviewGrade(msg.key, msg.grade).then(goal => ({ ok: true, goal }));
+    case "today": return todayInfo();
     case "cardRemove": return removeCard(msg.key);
     case "cardToggle": return toggleCard(msg.card);
     case "cardHas": return hasCard(msg.q);

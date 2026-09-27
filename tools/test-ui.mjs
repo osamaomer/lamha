@@ -145,6 +145,8 @@ await step("key 3 grades 'good': card moves 13 days ahead, next card is a new wo
   assert.equal(text($("rvCard").querySelector(".rv-word")), "resilient");
   assert.ok($("rvCard").querySelector(".rv-tag"), "'new word' tag");
   assert.equal($("rvBadge").textContent, "٢");
+  assert.equal($("rvProgress").hidden, false, "a progress bar once the sitting has begun");
+  assert.equal($("rvProgress").getAttribute("aria-valuenow"), "33", "1 answered, 2 to go");
 });
 
 await step("remove from review deletes the card", async () => {
@@ -153,6 +155,7 @@ await step("remove from review deletes the card", async () => {
   await sleep(100);
   assert.equal(local.data.cards.resilient, undefined);
   assert.equal(text($("rvCard").querySelector(".rv-word")), "thrive");
+  assert.equal($("rvProgress").getAttribute("aria-valuenow"), "50", "a removed card isn't an answer");
 });
 
 await step("finishing the queue shows the done message with next review time", async () => {
@@ -161,6 +164,8 @@ await step("finishing the queue shows the done message with next review time", a
   await sleep(100);
   assert.match(text($("rvCard")), /أحسنت! لا توجد كلمات للمراجعة الآن/);
   assert.match(text($("rvCard")), /المراجعة القادمة بعد ١٠ د/);
+  assert.match(text($("rvCard").querySelector(".rv-sum")), /^راجعت كلمتين · عرفت ١ · صعبة ٠ · نسيت ١$/, "what this sitting did");
+  assert.equal($("rvProgress").hidden, true);
   assert.equal($("rvBadge").hidden, true);
 });
 
@@ -197,6 +202,33 @@ await step("compose: 'use it' puts the correction back in the box; draft saved",
   await sleep(400);
   assert.equal($("draft").value, "I went to the market.");
   assert.equal(local.data.draft, "I went to the market.");
+});
+
+await step("today: the goal ring counts the review answers; the word of the day is one of yours that's due; a query hides it", async () => {
+  $("tabTr").click();
+  await sleep(100);
+  const card = $("todayCard");
+  assert.equal(card.hidden, false);
+  assert.equal(text(card.querySelector(".td-n")), "٢", "two answers so far");
+  assert.equal(text(card.querySelector(".td-text b")), "٢ من ١٠ اليوم");
+  assert.equal(card.querySelector(".td-ring").getAttribute("aria-label"), "٢ من ١٠");
+  assert.equal(text(card.querySelector(".td-label")), "كلمة اليوم · من كلماتك");
+  assert.equal(text(card.querySelector(".td-w")), "bank", "chosen when the popup opened (then overdue), kept all day");
+  assert.equal(text(card.querySelector(".td-tr")), "ضفة");
+  $("q").value = "hello";
+  $("q").dispatchEvent(new pop.Event("input"));
+  assert.equal(card.hidden, true, "steps aside for a result");
+  $("q").value = "";
+  $("q").dispatchEvent(new pop.Event("input"));
+  assert.equal(card.hidden, false);
+});
+
+await step("recent lookups follow words looked up elsewhere (the card) while the window stays open", async () => {
+  await local.set({ history: [{ q: "candid", tr: "صريح", src: "en", t: now }] });
+  await sleep(50);
+  assert.equal($("histCard").hidden, false);
+  assert.match(text($("hist")), /candid\s*صريح/);
+  await local.set({ history: [] });
 });
 
 /* ---- options: journal + review ---- */
@@ -276,7 +308,7 @@ await step("English: popup left to right, English labels, Western digits", async
   assert.equal(enPop.document.documentElement.dir, "ltr");
   assert.equal(enPop.document.documentElement.lang, "en");
   assert.equal(enPop.document.documentElement.hasAttribute("data-i18n-pending"), false, "page left hidden");
-  assert.deepEqual([...enPop.document.querySelectorAll(".tabs button")].map(b => text(b).replace(/\s*\d+$/, "")), ["Translate", "Write ✨", "Review"]);
+  assert.deepEqual([...enPop.document.querySelectorAll(".tabs button")].map(b => text(b).replace(/\s*\d+$/, "")), ["Translate", "Write", "Review"]);
   assert.equal(ep("q").placeholder, "Type a word or sentence to translate…");
   assert.equal(text(ep("openOptions")), "Settings");
   assert.ok(!/[\u0600-\u06FF]/.test(text(ep("rvHead"))), "Arabic left in the review header: " + text(ep("rvHead")));
@@ -290,7 +322,7 @@ await step("English: settings page translated, language menu shows the choice", 
   assert.equal(enOpt.document.documentElement.dir, "ltr");
   assert.equal(eo("uiLang").value, "en");
   const headings = [...enOpt.document.querySelectorAll(".panel h2")].map(text);
-  assert.ok(headings.includes("Dictionary") && headings.includes("Writing tools ✨") && headings.includes("Appearance"), headings.join(" | "));
+  assert.ok(headings.includes("Dictionary") && headings.includes("Writing tools") && headings.includes("Appearance"), headings.join(" | "));
   assert.match(text(eo("jSummary")), /^You proofread 5 texts and 13 mistakes were found\. Most frequent: Articles/);
   // no visible Arabic, except the native name of Arabic in the language menu
   const visible = [...enOpt.document.querySelectorAll("h1, h2, h3, b, small, p, button, label, option, li, span, footer")]
@@ -458,6 +490,34 @@ await step("card: no 'Better translation' without an AI translator; an AI quota 
   assert.ok(quota.root().querySelector(".err .btn"), "a way forward: try again");
 });
 
+await step("card: copy turns its icon into a check mark for a moment; a goal reached shows its banner", async () => {
+  const c = await cardPage(msg => (msg.type === "lookup" ? trResult("google", { goal: 10 }) : { ok: true }));
+  let copied = "";
+  Object.defineProperty(c.w.navigator, "clipboard", { value: { writeText: async t => { copied = t; } } });
+  c.show("It's a piece of cake.");
+  await sleep(100);
+  assert.match(text(c.root().querySelector(".milestone")), /حققت هدف اليوم: ١٠/);
+  const btn = [...c.root().querySelectorAll(".hero .actions .icon-btn")].find(b => /نسخ/.test(b.getAttribute("aria-label")));
+  btn.click();
+  await sleep(20);
+  assert.equal(copied, "إنها قطعة من الكعكة.");
+  assert.ok(btn.classList.contains("copied") && btn.querySelector('path[d="M20 6 9 17l-5-5"]'), "a check mark");
+});
+
+await step("card: no stray 'false' text in a sentence's loading state or in the finished page bar", async () => {
+  const c = await cardPage(msg => (msg.type === "lookup" ? new Promise(() => {}) : msg.type === "translateBatch" ? ok(msg.texts) : { ok: true }));
+  c.show("The quick brown fox jumps over the lazy dog."); // a sentence: its skeleton has no word lines
+  await sleep(50);
+  assert.ok(c.root().querySelector(".card .sk"), "the skeleton shows");
+  assert.doesNotMatch(c.root().querySelector(".card").textContent, /false/);
+  c.w.IntersectionObserver = class { constructor(cb) { this.cb = cb; } observe(el) { this.cb([{ isIntersecting: true, target: el }]); } unobserve() {} disconnect() {} };
+  c.w.eval("LamhaPage").start("ar");
+  await sleep(150);
+  const bar = c.root().querySelector(".pbar");
+  assert.ok(bar && !bar.querySelector(".spin"), "the page is translated");
+  assert.doesNotMatch(bar.textContent, /false/);
+});
+
 await step("card: العربية ⇄ English switch flips a word to the English–English dictionary and back", async () => {
   let en = false;
   const word = () => ({ ok: true, data: en
@@ -481,6 +541,7 @@ await step("card: العربية ⇄ English switch flips a word to the English�
   assert.deepEqual(c.sent.filter(m => m.type === "setWordDict").map(m => m.en), [true], "remembered through the background");
   assert.match(text(c.root().querySelector(".hero")), /elastic; rebounds readily.*clean bouncy hair/, "the definition that fits, with its example");
   assert.match(text(c.root().querySelector(".hero .ctx-label")), /^صفة · في هذا السياق$/, "part of speech, then 'in this context'");
+  assert.deepEqual([...c.root().querySelectorAll(".def .en-g")].map(text), ["recovering readily from adversity"], "the definition above isn't repeated below");
   assert.equal(sw()[1].getAttribute("aria-pressed"), "true");
   assert.ok([...c.root().querySelectorAll(".foot a")].some(a => a.href.includes("/dictionary/english/resilient")), "Cambridge's English dictionary");
   c.root().querySelector(".mark").click();
@@ -497,6 +558,31 @@ await step("popup review: an English–English card shows its definition first a
   const back = p.document.querySelector(".rv-back");
   assert.equal(text(back.querySelector(".rv-tr.en")), "elastic; rebounds readily");
   assert.equal(text(back.querySelector(".rv-def")), "مَرِن");
+});
+
+await step("colours: the card (content/styles.js) and the pages (shared/ui.css) use the same palette in both themes", async () => {
+  const vars = block => Object.fromEntries([...block.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/--([\w-]+):\s*([^;]+);/g)].map(m => [m[1], m[2].trim()]));
+  const cut = (s, from) => { const i = s.indexOf(from); assert.ok(i >= 0, from); return s.slice(i, s.indexOf("}", i)); };
+  const ui = src("shared/ui.css"), card = src("content/styles.js");
+  const pages = { light: vars(cut(ui, ":root {")), dark: vars(cut(ui, ':root[data-theme="dark"] {')) };
+  assert.deepEqual(vars(cut(ui, ':root:not([data-theme="light"]) {')), pages.dark, "the two dark blocks in ui.css are the same");
+  const cards = { light: vars(cut(card, ".root {")), dark: vars(cut(card, ".root.dark {")) };
+  const SHARED = ["fg", "muted", "faint", "line", "hover", "accent", "accent-soft", "accent-fg", "btn", "btn-fg", "ok", "ok-soft", "danger", "danger-soft", "toast-bg", "toast-fg", "toast-act", "celebrate", "scroll", "r-sm", "r-md", "r-lg"];
+  for (const theme of ["light", "dark"]) {
+    for (const k of SHARED) assert.equal(cards[theme][k], pages[theme][k], `${theme} --${k}`);
+    assert.equal(cards[theme].bg, pages[theme].surface, `${theme}: the card is a surface`);
+  }
+});
+
+await step("popup write: with no AI chosen, the tab says how to set one up (not in red) and the tools wait", async () => {
+  await local.set({ popupMode: "write", draft: "She dont like apples.", aiProvider: "claude", aiKeySet: false });
+  const p = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
+  await sleep(100);
+  const out = p.document.getElementById("wrOut");
+  assert.equal(out.hidden, false, "shown as soon as the tab opens");
+  assert.ok(out.querySelector(".setup") && !out.querySelector(".error"), "a setup step, not an error");
+  assert.ok([...p.document.querySelectorAll("#wrTools button")].every(b => b.disabled), "the tools wait for an AI");
+  await local.set({ popupMode: "translate", draft: "" });
 });
 
 await step("Theme: Settings and the popup follow the choice (not only the card); Automatic leaves it to the system", async () => {

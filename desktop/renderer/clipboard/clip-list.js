@@ -37,6 +37,7 @@ var LamhaClipList = (() => {
     lookup: '<path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/><path d="M20 20l-3.5-3.5"/>',
     review: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
     plain: '<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',
+    clipboard: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/>',
     back: '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>' // points right: "back" in Arabic; mirrored in English (clipboard.css)
   };
   const icon = name => svg(ICONS[name]);
@@ -158,7 +159,7 @@ var LamhaClipList = (() => {
         h("span", { class: "lc-app", dir: "auto" }, appName(it.sourceApp)),
         h("span", { "aria-hidden": "true" }, "·"),
         h("span", null, relTime(Math.max(it.lastCopiedAt, it.lastUsedAt))),
-        it.pinned && h("span", { class: "lc-pin", title: L("d.pinned"), "aria-label": L("d.pinned") }, "📌")
+        it.pinned && h("span", { class: "lc-pin", title: L("d.pinned"), "aria-label": L("d.pinned"), role: "img" }, icon("pin"))
       );
       const li = h("li", { class: "lc-row", role: "option", id: `${id}-o${i}`, "aria-selected": "false", "data-id": it.id },
         h("div", { class: "lc-main" },
@@ -282,7 +283,7 @@ var LamhaClipList = (() => {
       }
     }, L("d.enable"));
     const card = h("div", { class: "lc-optin" },
-      h("div", { class: "lc-optin-icon", "aria-hidden": "true" }, "📋"),
+      h("div", { class: "lc-optin-icon", "aria-hidden": "true" }, icon("clipboard")),
       h("h2", null, L("d.optInTitle")),
       h("p", null, L("d.optInText")),
       btn

@@ -15,7 +15,7 @@ User-facing documentation lives in [README.md](README.md). Update it whenever a 
 
 **One brain, two hosts.** `background.js` owns everything that matters: network calls (Google Translate, Wikipedia, speech), the three AI providers (Claude, Gemini, Ollama), settings, lookup history, the flashcard deck (SM-2) and the mistake journal. Pages never call the network. They send messages:
 
-`lookup · translateBatch · wiki · speak · stopSpeak · ai · aiTest · ollamaModels · reviewQueue · reviewGrade · cardRemove · cardToggle · cardHas · relayPage · dictMeta · getSettings · openOptions` (the switch at the bottom of `background.js`).
+`lookup · translateBatch · wiki · speak · stopSpeak · ai · aiTest · ollamaModels · reviewQueue · reviewGrade · today · cardRemove · cardToggle · cardHas · relayPage · dictMeta · getSettings · setWordDict · openOptions` (the switch at the bottom of `background.js`).
 
 - **Firefox:** the manifest loads `local-dict.js`, `shared/i18n.js`, `shared/lamha-ai.js` and `background.js` as the background. Content scripts (`shared/*`, `content/styles.js`, `content/page-translator.js`, `content/content.js`) run in every frame.
 - **Desktop:** `desktop/main.js` builds a `browser.*` stand-in, then loads the same background files with `vm.runInThisContext`. `preload.js` gives pages (popup = main window, options = Settings) their `browser.*`. The floating card over other apps is `renderer/card.html` with **the same content scripts injected**, so `content/content.js` must keep working in both (see `window.lamhaDesktop` and `external` messages).
@@ -48,13 +48,14 @@ npm install && npm test           # root: all four test files (tools/test-*.mjs)
 npm run lint                      # web-ext lint, expected 0 errors / 0 warnings (CI uses --warnings-as-errors)
 cd desktop && npm install && npm start   # run the Windows app from source
 cd desktop && npm run smoke       # full desktop self-test (needs a real Windows desktop; run before a release)
+cd desktop && npm run shots       # every screen as a PNG, light/dark × ar/en (~5 min; LAMHA_SHOTS_ONLY=dark-ar for one set, LAMHA_SHOTS=folder)
 ```
 
 CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. Tagging `vX.Y.Z` runs the release workflow.
 
 ## Where we left off
 
-_Last updated: 2026-09-27 (version 1.8.4 released)_
+_Last updated: 2026-09-27 (version 1.9.0 committed: the design audit; not yet pushed or tagged)_
 
 ### Done (2026-09-27, released in 1.8.1 with the translation service below)
 
@@ -149,6 +150,53 @@ The user reported that Settings stayed dark after choosing Light: the Theme sett
 - Wikipedia and updates: online only, and they fail quietly.
 - Writing tools: one provider at a time today. An automatic fallback (e.g. Gemini, then Ollama when offline) would fit the same design.
 - Truly offline (no network at all) needs Ollama **on the same PC**. Over the home network, Ollama must listen on the LAN (`OLLAMA_HOST=0.0.0.0`).
+
+### Design audit and polish (2026-09-27, version 1.9.0)
+
+The user asked for a thorough design audit to make the interface consistent and fun to use. Plan, agreed with the user:
+1. **Quick visible fixes.**
+2. **One design system:** the card (`content/styles.js`) and the pages (`shared/ui.css`) have drifted apart: different dark colours, a hard-coded dark toast in both themes (`.flash`, `.saved`, `.lc-toast`), bright periwinkle main buttons that outshine the content in dark mode, a muddy olive milestone banner, emoji in Settings (📖🌐✨💻📋) next to line icons, black "wells" behind them, no spacing / radius / type scale, two designs for the clipboard list (panel vs tab).
+3. **Layout:** the main window is ~60% empty below its card; Settings' section links are cut off with no hint, long intro paragraphs, tiny danger buttons; Review's front side is mostly empty.
+4. **Fun:** a daily goal and streak, a word of the day in the empty main window, a livelier review (progress, end-of-session summary), micro-interactions (bookmark pop, copy → ✓, sound waves while speaking). All through `LamhaMotion`.
+
+**Tool:** `npm run shots` (`desktop/scripts/screenshots.js`, started by `main.js --screenshots`) takes the before/after pictures with a temporary profile, sample text and no API keys (writing tools show their setup state). It never touches the real clipboard: sample clips go straight into the store. AI results, Firefox's popup and real web pages need screenshots from the user.
+
+**Step 1: quick fixes.**
+- **"false" as text** in the sentence loading card ("falsefalsefalse") and in the finished page bar: `cond && h()` passed to the DOM's own `.append()`. Both filtered (`renderSkeleton`, `renderPageBar`); a scan found no other place.
+- **Scrollbars in the theme:** the card's shadow root had no `color-scheme`, so its scrollbar was white on the dark card. `.root` / `.root.dark` set it, plus `scrollbar-color: var(--scroll)`, also on the pages (`ui.css`).
+- **Arabic placeholders** sat on the left (an empty `dir="auto"` box is left to right): `:placeholder-shown { direction: inherit }`.
+- **Writing tools before an AI is chosen:** the popup's Write tab shows a neutral setup box as soon as it opens (was red, and only after a click), the tools stay disabled, and they wake up when Settings changes; the card's title no longer names a provider and its chips are disabled.
+- **English–English view:** the definition in the top box isn't repeated as number 1 below it.
+- **One focus mark:** no outline on top of the popup text boxes' and the clipboard search's own focus ring; a selected tool chip gets a soft halo instead of a second ring.
+- Tests: 3 in test-ui, each failing on the old code.
+
+**Step 2: one palette.**
+- New shared tokens in `shared/ui.css`, copied into the card's `.root` / `.root.dark` (`content/styles.js`, whose `--bg` is the pages' `--surface`): `--btn` / `--btn-fg` (filled buttons, selected chips, badges: #5e5ce6 with white text in dark, calmer than the periwinkle `--accent`, which stays for links, labels and icons), `--ok-soft`, `--danger-soft`, `--toast-bg` / `--toast-fg` / `--toast-act` (toasts invert with the theme, like the card's pill), `--celebrate` (milestones in the Lamha gradient; amber went olive on dark).
+- A test in test-ui checks the card and page palettes match and the two dark blocks in ui.css are identical. **Change a colour in all three places.**
+- Corrections (`ins`) look the same everywhere: green text on `--ok-soft`.
+- Line icons, not emoji, in structural places: Settings' choice cards (on an `--accent-soft` tile), section titles, the Write tab, the clipboard's pin marker and opt-in. Emoji stay in celebrations (🎉 milestones, 🔥 streaks, 👋 welcome), warnings (⚠️) and prose.
+- The clipboard tools' lit row lost its edge bar (tinted row + filled icon, like a selected chip).
+
+**Step 3: layout.**
+- Corners: three steps, `--r-sm` 8 / `--r-md` 10 / `--r-lg` 14 px (plus 999px pills and 2–6 px marks), in ui.css and the card (checked by the palette test). The old `--radius` is gone.
+- Main window (desktop): the footer sits at the bottom (`desktop.css`, body a flex column); recent lookups show 12, the Firefox popup still 6 (`.hist li:nth-child(n+7)`).
+- Review: the word is centred in the card; "due" and "new" are the same pill in their own colours, quiet at zero.
+- Settings: the section links scroll in an inner `.toc-links` row that fades where more are hidden (`tocEdges`); the clear/delete buttons have a trash icon and a minimum width.
+- Clipboard panel: four key hints on one line (Enter, Shift+Enter, Tab, Esc); pin and delete keys are in the row buttons' tooltips.
+- Not done: a type scale (text still in half-pixel steps, e.g. 12.5 / 13.5 px); rewriting Settings' long intro paragraphs (the user's own copy: ask first).
+
+**Step 4: fun.** The user chose: the goal counts both lookups and review answers, 10 a day, and the word of the day mixes their own due words with new dictionary words.
+- **Today** (`background.js` "today" section): storage.local `activity` = `{ [toDateString()]: count }` for 60 days. `countActivity()` runs for each word new to the history (the same test as milestones) and each review answer, and returns the goal on the one that reaches it. `lookup` results then carry `goal`, and `reviewGrade` answers `{ ok, goal }`. `streakOf()` counts days in a row with any practice (today not started yet doesn't break it). Setting `dailyGoal` (sync, default 10, 0 = none) in Settings → Review.
+- **Word of the day** (`wordOfDay()`, kept in storage.local `wotd` for the day): a reviewed card due within 3 days (not yesterday's word), else `LocalDict.wordOfDay(dayNumber, known)`, which picks from positions 40–400 of a shard (shards keep frequency order), with Arabic and an example that uses the word itself.
+- **Popup:** a Today card in the ترجمة tab (`renderToday`: SVG ring, streak chip, the word with 🔊 and "see its meaning"), hidden while the query box has text. Recent lookups now also refresh on `history` changes (the desktop window stays open while the card adds words).
+- **Review:** a progress bar for this sitting (`rvSession`, `#rvProgress`, a `scaleX` transform) and a summary on the done screen (`rv.session`). Reaching the goal: a flash plus a burst.
+- **Micro-interactions:** copy → ✓ for 1.3 s (card `copyText(text, btn)`, popup `copyFrom`); the bookmark pops when a word goes in; speaking pulses the 🔊 icon's sound waves (`.playing`, opacity only; the old box-shadow pulse is gone).
+- Tests: 3 in test-writing, 4 new plus 3 extended in test-ui.
+
+**Before 1.9.0 goes out** (the version is bumped and committed, but not pushed or tagged):
+- Run `cd desktop && npm run smoke`: the tab names changed ("Write" without ✨) and the clipboard panel's key hints were trimmed. It wasn't run during the audit.
+- Check by hand in Firefox: the Today card in the 360 px popup, the card's dark scrollbar, and Arabic placeholders on the right.
+- Then push and tag `v1.9.0` (the tag runs the release workflow).
 
 ### Ideas for later
 

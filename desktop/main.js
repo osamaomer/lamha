@@ -14,7 +14,8 @@ const { Store } = require("./storage");
 // the extension files: the repository root while developing, a copy (ext/) inside the packaged app
 const EXT_DIR = app.isPackaged ? path.join(__dirname, "ext") : path.join(__dirname, "..");
 const BASE = "lamha://app/"; // what browser.runtime.getURL() returns
-const SMOKE = process.argv.includes("--smoke-test") && !app.isPackaged; // the self-test runs from source only (npm run smoke)
+const SHOTS = process.argv.includes("--screenshots") && !app.isPackaged; // npm run shots: every screen as a picture
+const SMOKE = (process.argv.includes("--smoke-test") || SHOTS) && !app.isPackaged; // the self-test runs from source only (npm run smoke)
 const START_HIDDEN = process.argv.includes("--hidden"); // started with Windows
 const ICON = path.join(__dirname, "assets", "icon-256.png");
 const TRAY_ICON = path.join(__dirname, "assets", "tray-32.png");
@@ -892,7 +893,7 @@ if (!gotLock) {
     watchMotionHint();
     if (!SMOKE) { createTray(); if (selection) registerHotkeys(); }
     if (SMOKE) {
-      return require("./scripts/smoke-test")({
+      return require(SHOTS ? "./scripts/screenshots" : "./scripts/smoke-test")({
         app, mainWin, openOptions, getOptionsWin: () => optionsWin, stores, send: msg => messageHandler(msg, {}),
         desktop: { onHotkey, uiaContext, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
           openPanel, hidePanel, getPanelWin: () => panelWin, panelReady: () => panelReady,

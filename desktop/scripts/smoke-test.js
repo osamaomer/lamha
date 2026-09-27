@@ -1144,10 +1144,10 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       await stores.sync.set({ uiLang: "en" });
       await until(mainWin, `document.documentElement.dir === "ltr" && (document.getElementById("tabCb") || {}).textContent === "Clipboard"`, "the main window in English");
       const main = await js(mainWin, `({ tabs: [...document.querySelectorAll(".tabs button")].map(b => b.textContent.replace(/\\s*[0-9]+$/, "").trim()), settings: document.getElementById("openOptions").textContent })`);
-      assert(JSON.stringify(main.tabs) === JSON.stringify(["Translate", "Write ✨", "Review", "Clipboard"]) && main.settings === "Settings", JSON.stringify(main));
+      assert(JSON.stringify(main.tabs) === JSON.stringify(["Translate", "Write", "Review", "Clipboard"]) && main.settings === "Settings", JSON.stringify(main));
 
       const win = getOptionsWin();
-      await until(win, `document.documentElement.dir === "ltr" && !!document.getElementById("clipPanel") && document.querySelector("#clipPanel h2").textContent === "Clipboard 📋"`, "settings in English");
+      await until(win, `document.documentElement.dir === "ltr" && !!document.getElementById("clipPanel") && document.querySelector("#clipPanel h2").textContent === "Clipboard"`, "settings in English");
       const updates = await js(win, `document.querySelector("#updatesPanel h2").textContent`);
       assert(updates === "Updates", "updates section: " + updates);
 

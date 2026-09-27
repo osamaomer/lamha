@@ -55,6 +55,7 @@ async function init() {
   $("perm").hidden = hasPerm;
 
   renderHistory();
+  renderToday();
   await initCompose();
   initTabMotion();
 }
@@ -140,6 +141,7 @@ q.addEventListener("input", () => {
   q.style.height = "auto";
   q.style.height = Math.min(140, q.scrollHeight) + "px";
   $("clearQ").hidden = !q.value;
+  refreshHistVisibility(); // the Today card makes room for a result
   clearTimeout(qTimer);
   qTimer = setTimeout(runQuick, 420);
 });
@@ -175,9 +177,10 @@ async function runQuick() {
         h("div", { class: "tr" + (d.translation.length > 40 ? " long" : ""), dir: dirOf(d.tl) }, d.translation),
         d.type === "word" && d.srcTranslit && h("div", { class: "phon" }, `${d.query} · /${d.srcTranslit}/`)
       ),
-      h("button", { class: "icon-btn", title: t("common.copy"), "aria-label": t("common.copy"), onclick: () => navigator.clipboard.writeText(d.translation) }, copyIcon())
+      h("button", { class: "icon-btn", title: t("common.copy"), "aria-label": t("common.copy"), onclick: e => copyFrom(e.currentTarget, d.translation) }, copyIcon())
     )
   ];
+  if (d.goal) kids.unshift(h("div", { class: "milestone" }, t("td.goalDone", { n: d.goal })));
   if (d.milestone) kids.unshift(h("div", { class: "milestone" }, t("ms.lookups", { n: d.milestone })));
   (d.dict || []).slice(0, 3).forEach(p => kids.push(
     h("div", { class: "pos-row" }, h("span", { class: "pos" }, p.pos), h("span", { class: "terms" }, p.terms.slice(0, 6).map(term => term.word).join(dirOf(d.tl) === "rtl" ? "، " : ", ")))
@@ -187,8 +190,28 @@ async function runQuick() {
     h("div", { class: "def" }, firstDef.glossTr && h("div", null, firstDef.glossTr), h("div", { class: "en" }, firstDef.gloss)));
   out.replaceChildren(...kids);
   LamhaMotion.stagger([...out.children].filter(k => !k.classList.contains("main")), { each: 45, distance: 4 });
-  if (d.milestone) LamhaMotion.burst(out.querySelector(".milestone"));
+  if (d.milestone || d.goal) LamhaMotion.burst(out.querySelector(".milestone"));
   renderHistory();
+}
+
+/** Copies `text`; the button's icon turns into a check mark for a moment, so it's clear it worked. */
+async function copyFrom(btn, text) {
+  try { await navigator.clipboard.writeText(text); } catch (_) { flash(t("common.copyFailed")); return; }
+  const svg = btn.querySelector("svg");
+  if (!svg) return;
+  const check = lineIcon(["M20 6 9 17l-5-5"], 15);
+  svg.replaceWith(check);
+  btn.classList.add("copied");
+  LamhaMotion.play(check, [{ transform: "scale(.4)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 220, easing: "cubic-bezier(.2,.9,.3,1.3)" });
+  setTimeout(() => { if (check.isConnected) check.replaceWith(svg); btn.classList.remove("copied"); }, 1300);
+}
+
+function lineIcon(paths, size) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  Object.entries({ viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: "currentColor", "stroke-width": 2.4, "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true" }).forEach(([k, v]) => svg.setAttribute(k, v));
+  paths.forEach(d => { const p = document.createElementNS(NS, "path"); p.setAttribute("d", d); svg.append(p); });
+  return svg;
 }
 
 function copyIcon() {
@@ -232,6 +255,7 @@ function setMode(m) {
     $(tabId).setAttribute("aria-selected", String(key === m));
     $(paneId).hidden = key !== m;
   }
+  if (m === "write") showSetup();
   browser.storage.local.set({ popupMode: m });
   refreshHistVisibility();
   if (m === "review") loadReview(true);
@@ -247,7 +271,7 @@ function renderTools(active) {
   const tools = WRITE_TOOLS.filter(([id]) => (arabic ? id === "toEnglish" : id !== "toEnglish"));
   $("wrTools").replaceChildren(
     ...tools.map(([id, label]) => h("button", {
-      class: id === active ? "on" : null, disabled: !draft.value.trim() || null, onclick: () => runWrite(id)
+      class: id === active ? "on" : null, disabled: !draft.value.trim() || !aiReady() || null, onclick: () => runWrite(id)
     }, t(label))),
     h("span", { class: "hint-key" }, h("span", { class: "combo" }, "Ctrl+Enter"))
   );
@@ -265,9 +289,17 @@ draft.addEventListener("keydown", e => {
   }
 });
 
+/** No AI chosen yet: say how to set one up as soon as the tab opens — a first step, not an error. */
+function showSetup() {
+  const out = $("wrOut");
+  if (!aiReady()) { out.hidden = false; out.replaceChildren(wrError(LamhaAI.provider(aiLocal).notReady)); }
+  else if (out.querySelector(".setup")) out.hidden = true;
+}
+
 function wrError(code, retry) {
   const [title, text, needsSettings] = LamhaAI.errorInfo(code, providerName());
-  return h("div", { class: "error" }, h("b", null, title), text,
+  const setup = ["ai_no_key", "gemini_no_key", "ollama_no_model"].includes(code); // nothing chosen yet: neutral, not red
+  return h("div", { class: setup ? "setup" : "error" }, h("b", null, title), text,
     h("div", { class: "acts" }, needsSettings
       ? h("button", { class: "btn small", onclick: openAISettings }, t("common.settings"))
       : retry && h("button", { class: "btn small", onclick: retry }, t("common.retry"))));
@@ -360,8 +392,12 @@ async function renderWeak() {
 }
 
 browser.storage.onChanged.addListener((changes, area) => {
+  if ((area === "local" && (changes.activity || changes.wotd)) || (area === "sync" && changes.dailyGoal)) renderToday();
+  if (area === "local" && changes.history) renderHistory(); // words looked up on the card while this window is open (desktop)
   if (area !== "local") return;
-  LamhaAI.PROVIDER_KEYS.forEach(k => { if (changes[k]) aiLocal[k] = changes[k].newValue; });
+  const ai = LamhaAI.PROVIDER_KEYS.filter(k => changes[k]);
+  ai.forEach(k => { aiLocal[k] = changes[k].newValue; });
+  if (ai.length) { renderTools(); if (mode === "write") showSetup(); } // set up in Settings meanwhile: the tools wake up
   if (changes.mistakes) renderWeak();
 });
 
@@ -383,6 +419,9 @@ function spanLabel(ms) {
   return t("span.years", { n: Math.round(days / 365) });
 }
 
+/** Answers since the popup opened: the progress bar and the summary at the end. */
+const rvSession = { n: 0, good: 0, hard: 0, again: 0 };
+
 async function loadReview(render = true) {
   const res = await browser.runtime.sendMessage({ type: "reviewQueue" }).catch(() => null);
   if (!res) return;
@@ -397,16 +436,23 @@ function renderReview() {
   const { queue, counts } = rv;
   const c = queue[0];
   $("rvHead").replaceChildren(
-    h("span", { class: "pill" }, t("rv.due", { n: counts.due })),
-    h("span", { class: "pill new" }, t("rv.fresh", { n: counts.fresh })),
+    h("span", { class: "pill due" + (counts.due ? "" : " zero") }, t("rv.due", { n: counts.due })),
+    h("span", { class: "pill new" + (counts.fresh ? "" : " zero") }, t("rv.fresh", { n: counts.fresh })),
     h("span", { class: "grow" }),
     h("span", null, t("rv.totals", counts))
   );
+  // this sitting: how far through the cards waiting now (answers so far / answers + cards left)
+  const all = rvSession.n + queue.length;
+  const bar = $("rvProgress");
+  bar.hidden = !rvSession.n || !queue.length;
+  bar.setAttribute("aria-valuenow", String(Math.round((100 * rvSession.n) / (all || 1))));
+  bar.firstElementChild.style.transform = `scaleX(${rvSession.n / (all || 1)})`;
   const enter = rvEnter;
   rvEnter = false;
   if (!c) {
     const done = counts.total
       ? h("div", { class: "rv-done" }, h("b", null, t("rv.doneTitle")),
+        rvSession.n > 0 && h("div", { class: "rv-sum" }, t("rv.session", rvSession)), // what this sitting did
         rv.nextDue ? t("rv.next", { span: spanLabel(rv.nextDue - Date.now()) }) : "",
         rv.streak >= 2 && h("div", null, h("span", { class: "rv-streak" }, t("rv.streak", { n: rv.streak }))))
       : h("div", { class: "rv-done" }, h("b", null, t("rv.emptyTitle")), t("rv.emptyText"));
@@ -424,7 +470,7 @@ function renderReview() {
     c.isNew && h("div", { class: "rv-tag" }, t("rv.newWord")),
     h("div", { class: "rv-word-row" },
       h("div", { class: "rv-word" }, c.q),
-      h("button", { class: "icon-btn", title: t("common.listen"), "aria-label": t("common.listen"), onclick: () => browser.runtime.sendMessage({ type: "speak", text: c.q, lang: "en" }).catch(() => {}) }, speakIcon())),
+      h("button", { class: "icon-btn", title: t("common.listen"), "aria-label": t("common.listen"), onclick: e => speakWord(e.currentTarget, c.q) }, speakIcon())),
     c.ex && h("div", { class: "rv-ex" }, highlight(c.ex, c.form || c.q))
   );
   const kids = [front];
@@ -497,8 +543,11 @@ async function answer(grade) {
   rvShown = false;
   flyOff(grade);
   rvEnter = true;
-  await browser.runtime.sendMessage({ type: "reviewGrade", key: c.key, grade }).catch(() => {});
+  rvSession.n++;
+  rvSession[grade]++;
+  const res = await browser.runtime.sendMessage({ type: "reviewGrade", key: c.key, grade }).catch(() => null);
   await loadReview(true);
+  if (res && res.goal) { flash(t("td.goalDone", { n: res.goal })); LamhaMotion.burst(document.querySelector(".flash")); }
 }
 
 async function removeCurrent(c) {
@@ -527,14 +576,72 @@ function speakIcon() {
 /* ---- history ---- */
 
 let histCount = 0;
-/** Recent lookups belong to the Translate tab: elsewhere they only make the popup taller. */
-function refreshHistVisibility() { $("histCard").hidden = !histCount || mode !== "translate"; }
+/** Recent lookups and the Today card belong to the Translate tab: elsewhere they only make the popup taller.
+ *  Today steps aside while a result is showing. */
+function refreshHistVisibility() {
+  $("histCard").hidden = !histCount || mode !== "translate";
+  $("todayCard").hidden = mode !== "translate" || !!q.value.trim() || !$("todayCard").childElementCount;
+}
+
+/* ---- today: the daily goal (words looked up + review answers), the streak and the word of the day ---- */
+
+let todayToken = 0;
+async function renderToday() {
+  const token = ++todayToken;
+  const info = await browser.runtime.sendMessage({ type: "today" }).catch(() => null);
+  if (token !== todayToken) return;
+  const card = $("todayCard");
+  if (!info) { card.replaceChildren(); refreshHistVisibility(); return; }
+  const { done, goal, streak, word } = info;
+  const met = goal > 0 && done >= goal;
+  const head = (goal > 0 || streak >= 2) && h("div", { class: "td-goal" + (met ? " met" : "") },
+    goal > 0 && h("div", { class: "td-ring", role: "img", "aria-label": t("td.ring", { done, goal }) }, ring(done / goal), h("span", { class: "td-n" }, num(done))),
+    goal > 0 && h("div", { class: "td-text" }, h("b", null, t("td.progress", { done, goal })), h("span", null, met ? t("td.met") : t("td.left", { n: goal - done }))),
+    streak >= 2 && h("span", { class: "td-streak", title: t("td.streakTitle") }, t("td.streak", { n: streak })));
+  card.replaceChildren(...[head, word && wordOfDay(word)].filter(Boolean));
+  refreshHistVisibility();
+  if (met && Number(card.dataset.done) < goal && !card.hidden) LamhaMotion.burst(card.querySelector(".td-ring")); // reached it just now
+  card.dataset.done = String(done);
+}
+
+/** The goal's ring: a circle filled to `p` (0…1), in the button colour, green when done. */
+function ring(p) {
+  const NS = "http://www.w3.org/2000/svg", C = 2 * Math.PI * 16;
+  const svg = document.createElementNS(NS, "svg");
+  Object.entries({ viewBox: "0 0 40 40", width: 44, height: 44, "aria-hidden": "true" }).forEach(([k, v]) => svg.setAttribute(k, v));
+  for (const [cls, dash] of [["td-track", 0], ["td-fill", C * (1 - Math.min(1, Math.max(0, p)))]]) {
+    const c = document.createElementNS(NS, "circle");
+    Object.entries({ class: cls, cx: 20, cy: 20, r: 16, fill: "none", "stroke-width": 4, "stroke-linecap": "round", "stroke-dasharray": C, "stroke-dashoffset": dash, transform: "rotate(-90 20 20)" }).forEach(([k, v]) => c.setAttribute(k, v));
+    svg.append(c);
+  }
+  return svg;
+}
+
+/** The word of the day: the word, its meaning and a sentence; "see its meaning" looks it up here. */
+function wordOfDay(w) {
+  const speakBtn = h("button", { class: "icon-btn", title: t("common.listen"), "aria-label": t("common.listen"), onclick: () => speakWord(speakBtn, w.q) }, speakIcon());
+  return h("div", { class: "td-word" },
+    h("div", { class: "td-label", title: w.from === "deck" ? t("td.wordDeckTitle") : null }, t(w.from === "deck" ? "td.wordDeck" : "td.wordNew")),
+    h("div", { class: "td-w-row" },
+      h("span", { class: "td-w", dir: "ltr" }, w.q), speakBtn,
+      h("span", { class: "grow" }),
+      w.tr && h("span", { class: "td-tr", dir: "auto" }, w.tr)),
+    (w.def || w.ex) && h("div", { class: "td-def", dir: "ltr" }, w.def, w.ex && h("span", { class: "td-ex" }, `“${w.ex}”`)),
+    h("button", { class: "link td-more", type: "button", onclick: () => { q.value = w.q; q.dispatchEvent(new Event("input")); clearTimeout(qTimer); runQuick(); } }, t("td.lookUp")));
+}
+
+/** Says an English word; the button shows sound waves until it's done. */
+async function speakWord(btn, text) {
+  btn.classList.add("playing");
+  await browser.runtime.sendMessage({ type: "speak", text, lang: "en" }).catch(() => {});
+  btn.classList.remove("playing");
+}
 
 async function renderHistory() {
   const { history = [] } = await browser.storage.local.get("history");
   histCount = history.length;
   refreshHistVisibility();
-  $("hist").replaceChildren(...history.slice(0, 6).map(item =>
+  $("hist").replaceChildren(...history.slice(0, 12).map(item => // 6 in Firefox's popup, 12 in the desktop window (CSS)
     h("li", null, h("button", {
       class: "hist-btn", type: "button", title: t("p.translateAgain"),
       onclick: () => { q.value = item.q; q.dispatchEvent(new Event("input")); clearTimeout(qTimer); runQuick(); }

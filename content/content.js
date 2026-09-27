@@ -95,9 +95,17 @@
   }
   const dirOf = LamhaI18n.textDir;
 
-  async function copyText(text) {
+  /** `btn`: the copy button, whose icon turns into a check mark for a moment. */
+  async function copyText(text, btn) {
     try { await navigator.clipboard.writeText(text); toast(L("c.copiedToast")); }
-    catch (_) { toast(L("common.copyFailed")); }
+    catch (_) { toast(L("common.copyFailed")); return; }
+    const svg = btn && btn.querySelector("svg");
+    if (!svg) return;
+    const check = icon("check", Number(svg.getAttribute("width")) || 15, 2.4);
+    svg.replaceWith(check);
+    btn.classList.add("copied");
+    LamhaMotion.play(check, [{ transform: "scale(.4)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 220, easing: "cubic-bezier(.2,.9,.3,1.3)" });
+    setTimeout(() => { if (check.isConnected) check.replaceWith(svg); btn.classList.remove("copied"); }, 1300);
   }
 
   function speak(text, lang, btn) {
@@ -508,7 +516,7 @@
   function renderSkeleton(text) {
     const b = frame(null);
     const word = isWordish(text);
-    b.append(
+    b.append(...[ // the DOM's own append writes `false` as text: leave the word-only lines out instead
       word
         ? h("div", { class: "head" }, h("div", { class: "w" }, h("div", { class: "headword", dir: "auto" }, text)))
         : h("div", { class: "source", dir: "auto" }, text),
@@ -516,7 +524,7 @@
       word && h("div", { class: "sk", style: { height: "12px", width: "40%", marginTop: "20px" } }),
       word && h("div", { class: "sk", style: { height: "12px", width: "90%", marginTop: "10px" } }),
       word && h("div", { class: "sk", style: { height: "12px", width: "75%", marginTop: "8px" } })
-    );
+    ].filter(Boolean));
   }
 
   function renderError(text, err, opts = {}) {
@@ -568,7 +576,7 @@
     card.classList.remove("thinking");
     if (!res || !res.ok) { morph(() => renderError(text, res && res.error, opts)); return; }
     const pending = morph(() => render(res.data));
-    if (res.data.milestone) LamhaMotion.burst(card.querySelector(".milestone"), { layer: root });
+    if (res.data.milestone || res.data.goal) LamhaMotion.burst(card.querySelector(".milestone"), { layer: root });
     if (settings.autoSpeak && res.data.type === "word") speak(res.data.query, res.data.src, null);
     if (pending.length) fillGlosses(pending, token);
     if (settings.dictSource !== "offline" && settings.showWikipedia && res.data.type === "word" && res.data.src === "en" && res.data.query.length > 2) {
@@ -614,6 +622,7 @@
     const pending = [];
     const tDir = dirOf(d.tl), sDir = dirOf(d.src);
     if (d.milestone) b.append(h("div", { class: "milestone", role: "status" }, L("ms.lookups", { n: d.milestone })));
+    else if (d.goal) b.append(h("div", { class: "milestone", role: "status" }, L("td.goalDone", { n: d.goal })));
 
     if (d.type === "word") {
       const speakBtn = h("button", { class: "speak", title: L("c.listenPron"), "aria-label": L("c.listenPron"), onclick: e => speak(d.query, d.src, e.currentTarget) }, icon("speak", 17));
@@ -657,7 +666,7 @@
       ),
       !!main && h("div", { class: "actions" },
         h("button", { class: "icon-btn", title: L("common.listen"), "aria-label": L("c.listenTr"), onclick: e => speak(main, d.tl, e.currentTarget) }, icon("speak", 15)),
-        h("button", { class: "icon-btn", title: L("common.copy"), "aria-label": L("c.copyTr"), onclick: () => copyText(main) }, icon("copy", 15))
+        h("button", { class: "icon-btn", title: L("common.copy"), "aria-label": L("c.copyTr"), onclick: e => copyText(main, e.currentTarget) }, icon("copy", 15))
       )
     ));
 
@@ -677,10 +686,11 @@
       b.append(sec);
     }
 
-    // definitions
-    if (d.definitions && d.definitions.length) {
+    // definitions — in the English view, not the one the box above already shows
+    const defs = (d.definitions || []).map(p => (d.mode === "en" && main ? { ...p, entries: p.entries.filter(e => e.gloss !== main) } : p)).filter(p => p.entries.length);
+    if (defs.length) {
       const sec = h("div", { class: "sec" }, h("div", { class: "sec-h" }, L("c.definition")));
-      for (const p of d.definitions) {
+      for (const p of defs) {
         sec.append(h("div", { class: "pos-row", style: { marginBottom: "6px" } }, h("span", { class: "pos" }, p.pos)));
         sec.append(h("ol", { class: "defs" }, p.entries.map(e => h("li", { class: "def" + (e.best ? " best" : ""), title: e.best ? L("c.bestSense") : null },
           e.ar && e.ar.length > 0 && h("div", { class: "ar-w", dir: "rtl" }, e.ar.join(" · ")),
@@ -732,6 +742,7 @@
           : { q: d.query, tr: (d.context && !d.context.untranslated && d.context.word) || d.translation, form, ex, def: def ? def.gloss : "" }
       });
       show(on === true);
+      if (on === true) LamhaMotion.play(btn.firstElementChild, [{ transform: "scale(1)" }, { transform: "scale(1.35)", offset: 0.4 }, { transform: "scale(1)" }], { duration: 320, easing: "ease-out", fill: "none" });
       toast(on === true ? L("c.addedReview") : L("c.removedReview"));
     });
     return btn;
@@ -840,7 +851,7 @@
   const notReadyCode = () => aiProvider().notReady;
 
   function renderWrite(info, active) {
-    const b = frame(null, L("c.writeTitle", { p: aiProvider().name }));
+    const b = frame(null, aiReady ? L("c.writeTitle", { p: aiProvider().name }) : L("p.writeTools")); // no provider named before one is set up
     const src = info.raw.trim();
     const tools = info.page ? ["summarize"]
       : isArabicText(src) ? ["toEnglish", "reply", "summarize"]
@@ -851,7 +862,7 @@
         info.page ? document.title || location.hostname : src),
       h("div", { class: "tools", role: "toolbar", "aria-label": L("p.writeTools") }, tools.map((id, i) =>
         h("button", {
-          class: "chip tool" + (id === active ? " on" : ""), "data-tool": id, "aria-pressed": String(id === active),
+          class: "chip tool" + (id === active ? " on" : ""), "data-tool": id, "aria-pressed": String(id === active), disabled: !aiReady || null,
           "aria-keyshortcuts": String(i + 1), title: L("c.toolKey", { n: i + 1 }), onclick: () => pickTool(id)
         }, h("span", { class: "num", "aria-hidden": "true" }, LamhaI18n.num(i + 1)), toolLabel(id))))
     );
@@ -910,7 +921,7 @@
     const canReplace = REPLACEABLE.has(tool) && cardInfo && cardInfo.editable;
     return h("div", { class: "w-actions" },
       canReplace && h("button", { class: "btn", onclick: () => doReplace(text, tool === "compose") }, icon("check", 14), tool === "compose" ? L("c.insert") : L("c.replace")),
-      h("button", { class: "btn" + (canReplace ? " ghost" : ""), onclick: () => copyText(text) }, icon("copy", 14), L("common.copy")),
+      h("button", { class: "btn" + (canReplace ? " ghost" : ""), onclick: e => copyText(text, e.currentTarget) }, icon("copy", 14), L("common.copy")),
       h("div", { class: "spacer" }),
       tool === "summarize" && h("button", { class: "btn ghost", onclick: () => runTool(tool, { lang: extra.lang === "en" ? "ar" : "en" }) },
         extra.lang === "en" ? L("c.inArabic") : L("c.inEnglish")),
@@ -1112,7 +1123,7 @@
     const busy = state.loading;
     const partial = !busy && state.failed; // some batches failed even after the retries
     const relay = action => send({ type: "relayPage", action });
-    pbar.append(
+    pbar.append(...[ // filtered: the DOM's own append would write `false` as text
       h("div", { class: "status", role: "status" },
         busy ? h("span", { class: "spin" }) : partial ? h("span", { class: "warn" }, icon("close", 15, 2.6)) : h("span", { class: "ok" }, icon("check", 15, 2.6)),
         busy ? L("common.translating") : partial ? L("c.pagePartial") : L("c.pageDone")
@@ -1123,7 +1134,7 @@
         h("button", { class: state.showingOriginal ? "on" : "", onclick: () => relay("original") }, L("c.original"))
       ),
       h("button", { class: "icon-btn", title: L("c.stopTranslation"), "aria-label": L("c.stopTranslation"), onclick: () => relay("stop") }, icon("close", 15))
-    );
+    ].filter(Boolean));
     pbar.classList.remove("mini");
     clearTimeout(pbarIdle);
     if (!busy && !partial) pbarIdle = setTimeout(() => pbar && pbar.classList.add("mini"), 2500); // a failure stays readable

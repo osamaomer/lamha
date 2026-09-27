@@ -111,9 +111,7 @@
     "d.panelHint": ["اختر نصًا لتلصقه", "Pick something to paste"],
     "d.kPaste": ["لصق", "paste"],
     "d.kPlain": ["نص عادي", "plain text"],
-    "d.kPin": ["تثبيت", "pin"],
     "d.kTools": ["أدوات", "tools"],
-    "d.kDelete": ["حذف", "delete"],
     "d.kClose": ["إغلاق", "close"],
     "d.pausedTitle": ["الحافظة متوقفة مؤقتًا", "Clipboard history is paused"],
     "d.pausedText": ["لا يُسجَّل ما تنسخه الآن.", "What you copy isn't being recorded."],
@@ -189,7 +187,7 @@
     "d.ignoredDone": [v => `أُضيف ${v.app} إلى البرامج المستثناة`, v => `${v.app} added to the excluded programs`],
 
     /* ---- Settings → الحافظة (settings.js) ---- */
-    "d.sTitle": ["الحافظة 📋", "Clipboard 📋"],
+    "d.sTitle": ["الحافظة", "Clipboard"],
     "d.sIntroA": ["سجل لما تنسخه في أي برنامج، تفتحه بـ ", "A history of what you copy in any program. Open it with "],
     "d.sIntroB": [" لتبحث فيه وتلصق. يبقى على جهازك فقط.", " to search and paste. It stays on your PC."],
     "d.sEnableHint": ["متوقف افتراضيًا. لا يُرسل أي نص إلا عندما تضغط إحدى أدوات لمحة عليه.", "Off by default. No text is sent anywhere unless you press one of Lamha's tools on it."],

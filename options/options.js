@@ -3,7 +3,7 @@
 const DEFAULTS = {
   enabled: true, targetLang: "ar", triggerMode: "button", reverseForArabic: true, dictSource: "local", useContext: true,
   showInInputs: false, showWikipedia: true, translateDefinitions: true, autoSpeak: false,
-  theme: "auto", motion: "auto", saveHistory: true, enDict: false, aiModel: "claude-opus-5", aiInInputs: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, disabledSites: []
+  theme: "auto", motion: "auto", saveHistory: true, enDict: false, aiModel: "claude-opus-5", aiInInputs: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, dailyGoal: 10, disabledSites: []
 };
 const BOOLS = ["enDict", "useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "saveMistakes", "cardsAuto"];
 const { t, num } = LamhaI18n;
@@ -34,7 +34,7 @@ function kbd(combo) {
 async function init() {
   await LamhaI18n.init({ onChange: () => location.reload() }); // the whole page is redrawn in the new language
   LamhaI18n.applyDom(document);
-  document.querySelectorAll("#cardsNewPerDay option").forEach(o => { o.textContent = num(Number(o.value)); });
+  document.querySelectorAll("#cardsNewPerDay option, #dailyGoal option:not([value='0'])").forEach(o => { o.textContent = num(Number(o.value)); });
   const { uiLang = "auto" } = await browser.storage.sync.get("uiLang");
   $("uiLang").value = uiLang;
   $("uiLang").addEventListener("change", e => save({ uiLang: e.target.value }));
@@ -73,6 +73,8 @@ async function init() {
   renderReviewStats();
   $("cardsNewPerDay").value = String(s.cardsNewPerDay);
   $("cardsNewPerDay").addEventListener("change", e => save({ cardsNewPerDay: Number(e.target.value) }));
+  $("dailyGoal").value = String([0, 5, 10, 20, 30].includes(s.dailyGoal) ? s.dailyGoal : 10);
+  $("dailyGoal").addEventListener("change", e => save({ dailyGoal: Number(e.target.value) }));
   $("rvClear").addEventListener("click", async () => {
     if (!confirm(t("o.confirmDeleteCards"))) return;
     await browser.storage.local.set({ cards: {}, cardStats: {}, cardsImported: true });
@@ -131,7 +133,11 @@ function buildToc() {
   const ink = document.createElement("span"); // the highlight that slides to the section in view (shared/motion.css)
   ink.className = "toc-ink";
   ink.hidden = true;
-  $("toc").replaceChildren(ink, ...links);
+  const row = document.createElement("div"); // the scrolling row inside the sticky bar: only it fades at the edges
+  row.className = "toc-links";
+  row.append(ink, ...links);
+  row.addEventListener("scroll", tocEdges, { passive: true });
+  $("toc").replaceChildren(row);
   $("toc").classList.add("has-ink");
   const moveInk = a => {
     const first = ink.hidden;
@@ -145,6 +151,7 @@ function buildToc() {
     a.setAttribute("aria-current", String(on));
     if (on) { a.scrollIntoView({ block: "nearest", inline: "nearest" }); moveInk(a); }
   });
+  setTimeout(tocEdges, 0); // once laid out
   if (typeof IntersectionObserver !== "function") return;
   const io = tocObserver = new IntersectionObserver(entries => {
     const top = entries.filter(e => e.isIntersecting).sort((x, y) => x.boundingClientRect.top - y.boundingClientRect.top)[0];
@@ -152,6 +159,18 @@ function buildToc() {
   }, { rootMargin: "-64px 0px -60% 0px" });
   sections.forEach(s => io.observe(s));
 }
+
+/** The section links scroll sideways on a narrow window: fade the edge where more links are hidden, so it shows. */
+function tocEdges() {
+  const row = $("toc").querySelector(".toc-links");
+  const links = row ? row.querySelectorAll("a") : [];
+  if (!links.length) return;
+  const box = row.getBoundingClientRect();
+  const rects = [...links].map(a => a.getBoundingClientRect());
+  row.style.setProperty("--fade-l", Math.min(...rects.map(r => r.left)) < box.left - 1 ? "48px" : "0px");
+  row.style.setProperty("--fade-r", Math.max(...rects.map(r => r.right)) > box.right + 1 ? "48px" : "0px");
+}
+addEventListener("resize", tocEdges, { passive: true });
 
 /** Settings → Appearance → Animations, with a small card that shows what the chosen level looks like. */
 function initMotionSetting(value) {

@@ -315,8 +315,36 @@ const LocalDict = (() => {
 
   const meta = () => load("meta.json");
 
+  /* Word of the day: shards keep their words in order of frequency (tools/build_dict.py), so a word from the middle of
+     a shard's list is useful without being basic ("come", "country" lead theirs). `seed` is the day's number. */
+  const WOTD_SHARDS = ["ac", "ad", "ap", "ba", "be", "ca", "ch", "co", "cr", "de", "di", "ef", "en", "ev", "ex", "fa", "fr", "ge",
+    "gr", "ha", "im", "in", "ma", "me", "mo", "ob", "pa", "pe", "pr", "re", "se", "st", "su", "tr", "va", "wi"];
+  async function wordOfDay(seed, exclude = new Set()) {
+    for (let i = 0; i < 4; i++) { // another shard if this one has nothing left (the user knows them all)
+      const shard = await load(`en/${WOTD_SHARDS[(seed + i * 7) % WOTD_SHARDS.length]}.json`);
+      const words = Object.keys(shard).filter(w => /^[a-z]{5,12}$/.test(w)).slice(40, 400);
+      const pool = words.filter(w => !exclude.has(w) && Object.hasOwn(shard, w) && senseFor(shard[w], w) && arabicOf(shard[w]));
+      if (!pool.length) continue;
+      const w = pool[(Math.imul(seed + i, 2654435761) >>> 0) % pool.length]; // spread over the pool, the same all day
+      const e = shard[w], s = senseFor(e, w);
+      return { q: w, tr: arabicOf(e), def: s[1], ex: s[2], pos: posName(s[0]), phon: e.p || "" };
+    }
+    return null;
+  }
+  /** The first sense whose example uses the word itself (WordNet's examples are often for a synonym: "pardon" →
+   *  "Please excuse my dirty hands"). */
+  const senseFor = (e, w) => {
+    const stem = w.slice(0, Math.max(4, w.length - 3));
+    return (e.s || []).find(s => s[1] && s[2] && s[2].toLowerCase().includes(stem));
+  };
+  const arabicOf = e => {
+    for (const groups of Object.values(e.t || {})) for (const g of groups) if (g[1] && g[1][0]) return g[1][0];
+    const s = (e.s || []).find(x => x[4] && x[4][0]);
+    return s ? s[4][0] : "";
+  };
+
   /** The part-of-speech guess, and its names in both interface languages (to find it among Google's labels). */
   const posNames = p => [POS_AR[p], POS_EN[p]].filter(Boolean);
 
-  return { lookupEn, lookupEnglish, lookupAr, meta, posHint, posNames };
+  return { lookupEn, lookupEnglish, lookupAr, meta, posHint, posNames, wordOfDay };
 })();

@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node scripts/run.mjs",
     "smoke": "node scripts/run.mjs --smoke-test",
+    "shots": "node scripts/run.mjs --screenshots",
     "icons": "node scripts/run.mjs scripts/make-icons.js",
     "sync": "node scripts/sync-ext.mjs",
     "dist": "npm run sync && electron-builder --win",

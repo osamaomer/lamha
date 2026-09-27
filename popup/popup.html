@@ -34,7 +34,7 @@
     <section class="card" id="toolsCard">
       <div class="tabs" role="tablist" aria-label="الوضع" data-i18n-attr="aria-label:p.modes">
         <button id="tabTr" role="tab" aria-selected="true" aria-controls="trPane" data-i18n="p.tabTranslate">ترجمة</button>
-        <button id="tabWr" role="tab" aria-selected="false" aria-controls="wrPane" data-i18n="p.tabWrite">كتابة ✨</button>
+        <button id="tabWr" role="tab" aria-selected="false" aria-controls="wrPane" data-i18n="p.tabWrite">كتابة</button>
         <button id="tabRv" role="tab" aria-selected="false" aria-controls="rvPane"><span data-i18n="p.tabReview">مراجعة</span> <span id="rvBadge" class="count" hidden></span></button>
       </div>
 
@@ -57,9 +57,12 @@
 
       <div id="rvPane" role="tabpanel" hidden>
         <div id="rvHead" class="rv-head"></div>
+        <div id="rvProgress" class="rv-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="التقدّم في المراجعة" data-i18n-attr="aria-label:rv.progress" hidden><span></span></div>
         <div id="rvCard" class="rv-card"></div>
       </div>
     </section>
+
+    <section class="card today" id="todayCard" hidden aria-label="اليوم" data-i18n-attr="aria-label:td.label"></section>
 
     <section class="card" id="histCard" hidden>
       <div class="sec-h"><span data-i18n="p.recent">آخر عمليات البحث</span><button id="clearHist" class="link" data-i18n="common.clear">مسح</button></div>

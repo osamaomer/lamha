@@ -117,14 +117,22 @@ Every English word you look up becomes a review card, with the sentence you foun
   - *Knew it* waits 2 days, then 5 days, then about 2.5× longer each time.
   - A word counts as learned once its gap reaches 3 weeks.
 - **Adding and removing:** the 🔖 button on a lookup card adds or removes a word.
-- **Settings:** turn automatic adding on or off, choose 5–30 new words a day, or delete all cards.
+- **While you review:** a thin bar shows how far through the waiting cards you are. At the end, a summary says what you did (*reviewed 12 · knew 9 · hard 2 · forgot 1*).
+- **Settings:** turn automatic adding on or off, choose 5–30 new words a day, set the daily goal, or delete all cards.
+
+### 🎯 Today: a daily goal, a streak and a word of the day
+
+The **ترجمة** tab opens on a **Today** card (it steps aside while you translate something):
+- **A daily goal ring:** words you look up (new ones only; the same word twice counts once) plus review answers, towards 10 a day by default. Settings → مراجعة الكلمات → **هدف اليوم** sets 5–30, or no goal. Reaching it gets a small celebration on the card or in Review.
+- **A streak** (🔥) of days in a row with some practice. A day you haven't started yet doesn't break it.
+- **A word of the day**, the same all day: a word of yours that's due for review (to refresh it before you forget it), otherwise a new, useful word from the offline dictionary with its Arabic meaning, definition and an example. **اعرض معناها** looks it up.
 
 ### 🎨 Language, looks and motion
 
 - **Arabic or English interface:** Settings → المظهر → لغة الواجهة. *Automatic* uses Arabic on an Arabic system and English otherwise. In English the layout runs left to right, and proofreading explanations, mistake tips and summaries are in English too. Translations still go to your chosen translation language. Existing users keep Arabic when they update.
 - **Light and dark themes** that follow the system, plus keyboard focus styles.
 - **Animations you can switch:** Settings → المظهر → الحركة.
-  - **Full:** the card grows out of the word you picked. Proofreading strikes each mistake before showing its fix, and AI answers appear word by word. Review cards flip and fly off the way you graded them. There are small celebrations too: a finished deck, a review streak, your 100th word. 🎉
+  - **Full:** the card grows out of the word you picked. Proofreading strikes each mistake before showing its fix, and AI answers appear word by word. Review cards flip and fly off the way you graded them. There are small celebrations too: a finished deck, a review streak, your 100th word, today's goal. 🎉 Copy buttons turn into a ✓, the bookmark pops when a word goes into review, and the 🔊 button's sound waves pulse while it speaks.
   - **Subtle:** short, calm fades and slides.
   - **Off:** nothing moves.
   - **Automatic** (default): Full, but Subtle on a slower PC and Off when Windows' *Animation effects* is off.
@@ -206,7 +214,7 @@ Then restart Ollama. (The Windows app doesn't need this step.)
 
 ## 🪟 The Windows app
 
-`desktop/` is Lamha as a standalone Windows app built with Electron. It runs the extension's own `background.js`, `local-dict.js` and `shared/` files unchanged, so the lookups, writing tools and review behave exactly the same. The main window has four tabs: **ترجمة · كتابة ✨ · مراجعة · الحافظة**.
+`desktop/` is Lamha as a standalone Windows app built with Electron. It runs the extension's own `background.js`, `local-dict.js` and `shared/` files unchanged, so the lookups, writing tools and review behave exactly the same. The main window has four tabs: **ترجمة · كتابة · مراجعة · الحافظة**. The Today card and up to 12 recent lookups fill the ترجمة tab.
 
 ### 🌐 Works in any program
 
@@ -277,6 +285,7 @@ cd desktop
 npm install
 npm start          # run from source
 npm run smoke      # self-test: starts with a temporary profile, checks everything, quits
+npm run shots      # a picture of every screen (light/dark × Arabic/English) in %TEMP%\lamha-shots
 npm run dist       # builds dist/Lamha-Setup-<version>.exe and dist/Lamha-Portable-<version>.exe
 ```
 

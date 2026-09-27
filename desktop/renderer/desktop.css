@@ -1,7 +1,9 @@
 /* Lamha desktop — injected into the extension's pages (html.desktop): hide browser-only controls. */
 
 /* main window (popup.html): a normal window, not a 360px popup */
-.desktop body:has(> header.top) { width: auto; max-width: 600px; margin: 0 auto; }
+.desktop body:has(> header.top) { width: auto; max-width: 600px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+.desktop body:has(> header.top) > main { flex: 1; } /* the footer (Settings) sits at the bottom of the window, not under the last card */
+.desktop .hist li:nth-child(n+7) { display: list-item; } /* room for 12 recent lookups, not 6 */
 .desktop .top .switch,               /* on/off for web pages */
 .desktop #perm,                      /* site permission banner */
 .desktop #siteCard,                  /* this site / translate this page (by id: the popup's card order may change) */
