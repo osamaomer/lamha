@@ -283,7 +283,7 @@ const LocalDict = (() => {
     const top = entries.find(e => e.best) || entries[0];
     const heroPos = (r.definitions.find(d => d.entries.includes(top)) || {}).pos || "";
     return {
-      ...r, mode: "en", tl: "en", dict: [], bestGloss: "",
+      ...r, mode: "explain", tl: "en", dict: [], bestGloss: "",
       translation: top.gloss, heroExample: top.example || "", contextSense: !!top.best, heroPos,
       ar: r.translation || (context ? toResult(r.query, hit.lemma, hit.e, hit.formOf, null).translation : ""), // the sense's Arabic, else the word's usual one
       definitions: r.definitions.map(d => ({ ...d, entries: d.entries.map(e => ({ ...e, ar: undefined })) })) // no Arabic in this view

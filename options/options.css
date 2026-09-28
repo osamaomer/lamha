@@ -42,6 +42,24 @@ label.opt { cursor: pointer; }
 .panel :not(.opt):not(h2) + .opt, .choices + div > .opt:first-child { margin-top: 14px; }
 .opt b { display: block; font-weight: 600; }
 .opt small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 1px; }
+/* Dictionary → Explain words in their own language: one toggle per language, looking like the section bar's links */
+.lang-toggles { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.lang-toggles button {
+  font: inherit; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border: 0; border-radius: 999px; cursor: pointer;
+  color: var(--muted); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line);
+}
+.lang-toggles button:hover { color: var(--fg); }
+.lang-toggles button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.lang-toggles button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Dictionary → Dictionaries to download: a row per language, its button on the far side (all the same width) */
+.opt > .grow { flex: 1; min-width: 0; }
+.packs { list-style: none; margin: 8px 0 0; padding: 0; }
+.packs li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+.packs li:first-child { border-top: 0; }
+.packs li b { display: block; font-weight: 600; font-size: 13.5px; }
+.packs li small { margin-top: 0; }
+.packs li small.err { color: var(--danger); }
+.packs .btn { min-width: 96px; justify-content: center; }
 
 select {
   font: inherit; color: var(--fg); background: var(--bg);

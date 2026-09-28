@@ -16,11 +16,12 @@
   let settings = {
     enabled: true, targetLang: "ar", triggerMode: "button", reverseForArabic: true,
     showInInputs: false, showWikipedia: true, translateDefinitions: true, autoSpeak: false, theme: "auto",
-    dictSource: "local", useContext: true, aiInInputs: true, disabledSites: []
+    dictSource: "local", useContext: true, aiInInputs: true, writeOnDblClick: true, disabledSites: []
   };
   // writing tools are available once Claude, Gemini (API key) or Ollama (a local model) is set up
   const AI_LOCAL_KEYS = LamhaAI.PROVIDER_KEYS;
   let aiLocal = {}, aiReady = false;
+  let writeTipSeen = true; // the double-click tip (storage.local); true until read, so it never shows by mistake
   const aiProvider = () => LamhaAI.provider(aiLocal);
   const aiTranslator = () => LamhaAI.translator(aiLocal); // Settings → Translation service
   const updateAiReady = () => { aiReady = aiProvider().ready; };
@@ -28,10 +29,12 @@
   // interface language: the card's labels follow it; an open card closes so the next one is in the new language
   LamhaI18n.init({ onChange: () => { if (root) root.classList.toggle("en", LamhaI18n.lang() === "en"); closeCard(); hidePill(); } }).catch(() => {});
   browser.storage.local.get(AI_LOCAL_KEYS).then(r => { aiLocal = r || {}; updateAiReady(); }).catch(() => {});
+  browser.storage.local.get({ writeTipSeen: false }).then(r => { writeTipSeen = !!(r && r.writeTipSeen); }).catch(() => {});
   browser.storage.onChanged.addListener((changes, area) => {
     if (area === "local") {
       AI_LOCAL_KEYS.forEach(k => { if (changes[k]) aiLocal[k] = changes[k].newValue; });
       updateAiReady();
+      if (changes.writeTipSeen) writeTipSeen = !!changes.writeTipSeen.newValue;
     }
     if (area !== "sync") return;
     for (const k in changes) settings[k] = changes[k].newValue;
@@ -218,6 +221,19 @@
     return null;
   }
 
+  /** The text box or editor at `el` when nothing is written in it yet (a double-click there offers Write new).
+   *  Plain text boxes and editors only: not passwords, e-mail addresses, links or number fields. */
+  function emptyEditable(el) {
+    if (el && (el.tagName === "TEXTAREA" || (el.tagName === "INPUT" && /^(text|)$/i.test(el.type || "")))) {
+      return !el.readOnly && !el.disabled && !el.value.trim() ? el : null;
+    }
+    if (el && el.isContentEditable) {
+      const host = editingHost(el);
+      return host.textContent.trim() ? null : host;
+    }
+    return null;
+  }
+
   /* ---- the sentence around a selection: lets the lookup pick the meaning that fits ---- */
   const BLOCK_SEL = "p,li,td,th,dd,dt,blockquote,figcaption,caption,summary,h1,h2,h3,h4,h5,h6,article,section,div,body";
 
@@ -327,7 +343,8 @@
     pillInfo = info;
     const word = isWordish(info.text) && !ARABIC_RE.test(info.text);
     const showAI = aiReady && (info.aiOnly || !!info.editable || !word);
-    const open = fn => e => { e.preventDefault(); e.stopPropagation(); const i = pillInfo; hidePill(); fn(i, { focus: e.detail === 0 }); };
+    // Write new (a double-click in an empty box) always remembers the box, so Esc puts the caret back in it
+    const open = fn => e => { e.preventDefault(); e.stopPropagation(); const i = pillInfo; hidePill(); fn(i, { focus: e.detail === 0 || !!i.compose }); };
     pill = h("div", {
       class: "pill", role: "toolbar", "aria-label": L("c.pill"),
       onpointerdown: e => { e.preventDefault(); e.stopPropagation(); } // keep the page selection
@@ -337,9 +354,14 @@
       }, icon(word ? "search" : "translate", 15, 2.2), word ? L("c.lookupBtn") : L("c.translateBtn")),
       !info.aiOnly && showAI && h("span", { class: "pill-sep" }),
       showAI && h("button", {
-        class: "pill-btn", type: "button", "aria-label": L("p.writeTools"), title: "Alt+Shift+W", onclick: open(openWriteCard)
+        class: "pill-btn", type: "button", "aria-label": info.compose ? L("c.writeNewHere") : L("p.writeTools"), title: "Alt+Shift+W", onclick: open(openWriteCard)
       }, icon("sparkle", 15, 2), L("c.writeBtn"))
     );
+    if (info.compose && !writeTipSeen) { // the first time: what this button is, and that it can be turned off
+      writeTipSeen = true;
+      pill.append(h("div", { class: "pill-tip" }, L("c.writeTip")));
+      send({ type: "writeTipSeen" });
+    }
     root.append(pill);
     placePill();
   }
@@ -359,6 +381,11 @@
     pill.style.left = x + "px";
     pill.style.top = y + "px";
     pill.style.setProperty("--arrow-x", Math.max(14, Math.min(w - 14, px - x)) + "px");
+    const tip = pill.querySelector(".pill-tip");
+    if (tip) { // centred on the pill, but inside the window
+      const tw = tip.offsetWidth;
+      tip.style.left = Math.round(Math.max(8 - x, Math.min((w - tw) / 2, innerWidth - 8 - x - tw))) + "px";
+    }
   }
 
   function hidePill() {
@@ -423,7 +450,9 @@
   /** `restore`: give the focus back to the page if it was in the card (Esc, ✕); not when another card replaces it
    *  or a click elsewhere closed it. `animate`: a short exit (not when another card takes its place); `send`: the
    *  card shrinks back into its point (Replace / Insert). Returns a promise that settles once the card is gone. */
-  function closeCard({ restore = true, animate = true, send = false } = {}) {
+  /** `notify: false`: something else takes the card's place in the desktop app's window (the Write button), so the
+   *  app mustn't hide the window as it does when the card is gone. */
+  function closeCard({ restore = true, animate = true, send = false, notify = true } = {}) {
     reqId++;
     const old = card;
     const back = returnFocus;
@@ -444,7 +473,7 @@
     }
     gone = gone.then(() => old.remove());
     // desktop app: tell it when the card is really gone (not replaced by another one) so it hides its window
-    if (window.lamhaDesktop) gone.then(() => { if (!card) window.lamhaDesktop.closed(); });
+    if (window.lamhaDesktop && notify) gone.then(() => { if (!card) window.lamhaDesktop.closed(); });
     return gone;
   }
   function closeAll() { hidePill(); closeCard(); }
@@ -472,21 +501,26 @@
     return bodyEl;
   }
 
-  /** English words, when the translation language isn't English: the meaning in it, or an English–English dictionary. */
-  const hasDictSwitch = d => d.type === "word" && d.src === "en" && settings.targetLang !== "en";
+  /** The language a word card translates into: the translation language, or English for Arabic words (Settings →
+   *  "Arabic text into English"). An explained word keeps it as `other`. */
+  const trLangOf = d => (d.mode === "explain" ? d.other : d.tl) || settings.targetLang;
+  /** A word in another language than the one it translates into: the meaning in that one, or explained in its own. */
+  const hasDictSwitch = d => d.type === "word" && !!d.src && d.src !== "auto" && d.src !== trLangOf(d);
 
-  /** العربية ⇄ English in the card's bar; the choice is remembered (setting enDict) for the next words too. */
+  /** العربية ⇄ English (or الفرنسية, العربية…) in the card's bar; the choice is remembered for the next words in that
+   *  language (enDict for English, explainLangs for the others). */
   function dictSwitch(d) {
-    const en = d.mode === "en";
-    const pick = async wantEn => {
-      if (wantEn === en) return;
-      await send({ type: "setWordDict", en: wantEn }); // through the background: the desktop card can't write settings itself
-      settings.enDict = wantEn;
+    const on = d.mode === "explain" || !!d.explainMissing;
+    const lang = d.src;
+    const pick = async want => {
+      if (want === on) return;
+      await send({ type: "setWordDict", lang, on: want }); // through the background: the desktop card can't write settings itself
       load(stack[stack.length - 1], stack.length === 1 && cardInfo ? cardInfo.context : null);
     };
+    const name = code => (code === "en" ? L("c.dictEn") : langName(code));
     return h("div", { class: "dsw", role: "group", "aria-label": L("c.dictSwitch"), title: L("c.dictSwitch") },
-      [[false, langName(settings.targetLang)], [true, L("c.dictEn")]].map(([v, label]) =>
-        h("button", { type: "button", class: v === en ? "on" : null, "aria-pressed": String(v === en), onclick: () => pick(v) }, label)));
+      [[false, name(trLangOf(d))], [true, name(lang)]].map(([v, label]) =>
+        h("button", { type: "button", class: v === on ? "on" : null, "aria-pressed": String(v === on), onclick: () => pick(v) }, label)));
   }
 
   function footer(data) {
@@ -494,8 +528,8 @@
     const links = [
       h("a", { href: `https://translate.google.com/?sl=${encodeURIComponent(data.src || "auto")}&tl=${encodeURIComponent(data.tl)}&text=${q}&op=translate`, target: "_blank", rel: "noopener noreferrer" }, icon("external", 13), L("c.google"))
     ];
-    if (data.type === "word" && data.src === "en" && (data.tl === "ar" || data.mode === "en")) {
-      const book = data.mode === "en" ? "english" : "english-arabic";
+    if (data.type === "word" && data.src === "en" && (data.tl === "ar" || data.mode === "explain")) {
+      const book = data.mode === "explain" ? "english" : "english-arabic";
       links.push(h("a", { href: `https://dictionary.cambridge.org/dictionary/${book}/${encodeURIComponent(data.query.toLowerCase().replace(/ /g, "-"))}`, target: "_blank", rel: "noopener noreferrer" }, icon("external", 13), L("c.cambridge")));
     }
     const tr = aiTranslator();
@@ -648,7 +682,8 @@
       b.append(h("div", { class: "spell" }, L("c.didYouMean"), h("button", { onclick: () => navigate(d.spell) }, d.spell), L("c.didYouMeanEnd")));
     }
 
-    // hero translation — the meaning in this sentence when we know it
+    // hero translation — the meaning in this sentence when we know it (explained words: the definition that fits)
+    const mono = d.mode === "explain";
     const ctx = d.context && d.context.word ? d.context : null;
     const main = ctx ? ctx.word : d.translation;
     const long = main.length > 40;
@@ -659,8 +694,9 @@
           ? h("div", { class: "t" + (long ? " long" : ""), dir: ctx && ctx.untranslated ? "auto" : tDir }, main)
           : h("div", { class: "t none" }, d.bestGloss
               ? [L("c.noArSense"), h("span", { class: "gloss", dir: "ltr" }, d.bestGloss)]
-              : d.mode === "en" ? L("c.noEnDef") : L("c.noArDirect")),
-        d.mode === "en" && main && d.heroExample && h("div", { class: "ctx", dir: "ltr" }, `“${d.heroExample}”`),
+              : mono ? L(d.explainMissing ? "c.noExplainAI" : "c.noDef", { lang: langName(d.src) }) : L("c.noArDirect")),
+        mono && main && d.heroExample && h("div", { class: "ctx", dir: tDir }, `“${d.heroExample}”`),
+        mono && (d.root || d.plural) && h("div", { class: "roots", dir: "rtl" }, [d.root && L("c.root", { r: d.root }), d.plural && L("c.plural", { p: d.plural })].filter(Boolean).join(" · ")),
         !ctx && d.type === "word" && d.translit && tDir === "rtl" && h("div", { class: "tr" }, d.translit),
         ctx && (ctx.pre || ctx.post) && h("div", { class: "ctx", dir: tDir }, ctx.pre, h("mark", null, ctx.word), ctx.post)
       ),
@@ -669,6 +705,9 @@
         h("button", { class: "icon-btn", title: L("common.copy"), "aria-label": L("c.copyTr"), onclick: e => copyText(main, e.currentTarget) }, icon("copy", 15))
       )
     ));
+
+    // a foreign word to be explained in its own language, with nothing to explain it: the translation, and why
+    if (!mono && d.explainMissing) b.append(h("div", { class: "w-note" }, L("c.noExplainAI", { lang: langName(d.src) })));
 
     // alternative meanings by part of speech
     if (d.dict && d.dict.length) {
@@ -686,8 +725,9 @@
       b.append(sec);
     }
 
-    // definitions — in the English view, not the one the box above already shows
-    const defs = (d.definitions || []).map(p => (d.mode === "en" && main ? { ...p, entries: p.entries.filter(e => e.gloss !== main) } : p)).filter(p => p.entries.length);
+    // definitions — in the explained view, not the one the box above already shows; in the word's own writing direction
+    const defs = (d.definitions || []).map(p => (mono && main ? { ...p, entries: p.entries.filter(e => e.gloss !== main) } : p)).filter(p => p.entries.length);
+    const defDir = mono ? tDir : sDir === "rtl" ? "rtl" : "ltr";
     if (defs.length) {
       const sec = h("div", { class: "sec" }, h("div", { class: "sec-h" }, L("c.definition")));
       for (const p of defs) {
@@ -696,10 +736,10 @@
           e.ar && e.ar.length > 0 && h("div", { class: "ar-w", dir: "rtl" }, e.ar.join(" · ")),
           e.glossTr && h("div", { class: "ar-g", dir: tDir }, e.glossTr),
           !e.glossTr && d.source === "local" && tDir === "rtl" && settings.translateDefinitions && settings.dictSource !== "offline" && pendingGloss(pending, e.gloss),
-          h("div", { class: "en-g", dir: "ltr" }, e.gloss),
-          e.example && h("div", { class: "ex", dir: "ltr" }, `“${e.example}”`),
-          e.synonyms && e.synonyms.length > 0 && h("div", { class: "syn" }, e.synonyms.map(s =>
-            h("button", { class: "chip en", title: L("c.lookUpX", { w: s }), onclick: () => navigate(s) }, s)))
+          h("div", { class: defDir === "rtl" ? "ar-g" : "en-g", dir: defDir }, e.gloss),
+          e.example && h("div", { class: "ex", dir: defDir }, `“${e.example}”`),
+          e.synonyms && e.synonyms.length > 0 && h("div", { class: "syn", dir: defDir }, e.synonyms.map(s =>
+            h("button", { class: "chip" + (defDir === "rtl" ? "" : " en"), dir: defDir, title: L("c.lookUpX", { w: s }), onclick: () => navigate(s) }, s)))
         ))));
       }
       b.append(sec);
@@ -714,7 +754,7 @@
 
   /** Above the main meaning: "in this context"; in the English view also the part of speech ("فعل · في هذا السياق"). */
   function heroLabel(d, ctx) {
-    if (d.mode === "en") return [d.heroPos, d.contextSense && L("c.inContext")].filter(Boolean).join(" · ");
+    if (d.mode === "explain") return [d.heroPos, d.contextSense && L("c.inContext")].filter(Boolean).join(" · ");
     return ctx || d.contextSense ? (ctx && ctx.untranslated ? L("c.inContextName") : L("c.inContext")) : "";
   }
 
@@ -737,7 +777,7 @@
       const ex = c ? (c.before + cardInfo.text + c.after).replace(/\s+/g, " ").trim().slice(0, 300) : "";
       const on = await send({
         type: "cardToggle",
-        card: d.mode === "en"
+        card: d.mode === "explain"
           ? { q: d.query, tr: d.ar || "", def: d.translation, en: true, form, ex } // English–English: the definition first on review
           : { q: d.query, tr: (d.context && !d.context.untranslated && d.context.word) || d.translation, form, ex, def: def ? def.gloss : "" }
       });
@@ -1006,7 +1046,7 @@
     input.value = prev.intent || "";
     // keep site shortcuts (Gmail, Slack…) from reacting to what is typed here
     ["keydown", "keyup", "keypress"].forEach(t => input.addEventListener(t, e => { if (e.key !== "Escape") e.stopPropagation(); }));
-    let kind = prev.kind || "message", tone = prev.tone || "";
+    let kind = prev.kind || (cardInfo && cardInfo.kind) || "message", tone = prev.tone || "";
     const choice = (options, value, set) => {
       const row = h("div", { class: "tools", role: "group" }, options.map(([v, label]) =>
         h("button", {
@@ -1049,10 +1089,14 @@
     return undefined;
   }
 
+  // Write new starts as an email in webmail, as a message everywhere else
+  const MAIL_HOSTS = /^(mail\.google\.com|outlook\.(live|office|office365)\.com|mail\.yahoo\.com|mail\.proton\.me|mail\.zoho\.[a-z.]+|app\.fastmail\.com)$/;
+
   function composeInfo(msg) {
     const ae = document.activeElement;
     return {
       compose: true, text: "", raw: "",
+      kind: msg.kind === "email" || (!msg.external && MAIL_HOSTS.test(location.hostname)) ? "email" : "message",
       point: msg.point || (isTextField(ae) ? fieldPoint(ae) : lastPointer) || { x: innerWidth / 2, y: 90 },
       editable: msg.external ? (msg.replaceable ? { kind: "external" } : undefined) : composeTarget()
     };
@@ -1155,7 +1199,7 @@
   function evaluate(e) {
     if (!isActiveHere()) return;
     const info = getSelectionInfo();
-    if (!info) { hidePill(); return; }
+    if (!info) { if (!pillInfo || !pillInfo.compose) hidePill(); return; } // a double-click's Write button outlives its own pointerup
     if (card && cardInfo && cardInfo.text === info.text) return;
     const mode = settings.triggerMode;
     if (info.aiOnly) showPill(info); // the writing tools are never opened unasked
@@ -1168,6 +1212,15 @@
     if (fromUs(e) || e.button > 0) return;
     lastPointer = { x: e.clientX, y: e.clientY };
     setTimeout(() => evaluate(e), 10);
+  }, true);
+
+  // a double-click in an empty text box: the Write button, for Write new in that box (it disappears on typing)
+  document.addEventListener("dblclick", e => {
+    if (fromUs(e) || e.button > 0 || !settings.writeOnDblClick || !aiReady || !isActiveHere() || card) return;
+    const el = emptyEditable(e.composedPath ? e.composedPath()[0] : e.target);
+    if (!el || (el !== document.activeElement && !el.contains(document.activeElement))) return;
+    lastPointer = { x: e.clientX, y: e.clientY };
+    showPill({ ...composeInfo({ point: lastPointer }), aiOnly: true });
   }, true);
 
   document.addEventListener("pointerdown", e => {
@@ -1189,7 +1242,7 @@
 
   let selTimer;
   document.addEventListener("selectionchange", () => {
-    if (!pill) return;
+    if (!pill || pillInfo.compose) return; // Write new has no selection to lose
     clearTimeout(selTimer);
     selTimer = setTimeout(() => {
       const s = window.getSelection();
@@ -1237,6 +1290,10 @@
       if (info) { openWriteCard(info, { focus: true }); return; }
       if (msg.text) { openWriteCard(textInfo(msg), { focus: true }); return; }
       openWriteCard(composeInfo(msg), { focus: true }); // nothing selected: write something new
+    } else if (msg.type === "showWritePill") { // desktop app: a double-click in an empty text box in another program
+      if (!msg.external || !aiReady) return;
+      closeCard({ restore: false, animate: false, notify: false }); // a card left from before (its window was hidden) goes quietly
+      showPill({ ...composeInfo(msg), aiOnly: true });
     } else if (msg.type === "summarizePage") {
       if (IS_TOP) summarizePage();
     } else if (msg.type === "togglePage") {

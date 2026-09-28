@@ -3,9 +3,9 @@
 const DEFAULTS = {
   enabled: true, targetLang: "ar", triggerMode: "button", reverseForArabic: true, dictSource: "local", useContext: true,
   showInInputs: false, showWikipedia: true, translateDefinitions: true, autoSpeak: false,
-  theme: "auto", motion: "auto", saveHistory: true, enDict: false, aiModel: "claude-opus-5", aiInInputs: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, dailyGoal: 10, disabledSites: []
+  theme: "auto", motion: "auto", saveHistory: true, enDict: false, explainLangs: [], aiModel: "claude-opus-5", aiInInputs: true, writeOnDblClick: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, dailyGoal: 10, disabledSites: []
 };
-const BOOLS = ["enDict", "useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "saveMistakes", "cardsAuto"];
+const BOOLS = ["enDict", "useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "writeOnDblClick", "saveMistakes", "cardsAuto"];
 const { t, num } = LamhaI18n;
 const OWN_ERRORS = ["ai_bad_key", "ai_no_credit", "ai_forbidden", "ai_model", "ai_rate_limited", "ai_busy", "ai_timeout", "network", "ollama_offline", "ollama_origin", "ollama_model"];
 const aiErrorText = code => (OWN_ERRORS.includes(code) ? t("oerr." + code) : null)
@@ -65,6 +65,8 @@ async function init() {
     $(k).addEventListener("change", e => save({ [k]: e.target.value }));
   });
 
+  renderExplainLangs(s.explainLangs);
+  renderPacks();
   renderSites(s.disabledSites);
   renderHistCount();
   initAI();
@@ -511,7 +513,70 @@ async function renderHistCount() {
   $("histCount").textContent = history.length ? t("o.histCount", { n: history.length }) : t("o.histEmpty");
 }
 
+/** Settings → Dictionary: the languages whose words are explained in that language (English has its own switch above).
+ *  The card's switch changes the same list, so it's redrawn when that happens with Settings open. */
+const EXPLAIN_LANGS = ["ar", "fr", "tr", "ur", "fa", "es", "de"];
+function renderExplainLangs(list) {
+  const on = new Set([].concat(list || []));
+  $("explainLangs").replaceChildren(...EXPLAIN_LANGS.map(code => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = t("lang." + code);
+    b.setAttribute("aria-pressed", String(on.has(code)));
+    b.addEventListener("click", async () => {
+      const { explainLangs = [] } = await browser.storage.sync.get({ explainLangs: [] });
+      const rest = [].concat(explainLangs).filter(l => l !== code);
+      await save({ explainLangs: on.has(code) ? rest : [...rest, code] }); // redrawn by the change listener below
+    });
+    return b;
+  }));
+}
+
+/** Settings → Dictionary → Dictionaries to download (packs.js, through the background). While one downloads, the list
+ *  is asked for again every 300 ms: it carries the download's progress. */
+const packErrors = Object.create(null); // lang → the last download's error code
+let packTimer = null;
+async function renderPacks() {
+  clearTimeout(packTimer);
+  const r = await browser.runtime.sendMessage({ type: "packList" }).catch(() => null);
+  if (!r || !r.ok) return;
+  $("packs").replaceChildren(...r.data.map(p => {
+    const busy = p.progress !== null;
+    const li = document.createElement("li");
+    const text = document.createElement("div");
+    const name = document.createElement("b");
+    name.textContent = t("lang." + p.lang);
+    const info = document.createElement("small");
+    info.textContent = t("o.packInfo", { words: p.words, mb: num(p.bytes / 1e6, { maximumFractionDigits: 1 }) });
+    text.append(name, info);
+    if (packErrors[p.lang]) {
+      const err = document.createElement("small");
+      err.className = "err";
+      err.textContent = t(packErrors[p.lang] === "pack_bad" ? "o.packBad" : "o.packFailed");
+      text.append(err);
+    }
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn small" + (p.installed ? " danger" : "");
+    btn.disabled = busy;
+    btn.textContent = busy ? t("o.packGetting", { p: Math.round(p.progress * 100) }) : p.installed ? t("common.remove") : t("o.packGet");
+    btn.addEventListener("click", async () => {
+      delete packErrors[p.lang];
+      const done = browser.runtime.sendMessage({ type: p.installed ? "packRemove" : "packInstall", lang: p.lang });
+      if (!p.installed) setTimeout(renderPacks, 100); // shows the progress while it downloads
+      const res = await done.catch(() => ({ ok: false, error: "pack_download" }));
+      if (!res || !res.ok) packErrors[p.lang] = (res && res.error) || "pack_download";
+      renderPacks();
+    });
+    li.append(text, btn);
+    return li;
+  }));
+  if (r.data.some(p => p.progress !== null)) packTimer = setTimeout(renderPacks, 300);
+}
+
 browser.storage.onChanged.addListener((changes, area) => {
+  if (area === "sync" && changes.explainLangs) renderExplainLangs(changes.explainLangs.newValue);
+  if (area === "sync" && changes.enDict) $("enDict").checked = !!changes.enDict.newValue;
   if (area === "sync" && changes.disabledSites) renderSites(changes.disabledSites.newValue || []);
   if (area === "local" && changes.mistakes) renderJournal();
   if (area === "local" && changes.cards) renderReviewStats();

@@ -43,6 +43,7 @@ Everything in this part works the same in the extension and the Windows app.
 | A Wikipedia summary, from the Arabic article when there is one | |
 
 - **📘 English–English dictionary:** a switch on every English word card, **العربية ⇄ English**, turns it into a monolingual dictionary: the pronunciation, the definition that fits your sentence (with its part of speech: *I mentioned* is the verb, *a mention* the noun), then every sense with examples and synonyms. Online, it agrees with the Arabic view: the sense whose Arabic matches Google's translation of your sentence leads. It works offline with the built-in dictionary and falls back to Google's English definitions for words it lacks. Lamha remembers your choice (also in Settings → القاموس). Review cards made this way show the English definition first and the Arabic meaning under it. With English as the translation language, words always use it.
+- **🗣️ Other languages explained in their own language:** the same idea for Arabic, French, Turkish, Urdu, Persian, Spanish and German. The card's switch on any foreign word (**العربية ⇄ الفرنسية**, or **English ⇄ العربية** on an Arabic word) explains it in its own language: definitions, an example, synonyms, and for Arabic its root and plural, with the translation under it. Lamha remembers the choice for each language (also in Settings → القاموس → شرح الكلمات بلغتها). A word in your translation language is always explained (French with French selected: no more "maison → maison"). The explanation comes from Google's definitions when it has them, otherwise from the AI (Settings → الترجمة), which also works offline with Ollama. Offline explanations without an AI are English only for now.
 - **Arabic → English too:** select Arabic text and it's translated to English. This can be turned off.
 - **Other languages:** Settings → لغة الترجمة. Arabic is the default; English, French, Turkish, Urdu, Persian, Spanish and German are there too.
 
@@ -71,6 +72,7 @@ About **86,000 English words** and **20,000 Arabic words** ship with Lamha, so w
 - Definitions, examples, synonyms and IPA pronunciation.
 - It knows inflected forms: *went → go*, *mice → mouse*, *studied → study*.
 - Choose **Local first** (the default), **Local only** (never goes online) or **Online first** in Settings.
+- **📥 Dictionaries to download:** French–French, German–German, Spanish–Spanish and Turkish–Turkish, from Settings → القاموس → قواميس للتنزيل (about 2–6 MB each, 34,000–40,000 common words). Once downloaded they stay on your device, and words in that language are explained in it with no internet and no AI: definitions, examples, synonyms, pronunciation, and forms such as *ging → gehen*, *evler → ev*, *ciudades → ciudad*. They come from each language's own Wiktionary. There is none for Arabic, Persian or Urdu (no open data good enough); the AI explains those.
 
 ### ✍️ Writing tools
 
@@ -90,6 +92,7 @@ Lamha offers the tools that fit the text: English text gets the editing tools, a
 - **Tool numbers:** each tool on the card has a number. Select text, press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>, then <kbd>1</kbd> to proofread, <kbd>2</kbd> to improve, and so on. Arabic digits work too.
 - **استبدال (Replace)** puts the result back where the text was. **نسخ** copies it.
 - **Write new:** with nothing selected, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> opens *كتابة جديدة*. Describe what you want in Arabic or English, choose **Email** or **Message** and a tone (automatic, friendly, formal, **short** or **longer**), and Lamha writes it in English. **إدراج (Insert)** puts it at your cursor.
+- **Double-click an empty box:** on a web page, double-click an empty text box or editor and the **كتابة** button appears. It opens *Write new* for that box: as an **Email** in Gmail, Outlook and other webmail, as a **Message** elsewhere. Typing hides it, and it never shows in password boxes. Turn it off in Settings → زر الكتابة بنقرتين على مربع فارغ.
 - **Mistake journal** (Settings → سجل أخطائي): proofreading notes the *type* of each mistake (articles, prepositions, verb tenses…). Settings shows your most frequent types, with a short rule and examples from your own writing. Your top 3 are passed to the AI so it explains those especially clearly. The journal stays on your device and can be turned off.
 
 #### 🤖 Choosing an AI provider
@@ -228,6 +231,10 @@ Select text in WhatsApp, Word, Outlook, Teams or anything else, then:
 
 **استبدال (Replace)** pastes the result straight back into that program.
 
+**Double-click an empty text box** in any program (WhatsApp, Outlook, Word, Teams, a web form…) and the ✨ **كتابة** button appears next to the mouse. Your cursor stays in the box. Click the button to open *Write new*: it starts as an **Email** in Outlook and Thunderbird and as a **Message** elsewhere, and **إدراج (Insert)** writes into that box. If you don't click it, the button goes away after a few seconds or at your next click. It needs a writing-tools AI, and Settings → زر الكتابة بنقرتين على مربع فارغ turns it off.
+- In a browser that has the Lamha extension, the extension shows its own button, so the app's stays away. Browsers without the extension get the app's button, in the web page only (not in the address bar).
+- It doesn't show in Windows' own search and address boxes, in password boxes, or in apps that draw their own text (for example Google Docs, games and remote desktops).
+
 <details>
 <summary>How does it read another program's selection?</summary>
 
@@ -236,6 +243,7 @@ Lamha presses Ctrl+C for you to read the selection and Ctrl+V to paste the resul
 - Windows' own clipboard history (<kbd>Win</kbd>+<kbd>V</kbd>) may briefly show these copies.
 - In terminals Lamha doesn't press Ctrl+C, because there it would stop the running program.
 - With *فهم الكلمة من سياق الجملة* on, Lamha also reads the sentence around a word through Windows UI Automation, so it can pick the right meaning.
+- For the double-click button, a small mouse hook in Lamha's helper process notices left-button presses (never the keyboard), and UI Automation says whether the box you double-clicked is empty. The box's text is only checked for emptiness; it's never stored or sent anywhere.
 </details>
 
 ### 📋 الحافظة: clipboard history
@@ -294,7 +302,8 @@ npm run dist       # builds dist/Lamha-Setup-<version>.exe and dist/Lamha-Portab
 GitHub Actions builds releases ([release.yml](.github/workflows/release.yml)), so no token or build tools are needed on your PC.
 
 1. Run the full self-test on Windows: `cd desktop && npm run smoke`. The cloud build runs the unit tests and the lint, but not this one, because it needs a real desktop.
-2. Raise the version, commit, and push a matching tag from the repository folder:
+2. Write what's new at the top of [`shared/changelog.js`](shared/changelog.js), in Arabic and English. The app shows it in Settings → التحديثات, and it becomes the release notes. A release without an entry stops (and `npm test` fails).
+3. Raise the version, commit, and push a matching tag from the repository folder:
    ```bash
    npm version 1.8.1 --no-git-tag-version --prefix desktop   # updates desktop/package.json and its lockfile
    git commit -am "Lamha 1.8.1"
@@ -302,8 +311,10 @@ GitHub Actions builds releases ([release.yml](.github/workflows/release.yml)), s
    git push && git push origin v1.8.1
    ```
    Keep `manifest.json`'s `version` in step with it.
-3. The **Release** workflow checks the tag matches the version, runs the tests, builds both installers, and publishes them with `latest.yml` as a GitHub Release. Follow it in the **Actions** tab.
-4. Installed copies pick it up on their next check. Add release notes by editing the release on GitHub.
+4. The **Release** workflow checks the tag matches the version, runs the tests, builds both installers, and publishes them with `latest.yml` as a GitHub Release, with the changelog entry as its notes. Follow it in the **Actions** tab.
+5. Installed copies pick it up on their next check.
+
+The language packs have their own workflow ([packs.yml](.github/workflows/packs.yml)): pushing a `packs-v*` tag builds them and publishes them as a release that is never marked "latest" (the app's updates come from the latest release).
 
 ---
 
@@ -317,6 +328,7 @@ GitHub Actions builds releases ([release.yml](.github/workflows/release.yml)), s
 manifest.json               MV3 manifest (Firefox 140+)
 background.js               The brain: network calls, caching, settings, history, AI tools, flashcards, menu, shortcuts
 local-dict.js               The offline dictionary (reads dict/)
+packs.js                    Language packs to download (French–French…): download, keep, look up
 content/
   content.js                Selection, floating button, lookup and writing card, page-translation bar
   page-translator.js        Whole-page translation engine
@@ -333,7 +345,9 @@ desktop/                    Windows app (Electron)
   main.js                   Main process: runs background.js with a browser.* stand-in, windows, tray, shortcuts
   preload.js, storage.js    The browser.* API for pages; storage in JSON files
   native.js, selection.js   Windows calls; reading and pasting selections in other apps
-  uia-context.js            The sentence around a word in other apps
+  pack-store.js             Where downloaded language packs are kept (files in %APPDATA%\Lamha\packs)
+  uia-context.js            A helper process: the sentence around a word in other apps, the double-click mouse hook
+  double-click.js           When a double-click shows the Write button (pairing clicks, which apps)
   clipboard-*.js            Clipboard history: capture, store, privacy, tools
   updater.js                Updates from GitHub Releases
   renderer/                 Card window, clipboard UI, desktop strings and styles
@@ -346,7 +360,7 @@ tools/                      Tests and the dictionary builder
 
 ```bash
 npm install     # once: installs jsdom for the UI test
-npm test        # all four test files
+npm test        # all five test files
 npm run lint    # web-ext lint (0 errors, 0 warnings expected)
 ```
 
@@ -356,7 +370,19 @@ npm run lint    # web-ext lint (0 errors, 0 warnings expected)
 | `tools/test-ui.mjs` | Renders the real popup and settings pages in jsdom and clicks through review, compose and the journal |
 | `tools/test-clipboard.mjs` | Clipboard history: Arabic search, the encrypted store, tools on clips, privacy rules |
 | `tools/test-updater.mjs` | The desktop updater |
+| `tools/test-desktop.mjs` | The desktop's double-click Write button: pairing clicks, which apps get it, and (on Windows) the helper's script and mouse hook |
 | `tools/compare-translation.mjs` | Not a test: runs the same sentences through Google, Gemini and Ollama and writes `translation-report.md`, to judge AI translation quality. Needs `GEMINI_API_KEY` and/or `--ollama <url>`. |
+
+### Building the language packs
+
+`tools/build_packs.py` builds `dist-packs/<lang>.json.gz` (git-ignored) from the Wiktionary edition written in that language, as extracted by kaikki.org, keeping the most common words by wordfreq. It streams the source (Turkish 44 MB … French 730 MB), so nothing big is saved.
+
+```bash
+pip install wordfreq
+python tools/build_packs.py tr          # also fr, de, es
+```
+
+To publish, push a `packs-v*` tag (see "Releasing a new version"): GitHub builds and publishes them. `RELEASE` in `packs.js` names the release (`packs-v1`); update `CATALOG` there (download size and word count, which Settings shows before downloading). A new format means a new `FORMAT` and a new release tag.
 
 ### Rebuilding the offline dictionary
 
@@ -381,6 +407,7 @@ Lamha sends nothing until you ask it to.
 | Sentences, paragraphs and pages, with AI translation | Your chosen translator: Ollama (your PC), Gemini or Claude | When the translation service uses the AI (Settings → الترجمة), or you press ✨ Better translation |
 | The sentence around a selected word (the word included) | The translation service, to pick the right meaning | With *فهم الكلمة من سياق الجملة* on (the default). On Local only, only a local AI (Ollama) gets it. |
 | Encyclopedia summaries | Wikipedia's REST API | For word lookups, when enabled |
+| Language packs (French–French…) | Downloaded from this project's GitHub releases; nothing is sent | Only when you press تنزيل in Settings |
 | Writing tools | The provider you chose: Ollama (your PC, `localhost:11434`), Gemini (`generativelanguage.googleapis.com`) or Claude (`api.anthropic.com`) | Only when you press a tool |
 | Clipboard items (Windows app) | The same service the tool uses anywhere else | Only when you press a tool on an item |
 
@@ -395,4 +422,4 @@ Lamha sends nothing until you ask it to.
 
 ## License
 
-The code is under the [MIT License](LICENSE). The dictionary data in `dict/` is CC BY-SA 4.0; see [dict/LICENSES.md](dict/LICENSES.md).
+The code is under the [MIT License](LICENSE). The dictionary data in `dict/` is CC BY-SA 4.0; see [dict/LICENSES.md](dict/LICENSES.md). The downloadable language packs come from the French, German, Spanish and Turkish Wiktionaries (CC BY-SA 4.0), extracted by [kaikki.org](https://kaikki.org) (wiktextract), with word frequencies from wordfreq (CC BY-SA 4.0).

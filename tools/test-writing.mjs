@@ -4,6 +4,7 @@
 //   node tools/test-writing.mjs --ollama   also one real proofread through the local Ollama
 //                                          (model: $env:OLLAMA_MODEL, else the first Qwen model)
 import { readFileSync } from "node:fs";
+import { gzipSync } from "node:zlib";
 import vm from "node:vm";
 import assert from "node:assert/strict";
 
@@ -26,8 +27,19 @@ function storageArea(data) {
   };
 }
 
+/** Downloaded language packs (packs.js) in memory, as desktop/pack-store.js keeps them in files. */
+function memoryPackStore() {
+  const data = new Map();
+  return {
+    data,
+    get: async k => (data.has(k) ? structuredClone(data.get(k)) : undefined),
+    setMany: async o => { for (const [k, v] of Object.entries(o)) data.set(k, structuredClone(v)); },
+    removePrefix: async p => { for (const k of [...data.keys()]) if (k.startsWith(p)) data.delete(k); }
+  };
+}
+
 /** `realDict`: the real local-dict.js, reading the dictionary files from dict/ (other requests go to `fetchImpl`). */
-function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = false }) {
+function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = false, packStore = memoryPackStore() }) {
   if (realDict) {
     const net = fetchImpl;
     fetchImpl = async (url, init) => {
@@ -48,14 +60,16 @@ function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = fa
   };
   const ctx = vm.createContext({
     browser, fetch: fetchImpl, console, setTimeout, clearTimeout, AbortController, URLSearchParams, structuredClone,
+    Response, TransformStream, DecompressionStream, LamhaPackStore: packStore,
     ...(realDict ? {} : { LocalDict: {} }), Audio: class {}
   });
   vm.runInContext(src("shared/i18n.js"), ctx, { filename: "i18n.js" });
   if (realDict) vm.runInContext(src("local-dict.js"), ctx, { filename: "local-dict.js" });
+  vm.runInContext(src("packs.js"), ctx, { filename: "packs.js" });
   vm.runInContext(src("shared/lamha-ai.js"), ctx, { filename: "lamha-ai.js" });
   vm.runInContext(src("background.js"), ctx, { filename: "background.js" });
   return {
-    ctx, browser, send: msg => onMessage(msg, {}), flush: () => vm.runInContext("journalQueue", ctx),
+    ctx, browser, packStore, send: msg => onMessage(msg, {}), flush: () => vm.runInContext("journalQueue", ctx),
     installed: details => Promise.all(installed.map(f => f(details))) // what Firefox fires on install / update
   };
 }
@@ -809,7 +823,7 @@ test("English–English: offline definitions, the one that fits the sentence fir
   const plain = await env.send({ type: "lookup", text: "resilient" });
   assert.equal(plain.ok, true, plain.error);
   const d = plain.data;
-  assert.deepEqual({ mode: d.mode, tl: d.tl, source: d.source, ar: d.ar, ipa: d.srcTranslit, dict: d.dict.length }, { mode: "en", tl: "en", source: "local", ar: "مَرِن", ipa: "rɪˈzɪljənt", dict: 0 });
+  assert.deepEqual({ mode: d.mode, tl: d.tl, source: d.source, ar: d.ar, ipa: d.srcTranslit, dict: d.dict.length }, { mode: "explain", tl: "en", source: "local", ar: "مَرِن", ipa: "rɪˈzɪljənt", dict: 0 });
   assert.match(d.translation, /^recovering readily from adversity/);
   assert.equal(d.contextSense, false);
   assert.ok(d.definitions.every(p => p.entries.every(e => !e.ar)), "no Arabic in the English view");
@@ -827,12 +841,12 @@ test("English–English: offline definitions, the one that fits the sentence fir
 test("English–English: automatic when English is the translation language; the card's switch is remembered", async () => {
   const net = recorder(() => json(429, {}));
   const toEnglish = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, sync: { uiLang: "en", targetLang: "en" } });
-  assert.equal((await toEnglish.send({ type: "lookup", text: "resilient" })).data.mode, "en", "no more 'resilient → resilient'");
+  assert.equal((await toEnglish.send({ type: "lookup", text: "resilient" })).data.mode, "explain", "no more 'resilient → resilient'");
   const env = makeEnv({ fetchImpl: fakeGoogle().fetchImpl, realDict: true, sync: { uiLang: "ar", useContext: false } });
   assert.equal((await env.send({ type: "lookup", text: "resilient" })).data.translation, "مَرِن", "Arabic by default");
   await env.send({ type: "setWordDict", en: true });
   assert.equal(env.browser.storage.sync.data.enDict, true);
-  assert.equal((await env.send({ type: "lookup", text: "resilient" })).data.mode, "en");
+  assert.equal((await env.send({ type: "lookup", text: "resilient" })).data.mode, "explain");
   await env.send({ type: "setWordDict", en: false });
   assert.equal((await env.send({ type: "lookup", text: "resilient" })).data.translation, "مَرِن");
   assert.equal((await env.send({ type: "lookup", text: "Can we talk tomorrow?" })).data.mode, undefined, "sentences still translate");
@@ -844,7 +858,7 @@ test("English–English online: Google's English definitions, the meaning kept; 
   const env = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", enDict: true, dictSource: "online" } });
   const d = (await env.send({ type: "lookup", text: "resilient" })).data;
   assert.deepEqual({ mode: d.mode, t: d.translation, ex: d.heroExample, ar: d.ar, source: d.source },
-    { mode: "en", t: "able to recover quickly from difficult conditions.", ex: "a resilient economy", ar: "مرن", source: "online" });
+    { mode: "explain", t: "able to recover quickly from difficult conditions.", ex: "a resilient economy", ar: "مرن", source: "online" });
   const offline = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", enDict: true, dictSource: "offline" } });
   assert.equal((await offline.send({ type: "lookup", text: "qwxzyv" })).error, "not_found_offline");
 });
@@ -883,6 +897,152 @@ test("online English definitions from Google lead with the part of speech the se
   const env = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", enDict: true, dictSource: "online", useContext: true } });
   const d = (await env.send({ type: "lookup", text: "mentioned", context: { before: "Everything I ", after: " yesterday." } })).data;
   assert.deepEqual({ t: d.translation, pos: d.heroPos, fits: d.contextSense }, { t: "refer to something briefly.", pos: "verb", fits: true });
+});
+
+/* ---- other languages explained in their own language ---- */
+
+const frGoogle = (translation = "maison") => recorder(url => (url.includes("translate_a/single")
+  ? json(200, { src: "fr", sentences: [{ trans: translation, orig: "maison" }],
+    definitions: [{ pos: "nom", entry: [{ gloss: "Bâtiment servant d'habitation.", example: "une <b>maison</b> de campagne" }, { gloss: "Famille, lignée." }] }] })
+  : json(429, {})));
+
+test("a French word with French as the translation language is explained in French (not 'maison → maison')", async () => {
+  const google = frGoogle();
+  const env = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", targetLang: "fr", dictSource: "online" } });
+  const d = (await env.send({ type: "lookup", text: "maison" })).data;
+  assert.deepEqual({ mode: d.mode, src: d.src, tl: d.tl, t: d.translation, ex: d.heroExample, ar: d.ar },
+    { mode: "explain", src: "fr", tl: "fr", t: "Bâtiment servant d'habitation.", ex: "une maison de campagne", ar: "" });
+  assert.equal(d.definitions[0].entries[1].gloss, "Famille, lignée.");
+});
+
+test("the card's switch turns explanations on for one language at a time; the translation stays under the definition", async () => {
+  const google = frGoogle("منزل");
+  const env = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", dictSource: "online", useContext: false } });
+  assert.equal((await env.send({ type: "lookup", text: "maison" })).data.translation, "منزل", "translated by default");
+  await env.send({ type: "setWordDict", lang: "fr", on: true });
+  assert.deepEqual(env.browser.storage.sync.data.explainLangs, ["fr"]);
+  const d = (await env.send({ type: "lookup", text: "maison" })).data;
+  assert.deepEqual({ mode: d.mode, t: d.translation, ar: d.ar, other: d.other }, { mode: "explain", t: "Bâtiment servant d'habitation.", ar: "منزل", other: "ar" });
+  await env.send({ type: "setWordDict", lang: "fr", on: false });
+  assert.deepEqual(env.browser.storage.sync.data.explainLangs, []);
+  assert.equal(env.browser.storage.sync.data.enDict, undefined, "English has its own setting");
+});
+
+test("a Latin-letter word that isn't English isn't forced into the English dictionary", async () => {
+  const google = frGoogle("منزل");
+  const env = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", enDict: true, dictSource: "online", useContext: false } });
+  const d = (await env.send({ type: "lookup", text: "maison" })).data;
+  assert.deepEqual({ mode: d.mode, src: d.src, t: d.translation }, { mode: undefined, src: "fr", t: "منزل" }, "French, translated as usual");
+});
+
+test("Arabic explained in Arabic by the AI: definitions, example, root and plural, the English meaning under it", async () => {
+  const asked = [];
+  const net = recorder((url, body) => {
+    if (url.endsWith("/api/chat")) {
+      asked.push(body.messages.map(m => m.content).join("\n"));
+      return ollamaReply({ senses: [
+        { pos: "noun", gloss: "مجموعة أوراق مطبوعة ومجلّدة تُقرأ.", example: "قرأتُ كتابًا ممتعًا.", synonyms: ["مؤلَّف", "سِفر"] },
+        { pos: "noun", gloss: "رسالة مكتوبة.", example: "وصلني كتابك.", synonyms: [] }
+      ], meaning: "book", root: "ك ت ب", plural: "كُتُب" });
+    }
+    return json(429, {}); // Google is down: the offline dictionary gives the English meaning
+  });
+  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, local: { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" },
+    sync: { uiLang: "ar", explainLangs: ["ar"], useContext: false } });
+  const r = await env.send({ type: "lookup", text: "كتاب" });
+  assert.equal(r.ok, true, r.error);
+  const d = r.data;
+  assert.deepEqual({ mode: d.mode, src: d.src, tl: d.tl, other: d.other, source: d.source, t: d.translation, ex: d.heroExample, pos: d.heroPos, root: d.root, plural: d.plural },
+    { mode: "explain", src: "ar", tl: "ar", other: "en", source: "ai", t: "مجموعة أوراق مطبوعة ومجلّدة تُقرأ.", ex: "قرأتُ كتابًا ممتعًا.", pos: "اسم", root: "ك ت ب", plural: "كُتُب" });
+  assert.equal(d.ar, "book", "the English meaning, from the offline dictionary");
+  assert.deepEqual([...d.definitions].map(p => [p.pos, p.entries.length]), [["اسم", 2]], "senses grouped by part of speech");
+  assert.match(asked[0], /Arabic–Arabic learner's dictionary/);
+  assert.match(asked[0], /<word>\nكتاب\n<\/word>/);
+});
+
+test("an AI explanation in the wrong script is asked again, then dropped: the translation stays and the card says why", async () => {
+  let n = 0;
+  const net = recorder(url => (url.endsWith("/api/chat")
+    ? (n++, ollamaReply({ senses: [{ pos: "noun", gloss: "مجموعة 캐시 أوراق.", example: "", synonyms: [] }], meaning: "", root: "", plural: "" }))
+    : json(429, {})));
+  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, local: { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" },
+    sync: { uiLang: "ar", explainLangs: ["ar"], useContext: false } });
+  const d = (await env.send({ type: "lookup", text: "كتاب" })).data;
+  assert.equal(n, 2, "asked twice");
+  assert.deepEqual({ mode: d.mode, t: d.translation, missing: d.explainMissing }, { mode: undefined, t: "book", missing: true });
+});
+
+test("no Google definitions and no AI: a same-language word says there's no explanation instead of giving itself back", async () => {
+  const google = recorder(url => (url.includes("translate_a/single") ? json(200, { src: "fr", sentences: [{ trans: "maison", orig: "maison" }] }) : json(429, {})));
+  const env = makeEnv({ fetchImpl: google.fetchImpl, realDict: true, sync: { uiLang: "ar", targetLang: "fr", dictSource: "online" } });
+  const d = (await env.send({ type: "lookup", text: "maison" })).data;
+  assert.deepEqual({ mode: d.mode, t: d.translation, missing: d.explainMissing }, { mode: "explain", t: "", missing: true });
+});
+
+/* ---- downloadable language packs (packs.js, tools/build_packs.py) ---- */
+
+/** A pack file as tools/build_packs.py writes it: gzip'd { meta, shards }. */
+function packFile(lang, { meta = {}, shards } = {}) {
+  const data = { meta: { lang, format: 1, version: "2026-09-28", words: 2, forms: 1, ...meta }, shards: shards || {
+    ma: { w: { maison: { s: [["n", "Bâtiment servant d'habitation.", "une maison de campagne", ["demeure", "logis"]], ["n", "Famille, lignée.", "", []], ["v", "(verbe fictif pour le test)", "", []]], p: "mɛ.zɔ̃" } },
+      f: { maisons: "maison" } },
+    fa: { w: { famille: { s: [["n", "Ensemble des parents.", "", []]] } }, f: {} }
+  } };
+  return gzipSync(Buffer.from(JSON.stringify(data)));
+}
+const PACK_URL = "https://github.com/osamaomer/lamha/releases/download/packs-v1/";
+const plain = x => JSON.parse(JSON.stringify(x)); // an answer from the VM, comparable with deepEqual
+/** The release serves `files` ({ "fr.json.gz": Buffer }); Google answers with `google(url)` (else 429). */
+const packNet = (files, google = () => json(429, {})) => recorder(url => {
+  if (url.startsWith(PACK_URL)) {
+    const f = files[url.slice(PACK_URL.length)];
+    return f ? new Response(f, { headers: { "content-length": String(f.length) } }) : json(404, {});
+  }
+  return google(url);
+});
+
+test("language packs: download one, find words and their forms with no internet, remove it", async () => {
+  const net = packNet({ "fr.json.gz": packFile("fr") });
+  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, sync: { uiLang: "ar", targetLang: "fr", dictSource: "offline" } });
+  const before = (await env.send({ type: "packList" })).data.find(p => p.lang === "fr");
+  assert.deepEqual({ installed: before.installed, progress: before.progress }, { installed: false, progress: null });
+  assert.equal((await env.send({ type: "lookup", text: "maisons" })).ok, false, "nothing to answer with before");
+  assert.deepEqual(plain(await env.send({ type: "packInstall", lang: "fr" })), { ok: true });
+  const after = (await env.send({ type: "packList" })).data.find(p => p.lang === "fr");
+  assert.deepEqual({ installed: after.installed, words: after.words, version: after.version }, { installed: true, words: 2, version: "2026-09-28" });
+  const d = (await env.send({ type: "lookup", text: "maisons" })).data;
+  assert.deepEqual({ mode: d.mode, source: d.source, q: d.query, inflected: d.inflected, t: d.translation, ex: d.heroExample, pos: d.heroPos, ipa: d.srcTranslit },
+    { mode: "explain", source: "local", q: "maison", inflected: "maisons", t: "Bâtiment servant d'habitation.", ex: "une maison de campagne", pos: "اسم", ipa: "mɛ.zɔ̃" });
+  assert.deepEqual([...d.definitions].map(p => [p.pos, p.entries.length]), [["اسم", 2], ["فعل", 1]], "grouped by part of speech");
+  assert.deepEqual([...d.definitions[0].entries[0].synonyms], ["demeure", "logis"]);
+  assert.equal((await env.send({ type: "lookup", text: "Famille" })).data.query, "famille", "any capitalisation");
+  const toArabic = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, packStore: env.packStore, sync: { uiLang: "ar", dictSource: "offline" } });
+  assert.equal((await toArabic.send({ type: "lookup", text: "maison" })).data.source, "local", "offline, any installed pack beats an error");
+  assert.deepEqual(plain(await env.send({ type: "packRemove", lang: "fr" })), { ok: true });
+  assert.equal([...env.packStore.data.keys()].length, 0, "every part is gone");
+  assert.equal((await env.send({ type: "lookup", text: "famille" })).ok, false);
+  assert.ok(net.calls.every(c => c.url.startsWith(PACK_URL)), "only the download went online");
+});
+
+test("online, a pack explains a word before the AI is asked; Google's translation stays under it", async () => {
+  const net = packNet({ "fr.json.gz": packFile("fr") }, url => (url.includes("translate_a/single") ? json(200, { src: "fr", sentences: [{ trans: "منزل", orig: "maison" }] }) : json(429, {})));
+  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, local: { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" },
+    sync: { uiLang: "ar", explainLangs: ["fr"], dictSource: "online", useContext: false } });
+  await env.send({ type: "packInstall", lang: "fr" });
+  const d = (await env.send({ type: "lookup", text: "maison" })).data;
+  assert.deepEqual({ mode: d.mode, source: d.source, t: d.translation, ar: d.ar, other: d.other }, { mode: "explain", source: "local", t: "Bâtiment servant d'habitation.", ar: "منزل", other: "ar" });
+  assert.ok(!net.calls.some(c => c.url.endsWith("/api/chat")), "no AI call");
+});
+
+test("a pack that isn't there, is damaged or is for another language is refused, and nothing is kept", async () => {
+  const net = packNet({ "fr.json.gz": packFile("de"), "de.json.gz": Buffer.from("not gzip at all") });
+  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true });
+  assert.deepEqual(plain(await env.send({ type: "packInstall", lang: "fr" })), { ok: false, error: "pack_bad" }, "a German pack under the French name");
+  assert.deepEqual(plain(await env.send({ type: "packInstall", lang: "de" })), { ok: false, error: "pack_bad" });
+  assert.deepEqual(plain(await env.send({ type: "packInstall", lang: "es" })), { ok: false, error: "pack_download" }, "not on the release");
+  assert.deepEqual(plain(await env.send({ type: "packInstall", lang: "../x" })), { ok: false, error: "pack_unknown" });
+  assert.equal(env.packStore.data.size, 0);
+  assert.ok((await env.send({ type: "packList" })).data.every(p => !p.installed && p.progress === null));
 });
 
 test("offline Arabic → English results label their word list in the interface language", async () => {

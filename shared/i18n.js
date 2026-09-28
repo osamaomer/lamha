@@ -24,6 +24,10 @@ var LamhaI18n = (() => {
     return String(v).replace(/\{(\w+)\}/g, (m, k) => (vars && k in vars ? (typeof vars[k] === "number" ? num(vars[k]) : vars[k]) : m));
   }
 
+  /** Both languages of a plain string: [arabic, english]. For recognising Lamha's own text wherever it was shown in
+   *  either language (the desktop app looks for the browser extension's button). */
+  const pair = key => (S[key] ? S[key].slice(0, 2) : [key, key]);
+
   /** Arabic counting: 1 · 2 (dual) · 3–10 plural · 11+ singular with tanween. */
   const arCount = (n, one, two, few, many) => (n === 1 ? one : n === 2 ? two : n >= 3 && n <= 10 ? `${num(n)} ${few}` : `${num(n)} ${many}`);
   const enCount = (n, one, other) => `${num(n)} ${n === 1 ? one : other}`;
@@ -216,14 +220,19 @@ var LamhaI18n = (() => {
     "c.lookupBtn": ["بحث", "Look up"],
     "c.translateBtn": ["ترجمة", "Translate"],
     "c.writeBtn": ["كتابة", "Write"],
+    "c.writeNewHere": ["اكتب نصًّا جديدًا في هذا المربع", "Write something new in this box"],
+    "c.writeTip": ["نقرتان على مربع فارغ تفتحان الكتابة مع لمحة. يمكنك إيقاف ذلك من الإعدادات.", "Double-click an empty box to write with Lamha. You can turn this off in Settings."],
     "c.cardLabel": ["لمحة — ترجمة", "Lamha — translation"],
     "c.localBadgeTitle": ["قاموس محلي: النتيجة من القاموس المدمج، ويعمل دون إنترنت", "Offline dictionary: from the built-in dictionary, works without internet"],
     "c.closeEsc": ["إغلاق (Esc)", "Close (Esc)"],
     "c.google": ["ترجمة Google", "Google Translate"],
     "c.cambridge": ["قاموس كامبريدج", "Cambridge Dictionary"],
     "c.dictEn": ["إنجليزي", "English"],
-    "c.dictSwitch": ["معنى الكلمة: مترجمًا، أو من قاموس إنجليزي–إنجليزي", "Word meaning: translated, or from an English–English dictionary"],
-    "c.noEnDef": ["لا يوجد تعريف إنجليزي لهذه الكلمة — جرّب الترجمة.", "No English definition for this word — try the translation."],
+    "c.dictSwitch": ["معنى الكلمة: مترجمًا، أو مشروحًا بلغتها", "Word meaning: translated, or explained in its own language"],
+    "c.noDef": ["لا يوجد تعريف لهذه الكلمة باللغة {lang} — جرّب الترجمة.", "No {lang} definition for this word — try the translation."],
+    "c.noExplainAI": ["لا يوجد شرح لهذه الكلمة باللغة {lang} هنا. لشرح الكلمات بلغتها اختر مزوّد ذكاء اصطناعي في الإعدادات.", "No {lang} explanation for this word here. To explain words in their own language, choose an AI provider in Settings."],
+    "c.root": ["الجذر: {r}", "Root: {r}"],
+    "c.plural": ["الجمع: {p}", "Plural: {p}"],
     "c.errNotFound": ["الكلمة غير موجودة في القاموس المحلي", "The word isn't in the offline dictionary"],
     "c.errOfflineMode": ["ترجمة الجمل تحتاج إلى الإنترنت", "Translating sentences needs the internet"],
     "c.errOffline": ["لا يوجد اتصال بالإنترنت", "No internet connection"],
@@ -302,5 +311,5 @@ var LamhaI18n = (() => {
     setTimeout(() => document.documentElement.removeAttribute("data-i18n-pending"), 1500);
   }
 
-  return { add, t, num, arCount, enCount, resolve, systemLang, setLang, lang: () => lang, dir, textDir, init, applyDom };
+  return { add, t, pair, num, arCount, enCount, resolve, systemLang, setLang, lang: () => lang, dir, textDir, init, applyDom };
 })();

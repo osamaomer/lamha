@@ -98,9 +98,19 @@
         </label>
       </div>
       <label class="opt">
-        <div><b data-i18n="o.enDict">قاموس إنجليزي–إنجليزي</b><small data-i18n="o.enDictHint">معاني الكلمات الإنجليزية بتعريفات إنجليزية وأمثلة ومرادفات بدل الترجمة، ويعمل دون إنترنت. بدّل من زر «العربية | إنجليزي» في بطاقة البحث أيضًا.</small></div>
+        <div><b data-i18n="o.enDict">قاموس إنجليزي–إنجليزي</b><small data-i18n="o.enDictHint">معاني الكلمات الإنجليزية بتعريفات إنجليزية وأمثلة ومرادفات بدل الترجمة، ويعمل دون إنترنت. يعمل تلقائيًا إن كانت الإنجليزية لغة الترجمة، وبدّله من زر «العربية | إنجليزي» في بطاقة البحث أيضًا.</small></div>
         <span class="switch"><input type="checkbox" id="enDict"><span class="track"><span class="thumb"></span></span></span>
       </label>
+      <div class="opt">
+        <div><b data-i18n="o.explainLangs">شرح الكلمات بلغتها</b><small data-i18n="o.explainLangsHint">كلمات اللغات التي تختارها هنا تُشرح بلغتها (العربية بالعربية، والفرنسية بالفرنسية…) بدل ترجمتها، والترجمة تحت الشرح. الشرح من تعريفات Google أو من الذكاء الاصطناعي، ودون إنترنت مع Ollama. كلمات لغة الترجمة نفسها تُشرح دائمًا.</small>
+          <div class="lang-toggles" id="explainLangs" role="group" aria-label="شرح الكلمات بلغتها" data-i18n-attr="aria-label:o.explainLangs"></div>
+        </div>
+      </div>
+      <div class="opt">
+        <div class="grow"><b data-i18n="o.packs">قواميس للتنزيل</b><small data-i18n="o.packsHint">لكل لغة قاموس بلغتها (فرنسي–فرنسي…) يُنزَّل مرة واحدة ويُحفظ على هذا الجهاز، فتُشرح كلماتها دون إنترنت ودون ذكاء اصطناعي. من ويكاموس (رخصة CC BY-SA).</small>
+          <ul class="packs" id="packs"></ul>
+        </div>
+      </div>
       <p class="tip" id="dictInfo" data-i18n="o.dictInfo">القاموس المحلي مدمج في الإضافة ويعمل دون إنترنت.</p>
     </section>
 
@@ -284,6 +294,10 @@
         <div><b data-i18n="o.aiInInputs">الزر داخل حقول الكتابة</b><small data-i18n="o.aiInInputsHint">إظهار زر «كتابة» عند تحديد نص داخل مربعات النص والمحررات (البريد، الرسائل…)</small></div>
         <span class="switch"><input type="checkbox" id="aiInInputs"><span class="track"><span class="thumb"></span></span></span>
       </label>
+      <label class="opt">
+        <div><b data-i18n="o.writeOnDblClick">زر الكتابة بنقرتين على مربع فارغ</b><small data-i18n="o.writeOnDblClickHint">انقر نقرتين على مربع نص فارغ ليظهر زر «كتابة»، فتصف ما تريد ويكتبه الذكاء الاصطناعي في المربع</small></div>
+        <span class="switch"><input type="checkbox" id="writeOnDblClick"><span class="track"><span class="thumb"></span></span></span>
+      </label>
       <p class="muted small" data-i18n="o.aiPrivacy">تُحفظ هذه الإعدادات والمفتاح على هذا الجهاز فقط ولا تُزامَن. مع Ollama لا يغادر النص جهازك. مع Gemini أو Claude لا يُرسَل أي نص إلى Google أو Anthropic إلا عندما تضغط إحدى أدوات الكتابة، ويُرسَل حينها النص المحدد (أو نص الصفحة عند طلب تلخيصها).</p>
     </section>
 
@@ -405,6 +419,7 @@
         <li><b>WordNet 3.0</b> — Princeton University (WordNet License)</li>
         <li><b>Arabic WordNet v2</b> — Abouenour, Bouzoubaa &amp; Rosso, via Open Multilingual Wordnet (CC BY-SA 3.0)</li>
         <li><b>English Wiktionary</b> — Wiktionary contributors, extracted by kaikki.org / wiktextract (CC BY-SA 4.0)</li>
+        <li><b>French, German, Spanish &amp; Turkish Wiktionary</b> — Wiktionary contributors, extracted by kaikki.org / wiktextract (CC BY-SA 4.0), for the dictionaries to download</li>
         <li><b>CMU Pronouncing Dictionary</b> — Carnegie Mellon University (BSD)</li>
         <li><b>wordfreq</b> — Robyn Speer (word frequencies, CC BY-SA 4.0)</li>
       </ul>

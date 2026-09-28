@@ -171,10 +171,13 @@ async function runQuick() {
     return;
   }
   const d = res.data;
+  // an explained word with nothing to explain it (no definitions, no AI): say so rather than show an empty line
+  const langOf = code => (Object.hasOwn({ ar: 1, en: 1, fr: 1, tr: 1, ur: 1, fa: 1, es: 1, de: 1 }, code) ? t("lang." + code) : code);
+  const main = d.translation || (d.mode === "explain" ? t(d.explainMissing ? "c.noExplainAI" : "c.noDef", { lang: langOf(d.src) }) : "");
   const kids = [
     h("div", { class: "main" },
       h("div", { style: "flex:1;min-width:0" },
-        h("div", { class: "tr" + (d.translation.length > 40 ? " long" : ""), dir: dirOf(d.tl) }, d.translation),
+        h("div", { class: "tr" + (main.length > 40 ? " long" : ""), dir: dirOf(d.tl) }, main),
         d.type === "word" && d.srcTranslit && h("div", { class: "phon" }, `${d.query} · /${d.srcTranslit}/`)
       ),
       h("button", { class: "icon-btn", title: t("common.copy"), "aria-label": t("common.copy"), onclick: e => copyFrom(e.currentTarget, d.translation) }, copyIcon())
@@ -186,8 +189,9 @@ async function runQuick() {
     h("div", { class: "pos-row" }, h("span", { class: "pos" }, p.pos), h("span", { class: "terms" }, p.terms.slice(0, 6).map(term => term.word).join(dirOf(d.tl) === "rtl" ? "، " : ", ")))
   ));
   const firstDef = d.definitions && d.definitions[0] && d.definitions[0].entries[0];
-  if (firstDef && d.mode !== "en") kids.push( // English–English: the definition is already the main line
+  if (firstDef && d.mode !== "explain") kids.push( // explained words: the definition is already the main line
     h("div", { class: "def" }, firstDef.glossTr && h("div", null, firstDef.glossTr), h("div", { class: "en" }, firstDef.gloss)));
+  if (d.mode === "explain" && d.ar) kids.push(h("div", { class: "def" }, h("div", { dir: dirOf(d.other || "ar") }, d.ar))); // …and the translation under it
   out.replaceChildren(...kids);
   LamhaMotion.stagger([...out.children].filter(k => !k.classList.contains("main")), { each: 45, distance: 4 });
   if (d.milestone || d.goal) LamhaMotion.burst(out.querySelector(".milestone"));

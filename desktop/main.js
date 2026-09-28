@@ -137,7 +137,8 @@ function startCore() {
   // interface language: a profile from before the setting keeps Arabic; the self-test is pinned (LAMHA_SMOKE_LANG to change)
   if (SMOKE) stores.sync.set({ uiLang: process.env.LAMHA_SMOKE_LANG || "ar" });
   else if (!firstRun && !("uiLang" in stores.sync.data)) stores.sync.set({ uiLang: "ar" });
-  for (const f of ["local-dict.js", "shared/i18n.js", "shared/lamha-ai.js", "background.js"]) {
+  globalThis.LamhaPackStore = require("./pack-store").createPackStore(path.join(dir, "packs")); // downloaded dictionaries (packs.js)
+  for (const f of ["local-dict.js", "packs.js", "shared/i18n.js", "shared/lamha-ai.js", "background.js"]) {
     vm.runInThisContext(fs.readFileSync(path.join(EXT_DIR, f), "utf8"), { filename: path.join(EXT_DIR, f) });
   }
   const desktopStrings = path.join(__dirname, "renderer", "i18n-desktop.js");
@@ -335,14 +336,90 @@ const native = process.platform === "win32" ? require("./native") : null;
 const uiaContext = process.platform === "win32" ? new (require("./uia-context").UiaContext)() : null;
 const isWordish = t => t.split(/\s+/).length <= 3 && t.length <= 40 && !/[.!?;:]\s|[\n\r]/.test(t); // as background.js decides
 
-/** Keeps the context helper running while the setting is on (it takes about a second to start). */
+/** Keeps the helper (uia-context.js) running while something needs it (it takes about a second to start): the
+ *  sentence setting, or the Write button on a double-click (its setting on and a writing-tools AI set up). */
 function startContextHelper() {
   if (!uiaContext || SMOKE) return;
-  const apply = on => (on ? uiaContext.start() : uiaContext.stop());
-  stores.sync.get({ useContext: true }).then(s => apply(s.useContext !== false));
+  let queue = Promise.resolve();
+  const apply = () => { queue = queue.then(async () => {
+    const s = await stores.sync.get({ useContext: true, writeOnDblClick: true });
+    const dbl = s.writeOnDblClick !== false && globalThis.LamhaAI.provider(stores.local.data).ready;
+    if (s.useContext !== false) uiaContext.start();
+    await watchDoubleClicks(dbl);
+    if (s.useContext === false && !dbl) uiaContext.stop();
+  }).catch(err => console.error("helper settings failed:", err && err.name)); };
+  apply();
+  const aiKeys = globalThis.LamhaAI.PROVIDER_KEYS;
   storageListeners.push((changes, area) => {
-    if (area === "sync" && changes.useContext) apply(changes.useContext.newValue !== false);
+    if ((area === "sync" && (changes.useContext || changes.writeOnDblClick)) || (area === "local" && aiKeys.some(k => changes[k]))) apply();
   });
+}
+
+/* ---- the Write button on a double-click in an empty text box, in any program ----
+ * The helper's mouse hook reports left-button presses; two close together (double-click.js) in an empty text box
+ * (the helper asks UI Automation) show the Write button next to the mouse without taking the focus, so the caret stays
+ * in the box. Clicking it opens Write new, whose Insert pastes into that program. In a browser with the Lamha
+ * extension, the extension's own button is already there, so this one stays away. */
+const { ClickPairer, composeKind, wantsButton } = require("./double-click");
+const clickPairer = new ClickPairer();
+const PILL_MS = 5000; // how long the button waits for a click (longer while the mouse is on it)
+let dblEnabled = false, dblToken = 0, pillShown = false, pillTimer = null, cardHover = false;
+
+/** Turns the mouse hook on or off; resolves to whether it runs. */
+async function watchDoubleClicks(on) {
+  dblEnabled = !!on;
+  if (!on) hideWritePill();
+  return uiaContext.watchMouse(dblEnabled);
+}
+
+async function onMouseDown(down) {
+  if (pillShown && !cardHover) hideWritePill(); // a click anywhere but on the button
+  if (!dblEnabled || !clickPairer.press(down, native.doubleClickZone())) return;
+  const token = ++dblToken;
+  const hwnd = native.foreground();
+  const exe = native.processNameOf(hwnd);
+  if (!hwnd || exe === "lamha" || native.isTerminal(hwnd)) return; // before asking the helper anything
+  await native.sleep(60); // let the app handle the click first
+  // a classic Windows text box answers directly; anything else (browsers, Word, modern apps) through UI Automation
+  const box = native.focusedTextBox(hwnd);
+  const under = r => r && down.x >= r.left && down.x < r.right && down.y >= r.top && down.y < r.bottom;
+  const field = box
+    ? (under(box.rect) && !box.readOnly && !box.password ? { empty: box.empty, web: false, lamha: false } : null)
+    : await uiaContext.field(down.x, down.y, globalThis.LamhaI18n.pair("c.writeNewHere"));
+  if (!app.isPackaged) console.log(`[write button] double-click in ${exe}: ${box ? "text box" : "UI Automation"} → ${JSON.stringify(field)}`); // never the text
+  // another click came meanwhile, or the user moved to another window
+  if (token !== dblToken || !dblEnabled || native.foreground() !== hwnd || !wantsButton(exe, field)) {
+    if (!app.isPackaged) console.log(`[write button] not shown: newer click ${token !== dblToken}, on ${dblEnabled}, same window ${native.foreground() === hwnd}, wanted ${wantsButton(exe, field)}`);
+    return;
+  }
+  await showWritePill({ hwnd, kind: composeKind(exe) });
+}
+
+async function showWritePill(cap) {
+  if (!cardWin || cardWin.isDestroyed()) createCardWin();
+  await cardReady;
+  cardSource = { hwnd: cap.hwnd, text: "", terminal: false }; // Insert pastes into this window
+  const point = placeCardWin({ pill: true });
+  cardWin.setIgnoreMouseEvents(true, { forward: true }); // until the mouse is over the button
+  cardHover = false;
+  pillShown = true;
+  cardWin.showInactive(); // the app keeps the focus, and its caret stays in the box
+  cardWin.webContents.send("lamha:page-message", { type: "showWritePill", external: true, replaceable: true, point, kind: cap.kind });
+  armPillTimer();
+}
+
+function armPillTimer() {
+  clearTimeout(pillTimer);
+  pillTimer = setTimeout(() => { if (cardHover) armPillTimer(); else hideWritePill(); }, PILL_MS);
+  pillTimer.unref();
+}
+
+function hideWritePill() {
+  clearTimeout(pillTimer);
+  pillTimer = null;
+  if (!pillShown) return;
+  pillShown = false;
+  if (cardWin && !cardWin.isDestroyed() && !cardWin.isFocused()) hideCard();
 }
 
 /* ---------------- clipboard history (الحافظة) ----------------
@@ -527,6 +604,7 @@ async function injectClipboardUi(wc, entry, { standalone = false } = {}) {
   const scripts = [
     ...(standalone ? ["theme.js", "i18n.js", "lamha-ai.js", "motion.js"].map(f => path.join(EXT_DIR, "shared", f)) : []),
     path.join(__dirname, "renderer", "i18n-desktop.js"),
+    ...(entry === "settings.js" ? [path.join(EXT_DIR, "shared", "changelog.js")] : []), // Settings → Updates → what's new
     path.join(EXT_DIR, "shared", "arabic-normalize.js"), path.join(CLIP_UI, "clip-list.js"), path.join(CLIP_UI, "clip-actions.js"), path.join(CLIP_UI, entry)
   ];
   for (const f of scripts) {
@@ -639,15 +717,23 @@ function createCardWin() {
   }));
   cardWin.loadFile(path.join(__dirname, "renderer", "card.html"));
   cardWin.on("blur", () => { if (Date.now() - cardShownAt > 400) hideCard(); });
+  cardWin.on("focus", () => { // the Write button was clicked: Write new opens in this window
+    if (!pillShown) return;
+    pillShown = false;
+    clearTimeout(pillTimer);
+    cardShownAt = Date.now();
+  });
   cardWin.on("closed", () => { cardWin = null; });
 }
 
 function hideCard() {
+  clearTimeout(pillTimer); // a Write button waiting for a click goes with it
+  pillShown = false;
   if (cardWin && !cardWin.isDestroyed() && cardWin.isVisible()) cardWin.hide();
 }
 
 const fromCard = e => cardWin && !cardWin.isDestroyed() && e.sender === cardWin.webContents;
-ipcMain.on("lamha:card-hover", (e, over) => { if (fromCard(e)) cardWin.setIgnoreMouseEvents(!over, { forward: true }); });
+ipcMain.on("lamha:card-hover", (e, over) => { if (fromCard(e)) { cardHover = !!over; cardWin.setIgnoreMouseEvents(!over, { forward: true }); } });
 ipcMain.on("lamha:card-closed", e => { if (fromCard(e)) hideCard(); });
 ipcMain.handle("lamha:card-replace", async (e, text) => {
   if (!fromCard(e) || !cardSource) return false;
@@ -660,11 +746,18 @@ ipcMain.handle("lamha:card-replace", async (e, text) => {
   return ok;
 });
 
-/** Places the card window next to the mouse; returns where the card should attach inside it. */
-function placeCardWin({ toast = false } = {}) {
+/** Places the card window next to the mouse; returns where the card should attach inside it.
+ *  `pill`: the mouse inside the window with room above it for the Write button, and below it for the card it opens. */
+function placeCardWin({ toast = false, pill = false } = {}) {
   const cursor = screen.getCursorScreenPoint();
   const wa = screen.getDisplayNearestPoint(cursor).workArea;
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(v, hi));
+  if (pill) {
+    const x = clamp(Math.round(cursor.x - CARD_W / 2), wa.x, wa.x + wa.width - CARD_W);
+    const y = clamp(cursor.y - 72, wa.y, wa.y + wa.height - CARD_H);
+    cardWin.setBounds({ x, y, width: CARD_W, height: CARD_H });
+    return { x: cursor.x - x, y: cursor.y - y };
+  }
   const down = !toast && (wa.y + wa.height - cursor.y >= 380 || wa.y + wa.height - cursor.y >= cursor.y - wa.y);
   const x = clamp(Math.round(cursor.x - CARD_W / 2), wa.x, wa.x + wa.width - CARD_W);
   const y = clamp(down ? cursor.y + 16 : cursor.y + (toast ? 60 : -16) - CARD_H, wa.y, wa.y + wa.height - CARD_H);
@@ -694,6 +787,8 @@ async function onHotkey(kind) {
 /** The card next to the mouse for `cap` ({ hwnd, text, terminal }); Replace pastes into cap.hwnd when there is one. */
 async function showCard(kind, cap) {
   if (!cardWin || cardWin.isDestroyed()) createCardWin();
+  clearTimeout(pillTimer); // a shortcut replaces a waiting Write button
+  pillShown = false;
   const wc = cardWin.webContents;
   await cardReady;
   cardSource = cap;
@@ -889,13 +984,14 @@ if (!gotLock) {
     // tray, notifications and window titles follow the interface language (pages redraw themselves)
     globalThis.LamhaI18n.init({ onChange: () => { updateTray(); if (mainWin && !mainWin.isDestroyed()) mainWin.setTitle(T("common.lamha")); } });
     startUpdates();
+    if (uiaContext) uiaContext.onMouseDown = down => onMouseDown(down).catch(err => console.error("double-click failed:", err && err.name));
     startContextHelper();
     watchMotionHint();
     if (!SMOKE) { createTray(); if (selection) registerHotkeys(); }
     if (SMOKE) {
       return require(SHOTS ? "./scripts/screenshots" : "./scripts/smoke-test")({
         app, mainWin, openOptions, getOptionsWin: () => optionsWin, stores, send: msg => messageHandler(msg, {}),
-        desktop: { onHotkey, uiaContext, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
+        desktop: { onHotkey, uiaContext, watchDoubleClicks, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
           openPanel, hidePanel, getPanelWin: () => panelWin, panelReady: () => panelReady,
           pauseClipboard, resumeClipboard, runClipExpiry, trayTooltip, updateMotionHint }
       });

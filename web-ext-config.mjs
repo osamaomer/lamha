@@ -4,6 +4,7 @@ export default {
     "desktop", "desktop/**",
     "store-assets", "store-assets/**",
     "tools", "tools/**",
+    "dist-packs", "dist-packs/**",
     "web-ext-artifacts", "web-ext-artifacts/**",
     "node_modules", "node_modules/**",
     "README.md", "CLAUDE.md", "web-ext-config.mjs", "package.json", "package-lock.json"

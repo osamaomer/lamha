@@ -20,6 +20,19 @@ const AttachThreadInput = user32.func("bool __stdcall AttachThreadInput(uint32_t
 const GetClassNameW = user32.func("int __stdcall GetClassNameW(intptr_t hWnd, uint16_t *lpClassName, int nMaxCount)");
 const GetCurrentThreadId = kernel32.func("uint32_t __stdcall GetCurrentThreadId()");
 
+// the Write button on a double-click (double-click.js), and a window's place (also for the self-test)
+const GetDoubleClickTime = user32.func("uint32_t __stdcall GetDoubleClickTime()");
+const GetSystemMetrics = user32.func("int __stdcall GetSystemMetrics(int nIndex)");
+const RECT = koffi.struct("RECT", { left: "int32_t", top: "int32_t", right: "int32_t", bottom: "int32_t" });
+const GetWindowRect = user32.func("bool __stdcall GetWindowRect(intptr_t hWnd, _Out_ RECT *lpRect)");
+const GUITHREADINFO = koffi.struct("GUITHREADINFO", {
+  cbSize: "uint32_t", flags: "uint32_t", hwndActive: "intptr_t", hwndFocus: "intptr_t", hwndCapture: "intptr_t",
+  hwndMenuOwner: "intptr_t", hwndMoveSize: "intptr_t", hwndCaret: "intptr_t", rcCaret: RECT
+});
+const GetGUIThreadInfo = user32.func("bool __stdcall GetGUIThreadInfo(uint32_t idThread, _Inout_ GUITHREADINFO *pgui)");
+const GetWindowLongPtrW = user32.func("intptr_t __stdcall GetWindowLongPtrW(intptr_t hWnd, int nIndex)");
+const SendMessageTimeoutW = user32.func("intptr_t __stdcall SendMessageTimeoutW(intptr_t hWnd, uint32_t Msg, uintptr_t wParam, intptr_t lParam, uint32_t fuFlags, uint32_t uTimeout, _Out_ uintptr_t *lpdwResult)");
+
 // clipboard history (clipboard-monitor.js)
 const AddClipboardFormatListener = user32.func("bool __stdcall AddClipboardFormatListener(intptr_t hwnd)");
 const RemoveClipboardFormatListener = user32.func("bool __stdcall RemoveClipboardFormatListener(intptr_t hwnd)");
@@ -96,6 +109,34 @@ function forceForeground(hwnd) {
   SetForegroundWindow(hwnd);
   if (attached) AttachThreadInput(me, other, false);
   return GetForegroundWindow() === hwnd;
+}
+
+/** How far apart two clicks may be and still make a double-click (Settings → Mouse): { time ms, width, height px }. */
+function doubleClickZone() {
+  return { time: GetDoubleClickTime(), width: GetSystemMetrics(36 /* SM_CXDOUBLECLK */), height: GetSystemMetrics(37 /* SM_CYDOUBLECLK */) };
+}
+
+/** A window's rectangle in physical screen pixels, or null. */
+function windowRect(hwnd) {
+  const r = {};
+  return hwnd && GetWindowRect(hwnd, r) ? r : null;
+}
+
+/**
+ * The classic Windows text box (Edit, RichEdit, WinForms' EDIT) that has the keyboard focus in `hwnd`'s thread:
+ * { rect, empty, readOnly, password }, or null for any other kind of control (UI Automation answers for those).
+ * Some of these describe themselves badly to UI Automation ("pane", no text), so they're asked directly: only their
+ * text *length* is read, never the text.
+ */
+function focusedTextBox(hwnd) {
+  const gui = { cbSize: koffi.sizeof(GUITHREADINFO) };
+  if (!hwnd || !GetGUIThreadInfo(threadOf(hwnd), gui) || !gui.hwndFocus) return null;
+  const focus = gui.hwndFocus;
+  if (!/^(Edit|RichEdit|RICHEDIT)|\.EDIT\./i.test(className(focus))) return null;
+  const style = Number(GetWindowLongPtrW(focus, -16 /* GWL_STYLE */));
+  const length = [0];
+  if (!SendMessageTimeoutW(focus, 0x000E /* WM_GETTEXTLENGTH */, 0, 0, 0x0002 /* SMTO_ABORTIFHUNG */, 200, length)) return null;
+  return { rect: windowRect(focus), empty: Number(length[0]) === 0, readOnly: !!(style & 0x0800 /* ES_READONLY */), password: !!(style & 0x0020 /* ES_PASSWORD */) };
 }
 
 /** BrowserWindow.getNativeWindowHandle() Buffer → HWND number */
@@ -187,6 +228,7 @@ function writeClipboardRaw(text, dwords = {}, hwnd = 0) {
 
 module.exports = {
   VK, sleep, isDown, releaseModifiers, ctrlChord, tap, isTerminal, className, forceForeground, hwndOf,
+  doubleClickZone, windowRect, focusedTextBox,
   hasClipboardFormat, clipboardDword, processNameOf, writeClipboardRaw,
   clipboardSeq: () => GetClipboardSequenceNumber(),
   clipboardOwner: () => GetClipboardOwner(),

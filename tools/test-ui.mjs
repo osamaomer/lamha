@@ -2,6 +2,7 @@
 // Real popup.html/options.html + popup.js/options.js in jsdom, wired to the real background.js
 // (in a VM) through a shared fake storage. Fake network: Ollama answers the proofread.
 import { readFileSync } from "node:fs";
+import { gzipSync } from "node:zlib";
 import vm from "node:vm";
 import assert from "node:assert/strict";
 import { JSDOM, VirtualConsole } from "jsdom";
@@ -51,6 +52,8 @@ const ev = { addListener() {} };
 
 let bgHandler;
 const aiCalls = [];
+const packFiles = {}; // what the language-pack release serves: { "tr.json.gz": Buffer }
+const packParts = new Map(); // downloaded packs, in memory (desktop/pack-store.js keeps them in files)
 const bgCtx = vm.createContext({
   browser: {
     storage: { local, sync, onChanged },
@@ -58,6 +61,8 @@ const bgCtx = vm.createContext({
     menus: { removeAll: async () => {}, create() {}, onClicked: ev }, commands: { onCommand: ev }
   },
   fetch: async (url, init) => {
+    const pack = /\/releases\/download\/packs-v1\/(\w+\.json\.gz)$/.exec(url);
+    if (pack) return packFiles[pack[1]] ? new Response(packFiles[pack[1]], { headers: { "content-length": String(packFiles[pack[1]].length) } }) : json(404, {});
     aiCalls.push(url);
     if (url.endsWith("/api/chat")) {
       return json(200, { done_reason: "stop", message: { content: JSON.stringify({
@@ -67,8 +72,15 @@ const bgCtx = vm.createContext({
     }
     return json(404, {});
   },
-  setTimeout, clearTimeout, AbortController, URLSearchParams, structuredClone, console, LocalDict: {}, Audio: class { play() { return Promise.resolve(); } }
+  setTimeout, clearTimeout, AbortController, URLSearchParams, structuredClone, console, LocalDict: {}, Audio: class { play() { return Promise.resolve(); } },
+  Response, TransformStream, DecompressionStream,
+  LamhaPackStore: {
+    get: async k => structuredClone(packParts.get(k)),
+    setMany: async o => { for (const [k, v] of Object.entries(o)) packParts.set(k, structuredClone(v)); },
+    removePrefix: async p => { for (const k of [...packParts.keys()]) if (k.startsWith(p)) packParts.delete(k); }
+  }
 });
+vm.runInContext(src("packs.js"), bgCtx);
 vm.runInContext(src("shared/i18n.js"), bgCtx);
 vm.runInContext(src("shared/lamha-ai.js"), bgCtx);
 vm.runInContext(src("background.js"), bgCtx);
@@ -447,8 +459,8 @@ await step("page translation: right-to-left targets (Persian too, not only Arabi
 /* ---- the card on a web page: AI translation ---- */
 
 /** The real content scripts on a page; the background is `reply(msg)`. The card's shadow root is opened for the test. */
-async function cardPage(reply, localData) {
-  const dom = new JSDOM("<body><p>Some text.</p></body>", { runScripts: "outside-only", url: "https://example.com/", pretendToBeVisual: true });
+async function cardPage(reply, localData, syncData = {}, url = "https://example.com/") {
+  const dom = new JSDOM("<body><p>Some text.</p></body>", { runScripts: "outside-only", url, pretendToBeVisual: true });
   const w = dom.window;
   const attach = w.Element.prototype.attachShadow;
   w.Element.prototype.attachShadow = function () { return (this.__root = attach.call(this, { mode: "open" })); };
@@ -457,13 +469,13 @@ async function cardPage(reply, localData) {
   let onMessage;
   const store = data => ({ get: async k => (k && typeof k === "object" && !Array.isArray(k) ? { ...k, ...data } : { ...data }), set: async () => {} });
   w.browser = {
-    storage: { sync: store({ uiLang: "ar" }), local: store(localData), onChanged: { addListener() {} } },
+    storage: { sync: store({ uiLang: "ar", ...syncData }), local: store(localData), onChanged: { addListener() {} } },
     runtime: { sendMessage: async msg => { sent.push(msg); return reply(msg); }, onMessage: { addListener: f => { onMessage = f; } } }
   };
   for (const s of ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "content/styles.js", "content/page-translator.js", "content/content.js"]) w.eval(src(s));
   await sleep(50);
   const root = () => w.document.querySelector("lamha-ui").__root;
-  return { w, sent, root, show: text => onMessage({ type: "showLookup", external: true, text }), write: text => onMessage({ type: "showWrite", external: true, text }) };
+  return { w, sent, root, message: msg => onMessage(msg), show: text => onMessage({ type: "showLookup", external: true, text }), write: text => onMessage({ type: "showWrite", external: true, text }) };
 }
 const trResult = (engine, extra = {}) => ({ ok: true, data: { query: "It's a piece of cake.", type: "text", src: "en", tl: "ar", translation: engine === "ai" ? "الأمر في غاية السهولة." : "إنها قطعة من الكعكة.", dict: [], definitions: [], examples: [], source: engine === "ai" ? "ai" : "online", ai: engine === "ai" ? "Gemini" : undefined, ...extra } });
 
@@ -540,6 +552,104 @@ await step("card: Write new offers Longer next to Short, for the message it writ
   assert.equal(ai.extra.tone, "long");
 });
 
+/** A text box on the card test page, focused, then double-clicked like a user would (pointerup, then dblclick). */
+async function dblClickIn(c, html) {
+  const box = c.w.document.createRange().createContextualFragment(html).firstChild;
+  c.w.document.body.append(box);
+  box.focus();
+  const at = { bubbles: true, composed: true, clientX: 60, clientY: 200, button: 0 };
+  box.dispatchEvent(new c.w.MouseEvent("pointerup", at));
+  box.dispatchEvent(new c.w.MouseEvent("dblclick", at));
+  await sleep(40); // past the pointerup's own check, which must leave this button alone
+  return box;
+}
+const writerAI = { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" };
+const pillOn = c => c.w.document.querySelector("lamha-ui")?.__root.querySelector(".pill") ?? null; // null before Lamha drew anything
+
+await step("double-click in an empty text box: only the Write button, a one-time tip, and Write new inserts into that box", async () => {
+  const c = await cardPage(msg => (msg.type === "ai" ? { ok: true, data: { text: "See you on Sunday!" } } : { ok: true }), writerAI);
+  const box = await dblClickIn(c, "<textarea></textarea>");
+  const pill = c.root().querySelector(".pill");
+  assert.ok(pill, "the button shows");
+  const btns = [...pill.querySelectorAll(".pill-btn")];
+  assert.equal(btns.length, 1, "no lookup button: there's nothing to look up");
+  assert.equal(btns[0].getAttribute("aria-label"), "اكتب نصًّا جديدًا في هذا المربع", "says what it does");
+  assert.match(text(pill.querySelector(".pill-tip")), /نقرتان على مربع فارغ/);
+  assert.ok(c.sent.some(m => m.type === "writeTipSeen"), "the tip is remembered as seen");
+  btns[0].click();
+  await sleep(50);
+  const kinds = [...c.root().querySelectorAll(".w-out .tools")][0];
+  assert.equal(text(kinds.querySelector(".chip.on")), "رسالة", "a message outside webmail");
+  c.root().querySelector(".w-input").value = "confirm Sunday";
+  c.root().querySelector(".w-out > .btn").click();
+  await sleep(50);
+  assert.equal(c.sent.find(m => m.type === "ai").tool, "compose");
+  const insert = [...c.root().querySelectorAll(".w-actions .btn")].find(b => /إدراج/.test(b.textContent));
+  assert.ok(insert, "Insert, because the box is known");
+  c.w.document.execCommand = () => false; // jsdom has none; browsers do (and keep the box's undo history)
+  insert.click();
+  await sleep(250);
+  assert.equal(box.value, "See you on Sunday!", "inserted into the box: " + JSON.stringify(box.value));
+  // the next double-click: no tip any more
+  box.value = "";
+  await dblClickIn(c, "<textarea></textarea>");
+  assert.ok(c.root().querySelector(".pill") && !c.root().querySelector(".pill-tip"));
+});
+
+await step("double-click: nothing for a box with text, a password, a read-only box, the setting off or no AI; typing hides it", async () => {
+  const c = await cardPage(() => ({ ok: true }), { ...writerAI, writeTipSeen: true });
+  for (const html of ["<textarea>Hello</textarea>", '<input type="password">', "<textarea readonly></textarea>", '<input type="email">']) {
+    await dblClickIn(c, html);
+    assert.equal(pillOn(c), null, html);
+  }
+  await dblClickIn(c, '<input type="text">');
+  assert.ok(pillOn(c), "an empty one-line box works");
+  c.w.document.dispatchEvent(new c.w.KeyboardEvent("keydown", { key: "H", bubbles: true }));
+  assert.equal(pillOn(c), null, "typing hides it");
+  const noAI = await cardPage(() => ({ ok: true }), {});
+  await dblClickIn(noAI, "<textarea></textarea>");
+  assert.equal(pillOn(noAI), null, "no writing tools set up: nothing");
+  const off = await cardPage(() => ({ ok: true }), writerAI, { writeOnDblClick: false });
+  await dblClickIn(off, "<textarea></textarea>");
+  assert.equal(pillOn(off), null, "the setting is off");
+});
+
+await step("double-click in webmail: Write new starts as an email", async () => {
+  const c = await cardPage(() => ({ ok: true }), { ...writerAI, writeTipSeen: true }, {}, "https://mail.google.com/mail/u/0/");
+  await dblClickIn(c, "<textarea></textarea>");
+  c.root().querySelector(".pill-btn").click();
+  await sleep(50);
+  const kinds = [...c.root().querySelectorAll(".w-out .tools")][0];
+  assert.equal(text(kinds.querySelector(".chip.on")), "بريد إلكتروني");
+});
+
+await step("desktop card: the app's double-click shows the Write button; Write new starts as the app's kind and Insert goes back to the app", async () => {
+  const c = await cardPage(msg => (msg.type === "ai" ? { ok: true, data: { text: "Dear team, …" } } : msg.type === "lookup" ? { ok: false, error: "network" } : { ok: true }), { ...writerAI, writeTipSeen: true });
+  const pasted = [];
+  let hides = 0; // the app hides its window when told the card is gone
+  c.w.lamhaDesktop = { replace: text => { pasted.push(text); return true; }, closed() { hides++; } };
+  c.show("left over"); // a card from before: in the app, its window was hidden, but the card stayed in the page
+  await sleep(50);
+  await c.message({ type: "showWritePill", external: true, replaceable: true, point: { x: 240, y: 72 }, kind: "email" });
+  await sleep(50);
+  assert.equal(hides, 0, "the old card goes without hiding the window the button is in");
+  const btns = [...c.root().querySelectorAll(".pill .pill-btn")];
+  assert.equal(btns.length, 1);
+  assert.equal(btns[0].getAttribute("aria-label"), "اكتب نصًّا جديدًا في هذا المربع", "what the app looks for in a browser");
+  btns[0].click();
+  await sleep(50);
+  assert.equal(text(c.root().querySelector(".w-out .tools .chip.on")), "بريد إلكتروني", "Outlook: an email");
+  c.root().querySelector(".w-input").value = "tell the team the meeting moved";
+  c.root().querySelector(".w-out > .btn").click();
+  await sleep(50);
+  [...c.root().querySelectorAll(".w-actions .btn")].find(b => /إدراج/.test(b.textContent)).click();
+  await sleep(250);
+  assert.deepEqual(pasted, ["Dear team, …"]);
+  const none = await cardPage(() => ({ ok: true }), {});
+  await none.message({ type: "showWritePill", external: true, replaceable: true, point: { x: 240, y: 72 } });
+  assert.equal(pillOn(none), null, "no writing tools set up: nothing");
+});
+
 await step("card: no stray 'false' text in a sentence's loading state or in the finished page bar", async () => {
   const c = await cardPage(msg => (msg.type === "lookup" ? new Promise(() => {}) : msg.type === "translateBatch" ? ok(msg.texts) : { ok: true }));
   c.show("The quick brown fox jumps over the lazy dog."); // a sentence: its skeleton has no word lines
@@ -557,10 +667,10 @@ await step("card: no stray 'false' text in a sentence's loading state or in the 
 await step("card: العربية ⇄ English switch flips a word to the English–English dictionary and back", async () => {
   let en = false;
   const word = () => ({ ok: true, data: en
-    ? { query: "resilient", type: "word", src: "en", tl: "en", mode: "en", translation: "elastic; rebounds readily", heroExample: "clean bouncy hair", contextSense: true, heroPos: "صفة", ar: "مَرِن", srcTranslit: "rɪˈzɪljənt", dict: [], definitions: [{ pos: "صفة", entries: [{ gloss: "recovering readily from adversity" }, { gloss: "elastic; rebounds readily", best: true }] }], examples: [], source: "local" }
+    ? { query: "resilient", type: "word", src: "en", tl: "en", other: "ar", mode: "explain", translation: "elastic; rebounds readily", heroExample: "clean bouncy hair", contextSense: true, heroPos: "صفة", ar: "مَرِن", srcTranslit: "rɪˈzɪljənt", dict: [], definitions: [{ pos: "صفة", entries: [{ gloss: "recovering readily from adversity" }, { gloss: "elastic; rebounds readily", best: true }] }], examples: [], source: "local" }
     : { query: "resilient", type: "word", src: "en", tl: "ar", translation: "مَرِن", srcTranslit: "rɪˈzɪljənt", dict: [], definitions: [], examples: [], source: "local" } });
   const c = await cardPage(msg => {
-    if (msg.type === "setWordDict") { en = msg.en; return { ok: true }; }
+    if (msg.type === "setWordDict") { en = msg.lang === "en" && msg.on; return { ok: true }; }
     if (msg.type === "cardToggle") return true;
     return msg.type === "lookup" ? word() : undefined;
   }, {});
@@ -574,7 +684,7 @@ await step("card: العربية ⇄ English switch flips a word to the English�
   assert.match(text(c.root().querySelector(".hero")), /مَرِن/);
   sw()[1].click();
   await sleep(150);
-  assert.deepEqual(c.sent.filter(m => m.type === "setWordDict").map(m => m.en), [true], "remembered through the background");
+  assert.deepEqual(c.sent.filter(m => m.type === "setWordDict").map(m => [m.lang, m.on]), [["en", true]], "remembered through the background, for English words");
   assert.match(text(c.root().querySelector(".hero")), /elastic; rebounds readily.*clean bouncy hair/, "the definition that fits, with its example");
   assert.match(text(c.root().querySelector(".hero .ctx-label")), /^صفة · في هذا السياق$/, "part of speech, then 'in this context'");
   assert.deepEqual([...c.root().querySelectorAll(".def .en-g")].map(text), ["recovering readily from adversity"], "the definition above isn't repeated below");
@@ -583,6 +693,82 @@ await step("card: العربية ⇄ English switch flips a word to the English�
   c.root().querySelector(".mark").click();
   await sleep(50);
   assert.deepEqual(JSON.parse(JSON.stringify(c.sent.find(m => m.type === "cardToggle").card)), { q: "resilient", tr: "مَرِن", def: "elastic; rebounds readily", en: true, form: "resilient", ex: "" });
+});
+
+await step("card: an Arabic word explained in Arabic reads right to left, with its root and plural; the switch goes back to English", async () => {
+  let explain = true;
+  const word = () => ({ ok: true, data: explain
+    ? { query: "كتاب", type: "word", src: "ar", tl: "ar", other: "en", mode: "explain", translation: "مجموعة أوراق مطبوعة ومجلّدة.", heroExample: "قرأتُ كتابًا.", heroPos: "اسم", ar: "book", root: "ك ت ب", plural: "كُتُب",
+      dict: [], examples: [], source: "ai", ai: "Ollama", definitions: [{ pos: "اسم", entries: [{ gloss: "مجموعة أوراق مطبوعة ومجلّدة." }, { gloss: "رسالة مكتوبة.", example: "وصلني كتابك.", synonyms: ["رسالة"] }] }] }
+    : { query: "كتاب", type: "word", src: "ar", tl: "en", translation: "book", dict: [], definitions: [], examples: [], source: "local" } });
+  const c = await cardPage(msg => {
+    if (msg.type === "setWordDict") { explain = msg.on; return { ok: true }; }
+    return msg.type === "lookup" ? word() : undefined;
+  }, {});
+  c.show("كتاب");
+  await sleep(100);
+  const sw = () => [...c.root().querySelectorAll(".bar .dsw button")];
+  assert.deepEqual(sw().map(b => [text(b), b.getAttribute("aria-pressed")]), [["إنجليزي", "false"], ["العربية", "true"]]);
+  assert.equal(c.root().querySelector(".hero .t").getAttribute("dir"), "rtl");
+  assert.equal(text(c.root().querySelector(".hero .roots")), "الجذر: ك ت ب · الجمع: كُتُب");
+  const def = c.root().querySelector(".def");
+  assert.equal(def.querySelector(".ar-g").getAttribute("dir"), "rtl", "the definition reads right to left");
+  assert.equal(def.querySelector(".ex").getAttribute("dir"), "rtl");
+  assert.equal(def.querySelector(".syn").getAttribute("dir"), "rtl");
+  assert.ok(!def.querySelector(".syn .chip.en"), "Arabic synonyms aren't styled as English");
+  sw()[0].click();
+  await sleep(150);
+  assert.deepEqual(c.sent.filter(m => m.type === "setWordDict").map(m => [m.lang, m.on]), [["ar", false]], "remembered for Arabic words only");
+  assert.match(text(c.root().querySelector(".hero")), /book/);
+});
+
+await step("card: a foreign word that should be explained but can't be shows the translation and says why", async () => {
+  const c = await cardPage(msg => (msg.type === "lookup" ? { ok: true, data: { query: "maison", type: "word", src: "fr", tl: "ar", translation: "منزل", explainMissing: true, dict: [], definitions: [], examples: [], source: "online" } } : undefined), {});
+  c.show("maison");
+  await sleep(100);
+  assert.match(text(c.root().querySelector(".hero")), /منزل/);
+  assert.match(text(c.root().querySelector(".w-note")), /لا يوجد شرح لهذه الكلمة باللغة الفرنسية/);
+  assert.equal([...c.root().querySelectorAll(".bar .dsw button")].find(b => b.getAttribute("aria-pressed") === "true").textContent, "الفرنسية", "the switch shows the choice");
+});
+
+await step("Settings: 'Explain words in their own language' turns languages on and off, and follows the card's switch", async () => {
+  const o = await openPage("options/options.html", ["shared/theme.js", "shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "options/i18n-options.js", "options/options.js"]);
+  const btn = name => [...o.document.querySelectorAll("#explainLangs button")].find(b => text(b) === name);
+  assert.deepEqual([...o.document.querySelectorAll("#explainLangs button")].map(text), ["العربية", "الفرنسية", "التركية", "الأردية", "الفارسية", "الإسبانية", "الألمانية"]);
+  btn("الفرنسية").click();
+  await sleep(50);
+  assert.deepEqual(sync.data.explainLangs, ["fr"]);
+  assert.equal(btn("الفرنسية").getAttribute("aria-pressed"), "true");
+  await bgHandler({ type: "setWordDict", lang: "ar", on: true }, {}); // the card's switch, with Settings open
+  await sleep(50);
+  assert.equal(btn("العربية").getAttribute("aria-pressed"), "true");
+  btn("الفرنسية").click();
+  await sleep(50);
+  assert.deepEqual(sync.data.explainLangs, ["ar"]);
+  await sync.set({ explainLangs: [] });
+});
+
+await step("Settings: dictionaries to download — sizes, a download with its progress, a failure explained, Remove", async () => {
+  packFiles["tr.json.gz"] = gzipSync(Buffer.from(JSON.stringify({ meta: { lang: "tr", format: 1, version: "2026-09-28", words: 33902 }, shards: { ev: { w: { ev: { s: [["n", "yaşanılan yer", "", []]] } }, f: {} } } })));
+  const o = await openPage("options/options.html", ["shared/i18n.js", "options/i18n-options.js", "shared/lamha-ai.js", "shared/motion.js", "options/options.js"]);
+  await sleep(100);
+  const rows = () => [...o.document.querySelectorAll("#packs li")];
+  const row = name => rows().find(li => text(li.querySelector("b")) === name);
+  assert.deepEqual(rows().map(li => text(li.querySelector("b"))), ["الفرنسية", "الألمانية", "الإسبانية", "التركية"]);
+  assert.match(text(row("التركية").querySelector("small")), /^٣٣٬٩٠٢ كلمة · ١٫٨ ميغابايت$/);
+  row("التركية").querySelector("button").click();
+  await sleep(400);
+  assert.equal(text(row("التركية").querySelector("button")), "إزالة", "installed: it can be removed");
+  assert.ok(row("التركية").querySelector("button").classList.contains("danger"), "and the button says it deletes");
+  assert.ok(packParts.has("tr/meta") && packParts.has("tr/ev"));
+  row("الفرنسية").querySelector("button").click(); // not on the release (404)
+  await sleep(400);
+  assert.match(text(row("الفرنسية").querySelector(".err")), /تعذّر التنزيل/);
+  assert.equal(text(row("الفرنسية").querySelector("button")), "تنزيل", "and it can be tried again");
+  row("التركية").querySelector("button").click();
+  await sleep(300);
+  assert.equal(text(row("التركية").querySelector("button")), "تنزيل");
+  assert.equal(packParts.size, 0);
 });
 
 await step("popup review: an English–English card shows its definition first and the Arabic under it", async () => {

@@ -135,6 +135,7 @@
   if (window.lamhaUpdates) {
     const upStatus = h("span", { class: "cb-up-status", role: "status" });
     const upBtn = h("button", { class: "btn small", type: "button", id: "upCheck" }, L("d.upCheckNow"));
+    const upNews = h("div", { class: "up-news", id: "upNews" });
     const upPanel = h("section", { class: "panel", id: "updatesPanel" },
       h("h2", null, L("d.upTitle")),
       h("p", { class: "muted", id: "upVersion" }),
@@ -144,7 +145,8 @@
       h("div", { class: "opt" },
         h("div", null, h("b", null, L("d.upCheckRow")), upStatus),
         upBtn),
-      h("button", { class: "link", type: "button", id: "upReleases" }, L("d.upWhatsNew"))
+      upNews,
+      h("button", { class: "link", type: "button", id: "upReleases" }, L("d.upAllReleases"))
     );
     (document.getElementById("privacy") || panel).after(upPanel); // the last section, easy to find (only the credits follow)
     const STATUS = {
@@ -156,10 +158,32 @@
       error: () => L("d.upSError"),
       dev: () => L("d.upDevBody")
     };
-    let releases = "";
+    let releases = "", newsFor = "";
+    /** What's new in the installed version (shared/changelog.js, shipped with the app: it works offline), and the
+     *  versions before it, folded. A version missing from the changelog (a build from source) shows the newest. */
+    const renderNews = current => {
+      if (newsFor === current) return;
+      newsFor = current;
+      const log = typeof LamhaChangelog !== "undefined" ? LamhaChangelog : [];
+      if (!log.length) return;
+      const at = Math.max(0, log.findIndex(e => e.v === current));
+      const ui = LamhaI18n.lang() === "en" ? 1 : 0;
+      const date = d => new Date(d + "T12:00:00").toLocaleDateString(ui ? "en-US" : "ar-EG", { year: "numeric", month: "long", day: "numeric" });
+      const notes = e => h("ul", { class: "up-notes" }, e.notes.map(n => h("li", null, n[ui])));
+      upNews.replaceChildren(
+        h("h3", { class: "sub" }, L("d.upNewIn", { v: log[at].v }), h("span", { class: "up-date" }, date(log[at].date))),
+        notes(log[at]),
+        log.length > at + 1 && h("details", { class: "up-older" },
+          h("summary", null, L("d.upEarlier")),
+          log.slice(at + 1).map(e => h("section", null,
+            h("h4", null, L("d.upVersionN", { v: e.v }), h("span", { class: "up-date" }, date(e.date))),
+            notes(e))))
+      );
+    };
     const renderUpdates = async () => {
       const st = await lamhaUpdates.state();
       releases = st.releases;
+      renderNews(st.current);
       $("upVersion").textContent = L("d.upCurrent", { v: st.current, portable: st.portable });
       upStatus.textContent = STATUS[st.status] ? STATUS[st.status](st) : "";
       upBtn.textContent = st.status === "ready" ? L("d.upRestartNow") : st.status === "available" ? L("d.upDownloadBtn") : L("d.upCheckNow");

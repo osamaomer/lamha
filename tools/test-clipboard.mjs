@@ -322,8 +322,10 @@ function bgEnv({ local = {}, sync = {} } = {}) {
   };
   const bg = vm.createContext({
     browser, fetch: net.fetchImpl, console, setTimeout, clearTimeout, AbortController, URLSearchParams, URL, structuredClone,
-    LocalDict: { lookupEn: async () => null, lookupAr: async () => null }, Audio: class {}
+    LocalDict: { lookupEn: async () => null, lookupAr: async () => null }, Audio: class {},
+    LamhaPackStore: { get: async () => undefined, setMany: async () => {}, removePrefix: async () => {} } // no language packs
   });
+  vm.runInContext(bgSrc("packs.js"), bg);
   vm.runInContext(bgSrc("shared/i18n.js"), bg);
   vm.runInContext(bgSrc("shared/lamha-ai.js"), bg);
   vm.runInContext(bgSrc("background.js"), bg);

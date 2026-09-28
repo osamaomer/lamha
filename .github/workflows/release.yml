@@ -1,4 +1,5 @@
 # Builds the Windows app and publishes it as a GitHub Release when a version tag is pushed:
+#   (add the version's notes to shared/changelog.js: they become the release notes, and the app shows them)
 #   npm version 1.5.1 --no-git-tag-version --prefix desktop
 #   git commit -am "Lamha 1.5.1" && git tag v1.5.1 && git push && git push origin v1.5.1
 # Installed copies of Lamha find the new release through latest.yml (electron-updater).
@@ -40,9 +41,11 @@ jobs:
 
       # One draft release up front: electron-builder's parallel uploads would otherwise each create their own
       # release for the tag, and GitHub would serve downloads from one that lacks the installer / latest.yml.
-      - name: Create the draft release
+      - name: Create the draft release, with the notes from shared/changelog.js
         shell: bash
-        run: gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "Lamha ${GITHUB_REF_NAME#v}" --generate-notes
+        run: |
+          node tools/release-notes.mjs "${GITHUB_REF_NAME#v}" > "$RUNNER_TEMP/release-notes.md"
+          gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "Lamha ${GITHUB_REF_NAME#v}" --notes-file "$RUNNER_TEMP/release-notes.md"
 
       - name: Build and upload the installers
         working-directory: desktop

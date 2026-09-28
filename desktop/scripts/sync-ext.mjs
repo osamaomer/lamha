@@ -4,7 +4,7 @@ import { cpSync, rmSync, mkdirSync } from "node:fs";
 
 const root = new URL("../../", import.meta.url);
 const dest = new URL("../ext/", import.meta.url);
-const ITEMS = ["background.js", "local-dict.js", "shared", "content", "popup", "options", "icons", "dict"];
+const ITEMS = ["background.js", "local-dict.js", "packs.js", "shared", "content", "popup", "options", "icons", "dict"];
 
 rmSync(dest, { recursive: true, force: true });
 mkdirSync(dest, { recursive: true });

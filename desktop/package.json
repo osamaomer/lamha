@@ -1,7 +1,7 @@
 {
   "name": "lamha-desktop",
   "productName": "Lamha",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "description": "Lamha — لمحة: Arabic-first dictionary, translator, writing tools and word review for Windows",
   "author": "Artwork Lab",
   "license": "MIT",
@@ -34,6 +34,8 @@
       "clipboard-actions.js",
       "clipboard-privacy.js",
       "uia-context.js",
+      "double-click.js",
+      "pack-store.js",
       "updater.js",
       "renderer/**",
       "assets/**",

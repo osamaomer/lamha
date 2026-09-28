@@ -73,7 +73,7 @@ function createClipActions({ store, send, targetLang, readCards }) {
     if (await send({ type: "cardHas", q: res.query })) await send({ type: "cardRemove", key: cardKey(res.query) });
     const def = (res.definitions || []).flatMap(d => d.entries || [])[0] || null;
     const ex = (def && def.example) || (res.examples || [])[0] || "";
-    const card = res.mode === "en" // looked up in the English–English dictionary: the definition first on review
+    const card = res.mode === "explain" // looked up in the English–English dictionary: the definition first on review
       ? { q: res.query, tr: res.ar || "", ex: ex || res.heroExample || "", form: word, def: res.translation, en: true }
       : { q: res.query, tr: res.translation, ex, form: word, def: def ? def.gloss : "" };
     const added = await send({ type: "cardToggle", card });

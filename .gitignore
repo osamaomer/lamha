@@ -14,3 +14,6 @@ desktop.ini
 
 # tools/compare-translation.mjs output
 translation-report.md
+
+# tools/build_packs.py output: the language packs, uploaded to a GitHub release
+dist-packs/

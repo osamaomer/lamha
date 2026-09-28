@@ -5,7 +5,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 /** A tiny Windows Forms window with a text box: stands in for "any app" (WhatsApp, Word…). */
-function startTargetApp(text) {
+/** `visible`: really on screen, for mouse clicks. Otherwise it's started like the other helpers (windowsHide), and
+ *  Windows applies that to the form too: it can be in front and take keys, but a click lands on what's behind it. */
+function startTargetApp(text, { visible = false } = {}) {
   const { spawn } = require("node:child_process");
   const script = `
 Add-Type -AssemblyName System.Windows.Forms
@@ -21,7 +23,7 @@ $timer = New-Object Windows.Forms.Timer; $timer.Interval = 100
 $timer.Add_Tick({ if ($t.Text -ne $script:last) { $script:last = $t.Text; [Console]::Out.WriteLine("TEXT " + $t.Text); [Console]::Out.Flush() } })
 $timer.Start()
 [void]$f.ShowDialog()`;
-  const proc = spawn("powershell.exe", ["-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-Command", script], { windowsHide: true });
+  const proc = spawn("powershell.exe", ["-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", ...(visible ? ["-WindowStyle", "Hidden"] : []), "-Command", script], { windowsHide: !visible });
   const state = { text: text };
   const hwnd = new Promise((resolve, reject) => {
     proc.stdout.setEncoding("utf8");
@@ -36,6 +38,27 @@ $timer.Start()
     setTimeout(() => reject(new Error("test window did not open")), 15000);
   });
   return { proc, hwnd, state };
+}
+
+/**
+ * Real mouse clicks at (x, y) in physical pixels, sent from a short-lived process of their own. Not from here: the card
+ * window forwards mouse moves (setIgnoreMouseEvents), for which Electron keeps a low-level mouse hook on this main
+ * thread, and a click sent from this thread would wait for that hook until Windows gives up on it.
+ */
+function clickFromOutside(x, y, count = 1) {
+  const { spawn } = require("node:child_process");
+  const code = `const k = require(${JSON.stringify(require.resolve("koffi"))}); const u = k.load("user32.dll");
+u.func("bool __stdcall SetProcessDpiAwarenessContext(intptr_t v)")(-4);
+const move = u.func("bool __stdcall SetCursorPos(int x, int y)");
+const press = u.func("void __stdcall mouse_event(uint32_t f, uint32_t x, uint32_t y, uint32_t d, uintptr_t e)");
+const sleep = ms => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+move(${Math.round(x)}, ${Math.round(y)}); sleep(30);
+for (let i = 0; i < ${count}; i++) { press(2, 0, 0, 0, 0); press(4, 0, 0, 0, 0); sleep(60); }`;
+  return new Promise((resolve, reject) => {
+    const p = spawn(process.execPath, ["-e", code], { env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" }, windowsHide: true });
+    p.on("exit", c => (c === 0 ? resolve() : reject(new Error("the click helper exited with " + c))));
+    p.on("error", reject);
+  });
 }
 
 /** A WPF window with a sentence and one word selected in it: WPF text boxes expose their text to UI Automation,
@@ -985,6 +1008,52 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
     }
   }
 
+  /* ---- any app: the Write button on a double-click in an empty text box (a real double-click, the real hook) ---- */
+  if (desktop && desktop.selection && desktop.watchDoubleClicks) {
+    const { native, getCardWin, watchDoubleClicks } = desktop;
+    const target = startTargetApp("", { visible: true }); // clicked with the mouse
+    const AI_KEYS = ["aiProvider", "ollamaModel"];
+    const aiBefore = await stores.local.get(AI_KEYS);
+    const cw = () => getCardWin();
+    /** A double-click in the middle of the test app's text box; resolves once the card window shows (or 3 s pass). */
+    const dblClickApp = async hwnd => {
+      for (let i = 0; i < 5 && native.foreground() !== hwnd; i++) { native.forceForeground(hwnd); await wait(200); }
+      // never click into a window the test doesn't own (e.g. if the user clicked elsewhere)
+      assert(native.foreground() === hwnd, "test app not in front: " + native.className(native.foreground()));
+      const r = native.windowRect(hwnd);
+      await clickFromOutside((r.left + r.right) / 2, r.top + (r.bottom - r.top) * 0.6, 2);
+      for (let i = 0; i < 30 && !cw().isVisible(); i++) await wait(100);
+    };
+    try {
+      await check("double-click in an empty box in another app: the Write button, the app keeps the focus, Insert writes there", async () => {
+        await stores.local.set({ aiProvider: "ollama", ollamaModel: aiBefore.ollamaModel || "qwen3.5:4b" }); // the button needs a writing-tools AI
+        assert(await watchDoubleClicks(true), "the mouse hook didn't start");
+        const hwnd = await target.hwnd;
+        await wait(500);
+        await dblClickApp(hwnd);
+        assert(cw().isVisible(), "no Write button");
+        assert(!cw().isFocused() && native.foreground() === hwnd, "the app lost the focus (its caret must stay in the box)");
+        const ok = await js(cw(), `window.lamhaDesktop.replace("Hello from Lamha")`); // what Insert in Write new calls
+        assert(ok === true, "replace returned " + ok);
+        await wait(400);
+        assert(target.state.text === "Hello from Lamha", "app has " + JSON.stringify(target.state.text));
+        return "app now has " + JSON.stringify(target.state.text);
+      });
+      await check("no Write button after a double-click in a box with text", async () => {
+        await wait(300);
+        assert(!cw().isVisible(), "card window still showing");
+        await dblClickApp(await target.hwnd);
+        assert(!cw().isVisible(), "the button showed over text");
+      });
+    } finally {
+      await watchDoubleClicks(false);
+      const restore = Object.fromEntries(AI_KEYS.filter(k => aiBefore[k] !== undefined).map(k => [k, aiBefore[k]]));
+      await stores.local.remove(AI_KEYS.filter(k => aiBefore[k] === undefined));
+      if (Object.keys(restore).length) await stores.local.set(restore);
+      try { target.proc.kill(); } catch (_) { /* already closed */ }
+    }
+  }
+
   /* ---- Phase 5: settings, expiry, ignoring a program, turning it off (these empty the history: last) ---- */
   if (monitor) {
     const { clipboard } = require("electron");
@@ -1034,6 +1103,19 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       assert(off === false, "switch not saved");
       assert(desktop.updater.state.status === "idle", "the self-test must not contact GitHub: " + desktop.updater.state.status);
       return r.version;
+    });
+
+    await check("Settings → التحديثات: what's new in this version, earlier versions folded under it", async () => {
+      const win = getOptionsWin();
+      const r = await js(win, `({
+        title: document.querySelector("#upNews .sub").textContent,
+        notes: document.querySelectorAll("#upNews > .up-notes li").length,
+        older: document.querySelectorAll("#upNews .up-older section").length,
+        open: document.querySelector("#upNews .up-older").open
+      })`);
+      assert(r.title.includes("ما الجديد في الإصدار " + app.getVersion()), "title: " + r.title);
+      assert(r.notes > 0 && r.older > 0 && r.open === false, JSON.stringify(r));
+      return `${r.notes} notes, ${r.older} earlier versions`;
     });
 
     await check("expiry (mocked clock): old unpinned clips deleted, pinned kept; runs hourly and at startup", async () => {

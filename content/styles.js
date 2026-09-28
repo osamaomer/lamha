@@ -122,6 +122,16 @@ svg { display: block; flex: none; }
   z-index: -1;
 }
 .pill.below::after { bottom: auto; top: -5px; }
+/* the first double-click Write button explains itself once, on the side away from the text box */
+.pill-tip {
+  position: absolute; bottom: calc(100% + 8px); left: 0;
+  width: max-content; max-width: 250px; padding: 7px 11px; border-radius: var(--r-md);
+  background: var(--pill-bg); color: var(--pill-fg); box-shadow: 0 6px 20px rgba(0,0,0,.22);
+  font-size: 12px; font-weight: 500; line-height: 1.5; white-space: normal;
+  animation: pill-in .2s .15s cubic-bezier(.2,.9,.3,1.3) both;
+}
+.pill.below .pill-tip { bottom: auto; top: calc(100% + 8px); }
+.root.en .pill-tip { font-family: var(--font-ui); }
 @keyframes pill-in { from { opacity: 0; transform: scale(.7) translateY(4px); } to { opacity: 1; transform: none; } }
 
 /* ---------------- card ---------------- */
@@ -226,6 +236,7 @@ svg { display: block; flex: none; }
 .hero .t.long { font-size: 16.5px; font-weight: 500; line-height: 1.75; }
 .hero .t[dir="ltr"] { font-family: var(--font-ui); }
 .hero .tr { font-size: 12px; color: var(--muted); margin-top: 2px; font-weight: 400; font-family: var(--font-ui); direction: ltr; text-align: right; }
+.hero .roots { font-family: var(--font-ar); font-size: 12.5px; color: var(--muted); margin-top: 6px; } /* Arabic explained in Arabic: root · plural */
 .hero .actions { display: flex; flex-direction: column; gap: 2px; align-self: flex-start; }
 
 .source {
@@ -286,6 +297,9 @@ div.pos { display: block; margin-bottom: 6px; }
 .def .ex { direction: ltr; text-align: left; font-size: 13px; color: var(--muted); font-style: italic; margin-top: 3px; padding-left: 9px; border-left: 2px solid var(--line); }
 .def .syn { direction: ltr; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
 .def .syn .chip { font-size: 12px; padding: 1px 8px; }
+/* a word explained in a right-to-left language (Arabic in Arabic): its examples and synonyms read from the right */
+.def .ex[dir="rtl"] { direction: rtl; text-align: right; font-family: var(--font-ar); font-style: normal; padding-left: 0; border-left: 0; padding-right: 9px; border-right: 2px solid var(--line); }
+.def .syn[dir="rtl"] { direction: rtl; }
 
 .examples { direction: ltr; margin: 0; padding: 0 0 0 16px; color: var(--muted); font-size: 13px; }
 .examples li { margin-bottom: 4px; }
@@ -433,6 +447,8 @@ div.pos { display: block; margin-bottom: 6px; }
 .root.en .pos-row, .root.en .def { direction: ltr; }
 .root.en .pos { font-family: var(--font-ui); }
 .root.en .def [dir="rtl"] { text-align: left; }
+/* "Read more on Wikipedia" starts at the left edge like the rest of the card (the icon stays before the text) */
+.root.en .wiki a { display: flex; width: fit-content; margin-right: auto; font-family: var(--font-ui); }
 
 /* a milestone ("word number 100") at the top of the card */
 .milestone {

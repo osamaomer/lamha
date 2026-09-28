@@ -1,0 +1,34 @@
+# Builds the downloadable language packs (tools/build_packs.py) and publishes them as a GitHub Release when a packs tag
+# is pushed. packs.js downloads them from the release named in its RELEASE constant:
+#   git tag packs-v1 && git push origin packs-v1
+# The release is never marked "latest": installed copies of the Windows app look for their updates in the latest release.
+name: Language packs
+
+on:
+  push:
+    tags: ["packs-v*"]
+
+permissions:
+  contents: write # create the release and upload the packs (this run's own, temporary token)
+
+jobs:
+  packs:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Build the packs (streams each Wiktionary edition from kaikki.org; French is the big one)
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          . "$RUNNER_TEMP/venv/bin/activate"
+          pip install --quiet wordfreq
+          for lang in tr es de fr; do python tools/build_packs.py "$lang"; done
+          ls -l dist-packs
+
+      - name: Publish them (not as the latest release)
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist-packs/*.json.gz --verify-tag --latest=false \
+            --title "Language packs (${GITHUB_REF_NAME#packs-})" \
+            --notes "Offline dictionaries for Lamha, downloaded from Settings → Dictionary: French–French, German–German, Spanish–Spanish and Turkish–Turkish. From each language's Wiktionary (CC BY-SA 4.0) via kaikki.org; word frequencies from wordfreq."
