@@ -149,6 +149,15 @@ function parseMeta4(xml, file) {
   return urls.sort((a, b) => a.priority - b.priority).map(u => u.url);
 }
 
+/** The file's exact size in its .meta4 (the catalog's is rounded up to 512-byte blocks), or 0. */
+function meta4Size(xml) {
+  const n = Number((/<size>(\d+)<\/size>/.exec(String(xml)) || [])[1]);
+  return Number.isSafeInteger(n) && n > 0 ? n : 0;
+}
+
+/** Kiwix's catalog gives sizes rounded up to whole 512-byte blocks: a real size this close is the same file. */
+const nearSize = (real, listed) => real > 0 && Math.abs(real - listed) < 64 * 1024;
+
 /* ---------------- the library ---------------- */
 
 /** Which file answers first for a language: the most articles (all before top before a topic), then pictures. */
@@ -379,6 +388,8 @@ class WikiLibrary extends EventEmitter {
     if (!d.mirrors || !d.mirrors.length) {
       const meta = await this.getText(url + ".meta4", signal).catch(() => "");
       d.mirrors = parseMeta4(meta, d.file);
+      const exact = meta4Size(meta);
+      if (!d.exact && nearSize(exact, d.size)) { d.size = exact; d.exact = true; }
       for (const u of [url, "https://dumps.wikimedia.org/kiwix/zim/wikipedia/" + d.file]) if (!d.mirrors.includes(u)) d.mirrors.push(u);
     }
     await fs.promises.mkdir(path.dirname(d.part), { recursive: true });
@@ -452,7 +463,11 @@ class WikiLibrary extends EventEmitter {
     });
     if (!(res.status === 206 || (res.status === 200 && !d.got))) { clearTimeout(timer); await res.body?.cancel().catch(() => {}); throw codeError("mirror"); }
     const length = Number(res.headers.get("content-length")) || 0;
-    if (length && d.got + length !== d.size) { clearTimeout(timer); await res.body?.cancel().catch(() => {}); throw codeError("mirror"); } // another file
+    // The whole file's size: Content-Range's total when resuming, else the length. Until it's known exactly (from
+    // the .meta4 or an earlier answer), the catalog's rounded size only has to be close; the SHA-256 checks the rest.
+    const total = res.status === 206 ? Number((/\/(\d+)\s*$/.exec(res.headers.get("content-range") || "") || [])[1]) || (length && d.got + length) : length;
+    if (!d.exact && nearSize(total, d.size)) { d.size = total; d.exact = true; }
+    if (total && total !== d.size) { clearTimeout(timer); await res.body?.cancel().catch(() => {}); throw codeError("mirror"); } // another file
     const out = fs.createWriteStream(d.part, { flags: "a" });
     let diskError = null; // a full disk: stop, and say so (an unhandled "error" would take the whole app down)
     out.on("error", err => { diskError = err; stall.abort(); });

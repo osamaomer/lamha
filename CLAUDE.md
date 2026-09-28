@@ -59,7 +59,7 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-09-28 (version 1.9.4 released: offline Wikipedia, stages 1–5)_
+_Last updated: 2026-09-28 (version 1.9.5 released: Wikipedia downloads work)_
 
 ### Done (2026-09-27, released in 1.8.1 with the translation service below)
 
@@ -366,6 +366,16 @@ The user asked for a way to read the changelog inside the app, in the Updates ca
 - **Not tried yet:** a real Firefox against the real app (needs the key in the real registry: the installed app, or `npm start`, writes it). Try: install/start the app, then in Firefox Settings → لمحة لـ Windows → اتصال; look up an English word with Wi-Fi off; press اقرأ المقالة في لمحة with the app closed (it should start in the tray and open the reader).
 - Flaky, not a regression: one self-test run failed the three clipboard-formatting checks (HTML kept, نسخ, the quick panel) and the next passed 70/70; the clipboard is shared with whatever else runs on the PC. Seen once before with "reads the selection from another app".
 - Later over the same link: the double-click Write button (the app would know exactly when the extension handles a box), settings, the review deck and history.
+
+### After 1.9.4: Wikipedia downloads never started (2026-09-28, released in 1.9.5)
+
+The user's screenshot: both downloads stopped at once with "The connection dropped", and the list below said "Downloaded" for them.
+- **The cause:** Kiwix's catalog rounds sizes **up to whole 512-byte blocks** (Arabic Top · Mini: listed 226,337,792, real 226,337,504). The downloader treated the listed size as exact, so every mirror looked like "another file" (`mirror`), and after two rounds it gave up (`offline`). No download could ever start; the tests' fake catalog used exact sizes.
+- **The fix (wiki-library.js):** the exact size comes from the `.meta4`'s `<size>` (`meta4Size`) or the first answer (Content-Length, or Content-Range's total when resuming), accepted when within 64 KB of the listed one (`nearSize`), then `d.exact`. A real size far from it still refuses the mirror (nothing written). The SHA-256 still checks the file. Downloads saved by 1.9.4 (mirrors known, no `.meta4` read again) learn it from the answer.
+- Tried against the real Kiwix: Arabic Top · Mini downloaded in ~20 s from the fastest mirror, SHA-256 matched, 231,103 articles, باريس found.
+- **Settings:** the catalog says **Downloading / Paused / Not finished** for an entry still in the list above (only a file on the PC is "Downloaded"; `owned()` also redraws when a download fails). 0 bytes reads "0 MB", not "1 MB". A download row is a grid: name and progress beside the buttons, then the bar and the error across the whole row (the bar ends where the buttons end).
+- Tests: test-desktop 1 (a rounded catalog size with and without the .meta4's size; a size far off writes nothing): fails on 1.9.4. `npm run shots` adds two sample download rows (stopped, paused) to Settings.
+- Released quickly as 1.9.5 (Wikipedia downloads were broken in 1.9.4 for everyone), with its `shared/changelog.js` entry; `npm run smoke` passed 70/70.
 
 ### Ideas for later
 

@@ -303,18 +303,19 @@ function opds(list) {
     `<flavour>${e.flavour}</flavour><tags>wikipedia;_pictures:no</tags><articleCount>3</articleCount><dc:issued>2026-07-10T00:00:00Z</dc:issued>` +
     `<link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/wikipedia/${e.file}.meta4" length="${e.size}" /></entry>`).join("")}</feed>`;
 }
-/** Kiwix: its catalog, checksums, mirror lists and mirrors. `broken`: the fastest mirror drops the connection halfway. */
-function kiwix(bytes, { broken = false, badSha = false } = {}) {
+/** Kiwix: its catalog, checksums, mirror lists and mirrors. `broken`: the fastest mirror drops the connection halfway.
+ *  `listed`: the catalog's size (the real one is rounded up to 512-byte blocks); `metaSize`: the .meta4 has <size>. */
+function kiwix(bytes, { broken = false, badSha = false, listed = bytes.length, metaSize = false } = {}) {
   const file = path.basename(arFile);
   const calls = [];
   const fetch = async (url, init = {}) => {
     const range = (init.headers || {}).Range || "";
     const u = new URL(url);
     calls.push({ host: u.host, range });
-    if (u.host === "library.kiwix.org") return new Response(opds([{ file, size: bytes.length, name: "wikipedia_ar_top", flavour: "mini" }]));
+    if (u.host === "library.kiwix.org") return new Response(opds([{ file, size: listed, name: "wikipedia_ar_top", flavour: "mini" }]));
     const name = decodeURIComponent(u.pathname.split("/").pop());
     if (name === file + ".sha256") return new Response((badSha ? "0".repeat(64) : createHash("sha256").update(bytes).digest("hex")) + "  " + file);
-    if (name === file + ".meta4") return new Response(`<url priority="1">https://first.example/${file}</url><url priority="2">https://second.example/${file}</url>`);
+    if (name === file + ".meta4") return new Response(`<file name="${file}">${metaSize ? `<size>${bytes.length}</size>` : ""}<url priority="1">https://first.example/${file}</url><url priority="2">https://second.example/${file}</url></file>`);
     if (name !== file) return new Response("", { status: 404 });
     const [, from = "0", to = ""] = /bytes=(\d+)-(\d*)/.exec(range) || [];
     const part = bytes.subarray(Number(from), to ? Number(to) + 1 : bytes.length);
@@ -325,7 +326,8 @@ function kiwix(bytes, { broken = false, badSha = false } = {}) {
       return new Response(new ReadableStream({ pull(c) { if (sent) c.error(new TypeError("connection reset")); else { sent = true; c.enqueue(part.subarray(0, part.length >> 1)); } } }),
         { status: range ? 206 : 200, headers: { "content-length": String(part.length) } });
     }
-    return new Response(part, { status: range ? 206 : 200, headers: { "content-length": String(part.length) } });
+    const headers = { "content-length": String(part.length), ...(range && { "content-range": `bytes ${from}-${Number(from) + part.length - 1}/${bytes.length}` }) };
+    return new Response(part, { status: range ? 206 : 200, headers });
   };
   return { calls, fetch };
 }
@@ -357,6 +359,33 @@ zimTest("a download: the fastest mirror first, the next one when it breaks (from
     await lib.remove(f.id);
     assert.equal(existsSync(f.file), false, "a downloaded file is deleted");
   } finally { await lib.closeAll(); }
+});
+
+zimTest("Kiwix's catalog rounds sizes up to 512-byte blocks: the download takes the exact size from the .meta4 or the mirror", async () => {
+  const bytes = readFileSync(arFile);
+  const listed = (Math.floor(bytes.length / 512) + 1) * 512; // never the real size, as with Kiwix's files
+  for (const metaSize of [true, false]) {
+    const lib = new WikiLibrary({ dataDir: path.join(dir, "lib-rounded-" + metaSize), fetch: kiwix(bytes, { listed, metaSize }).fetch });
+    await lib.init();
+    try {
+      const [entry] = await lib.catalog("ar");
+      assert.equal(entry.size, listed);
+      await lib.download(entry.id);
+      await until(() => lib.list().files.length === 1 || (lib.list().downloads[0] || {}).state === "failed");
+      assert.deepEqual(lib.list().downloads.map(d => d.error), [], metaSize ? "size from the .meta4" : "size from the mirror's answer");
+      assert.deepEqual(readFileSync(lib.list().files[0].file), bytes);
+    } finally { await lib.closeAll(); }
+  }
+  const net = kiwix(bytes, { listed: bytes.length + 5e6 }); // not this file at all
+  const far = new WikiLibrary({ dataDir: path.join(dir, "lib-far"), fetch: net.fetch });
+  await far.init();
+  await far.catalog("ar");
+  await far.download("wikipedia_ar_top_mini_2026-07");
+  await until(() => net.calls.some(c => c.host.endsWith(".example") && !c.range)); // a mirror was asked for the whole file…
+  await sleep(100);
+  assert.equal(far.list().downloads[0].got, 0, "…and a file of another size is never written");
+  await far.cancel("wikipedia_ar_top_mini_2026-07");
+  await far.closeAll();
 });
 
 zimTest("a damaged download is deleted and says so; a download that was running when the app closed carries on at the next start", async () => {

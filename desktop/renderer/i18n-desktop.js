@@ -253,6 +253,8 @@
     "d.wGB": [v => `${v.n} غيغابايت`, v => `${v.n} GB`],
     "d.wStart": ["للبداية", "Start here"],
     "d.wHaveIt": ["عندك", "Downloaded"],
+    "d.wInProgress": ["قيد التنزيل", "Downloading"],
+    "d.wNotFinished": ["لم يكتمل", "Not finished"],
     "d.wNewer": ["نسخة أحدث", "Newer copy"],
     "d.wLoading": ["جارٍ جلب القائمة من Kiwix…", "Getting the list from Kiwix…"],
     "d.wCatalogOffline": ["تعذّر جلب القائمة من Kiwix. تحقّق من الاتصال بالإنترنت.", "Couldn't get the list from Kiwix. Check your internet connection."],

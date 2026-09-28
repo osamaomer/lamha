@@ -20,7 +20,7 @@
   };
   const size = bytes => (bytes >= 1e9
     ? L("d.wGB", { n: num(bytes / 1e9, { maximumFractionDigits: 1 }) })
-    : L("d.wMB", { n: num(Math.max(1, bytes / 1e6), { maximumFractionDigits: 0 }) }));
+    : L("d.wMB", { n: num(bytes > 0 && bytes < 1e6 ? 1 : bytes / 1e6, { maximumFractionDigits: 0 }) })); // nothing yet is 0 MB, not 1
   const month = date => (/^\d{4}-\d{2}/.test(date || "") ? new Date(date.slice(0, 7) + "-15T12:00:00").toLocaleDateString(ui(), { year: "numeric", month: "long" }) : "");
   const scopeName = e => (e.scope === "top" ? L("d.wTop") : e.scope === "all" ? L("d.wAll") : e.title || e.scope);
   const flavourName = f => (FLAVOURS.includes(f) ? L("d.w" + cap(f)) : f || "");
@@ -85,12 +85,13 @@
     const running = ["running", "queued", "checking"].includes(d.state);
     const bar = h("div", { class: "wk-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(Math.round(d.size ? (d.got / d.size) * 100 : 0)) },
       h("span", { style: `transform: scaleX(${d.size ? Math.min(1, d.got / d.size) : 0})` }));
+    // a grid: the name and progress beside the buttons, then the bar under both (it ends where the buttons end)
     return h("li", { class: "wk-dl", "data-id": d.id },
       h("div", { class: "grow" },
         h("b", null, fileName(d)),
-        h("small", { class: "wk-prog" }, progressText(d)),
-        bar,
-        d.state === "failed" && h("small", { class: "err" }, err(d.error))),
+        h("small", { class: "wk-prog" }, progressText(d))),
+      bar,
+      d.state === "failed" && h("small", { class: "err" }, err(d.error)),
       h("div", { class: "cb-set-acts" },
         d.state !== "checking" && h("button", { class: "btn small ghost", type: "button", onclick: () => (running ? lamhaWiki.pause(d.id) : lamhaWiki.resume(d.id)) },
           running ? L("d.wPause") : d.state === "failed" ? L("d.wRetry") : L("d.wResume")),
@@ -153,8 +154,9 @@
 
   function entryRow(e, suggested) {
     const same = f => f.name === e.name && f.flavour === e.flavour && String(f.date).slice(0, 7) === e.date.slice(0, 7); // a file added by hand
-    const have = state.files.find(f => f.id === e.id || same(f)) || state.downloads.find(d => d.id === e.id);
-    const older = !have && state.files.find(f => f.name === e.name && f.flavour === e.flavour && f.date < e.date);
+    const have = state.files.find(f => f.id === e.id || same(f));
+    const inList = !have && state.downloads.find(d => d.id === e.id); // in the list above: downloading, paused or stopped
+    const older = !have && !inList && state.files.find(f => f.name === e.name && f.flavour === e.flavour && f.date < e.date);
     const hint = FLAVOURS.includes(e.flavour) ? L("d.w" + cap(e.flavour) + "Hint") : "";
     return h("li", { "data-id": e.id },
       h("div", { class: "grow" },
@@ -162,8 +164,8 @@
           suggested && h("span", { class: "wk-tag" }, L("d.wStart")),
           older && h("span", { class: "wk-tag" }, L("d.wNewer"))),
         h("small", null, [hint, L("d.wArticles", { n: e.articles }), size(e.size), month(e.date)].filter(Boolean).join(" · "))),
-      have
-        ? h("span", { class: "wk-have" }, L("d.wHaveIt"))
+      have ? h("span", { class: "wk-have" }, L("d.wHaveIt"))
+        : inList ? h("span", { class: "wk-have wk-pending" }, L(inList.state === "failed" ? "d.wNotFinished" : inList.state === "paused" ? "d.wPaused" : "d.wInProgress"))
         : h("button", { class: "btn small ghost", type: "button", onclick: () => download(e) }, L("d.wGet")));
   }
 
@@ -205,7 +207,7 @@
     renderHave();
     if (catalog.entries && owned() !== before) renderCatalog(); // "Downloaded" marks follow
   }
-  const owned = () => [...state.files.map(f => f.id), ...state.downloads.map(d => d.id)].join("|");
+  const owned = () => [...state.files.map(f => f.id), ...state.downloads.map(d => d.id + (d.state === "failed" ? "!" : ""))].join("|"); // a stopped download marks its entry differently
 
   let pending = false;
   lamhaWiki.onChanged(() => { // several times a second while a download runs: one redraw per frame at most

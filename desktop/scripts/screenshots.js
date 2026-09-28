@@ -89,6 +89,12 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
   // Paris from them, and the reader shows its start page, a search and articles (Karbon too, from a Turkish maxi file)
   const zim = process.env.LAMHA_SHOTS_ZIM;
   const wiki = desktop.getWikiLibrary && desktop.getWikiLibrary();
+  if (wiki && wiki.state) { // two sample downloads (never started) so Settings shows a download row: stopped, and paused
+    const sample = (flavour, size, got, state, error) => ({ id: `wikipedia_ar_top_${flavour}_2026-07`, file: `wikipedia_ar_top_${flavour}_2026-07.zim`,
+      lang: "ar", name: "wikipedia_ar_top", scope: "top", flavour, date: "2026-07-10", articles: 231103, size, got, state, error, mirrors: [], sha256: "", part: "" });
+    wiki.state.downloads.push(sample("mini", 226337504, 0, "failed", "offline"), sample("nopic", 925690880, 312e6, "paused", ""));
+    wiki.changed(true);
+  }
   if (zim && wiki) {
     for (const f of zim.split(";").filter(Boolean)) await wiki.addFile(f).catch(err => console.log("offline Wikipedia file:", err.code || err.message));
   }

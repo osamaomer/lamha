@@ -3,6 +3,14 @@
  * stops when the version being released has no entry here. Newest first; each note is [arabic, english]. */
 // eslint-disable-next-line no-unused-vars
 var LamhaChangelog = [
+  { v: "1.9.5", date: "2026-09-28", notes: [
+    ["إصلاح: تنزيل ويكيبيديا من الإعدادات كان يتوقف فورًا برسالة «انقطع الاتصال». صار يعمل، والتنزيلات التي توقفت تكمل بزر «إعادة المحاولة».",
+      "Fix: downloading Wikipedia in Settings stopped at once with “The connection dropped”. It works now, and stopped downloads carry on with Try again."],
+    ["قائمة التنزيل لا تقول «عندك» إلا للملف الموجود فعلًا، وتقول «قيد التنزيل» أو «متوقف مؤقتًا» أو «لم يكتمل» لغيره.",
+      "The download list only says “Downloaded” for a file that's really there, and “Downloading”, “Paused” or “Not finished” otherwise."],
+    ["شريط التقدّم يمتد تحت اسم الملف وأزراره معًا، على سطر واحد مع الأزرار.",
+      "The progress bar runs under the file's name and its buttons, lined up with them."]
+  ] },
   { v: "1.9.4", date: "2026-09-28", notes: [
     ["ويكيبيديا دون إنترنت في تطبيق Windows: نزّلها من الإعدادات (من Kiwix، وأنت تختار اللغة والحجم)، فيظهر قسم ويكيبيديا في بطاقة البحث دون اتصال.",
       "Wikipedia without internet in the Windows app: download it in Settings (from Kiwix, in the language and size you choose), and the lookup card's Wikipedia part works with no connection."],
