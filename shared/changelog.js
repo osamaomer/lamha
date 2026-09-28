@@ -3,6 +3,15 @@
  * stops when the version being released has no entry here. Newest first; each note is [arabic, english]. */
 // eslint-disable-next-line no-unused-vars
 var LamhaChangelog = [
+  { v: "1.9.4", date: "2026-09-28", notes: [
+    ["ويكيبيديا دون إنترنت في تطبيق Windows: نزّلها من الإعدادات (من Kiwix، وأنت تختار اللغة والحجم)، فيظهر قسم ويكيبيديا في بطاقة البحث دون اتصال.",
+      "Wikipedia without internet in the Windows app: download it in Settings (from Kiwix, in the language and size you choose), and the lookup card's Wikipedia part works with no connection."],
+    ["قارئ ويكيبيديا في لمحة: مقالات كاملة بتصميم لمحة، مع بحث في العناوين والمحتويات وحجم النص، وحدّد أي كلمة لتراها في بطاقة لمحة.",
+      "A Wikipedia reader in Lamha: whole articles in Lamha's design, with title search, contents and text size. Select any word to look it up."],
+    ["إضافة Firefox تتصل بتطبيق Windows (الإعدادات ← لمحة لـ Windows) لتستخدم ويكيبيديا المنزّلة فيه وتفتح المقالات في قارئه.",
+      "The Firefox extension can link to the Windows app (Settings → Lamha for Windows) to use its downloaded Wikipedia and open articles in its reader."],
+    ["أزرار التنزيل في الإعدادات أهدأ.", "Download buttons in Settings are quieter."]
+  ] },
   { v: "1.9.3", date: "2026-09-28", notes: [
     ["نقرتان على مربع نص فارغ تُظهران زر «كتابة» لتكتب فيه نصًّا جديدًا، في صفحات الويب وفي أي برنامج على Windows.",
       "Double-click an empty text box to get the Write button and write something new into it: on web pages, and in any program on Windows."],

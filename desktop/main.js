@@ -4,12 +4,14 @@
  *   npm start               run the app
  *   npm run smoke           self-test: starts with a temporary profile, checks everything, quits */
 "use strict";
-const { app, BrowserWindow, Tray, Menu, ipcMain, shell, nativeImage, Notification, globalShortcut, screen, clipboard, safeStorage, nativeTheme } = require("electron");
+const { app, BrowserWindow, Tray, Menu, ipcMain, shell, nativeImage, Notification, globalShortcut, screen, clipboard, safeStorage, nativeTheme, dialog, protocol } = require("electron");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const vm = require("node:vm");
 const { Store } = require("./storage");
+const { WikiLibrary } = require("./wiki-library");
+const { NativeBridge } = require("./native-bridge");
 
 // the extension files: the repository root while developing, a copy (ext/) inside the packaged app
 const EXT_DIR = app.isPackaged ? path.join(__dirname, "ext") : path.join(__dirname, "..");
@@ -26,7 +28,9 @@ if (SMOKE) app.setPath("userData", fs.mkdtempSync(path.join(os.tmpdir(), "lamha-
 let mainWin = null, optionsWin = null, tray = null, quitting = false;
 /** Interface text (shared/i18n.js + renderer/i18n-desktop.js, loaded by startCore). */
 const T = (key, vars) => globalThis.LamhaI18n.t(key, vars);
-let stores, messageHandler = null, badgeCount = 0, lastReminder = 0;
+let stores, messageHandler = null, badgeCount = 0, lastReminder = 0, wikiLibrary = null, readerWin = null;
+// the Wikipedia reader's pictures: lamha-wiki://zim/<file id>/<path> (registered before the app is ready)
+protocol.registerSchemesAsPrivileged([{ scheme: "lamha-wiki", privileges: { standard: true, secure: true } }]);
 /** storage.local keys that hold API keys: encrypted on disk, and never given to the floating card. */
 const SECRET_KEYS = ["aiKey", "geminiKey"];
 
@@ -138,6 +142,18 @@ function startCore() {
   if (SMOKE) stores.sync.set({ uiLang: process.env.LAMHA_SMOKE_LANG || "ar" });
   else if (!firstRun && !("uiLang" in stores.sync.data)) stores.sync.set({ uiLang: "ar" });
   globalThis.LamhaPackStore = require("./pack-store").createPackStore(path.join(dir, "packs")); // downloaded dictionaries (packs.js)
+  // downloaded Wikipedia (wiki-library.js): the background reads it through these two calls only
+  wikiLibrary = new WikiLibrary({ dataDir: dir, fetch: netFetch });
+  globalThis.LamhaWikiOffline = {
+    langs: () => wikiLibrary.langs(),
+    summary: (titles, lang) => wikiLibrary.summary(titles, lang),
+    open: (file, articlePath) => { openReader({ file: String(file || ""), path: String(articlePath || "") }); return true; } // the card's "Read the article in Lamha"
+  };
+  wikiLibrary.on("change", () => {
+    for (const w of [optionsWin, readerWin]) if (w && !w.isDestroyed()) w.webContents.send("lamha:wiki-changed");
+    updateTray(); // the Wikipedia item comes and goes with the files
+  });
+  wikiLibrary.init().catch(err => console.error("offline Wikipedia:", err && err.message));
   for (const f of ["local-dict.js", "packs.js", "shared/i18n.js", "shared/lamha-ai.js", "background.js"]) {
     vm.runInThisContext(fs.readFileSync(path.join(EXT_DIR, f), "utf8"), { filename: path.join(EXT_DIR, f) });
   }
@@ -215,7 +231,48 @@ ipcMain.handle("lamha:call", async (e, method, args) => {
     case "update.state": return { ...updater.state, current: app.getVersion(), packaged: app.isPackaged, portable: !!process.env.PORTABLE_EXECUTABLE_DIR, releases: updater.releasesUrl };
     case "update.check": await updater.check(true); return { ...updater.state };
     case "update.restart": updater.restart(); return true;
+    case "firefox.status": return { available: !!bridge, connected: !!(bridge && bridge.connected), lastSeen: bridge ? bridge.lastSeen : 0 };
     default: throw new Error("unknown call " + method);
+  }
+});
+
+/** Settings → Offline Wikipedia (the app's own pages, never the card). Downloads name a catalog id, never a URL. */
+const WIKI_CALLS = {
+  list: () => wikiLibrary.list(),
+  catalog: lang => wikiLibrary.catalog(String(lang)),
+  download: id => wikiLibrary.download(String(id)),
+  pause: id => wikiLibrary.pause(String(id)),
+  resume: id => wikiLibrary.resume(String(id)),
+  cancel: id => wikiLibrary.cancel(String(id)),
+  remove: id => wikiLibrary.remove(String(id)),
+  addFile: async win => {
+    const r = await dialog.showOpenDialog(win, { properties: ["openFile"], filters: [{ name: "Wikipedia (.zim)", extensions: ["zim"] }] });
+    return r.canceled || !r.filePaths[0] ? null : wikiLibrary.addFile(r.filePaths[0]);
+  },
+  chooseFolder: async win => {
+    const r = await dialog.showOpenDialog(win, { properties: ["openDirectory", "createDirectory"], defaultPath: wikiLibrary.folder });
+    if (!r.canceled && r.filePaths[0]) await wikiLibrary.setFolder(r.filePaths[0]);
+    return wikiLibrary.list();
+  },
+  defaultFolder: async () => { await wikiLibrary.setFolder(""); return wikiLibrary.list(); },
+  openFolder: async () => {
+    await fs.promises.mkdir(wikiLibrary.folder, { recursive: true });
+    return shell.openPath(wikiLibrary.folder);
+  },
+  // the reader
+  article: (fileId, articlePath) => wikiLibrary.article(String(fileId || ""), String(articlePath || "")),
+  suggest: (query, lang) => wikiLibrary.suggest(String(query || ""), { lang: String(lang || "") }),
+  random: fileId => wikiLibrary.random(String(fileId || "")),
+  openReader: (fileId, articlePath) => { openReader({ file: String(fileId || ""), path: String(articlePath || "") }); return true; }
+};
+const WIKI_WINDOW = new Set(["addFile", "chooseFolder"]); // they open a dialog over the page's window
+ipcMain.handle("lamha:wiki", async (e, method, args) => {
+  if (!wikiLibrary || fromCard(e) || !Object.hasOwn(WIKI_CALLS, method)) return { ok: false, error: "unavailable" };
+  try {
+    const a = Array.isArray(args) ? args : [];
+    return { ok: true, data: await WIKI_CALLS[method](...(WIKI_WINDOW.has(method) ? [BrowserWindow.fromWebContents(e.sender)] : a)) };
+  } catch (err) {
+    return { ok: false, error: err.code || "failed" };
   }
 });
 
@@ -320,6 +377,58 @@ function openUrl(url) {
   } else if (/^https?:\/\//i.test(u)) {
     shell.openExternal(u);
   }
+}
+
+/* ---------------- the Wikipedia reader (renderer/wiki/) ---------------- */
+
+/** Opens the reader (or brings it forward) at an article; no path: its start page. */
+function openReader({ file = "", path: articlePath = "" } = {}) {
+  if (readerWin && !readerWin.isDestroyed()) {
+    readerWin.webContents.send("lamha:wiki-open", { file, path: articlePath });
+    if (readerWin.isMinimized()) readerWin.restore();
+    if (!SMOKE) { readerWin.show(); readerWin.focus(); }
+    return readerWin;
+  }
+  readerWin = new BrowserWindow({
+    width: 1100, height: 820, minWidth: 420, minHeight: 420, title: T("d.rTitle"), icon: ICON, show: false,
+    autoHideMenuBar: true, backgroundColor: nativeTheme.shouldUseDarkColors ? "#1c1c1e" : "#f5f5f7", webPreferences: webPrefs()
+  });
+  prepare(readerWin);
+  const wc = readerWin.webContents;
+  wc.on("did-finish-load", async () => { // again after a reload (the interface language changed)
+    try {
+      for (const f of ["ui.css", "motion.css"]) await wc.insertCSS(fs.readFileSync(path.join(EXT_DIR, "shared", f), "utf8"));
+      const scripts = [
+        ...["theme.js", "i18n.js", "motion.js"].map(f => path.join(EXT_DIR, "shared", f)),
+        path.join(__dirname, "renderer", "i18n-desktop.js"),
+        path.join(__dirname, "renderer", "wiki", "sanitize.js"), path.join(__dirname, "renderer", "wiki", "reader.js"),
+        // Lamha's lookup in articles: the scripts Firefox puts into web pages
+        ...["shared/lamha-ai.js", "content/styles.js", "content/page-translator.js", "content/content.js"].map(f => path.join(EXT_DIR, f))
+      ];
+      for (const f of scripts) await wc.executeJavaScript(fs.readFileSync(f, "utf8") + "\n;true");
+    } catch (err) { console.error("wikipedia reader failed:", err && err.message); }
+  });
+  readerWin.on("app-command", (_e, cmd) => { // the mouse's back and forward buttons
+    if (cmd === "browser-backward" || cmd === "browser-forward") wc.send("lamha:wiki-open", { nav: cmd === "browser-backward" ? "back" : "forward" });
+  });
+  readerWin.loadFile(path.join(__dirname, "renderer", "wiki", "reader.html"), { query: { file, path: articlePath } });
+  readerWin.once("ready-to-show", () => { if (!SMOKE) readerWin.show(); });
+  readerWin.on("closed", () => { readerWin = null; });
+  return readerWin;
+}
+
+/** lamha-wiki://zim/<file id>/<path>: a picture from a downloaded Wikipedia, for the reader and the card. Pictures
+ *  only (wiki-library.js asset()); anything else, or a file that isn't there, is "not found". */
+function serveWikiAssets() {
+  protocol.handle("lamha-wiki", async req => {
+    try {
+      const url = new URL(req.url);
+      const [fileId, ...rest] = url.pathname.slice(1).split("/").map(decodeURIComponent);
+      const a = url.host === "zim" && wikiLibrary && rest.length ? await wikiLibrary.asset(fileId, rest.join("/")) : null;
+      if (a) return new Response(a.data, { headers: { "content-type": a.mime, "cache-control": "max-age=86400", "x-content-type-options": "nosniff" } });
+    } catch (_) { /* a broken address */ }
+    return new Response("", { status: 404 });
+  });
 }
 
 /* ---------------- the card over other apps (global shortcuts) ----------------
@@ -605,7 +714,8 @@ async function injectClipboardUi(wc, entry, { standalone = false } = {}) {
     ...(standalone ? ["theme.js", "i18n.js", "lamha-ai.js", "motion.js"].map(f => path.join(EXT_DIR, "shared", f)) : []),
     path.join(__dirname, "renderer", "i18n-desktop.js"),
     ...(entry === "settings.js" ? [path.join(EXT_DIR, "shared", "changelog.js")] : []), // Settings → Updates → what's new
-    path.join(EXT_DIR, "shared", "arabic-normalize.js"), path.join(CLIP_UI, "clip-list.js"), path.join(CLIP_UI, "clip-actions.js"), path.join(CLIP_UI, entry)
+    path.join(EXT_DIR, "shared", "arabic-normalize.js"), path.join(CLIP_UI, "clip-list.js"), path.join(CLIP_UI, "clip-actions.js"), path.join(CLIP_UI, entry),
+    ...(entry === "settings.js" ? [path.join(__dirname, "renderer", "wiki-settings.js")] : []) // Settings → Offline Wikipedia
   ];
   for (const f of scripts) {
     await wc.executeJavaScript(read(f) + "\n;true");
@@ -872,6 +982,39 @@ function startUpdates() {
   });
 }
 
+/* ---------------- the Firefox extension's link (native-bridge.js) ---------------- */
+
+let bridge = null;
+const LANG_CODE = /^[a-z]{2,3}$/;
+/** What the extension may ask. Everything it sends is checked here: it arrives from another program. */
+const BRIDGE_CALLS = {
+  hello: () => ({ app: "lamha", version: app.getVersion(), wiki: { langs: wikiLibrary ? wikiLibrary.langs() : [] } }),
+  wikiSummary: msg => {
+    const titles = (Array.isArray(msg.titles) ? msg.titles : []).filter(t => typeof t === "string" && t.trim() && t.length <= 120).slice(0, 6);
+    const lang = String(msg.lang || "");
+    return titles.length && LANG_CODE.test(lang) && wikiLibrary ? wikiLibrary.summary(titles, lang) : null;
+  },
+  openReader: msg => { openReader({ file: String(msg.file || "").slice(0, 200), path: String(msg.path || "").slice(0, 500) }); return true; }
+};
+
+/** Settings → Firefox (storage.local firefoxLink, on unless turned off): Firefox can reach this app only while it's on. */
+function startBridge() {
+  if (process.platform !== "win32") return;
+  const launch = app.isPackaged
+    ? { app: process.env.PORTABLE_EXECUTABLE_FILE || process.execPath, args: ["--hidden"] }
+    : { app: process.execPath, args: [app.getAppPath(), "--hidden"] }; // from source: electron.exe and this folder
+  bridge = new NativeBridge({
+    dir: path.join(app.getPath("userData"), "firefox"), launch, handlers: BRIDGE_CALLS,
+    ...(SMOKE ? { register: async () => {}, unregister: async () => {} } : {}) // the self-test never touches the real registry
+  });
+  bridge.on("change", () => { if (optionsWin && !optionsWin.isDestroyed()) optionsWin.webContents.send("lamha:firefox-changed"); });
+  const apply = on => (on ? bridge.enable() : bridge.disable()).catch(err => console.error("Firefox link:", err && (err.code || err.message)));
+  stores.local.get({ firefoxLink: true }).then(s => apply(s.firefoxLink !== false));
+  storageListeners.push((changes, area) => {
+    if (area === "local" && changes.firefoxLink) apply(changes.firefoxLink.newValue !== false);
+  });
+}
+
 /* ---------------- tray, badge, reminders ---------------- */
 
 function trayMenu() {
@@ -881,6 +1024,7 @@ function trayMenu() {
     ...(clipboardMonitor ? [{ label: T("d.trayClipboard"), click: () => openPanel({ target: 0 }).catch(() => {}) }] : []), // no app to paste into: Enter copies
     { label: T("d.trayReview", { n: badgeCount }), click: () => showMain("review") },
     { label: T("d.trayWrite"), click: () => showMain("write") },
+    ...(wikiLibrary && wikiLibrary.langs().length ? [{ label: T("d.rTrayItem"), click: () => openReader() }] : []), // the downloaded Wikipedia
     ...pauseMenu(),
     motionMenu(),
     { label: T("d.traySettings"), click: () => openOptions("") },
@@ -976,6 +1120,7 @@ if (!gotLock) {
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null);
     startCore();
+    serveWikiAssets();
     applyThemeSetting(); // before the windows open, so they start in the right colours
     createMain();
     if (selection) createCardWin(); // ready before the first shortcut, so it opens instantly
@@ -984,6 +1129,7 @@ if (!gotLock) {
     // tray, notifications and window titles follow the interface language (pages redraw themselves)
     globalThis.LamhaI18n.init({ onChange: () => { updateTray(); if (mainWin && !mainWin.isDestroyed()) mainWin.setTitle(T("common.lamha")); } });
     startUpdates();
+    startBridge();
     if (uiaContext) uiaContext.onMouseDown = down => onMouseDown(down).catch(err => console.error("double-click failed:", err && err.name));
     startContextHelper();
     watchMotionHint();
@@ -993,7 +1139,7 @@ if (!gotLock) {
         app, mainWin, openOptions, getOptionsWin: () => optionsWin, stores, send: msg => messageHandler(msg, {}),
         desktop: { onHotkey, uiaContext, watchDoubleClicks, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
           openPanel, hidePanel, getPanelWin: () => panelWin, panelReady: () => panelReady,
-          pauseClipboard, resumeClipboard, runClipExpiry, trayTooltip, updateMotionHint }
+          pauseClipboard, resumeClipboard, runClipExpiry, trayTooltip, updateMotionHint, getWikiLibrary: () => wikiLibrary, openReader, getReaderWin: () => readerWin, getBridge: () => bridge }
       });
     }
   }).catch(err => {
@@ -1008,5 +1154,7 @@ if (!gotLock) {
     if (clipboardMonitor) clipboardMonitor.stop();
     if (clipStore) clipStore.flush();
     if (uiaContext) uiaContext.stop();
+    if (wikiLibrary) wikiLibrary.saveSync();
+    if (bridge) bridge.close().catch(() => {});
   });
 }

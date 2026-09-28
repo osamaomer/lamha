@@ -60,6 +60,51 @@ if (info.role === "page") {
   });
 }
 
+/* ---- the Firefox extension's link (Settings → Firefox): the app's own pages ---- */
+if (info.role === "page") {
+  const firefoxListeners = [];
+  ipcRenderer.on("lamha:firefox-changed", () => {
+    for (const f of firefoxListeners) { try { f(); } catch (err) { console.error(err); } }
+  });
+  contextBridge.exposeInMainWorld("lamhaFirefox", {
+    status: () => call("firefox.status"), // { available, connected, lastSeen }
+    onChanged: f => { firefoxListeners.push(f); }
+  });
+}
+
+/* ---- offline Wikipedia (Settings): the app's own pages ---- */
+if (info.role === "page") {
+  const wiki = (method, ...args) => ipcRenderer.invoke("lamha:wiki", method, args); // → { ok, data } | { ok: false, error }
+  const wikiListeners = [];
+  ipcRenderer.on("lamha:wiki-changed", () => {
+    for (const f of wikiListeners) { try { f(); } catch (err) { console.error(err); } }
+  });
+  contextBridge.exposeInMainWorld("lamhaWiki", {
+    list: () => wiki("list"), // { folder, isDefault, files, downloads }
+    catalog: lang => wiki("catalog", String(lang)), // Kiwix's files in that language
+    download: id => wiki("download", String(id)),
+    pause: id => wiki("pause", String(id)),
+    resume: id => wiki("resume", String(id)),
+    cancel: id => wiki("cancel", String(id)),
+    remove: id => wiki("remove", String(id)),
+    addFile: () => wiki("addFile"), // a .zim the user already has (a file dialog)
+    chooseFolder: () => wiki("chooseFolder"),
+    defaultFolder: () => wiki("defaultFolder"),
+    openFolder: () => wiki("openFolder"),
+    onChanged: f => { wikiListeners.push(f); },
+    // the reader (renderer/wiki/)
+    article: (fileId, path) => wiki("article", String(fileId || ""), String(path || "")), // { fileId, path, title, html, lang, … } | null
+    suggest: (query, lang) => wiki("suggest", String(query || ""), String(lang || "")),
+    random: fileId => wiki("random", String(fileId || "")),
+    openReader: (fileId, path) => wiki("openReader", String(fileId || ""), String(path || "")),
+    onOpen: f => { openListeners.push(f); } // { file, path } | { nav: "back" | "forward" }
+  });
+  const openListeners = [];
+  ipcRenderer.on("lamha:wiki-open", (_e, msg) => {
+    for (const f of openListeners) { try { f(msg); } catch (err) { console.error(err); } }
+  });
+}
+
 /* ---- clipboard history (الحافظة): the app's own pages, not the card ---- */
 if (info.role === "page") {
   const clip = (method, ...args) => ipcRenderer.invoke("lamha:clip", method, args); // → { ok, data } | { ok: false, error }

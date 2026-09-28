@@ -201,6 +201,27 @@
     renderUpdates();
   }
 
+  /* ---- Firefox: the extension's link to this app (native-bridge.js), before Updates ---- */
+  if (window.lamhaFirefox) {
+    const fxState = h("small", { id: "fxState", role: "status" });
+    const fxPanel = h("section", { class: "panel", id: "firefoxPanel" },
+      h("h2", null, L("d.fxTitle")),
+      h("p", { class: "muted" }, L("d.fxIntro")),
+      h("label", { class: "opt" },
+        h("div", null, h("b", null, L("d.fxLink")), h("small", null, L("d.fxLinkHint")), fxState),
+        sw("firefoxLink", L("d.fxLink"))));
+    (document.getElementById("privacy") || panel).after(fxPanel); // Updates stays the last section
+    const renderFx = async () => {
+      const [{ firefoxLink }, st] = await Promise.all([local.get({ firefoxLink: true }), lamhaFirefox.status()]);
+      $("firefoxLink").checked = firefoxLink !== false;
+      fxState.textContent = firefoxLink === false ? "" : st.connected ? L("d.fxConnected") : L("d.fxWaiting");
+    };
+    $("firefoxLink").addEventListener("change", e => local.set({ firefoxLink: e.target.checked }));
+    lamhaFirefox.onChanged(renderFx);
+    browser.storage.onChanged.addListener((changes, area) => { if (area === "local" && changes.firefoxLink) renderFx(); });
+    renderFx();
+  }
+
   const toSection = () => {
     const target = { "#clipboard": panel, "#updates": document.getElementById("updatesPanel") }[location.hash];
     if (target) target.scrollIntoView({ block: "start" });

@@ -1090,7 +1090,7 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       const win = getOptionsWin();
       const r = await js(win, `({
         panel: !!document.getElementById("updatesPanel"),
-        last: document.getElementById("updatesPanel").previousElementSibling.id === "privacy", // the last section, easy to reach
+        last: document.getElementById("updatesPanel").previousElementSibling.id === "firefoxPanel" && !document.querySelector("#updatesPanel ~ section.panel[id]"), // the last section, easy to reach
         version: document.getElementById("upVersion").textContent,
         auto: document.getElementById("updatesAuto").checked,
         button: document.getElementById("upCheck").textContent
@@ -1103,6 +1103,118 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       assert(off === false, "switch not saved");
       assert(desktop.updater.state.status === "idle", "the self-test must not contact GitHub: " + desktop.updater.state.status);
       return r.version;
+    });
+
+    await check("offline Wikipedia: a .zim added to Lamha answers the card with no internet (Electron's own Zstandard), and Settings lists it", async () => {
+      const lib = desktop.getWikiLibrary();
+      const { writeZim } = await import(require("node:url").pathToFileURL(path.join(__dirname, "..", "..", "tools", "zim-fixture.mjs")).href);
+      const file = path.join(app.getPath("temp"), `wikipedia_ar_smoke_${process.pid}.zim`);
+      const lead = "باريس هي عاصمة فرنسا وأكبر مدنها، وتقع على ضفاف نهر السين في شمال البلاد.";
+      writeZim(file, { name: "wikipedia_ar_top", lang: "ara", flavour: "mini", entries: [
+        { path: "باريس", html: `<section data-mw-section-id="0"><p>${lead}</p></section>` }, { path: "Paris", redirect: "باريس" }
+      ] });
+      const info = await lib.addFile(file);
+      try {
+        const r = await send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"], offline: true });
+        assert(r && r.ok && r.data && r.data.extract === lead && r.data.offline, "card answer: " + JSON.stringify(r && r.data));
+        const win = getOptionsWin();
+        let s;
+        for (let i = 0; i < 40; i++) { // the list redraws when the main process says it changed
+          s = await js(win, `({ rows: document.querySelectorAll("#wikiFiles li[data-id]").length, after: document.getElementById("wikiPanel").previousElementSibling.id,
+            name: (document.querySelector("#wikiFiles li[data-id] b") || {}).textContent || "" })`);
+          if (s.rows) break;
+          await wait(100);
+        }
+        assert(s.rows === 1 && s.after === "dictionary" && /العربية · أهم المقالات · مختصرة/.test(s.name), JSON.stringify(s));
+        return `${info.articles} articles, "${r.data.title}"`;
+      } finally {
+        await lib.remove(lib.list().files.find(f => f.file === file).id);
+        await lib.closeAll();
+        fs.rmSync(file, { force: true });
+      }
+    });
+
+    await check("the Wikipedia reader: an article with its picture (lamha-wiki:), the file's scripts never run, links open articles, Lamha's lookup is there", async () => {
+      const lib = desktop.getWikiLibrary();
+      const { writeZim } = await import(require("node:url").pathToFileURL(path.join(__dirname, "..", "..", "tools", "zim-fixture.mjs")).href);
+      const file = path.join(app.getPath("temp"), `wikipedia_ar_reader_${process.pid}.zim`);
+      const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
+      writeZim(file, { name: "wikipedia_ar_top", lang: "ara", flavour: "maxi", entries: [
+        { path: "باريس", html: `<body><script>window.__pwned = 1</script><div id="mw-content-text"><div class="mw-parser-output"><section data-mw-section-id="0">
+          <p onclick="window.__pwned = 2">باريس عاصمة <a href="فرنسا">فرنسا</a>.</p><img src="./_assets_/a/dot.png" width="40" height="40" onerror="window.__pwned = 3"></section></div></div></body>` },
+        { path: "فرنسا", html: `<section data-mw-section-id="0"><p>فرنسا دولة في غرب أوروبا.</p></section>` },
+        { path: "_assets_/a/dot.png", data: PNG, mime: "image/png" }
+      ] });
+      await lib.addFile(file);
+      const id = lib.list().files.find(f => f.file === file).id;
+      try {
+        const win = desktop.openReader({ file: id, path: "باريس" });
+        await new Promise(r => (win.webContents.isLoading() ? win.webContents.once("did-finish-load", r) : r()));
+        let s;
+        for (let i = 0; i < 50; i++) {
+          s = await js(win, `({ title: (document.querySelector(".rd-title") || {}).textContent || "", img: (document.querySelector(".rd-body img") || {}).naturalWidth || 0,
+            pwned: window.__pwned, lamha: !!window.__lamhaLoaded, csp: !!document.querySelector('meta[http-equiv="Content-Security-Policy"]') })`);
+          if (s.title && s.img && s.lamha) break;
+          await wait(100);
+        }
+        assert(s.title === "باريس" && s.img === 1 && s.pwned === undefined && s.lamha && s.csp, JSON.stringify(s));
+        // select a word in the article: Lamha's button appears, as on any web page
+        await js(win, `(() => { const t = document.querySelector(".rd-body p").firstChild, r = document.createRange(); r.setStart(t, 0); r.setEnd(t, 5);
+          getSelection().removeAllRanges(); getSelection().addRange(r); const b = r.getBoundingClientRect();
+          document.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, clientX: b.right, clientY: b.bottom, button: 0 })); return true; })()`);
+        let pill = false;
+        for (let i = 0; i < 20 && !pill; i++) { await wait(100); pill = await js(win, `!!document.querySelector("lamha-ui")`); }
+        assert(pill, "no lookup button after selecting a word");
+        await js(win, `getSelection().removeAllRanges(); true`);
+        await js(win, `document.querySelector('.rd-body a[data-path="فرنسا"]').click(); true`);
+        let next = "";
+        for (let i = 0; i < 30 && next !== "فرنسا"; i++) { await wait(100); next = await js(win, `(document.querySelector(".rd-title") || {}).textContent || ""`); }
+        assert(next === "فرنسا", "the link: " + next);
+        win.close();
+        return "picture loaded, nothing from the file ran";
+      } finally {
+        await lib.remove(id);
+        await lib.closeAll();
+        fs.rmSync(file, { force: true });
+      }
+    });
+
+    await check("Firefox's link: the host Firefox would start (host.bat → PowerShell → the pipe) reaches this app: hello, a Wikipedia summary; Settings has the switch", async () => {
+      const bridge = desktop.getBridge();
+      assert(bridge && bridge.server, "the app isn't listening for Firefox");
+      const lib = desktop.getWikiLibrary();
+      const { writeZim } = await import(require("node:url").pathToFileURL(path.join(__dirname, "..", "..", "tools", "zim-fixture.mjs")).href);
+      const file = path.join(app.getPath("temp"), `wikipedia_ar_firefox_${process.pid}.zim`);
+      writeZim(file, { name: "wikipedia_ar_top", lang: "ara", flavour: "mini", entries: [
+        { path: "باريس", html: `<section data-mw-section-id="0"><p>باريس هي عاصمة فرنسا وأكبر مدنها، وتقع على ضفاف نهر السين في شمال البلاد.</p></section>` },
+        { path: "Paris", redirect: "باريس" }
+      ] });
+      await lib.addFile(file);
+      const host = require("node:child_process").spawn("cmd.exe", ["/d", "/s", "/c", `"${path.join(bridge.dir, "host.bat")}"`], { windowsHide: true, windowsVerbatimArguments: true });
+      const replies = [];
+      let out = Buffer.alloc(0);
+      host.stdout.on("data", d => {
+        out = Buffer.concat([out, d]);
+        while (out.length >= 4 && out.length >= 4 + out.readUInt32LE(0)) { replies.push(JSON.parse(out.subarray(4, 4 + out.readUInt32LE(0)).toString("utf8"))); out = out.subarray(4 + out.readUInt32LE(0)); }
+      });
+      const send = m => { const b = Buffer.from(JSON.stringify(m)); const n = Buffer.alloc(4); n.writeUInt32LE(b.length); host.stdin.write(Buffer.concat([n, b])); };
+      try {
+        send({ id: 1, type: "hello", launch: false });
+        send({ id: 2, type: "wikiSummary", titles: ["Paris"], lang: "ar", launch: false });
+        for (let i = 0; i < 150 && replies.length < 2; i++) await wait(100);
+        const [hello, summary] = replies;
+        assert(hello && hello.ok && hello.data.version === app.getVersion() && hello.data.wiki.langs.includes("ar"), "hello: " + JSON.stringify(hello));
+        assert(summary && summary.ok && summary.data.title === "باريس", "summary: " + JSON.stringify(summary && { ok: summary.ok, error: summary.error }));
+        const s = await js(getOptionsWin(), `({ on: !!document.getElementById("firefoxLink") && document.getElementById("firefoxLink").checked, state: (document.getElementById("fxState") || {}).textContent || "" })`);
+        assert(s.on, "Settings → Firefox: " + JSON.stringify(s));
+        return `hello from ${hello.data.version}; Settings: "${s.state}"`;
+      } finally {
+        host.stdin.end();
+        await new Promise(r => { host.on("exit", r); setTimeout(r, 3000); });
+        await lib.remove(lib.list().files.find(f => f.file === file).id);
+        await lib.closeAll();
+        fs.rmSync(file, { force: true });
+      }
     });
 
     await check("Settings → التحديثات: what's new in this version, earlier versions folded under it", async () => {

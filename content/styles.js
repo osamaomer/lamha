@@ -262,6 +262,10 @@ svg { display: block; flex: none; }
   margin-bottom: 8px; direction: rtl;
 }
 .sec-h::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.wiki-offline {
+  display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; border-radius: 999px;
+  background: var(--chip); color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 0;
+}
 
 .pos-row { direction: rtl; margin-bottom: 10px; }
 .pos { display: inline-block; font-family: var(--font-ar); font-size: 12px; font-weight: 700; color: var(--accent); margin-inline-end: 6px; }

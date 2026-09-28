@@ -54,10 +54,20 @@ let bgHandler;
 const aiCalls = [];
 const packFiles = {}; // what the language-pack release serves: { "tr.json.gz": Buffer }
 const packParts = new Map(); // downloaded packs, in memory (desktop/pack-store.js keeps them in files)
+// Firefox's link to Lamha for Windows: the permission, and the app answering hello (Settings → لمحة لـ Windows)
+const fxApp = { granted: false, asked: [] };
+const fxPort = () => {
+  const onMsg = [];
+  return {
+    onMessage: { addListener: f => onMsg.push(f) }, onDisconnect: { addListener() {} }, disconnect() {},
+    postMessage: m => { fxApp.asked.push([m.type, m.launch]); setTimeout(() => onMsg.forEach(f => f({ id: m.id, ok: true, data: { app: "lamha", version: "1.10.0", wiki: { langs: ["ar"] } } })), 0); }
+  };
+};
 const bgCtx = vm.createContext({
   browser: {
     storage: { local, sync, onChanged },
-    runtime: { onMessage: { addListener: f => { bgHandler = f; } }, onInstalled: ev, onStartup: ev },
+    runtime: { onMessage: { addListener: f => { bgHandler = f; } }, onInstalled: ev, onStartup: ev, connectNative: fxPort },
+    permissions: { contains: async q => !(q.permissions || []).includes("nativeMessaging") || fxApp.granted },
     menus: { removeAll: async () => {}, create() {}, onClicked: ev }, commands: { onCommand: ev }
   },
   fetch: async (url, init) => {
@@ -98,10 +108,15 @@ async function openPage(path, scripts, { extra = {} } = {}) {
     storage: { local, sync, onChanged },
     runtime: {
       sendMessage: async msg => structuredClone(await bgHandler(msg, {})),
-      getURL: p => "moz-extension://lamha/" + p, getManifest: () => ({ version: "test" }), openOptionsPage() {}
+      getURL: p => "moz-extension://lamha/" + p, getManifest: () => ({ version: "test" }), openOptionsPage() {},
+      ...(extra.native ? { connectNative() {} } : {}) // Firefox on a computer (not Android, not the Windows app)
     },
     tabs: { query: async () => [{ id: 1, url: "https://example.com/" }], sendMessage: async () => ({ active: false }), create: async () => {} },
-    permissions: { contains: async () => true, request: async () => true },
+    permissions: {
+      contains: async () => true,
+      request: async q => { if ((q.permissions || []).includes("nativeMessaging")) fxApp.granted = true; return true; },
+      remove: async q => { if ((q.permissions || []).includes("nativeMessaging")) fxApp.granted = false; return true; }
+    },
     commands: { getAll: async () => [] }
   };
   w.confirm = () => true;
@@ -470,7 +485,7 @@ async function cardPage(reply, localData, syncData = {}, url = "https://example.
   const store = data => ({ get: async k => (k && typeof k === "object" && !Array.isArray(k) ? { ...k, ...data } : { ...data }), set: async () => {} });
   w.browser = {
     storage: { sync: store({ uiLang: "ar", ...syncData }), local: store(localData), onChanged: { addListener() {} } },
-    runtime: { sendMessage: async msg => { sent.push(msg); return reply(msg); }, onMessage: { addListener: f => { onMessage = f; } } }
+    runtime: { sendMessage: async msg => { sent.push(msg); return reply(msg); }, onMessage: { addListener: f => { onMessage = f; } }, getURL: p => "moz-extension://x/" + p }
   };
   for (const s of ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "content/styles.js", "content/page-translator.js", "content/content.js"]) w.eval(src(s));
   await sleep(50);
@@ -731,6 +746,50 @@ await step("card: a foreign word that should be explained but can't be shows the
   assert.equal([...c.root().querySelectorAll(".bar .dsw button")].find(b => b.getAttribute("aria-pressed") === "true").textContent, "الفرنسية", "the switch shows the choice");
 });
 
+await step("card: Wikipedia from the downloaded copy says so; the card sends the word's translations as titles, and asks on 'offline only' too", async () => {
+  const c = await cardPage(msg => (msg.type === "lookup"
+    ? { ok: true, data: { query: "Paris", type: "word", src: "en", tl: "ar", translation: "باريس، بارِس", dict: [{ pos: "اسم", terms: [{ word: "عاصمة فرنسا" }] }], definitions: [], examples: [], source: "online" } }
+    : msg.type === "wiki" ? { ok: true, data: { lang: "ar", title: "باريس", extract: "باريس عاصمة فرنسا.", url: "", thumb: "", offline: { date: "2026-07-10", id: "x", path: "باريس" } } }
+      : undefined), {}, { dictSource: "offline" });
+  c.show("Paris");
+  await sleep(150);
+  const asked = c.sent.find(m => m.type === "wiki");
+  assert.ok(asked, "offline only still asks: only a downloaded copy may answer");
+  assert.deepEqual(JSON.parse(JSON.stringify({ alt: asked.alt, offline: asked.offline })), { alt: ["باريس", "بارِس", "عاصمة فرنسا"], offline: true });
+  const chip = c.root().querySelector(".sec-h .wiki-offline");
+  assert.ok(chip, "marked as the downloaded copy");
+  assert.match(text(chip), /^من النسخة المنزّلة · يوليو/);
+  assert.match(text(c.root().querySelector(".wiki .x")), /باريس عاصمة فرنسا/);
+  const more = c.root().querySelector(".wiki a");
+  assert.equal(text(more), "اقرأ المقالة في لمحة", "the article opens in Lamha's own reader: no internet needed");
+  more.click();
+  assert.deepEqual(JSON.parse(JSON.stringify(c.sent.at(-1))), { type: "wikiOpen", file: "x", path: "باريس" }, "the app's reader (from Firefox: through the app)");
+});
+
+await step("Settings → Lamha for Windows (Firefox on a computer): Connect asks for the permission and reaches the app; Disconnect gives it back", async () => {
+  const scripts = ["shared/theme.js", "shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "options/i18n-options.js", "options/options.js"];
+  const plainPage = await openPage("options/options.html", scripts);
+  assert.equal(plainPage.document.getElementById("appPanel").hidden, true, "no connectNative (Android, the Windows app): no section");
+  const o = await openPage("options/options.html", scripts, { extra: { native: true } });
+  const $o = id => o.document.getElementById(id);
+  assert.equal($o("appPanel").hidden, false);
+  assert.ok([...o.document.querySelectorAll("#toc a")].some(a => a.hash === "#appPanel"), "in the section bar");
+  await sleep(100);
+  assert.deepEqual([text($o("appState")), text($o("appBtn"))], ["غير متصل.", "اتصال"]);
+  assert.deepEqual(fxApp.asked, [], "not connected: the app isn't asked");
+  $o("appBtn").click();
+  await sleep(150);
+  assert.equal(fxApp.granted, true);
+  assert.equal(text($o("appState")), "متصل بلمحة 1.10.0 · ويكيبيديا: العربية");
+  assert.deepEqual(fxApp.asked, [["hello", true]], "Connect may start the app");
+  assert.ok($o("appBtn").classList.contains("danger") && text($o("appBtn")) === "قطع الاتصال");
+  $o("appBtn").click();
+  await sleep(150);
+  assert.equal(fxApp.granted, false, "the permission goes back");
+  assert.equal((await local.get("appLink")).appLink, false);
+  assert.deepEqual([text($o("appState")), text($o("appBtn"))], ["غير متصل.", "اتصال"]);
+});
+
 await step("Settings: 'Explain words in their own language' turns languages on and off, and follows the card's switch", async () => {
   const o = await openPage("options/options.html", ["shared/theme.js", "shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "options/i18n-options.js", "options/options.js"]);
   const btn = name => [...o.document.querySelectorAll("#explainLangs button")].find(b => text(b) === name);
@@ -881,6 +940,135 @@ await step("clipboard tools: numbered rows with icons and hints, one lit row, nu
   assert.equal(back, 1, "Esc again: back to the list");
   root.querySelector(".ca-back").click();
   assert.equal(back, 2, "the arrow goes back to the list");
+});
+
+/* ---- the Windows app's Wikipedia reader (desktop/renderer/wiki/): the cleaner and the page, with a fake library ---- */
+const PARIS_HTML = `<html><head><title>باريس</title><script>window.__pwned = 1</script></head><body>
+<div id="mw-content-text"><div class="mw-parser-output">
+<section data-mw-section-id="0"><p onclick="window.__pwned = 2" style="color:red">باريس <a href="%D9%81%D8%B1%D9%86%D8%B3%D8%A7">عاصمة فرنسا</a>
+و<a href="Lyon">ليون</a> و<a href="#إسكان">السكان</a> و<a href="https://www.paris.fr/" class="external text">موقعها</a> و<a href="javascript:window.__pwned=3">رابط خطر</a>
+<img src="./_assets_/a/Eiffel.jpg" onerror="window.__pwned = 4" width="250"><img src="https://tracker.example/t.gif"></p>
+<script>window.__pwned = 5</script><style>p { color: red }</style><iframe src="https://evil.example/"></iframe>
+<form action="https://evil.example/"><input name="x"></form><math><mi>x</mi></math>
+<table class="infobox"><tr><td><table class="wikitable"><tr><td>داخل</td></tr></table></td></tr></table>
+<details><summary>المزيد</summary><p>مطوي</p></details></section>
+<section data-mw-section-id="1"><div class="mw-heading mw-heading2"><h2 id="إسكان">السكان<span class="mw-editsection">تعديل</span></h2></div>
+<p id="rdQ">يبلغ عدد السكان أكثر من مليونين.</p><div class="navbox">روابط كثيرة</div></section>
+</div></div><div class="zim-footer">This article is issued from Wikipedia via Kiwix</div></body></html>`;
+
+/** The reader page in jsdom, with a fake lamhaWiki: `articles` by path ("" = the main page). */
+async function readerPage({ articles = {}, files, uiLang = "ar" } = {}) {
+  const dom = new JSDOM('<!DOCTYPE html><html><body><div id="app"></div></body></html>', { runScripts: "outside-only", url: "https://reader.lamha.test/", pretendToBeVisual: true /* jsdom keeps no storage for file: pages; Electron does */ });
+  const w = dom.window;
+  const calls = [], opened = [];
+  let onOpen = null;
+  const list = files || [{ id: "ar1", lang: "ar", scope: "top", flavour: "mini", date: "2026-07-10", articles: 231103, title: "x", missing: false }];
+  w.browser = {
+    storage: { sync: { get: async d => ({ ...d, uiLang }) }, onChanged: { addListener() {} } },
+    tabs: { create: async ({ url }) => { opened.push(url); } },
+    runtime: { getURL: p => "lamha://app/" + p }
+  };
+  w.lamhaWiki = {
+    list: async () => ({ ok: true, data: { files: list } }),
+    article: async (fileId, path) => {
+      calls.push(["article", fileId, path]);
+      const a = Object.hasOwn(articles, path) ? articles[path] : null;
+      return { ok: true, data: a && { fileId: fileId || "ar1", path, lang: "ar", flavour: "mini", date: "2026-07-10", url: "https://ar.wikipedia.org/wiki/" + path, ...a } };
+    },
+    suggest: async (q, lang) => { calls.push(["suggest", q, lang]); return { ok: true, data: Object.keys(articles).filter(p => p && p.startsWith(q)).map(p => ({ fileId: "ar1", lang: "ar", path: p, title: p })) }; },
+    random: async () => ({ ok: true, data: { fileId: "ar1", path: "باريس" } }),
+    onOpen: f => { onOpen = f; },
+    onChanged: () => {}
+  };
+  w.scrollTo = () => {};
+  w.HTMLElement.prototype.scrollIntoView = function () { w.__scrolledTo = this.id; };
+  for (const s of ["shared/i18n.js", "desktop/renderer/i18n-desktop.js", "desktop/renderer/wiki/sanitize.js", "desktop/renderer/wiki/reader.js"]) w.eval(src(s));
+  await sleep(100);
+  return { w, calls, opened, open: msg => onOpen(msg), $: id => w.document.getElementById(id) };
+}
+const ARTICLES = { "باريس": { title: "باريس", html: PARIS_HTML }, "فرنسا": { title: "فرنسا", html: "<p>فرنسا دولة في غرب أوروبا، عاصمتها باريس.</p>" } };
+
+await step("Wikipedia reader: an article is rebuilt from an allow-list: no scripts, handlers, styles, frames or forms; links and pictures are the reader's", async () => {
+  const r = await readerPage();
+  const doc = r.w.document;
+  const { fragment, headings } = r.w.LamhaWikiSanitize.article(PARIS_HTML, { path: "باريس", assetUrl: p => "lamha-wiki://zim/ar1/" + p, document: doc });
+  const div = doc.createElement("div");
+  div.append(fragment);
+  assert.equal(div.querySelectorAll("script, style, iframe, form, input, link, meta, math, svg").length, 0);
+  assert.ok(![...div.querySelectorAll("*")].some(el => [...el.attributes].some(a => /^on/i.test(a.name) || a.name === "style")), "no handlers, no inline styles");
+  assert.deepEqual([...div.querySelectorAll("a")].map(a => [a.textContent, a.getAttribute("href"), a.dataset.path || a.dataset.anchor || a.dataset.ext]),
+    [["عاصمة فرنسا", "#", "فرنسا"], ["ليون", "#", "Lyon"], ["السكان", "#", "wk-إسكان"], ["موقعها", "#", "https://www.paris.fr/"]], "javascript: is left as text");
+  assert.match(div.textContent, /رابط خطر/);
+  assert.deepEqual([...div.querySelectorAll("img")].map(i => i.getAttribute("src")), ["lamha-wiki://zim/ar1/_assets_/a/Eiffel.jpg"], "pictures from the file only: nothing from the web");
+  assert.ok(div.querySelector("#wk-rdQ") && !div.querySelector("#rdQ"), "the article's ids never meet the reader's");
+  assert.deepEqual(JSON.parse(JSON.stringify(headings)), [{ id: "wk-إسكان", text: "السكان", level: 2 }]);
+  assert.doesNotMatch(div.textContent, /Kiwix|روابط كثيرة|تعديل/, "Kiwix's footer, navigation boxes and edit links are left out");
+  assert.deepEqual([...div.querySelectorAll(".wk-scroll")].map(d => d.className), ["wk-scroll wk-infobox", "wk-scroll"], "tables scroll, inner ones too");
+  assert.equal(div.querySelector("details").open, true);
+  let deep = "";
+  for (let i = 0; i < 3000; i++) deep += "<div>";
+  assert.doesNotThrow(() => r.w.LamhaWikiSanitize.article(deep + "x", { path: "x", assetUrl: p => p, document: doc }), "very deep nesting is cut, not a crash");
+  assert.equal(r.w.__pwned, undefined);
+});
+
+await step("Wikipedia reader: search suggests titles, Enter opens one; links open articles, places or the web; back and forward remember", async () => {
+  const r = await readerPage({ articles: ARTICLES });
+  const main = r.$("rdMain");
+  assert.match(text(main), /ويكيبيديا دون إنترنت/, "the start page");
+  assert.ok(r.$("rdRandom"));
+  const q = r.$("rdQ");
+  q.value = "بار";
+  q.dispatchEvent(new r.w.Event("input", { bubbles: true }));
+  await sleep(250);
+  assert.deepEqual([...r.$("rdSug").querySelectorAll("li")].map(text), ["باريس"]);
+  q.dispatchEvent(new r.w.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  await sleep(100);
+  assert.equal(text(main.querySelector(".rd-title")), "باريس");
+  assert.equal(main.querySelector(".rd-article").dir, "rtl");
+  assert.match(r.w.document.title, /^باريس — /);
+  assert.equal(r.$("rdToc").querySelectorAll("a").length, 1, "contents: the article's headings");
+  main.querySelector('a[data-path="فرنسا"]').click();
+  await sleep(100);
+  assert.equal(text(main.querySelector(".rd-title")), "فرنسا");
+  r.$("rdBack").click();
+  await sleep(100);
+  assert.equal(text(main.querySelector(".rd-title")), "باريس");
+  assert.equal(r.$("rdFwd").disabled, false);
+  main.querySelector('a[data-anchor="wk-إسكان"]:not([data-path])').click();
+  assert.equal(r.w.__scrolledTo, "wk-إسكان", "a place in the article");
+  main.querySelector("a[data-ext]").click();
+  main.querySelector('a[data-path="Lyon"]').click();
+  await sleep(100);
+  assert.equal(text(main.querySelector(".rd-title")), "باريس", "an article the copy doesn't have: the page stays");
+  const toast = r.w.document.querySelector(".rd-toast");
+  assert.equal(toast.hidden, false);
+  assert.match(text(toast), /ليست في النسخة المنزّلة/);
+  toast.querySelector("button").click();
+  assert.deepEqual(r.opened, ["https://www.paris.fr/", "https://ar.wikipedia.org/wiki/Lyon"], "the web, in the default browser");
+  r.open({ file: "ar1", path: "فرنسا" }); // the card's "Read the article in Lamha"
+  await sleep(100);
+  assert.equal(text(main.querySelector(".rd-title")), "فرنسا");
+});
+
+await step("Wikipedia reader: text size starts in the middle and is remembered; English interface: the article keeps its own edge", async () => {
+  const r = await readerPage({ articles: ARTICLES, uiLang: "en" });
+  assert.equal(r.w.document.documentElement.style.getPropertyValue("--rd-size"), "17px");
+  assert.equal(r.$("rdSmaller").disabled, false, "nothing saved yet: not the smallest size");
+  r.$("rdSmaller").click();
+  assert.equal(r.w.document.documentElement.style.getPropertyValue("--rd-size"), "16px");
+  assert.equal(r.w.localStorage.getItem("lamhaWikiSize"), "2");
+  r.open({ file: "ar1", path: "باريس" });
+  await sleep(100);
+  const meta = r.w.document.querySelector(".rd-meta");
+  assert.equal(meta.dir, "rtl", "under an Arabic title, on its side");
+  assert.equal(meta.firstElementChild.dir, "ltr", "in English words");
+});
+
+await step("Wikipedia reader: with nothing downloaded, the start page says so and leads to Settings", async () => {
+  const r = await readerPage({ files: [] });
+  assert.match(text(r.$("rdMain")), /لم تنزّل ويكيبيديا بعد/);
+  r.$("rdMain").querySelector(".btn").click();
+  assert.deepEqual(r.opened, ["lamha://app/options/options.html#wikipedia"]);
 });
 
 console.log(results.join("\n"));

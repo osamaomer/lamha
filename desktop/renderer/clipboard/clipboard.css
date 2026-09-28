@@ -198,6 +198,30 @@ html[dir="ltr"] .ca-back svg { transform: scaleX(-1); } /* the arrow points back
 .up-notes li + li { margin-top: 4px; }
 .up-older { margin: 0 0 10px; }
 .up-older summary { cursor: pointer; color: var(--accent); font-size: 13px; font-weight: 600; padding: 4px 0; }
+
+/* Settings → Offline Wikipedia (wiki-settings.js): rows like the language packs' (.packs, options.css) */
+.wk-files li.empty { display: block; color: var(--faint); font-size: 13px; }
+.packs li > .grow { flex: 1; min-width: 0; }
+.packs li small { display: block; }
+.wk-path { font-family: var(--font-en); overflow-wrap: anywhere; color: var(--faint); }
+.wk-msg { display: block; font-size: 12.5px; color: var(--muted); }
+.wk-msg.err { color: var(--danger); }
+.wk-bar { height: 4px; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: 6px; }
+.wk-bar span { display: block; height: 100%; background: var(--btn); border-radius: inherit; transform-origin: left; transition: transform .25s linear; }
+[dir="rtl"] .wk-bar span { transform-origin: right; }
+.wk-dl .cb-set-acts { align-items: center; }
+.wk-get-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 2px; }
+.wk-get-h .sub { margin: 0; }
+.wk-get-h select { width: auto; min-width: 150px; }
+.wk-state { margin: 10px 0; }
+.wk-err { border-radius: var(--r-md); margin: 8px 0; }
+.wk-tag {
+  display: inline-block; margin-inline-start: 8px; padding: 0 7px; border-radius: 999px; vertical-align: 1px;
+  background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700;
+}
+.wk-have { font-size: 12.5px; font-weight: 600; color: var(--ok, var(--muted)); min-width: 96px; text-align: center; }
+.wk-topics { margin: 4px 0 8px; }
+.wk-topics summary { cursor: pointer; color: var(--accent); font-size: 13px; font-weight: 600; padding: 6px 0; }
 .up-older summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-sm); }
 .up-older h4 { font-size: 13px; font-weight: 700; margin: 12px 0 4px; }
 

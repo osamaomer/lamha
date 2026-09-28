@@ -58,7 +58,7 @@ label.opt { cursor: pointer; }
 .packs li:first-child { border-top: 0; }
 .packs li b { display: block; font-weight: 600; font-size: 13.5px; }
 .packs li small { margin-top: 0; }
-.packs li small.err { color: var(--danger); }
+.packs li small.err, #appState.err { color: var(--danger); }
 .packs .btn { min-width: 96px; justify-content: center; }
 
 select {

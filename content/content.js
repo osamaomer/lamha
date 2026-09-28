@@ -613,8 +613,11 @@
     if (res.data.milestone || res.data.goal) LamhaMotion.burst(card.querySelector(".milestone"), { layer: root });
     if (settings.autoSpeak && res.data.type === "word") speak(res.data.query, res.data.src, null);
     if (pending.length) fillGlosses(pending, token);
-    if (settings.dictSource !== "offline" && settings.showWikipedia && res.data.type === "word" && res.data.src === "en" && res.data.query.length > 2) {
-      const w = await send({ type: "wiki", title: res.data.query, lang: res.data.tl === "en" ? "en" : settings.targetLang });
+    if (settings.showWikipedia && res.data.type === "word" && res.data.src === "en" && res.data.query.length > 2) {
+      // "offline": only a downloaded Wikipedia (Windows app) may answer; alt: the word's translations, which name the
+      // article in the other language when there's no internet to ask Wikipedia for the link between the two
+      const w = await send({ type: "wiki", title: res.data.query, lang: res.data.tl === "en" ? "en" : settings.targetLang,
+        alt: wikiTitles(res.data), offline: settings.dictSource === "offline" });
       if (token !== reqId || !bodyEl || !w || !w.data) return;
       bodyEl.append(wikiSection(w.data));
     }
@@ -825,15 +828,34 @@
     }, t.word);
   }
 
+  /** Titles a downloaded Wikipedia in the translation language may have for this word: its translation and the
+   *  first word of each meaning ("paris" → باريس). Explained words have no translation to go by. */
+  function wikiTitles(d) {
+    if (d.mode === "explain") return [];
+    const out = [];
+    for (const t of [...String(d.translation || "").split(/[،,;؛]/), ...(d.dict || []).map(p => p.terms && p.terms[0] && p.terms[0].word)]) {
+      const v = String(t || "").trim();
+      if (v && v.length <= 60 && !out.includes(v)) out.push(v);
+    }
+    return out.slice(0, 4);
+  }
+
   function wikiSection(w) {
     const xDir = dirOf(w.lang);
+    const offline = w.offline && /^\d{4}-\d{2}/.test(w.offline.date || "")
+      ? new Date(w.offline.date.slice(0, 7) + "-15T12:00:00").toLocaleDateString(LamhaI18n.lang() === "en" ? "en-US" : "ar-EG", { year: "numeric", month: "long" })
+      : "";
     return h("div", { class: "sec" },
-      h("div", { class: "sec-h" }, L("c.wikipedia")),
+      h("div", { class: "sec-h" }, L("c.wikipedia"),
+        w.offline && h("span", { class: "wiki-offline", title: L("c.wikiOfflineTitle") }, icon("book", 11), offline ? L("c.wikiOffline", { date: offline }) : L("c.wikiOfflineShort"))),
       h("div", { class: "wiki", dir: "rtl" },
         w.thumb && h("img", { src: w.thumb, alt: "", loading: "lazy", referrerpolicy: "no-referrer", onerror: e => e.currentTarget.remove() }),
         h("div", { style: { minWidth: "0" } },
           h("div", { class: "x", dir: xDir }, w.extract),
-          w.url && h("a", { href: w.url, target: "_blank", rel: "noopener noreferrer" }, L("c.readWiki"), icon("external", 12))
+          // from the downloaded copy (the Windows app's, also from Firefox): the article opens in the app's own reader
+          w.offline && w.offline.path
+            ? h("a", { href: "#", role: "button", onclick: e => { e.preventDefault(); send({ type: "wikiOpen", file: w.offline.id || "", path: w.offline.path }); } }, L("c.readWikiHere"), icon("book", 12))
+            : w.url && h("a", { href: w.url, target: "_blank", rel: "noopener noreferrer" }, L("c.readWiki"), icon("external", 12))
         )
       )
     );

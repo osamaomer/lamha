@@ -85,6 +85,14 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
     CLIPS.forEach((c, i) => clipStore.ingest({ ...c, capturedAt: Date.now() - (CLIPS.length - i) * 7 * 60e3 }));
   }
 
+  // Wikipedia .zim files, separated by ";" (e.g. Kiwix's wikipedia_ar_top_mini): Settings lists them, the card reads
+  // Paris from them, and the reader shows its start page, a search and articles (Karbon too, from a Turkish maxi file)
+  const zim = process.env.LAMHA_SHOTS_ZIM;
+  const wiki = desktop.getWikiLibrary && desktop.getWikiLibrary();
+  if (zim && wiki) {
+    for (const f of zim.split(";").filter(Boolean)) await wiki.addFile(f).catch(err => console.log("offline Wikipedia file:", err.code || err.message));
+  }
+
   const only = process.env.LAMHA_SHOTS_ONLY; // e.g. "dark-ar": one set, for a quick check
   for (const theme of ["light", "dark"]) {
     for (const lang of ["ar", "en"]) {
@@ -100,6 +108,15 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       cw.showInactive();
       await card("card-word-in-sentence", { type: "showLookup", ...WORD_CTX });
       await card("card-word-wikipedia", { type: "showLookup", text: "serendipity" }, 4500);
+      if (zim && wiki) { // the same part of the card, from the downloaded copy
+        await stores.local.set({ wikiOfflineFirst: true });
+        await card("card-wikipedia-offline", { type: "showLookup", text: "Paris" }, 2500);
+        const b = cw.getContentBounds(); // down to the Wikipedia part, at the end of the card
+        cw.webContents.sendInputEvent({ type: "mouseWheel", x: Math.round(b.width / 2), y: Math.round(b.height / 2), deltaX: 0, deltaY: -4000 });
+        await wait(700);
+        await save(cw, "card-wikipedia-offline-end");
+        await stores.local.set({ wikiOfflineFirst: false });
+      }
       await stores.sync.set({ enDict: true });
       await wait(300);
       await card("card-english-view", { type: "showLookup", text: "bank", context: { before: "I deposited the check at the ", after: " this morning." } }, 4000);
@@ -211,13 +228,40 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       ow.setPosition(600, 40);
       ow.showInactive();
       await wait(1200);
-      for (const id of [null, "dictionary", "translation", "ai", "review", "journal", "appearance", "privacy", "updatesPanel", "clipPanel", "cbAppForm"]) {
+      for (const id of [null, "dictionary", "wikiPanel", "translation", "ai", "review", "journal", "appearance", "privacy", "updatesPanel", "clipPanel", "cbAppForm"]) {
         const found = await js(ow, id ? `(() => { const s = document.getElementById("${id}"); if (!s || s.offsetParent === null) return false; s.scrollIntoView({ block: "start" }); return true; })()` : "scrollTo(0, 0); true");
         if (!found) continue;
         await wait(700);
         await save(ow, "settings-" + (id || "top").toLowerCase());
       }
       ow.hide();
+
+      /* the Wikipedia reader */
+      if (zim && wiki) {
+        const rw = desktop.openReader({});
+        await loaded(rw);
+        rw.setContentSize(1100, 820);
+        rw.setPosition(560, 40);
+        rw.showInactive();
+        await wait(1500);
+        await save(rw, "reader-home");
+        await js(rw, `(() => { const q = document.getElementById("rdQ"); q.focus(); q.value = "بار"; q.dispatchEvent(new Event("input", { bubbles: true })); return true; })()`);
+        await wait(900);
+        await save(rw, "reader-search");
+        for (const article of ["باريس", "Karbon"]) {
+          if (!await wiki.article("", article).catch(() => null)) continue;
+          desktop.openReader({ path: article });
+          await wait(1800);
+          await save(rw, "reader-" + (article === "Karbon" ? "pictures" : "article"));
+        }
+        rw.setContentSize(620, 820); // narrow: contents behind a button, no floats
+        await wait(900);
+        await save(rw, "reader-narrow");
+        await js(rw, `(() => { const s = document.querySelector(".rd-body h2"); if (s) s.scrollIntoView(); return true; })()`);
+        await wait(700);
+        await save(rw, "reader-narrow-section");
+        rw.hide();
+      }
 
       /* the quick clipboard panel (Win+V-like) */
       if (clipStore) {

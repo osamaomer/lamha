@@ -169,6 +169,7 @@ Select text on any page and a small **بحث** (Look Up) / **ترجمة** (Trans
   - **مراجعة:** word review.
   - An on/off switch for the current site, and page translation.
 - Works inside iframes. The card lives in a closed Shadow DOM, so websites can't break its styling.
+- **With Lamha for Windows on the same PC:** Settings → *لمحة لـ Windows* → *اتصال* links the two (Firefox asks for permission once). The extension then uses the Wikipedia you downloaded in the app: the card's Wikipedia part works without internet, and *اقرأ المقالة في لمحة* opens the article in the app's reader (starting the app in the tray if it isn't running). Nothing goes over the network: Firefox starts a small helper the app wrote, which talks to the app on this PC only.
 
 ### ⌨️ Shortcuts
 
@@ -245,6 +246,20 @@ Lamha presses Ctrl+C for you to read the selection and Ctrl+V to paste the resul
 - With *فهم الكلمة من سياق الجملة* on, Lamha also reads the sentence around a word through Windows UI Automation, so it can pick the right meaning.
 - For the double-click button, a small mouse hook in Lamha's helper process notices left-button presses (never the keyboard), and UI Automation says whether the box you double-clicked is empty. The box's text is only checked for emptiness; it's never stored or sent anywhere.
 </details>
+
+### 📖 Wikipedia without internet
+
+Settings → **ويكيبيديا دون إنترنت** downloads Wikipedia to your PC, so the card's Wikipedia part keeps working with no connection. It's optional: nothing is downloaded until you choose something.
+
+- **What you can download** comes from [Kiwix](https://kiwix.org)'s catalog, in the language you pick: *Top articles* or *All articles*, each as *Mini* (introductions only, all the card needs), *Full, no pictures* or *Full, with pictures*, plus topic sets (medicine, history…). For example, Arabic Top articles · Mini is 226 MB for 231,000 articles; all of Arabic Wikipedia with pictures is 19 GB.
+- **Downloads** come from the fastest of Kiwix's mirrors. They can be paused, resume where they stopped (also after a restart or a dropped connection, from another mirror), and are checked against Kiwix's SHA-256 before they're used. Files over 2 GB ask first.
+- **Where:** `%APPDATA%\Lamha\wikipedia` by default. *تغيير* picks another folder (a big file may belong on another drive).
+- **A file you already have** (from Kiwix, for example) can be added as it is: Lamha reads it where it is, and removing it from Lamha never deletes it.
+- **When the card uses it:** when Wikipedia can't be reached, or always with *استخدم النسخة المنزّلة أولًا* (faster, and nothing goes online). With the dictionary on *Local only*, only the downloaded copy is used. The card marks it *من النسخة المنزّلة* with the file's month.
+- With no internet, nothing links an English word to its Arabic article, so the card looks for the article under the word's translation (Paris → باريس), then in an English file if you have one.
+- **Read whole articles in Lamha:** *اقرأ المقالة في لمحة* on the card, *قراءة* next to a file in Settings, or **ويكيبيديا** in the tray menu opens Lamha's own reader. It has a search box that suggests titles as you type, back and forward (also <kbd>Alt</kbd>+arrows and the mouse's side buttons), contents, text size, a random article, and *open on Wikipedia* when you're online. Select any word in an article to look it up with Lamha, as on a web page. Mini files hold introductions only, so their articles end after the lead.
+- **From Firefox too:** the Lamha extension can use these files (Settings → Firefox in the app, *لمحة لـ Windows* in the extension; see the Firefox part).
+- **Safe by design:** an article is rebuilt from a short list of allowed tags before it's shown, so nothing in a downloaded file can run (no scripts, event handlers, styles, frames or forms). Links are handled by the reader, never followed by the page. Pictures come only from the file, and a strict content policy blocks everything else.
 
 ### 📋 الحافظة: clipboard history
 
@@ -346,14 +361,19 @@ desktop/                    Windows app (Electron)
   preload.js, storage.js    The browser.* API for pages; storage in JSON files
   native.js, selection.js   Windows calls; reading and pasting selections in other apps
   pack-store.js             Where downloaded language packs are kept (files in %APPDATA%\Lamha\packs)
+  native-bridge.js          The Firefox extension's link to the app: the native messaging host (PowerShell) and the pipe it talks to
+  build/installer.nsh       Uninstalling removes Firefox's registry entry for the link
+  zim.js                    Reads Wikipedia's offline files (.zim, Kiwix's format): articles, redirects, titles
+  wiki-library.js           Offline Wikipedia: Kiwix's catalog, downloads (mirrors, resume, SHA-256), the card's summaries, the reader's articles
   uia-context.js            A helper process: the sentence around a word in other apps, the double-click mouse hook
   double-click.js           When a double-click shows the Write button (pairing clicks, which apps)
   clipboard-*.js            Clipboard history: capture, store, privacy, tools
   updater.js                Updates from GitHub Releases
   renderer/                 Card window, clipboard UI, desktop strings and styles
+  renderer/wiki/            The Wikipedia reader: reader.html/js/css, and sanitize.js (rebuilds articles from an allow-list)
   scripts/                  run, smoke test, icons, copying the extension files in
 dict/                       Offline dictionary data (generated)
-tools/                      Tests and the dictionary builder
+tools/                      Tests (zim-fixture.mjs writes small .zim files for them) and the dictionary builders
 ```
 
 ### Tests
@@ -367,10 +387,10 @@ npm run lint    # web-ext lint (0 errors, 0 warnings expected)
 | File | What it covers |
 |---|---|
 | `tools/test-writing.mjs` | The writing tools and flashcard scheduling, running the real background code with a fake browser and a fake network (no key needed). Add `--ollama` for one real proofread through local Ollama, or `--gemini` with `GEMINI_API_KEY` set for both Gemini models. |
-| `tools/test-ui.mjs` | Renders the real popup and settings pages in jsdom and clicks through review, compose and the journal |
+| `tools/test-ui.mjs` | Renders the real popup and settings pages in jsdom and clicks through review, compose and the journal; also the Windows app's Wikipedia reader (its article cleaner, search, links, back and forward) |
 | `tools/test-clipboard.mjs` | Clipboard history: Arabic search, the encrypted store, tools on clips, privacy rules |
 | `tools/test-updater.mjs` | The desktop updater |
-| `tools/test-desktop.mjs` | The desktop's double-click Write button: pairing clicks, which apps get it, and (on Windows) the helper's script and mouse hook |
+| `tools/test-desktop.mjs` | The Windows app's own parts: offline Wikipedia (reading .zim files, the card's summary, Kiwix's catalog, downloads that break and resume), the double-click Write button (pairing clicks, which apps get it, and on Windows the helper's script and mouse hook), the language-pack store and the changelog. Set `LAMHA_TEST_ZIM` to a real `wikipedia_ar_*.zim` from Kiwix to check it too. |
 | `tools/compare-translation.mjs` | Not a test: runs the same sentences through Google, Gemini and Ollama and writes `translation-report.md`, to judge AI translation quality. Needs `GEMINI_API_KEY` and/or `--ollama <url>`. |
 
 ### Building the language packs
@@ -406,7 +426,9 @@ Lamha sends nothing until you ask it to.
 | Translations, dictionary, pronunciation | Google Translate's public endpoints (`translate.googleapis.com`, failing over to `clients5.google.com` when one is rate-limited) | When you open a card or translate a page |
 | Sentences, paragraphs and pages, with AI translation | Your chosen translator: Ollama (your PC), Gemini or Claude | When the translation service uses the AI (Settings → الترجمة), or you press ✨ Better translation |
 | The sentence around a selected word (the word included) | The translation service, to pick the right meaning | With *فهم الكلمة من سياق الجملة* on (the default). On Local only, only a local AI (Ollama) gets it. |
-| Encyclopedia summaries | Wikipedia's REST API | For word lookups, when enabled |
+| Encyclopedia summaries | Wikipedia's REST API, or the Wikipedia you downloaded (Windows app), which sends nothing | For word lookups, when enabled |
+| Firefox ↔ the Windows app | Nowhere: a helper on this PC (PowerShell, written by the app) passes messages between Firefox and the app over a local pipe | Only after you press اتصال in the extension's Settings |
+| Offline Wikipedia (Windows app) | Kiwix: its catalog (`library.kiwix.org`), then the file from one of its mirrors (`download.kiwix.org`, `dumps.wikimedia.org`…) | Only when you open that Settings section, and when you press تنزيل |
 | Language packs (French–French…) | Downloaded from this project's GitHub releases; nothing is sent | Only when you press تنزيل in Settings |
 | Writing tools | The provider you chose: Ollama (your PC, `localhost:11434`), Gemini (`generativelanguage.googleapis.com`) or Claude (`api.anthropic.com`) | Only when you press a tool |
 | Clipboard items (Windows app) | The same service the tool uses anywhere else | Only when you press a tool on an item |
@@ -422,4 +444,4 @@ Lamha sends nothing until you ask it to.
 
 ## License
 
-The code is under the [MIT License](LICENSE). The dictionary data in `dict/` is CC BY-SA 4.0; see [dict/LICENSES.md](dict/LICENSES.md). The downloadable language packs come from the French, German, Spanish and Turkish Wiktionaries (CC BY-SA 4.0), extracted by [kaikki.org](https://kaikki.org) (wiktextract), with word frequencies from wordfreq (CC BY-SA 4.0).
+The code is under the [MIT License](LICENSE). The dictionary data in `dict/` is CC BY-SA 4.0; see [dict/LICENSES.md](dict/LICENSES.md). The downloadable language packs come from the French, German, Spanish and Turkish Wiktionaries (CC BY-SA 4.0), extracted by [kaikki.org](https://kaikki.org) (wiktextract), with word frequencies from wordfreq (CC BY-SA 4.0). Offline Wikipedia files are Wikipedia's articles (CC BY-SA 4.0), packaged by [Kiwix](https://kiwix.org) (openZIM); the app downloads them, they aren't part of this repository.

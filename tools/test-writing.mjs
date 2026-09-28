@@ -39,7 +39,7 @@ function memoryPackStore() {
 }
 
 /** `realDict`: the real local-dict.js, reading the dictionary files from dict/ (other requests go to `fetchImpl`). */
-function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = false, packStore = memoryPackStore() }) {
+function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = false, packStore = memoryPackStore(), wiki = null, connectNative = null }) {
   if (realDict) {
     const net = fetchImpl;
     fetchImpl = async (url, init) => {
@@ -52,7 +52,8 @@ function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = fa
   const noopEvent = { addListener() {} };
   const browser = {
     storage: { local: storageArea(local), sync: storageArea(sync), onChanged: noopEvent },
-    runtime: { onMessage: { addListener: f => { onMessage = f; } }, onInstalled: { addListener: f => installed.push(f) }, onStartup: noopEvent, getURL: p => "moz-extension://x/" + p },
+    runtime: { onMessage: { addListener: f => { onMessage = f; } }, onInstalled: { addListener: f => installed.push(f) }, onStartup: noopEvent, getURL: p => "moz-extension://x/" + p,
+      ...(connectNative ? { connectNative } : {}) }, // Firefox on a computer: the link to Lamha for Windows
     menus: { removeAll: async () => {}, create() {}, onClicked: noopEvent },
     commands: { onCommand: noopEvent },
     tabs: { query: async () => [], sendMessage: async () => {}, create: async () => {} },
@@ -61,6 +62,7 @@ function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = fa
   const ctx = vm.createContext({
     browser, fetch: fetchImpl, console, setTimeout, clearTimeout, AbortController, URLSearchParams, structuredClone,
     Response, TransformStream, DecompressionStream, LamhaPackStore: packStore,
+    ...(wiki ? { LamhaWikiOffline: wiki } : {}), // a downloaded Wikipedia (the Windows app's desktop/wiki-library.js)
     ...(realDict ? {} : { LocalDict: {} }), Audio: class {}
   });
   vm.runInContext(src("shared/i18n.js"), ctx, { filename: "i18n.js" });
@@ -1043,6 +1045,144 @@ test("a pack that isn't there, is damaged or is for another language is refused,
   assert.deepEqual(plain(await env.send({ type: "packInstall", lang: "../x" })), { ok: false, error: "pack_unknown" });
   assert.equal(env.packStore.data.size, 0);
   assert.ok((await env.send({ type: "packList" })).data.every(p => !p.installed && p.progress === null));
+});
+
+/** A downloaded Wikipedia, as the Windows app hands it to the background: articles by "lang|title". */
+function fakeWiki(articles) {
+  const asked = [];
+  return {
+    asked,
+    langs: () => [...new Set(Object.keys(articles).map(k => k.split("|")[0]))],
+    summary: async (titles, lang) => {
+      asked.push([lang, ...titles]);
+      for (const t of titles) {
+        if (Object.hasOwn(articles, lang + "|" + t)) return { lang, title: t, extract: articles[lang + "|" + t], url: "", thumb: "", offline: { date: "2026-07-10", id: "x", path: t } };
+      }
+      return null;
+    }
+  };
+}
+/** Wikipedia itself: Paris has an Arabic article. `net.online = false` turns the internet off. */
+function wikipediaNet() {
+  const net = { online: true };
+  const rec = recorder(url => {
+    if (!net.online) throw new TypeError("NetworkError when attempting to fetch resource.");
+    if (url.includes("en.wikipedia.org/w/api.php")) return json(200, { query: { pages: { 1: { title: "Paris", langlinks: [{ "*": "باريس" }] } } } });
+    if (url.includes("ar.wikipedia.org/api/rest_v1/page/summary/")) return json(200, { type: "standard", title: "باريس", extract: "من ويكيبيديا نفسها.", content_urls: { desktop: { page: "https://ar.wikipedia.org/wiki/x" } } });
+    return json(404, {});
+  });
+  return Object.assign(net, rec);
+}
+
+test("offline Wikipedia: with no internet the downloaded copy answers, found by the word's translation; it isn't kept, so Wikipedia answers once back online", async () => {
+  const wiki = fakeWiki({ "ar|باريس": "باريس عاصمة فرنسا." });
+  const net = wikipediaNet();
+  net.online = false;
+  const env = makeEnv({ fetchImpl: net.fetchImpl, wiki });
+  const off = await env.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"] });
+  assert.equal(off.data.extract, "باريس عاصمة فرنسا.");
+  assert.equal(off.data.offline.date, "2026-07-10", "the card can say it's the downloaded copy");
+  assert.deepEqual(plain(wiki.asked), [["ar", "باريس", "Paris"]], "the translation first: no internet to ask Wikipedia for the Arabic title");
+  net.online = true;
+  const on = await env.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"] });
+  assert.equal(on.data.extract, "من ويكيبيديا نفسها.");
+  assert.equal(on.data.offline, undefined);
+});
+
+test("offline Wikipedia: 'offline only' never asks Wikipedia; without a downloaded copy the card gets nothing, still without going online", async () => {
+  const net = wikipediaNet();
+  const withCopy = makeEnv({ fetchImpl: net.fetchImpl, wiki: fakeWiki({ "ar|باريس": "باريس عاصمة فرنسا." }) });
+  assert.equal((await withCopy.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"], offline: true })).data.extract, "باريس عاصمة فرنسا.");
+  const without = makeEnv({ fetchImpl: net.fetchImpl });
+  assert.equal((await without.send({ type: "wiki", title: "Paris", lang: "ar", offline: true })).data, null);
+  assert.equal(net.calls.length, 0, "nothing went online");
+});
+
+test("offline Wikipedia first (a per-device setting): the copy answers before Wikipedia; what it doesn't have is asked online", async () => {
+  const net = wikipediaNet();
+  const env = makeEnv({ fetchImpl: net.fetchImpl, local: { wikiOfflineFirst: true }, wiki: fakeWiki({ "ar|باريس": "باريس عاصمة فرنسا." }) });
+  assert.equal((await env.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"] })).data.extract, "باريس عاصمة فرنسا.");
+  assert.equal(net.calls.length, 0);
+  await env.send({ type: "wiki", title: "Lyon", lang: "ar", alt: ["ليون"] });
+  assert.ok(net.calls.length > 0, "not in the copy: Wikipedia is asked");
+});
+
+test("offline Wikipedia: the English copy answers when the translation language's copy has no such article", async () => {
+  const wiki = fakeWiki({ "en|Photosynthesis": "Photosynthesis is how plants make food." });
+  const env = makeEnv({ fetchImpl: wikipediaNet().fetchImpl, wiki });
+  const r = await env.send({ type: "wiki", title: "Photosynthesis", lang: "ar", alt: ["تركيب ضوئي"], offline: true });
+  assert.equal(r.data.lang, "en");
+  assert.deepEqual(plain(wiki.asked), [["ar", "تركيب ضوئي", "Photosynthesis"], ["en", "Photosynthesis"]]);
+  const bad = await env.send({ type: "wiki", title: "Photosynthesis", lang: "ar", alt: [{ toString: () => "x" }, "y".repeat(200)], offline: true });
+  assert.equal(bad.data.lang, "en");
+  assert.deepEqual(plain(wiki.asked[2]), ["ar", "Photosynthesis"], "only short text titles are passed on");
+});
+
+/** Lamha for Windows as Firefox reaches it (runtime.connectNative): answers by message type. missing: not installed. */
+function fakeApp(handlers, { missing = false } = {}) {
+  const sent = [];
+  const connectNative = name => {
+    const onMsg = [], onGone = [];
+    const port = {
+      name, error: null,
+      onMessage: { addListener: f => onMsg.push(f) },
+      onDisconnect: { addListener: f => onGone.push(f) },
+      disconnect() {},
+      postMessage: m => {
+        sent.push(JSON.parse(JSON.stringify(m)));
+        setTimeout(async () => {
+          if (missing) { port.error = { message: "No such native application com.artworklab.lamha" }; onGone.forEach(f => f(port)); return; }
+          const reply = Object.hasOwn(handlers, m.type) ? { id: m.id, ok: true, data: await handlers[m.type](m) } : { id: m.id, ok: false, error: "unknown" };
+          onMsg.forEach(f => f(reply));
+        }, 0);
+      }
+    };
+    return port;
+  };
+  return { sent, connectNative };
+}
+const APP_HELLO = { hello: () => ({ app: "lamha", version: "1.10.0", wiki: { langs: ["ar"] } }) };
+
+test("Firefox with Lamha for Windows connected: the card's Wikipedia comes from the app's copy, and only fields of the right kind are kept", async () => {
+  const app = fakeApp({ ...APP_HELLO, wikiSummary: m => ({
+    lang: "ar", title: "باريس", extract: "باريس عاصمة فرنسا.", url: "javascript:alert(1)", thumb: "data:text/html;base64,PHNjcmlwdD4=",
+    offline: { date: "2026-07-10", id: "wikipedia_ar_top_mini_2026-07", path: "باريس", more: "x" }, extra: "<b>", asked: m.titles
+  }) });
+  const env = makeEnv({ fetchImpl: wikipediaNet().fetchImpl, local: { appLink: true }, connectNative: app.connectNative });
+  const r = await env.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"], offline: true });
+  assert.deepEqual(plain(r.data), { lang: "ar", title: "باريس", extract: "باريس عاصمة فرنسا.", url: "", thumb: "",
+    offline: { date: "2026-07-10", id: "wikipedia_ar_top_mini_2026-07", path: "باريس" } });
+  assert.deepEqual(app.sent.map(m => [m.type, m.launch]), [["hello", false], ["wikiSummary", false]], "a lookup never starts the app");
+  assert.deepEqual(app.sent[1].titles, ["باريس", "Paris"]);
+});
+
+test("Firefox not connected in Settings: the app is never asked", async () => {
+  const app = fakeApp(APP_HELLO);
+  const env = makeEnv({ fetchImpl: wikipediaNet().fetchImpl, connectNative: app.connectNative });
+  assert.equal((await env.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"], offline: true })).data, null);
+  assert.deepEqual(plain((await env.send({ type: "appStatus" })).data), { supported: true, allowed: false });
+  assert.equal(app.sent.length, 0);
+});
+
+test("Settings → Lamha for Windows: connecting remembers it and reaches the app (starting it); not installed says so", async () => {
+  const app = fakeApp(APP_HELLO);
+  const env = makeEnv({ fetchImpl: wikipediaNet().fetchImpl, connectNative: app.connectNative });
+  const on = await env.send({ type: "appLink", on: true });
+  assert.deepEqual(plain(on.data), { supported: true, allowed: true, connected: true, version: "1.10.0", langs: ["ar"] });
+  assert.equal((await env.browser.storage.local.get("appLink")).appLink, true);
+  assert.deepEqual(app.sent.map(m => [m.type, m.launch]), [["hello", true]], "Connect may start the app");
+  const none = makeEnv({ fetchImpl: wikipediaNet().fetchImpl, local: { appLink: true }, connectNative: fakeApp(APP_HELLO, { missing: true }).connectNative });
+  assert.deepEqual(plain((await none.send({ type: "appStatus" })).data), { supported: true, allowed: true, connected: false, error: "not_installed" });
+  assert.equal((await none.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"], offline: true })).data, null, "and the card simply has no Wikipedia part");
+});
+
+test("'Read the article in Lamha' from Firefox asks the app to open it, starting the app if it isn't running", async () => {
+  const opened = [];
+  const app = fakeApp({ ...APP_HELLO, openReader: m => { opened.push([m.file, m.path]); return true; } });
+  const env = makeEnv({ fetchImpl: wikipediaNet().fetchImpl, local: { appLink: true }, connectNative: app.connectNative });
+  assert.deepEqual(plain(await env.send({ type: "wikiOpen", file: "wikipedia_ar_top_mini_2026-07", path: "باريس" })), { ok: true });
+  assert.deepEqual(opened, [["wikipedia_ar_top_mini_2026-07", "باريس"]]);
+  assert.equal(app.sent.at(-1).launch, true);
 });
 
 test("offline Arabic → English results label their word list in the interface language", async () => {

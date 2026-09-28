@@ -777,13 +777,154 @@ async function longLookup(text, sl, tl, settings) {
 
 const httpsOnly = u => (typeof u === "string" && /^https:\/\/[a-z0-9.-]+\.(wikipedia|wikimedia)\.org\//i.test(u) ? u : "");
 
-async function wikiSummary(title, preferLang = "ar") {
+/**
+ * A downloaded Wikipedia: in the Windows app the background has `LamhaWikiOffline` (desktop/wiki-library.js); in
+ * Firefox, the app's copy through the link to it (askApp below), when the user connected the two. The translation
+ * language's file first, with the word's translations as titles (no internet: nothing links an English title to its
+ * Arabic article), then the English file with the word itself.
+ */
+async function offlineWiki() {
+  if (typeof LamhaWikiOffline !== "undefined") return LamhaWikiOffline.langs().length ? LamhaWikiOffline : null;
+  const info = await appInfo().catch(() => null);
+  const langs = info && info.wiki && Array.isArray(info.wiki.langs) ? info.wiki.langs.filter(l => typeof l === "string") : [];
+  return langs.length ? {
+    langs: () => langs,
+    summary: async (titles, lang) => (langs.includes(lang) ? cleanWiki(await askApp("wikiSummary", { titles, lang })) : null)
+  } : null;
+}
+async function offlineWikiSummary(title, lang, alt) {
+  const wiki = await offlineWiki();
+  if (!wiki) return null;
+  try {
+    if (lang !== "en") {
+      const r = await wiki.summary([...alt, title], lang);
+      if (r) return r;
+    }
+    return await wiki.summary([title], "en");
+  } catch (_) { return null; }
+}
+/** An answer from another program (the app, in Firefox): only the fields the card shows, of the kinds it expects. */
+function cleanWiki(r) {
+  if (!r || typeof r.extract !== "string" || !r.extract) return null;
+  const s = (v, n) => String(typeof v === "string" ? v : "").slice(0, n);
+  const o = r.offline && typeof r.offline === "object" ? r.offline : null;
+  return {
+    lang: /^[a-z]{2,3}$/.test(r.lang) ? r.lang : "en", title: s(r.title, 300), extract: s(r.extract, 2000), url: httpsOnly(r.url),
+    thumb: typeof r.thumb === "string" && r.thumb.length < 700000 && /^data:image\/(webp|png|jpeg|gif);base64,[A-Za-z0-9+/]+=*$/.test(r.thumb) ? r.thumb : "",
+    offline: o ? { date: s(o.date, 10), id: s(o.id, 200), path: s(o.path, 500) } : undefined
+  };
+}
+
+/* ---------------- the Windows app, from Firefox (native messaging) ---------------- */
+/*
+ * With Lamha for Windows on this PC and Settings → لمحة لـ Windows connected (the optional nativeMessaging permission,
+ * and storage.local appLink), Firefox reaches the app through its host (desktop/native-bridge.js): the app's downloaded
+ * Wikipedia answers the card, and articles open in the app's reader. One request at a time goes out, each with an id;
+ * the link closes after 5 minutes unused (the host is a PowerShell process). Only opening an article starts the app.
+ */
+const APP_HOST = "com.artworklab.lamha";
+const appLink = { port: null, seq: 0, waiting: new Map(), idle: null, info: null, infoAt: 0 };
+const appError = code => Object.assign(new Error(code), { code });
+
+async function appAllowed() {
+  if (typeof LamhaWikiOffline !== "undefined") return false; // this is the app itself
+  if (!browser.runtime.connectNative || !browser.permissions) return false;
+  const [{ appLink: on }, granted] = await Promise.all([
+    browser.storage.local.get({ appLink: false }),
+    browser.permissions.contains({ permissions: ["nativeMessaging"] }).catch(() => false)
+  ]);
+  return !!on && !!granted;
+}
+
+function appPort() {
+  if (appLink.port) return appLink.port;
+  const port = browser.runtime.connectNative(APP_HOST);
+  port.onMessage.addListener(msg => {
+    const w = msg && appLink.waiting.get(msg.id);
+    if (!w) return;
+    appLink.waiting.delete(msg.id);
+    clearTimeout(w.timer);
+    if (msg.ok) w.resolve(msg.data); else w.reject(appError(typeof msg.error === "string" ? msg.error : "failed"));
+  });
+  port.onDisconnect.addListener(p => {
+    // Firefox couldn't start the host: the app isn't installed, or its Firefox link is off
+    const gone = /no such native application|not found|manifest/i.test(String((p && p.error && p.error.message) || ""));
+    if (appLink.port === port) appLink.port = null;
+    for (const w of appLink.waiting.values()) { clearTimeout(w.timer); w.reject(appError(gone ? "not_installed" : "no_app")); }
+    appLink.waiting.clear();
+    appLink.infoAt = 0;
+  });
+  appLink.port = port;
+  return port;
+}
+
+/** One request to the app → its answer; rejects with a code: not_allowed, not_installed, no_app, timeout, … */
+async function askApp(type, data = {}, { launch = false } = {}) {
+  if (!await appAllowed()) throw appError("not_allowed");
+  const port = appPort();
+  const id = ++appLink.seq;
+  clearTimeout(appLink.idle);
+  appLink.idle = setTimeout(() => { if (appLink.port) { appLink.port.disconnect(); appLink.port = null; } }, 5 * 60e3);
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => { appLink.waiting.delete(id); reject(appError("timeout")); }, launch ? 30000 : 8000);
+    appLink.waiting.set(id, { resolve, reject, timer });
+    try { port.postMessage({ ...data, id, type, launch }); } catch (_) { clearTimeout(timer); appLink.waiting.delete(id); reject(appError("no_app")); }
+  });
+}
+
+/** The app's hello ({ app, version, wiki: { langs } }), kept for a minute; null when it can't be reached. */
+async function appInfo({ fresh = false, launch = false } = {}) {
+  if (!fresh && appLink.infoAt && Date.now() - appLink.infoAt < 60e3) return appLink.info;
+  let info = null, error = "";
+  try {
+    info = await askApp("hello", {}, { launch });
+    if (!info || info.app !== "lamha") { info = null; error = "no_app"; }
+  } catch (err) { error = err.code || "failed"; }
+  appLink.info = info;
+  appLink.infoAt = error === "not_allowed" ? 0 : Date.now();
+  if (fresh && error) throw appError(error);
+  return info;
+}
+
+/** Settings → لمحة لـ Windows: what it shows. launch: start the app when it isn't running (the Connect button). */
+async function appStatus(launch) {
+  if (typeof LamhaWikiOffline !== "undefined" || !browser.runtime.connectNative) return { supported: false };
+  const allowed = await appAllowed();
+  if (!allowed) return { supported: true, allowed: false };
+  try {
+    const info = await appInfo({ fresh: true, launch });
+    return { supported: true, allowed: true, connected: true, version: String(info.version || ""), langs: info.wiki && Array.isArray(info.wiki.langs) ? info.wiki.langs.filter(l => typeof l === "string") : [] };
+  } catch (err) {
+    return { supported: true, allowed: true, connected: false, error: err.code || "failed" };
+  }
+}
+
+/** The card's "Read the article in Lamha": the reader, in this app or in the Windows app (started if need be). */
+async function openWikiReader(file, articlePath) {
+  if (typeof LamhaWikiOffline !== "undefined") return LamhaWikiOffline.open(file, articlePath);
+  return askApp("openReader", { file, path: articlePath }, { launch: true });
+}
+
+/**
+ * opts.alt: titles the article may have in `preferLang` (the word's translations). opts.offline: never go online
+ * ("offline" dictionary setting). A downloaded Wikipedia answers when Wikipedia can't be reached, or first when the
+ * user chose that (wikiOfflineFirst, per device).
+ */
+async function wikiSummary(title, preferLang = "ar", { alt = [], offline = false } = {}) {
   if (!/^[a-z]{2,3}(-[a-z]{2,8})?$/.test(preferLang)) preferLang = "en"; // it becomes part of a hostname
-  const key = title.toLowerCase() + "|" + preferLang;
+  alt = (Array.isArray(alt) ? alt : []).filter(t => typeof t === "string" && t.trim() && t.length <= 60).slice(0, 4);
+  const key = [title.toLowerCase(), preferLang, offline ? "off" : "", ...alt].join("|");
   const hit = wikiCache.get(key);
   if (hit !== undefined) return hit;
 
-  let result = null;
+  const local = await offlineWiki();
+  const first = local && (offline || (await browser.storage.local.get({ wikiOfflineFirst: false })).wikiOfflineFirst);
+  let result = first ? await offlineWikiSummary(title, preferLang, alt) : null;
+  if (result || offline) {
+    wikiCache.set(key, result);
+    return result;
+  }
+  let failed = false; // Wikipedia couldn't be reached: the downloaded copy answers, and nothing is kept
   try {
     const q = new URLSearchParams({
       action: "query", titles: title, prop: "langlinks", lllang: preferLang,
@@ -808,9 +949,10 @@ async function wikiSummary(title, preferLang = "ar") {
       if (arTitle && preferLang !== "en") result = await tryFetch(preferLang, arTitle);
       if (!result) result = await tryFetch("en", page.title);
     }
-  } catch (_) { result = null; }
+  } catch (_) { result = null; failed = true; }
 
-  wikiCache.set(key, result);
+  if (failed && local && !first) result = await offlineWikiSummary(title, preferLang, alt);
+  if (!failed) wikiCache.set(key, result);
   return result;
 }
 
@@ -1551,7 +1693,7 @@ browser.runtime.onMessage.addListener((msg, sender) => {
   switch (msg && msg.type) {
     case "lookup": return lookup(msg.text, msg).then(r => ({ ok: true, data: r }), e => ({ ok: false, error: String(e.message || e) }));
     case "translateBatch": return translateBatch(msg.texts, msg.tl || "ar", msg.sl || "auto", msg.format, ["page", "gloss"].includes(msg.kind) ? msg.kind : "text").then(r => ({ ok: true, data: r }), e => ({ ok: false, error: String(e.message || e) }));
-    case "wiki": return wikiSummary(msg.title, msg.lang || "ar").then(r => ({ ok: true, data: r }), () => ({ ok: true, data: null }));
+    case "wiki": return wikiSummary(String(msg.title || ""), msg.lang || "ar", { alt: msg.alt, offline: !!msg.offline }).then(r => ({ ok: true, data: r }), () => ({ ok: true, data: null }));
     case "speak": return speak(msg.text, msg.lang).then(() => ({ ok: true }), e => ({ ok: false, error: String(e.message || e) }));
     case "stopSpeak": stopSpeaking(); return Promise.resolve({ ok: true });
     case "reviewQueue": return reviewQueue();
@@ -1572,6 +1714,12 @@ browser.runtime.onMessage.addListener((msg, sender) => {
     case "getSettings": return getSettings();
     case "packList": return LamhaPacks.list().then(data => ({ ok: true, data })); // Settings → Dictionary → downloadable dictionaries
     case "packInstall": return LamhaPacks.install(String(msg.lang)).then(() => ({ ok: true }), e => ({ ok: false, error: String(e.message || e) }));
+    case "wikiOpen": return Promise.resolve(openWikiReader(String(msg.file || ""), String(msg.path || ""))).then(() => ({ ok: true }), e => ({ ok: false, error: e.code || "failed" }));
+    case "appStatus": return appStatus(!!msg.launch).then(data => ({ ok: true, data }));
+    case "appLink": // Settings: the permission was granted (or given back) on the page; this remembers the choice
+      appLink.infoAt = 0;
+      if (!msg.on && appLink.port) { appLink.port.disconnect(); appLink.port = null; }
+      return browser.storage.local.set({ appLink: !!msg.on }).then(() => (msg.on ? appStatus(true) : { supported: true, allowed: false })).then(data => ({ ok: true, data }));
     case "packRemove": return LamhaPacks.remove(String(msg.lang)).then(() => ({ ok: true }), e => ({ ok: false, error: String(e.message || e) }));
     case "setWordDict": return setExplain(msg.lang || "en", msg.lang ? !!msg.on : !!msg.en).then(() => ({ ok: true })); // the card's switch
     case "writeTipSeen": return browser.storage.local.set({ writeTipSeen: true }).then(() => ({ ok: true })); // the double-click tip, shown once per device

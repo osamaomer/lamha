@@ -87,6 +87,7 @@ async function init() {
     await browser.storage.local.remove("mistakes");
     saved();
   });
+  initAppLink();
   buildToc();
   // the desktop app adds its own sections (clipboard, updates) after the page loads
   new MutationObserver(buildToc).observe(document.querySelector(".wrap"), { childList: true });
@@ -119,6 +120,46 @@ async function init() {
     await browser.storage.local.set({ history: [] });
     renderHistCount(); saved();
   });
+}
+
+/**
+ * Settings → لمحة لـ Windows (Firefox on a computer only: Android and the Windows app itself have no connectNative).
+ * Connect asks Firefox for the nativeMessaging permission (it must come from the click), then the background tries
+ * the app, starting it when it isn't running. Disconnect gives the permission back.
+ */
+function initAppLink() {
+  if (typeof browser.runtime.connectNative !== "function") return;
+  $("appPanel").hidden = false;
+  let status = null;
+  const render = s => {
+    status = s;
+    const langs = (s.langs || []).map(l => t("lang." + l) === "lang." + l ? l : t("lang." + l)).join("، ");
+    $("appState").textContent = !s.allowed ? t("o.appOff")
+      : s.connected ? [t("o.appOn", { v: s.version }), langs && t("o.appWiki", { langs })].filter(Boolean).join(" · ")
+        : t(s.error === "not_installed" ? "o.appNotInstalled" : s.error === "not_allowed" ? "o.appOff" : "o.appNoApp");
+    $("appState").classList.toggle("err", !!s.allowed && !s.connected);
+    $("appBtn").textContent = s.allowed ? (s.connected ? t("o.appDisconnect") : t("o.appRetry")) : t("o.appConnect");
+    $("appBtn").classList.toggle("danger", !!s.allowed && !!s.connected);
+    $("appBtn").classList.toggle("ghost", !(s.allowed && s.connected));
+    $("appBtn").disabled = false;
+  };
+  const ask = async msg => {
+    $("appBtn").disabled = true;
+    $("appState").textContent = t("o.appChecking");
+    const r = await browser.runtime.sendMessage(msg).catch(() => null);
+    render(r && r.ok ? r.data : { allowed: true, connected: false, error: "failed" });
+  };
+  $("appBtn").addEventListener("click", async () => {
+    if (status && status.allowed && status.connected) { // disconnect: the choice goes, and so does the permission
+      await ask({ type: "appLink", on: false });
+      await browser.permissions.remove({ permissions: ["nativeMessaging"] }).catch(() => {});
+      return;
+    }
+    if (status && status.allowed) { ask({ type: "appStatus", launch: true }); return; } // try again
+    const granted = await browser.permissions.request({ permissions: ["nativeMessaging"] }).catch(() => false);
+    if (granted) ask({ type: "appLink", on: true });
+  });
+  ask({ type: "appStatus", launch: false });
 }
 
 /** Links to the page's sections, named by their headings (so they follow the interface language). */
@@ -557,7 +598,7 @@ async function renderPacks() {
     }
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "btn small" + (p.installed ? " danger" : "");
+    btn.className = "btn small " + (p.installed ? "danger" : "ghost"); // a list of downloads: soft buttons, not a row of loud ones
     btn.disabled = busy;
     btn.textContent = busy ? t("o.packGetting", { p: Math.round(p.progress * 100) }) : p.installed ? t("common.remove") : t("o.packGet");
     btn.addEventListener("click", async () => {
