@@ -122,6 +122,7 @@ Every English word you look up becomes a review card, with the sentence you foun
 - **Adding and removing:** the 🔖 button on a lookup card adds or removes a word.
 - **While you review:** a thin bar shows how far through the waiting cards you are. At the end, a summary says what you did (*reviewed 12 · knew 9 · hard 2 · forgot 1*).
 - **Settings:** turn automatic adding on or off, choose 5–30 new words a day, set the daily goal, or delete all cards.
+- **A copy of your data** (Settings → الخصوصية والسجل → *نسخة من بياناتي*): your cards and progress, word history and mistake journal in one file. *استرجاع* (Restore) adds a copy to what's already there, on the same device or another: nothing is deleted, a word in both keeps the schedule of the copy you reviewed last, and a word you deleted after saving the copy stays deleted.
 
 ### 🎯 Today: a daily goal, a streak and a word of the day
 
@@ -169,7 +170,7 @@ Select text on any page and a small **بحث** (Look Up) / **ترجمة** (Trans
   - **مراجعة:** word review.
   - An on/off switch for the current site, and page translation.
 - Works inside iframes. The card lives in a closed Shadow DOM, so websites can't break its styling.
-- **With Lamha for Windows on the same PC:** Settings → *لمحة لـ Windows* → *اتصال* links the two (Firefox asks for permission once). The extension then uses the Wikipedia you downloaded in the app: the card's Wikipedia part works without internet, and *اقرأ المقالة في لمحة* opens the article in the app's reader (starting the app in the tray if it isn't running). Nothing goes over the network: Firefox starts a small helper the app wrote, which talks to the app on this PC only.
+- **With Lamha for Windows on the same PC:** Settings → *لمحة لـ Windows* → *اتصال* links the two (Firefox asks for permission once). The extension then uses the Wikipedia you downloaded in the app: the card's Wikipedia part works without internet, and *اقرأ المقالة في لمحة* opens the article in the app's reader (starting the app in the tray if it isn't running). **Your review cards are shared too:** words you add, review or delete in either one reach the other while the app is running (the app is never started just for this). Nothing goes over the network: Firefox starts a small helper the app wrote, which talks to the app on this PC only.
 
 ### ⌨️ Shortcuts
 
@@ -367,13 +368,14 @@ desktop/                    Windows app (Electron)
   wiki-library.js           Offline Wikipedia: Kiwix's catalog, downloads (mirrors, resume, SHA-256), the card's summaries, the reader's articles
   uia-context.js            A helper process: the sentence around a word in other apps, the double-click mouse hook
   double-click.js           When a double-click shows the Write button (pairing clicks, which apps)
+  app-rules.js              What each window is told and may ask, what Firefox may ask, where the floating windows go
   clipboard-*.js            Clipboard history: capture, store, privacy, tools
   updater.js                Updates from GitHub Releases
   renderer/                 Card window, clipboard UI, desktop strings and styles
   renderer/wiki/            The Wikipedia reader: reader.html/js/css, and sanitize.js (rebuilds articles from an allow-list)
   scripts/                  run, smoke test, icons, copying the extension files in
-dict/                       Offline dictionary data (generated)
-tools/                      Tests (zim-fixture.mjs writes small .zim files for them) and the dictionary builders
+dict/                       Offline dictionary data (generated): en/ and forms/ by a word's first two letters, ar/
+tools/                      Tests (zim-fixture.mjs writes small .zim files for them), bench.mjs, and the dictionary builders
 ```
 
 ### Tests
@@ -382,6 +384,8 @@ tools/                      Tests (zim-fixture.mjs writes small .zim files for t
 npm install     # once: installs jsdom for the UI test
 npm test        # all five test files
 npm run lint    # web-ext lint (0 errors, 0 warnings expected)
+npm run bench   # performance numbers: lookups on a simulated network (normal, dead, none), the dictionary, the deck,
+                # and the Windows app's storage, clipboard search and downloaded Wikipedia (not a test: no pass or fail)
 ```
 
 | File | What it covers |
@@ -427,7 +431,8 @@ Lamha sends nothing until you ask it to.
 | Sentences, paragraphs and pages, with AI translation | Your chosen translator: Ollama (your PC), Gemini or Claude | When the translation service uses the AI (Settings → الترجمة), or you press ✨ Better translation |
 | The sentence around a selected word (the word included) | The translation service, to pick the right meaning | With *فهم الكلمة من سياق الجملة* on (the default). On Local only, only a local AI (Ollama) gets it. |
 | Encyclopedia summaries | Wikipedia's REST API, or the Wikipedia you downloaded (Windows app), which sends nothing | For word lookups, when enabled |
-| Firefox ↔ the Windows app | Nowhere: a helper on this PC (PowerShell, written by the app) passes messages between Firefox and the app over a local pipe | Only after you press اتصال in the extension's Settings |
+| Firefox ↔ the Windows app (Wikipedia, review cards) | Nowhere: a helper on this PC (PowerShell, written by the app) passes messages between Firefox and the app over a local pipe | Only after you press اتصال in the extension's Settings |
+| A problem report (settings, counts, recent error codes; never your text, words, keys or addresses) | Nowhere by itself: *الإبلاغ عن مشكلة* shows it, copies it, or opens a GitHub issue page with it for you to read and submit | Only when you press one of those buttons |
 | Offline Wikipedia (Windows app) | Kiwix: its catalog (`library.kiwix.org`), then the file from one of its mirrors (`download.kiwix.org`, `dumps.wikimedia.org`…) | Only when you open that Settings section, and when you press تنزيل |
 | Language packs (French–French…) | Downloaded from this project's GitHub releases; nothing is sent | Only when you press تنزيل in Settings |
 | Writing tools | The provider you chose: Ollama (your PC, `localhost:11434`), Gemini (`generativelanguage.googleapis.com`) or Claude (`api.anthropic.com`) | Only when you press a tool |
@@ -436,7 +441,8 @@ Lamha sends nothing until you ask it to.
 - **Local first** looks single words up in the built-in dictionary. Nothing about the word is sent, unless the sentence context is on or the dictionary has definitions but no Arabic word (then one small request fetches the main meaning).
 - **Local only** never goes online for words at all.
 - Pointing Ollama at another computer over `http://` sends your text across the network unencrypted.
-- Lookup history, review cards and the mistake journal stay on your device. In Firefox, settings sync through your Firefox account; API keys never do.
+- Lookup history, review cards and the mistake journal stay on your device (review cards also on the Windows app on the same PC, once the two are linked). In Firefox, settings sync through your Firefox account; API keys never do.
+- The Windows app's windows can't use the camera, microphone, location or notifications (only copying to the clipboard), the card can't ask the app for anything it doesn't do itself, and the app checks its own files when it starts: a modified copy doesn't run.
 
 > **A note on Google Translate:** the `gtx` endpoints are free and need no key, but they're unofficial. For heavy or commercial use, switch `translateBatch()` and `lookup()` in `background.js` to an official API (Google Cloud Translation, DeepL, Azure). Nothing else needs to change.
 

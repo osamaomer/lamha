@@ -685,8 +685,10 @@ function codeError(code) { const e = new Error(code); e.code = code; return e; }
 
 function sleep(ms, signal) {
   return new Promise((resolve, reject) => {
-    const t = setTimeout(resolve, ms);
-    signal.addEventListener("abort", () => { clearTimeout(t); reject(codeError("aborted")); }, { once: true });
+    const stop = () => { clearTimeout(t); reject(codeError("aborted")); };
+    // the listener goes when the wait ends: a long download retries many times on the same signal
+    const t = setTimeout(() => { signal.removeEventListener("abort", stop); resolve(); }, ms);
+    signal.addEventListener("abort", stop, { once: true });
   });
 }
 

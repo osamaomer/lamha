@@ -4,7 +4,7 @@
  *   npm start               run the app
  *   npm run smoke           self-test: starts with a temporary profile, checks everything, quits */
 "use strict";
-const { app, BrowserWindow, Tray, Menu, ipcMain, shell, nativeImage, Notification, globalShortcut, screen, clipboard, safeStorage, nativeTheme, dialog, protocol } = require("electron");
+const { app, BrowserWindow, Tray, Menu, ipcMain, shell, nativeImage, Notification, globalShortcut, screen, clipboard, safeStorage, nativeTheme, dialog, protocol, net } = require("electron");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -31,8 +31,9 @@ const T = (key, vars) => globalThis.LamhaI18n.t(key, vars);
 let stores, messageHandler = null, badgeCount = 0, lastReminder = 0, wikiLibrary = null, readerWin = null;
 // the Wikipedia reader's pictures: lamha-wiki://zim/<file id>/<path> (registered before the app is ready)
 protocol.registerSchemesAsPrivileged([{ scheme: "lamha-wiki", privileges: { standard: true, secure: true } }]);
-/** storage.local keys that hold API keys: encrypted on disk, and never given to the floating card. */
-const SECRET_KEYS = ["aiKey", "geminiKey"];
+// what each window is told and may ask, where the floating windows go: decisions tested in plain Node (app-rules.js)
+const rules = require("./app-rules");
+const { SECRET_KEYS, withoutSecrets } = rules;
 
 /* ---------------- the browser.* replacement for the background logic ---------------- */
 
@@ -40,16 +41,12 @@ function broadcast(changes, areaName) {
   for (const f of storageListeners) { try { f(changes, areaName); } catch (err) { console.error(err); } }
   if (areaName === "sync" && changes.motion) updateTray(); // the Animations choice is also in the tray menu
   if (areaName === "sync" && changes.theme) applyThemeSetting();
-  const forCard = withoutSecrets(changes);
   for (const w of BrowserWindow.getAllWindows()) {
-    if (w.isDestroyed()) continue;
-    const card = w === cardWin;
-    if (card && !Object.keys(forCard).length) continue;
-    w.webContents.send("lamha:storage-changed", card ? forCard : changes, areaName);
+    if (w.isDestroyed() || (clipboardMonitor && w === clipboardMonitor.win)) continue; // that one only hears the clipboard
+    const out = rules.changesFor(w === cardWin ? "card" : w === panelWin || w === readerWin ? "lean" : "page", changes);
+    if (out) w.webContents.send("lamha:storage-changed", out, areaName);
   }
 }
-/** The floating card shows text from other apps and the web: it never gets the API keys (it has aiKeySet / geminiKeySet). */
-const withoutSecrets = obj => Object.fromEntries(Object.entries(obj || {}).filter(([k]) => !SECRET_KEYS.includes(k)));
 const storageListeners = [];
 const listeners = { installed: [], startup: [], alarm: [] };
 
@@ -126,6 +123,10 @@ function installBrowserShim() {
   };
   globalThis.Audio = RemoteAudio;
   globalThis.fetch = extFetch;
+  // navigator.onLine, as in a browser: Windows' own network state through Chromium (background.js browserOffline()).
+  // Node's navigator has none, so offline the background used to wait for Google to fail before the dictionary answered.
+  if (typeof globalThis.navigator !== "object" || !globalThis.navigator) globalThis.navigator = {};
+  Object.defineProperty(globalThis.navigator, "onLine", { configurable: true, get: () => net.isOnline() });
 }
 
 /** Loads the extension's background scripts into this process, as Firefox would. */
@@ -154,6 +155,13 @@ function startCore() {
     updateTray(); // the Wikipedia item comes and goes with the files
   });
   wikiLibrary.init().catch(err => console.error("offline Wikipedia:", err && err.message));
+  // Settings → Report a problem: what the background adds about the Windows app (background.js diagnostics())
+  globalThis.LamhaDesktopInfo = () => ({
+    version: app.getVersion(), electron: process.versions.electron, windows: os.release(),
+    wiki: wikiLibrary ? wikiLibrary.langs() : [],
+    memoryMB: Math.round(app.getAppMetrics().reduce((n, m) => n + (m.memory.privateBytes || m.memory.workingSetSize), 0) / 1024),
+    writeButton: writeButtonLog.map(d => ({ ...d }))
+  });
   for (const f of ["local-dict.js", "packs.js", "shared/i18n.js", "shared/lamha-ai.js", "background.js"]) {
     vm.runInThisContext(fs.readFileSync(path.join(EXT_DIR, f), "utf8"), { filename: path.join(EXT_DIR, f) });
   }
@@ -205,8 +213,11 @@ ipcMain.on("lamha:info", e => {
   e.returnValue = { base: BASE, version: app.getVersion(), role, locale: app.getLocale() };
 });
 
-ipcMain.handle("lamha:message", async (_e, msg) => {
+ipcMain.handle("lamha:message", async (e, msg) => {
   if (!messageHandler) return undefined;
+  // the windows that show outside text (the card, the reader) may ask only for what the card does (app-rules.js)
+  const outside = fromCard(e) || (readerWin && !readerWin.isDestroyed() && e.sender === readerWin.webContents);
+  if (outside && !rules.allowedFromOutsideText(msg)) return { ok: false, error: "not_allowed" };
   const res = await messageHandler(msg, {});
   return res === undefined ? undefined : JSON.parse(JSON.stringify(res));
 });
@@ -275,6 +286,20 @@ ipcMain.handle("lamha:wiki", async (e, method, args) => {
     return { ok: false, error: err.code || "failed" };
   }
 });
+
+/* ---------------- permissions ---------------- */
+
+/** What Lamha's pages may use: writing to the clipboard (the Copy buttons). Electron grants everything a page asks for
+ *  unless told otherwise (camera, microphone, location, notifications…); the card shows text from any website or
+ *  program, so nothing else is granted, asked or merely checked. */
+const PAGE_PERMISSIONS = new Set(["clipboard-sanitized-write"]);
+function lockPermissions() {
+  const { session } = require("electron");
+  const ses = session.defaultSession;
+  ses.setPermissionRequestHandler((_wc, permission, done) => done(PAGE_PERMISSIONS.has(permission)));
+  ses.setPermissionCheckHandler((_wc, permission) => PAGE_PERMISSIONS.has(permission));
+  ses.setDevicePermissionHandler(() => false); // USB, serial, HID
+}
 
 /* ---------------- windows ---------------- */
 
@@ -347,8 +372,7 @@ function showMain(tab) {
 
 /** suffix: "?welcome=1", "#ai", "#journal" … */
 function openOptions(suffix) {
-  const [, search = "", hash = ""] = /^\??([^#]*)#?(.*)$/.exec(suffix || "") || [];
-  const target = { search, hash: hash || (search.includes("welcome") ? "ai" : "") };
+  const target = rules.optionsTarget(suffix);
   if (optionsWin && !optionsWin.isDestroyed()) {
     optionsWin.loadFile(path.join(EXT_DIR, "options", "options.html"), target);
   } else {
@@ -469,10 +493,18 @@ function startContextHelper() {
  * (the helper asks UI Automation) show the Write button next to the mouse without taking the focus, so the caret stays
  * in the box. Clicking it opens Write new, whose Insert pastes into that program. In a browser with the Lamha
  * extension, the extension's own button is already there, so this one stays away. */
-const { ClickPairer, composeKind, wantsButton } = require("./double-click");
+const { ClickPairer, composeKind, wantsButton, BROWSERS } = require("./double-click");
 const clickPairer = new ClickPairer();
 const PILL_MS = 5000; // how long the button waits for a click (longer while the mouse is on it)
 let dblEnabled = false, dblToken = 0, pillShown = false, pillTimer = null, cardHover = false;
+
+/** The last double-click decisions, for Settings → Report a problem: the program, what Windows said about the box, and
+ *  why the button showed or didn't (never any text). The data the "no button in Slack" kind of report needs. */
+const writeButtonLog = [];
+function noteWriteButton(entry) {
+  writeButtonLog.unshift({ t: Date.now(), ...entry });
+  writeButtonLog.length = Math.min(writeButtonLog.length, 10);
+}
 
 /** Turns the mouse hook on or off; resolves to whether it runs. */
 async function watchDoubleClicks(on) {
@@ -492,13 +524,18 @@ async function onMouseDown(down) {
   // a classic Windows text box answers directly; anything else (browsers, Word, modern apps) through UI Automation
   const box = native.focusedTextBox(hwnd);
   const under = r => r && down.x >= r.left && down.x < r.right && down.y >= r.top && down.y < r.bottom;
+  // Lamha's extension only lives in browsers: elsewhere (Slack, Teams, VS Code…, web content too) the helper neither
+  // waits for its button nor searches the page for it, which on a big page could outlast the answer's time limit
   const field = box
     ? (under(box.rect) && !box.readOnly && !box.password ? { empty: box.empty, web: false, lamha: false } : null)
-    : await uiaContext.field(down.x, down.y, globalThis.LamhaI18n.pair("c.writeNewHere"));
+    : await uiaContext.field(down.x, down.y, BROWSERS.has(exe) ? globalThis.LamhaI18n.pair("c.writeNewHere") : []);
   if (!app.isPackaged) console.log(`[write button] double-click in ${exe}: ${box ? "text box" : "UI Automation"} → ${JSON.stringify(field)}`); // never the text
   // another click came meanwhile, or the user moved to another window
-  if (token !== dblToken || !dblEnabled || native.foreground() !== hwnd || !wantsButton(exe, field)) {
-    if (!app.isPackaged) console.log(`[write button] not shown: newer click ${token !== dblToken}, on ${dblEnabled}, same window ${native.foreground() === hwnd}, wanted ${wantsButton(exe, field)}`);
+  const why = token !== dblToken ? "another click came" : !dblEnabled ? "turned off" : native.foreground() !== hwnd ? "another window came to the front"
+    : !field ? "no text box under the mouse" : !field.empty ? "the box has text" : field.lamha ? "the browser extension showed its own" : !wantsButton(exe, field) ? "not a box for it (address bar, Windows' own)" : "";
+  noteWriteButton({ exe, via: box ? "text box" : "UI Automation", field: field ? JSON.stringify(field) : "nothing", shown: !why, why });
+  if (why) {
+    if (!app.isPackaged) console.log(`[write button] not shown: ${why}`);
     return;
   }
   await showWritePill({ hwnd, kind: composeKind(exe) });
@@ -573,6 +610,9 @@ async function startClipboard() {
     if ("clipboardExpiryDays" in s) { expiryDays = Number(v("clipboardExpiryDays")) || 0; runClipExpiry(); }
     if ("clipboardEnabled" in s) {
       clipboardMonitor.setEnabled(v("clipboardEnabled"));
+      // the quick panel's window is kept ready (it must show within 150 ms) only while there's a history to show;
+      // with history off, Alt+Shift+V opens it the first time it's pressed (a moment slower, to say how to turn it on)
+      if (v("clipboardEnabled") && (!panelWin || panelWin.isDestroyed())) createPanelWin();
       if (!v("clipboardEnabled")) resumeClipboard();
       updateTray();
     }
@@ -751,12 +791,7 @@ function hidePanel() {
 /** Next to the mouse, inside the work area of the monitor it's on. */
 function placePanel() {
   const cursor = screen.getCursorScreenPoint();
-  const wa = screen.getDisplayNearestPoint(cursor).workArea;
-  const clamp = (v, lo, hi) => Math.max(lo, Math.min(v, hi));
-  const below = wa.y + wa.height - cursor.y >= PANEL_H + 16;
-  const x = clamp(cursor.x - Math.round(PANEL_W / 2), wa.x, wa.x + wa.width - PANEL_W);
-  const y = clamp(below ? cursor.y + 16 : cursor.y - 16 - PANEL_H, wa.y, wa.y + wa.height - PANEL_H);
-  panelWin.setBounds({ x, y, width: PANEL_W, height: PANEL_H });
+  panelWin.setBounds(rules.panelPlacement({ cursor, workArea: screen.getDisplayNearestPoint(cursor).workArea, w: PANEL_W, h: PANEL_H }));
 }
 
 /**
@@ -860,19 +895,9 @@ ipcMain.handle("lamha:card-replace", async (e, text) => {
  *  `pill`: the mouse inside the window with room above it for the Write button, and below it for the card it opens. */
 function placeCardWin({ toast = false, pill = false } = {}) {
   const cursor = screen.getCursorScreenPoint();
-  const wa = screen.getDisplayNearestPoint(cursor).workArea;
-  const clamp = (v, lo, hi) => Math.max(lo, Math.min(v, hi));
-  if (pill) {
-    const x = clamp(Math.round(cursor.x - CARD_W / 2), wa.x, wa.x + wa.width - CARD_W);
-    const y = clamp(cursor.y - 72, wa.y, wa.y + wa.height - CARD_H);
-    cardWin.setBounds({ x, y, width: CARD_W, height: CARD_H });
-    return { x: cursor.x - x, y: cursor.y - y };
-  }
-  const down = !toast && (wa.y + wa.height - cursor.y >= 380 || wa.y + wa.height - cursor.y >= cursor.y - wa.y);
-  const x = clamp(Math.round(cursor.x - CARD_W / 2), wa.x, wa.x + wa.width - CARD_W);
-  const y = clamp(down ? cursor.y + 16 : cursor.y + (toast ? 60 : -16) - CARD_H, wa.y, wa.y + wa.height - CARD_H);
-  cardWin.setBounds({ x, y, width: CARD_W, height: CARD_H });
-  return { x: cursor.x - x, y: down ? Math.max(12, cursor.y + 16 - y) : Math.min(CARD_H - 12, cursor.y - 16 - y) };
+  const { bounds, point } = rules.cardPlacement({ cursor, workArea: screen.getDisplayNearestPoint(cursor).workArea, w: CARD_W, h: CARD_H, toast, pill });
+  cardWin.setBounds(bounds);
+  return point;
 }
 
 /** What a shortcut does: grab the selection from the app in front and open the card on it. */
@@ -888,7 +913,7 @@ async function onHotkey(kind) {
     }
     await showCard(kind, cap);
   } catch (err) {
-    console.error("shortcut failed:", err);
+    console.error("shortcut failed:", err && err.name); // the name only: a message could quote the selection
   } finally {
     hotkeyBusy = false;
   }
@@ -985,16 +1010,21 @@ function startUpdates() {
 /* ---------------- the Firefox extension's link (native-bridge.js) ---------------- */
 
 let bridge = null;
-const LANG_CODE = /^[a-z]{2,3}$/;
 /** What the extension may ask. Everything it sends is checked here: it arrives from another program. */
 const BRIDGE_CALLS = {
   hello: () => ({ app: "lamha", version: app.getVersion(), wiki: { langs: wikiLibrary ? wikiLibrary.langs() : [] } }),
   wikiSummary: msg => {
-    const titles = (Array.isArray(msg.titles) ? msg.titles : []).filter(t => typeof t === "string" && t.trim() && t.length <= 120).slice(0, 6);
-    const lang = String(msg.lang || "");
-    return titles.length && LANG_CODE.test(lang) && wikiLibrary ? wikiLibrary.summary(titles, lang) : null;
+    const a = rules.wikiSummaryArgs(msg);
+    return a && wikiLibrary ? wikiLibrary.summary(a.titles, a.lang) : null;
   },
-  openReader: msg => { openReader({ file: String(msg.file || "").slice(0, 200), path: String(msg.path || "").slice(0, 500) }); return true; }
+  openReader: msg => { openReader({ file: String(msg.file || "").slice(0, 200), path: String(msg.path || "").slice(0, 500) }); return true; },
+  // the review deck shared with Firefox: its words merged in, or a page of this app's (background.js answerDeckSync,
+  // which rebuilds every card it's given)
+  deckSync: async msg => {
+    const r = await messageHandler({ type: "deckSync", upload: msg.upload === true, cards: msg.cards, removed: msg.removed, since: msg.since }, {});
+    if (!r || !r.ok) throw Object.assign(new Error("deck sync"), { code: "failed" });
+    return r.data;
+  }
 };
 
 /** Settings → Firefox (storage.local firefoxLink, on unless turned off): Firefox can reach this app only while it's on. */
@@ -1119,12 +1149,12 @@ if (!gotLock) {
   app.setAppUserModelId("com.artworklab.lamha"); // Windows notifications
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null);
+    lockPermissions(); // before any window opens
     startCore();
     serveWikiAssets();
     applyThemeSetting(); // before the windows open, so they start in the right colours
     createMain();
     if (selection) createCardWin(); // ready before the first shortcut, so it opens instantly
-    if (clipboardMonitor) createPanelWin(); // likewise: the quick panel must show within 150 ms
     startClipboard().catch(err => console.error("clipboard history failed to start:", err && err.name)); // runs synchronously up to its await
     // tray, notifications and window titles follow the interface language (pages redraw themselves)
     globalThis.LamhaI18n.init({ onChange: () => { updateTray(); if (mainWin && !mainWin.isDestroyed()) mainWin.setTitle(T("common.lamha")); } });

@@ -158,7 +158,7 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       await card("card-write-new", { type: "showWrite", text: "" }, 1500);
       await closeCard();
       // the pill (Firefox: selecting text on a web page) and the page-translation bar, on a stand-in page
-      await js(cw, `(() => {
+      const word = await js(cw, `(() => {
         const p = document.createElement("p");
         p.id = "shotPage";
         p.setAttribute("style", "margin:120px 24px;padding:16px 18px;border-radius:12px;font:16px/1.7 Segoe UI;background:${theme === "dark" ? "#1b1b1f" : "#fff"};color:${theme === "dark" ? "#eee" : "#222"}");
@@ -166,11 +166,14 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
         document.body.append(p);
         const t = p.firstChild, r = document.createRange();
         r.setStart(t, t.data.indexOf("rollercoaster")); r.setEnd(t, t.data.indexOf("rollercoaster") + 13);
-        getSelection().removeAllRanges(); getSelection().addRange(r);
         const b = r.getBoundingClientRect();
-        document.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, clientX: b.right, clientY: b.bottom, button: 0 }));
-        return true;
+        return { x: Math.round(b.left + b.width / 2), y: Math.round(b.top + b.height / 2) };
       })()`);
+      // a real double-click on the word (Lamha ignores mouse events a page's script makes up)
+      for (const clickCount of [1, 2]) {
+        cw.webContents.sendInputEvent({ type: "mouseDown", x: word.x, y: word.y, button: "left", clickCount });
+        cw.webContents.sendInputEvent({ type: "mouseUp", x: word.x, y: word.y, button: "left", clickCount });
+      }
       await wait(700);
       await save(cw, "pill");
       cw.webContents.send("lamha:page-message", { type: "pageAction", action: "toggle" });

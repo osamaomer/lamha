@@ -79,7 +79,8 @@ async function fetchJSON(url, opts = {}, { retries = 2, timeout = 12000 } = {}) 
       if (!res.ok) throw Object.assign(new Error("HTTP " + res.status), { status: res.status });
       return await res.json();
     } catch (err) {
-      const retryable = err.retry || err.name === "AbortError" || err instanceof TypeError;
+      // a quick failure (a network blip, a busy server) is worth one more try; a timeout isn't: it would only double the wait
+      const retryable = err.retry || err.name === "TypeError"; // fetch's network failure (by name: from any realm)
       if (!retryable || attempt >= retries) throw err;
       await new Promise(r => setTimeout(r, 400 * 2 ** attempt));
     } finally {
@@ -103,14 +104,25 @@ function providerOrder() {
   return [...PROVIDERS].sort((a, b) => (a.until > now) - (b.until > now) || (a.until > now && a.until - b.until));
 }
 
+/* A network that is connected but answers nothing (a hotel Wi-Fi, a captive portal): each request would wait for its
+ * timeout, and a word lookup waited for three of them (~50 s) before the offline dictionary's answer showed. Once
+ * Google can't be reached, the next requests fail at once for a while, so the dictionary, a language pack or a local
+ * AI answers straight away; the first success ends it. */
+const NET_PAUSE_MS = 20e3;
+let netDownUntil = 0;
+const googleDown = () => Date.now() < netDownUntil;
+
 /** GET/POST a translate_a endpoint with automatic failover between providers. */
 async function googleJSON(path, params, init) {
+  if (googleDown()) throw new Error("network");
   let lastErr;
   for (const p of providerOrder()) {
     const url = `${p.base}/translate_a/${path}?client=${p.client}&${params}`;
     try {
-      const data = await fetchJSON(url, init, { retries: 1 });
+      // a word or a sentence: someone is waiting for the card; a page's batch may be long
+      const data = await fetchJSON(url, init, { retries: 1, timeout: path === "single" ? 8000 : 12000 });
       p.strikes = 0; p.until = 0;
+      netDownUntil = 0;
       return data;
     } catch (err) {
       lastErr = err;
@@ -118,9 +130,11 @@ async function googleJSON(path, params, init) {
         p.strikes = Math.min(p.strikes + 1, 6);
         p.until = Date.now() + Math.min(30 * 60e3, 60e3 * 2 ** (p.strikes - 1)); // 1, 2, 4 … 30 min
       }
+      if (err.name === "AbortError") break; // no answer in time: the network, not this address; the other would wait as long
     }
   }
   if (lastErr && lastErr.status === 429) throw new Error("rate_limited");
+  if (!lastErr || lastErr.name === "AbortError" || lastErr.name === "TypeError") netDownUntil = Date.now() + NET_PAUSE_MS;
   throw lastErr || new Error("network");
 }
 
@@ -212,7 +226,7 @@ const browserOffline = () => typeof navigator !== "undefined" && navigator.onLin
 function trPlan(tr, kind, { offline = false, force = "" } = {}) {
   if (force === "ai") return tr.ai ? ["ai"] : [];
   const ai = !!tr.ai && tr.service !== "google" && (kind !== "page" || tr.pages) && (!offline || tr.ai.provider === "ollama");
-  const google = !offline && !browserOffline();
+  const google = !offline && !browserOffline() && !googleDown();
   const order = tr.service === "ai" && kind !== "word" ? ["ai", "google"] : ["google", "ai"];
   return order.filter(e => (e === "ai" ? ai : google));
 }
@@ -474,7 +488,10 @@ async function lookup(rawText, opts = {}) {
   const key = [text.toLowerCase(), sl, tl, word, settings.translateDefinitions, mode, LamhaI18n.lang(),
     context ? context.before + "¦" + context.after : "", tr.key, force, english, [].concat(settings.explainLangs || []).join(","), LamhaPacks.key()].join("|");
   const cached = lookupCache.get(key);
-  if (cached) return cached;
+  if (cached) return remember(cached, text, word, context, settings);
+  // the word's meaning in its sentence, asked at once: it doesn't depend on the dictionary's answer, so the two
+  // requests go out together (Online first: two round trips instead of three). Unused if the word is explained.
+  const ctxAsk = context && !english && !force ? contextTranslate(text, context, tl, sl, { tr, offline: mode === "offline" }).catch(() => null) : null;
 
   // The offline dictionary covers English → Arabic and Arabic → English single words / short phrases.
   const enLocal = word && tl === "ar" && /^[A-Za-z][A-Za-z'’ -]*$/.test(text);
@@ -509,21 +526,29 @@ async function lookup(rawText, opts = {}) {
     result = await explainWord(result, text, context, mode, tr);
   }
 
-  // The meaning of the word in *this* sentence: translate the sentence with the word marked.
-  if (context && result.type === "word" && result.mode !== "explain") { // on "Local only", only a local AI may read the sentence (trPlan)
-    try {
-      const ctx = await contextTranslate(text, context, tl, sl, { tr, offline: mode === "offline" });
-      if (ctx) {
-        // the sentence's translation kept the word as it is (a name: "Gemini", "Firefox"): say so, don't call it the meaning
-        const same = s => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
-        if (same(ctx.word) === same(text)) ctx.untranslated = true;
-        result = { ...result, context: ctx };
-        if (!result.translation && !ctx.untranslated) result.translation = ctx.word;
-      }
-    } catch (_) { /* dictionary result is still shown */ }
+  // The meaning of the word in *this* sentence: the sentence translated with the word marked (on "Local only", only a
+  // local AI may read it: trPlan). An answer from the dictionary waits for it a short while only: a network that
+  // answers nothing mustn't hold the card; that answer isn't kept, so the next lookup asks again.
+  let contextLate = false;
+  if (ctxAsk && result.type === "word" && result.mode !== "explain") {
+    const ctx = result.source === "local" ? await within(ctxAsk, CONTEXT_WAIT_MS, "late") : await ctxAsk;
+    if (ctx === "late") contextLate = true;
+    else if (ctx) {
+      // the sentence's translation kept the word as it is (a name: "Gemini", "Firefox"): say so, don't call it the meaning
+      const same = s => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+      if (same(ctx.word) === same(text)) ctx.untranslated = true;
+      result = { ...result, context: ctx };
+      if (!result.translation && !ctx.untranslated) result.translation = ctx.word;
+    }
   }
 
-  if (!result.rough) lookupCache.set(key, result); // an AI answer with stray letters is asked again next time
+  if (!result.rough && !contextLate) lookupCache.set(key, result); // an AI answer with stray letters is asked again next time
+  return remember(result, text, word, context, settings);
+}
+
+/** What a lookup leaves behind, fresh or from the cache alike (the Windows app keeps its cache for days): the word at
+ *  the top of the history, its review card, and the count toward milestones and today's goal. */
+async function remember(result, text, word, context, settings) {
   const learnable = word && result.translation && result.translation.toLowerCase() !== text.toLowerCase() &&
     !(result.context && result.context.untranslated); // a name here: not a word to learn
   const newWord = settings.saveHistory && learnable && addHistory({ q: result.query, tr: (result.mode === "explain" && result.ar) || result.translation, src: result.src });
@@ -648,10 +673,14 @@ async function packLookup(text, tl, settings) {
   return null;
 }
 
+/** `p`, or `late` if it hasn't settled within `ms`. */
+const within = (p, ms, late) => Promise.race([p, new Promise(done => setTimeout(() => done(late), ms))]);
+const CONTEXT_WAIT_MS = 2500; // how long a dictionary answer waits for the sentence's translation
+
 /** How the word reads in Arabic inside its sentence (as the Arabic view shows it), or "" — at most ~2.5 s, never an error. */
 async function contextArabic(text, context, tr) {
   const ask = contextTranslate(text, context, "ar", "en", { tr }).then(c => (c && !c.untranslated ? c.word : ""), () => "");
-  return Promise.race([ask, new Promise(done => setTimeout(() => done(""), 2500))]);
+  return within(ask, CONTEXT_WAIT_MS, "");
 }
 
 /** The card's switch for `lang` words: explained in their own language (on) or translated. English keeps its own
@@ -893,7 +922,8 @@ async function appStatus(launch) {
   if (!allowed) return { supported: true, allowed: false };
   try {
     const info = await appInfo({ fresh: true, launch });
-    return { supported: true, allowed: true, connected: true, version: String(info.version || ""), langs: info.wiki && Array.isArray(info.wiki.langs) ? info.wiki.langs.filter(l => typeof l === "string") : [] };
+    const { deckSyncedAt = 0 } = await browser.storage.local.get("deckSyncedAt");
+    return { supported: true, allowed: true, connected: true, version: String(info.version || ""), langs: info.wiki && Array.isArray(info.wiki.langs) ? info.wiki.langs.filter(l => typeof l === "string") : [], deckSyncedAt };
   } catch (err) {
     return { supported: true, allowed: true, connected: false, error: err.code || "failed" };
   }
@@ -918,10 +948,13 @@ async function wikiSummary(title, preferLang = "ar", { alt = [], offline = false
   if (hit !== undefined) return hit;
 
   const local = await offlineWiki();
-  const first = local && (offline || (await browser.storage.local.get({ wikiOfflineFirst: false })).wikiOfflineFirst);
+  const noNet = browserOffline(); // no network at all: only the downloaded copy, without waiting for Wikipedia to fail
+  const first = local && (offline || noNet || (await browser.storage.local.get({ wikiOfflineFirst: false })).wikiOfflineFirst);
   let result = first ? await offlineWikiSummary(title, preferLang, alt) : null;
-  if (result || offline) {
-    wikiCache.set(key, result);
+  if (result || offline || noNet) {
+    // nothing found offline isn't kept (a copy downloaded later answers at once), nor the copy's answer while the
+    // network is down (Wikipedia answers again once it's back)
+    if (result && !noNet) wikiCache.set(key, result);
     return result;
   }
   let failed = false; // Wikipedia couldn't be reached: the downloaded copy answers, and nothing is kept
@@ -984,6 +1017,7 @@ function stopSpeaking() {
 /** Plays the text piece by piece; resolves when it finishes or is interrupted. */
 async function speak(text, lang) {
   stopSpeaking();
+  if (googleDown()) throw new Error("network"); // Google can't be reached just now: the page uses the system's voice
   const token = speechToken;
   const parts = ttsChunks(String(text).slice(0, 3000));
   for (let i = 0; i < parts.length; i++) {
@@ -1454,18 +1488,49 @@ function addHistory(entry) {
 const MINUTE = 60e3, DAY = 864e5;
 const cardKey = q => String(q || "").trim().toLowerCase();
 const today = () => new Date().toDateString();
+/** The day `back` days before today, by the calendar: 24 hours back isn't always yesterday (the night the clocks go
+ *  forward is 23 hours long, so just after the next midnight "now − 24 h" lands two days back). */
+const dayKey = (back = 0) => { const d = new Date(); d.setDate(d.getDate() - back); return d.toDateString(); };
 
 let deckQueue = Promise.resolve();
-/** Serialized read-modify-write of the deck (lookups and reviews can race). */
+/* The deck in memory: every lookup asks about it (bookmark, automatic card, the toolbar's count), and reading the whole
+ * deck from storage each time grows with it. Each write is numbered (storage.local cardsRev); a change to the deck
+ * that doesn't carry the number just written came from elsewhere (Settings → delete all cards), so the copy is dropped
+ * and read again: never written back over what the user deleted. */
+let deckMem = null; // { cards, stats, imported, removed, rev }
+browser.storage.onChanged.addListener((changes, area) => {
+  if (area !== "local" || !(changes.cards || changes.cardStats || changes.cardsImported || changes.cardsRemoved)) return;
+  if (!(deckMem && changes.cardsRev && changes.cardsRev.newValue === deckMem.rev)) deckMem = null;
+});
+
+/** Serialized read-modify-write of the deck (lookups and reviews can race). `deck.removed`: { word: when it was removed },
+ *  so a word deleted here isn't brought back by a backup or by Lamha on the other side of the Firefox link. */
 function withDeck(fn) {
   const run = deckQueue.then(async () => {
-    const st = await browser.storage.local.get(["cards", "cardStats", "cardsImported"]);
-    // no prototype: words like "constructor" or "__proto__" are ordinary keys, not Object's own properties
-    const cards = Object.assign(Object.create(null), st.cards || {});
-    const deck = { cards, stats: st.cardStats || {}, imported: !!st.cardsImported, dirty: false };
-    const out = await fn(deck);
-    if (deck.dirty) await browser.storage.local.set({ cards: deck.cards, cardStats: deck.stats, cardsImported: deck.imported });
-    return out;
+    if (!deckMem) {
+      const st = await browser.storage.local.get(["cards", "cardStats", "cardsImported", "cardsRemoved", "cardsRev"]);
+      // no prototype: words like "constructor" or "__proto__" are ordinary keys, not Object's own properties
+      deckMem = {
+        cards: Object.assign(Object.create(null), st.cards || {}), stats: st.cardStats || {}, imported: !!st.cardsImported,
+        removed: Object.assign(Object.create(null), st.cardsRemoved || {}), rev: Number(st.cardsRev) || 0
+      };
+    }
+    const deck = { cards: deckMem.cards, stats: deckMem.stats, imported: deckMem.imported, removed: deckMem.removed, dirty: false };
+    try {
+      const out = await fn(deck);
+      if (deck.dirty) {
+        const rev = deckMem.rev + 1;
+        const old = Date.now() - REMOVED_KEEP_MS; // a removal older than that has reached every copy long ago
+        for (const k of Object.keys(deck.removed)) if (!(deck.removed[k] > old)) delete deck.removed[k];
+        deckMem = { cards: deck.cards, stats: deck.stats, imported: deck.imported, removed: deck.removed, rev };
+        await browser.storage.local.set({ cards: deck.cards, cardStats: deck.stats, cardsImported: deck.imported, cardsRemoved: deck.removed, cardsRev: rev });
+        deckChanged();
+      }
+      return out;
+    } catch (err) {
+      deckMem = null; // half-changed, perhaps: read it again next time
+      throw err;
+    }
   });
   deckQueue = run.catch(() => {});
   return run;
@@ -1485,14 +1550,16 @@ function putCard(deck, c) {
   if (!k || !(c.tr || (c.en && c.def))) return false; // English–English cards may have only the definition
   const old = deck.cards[k];
   if (old) { // keep progress, fill in anything missing
-    for (const f of ["tr", "ex", "form", "def"]) if (c[f] && !old[f]) { old[f] = c[f]; deck.dirty = true; }
+    for (const f of ["tr", "ex", "form", "def"]) if (c[f] && !old[f]) { old[f] = c[f]; old.mod = Date.now(); deck.dirty = true; }
     return false;
   }
+  const now = Date.now();
   deck.cards[k] = {
     q: c.q, tr: String(c.tr || "").slice(0, 200), ex: c.ex || "", form: c.form || "", def: String(c.def || "").slice(0, 300),
     ...(c.en ? { en: true } : {}), // review shows the English definition first, the meaning under it
-    added: Date.now(), due: 0, interval: 0, ease: 2.5, reps: 0, lapses: 0
+    added: now, due: 0, interval: 0, ease: 2.5, reps: 0, lapses: 0, mod: now // mod: when it last changed (backups, the Firefox link)
   };
+  delete deck.removed[k]; // added again after it was removed
   deck.dirty = true;
   return true;
 }
@@ -1566,10 +1633,9 @@ async function reviewGrade(key, grade) {
       deck.stats.newSeen = (deck.stats.newSeen || 0) + 1;
     }
     if (deck.stats.reviewDay !== today()) { // the review streak: yesterday too → one more day, otherwise it starts again
-      const yesterday = new Date(Date.now() - DAY).toDateString();
-      deck.stats = { ...deck.stats, streak: deck.stats.reviewDay === yesterday ? (deck.stats.streak || 0) + 1 : 1, reviewDay: today() };
+      deck.stats = { ...deck.stats, streak: deck.stats.reviewDay === dayKey(1) ? (deck.stats.streak || 0) + 1 : 1, reviewDay: today() };
     }
-    deck.cards[key] = schedule(c, grade);
+    deck.cards[key] = { ...schedule(c, grade), mod: Date.now() };
     deck.dirty = true;
   });
   updateBadge();
@@ -1580,7 +1646,6 @@ async function reviewGrade(key, grade) {
  * storage.local activity: { [day]: count } for the last 60 days — words new to the history plus review answers.
  * wotd: { day, q, tr, def, ex, pos, from: "deck" | "dict" } keeps the word of the day the same until midnight. */
 
-const dayKey = (back = 0) => new Date(Date.now() - back * DAY).toDateString();
 let activityQueue = Promise.resolve();
 /** Counts one looked-up word or review answer for today; resolves to the goal when this one reached it, else 0. */
 function countActivity() {
@@ -1640,27 +1705,210 @@ async function wordOfDay(saved) {
   return w;
 }
 
+/** Removes a word from the deck, noting when (deck.removed) so its copies elsewhere go too. */
+function dropCard(deck, key) {
+  if (!deck.cards[key]) return false;
+  delete deck.cards[key];
+  deck.removed[key] = Date.now();
+  deck.dirty = true;
+  return true;
+}
+
 function removeCard(key) {
-  return withDeck(deck => {
-    if (!deck.cards[key]) return false;
-    delete deck.cards[key];
-    deck.dirty = true;
-    return true;
-  }).then(r => { updateBadge(); return r; });
+  return withDeck(deck => dropCard(deck, key)).then(r => { updateBadge(); return r; });
 }
 
 /** Lookup card's bookmark: add the word if missing, otherwise remove it. Returns whether it's in the deck now. */
 function toggleCard(c) {
   const k = cardKey(c.q);
+  return withDeck(deck => (deck.cards[k] ? !dropCard(deck, k) : putCard(deck, c))).then(r => { updateBadge(); return r; });
+}
+
+/** Settings → delete all cards: the words and the progress; each noted as removed (the other copy lets them go too). */
+function clearCards() {
   return withDeck(deck => {
-    if (deck.cards[k]) { delete deck.cards[k]; deck.dirty = true; return false; }
-    return putCard(deck, c);
-  }).then(r => { updateBadge(); return r; });
+    for (const k of Object.keys(deck.cards)) dropCard(deck, k);
+    deck.stats = {};
+    deck.imported = true; // the history isn't turned into cards again
+    deck.dirty = true;
+  }).then(() => { updateBadge(); return true; });
 }
 
 /** Goes through the queue so a lookup's automatic add has finished before we answer. */
 function hasCard(q) {
   return withDeck(deck => !!deck.cards[cardKey(q)]);
+}
+
+/* ---------------- the deck from elsewhere: a backup file, and Lamha on the other side of the Firefox link ----------------
+ * Both are merged the same way. A word in both copies keeps the schedule of the one reviewed last, and its text fields
+ * are filled from either; a word removed on one side after its last change stays removed. Everything that arrives is
+ * untrusted (a file, another program): each card is rebuilt from the fields and kinds a card has. */
+
+const REMOVED_KEEP_MS = 180 * DAY;
+const SCHEDULE_FIELDS = ["added", "due", "interval", "ease", "reps", "lapses", "last"];
+/** When a card last changed: added, reviewed, or a field filled in. */
+const cardTime = c => Math.max(c.mod || 0, c.last || 0, c.added || 0);
+
+/** A card from outside, rebuilt, or null. */
+function cleanCard(raw) {
+  if (!raw || typeof raw !== "object" || typeof raw.q !== "string" || raw.q.length > 100 || !cardKey(raw.q)) return null;
+  const s = (v, n) => (typeof v === "string" ? v.slice(0, n) : "");
+  const num = v => (Number.isFinite(v) && v >= 0 ? v : 0);
+  const c = {
+    q: raw.q.trim(), tr: s(raw.tr, 200), ex: s(raw.ex, 300), form: s(raw.form, 100), def: s(raw.def, 300),
+    added: num(raw.added), due: num(raw.due), interval: num(raw.interval), ease: Number.isFinite(raw.ease) ? Math.min(5, Math.max(1.3, raw.ease)) : 2.5,
+    reps: num(raw.reps), lapses: num(raw.lapses), mod: num(raw.mod)
+  };
+  if (num(raw.last)) c.last = num(raw.last);
+  if (raw.en === true) c.en = true;
+  return c.tr || (c.en && c.def) ? c : null;
+}
+
+/** Merges `incoming` ({ key: card }) and `removedIn` ({ key: when }) into the deck; returns how many words changed. */
+function mergeCards(deck, incoming, removedIn = {}) {
+  let changed = 0;
+  const now = Date.now();
+  for (const [k, t] of Object.entries(removedIn && typeof removedIn === "object" ? removedIn : {})) {
+    if (k !== cardKey(k) || k.length > 100 || !(Number.isFinite(t) && t > 0 && t < now + DAY)) continue;
+    if (!(deck.removed[k] >= t)) deck.removed[k] = t;
+    if (deck.cards[k] && cardTime(deck.cards[k]) <= t) { delete deck.cards[k]; changed++; }
+  }
+  for (const raw of Object.values(incoming && typeof incoming === "object" ? incoming : {})) {
+    const c = cleanCard(raw);
+    if (!c) continue;
+    const k = cardKey(c.q);
+    if (deck.removed[k] >= cardTime(c)) continue; // removed after its last change
+    const old = deck.cards[k];
+    if (!old) { deck.cards[k] = c; delete deck.removed[k]; changed++; continue; }
+    const sched = (c.last || 0) > (old.last || 0) ? c : old; // the schedule of the copy reviewed last
+    const merged = { ...old };
+    for (const f of SCHEDULE_FIELDS) { if (sched[f] !== undefined) merged[f] = sched[f]; else delete merged[f]; }
+    for (const f of ["tr", "ex", "form", "def"]) if (!merged[f] && c[f]) merged[f] = c[f];
+    if (c.en) merged.en = true;
+    merged.mod = Math.max(old.mod || 0, c.mod || 0);
+    if (JSON.stringify(merged) !== JSON.stringify(old)) { deck.cards[k] = merged; changed++; }
+  }
+  if (changed) deck.dirty = true;
+  return changed;
+}
+
+/** Settings → save a copy: the deck, the history, the mistake journal and the days' practice, in one file. */
+async function exportData() {
+  const [deck, st] = await Promise.all([
+    withDeck(d => ({ cards: { ...d.cards }, cardsRemoved: { ...d.removed }, cardStats: d.stats })),
+    browser.storage.local.get(["history", "mistakes", "activity", "lookupCount"])
+  ]);
+  return { app: "lamha", kind: "backup", format: 1, version: browser.runtime.getManifest ? browser.runtime.getManifest().version : "", exportedAt: Date.now(), ...deck, ...st };
+}
+
+/** Settings → restore: a saved copy merged with what's here (nothing here is lost). Returns what it added. */
+async function importData(data) {
+  if (!data || typeof data !== "object" || data.app !== "lamha" || data.format !== 1) throw new Error("not_backup");
+  const cards = await withDeck(deck => mergeCards(deck, data.cards, data.cardsRemoved));
+  // history: both lists, newest first, the last 100 words
+  let history = 0;
+  if (Array.isArray(data.history)) {
+    const run = historyQueue.then(async () => {
+      const { history: mine = [] } = await browser.storage.local.get("history");
+      const seen = new Set(mine.map(h => String(h.q).toLowerCase()));
+      const add = data.history.filter(h => h && typeof h.q === "string" && h.q.length <= 100 && !seen.has(h.q.toLowerCase()))
+        .map(h => ({ q: h.q, tr: typeof h.tr === "string" ? h.tr.slice(0, 200) : "", src: typeof h.src === "string" ? h.src.slice(0, 8) : "", t: Number.isFinite(h.t) ? h.t : 0 }));
+      history = add.length;
+      if (add.length) await browser.storage.local.set({ history: [...mine, ...add].sort((a, b) => (b.t || 0) - (a.t || 0)).slice(0, 100) });
+    });
+    historyQueue = run.catch(() => {});
+    await run;
+  }
+  // the journal and the days' practice: whichever copy has seen more (adding them up would count twice on a second restore)
+  const { mistakes, activity = {}, lookupCount = 0 } = await browser.storage.local.get(["mistakes", "activity", "lookupCount"]);
+  const m = data.mistakes;
+  if (m && typeof m === "object" && Number.isFinite(m.checks) && m.checks > ((mistakes && mistakes.checks) || 0)) {
+    const counts = Object.fromEntries(Object.entries(m.counts || {}).filter(([c, n]) => LamhaAI.isCategory(c) && Number.isFinite(n) && n >= 0));
+    const recent = (Array.isArray(m.recent) ? m.recent : []).filter(r => r && LamhaAI.isCategory(r.cat)).slice(0, 200)
+      .map(r => ({ cat: r.cat, original: String(r.original || "").slice(0, 200), fix: String(r.fix || "").slice(0, 200), why: String(r.why || "").slice(0, 400), t: Number(r.t) || 0 }));
+    await browser.storage.local.set({ mistakes: { checks: m.checks, counts, recent, since: Number(m.since) || Date.now() } });
+  }
+  const days = { ...activity };
+  for (const [k, n] of Object.entries(data.activity && typeof data.activity === "object" ? data.activity : {})) {
+    if (/^\w{3} \w{3} \d{2} \d{4}$/.test(k) && Number.isFinite(n) && n > 0) days[k] = Math.max(Object.hasOwn(days, k) ? days[k] : 0, n);
+  }
+  await browser.storage.local.set({ activity: days, lookupCount: Math.max(lookupCount, Number.isFinite(data.lookupCount) ? data.lookupCount : 0) });
+  updateBadge();
+  return { cards, history };
+}
+
+/* ----- the review deck shared with Lamha for Windows, over the Firefox link (Settings → لمحة لـ Windows) -----
+ * Firefox sends its words changed since the last time and gets the app's; each side merges the other's. The app is never
+ * started for this: if it isn't running, the next change tries again. Both sides of a link message are held to 1 MB, so
+ * a big deck goes in pages. */
+const SYNC_DELAY_MS = 15e3, SYNC_PAGE_CHARS = 300e3; // characters: Arabic ones are two bytes, and the limit is 1 MB
+let syncTimer = null, syncing = null;
+/** After the deck changed (Firefox only; the app answers, it doesn't ask). */
+function deckChanged() {
+  if (typeof LamhaWikiOffline !== "undefined" || !browser.runtime.connectNative) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => syncDeck().catch(() => {}), SYNC_DELAY_MS);
+}
+
+/** The deck's words changed after `since` ([time, key], in that order), at most SYNC_PAGE_CHARS of them: { cards, removed, next }. */
+function deckPage(deck, since = [0, ""]) {
+  const after = (t, k) => t > since[0] || (t === since[0] && k > since[1]);
+  const words = Object.entries(deck.cards).map(([k, c]) => [cardTime(c), k, c]).filter(([t, k]) => after(t, k)).sort((a, b) => a[0] - b[0] || (a[1] < b[1] ? -1 : 1));
+  const cards = {};
+  let size = 0, last = null;
+  for (const [t, k, c] of words) {
+    size += JSON.stringify(c).length + k.length + 8;
+    if (size > SYNC_PAGE_CHARS && last) return { cards, removed: {}, next: last };
+    cards[k] = c;
+    last = [t, k];
+  }
+  const removed = Object.fromEntries(Object.entries(deck.removed).filter(([, t]) => t > since[0]));
+  return { cards, removed, next: null };
+}
+
+/** Firefox: one round with the app. Resolves to { sent, got } or null (not connected, the app not running). */
+function syncDeck() {
+  if (syncing) return syncing;
+  syncing = (async () => {
+    if (!(await appAllowed())) return null;
+    const { deckSyncAt = 0 } = await browser.storage.local.get("deckSyncAt"); // up to when both copies had each other's words
+    const began = Date.now();
+    let sent = 0, got = 0, since = [deckSyncAt, ""], page = null, appNow = 0;
+    // ours, a page at a time
+    do {
+      page = await withDeck(deck => deckPage(deck, since));
+      const r = await askApp("deckSync", { cards: page.cards, removed: page.removed, since: [deckSyncAt, ""], upload: true });
+      sent += Object.keys(page.cards).length;
+      since = page.next || since;
+      appNow = r && r.now;
+    } while (page.next);
+    // theirs, a page at a time
+    let theirs = [deckSyncAt, ""];
+    for (let i = 0; i < 200; i++) {
+      const r = await askApp("deckSync", { since: theirs });
+      if (!r || typeof r !== "object") break;
+      got += await withDeck(deck => mergeCards(deck, r.cards, r.removed));
+      appNow = r.now;
+      if (!Array.isArray(r.next)) break;
+      theirs = r.next;
+    }
+    // what changed on either side while this ran is sent again next time (merging twice changes nothing)
+    await browser.storage.local.set({ deckSyncAt: Math.min(Number(appNow) || began, began), deckSyncedAt: Date.now() });
+    return { sent, got };
+  })().finally(() => { syncing = null; });
+  return syncing;
+}
+
+/** The app: Firefox's words merged in (`upload`), or a page of the app's changed after `since`. */
+async function answerDeckSync(msg) {
+  const since = Array.isArray(msg.since) && Number.isFinite(msg.since[0]) ? [msg.since[0], String(msg.since[1] || "")] : [0, ""];
+  if (msg.upload) {
+    await withDeck(deck => mergeCards(deck, msg.cards, msg.removed));
+    updateBadge();
+    return { now: Date.now() };
+  }
+  const page = await withDeck(deck => deckPage(deck, since));
+  return { ...page, now: Date.now() };
 }
 
 /** Toolbar badge: how many cards are waiting. */
@@ -1687,14 +1935,70 @@ if (browser.alarms) {
   browser.alarms.onAlarm.addListener(a => { if (a.name === "lamha-badge") updateBadge(); });
 }
 
+/* ---------------- what went wrong lately (Settings → Report a problem) ----------------
+ * The last 30 failures: when, where (lookup, ai…) and the error's code. Never the text involved: a message that isn't
+ * one of Lamha's codes is cut short, with anything in quotes taken out. Kept in storage.local (Firefox restarts the
+ * background when it's idle), and only ever shown to the user, who decides whether to send it. */
+const ERROR_LOG_MAX = 30;
+let errorLog = null, errorLogTimer = null;
+const errorLogReady = browser.storage.local.get({ errorLog: [] }).then(r => { errorLog = Array.isArray(r.errorLog) ? r.errorLog.slice(0, ERROR_LOG_MAX) : []; }, () => { errorLog = []; });
+const errorCode = e => {
+  const s = String((e && e.message) || e || "").replace(/"[^"]*"|'[^']*'|“[^”]*”/g, "…");
+  return (/^[\w.-]+(:|$)/.test(s) ? s.split(":")[0] : s).slice(0, 80); // "ai_error:<the provider's words>" → ai_error
+};
+function noteError(where, e) {
+  errorLogReady.then(() => {
+    errorLog.unshift({ t: Date.now(), where, code: errorCode(e) });
+    errorLog.length = Math.min(errorLog.length, ERROR_LOG_MAX);
+    clearTimeout(errorLogTimer);
+    errorLogTimer = setTimeout(() => browser.storage.local.set({ errorLog }).catch(() => {}), 2000); // a burst is one write
+  });
+}
+/** A failed request's answer, noted in the log. */
+const failed = where => e => { noteError(where, e); return { ok: false, error: String((e && e.message) || e) }; };
+
+/** Settings → Report a problem: what the user sends (after reading it), as plain text. Settings and counts, never words,
+ *  text, keys or addresses. */
+async function diagnostics() {
+  await errorLogReady;
+  const [s, l, info] = await Promise.all([
+    getSettings(),
+    browser.storage.local.get(["aiProvider", "ollamaModel", "ollamaUrl", "geminiModel", "aiKeySet", "geminiKeySet", "trService", "trProvider", "trPages", "cards", "history", "mistakes", "appLink", "deckSyncedAt", "clipboardEnabled", "wikiOfflineFirst"]),
+    browser.runtime.getBrowserInfo ? browser.runtime.getBrowserInfo().catch(() => null) : null
+  ]);
+  const desktop = typeof LamhaDesktopInfo === "function" ? LamhaDesktopInfo() : null; // the Windows app (desktop/main.js)
+  const on = v => (v ? "on" : "off");
+  const when = t => (t ? new Date(t).toISOString().replace("T", " ").slice(0, 16) : "never");
+  const version = desktop ? desktop.version : browser.runtime.getManifest ? browser.runtime.getManifest().version : "?";
+  const host = desktop ? `Windows app (Electron ${desktop.electron}, Windows ${desktop.windows})` : info ? `${info.name} ${info.version}` : String(typeof navigator !== "undefined" ? navigator.userAgent : "");
+  const lines = [
+    `Lamha ${version} · ${host} · interface ${LamhaI18n.lang()} (${s.uiLang})`,
+    `Dictionary: ${s.dictSource}, sentence context ${on(s.useContext)}, English–English ${on(s.enDict)}, explained: ${[].concat(s.explainLangs || []).join(",") || "-"}, translate into ${s.targetLang}, Arabic → English ${on(s.reverseForArabic)}`,
+    `Card: ${s.triggerMode}, in text boxes ${on(s.showInInputs)}, Wikipedia ${on(s.showWikipedia)}, speak ${on(s.autoSpeak)}, theme ${s.theme}, animations ${s.motion}, excluded sites ${[].concat(s.disabledSites || []).length}`,
+    `Translation: ${l.trService || "auto"} via ${l.trProvider || "the writing tools' AI"}, pages with AI ${on(l.trPages)}`,
+    `Writing tools: ${l.aiProvider || "claude"} (Claude key ${l.aiKeySet ? "saved" : "none"}, Gemini key ${l.geminiKeySet ? "saved" : "none"}, Gemini model ${l.geminiModel || "default"}, Ollama model ${l.ollamaModel || "none"} at ${l.ollamaUrl ? "a custom address" : "the default address"}), in text boxes ${on(s.aiInInputs)}, double-click ${on(s.writeOnDblClick)}`,
+    `Data: ${Object.keys(l.cards || {}).length} cards, ${(l.history || []).length} in history, journal ${(l.mistakes && l.mistakes.checks) || 0} checks, packs: ${LamhaPacks.langs().join(",") || "-"}`,
+    ...(desktop ? [] : [`Link to the Windows app: ${on(l.appLink)}, deck last shared ${when(l.deckSyncedAt)}`]),
+    ...(desktop ? [`Clipboard history ${on(l.clipboardEnabled)}, Wikipedia downloaded: ${desktop.wiki.join(",") || "-"} (offline first ${on(l.wikiOfflineFirst)}), memory ${desktop.memoryMB} MB`] : []),
+    "",
+    "Recent errors (newest first):",
+    ...(errorLog.length ? errorLog.map(e => `  ${when(e.t)}  ${e.where}: ${e.code}`) : ["  none"])
+  ];
+  if (desktop && desktop.writeButton.length) {
+    lines.push("", "Write button, the last double-clicks (program → what Windows said about the box):");
+    for (const d of desktop.writeButton) lines.push(`  ${when(d.t)}  ${d.exe} via ${d.via} → ${d.field}; ${d.shown ? "shown" : "not shown: " + d.why}`);
+  }
+  return lines.join("\n");
+}
+
 /* ---------------- messaging ---------------- */
 
 browser.runtime.onMessage.addListener((msg, sender) => {
   switch (msg && msg.type) {
-    case "lookup": return lookup(msg.text, msg).then(r => ({ ok: true, data: r }), e => ({ ok: false, error: String(e.message || e) }));
-    case "translateBatch": return translateBatch(msg.texts, msg.tl || "ar", msg.sl || "auto", msg.format, ["page", "gloss"].includes(msg.kind) ? msg.kind : "text").then(r => ({ ok: true, data: r }), e => ({ ok: false, error: String(e.message || e) }));
+    case "lookup": return lookup(msg.text, msg).then(r => ({ ok: true, data: r }), failed("lookup"));
+    case "translateBatch": return translateBatch(msg.texts, msg.tl || "ar", msg.sl || "auto", msg.format, ["page", "gloss"].includes(msg.kind) ? msg.kind : "text").then(r => ({ ok: true, data: r }), failed("translate " + (["page", "gloss"].includes(msg.kind) ? msg.kind : "text")));
     case "wiki": return wikiSummary(String(msg.title || ""), msg.lang || "ar", { alt: msg.alt, offline: !!msg.offline }).then(r => ({ ok: true, data: r }), () => ({ ok: true, data: null }));
-    case "speak": return speak(msg.text, msg.lang).then(() => ({ ok: true }), e => ({ ok: false, error: String(e.message || e) }));
+    case "speak": return speak(msg.text, msg.lang).then(() => ({ ok: true }), failed("speak"));
     case "stopSpeak": stopSpeaking(); return Promise.resolve({ ok: true });
     case "reviewQueue": return reviewQueue();
     case "reviewGrade": return reviewGrade(msg.key, msg.grade).then(goal => ({ ok: true, goal }));
@@ -1702,7 +2006,13 @@ browser.runtime.onMessage.addListener((msg, sender) => {
     case "cardRemove": return removeCard(msg.key);
     case "cardToggle": return toggleCard(msg.card);
     case "cardHas": return hasCard(msg.q);
-    case "ai": return aiRun(msg.tool, msg.text, msg.extra).then(r => ({ ok: true, data: r }), e => ({ ok: false, error: String(e.message || e) }));
+    case "cardsClear": return clearCards(); // Settings → delete all cards
+    case "dataExport": return exportData().then(data => ({ ok: true, data }), failed("backup"));
+    case "dataImport": return importData(msg.data).then(data => ({ ok: true, data }), failed("restore"));
+    case "deckSyncNow": return syncDeck().then(data => ({ ok: true, data }), failed("deck sync")); // Settings → لمحة لـ Windows
+    case "deckSync": return answerDeckSync(msg).then(data => ({ ok: true, data }), failed("deck sync")); // the app, for Firefox (main.js)
+    case "diagnostics": return diagnostics().then(data => ({ ok: true, data }));
+    case "ai": return aiRun(msg.tool, msg.text, msg.extra).then(r => ({ ok: true, data: r }), failed("ai " + String(msg.tool || "").slice(0, 20)));
     case "aiTest": return aiTest(msg).then(
       note => ({ ok: true, note: typeof note === "string" ? note : undefined }),
       e => ({ ok: false, error: String(e.message || e), detail: e.detail }));
@@ -1713,13 +2023,16 @@ browser.runtime.onMessage.addListener((msg, sender) => {
     case "dictMeta": return LocalDict.meta();
     case "getSettings": return getSettings();
     case "packList": return LamhaPacks.list().then(data => ({ ok: true, data })); // Settings → Dictionary → downloadable dictionaries
-    case "packInstall": return LamhaPacks.install(String(msg.lang)).then(() => ({ ok: true }), e => ({ ok: false, error: String(e.message || e) }));
+    case "packInstall": return LamhaPacks.install(String(msg.lang)).then(() => ({ ok: true }), failed("pack download"));
     case "wikiOpen": return Promise.resolve(openWikiReader(String(msg.file || ""), String(msg.path || ""))).then(() => ({ ok: true }), e => ({ ok: false, error: e.code || "failed" }));
     case "appStatus": return appStatus(!!msg.launch).then(data => ({ ok: true, data }));
     case "appLink": // Settings: the permission was granted (or given back) on the page; this remembers the choice
       appLink.infoAt = 0;
       if (!msg.on && appLink.port) { appLink.port.disconnect(); appLink.port = null; }
-      return browser.storage.local.set({ appLink: !!msg.on }).then(() => (msg.on ? appStatus(true) : { supported: true, allowed: false })).then(data => ({ ok: true, data }));
+      return browser.storage.local.set({ appLink: !!msg.on }).then(() => (msg.on ? appStatus(true) : { supported: true, allowed: false })).then(data => {
+        if (data.connected) syncDeck().catch(() => {}); // the two decks meet as soon as they're linked
+        return { ok: true, data };
+      });
     case "packRemove": return LamhaPacks.remove(String(msg.lang)).then(() => ({ ok: true }), e => ({ ok: false, error: String(e.message || e) }));
     case "setWordDict": return setExplain(msg.lang || "en", msg.lang ? !!msg.on : !!msg.en).then(() => ({ ok: true })); // the card's switch
     case "writeTipSeen": return browser.storage.local.set({ writeTipSeen: true }).then(() => ({ ok: true })); // the double-click tip, shown once per device
@@ -1781,3 +2094,4 @@ browser.runtime.onInstalled.addListener(async details => {
   }
 });
 browser.runtime.onStartup.addListener(async () => { await i18nReady; setupMenus(); updateBadge(); });
+deckChanged(); // Firefox: catch up with the Windows app's deck a little after starting (nothing if they aren't linked)

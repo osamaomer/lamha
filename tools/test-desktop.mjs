@@ -91,6 +91,61 @@ test("the extension's button is recognised in both interface languages", () => {
   assert.equal(L.t("c.writeNewHere"), L.pair("c.writeNewHere")[1]);
 });
 
+section("what each window is told and may ask, and where it goes (app-rules.js)");
+const rules = require("../desktop/app-rules.js");
+
+test("storage changes: pages get everything; the card no API keys and no deck; the panel and the reader no deck", () => {
+  const changes = { aiKey: { newValue: "sk-x" }, aiKeySet: { newValue: true }, cards: { newValue: { a: {} } }, history: { newValue: [] }, theme: { newValue: "dark" } };
+  assert.deepEqual(Object.keys(rules.changesFor("page", changes)), ["aiKey", "aiKeySet", "cards", "history", "theme"]);
+  assert.deepEqual(Object.keys(rules.changesFor("card", changes)), ["aiKeySet", "theme"]);
+  assert.deepEqual(Object.keys(rules.changesFor("lean", changes)), ["aiKey", "aiKeySet", "theme"]);
+  assert.equal(rules.changesFor("card", { cards: {}, geminiKey: {} }), null, "nothing left: nothing sent");
+  assert.deepEqual(Object.keys(rules.withoutSecrets({ geminiKey: "x", geminiKeySet: true })), ["geminiKeySet"]);
+});
+
+test("the card and the reader may ask for what the card does, not for requests to an address or deleting data", () => {
+  for (const type of ["lookup", "translateBatch", "wiki", "speak", "ai", "cardHas", "cardToggle", "openOptions"]) assert.equal(rules.allowedFromOutsideText({ type }), true, type);
+  for (const type of ["aiTest", "ollamaModels", "cardRemove", "packInstall", "packRemove", "appLink", "reviewGrade", "reviewQueue", "getSettings", "__proto__", "constructor"]) {
+    assert.equal(rules.allowedFromOutsideText({ type }), false, type);
+  }
+  for (const odd of [null, undefined, "lookup", 5, {}]) assert.equal(rules.allowedFromOutsideText(odd), false, String(odd));
+});
+
+test("Firefox's Wikipedia request: at most 6 short titles and a language code, or nothing", () => {
+  assert.deepEqual(rules.wikiSummaryArgs({ titles: ["Paris", "باريس"], lang: "ar" }), { titles: ["Paris", "باريس"], lang: "ar" });
+  assert.equal(rules.wikiSummaryArgs({ titles: ["x"], lang: "ar/../x" }), null);
+  assert.equal(rules.wikiSummaryArgs({ titles: [], lang: "en" }), null);
+  assert.equal(rules.wikiSummaryArgs(null), null);
+  const a = rules.wikiSummaryArgs({ titles: ["a", 5, "", " ", "x".repeat(121), "b", "c", "d", "e", "f", "g"], lang: "en" });
+  assert.deepEqual(a.titles, ["a", "b", "c", "d", "e", "f"]);
+});
+
+test("Settings' address: section and welcome", () => {
+  assert.deepEqual(rules.optionsTarget("#journal"), { search: "", hash: "journal" });
+  assert.deepEqual(rules.optionsTarget("?welcome=1"), { search: "welcome=1", hash: "ai" });
+  assert.deepEqual(rules.optionsTarget("?welcome=1&perm=1#wikipedia"), { search: "welcome=1&perm=1", hash: "wikipedia" });
+  assert.deepEqual(rules.optionsTarget(""), { search: "", hash: "" });
+});
+
+test("the card window stays on the mouse's monitor: below the mouse, above it near the bottom, the Write button over it", () => {
+  const workArea = { x: 0, y: 0, width: 1920, height: 1040 }, w = 480, h = 620;
+  const inside = b => b.x >= workArea.x && b.y >= workArea.y && b.x + b.width <= workArea.x + workArea.width && b.y + b.height <= workArea.y + workArea.height;
+  const top = rules.cardPlacement({ cursor: { x: 960, y: 100 }, workArea, w, h });
+  assert.deepEqual(top, { bounds: { x: 720, y: 116, width: w, height: h }, point: { x: 240, y: 12 } }, "below the mouse");
+  const low = rules.cardPlacement({ cursor: { x: 960, y: 1000 }, workArea, w, h });
+  assert.ok(inside(low.bounds) && low.bounds.y + low.point.y < 1000, "above the mouse near the bottom");
+  const corner = rules.cardPlacement({ cursor: { x: 5, y: 5 }, workArea, w, h });
+  assert.deepEqual([corner.bounds.x, corner.bounds.y], [0, 21], "never off the screen's left edge");
+  const pill = rules.cardPlacement({ cursor: { x: 960, y: 300 }, workArea, w, h, pill: true });
+  assert.deepEqual(pill.point, { x: 240, y: 72 }, "the Write button: the mouse 72 px from the window's top");
+  const lowPill = rules.cardPlacement({ cursor: { x: 960, y: 1000 }, workArea, w, h, pill: true });
+  assert.ok(inside(lowPill.bounds) && lowPill.point.y > 72 && lowPill.point.y < h, "near the bottom the window stays on screen, the button still under the mouse");
+  const second = { x: -1920, y: 0, width: 1920, height: 1040 }; // a monitor to the left
+  assert.ok(rules.cardPlacement({ cursor: { x: -10, y: 300 }, workArea: second, w, h }).bounds.x + w <= 0, "on the left monitor, not across two");
+  const panel = rules.panelPlacement({ cursor: { x: 1910, y: 1030 }, workArea, w: 380, h: 460 });
+  assert.ok(inside(panel) && panel.y + 460 <= 1030 - 16, "the panel goes above the mouse when there's no room below");
+});
+
 section("what's new (shared/changelog.js, tools/release-notes.mjs)");
 const { changelog, releaseNotes } = await import("./release-notes.mjs");
 const version = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8")).version;
@@ -488,6 +543,11 @@ test("the host is registered for Lamha's extension only, and its files say how t
     const cfg = JSON.parse(readFileSync(path.join(bridge.dir, "config.json"), "utf8"));
     assert.deepEqual([cfg.pipe, cfg.token.length, cfg.app, cfg.args], [bridge.pipe, 48, "C:\\Program Files\\Lamha\\Lamha.exe", "--hidden"]);
     assert.match(readFileSync(path.join(bridge.dir, "host.bat"), "utf8"), /powershell\.exe" .*-File "%~dp0host\.ps1"/);
+    assert.match(bridge.pipe, /^lamha-firefox-[0-9a-f]{32}$/, "a name nobody can work out from the folder (another Windows account could take it first)");
+    const other = makeBridge({}).bridge;
+    await other.enable();
+    assert.notEqual(other.pipe, bridge.pipe, "random, not from the data folder");
+    await other.disable();
   } finally { await bridge.disable(); }
   assert.deepEqual(reg.at(-1), ["delete"]);
   assert.equal(existsSync(bridge.dir), false, "turned off: the files go too");
@@ -541,6 +601,12 @@ test("Firefox's side, for real: host.bat → PowerShell → the pipe, 4-byte-len
     send({ id: 2, type: "echo", text: "x" }); // the app quit: the host answers for it (and never starts it: no launch)
     await wait(2);
     assert.deepEqual(replies[1], { ok: false, error: "no_app", id: 2 });
+    const before = bridge.pipe;
+    await bridge.enable(); // the app starts again: a new pipe name and token; the host, still running, finds them
+    assert.notEqual(bridge.pipe, before);
+    send({ id: 3, type: "echo", text: "back" });
+    await wait(3);
+    assert.deepEqual(replies[2], { id: 3, ok: true, data: "back" });
   } finally {
     host.stdin.end();
     await new Promise(r => host.on("exit", r));

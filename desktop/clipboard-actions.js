@@ -65,7 +65,7 @@ function createClipActions({ store, send, targetLang, readCards }) {
     if (!r || !r.ok) fail(r);
     const res = r.data;
     const out = { action: "review", word: res.query, tr: String(res.translation || "") };
-    if (before[cardKey(res.query)]) {
+    if (Object.hasOwn(before, cardKey(res.query))) { // words are untrusted keys: "constructor" isn't in every deck
       await send({ type: "cardRemove", key: cardKey(res.query) });
       return { ...out, inDeck: false };
     }

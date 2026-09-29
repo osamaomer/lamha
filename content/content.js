@@ -28,8 +28,12 @@
   browser.storage.sync.get(settings).then(s => { settings = { ...settings, ...s }; applyTheme(); }).catch(() => {});
   // interface language: the card's labels follow it; an open card closes so the next one is in the new language
   LamhaI18n.init({ onChange: () => { if (root) root.classList.toggle("en", LamhaI18n.lang() === "en"); closeCard(); hidePill(); } }).catch(() => {});
-  browser.storage.local.get(AI_LOCAL_KEYS).then(r => { aiLocal = r || {}; updateAiReady(); }).catch(() => {});
-  browser.storage.local.get({ writeTipSeen: false }).then(r => { writeTipSeen = !!(r && r.writeTipSeen); }).catch(() => {});
+  // one read for both (this runs in every frame of every page)
+  browser.storage.local.get([...AI_LOCAL_KEYS, "writeTipSeen"]).then(r => {
+    const { writeTipSeen: seen, ...ai } = r || {};
+    aiLocal = ai; updateAiReady();
+    writeTipSeen = !!seen;
+  }).catch(() => {});
   browser.storage.onChanged.addListener((changes, area) => {
     if (area === "local") {
       AI_LOCAL_KEYS.forEach(k => { if (changes[k]) aiLocal[k] = changes[k].newValue; });
@@ -514,7 +518,9 @@
     const lang = d.src;
     const pick = async want => {
       if (want === on) return;
+      const mine = card;
       await send({ type: "setWordDict", lang, on: want }); // through the background: the desktop card can't write settings itself
+      if (card !== mine) return; // closed (or another card opened) meanwhile: the choice is kept for the next one
       load(stack[stack.length - 1], stack.length === 1 && cardInfo ? cardInfo.context : null);
     };
     const name = code => (code === "en" ? L("c.dictEn") : langName(code));
@@ -1230,15 +1236,17 @@
     // "modifier" mode: only Alt+select opens (handled above)
   }
 
+  // Only the user's own mouse and keys open anything: a page's script can fake these events (isTrusted false), e.g. a
+  // selection and a mouse-up in "instant" mode, which would send text it chose to the translator.
   document.addEventListener("pointerup", e => {
-    if (fromUs(e) || e.button > 0) return;
+    if (!e.isTrusted || fromUs(e) || e.button > 0) return;
     lastPointer = { x: e.clientX, y: e.clientY };
     setTimeout(() => evaluate(e), 10);
   }, true);
 
   // a double-click in an empty text box: the Write button, for Write new in that box (it disappears on typing)
   document.addEventListener("dblclick", e => {
-    if (fromUs(e) || e.button > 0 || !settings.writeOnDblClick || !aiReady || !isActiveHere() || card) return;
+    if (!e.isTrusted || fromUs(e) || e.button > 0 || !settings.writeOnDblClick || !aiReady || !isActiveHere() || card) return;
     const el = emptyEditable(e.composedPath ? e.composedPath()[0] : e.target);
     if (!el || (el !== document.activeElement && !el.contains(document.activeElement))) return;
     lastPointer = { x: e.clientX, y: e.clientY };
@@ -1257,7 +1265,7 @@
   }, true);
 
   document.addEventListener("keyup", e => {
-    if (fromUs(e)) return;
+    if (!e.isTrusted || fromUs(e)) return;
     const selectAll = (e.ctrlKey || e.metaKey) && (e.key || "").toLowerCase() === "a";
     if (e.shiftKey || e.key === "Shift" || selectAll) { lastPointer = null; evaluate(e); }
   }, true);

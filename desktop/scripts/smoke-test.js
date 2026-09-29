@@ -172,6 +172,29 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
     return `serendipity → ${r.data.translation || r.data.definitions[0].entries[0].gloss}`;
   });
 
+  await check("the background knows whether Windows has a network (navigator.onLine from Electron's net)", async () => {
+    const { net } = require("electron");
+    assert(typeof navigator.onLine === "boolean", "navigator.onLine is " + typeof navigator.onLine);
+    assert(navigator.onLine === net.isOnline(), "differs from net.isOnline()");
+    return navigator.onLine ? "online" : "offline";
+  });
+
+  await check("pages get the clipboard only: camera, microphone, location and notifications are refused", async () => {
+    const states = await js(mainWin, `Promise.all(["geolocation", "camera", "microphone", "notifications", "clipboard-write"].map(n => navigator.permissions.query({ name: n }).then(s => s.state, () => "error")))`);
+    assert(JSON.stringify(states) === JSON.stringify(["denied", "denied", "denied", "denied", "granted"]), states.join(" "));
+    return states.join(" ");
+  });
+
+  await check("the floating card can't ask for what it doesn't do (a request to any address, deleting cards)", async () => {
+    const card = desktop.getCardWin();
+    await desktop.cardReady();
+    // (its own request: an offline Wikipedia one, which changes nothing: a lookup would add the word to the deck)
+    const r = await js(card, `Promise.all([browser.runtime.sendMessage({ type: "ollamaModels", url: "http://192.168.1.1:80" }), browser.runtime.sendMessage({ type: "cardRemove", key: "bank" }), browser.runtime.sendMessage({ type: "wiki", title: "zzqx", lang: "en", offline: true })]).then(a => a.map(x => (x && x.ok ? "ok" : x && x.error)))`);
+    assert(r[0] === "not_allowed" && r[1] === "not_allowed", r.join(" "));
+    assert(r[2] === "ok", "its own request: " + r[2]);
+    return r.join(" ");
+  });
+
   await check("page → main process messaging", async () => {
     const q = await js(mainWin, `browser.runtime.sendMessage({ type: "lookup", text: "resilient" }).then(r => r.ok ? r.data.query + " → " + r.data.translation : "ERR " + r.error)`);
     assert(!q.startsWith("ERR"), q);
@@ -1158,10 +1181,14 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
           await wait(100);
         }
         assert(s.title === "باريس" && s.img === 1 && s.pwned === undefined && s.lamha && s.csp, JSON.stringify(s));
-        // select a word in the article: Lamha's button appears, as on any web page
-        await js(win, `(() => { const t = document.querySelector(".rd-body p").firstChild, r = document.createRange(); r.setStart(t, 0); r.setEnd(t, 5);
-          getSelection().removeAllRanges(); getSelection().addRange(r); const b = r.getBoundingClientRect();
-          document.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, clientX: b.right, clientY: b.bottom, button: 0 })); return true; })()`);
+        // select a word in the article: Lamha's button appears, as on any web page. A real double-click (sendInputEvent,
+        // trusted like the user's own): Lamha ignores mouse events a page's script makes up
+        const at = await js(win, `(() => { const t = document.querySelector(".rd-body p").firstChild, r = document.createRange(); r.setStart(t, 0); r.setEnd(t, 2);
+          const b = r.getBoundingClientRect(); return { x: Math.round(b.left + b.width / 2), y: Math.round(b.top + b.height / 2) }; })()`);
+        for (const clickCount of [1, 2]) {
+          win.webContents.sendInputEvent({ type: "mouseDown", x: at.x, y: at.y, button: "left", clickCount });
+          win.webContents.sendInputEvent({ type: "mouseUp", x: at.x, y: at.y, button: "left", clickCount });
+        }
         let pill = false;
         for (let i = 0; i < 20 && !pill; i++) { await wait(100); pill = await js(win, `!!document.querySelector("lamha-ui")`); }
         assert(pill, "no lookup button after selecting a word");
@@ -1419,6 +1446,19 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
     }
     console.log("screenshots →", process.env.LAMHA_SHOTS);
   }
+
+  // last, after every window has been used: what the app holds, per kind of process (a record for each release;
+  // the installed 1.9.5 held ~445 MB private: GPU 193, main 97, three windows 133, services 22)
+  await check("memory: every process of the app, after the whole self-test", async () => {
+    const byType = {};
+    for (const m of app.getAppMetrics()) {
+      const t = m.type === "Utility" && m.serviceName ? m.serviceName.replace(/^.*\.|Service$/g, "") : m.type;
+      byType[t] = (byType[t] || 0) + (m.memory.privateBytes || m.memory.workingSetSize) / 1024;
+    }
+    const total = Object.values(byType).reduce((a, b) => a + b, 0);
+    assert(total < 1500, `${Math.round(total)} MB`); // a leak, not a number to tune
+    return `${Math.round(total)} MB private: ` + Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([t, mb]) => `${t} ${Math.round(mb)}`).join(", ");
+  });
 
   for (const f of smokeCleanups) f();
   const failed = results.filter(r => r.startsWith("  ✗")).length;

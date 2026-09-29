@@ -2,7 +2,7 @@
 
 const $ = id => document.getElementById(id);
 const { t, num } = LamhaI18n;
-const DEFAULTS = { enabled: true, targetLang: "ar", disabledSites: [] };
+const DEFAULTS = { enabled: true, targetLang: "ar", dictSource: "local", disabledSites: [] };
 let settings = { ...DEFAULTS };
 let tab = null, host = "", pageActive = false, pageSupported = false;
 
@@ -164,10 +164,7 @@ async function runQuick() {
   const res = await browser.runtime.sendMessage({ type: "lookup", text }).catch(() => null);
   if (token !== qToken) return;
   if (!res || !res.ok) {
-    const msg = res && res.error === "rate_limited" ? t("p.busy")
-      : res && res.error === "too_long" ? LamhaAI.errorInfo("ai_too_long").join(" — ")
-      : t("p.failed");
-    out.replaceChildren(h("div", { class: "error" }, msg));
+    out.replaceChildren(h("div", { class: "error" }, quickError(res && res.error)));
     return;
   }
   const d = res.data;
@@ -196,6 +193,19 @@ async function runQuick() {
   LamhaMotion.stagger([...out.children].filter(k => !k.classList.contains("main")), { each: 45, distance: 4 });
   if (d.milestone || d.goal) LamhaMotion.burst(out.querySelector(".milestone"));
   renderHistory();
+}
+
+/** Why the quick translation failed, as the card says it: "Local only" has no such word, the AI translator's quota or
+ *  key, too long, busy; anything else is the connection. */
+function quickError(code) {
+  code = String(code || "");
+  if (code === "not_found_offline" || code === "offline_mode") return `${t(code === "offline_mode" ? "c.errOfflineMode" : "c.errNotFound")} — ${t("c.errLocalOnly")}`;
+  if (code === "rate_limited") return t("p.busy");
+  if (code === "too_long") return LamhaAI.errorInfo("ai_too_long").join(" — ");
+  if ((Object.hasOwn(LamhaAI.ERRORS, code) && code !== "network") || code.startsWith("ai_error:")) {
+    return LamhaAI.errorInfo(code, LamhaAI.translator(aiLocal).name).slice(0, 2).join(" — ");
+  }
+  return t("p.failed");
 }
 
 /** Copies `text`; the button's icon turns into a check mark for a moment, so it's clear it worked. */
@@ -634,11 +644,28 @@ function wordOfDay(w) {
     h("button", { class: "link td-more", type: "button", onclick: () => { q.value = w.q; q.dispatchEvent(new Event("input")); clearTimeout(qTimer); runQuick(); } }, t("td.lookUp")));
 }
 
-/** Says an English word; the button shows sound waves until it's done. */
+/** Says an English word; the button shows sound waves until it's done, and a second tap stops it. Google's voice when
+ *  there's a network (and not "Local only"), else — or when it can't play — the system's own voice, as on the card. */
 async function speakWord(btn, text) {
+  const stop = () => btn.classList.remove("playing");
+  if (btn.classList.contains("playing")) {
+    browser.runtime.sendMessage({ type: "stopSpeak" }).catch(() => {});
+    try { speechSynthesis.cancel(); } catch (_) { /* no system voice */ }
+    stop();
+    return;
+  }
+  document.querySelectorAll(".playing").forEach(b => b.classList.remove("playing"));
   btn.classList.add("playing");
-  await browser.runtime.sendMessage({ type: "speak", text, lang: "en" }).catch(() => {});
-  btn.classList.remove("playing");
+  const online = settings.dictSource !== "offline" && navigator.onLine;
+  const res = online ? await browser.runtime.sendMessage({ type: "speak", text, lang: "en" }).catch(() => null) : null;
+  if (res && res.ok) { stop(); return; } // the background answers once playback has finished
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    u.onend = stop; u.onerror = stop;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch (_) { stop(); }
 }
 
 async function renderHistory() {

@@ -13,7 +13,8 @@ const src = p => readFileSync(new URL(p, root), "utf8");
 
 /* ---------- fake WebExtension environment ---------- */
 
-function storageArea(data) {
+/** `events`: listeners told about each set(), as storage.onChanged does (only in the tests that ask for it). */
+function storageArea(data, name = "local", events = null) {
   return {
     data,
     async get(keys) {
@@ -22,7 +23,11 @@ function storageArea(data) {
       if (Array.isArray(keys)) return Object.fromEntries(keys.filter(k => k in data).map(k => [k, data[k]]));
       return Object.fromEntries(Object.entries(keys).map(([k, d]) => [k, k in data ? data[k] : d]));
     },
-    async set(obj) { Object.assign(data, structuredClone(obj)); },
+    async set(obj) {
+      const changes = Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, { oldValue: data[k], newValue: structuredClone(v) }]));
+      Object.assign(data, structuredClone(obj));
+      if (events) events.forEach(f => f(changes, name));
+    },
     async remove(k) { [].concat(k).forEach(x => delete data[x]); }
   };
 }
@@ -39,7 +44,7 @@ function memoryPackStore() {
 }
 
 /** `realDict`: the real local-dict.js, reading the dictionary files from dict/ (other requests go to `fetchImpl`). */
-function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = false, packStore = memoryPackStore(), wiki = null, connectNative = null }) {
+function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = false, packStore = memoryPackStore(), wiki = null, connectNative = null, navigator = null, scale = 1, events = false }) {
   if (realDict) {
     const net = fetchImpl;
     fetchImpl = async (url, init) => {
@@ -50,8 +55,9 @@ function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = fa
   let onMessage;
   const installed = [];
   const noopEvent = { addListener() {} };
+  const heard = events ? [] : null;
   const browser = {
-    storage: { local: storageArea(local), sync: storageArea(sync), onChanged: noopEvent },
+    storage: { local: storageArea(local, "local", heard), sync: storageArea(sync, "sync", heard), onChanged: heard ? { addListener: f => heard.push(f) } : noopEvent },
     runtime: { onMessage: { addListener: f => { onMessage = f; } }, onInstalled: { addListener: f => installed.push(f) }, onStartup: noopEvent, getURL: p => "moz-extension://x/" + p,
       ...(connectNative ? { connectNative } : {}) }, // Firefox on a computer: the link to Lamha for Windows
     menus: { removeAll: async () => {}, create() {}, onClicked: noopEvent },
@@ -60,9 +66,10 @@ function makeEnv({ fetchImpl, local = {}, sync = { uiLang: "ar" }, realDict = fa
     permissions: { contains: async () => true }
   };
   const ctx = vm.createContext({
-    browser, fetch: fetchImpl, console, setTimeout, clearTimeout, AbortController, URLSearchParams, structuredClone,
+    browser, fetch: fetchImpl, console, setTimeout: scale === 1 ? setTimeout : (f, t = 0, ...a) => setTimeout(f, t / scale, ...a), clearTimeout, AbortController, URLSearchParams, structuredClone,
     Response, TransformStream, DecompressionStream, LamhaPackStore: packStore,
     ...(wiki ? { LamhaWikiOffline: wiki } : {}), // a downloaded Wikipedia (the Windows app's desktop/wiki-library.js)
+    ...(navigator ? { navigator } : {}), // navigator.onLine: the browser's, or the Windows app's (desktop/main.js, from Electron's net)
     ...(realDict ? {} : { LocalDict: {} }), Audio: class {}
   });
   vm.runInContext(src("shared/i18n.js"), ctx, { filename: "i18n.js" });
@@ -1168,9 +1175,10 @@ test("Settings → Lamha for Windows: connecting remembers it and reaches the ap
   const app = fakeApp(APP_HELLO);
   const env = makeEnv({ fetchImpl: wikipediaNet().fetchImpl, connectNative: app.connectNative });
   const on = await env.send({ type: "appLink", on: true });
-  assert.deepEqual(plain(on.data), { supported: true, allowed: true, connected: true, version: "1.10.0", langs: ["ar"] });
+  assert.deepEqual(plain(on.data), { supported: true, allowed: true, connected: true, version: "1.10.0", langs: ["ar"], deckSyncedAt: 0 });
   assert.equal((await env.browser.storage.local.get("appLink")).appLink, true);
-  assert.deepEqual(app.sent.map(m => [m.type, m.launch]), [["hello", true]], "Connect may start the app");
+  assert.deepEqual(app.sent.filter(m => m.type === "hello").map(m => [m.type, m.launch]), [["hello", true]], "Connect may start the app");
+  assert.ok(app.sent.filter(m => m.type === "deckSync").every(m => !m.launch), "the decks meet then, but never by starting the app");
   const none = makeEnv({ fetchImpl: wikipediaNet().fetchImpl, local: { appLink: true }, connectNative: fakeApp(APP_HELLO, { missing: true }).connectNative });
   assert.deepEqual(plain((await none.send({ type: "appStatus" })).data), { supported: true, allowed: true, connected: false, error: "not_installed" });
   assert.equal((await none.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"], offline: true })).data, null, "and the card simply has no Wikipedia part");
@@ -1221,6 +1229,245 @@ test("an update keeps Arabic for existing users; a new install follows the syste
   assert.equal(resolve("auto", "en-US"), "en");
   assert.equal(resolve("auto", "fr-FR"), "en");
   assert.equal(resolve("ar", "en-US"), "ar");
+});
+
+test("words named like Object's properties look up offline like any other ('constructor' is a builder)", async () => {
+  const env = makeEnv({ fetchImpl: async () => json(404, {}), sync: { uiLang: "ar", dictSource: "offline" }, realDict: true });
+  const res = await env.send({ type: "lookup", text: "constructor" });
+  assert.equal(res.ok, true, res.error);
+  assert.equal(res.data.source, "local");
+  assert.match(res.data.translation, /\p{Script=Arabic}/u);
+  assert.deepEqual(plain(env.ctx.LamhaAI.errorInfo("constructor")), ["حدث خطأ", "أعد المحاولة."], "an unknown code, not Object's own");
+});
+
+/** Runs `fn` with the background's clock at `iso` (local time) in time zone `tz`. */
+async function atTime(env, tz, iso, fn) {
+  const before = process.env.TZ;
+  process.env.TZ = tz; // Node reads it again when it's set
+  try {
+    const t = new Date(iso).getTime();
+    vm.runInContext(`(() => { const R = Date, T = ${t}; globalThis.Date = class extends R { constructor(...a) { super(...(a.length ? a : [T])); } static now() { return T; } }; })()`, env.ctx);
+    await fn();
+  } finally {
+    if (before === undefined) delete process.env.TZ; else process.env.TZ = before;
+  }
+}
+
+test("days go by the calendar: the night the clocks go forward (23 hours) breaks no streak and loses no day", async () => {
+  const cards = { a: { ...newCard, q: "a", tr: "أ" } };
+  // Egypt moved its clocks forward at midnight on Friday 24 April 2026; it's 00:30 on Saturday
+  const env = makeEnv({ fetchImpl: async () => json(200, {}), local: { cards, cardsImported: true,
+    activity: { "Thu Apr 23 2026": 2, "Fri Apr 24 2026": 3 }, cardStats: { reviewDay: "Fri Apr 24 2026", streak: 4 } } });
+  await atTime(env, "Africa/Cairo", "2026-04-25T00:30:00", async () => {
+    assert.equal((await env.send({ type: "today" })).streak, 2, "Friday and Thursday, not a gap on Friday");
+    await env.send({ type: "reviewGrade", key: "a", grade: "good" });
+    assert.equal((await env.send({ type: "reviewQueue" })).streak, 5, "yesterday's review streak goes on");
+    assert.equal(env.browser.storage.local.data.activity["Fri Apr 24 2026"], 3, "yesterday's practice is kept");
+    assert.equal((await env.send({ type: "today" })).streak, 3);
+  });
+});
+
+test("a word looked up again (answered from the cache) goes back to the top of the history, as a fresh lookup does", async () => {
+  const google = recorder(url => json(200, { src: "en", sentences: [{ trans: url.includes("q=tenacious") ? "عنيد" : "مرن", orig: "x" }] }));
+  const env = makeEnv({ fetchImpl: google.fetchImpl, local: { cardsImported: true }, sync: { dictSource: "online", translateDefinitions: false, cardsAuto: false } });
+  await env.send({ type: "lookup", text: "resilient" });
+  await env.send({ type: "lookup", text: "tenacious" });
+  const asked = google.calls.length;
+  await env.send({ type: "lookup", text: "resilient" });
+  assert.equal(google.calls.length, asked, "answered from the cache");
+  assert.deepEqual(plain(env.browser.storage.local.data.history.map(h => h.q)), ["resilient", "tenacious"]);
+  env.browser.storage.local.data.history = []; // cleared in Settings (the Windows app keeps its cache for days)
+  await env.send({ type: "lookup", text: "tenacious" });
+  assert.deepEqual(plain(env.browser.storage.local.data.history.map(h => h.q)), ["tenacious"], "recorded again after clearing");
+});
+
+test("offline Wikipedia: 'nothing found' isn't kept, so a copy downloaded afterwards answers at once", async () => {
+  const articles = {};
+  const net = wikipediaNet();
+  const env = makeEnv({ fetchImpl: net.fetchImpl, wiki: fakeWiki(articles) });
+  const ask = () => env.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"], offline: true });
+  assert.equal((await ask()).data, null, "no copy yet");
+  articles["ar|باريس"] = "باريس عاصمة فرنسا."; // downloaded in Settings meanwhile
+  assert.equal((await ask()).data.extract, "باريس عاصمة فرنسا.");
+  assert.equal(net.calls.length, 0, "never online");
+});
+
+test("no network at all (navigator.onLine false): the dictionary and the downloaded Wikipedia answer without asking the internet first", async () => {
+  const net = recorder(() => { throw new TypeError("NetworkError when attempting to fetch resource."); });
+  const env = makeEnv({ fetchImpl: net.fetchImpl, sync: { uiLang: "ar", dictSource: "online" }, realDict: true,
+    navigator: { onLine: false }, wiki: fakeWiki({ "ar|بيت": "البيت مكان السكن." }) });
+  const res = await env.send({ type: "lookup", text: "house" });
+  assert.equal(res.ok, true, res.error);
+  assert.equal(res.data.source, "local", "Online first, but there's no network: the dictionary");
+  const w = await env.send({ type: "wiki", title: "house", lang: "ar", alt: ["بيت"] });
+  assert.equal(w.data.extract, "البيت مكان السكن.");
+  assert.deepEqual(net.calls.filter(c => !String(c.url).includes("/dict/")).map(c => c.url), [], "nothing was sent to the internet");
+});
+
+test("inflected forms come in small parts, each under the key the dictionary looks in; irregular ones still find their word", async () => {
+  const { readdirSync, statSync } = await import("node:fs");
+  const dir = new URL("dict/forms/", root);
+  const shard = w => { const k = w.toLowerCase().replace(/[^a-z]/g, "").slice(0, 2); return k ? (k + "_").slice(0, 2) : "__"; }; // local-dict.js shardEn
+  let forms = 0, largest = 0;
+  for (const f of readdirSync(dir)) {
+    const part = JSON.parse(src("dict/forms/" + f));
+    for (const w of Object.keys(part)) assert.equal(shard(w) + ".json", f, `"${w}" is in ${f}`);
+    forms += Object.keys(part).length;
+    largest = Math.max(largest, statSync(new URL(f, dir)).size);
+  }
+  assert.ok(forms > 40000, forms + " forms");
+  assert.ok(largest < 100 * 1024, "the largest part is " + largest + " bytes");
+  const env = makeEnv({ fetchImpl: async () => json(404, {}), sync: { uiLang: "ar", dictSource: "offline" }, realDict: true });
+  for (const [form, word] of [["went", "go"], ["children", "child"], ["mice", "mouse"], ["geese", "goose"], ["studied", "study"], ["taught", "teach"]]) {
+    const r = await env.send({ type: "lookup", text: form });
+    assert.equal(r.ok && r.data.query, word, `${form} → ${r.ok ? r.data.query : r.error}`);
+  }
+});
+
+test("the deck is read from storage once, not for every lookup; deleting all cards in Settings is never undone", async () => {
+  const cards = {};
+  for (let i = 0; i < 50; i++) cards["w" + i] = { ...newCard, q: "w" + i, tr: "ك" };
+  const google = recorder(() => json(200, { src: "en", sentences: [{ trans: "مرن", orig: "x" }] }));
+  const env = makeEnv({ fetchImpl: google.fetchImpl, local: { cards, cardsImported: true }, sync: { uiLang: "ar", dictSource: "online", translateDefinitions: false }, events: true });
+  let reads = 0;
+  const get = env.browser.storage.local.get.bind(env.browser.storage.local);
+  env.browser.storage.local.get = keys => { if ([].concat(keys || []).includes("cards")) reads++; return get(keys); };
+  await env.send({ type: "lookup", text: "resilient" }); // adds a card (cardsAuto)
+  await env.send({ type: "cardHas", q: "resilient" });
+  await env.send({ type: "reviewQueue" });
+  await env.send({ type: "lookup", text: "tenacious" });
+  const q = await env.send({ type: "reviewQueue" });
+  assert.equal(q.counts.total, 52);
+  assert.equal(reads, 1, "one read of the deck");
+  assert.equal(env.browser.storage.local.data.cards.tenacious.tr, "مرن", "every change still reaches storage");
+  await env.browser.storage.local.set({ cards: {}, cardStats: {}, cardsImported: true }); // Settings → delete all cards
+  assert.equal((await env.send({ type: "reviewQueue" })).counts.total, 0, "the deleted deck isn't kept in memory");
+  await env.send({ type: "cardToggle", card: { q: "candid", tr: "صريح" } });
+  assert.deepEqual(Object.keys(env.browser.storage.local.data.cards), ["candid"], "nor written back");
+});
+
+const ago = days => Date.now() - days * DAYMS;
+const deckCard = (q, extra = {}) => ({ ...newCard, q, tr: "ك", added: ago(30), mod: ago(30), ...extra });
+
+test("a copy of my data: saved, restored elsewhere; nothing there is lost, the copy reviewed last keeps its schedule, a removed word stays removed", async () => {
+  const net = async () => json(404, {});
+  const here = makeEnv({ fetchImpl: net, local: { cardsImported: true,
+    cards: { apple: deckCard("apple", { last: ago(10), reps: 2, interval: 5, due: 9e12, ex: "An apple a day." }), pear: deckCard("pear") },
+    history: [{ q: "apple", tr: "تفاحة", src: "en", t: ago(10) }], mistakes: { checks: 5, counts: { articles: 3 }, recent: [] } } });
+  const saved = JSON.parse(JSON.stringify((await here.send({ type: "dataExport" })).data)); // through a file
+  assert.deepEqual([saved.app, saved.format, Object.keys(saved.cards).sort()], ["lamha", 1, ["apple", "pear"]]);
+
+  const there = makeEnv({ fetchImpl: net, local: { cardsImported: true,
+    cards: { apple: deckCard("apple", { last: ago(2), reps: 3, interval: 12 }), kiwi: deckCard("kiwi") },
+    cardsRemoved: { pear: ago(5) } } }); // pear was removed there after it was last changed
+  const r = await there.send({ type: "dataImport", data: saved });
+  assert.deepEqual(plain(r.data), { cards: 1, history: 1 });
+  const cards = there.browser.storage.local.data.cards;
+  assert.deepEqual(Object.keys(cards).sort(), ["apple", "kiwi"], "kiwi kept; pear stays removed");
+  assert.deepEqual([cards.apple.reps, cards.apple.interval, cards.apple.ex], [3, 12, "An apple a day."], "the later review's schedule, the missing example filled in");
+  assert.equal(there.browser.storage.local.data.mistakes.checks, 5, "the journal that has seen more");
+  assert.deepEqual(plain((await there.send({ type: "dataImport", data: saved })).data), { cards: 0, history: 0 }, "restoring twice adds nothing");
+
+  const hostile = { app: "lamha", format: 1, history: "no", activity: { __proto__: 5, "Mon Sep 28 2026": 3, x: 1e9 },
+    cards: { a: { q: "__proto__", tr: "بروتو" }, b: { q: 5 }, c: { q: "okay", tr: "ع".repeat(5000), ease: 99, reps: -3, en: "yes" }, d: null } };
+  assert.equal((await there.send({ type: "dataImport", data: hostile })).ok, true);
+  const after = there.browser.storage.local.data.cards;
+  assert.equal(Object.hasOwn(after, "__proto__") && after.__proto__.tr, "بروتو", "an ordinary word");
+  assert.deepEqual([after.okay.tr.length, after.okay.ease, after.okay.reps, after.okay.en], [200, 5, 0, undefined]);
+  assert.equal(({}).polluted, undefined);
+  assert.deepEqual(Object.keys(there.browser.storage.local.data.activity), ["Mon Sep 28 2026"]);
+  assert.equal((await there.send({ type: "dataImport", data: { cards: {} } })).error, "not_backup");
+});
+
+test("Firefox and the Windows app share the review deck: each gets the other's words, the later review's schedule and removals; a big deck goes in pages under 1 MB", async () => {
+  const appEnv = makeEnv({ fetchImpl: async () => json(404, {}), wiki: fakeWiki({}), local: { cardsImported: true, // the app (it has LamhaWikiOffline)
+    cards: { apple: deckCard("apple", { last: ago(2), reps: 3, interval: 12 }), cherry: deckCard("cherry") } } });
+  let biggest = 0;
+  const size = m => { biggest = Math.max(biggest, Buffer.byteLength(JSON.stringify(m))); return m; };
+  const link = fakeApp({ deckSync: async m => { // desktop/main.js BRIDGE_CALLS.deckSync
+    size(m);
+    const r = await appEnv.send({ type: "deckSync", upload: m.upload === true, cards: m.cards, removed: m.removed, since: m.since });
+    return size(JSON.parse(JSON.stringify(r.data)));
+  } });
+  const ff = makeEnv({ fetchImpl: async () => json(404, {}), connectNative: link.connectNative, local: { appLink: true, cardsImported: true,
+    cards: { apple: deckCard("apple", { last: ago(10), reps: 2 }), banana: deckCard("banana") } } });
+  const both = () => [ff, appEnv].map(e => Object.keys(e.browser.storage.local.data.cards).sort().join(","));
+
+  await ff.send({ type: "deckSyncNow" });
+  assert.deepEqual(both(), ["apple,banana,cherry", "apple,banana,cherry"]);
+  assert.equal(ff.browser.storage.local.data.cards.apple.reps, 3, "the schedule of the copy reviewed last");
+  await new Promise(r => setTimeout(r, 5));
+  await ff.send({ type: "cardToggle", card: { q: "banana" } }); // removed in Firefox
+  await appEnv.send({ type: "reviewGrade", key: "cherry", grade: "good" }); // reviewed in the app
+  await ff.send({ type: "deckSyncNow" });
+  assert.deepEqual(both(), ["apple,cherry", "apple,cherry"], "the removal reached the app");
+  assert.equal(ff.browser.storage.local.data.cards.cherry.reps, 1, "the app's review reached Firefox");
+
+  const many = {};
+  for (let i = 0; i < 3000; i++) many["w" + i] = deckCard("w" + i, { tr: "معنى عربي طويل للكلمة ".repeat(6), ex: "An example sentence where the word appears, found on a page." });
+  await appEnv.send({ type: "dataImport", data: { app: "lamha", format: 1, cards: many } }); // 3,000 words in the app
+  const fresh = makeEnv({ fetchImpl: async () => json(404, {}), connectNative: link.connectNative, local: { appLink: true, cardsImported: true } });
+  biggest = 0;
+  await fresh.send({ type: "deckSyncNow" });
+  assert.equal(Object.keys(fresh.browser.storage.local.data.cards).length, 3002, "every word arrived");
+  assert.ok(biggest < 1000 * 1024, `the largest message was ${biggest} bytes`);
+  assert.ok(link.sent.filter(m => m.type === "deckSync").every(m => !m.launch), "never by starting the app");
+});
+
+test("Report a problem: settings, counts and the latest errors — never a word, a text, a key or an address", async () => {
+  const env = makeEnv({ fetchImpl: async () => { throw new TypeError("NetworkError when attempting to fetch resource."); },
+    sync: { uiLang: "ar", dictSource: "online", disabledSites: ["secret-bank.example"] },
+    local: { aiKey: "sk-ant-SECRET", aiKeySet: true, ollamaUrl: "http://192.168.1.7:11434", ollamaModel: "qwen3.5:4b", cardsImported: true,
+      cards: { serendipity: deckCard("serendipity") }, history: [{ q: "privateword", tr: "خاص", src: "en", t: 1 }] } });
+  await env.send({ type: "lookup", text: "A sentence the user selected." });
+  await env.send({ type: "ai", tool: "proofread", text: "my private letter" });
+  await new Promise(r => setTimeout(r, 20));
+  const report = (await env.send({ type: "diagnostics" })).data;
+  for (const secret of ["SECRET", "192.168", "privateword", "serendipity", "secret-bank", "sentence the user", "private letter"]) assert.ok(!report.includes(secret), "leaks " + secret);
+  assert.match(report, /^Lamha /);
+  assert.match(report, /1 cards, 1 in history/);
+  assert.match(report, /lookup: network/);
+  assert.match(report, /Ollama model qwen3\.5:4b at a custom address/);
+});
+
+const IN_SENTENCE = { before: "Kids are very ", after: " after all." };
+
+test("a network that answers nothing: the dictionary's answer shows within seconds, and the next lookups don't wait at all", async () => {
+  const SCALE = 50; // the background's timers run 50× faster: its 8–12 s timeouts take a fraction of a second here
+  const calls = [];
+  const dead = async (url, init = {}) => { // connected, but nothing ever answers (a Wi-Fi with no internet behind it)
+    calls.push(String(url));
+    return new Promise((_, reject) => init.signal && init.signal.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" }))));
+  };
+  const env = makeEnv({ fetchImpl: dead, realDict: true, scale: SCALE, sync: { uiLang: "ar", dictSource: "local" } });
+  let t0 = Date.now();
+  const first = await env.send({ type: "lookup", text: "resilient", context: IN_SENTENCE });
+  assert.equal(first.data.source, "local");
+  assert.ok((Date.now() - t0) * SCALE < 4000, `the card waited ${(Date.now() - t0) * SCALE} ms for the sentence`);
+  await new Promise(r => setTimeout(r, 12000 / SCALE + 50)); // the sentence's request gives up: Google counts as unreachable
+  const sent = calls.length;
+  t0 = Date.now();
+  const second = await env.send({ type: "lookup", text: "tenacious", context: IN_SENTENCE });
+  assert.equal(second.data.source, "local");
+  const sentence = await env.send({ type: "lookup", text: "Kids are very resilient after all." });
+  assert.equal(sentence.error, "network", "a sentence says there's no connection");
+  assert.ok(Date.now() - t0 < 300, "at once");
+  assert.equal(calls.length, sent, "nothing sent while Google is unreachable");
+});
+
+test("Online first: the word's sentence is translated alongside the lookup, not after it", async () => {
+  const events = [];
+  const fetchImpl = async url => {
+    const kind = url.includes("/translate_a/single") ? "single" : url.includes("/translate_a/t") ? "sentence" : "other";
+    events.push("start " + kind);
+    await new Promise(r => setTimeout(r, 30));
+    events.push("end " + kind);
+    return kind === "sentence" ? json(200, [["الأطفال <a i=0>مرنون</a> جدًا.", "en"]]) : json(200, { src: "en", sentences: [{ trans: "مرن", orig: "resilient" }] });
+  };
+  const env = makeEnv({ fetchImpl, sync: { uiLang: "ar", dictSource: "online", translateDefinitions: false } });
+  const r = await env.send({ type: "lookup", text: "resilient", context: IN_SENTENCE });
+  assert.equal(r.data.context.word, "مرنون");
+  assert.ok(events.indexOf("start sentence") < events.indexOf("end single"), events.join(", "));
 });
 
 /* optional: one real request to the local Ollama */

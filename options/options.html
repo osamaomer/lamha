@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl" data-i18n-pending>
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; media-src https: blob: data:; font-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title data-i18n="o.title">إعدادات لمحة</title>
   <script src="../shared/theme.js"></script>
@@ -419,6 +420,24 @@
       <div class="opt">
         <div><b data-i18n="o.clearHistory">مسح السجل</b><small id="histCount"></small></div>
         <button id="clearHist" class="btn small danger"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg><span data-i18n="common.clear">مسح</span></button>
+      </div>
+      <div class="opt">
+        <div class="grow"><b data-i18n="o.backup">نسخة من بياناتي</b><small data-i18n="o.backupHint"></small><small id="backupState" class="state" role="status"></small></div>
+        <div class="opt-btns">
+          <button id="backupSave" class="btn small ghost" type="button" data-i18n="o.backupSave">حفظ نسخة</button>
+          <button id="backupRestore" class="btn small ghost" type="button" data-i18n="o.backupRestore">استرجاع</button>
+        </div>
+        <input type="file" id="backupFile" accept=".json,application/json" hidden>
+      </div>
+      <div class="opt">
+        <div class="grow">
+          <b data-i18n="o.report">الإبلاغ عن مشكلة</b><small data-i18n="o.reportHint"></small><small id="reportState" class="state" role="status"></small>
+          <details id="reportBox" class="report"><summary data-i18n="o.reportShow">عرض التقرير</summary><pre id="reportText"></pre></details>
+        </div>
+        <div class="opt-btns">
+          <button id="reportCopy" class="btn small ghost" type="button" data-i18n="o.reportCopy">نسخ</button>
+          <button id="reportSend" class="btn small ghost" type="button" data-i18n="o.reportSend">إبلاغ على GitHub</button>
+        </div>
       </div>
       <p class="muted small" data-i18n="o.privacyText">يُرسَل إلى خدمة Google للترجمة: النص الذي تختاره، والجملة المحيطة به (إن كان «فهم السياق» مفعّلًا)، ونص الصفحة عندما تطلب ترجمتها. تُرسَل الكلمة إلى ويكيبيديا للنبذة. في وضع «القاموس المحلي» تُبحث الكلمات دون إرسال. عند استخدام أدوات الكتابة يُرسَل النص إلى المزوّد الذي اخترته: Claude أو Gemini بمفتاحك، أما Ollama فيبقى النص على جهازك. لا تُجمع أي بيانات أخرى.</p>
     </section>

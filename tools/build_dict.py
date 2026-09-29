@@ -17,7 +17,7 @@ Usage:
 Output (inside the extension):
   dict/en/<shard>.json   English headwords -> entry
   dict/ar/<shard>.json   normalised Arabic word -> [English words]
-  dict/forms.json        inflected form -> lemma(s)
+  dict/forms/<xx>.json   inflected form -> lemma(s), by the same two-letter key
   dict/meta.json         counts + build info
 """
 import argparse, collections, gzip, json, os, re, sys, zipfile
@@ -230,14 +230,18 @@ def main():
 
     print("• Writing …")
     out = os.path.abspath(args.out)
-    for sub in ("en", "ar"):
+    for sub in ("en", "ar", "forms"):
         d = os.path.join(out, sub)
         os.makedirs(d, exist_ok=True)
         for fn in os.listdir(d): os.remove(os.path.join(d, fn))
     dump = lambda path, obj: json.dump(obj, open(path, "w", encoding="utf8"), ensure_ascii=False, separators=(",", ":"))
     for k, v in en_shards.items(): dump(os.path.join(out, "en", k + ".json"), v)
     for k, v in ar_index.items(): dump(os.path.join(out, "ar", k + ".json"), v)
-    dump(os.path.join(out, "forms.json"), form_map)
+    # inflected forms in parts by the same key as the words: a lookup reads a few KB, not the whole 1.2 MB list
+    form_shards = collections.defaultdict(dict)
+    for f, ls in form_map.items(): form_shards[shard(f)][f] = ls
+    for k, v in form_shards.items(): dump(os.path.join(out, "forms", k + ".json"), v)
+    if os.path.exists(os.path.join(out, "forms.json")): os.remove(os.path.join(out, "forms.json"))  # the old single file
     meta = {"entries": stats["entries"], "withArabic": stats["with_arabic"], "forms": len(form_map),
             "arabicIndex": sum(len(v) for v in ar_index.values()),
             "sources": ["WordNet 3.0", "Arabic WordNet v2 (OMW 1.4)", "English Wiktionary via kaikki.org", "CMUdict"]}

@@ -479,6 +479,16 @@ async function cardPage(reply, localData, syncData = {}, url = "https://example.
   const w = dom.window;
   const attach = w.Element.prototype.attachShadow;
   w.Element.prototype.attachShadow = function () { return (this.__root = attach.call(this, { mode: "open" })); };
+  // jsdom marks every dispatched event untrusted, as a browser does a page script's: here they stand for the user's own
+  // mouse and keys, except the ones a test marks `byPage` (a page faking them)
+  const listen = w.EventTarget.prototype.addEventListener;
+  w.EventTarget.prototype.addEventListener = function (type, fn, opts) {
+    if (typeof fn !== "function") return listen.call(this, type, fn, opts);
+    return listen.call(this, type, function (e) {
+      const trusted = !e.byPage;
+      return fn.call(this, new Proxy(e, { get: (t, k) => (k === "isTrusted" ? trusted : typeof t[k] === "function" ? t[k].bind(t) : t[k]) }));
+    }, opts);
+  };
   w.matchMedia = () => ({ matches: false, addEventListener() {} });
   const sent = [];
   let onMessage;
@@ -580,6 +590,28 @@ async function dblClickIn(c, html) {
 }
 const writerAI = { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" };
 const pillOn = c => c.w.document.querySelector("lamha-ui")?.__root.querySelector(".pill") ?? null; // null before Lamha drew anything
+
+await step("a page's own script can't fake the user: a scripted mouse-up (instant mode) or double-click opens nothing", async () => {
+  const c = await cardPage(msg => (msg.type === "lookup" ? trResult("google") : { ok: true }), writerAI, { triggerMode: "instant" });
+  const p = c.w.document.querySelector("p");
+  c.w.Range.prototype.getClientRects = () => []; // jsdom doesn't lay text out
+  c.w.Range.prototype.getBoundingClientRect = () => new c.w.DOMRect(20, 10, 80, 18);
+  c.w.getSelection().selectAllChildren(p); // a script may select text too
+  const fire = (el, type, byPage) => { const ev = new c.w.MouseEvent(type, { bubbles: true, composed: true, clientX: 40, clientY: 20, button: 0 }); ev.byPage = byPage; el.dispatchEvent(ev); };
+  fire(p, "pointerup", true);
+  await sleep(60);
+  assert.equal(c.sent.filter(m => m.type === "lookup").length, 0, "the page's mouse-up sent nothing to the translator");
+  fire(p, "pointerup", false);
+  await sleep(60);
+  assert.equal(c.sent.filter(m => m.type === "lookup").length, 1, "the user's own opens the card");
+  c.w.document.dispatchEvent(new c.w.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  const box = c.w.document.createElement("textarea");
+  c.w.document.body.append(box);
+  box.focus();
+  fire(box, "dblclick", true);
+  await sleep(40);
+  assert.equal(pillOn(c), null, "no Write button for a scripted double-click");
+});
 
 await step("double-click in an empty text box: only the Write button, a one-time tip, and Write new inserts into that box", async () => {
   const c = await cardPage(msg => (msg.type === "ai" ? { ok: true, data: { text: "See you on Sunday!" } } : { ok: true }), writerAI);
@@ -781,7 +813,8 @@ await step("Settings → Lamha for Windows (Firefox on a computer): Connect asks
   await sleep(150);
   assert.equal(fxApp.granted, true);
   assert.equal(text($o("appState")), "متصل بلمحة 1.10.0 · ويكيبيديا: العربية");
-  assert.deepEqual(fxApp.asked, [["hello", true]], "Connect may start the app");
+  assert.deepEqual(fxApp.asked.filter(([t]) => t === "hello"), [["hello", true]], "Connect may start the app");
+  assert.ok(fxApp.asked.filter(([t]) => t === "deckSync").every(([, launch]) => !launch), "the decks meet, never by starting the app");
   assert.ok($o("appBtn").classList.contains("danger") && text($o("appBtn")) === "قطع الاتصال");
   $o("appBtn").click();
   await sleep(150);
@@ -1062,6 +1095,92 @@ await step("Wikipedia reader: text size starts in the middle and is remembered; 
   const meta = r.w.document.querySelector(".rd-meta");
   assert.equal(meta.dir, "rtl", "under an Arabic title, on its side");
   assert.equal(meta.firstElementChild.dir, "ltr", "in English words");
+});
+
+await step("Wikipedia reader: a link with a stray % in an article doesn't stop the rest of it from showing", async () => {
+  const html = '<p>أول <a href="Foo%zz">رابط معطوب</a> و<a href="#x%E0%A4%A">مكان معطوب</a> و<a href="Lyon">ليون</a>.</p><p>الفقرة التالية.</p>';
+  const r = await readerPage({ articles: { "معطوبة": { title: "معطوبة", html } } });
+  r.open({ file: "ar1", path: "معطوبة" });
+  await sleep(100);
+  const main = r.$("rdMain");
+  assert.equal(text(main.querySelector(".rd-title")), "معطوبة");
+  assert.match(text(main), /الفقرة التالية/);
+  assert.deepEqual([...main.querySelectorAll(".rd-body a")].map(a => a.dataset.path || a.dataset.anchor), ["Foo%zz", "wk-x%E0%A4%A", "Lyon"]);
+});
+
+await step("popup: the quick translation says why it failed, as the card does ('Local only', the AI translator's quota)", async () => {
+  await local.set({ popupMode: "translate", trProvider: "gemini" });
+  const p = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
+  await sleep(100);
+  let reply = null;
+  const real = p.browser.runtime.sendMessage;
+  p.browser.runtime.sendMessage = async msg => (msg.type === "lookup" ? reply : real(msg));
+  const ask = async (error, textIn) => {
+    reply = { ok: false, error };
+    const q = p.document.getElementById("q");
+    q.value = textIn;
+    q.dispatchEvent(new p.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    await sleep(50);
+    return text(p.document.querySelector("#result .error"));
+  };
+  assert.match(await ask("not_found_offline", "zyxt"), /غير موجودة في القاموس المحلي.*القاموس المحلي فقط/);
+  assert.match(await ask("offline_mode", "a whole sentence here."), /تحتاج إلى الإنترنت/);
+  assert.match(await ask("gemini_quota", "hello"), /انتهى الحد المجاني من Gemini/);
+  assert.match(await ask("ai_error:bad response", "hello"), /تعذّر الاتصال بـ Gemini — bad response/, "the translating AI, named");
+  assert.equal(await ask("network", "hello"), "تعذّرت الترجمة. تحقق من الاتصال.");
+  await local.remove("trProvider");
+});
+
+await step("popup 🔊: when Google's voice can't play, or there's no network, the system's voice says the word", async () => {
+  await local.set({ popupMode: "review", cards: { resilient: card("resilient", "مرن", { added: now }) } });
+  const p = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
+  await sleep(100);
+  const spoken = [], asked = [];
+  p.SpeechSynthesisUtterance = class { constructor(t) { this.text = t; } };
+  p.speechSynthesis = { cancel() {}, speak: u => { spoken.push([u.text, u.lang]); setTimeout(() => u.onend(), 0); } };
+  const real = p.browser.runtime.sendMessage;
+  p.browser.runtime.sendMessage = async msg => (msg.type === "speak" ? (asked.push(msg.text), { ok: false, error: "audio error" }) : real(msg));
+  const btn = () => p.document.querySelector(".rv-word-row .icon-btn");
+  btn().click();
+  await sleep(50);
+  assert.deepEqual(asked, ["resilient"], "Google's voice first");
+  assert.deepEqual(spoken, [["resilient", "en-US"]], "then the system's");
+  assert.equal(btn().classList.contains("playing"), false, "the waves stop when it's done");
+  Object.defineProperty(p.navigator, "onLine", { configurable: true, get: () => false });
+  btn().click();
+  await sleep(50);
+  assert.equal(asked.length, 1, "no network: Google isn't asked");
+  assert.equal(spoken.length, 2);
+});
+
+await step("Settings → Privacy: restore a copy (merged), the report to read before sending, and 'delete all cards' noted as removals", async () => {
+  await local.set({ cards: { bank: card("bank", "ضفة") }, cardsImported: true });
+  const o = await openPage("options/options.html", ["shared/theme.js", "shared/i18n.js", "options/i18n-options.js", "shared/lamha-ai.js", "shared/motion.js", "options/options.js"]);
+  await sleep(100);
+  const $o = id => o.document.getElementById(id);
+  const backup = { app: "lamha", format: 1, cards: { thrive: card("thrive", "يزدهر", { mod: Date.now() }) }, history: [{ q: "thrive", tr: "يزدهر", src: "en", t: Date.now() }] };
+  const input = $o("backupFile");
+  Object.defineProperty(input, "files", { configurable: true, value: [new o.File([JSON.stringify(backup)], "lamha.json", { type: "application/json" })] });
+  input.dispatchEvent(new o.Event("change"));
+  await sleep(150);
+  assert.match(text($o("backupState")), /أُضيفت بطاقة واحدة/);
+  assert.deepEqual(Object.keys(local.data.cards).sort(), ["bank", "thrive"], "merged, nothing lost");
+  Object.defineProperty(input, "files", { configurable: true, value: [new o.File(["{\"not\": \"lamha\"}"], "other.json")] });
+  input.dispatchEvent(new o.Event("change"));
+  await sleep(100);
+  assert.ok($o("backupState").classList.contains("err") && /ليس نسخة/.test(text($o("backupState"))), "another file is refused");
+
+  $o("reportBox").open = true;
+  $o("reportBox").dispatchEvent(new o.Event("toggle"));
+  await sleep(100);
+  const report = $o("reportText").textContent;
+  assert.match(report, /^Lamha /);
+  assert.ok(!/bank|thrive|ضفة/.test(report), "no words in the report");
+
+  $o("rvClear").click();
+  await sleep(100);
+  assert.deepEqual(Object.keys(local.data.cards), []);
+  assert.ok(["bank", "thrive"].every(k => Object.hasOwn(local.data.cardsRemoved, k)), "each noted as removed, so a copy won't bring it back: " + Object.keys(local.data.cardsRemoved));
 });
 
 await step("Wikipedia reader: with nothing downloaded, the start page says so and leads to Settings", async () => {

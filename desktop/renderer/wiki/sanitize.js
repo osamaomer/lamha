@@ -19,8 +19,10 @@ var LamhaWikiSanitize = (() => {
 
   /** The address of the article itself, to resolve its relative links and pictures against. */
   const baseOf = path => "http://zim/C/" + String(path).split("/").map(encodeURIComponent).join("/");
-  const internal = url => (url.protocol === "http:" && url.host === "zim" && url.pathname.startsWith("/C/") ? decodeURIComponent(url.pathname.slice(3)) : null);
-  const anchor = hash => ID + decodeURIComponent(String(hash).replace(/^#/, ""));
+  /** decodeURIComponent that never throws: one link with a stray "%" mustn't stop the whole article. */
+  const decode = s => { try { return decodeURIComponent(s); } catch (_) { return s; } };
+  const internal = url => (url.protocol === "http:" && url.host === "zim" && url.pathname.startsWith("/C/") ? decode(url.pathname.slice(3)) : null);
+  const anchor = hash => ID + decode(String(hash).replace(/^#/, ""));
 
   /**
    * html: the article's page. opts.path: its path in the file. opts.assetUrl(path): the address of a picture.

@@ -448,6 +448,14 @@ for (const cardsAuto of [true, false]) {
   });
 }
 
+test("أضف للمراجعة: a word named like Object's properties (constructor) is added, not taken as already there", async () => {
+  const env = bgEnv({ sync: { cardsAuto: false } });
+  const id = env.store.ingest(cap("constructor"));
+  assert.equal((await env.actions.run(id, "review")).inDeck, true);
+  assert.ok(Object.hasOwn(env.browser.storage.local.data.cards, "constructor"), "the card is in the deck");
+  assert.equal((await env.actions.run(id, "review")).inDeck, false, "a second press removes it, as for any word");
+});
+
 test("أضف للمراجعة only for a single English word; copying words never adds cards", async () => {
   const env = bgEnv();
   await failsWith(env.actions.run(env.store.ingest(cap("two words")), "review"), "not_a_word");

@@ -21,8 +21,8 @@ const { EventEmitter } = require("node:events");
 const HOST = "com.artworklab.lamha";
 const EXTENSION_ID = "lamha@artwork-lab";
 const REG_KEY = "HKCU\\Software\\Mozilla\\NativeMessagingHosts\\" + HOST;
-const MAX_LINE = 256 * 1024; // a request is a few hundred bytes
-const MAX_REPLY = 1000 * 1024; // Firefox refuses messages from a host over 1 MB
+const MAX_LINE = 1100 * 1024; // the host passes on messages up to 1 MB (a page of the review deck, when the two decks meet)
+const MAX_REPLY = 1000 * 1024; // Firefox refuses messages from a host over 1 MB (bytes: Arabic takes two each)
 
 const HOST_BAT = [
   "@echo off",
@@ -35,7 +35,7 @@ const HOST_SCRIPT = String.raw`# Lamha: the Firefox extension's link to the Wind
 # Firefox talks to this over stdin/stdout (each message: a 4-byte length, then UTF-8 JSON); it passes every message on
 # to the running app over a named pipe, one line each way, and sends the answer back.
 $ErrorActionPreference = "Stop"
-$cfg = Get-Content -Raw -Encoding UTF8 (Join-Path $PSScriptRoot "config.json") | ConvertFrom-Json
+$cfg = $null
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 $stdin = [Console]::OpenStandardInput()
 $stdout = [Console]::OpenStandardOutput()
@@ -56,9 +56,11 @@ function Send([string]$json) {
   $stdout.Write($bytes, 0, $bytes.Length)
   $stdout.Flush()
 }
-# the app's pipe; with $launch, the app is started in the tray when it isn't running, and waited for (20 s at most)
+# the app's pipe; with $launch, the app is started in the tray when it isn't running, and waited for (20 s at most).
+# config.json is read again each time: the app writes a new pipe name and token whenever it starts.
 function Open-App([bool]$launch) {
   for ($i = 0; $i -lt 80; $i++) {
+    $script:cfg = Get-Content -Raw -Encoding UTF8 (Join-Path $PSScriptRoot "config.json") | ConvertFrom-Json
     $p = New-Object System.IO.Pipes.NamedPipeClientStream(".", $cfg.pipe, [System.IO.Pipes.PipeDirection]::InOut)
     try { $p.Connect(100); return $p } catch { $p.Dispose() }
     if (-not $launch) { return $null }
@@ -117,7 +119,7 @@ class NativeBridge extends EventEmitter {
     this.handlers = handlers;
     this.register = register || (file => reg(["add", REG_KEY, "/ve", "/t", "REG_SZ", "/d", file, "/f"]));
     this.unregister = unregister || (() => reg(["delete", REG_KEY, "/f"]).catch(() => {}));
-    this.pipe = "lamha-firefox-" + crypto.createHash("sha256").update(dir.toLowerCase()).digest("hex").slice(0, 16);
+    this.pipe = ""; // chosen at random when it starts listening (enable)
     this.server = null;
     this.token = "";
     this.clients = new Set();
@@ -130,6 +132,10 @@ class NativeBridge extends EventEmitter {
   /** Writes the host's files, registers it for Firefox and listens. Again: refreshes them (the app may have moved). */
   async enable() {
     this.token = crypto.randomBytes(24).toString("hex");
+    // A name nobody can guess (it's only in config.json, which only this Windows account can read): named pipes are
+    // machine-wide, so a fixed one could be taken first by another account on the PC, which would then get the token
+    // and the words looked up. A new one each time the app starts listening.
+    if (!this.server) this.pipe = "lamha-firefox-" + crypto.randomBytes(16).toString("hex");
     await fs.promises.mkdir(this.dir, { recursive: true });
     const write = (name, text) => fs.promises.writeFile(path.join(this.dir, name), text, "utf8");
     await write("host.bat", HOST_BAT);
@@ -213,7 +219,7 @@ class NativeBridge extends EventEmitter {
     this.lastSeen = Date.now();
     try {
       const reply = { id, ok: true, data: await this.handlers[msg.type](msg) };
-      return JSON.stringify(reply).length > MAX_REPLY ? { id, ok: false, error: "too_big" } : reply;
+      return Buffer.byteLength(JSON.stringify(reply)) > MAX_REPLY ? { id, ok: false, error: "too_big" } : reply;
     } catch (err) {
       return { id, ok: false, error: (err && err.code) || "failed" };
     }

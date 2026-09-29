@@ -5,7 +5,7 @@
  *   dict/en/<xx>.json  { word: { p: ipa, s: [[pos, gloss, example, [synonyms], [arabic]]…],
  *                                t: { pos: [[senseHint, [arabic…]]…] } } }
  *   dict/ar/<xxxx>.json { normalisedArabic: [english…] }
- *   dict/forms.json     { inflectedForm: [lemma…] }
+ *   dict/forms/<xx>.json { inflectedForm: [lemma…] }, by the same two-letter key as dict/en
  */
 "use strict";
 
@@ -109,8 +109,8 @@ const LocalDict = (() => {
   /** Returns { lemma, e, formOf? } or null. */
   async function find(raw) {
     const w = raw.toLowerCase().replace(/[’`]/g, "'").replace(/\s+/g, " ").trim();
-    const forms = await load("forms.json");
-    const lemmas = (forms[w] || []).filter(l => l !== w);
+    const forms = await load(`forms/${shardEn(w)}.json`); // the part for this word's first two letters (tools/build_dict.py)
+    const lemmas = (Object.hasOwn(forms, w) ? forms[w] : []).filter(l => l !== w); // "constructor" is a word, not Object's
     let e = await entry(w);
     if (e) {
       // "studied" (adj.) is rarely what a reader wants when "study" exists and has Arabic meanings
@@ -300,7 +300,7 @@ const LocalDict = (() => {
     for (const c of cands) {
       if (!c) continue;
       const shard = await load(`ar/${shardAr(c)}.json`);
-      const en = shard[c];
+      const en = Object.hasOwn(shard, c) ? shard[c] : null;
       if (en && en.length) {
         return {
           query: text.trim(), inflected: "", type: "word", src: "ar", tl: "en",

@@ -53,6 +53,19 @@ label.opt { cursor: pointer; }
 .lang-toggles button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 /* Dictionary → Dictionaries to download: a row per language, its button on the far side (all the same width) */
 .opt > .grow { flex: 1; min-width: 0; }
+/* two buttons on a row's far side (Privacy → A copy of my data, Report a problem): side by side, the row's height */
+.opt-btns { display: flex; gap: 8px; flex: none; }
+.opt small.state:empty { display: none; }
+.opt small.state { color: var(--fg); margin-top: 4px; }
+.opt small.state.err { color: var(--danger); }
+/* the report, to read before sending it: in the row's text column, so it keeps the row's edges */
+.report { margin-top: 6px; }
+.report summary { cursor: pointer; color: var(--accent); font-size: 12.5px; font-weight: 600; width: fit-content; }
+.report pre {
+  margin: 8px 0 0; padding: 10px 12px; max-height: 240px; overflow: auto; white-space: pre-wrap; word-break: break-word;
+  direction: ltr; text-align: left; font: 12px/1.55 ui-monospace, Consolas, monospace; color: var(--fg);
+  background: var(--bg); border-radius: var(--r-sm); box-shadow: inset 0 0 0 1px var(--line);
+}
 .packs { list-style: none; margin: 8px 0 0; padding: 0; }
 .packs li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); }
 .packs li:first-child { border-top: 0; }

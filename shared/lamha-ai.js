@@ -123,7 +123,7 @@ var LamhaAI = (() => {
     code = String(code || "");
     const en = lang === "en";
     const table = en ? ERRORS_EN : ERRORS;
-    if (table[code]) return table[code];
+    if (Object.hasOwn(table, code)) return table[code];
     if (code.startsWith("ai_error:")) return [(en ? "Couldn't reach " : "تعذّر الاتصال بـ ") + providerName, code.slice(9)];
     return en ? ["Something went wrong", "Try again."] : ["حدث خطأ", "أعد المحاولة."];
   }

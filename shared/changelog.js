@@ -3,6 +3,22 @@
  * stops when the version being released has no entry here. Newest first; each note is [arabic, english]. */
 // eslint-disable-next-line no-unused-vars
 var LamhaChangelog = [
+  { v: "1.9.6", date: "2026-09-29", notes: [
+    ["نسخة من بياناتك: احفظ بطاقات المراجعة وتقدّمك وسجل الكلمات وسجل أخطائك في ملف، واسترجعها على هذا الجهاز أو غيره دون أن يُحذف شيء (الإعدادات ← الخصوصية والسجل).",
+      "A copy of your data: save your review cards and progress, word history and mistake journal in a file, and restore it on this device or another without losing anything (Settings → Privacy & history)."],
+    ["بطاقات المراجعة مشتركة بين إضافة Firefox وتطبيق Windows حين يكونان متصلين: ما تضيفه أو تراجعه أو تحذفه في أحدهما يصل إلى الآخر.",
+      "Review cards are shared between the Firefox extension and the Windows app once they're linked: what you add, review or delete in one reaches the other."],
+    ["الإبلاغ عن مشكلة: تقرير بإعداداتك وآخر الأخطاء، دون نصوصك أو كلماتك أو مفاتيحك، تقرؤه أولًا ثم تنسخه أو ترسله على GitHub.",
+      "Report a problem: a report of your settings and the latest errors, without your text, words or keys, that you read first and then copy or send on GitHub."],
+    ["أسرع دون إنترنت: حين لا تجيب الشبكة تظهر الكلمة من القاموس المحلي خلال ثانيتين بدل الانتظار قرابة دقيقة، وتطبيق Windows يعرف متى لا يوجد اتصال فلا ينتظره.",
+      "Faster offline: when the network doesn't answer, a word comes from the offline dictionary within two seconds instead of nearly a minute, and the Windows app knows when there's no connection at all."],
+    ["أسرع عمومًا: أول بحث في القاموس المحلي، والبحث عبر الإنترنت مع الجملة، وتطبيق Windows مع قائمة مراجعة كبيرة.",
+      "Faster in general: the first offline lookup, online lookups with their sentence, and the Windows app with a big review deck."],
+    ["أمان أكثر: نوافذ تطبيق Windows لا تستطيع استخدام الكاميرا أو الميكروفون أو الموقع، والتطبيق يتحقق من ملفاته عند التشغيل، والمواقع لا تستطيع تقليد نقراتك لفتح لمحة.",
+      "Safer: the Windows app's windows can't use the camera, microphone or location, the app checks its own files when it starts, and websites can't fake your clicks to open Lamha."],
+    ["إصلاحات: كلمة «constructor» في القاموس المحلي، وأيام المواظبة ليلة تغيير الساعة، والكلمة التي تبحث عنها مجددًا تعود إلى أعلى السجل، وزر النطق في النافذة الرئيسية يستخدم صوت النظام دون إنترنت، ورسائل أوضح في مربع الترجمة السريعة، ورابط معطوب لم يعد يخفي مقالة ويكيبيديا.",
+      "Fixes: the word “constructor” in the offline dictionary, streaks on the night the clocks change, a word you look up again goes back to the top of your history, the main window's 🔊 uses the system voice offline, clearer messages in the quick-translate box, and a broken link no longer hides a Wikipedia article."]
+  ] },
   { v: "1.9.5", date: "2026-09-28", notes: [
     ["إصلاح: تنزيل ويكيبيديا من الإعدادات كان يتوقف فورًا برسالة «انقطع الاتصال». صار يعمل، والتنزيلات التي توقفت تكمل بزر «إعادة المحاولة».",
       "Fix: downloading Wikipedia in Settings stopped at once with “The connection dropped”. It works now, and stopped downloads carry on with Try again."],

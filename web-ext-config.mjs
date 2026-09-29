@@ -7,6 +7,7 @@ export default {
     "dist-packs", "dist-packs/**",
     "web-ext-artifacts", "web-ext-artifacts/**",
     "node_modules", "node_modules/**",
-    "README.md", "CLAUDE.md", "web-ext-config.mjs", "package.json", "package-lock.json"
+    "README.md", "CLAUDE.md", "web-ext-config.mjs", "package.json", "package-lock.json",
+    "translation-report.md" // tools/compare-translation.mjs writes it here (git-ignored, but a local build would pack it)
   ]
 };

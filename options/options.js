@@ -79,9 +79,11 @@ async function init() {
   $("dailyGoal").addEventListener("change", e => save({ dailyGoal: Number(e.target.value) }));
   $("rvClear").addEventListener("click", async () => {
     if (!confirm(t("o.confirmDeleteCards"))) return;
-    await browser.storage.local.set({ cards: {}, cardStats: {}, cardsImported: true });
+    await browser.runtime.sendMessage({ type: "cardsClear" }); // the background notes each word as removed (a backup or the other copy won't bring it back)
     saved();
   });
+  initBackup();
+  initReport();
   $("jClear").addEventListener("click", async () => {
     if (!confirm(t("o.confirmClearJournal"))) return;
     await browser.storage.local.remove("mistakes");
@@ -135,7 +137,8 @@ function initAppLink() {
     status = s;
     const langs = (s.langs || []).map(l => t("lang." + l) === "lang." + l ? l : t("lang." + l)).join("، ");
     $("appState").textContent = !s.allowed ? t("o.appOff")
-      : s.connected ? [t("o.appOn", { v: s.version }), langs && t("o.appWiki", { langs })].filter(Boolean).join(" · ")
+      : s.connected ? [t("o.appOn", { v: s.version }), langs && t("o.appWiki", { langs }),
+        s.deckSyncedAt && t("o.appDeck", { when: new Date(s.deckSyncedAt).toLocaleString(LamhaI18n.lang() === "en" ? "en-US" : "ar-EG", { dateStyle: "medium", timeStyle: "short" }) })].filter(Boolean).join(" · ")
         : t(s.error === "not_installed" ? "o.appNotInstalled" : s.error === "not_allowed" ? "o.appOff" : "o.appNoApp");
     $("appState").classList.toggle("err", !!s.allowed && !s.connected);
     $("appBtn").textContent = s.allowed ? (s.connected ? t("o.appDisconnect") : t("o.appRetry")) : t("o.appConnect");
@@ -160,6 +163,73 @@ function initAppLink() {
     if (granted) ask({ type: "appLink", on: true });
   });
   ask({ type: "appStatus", launch: false });
+}
+
+/** Privacy → A copy of my data: a file with the deck, the history and the journal; restoring merges it with what's here. */
+function initBackup() {
+  const state = (text, err = false) => { $("backupState").textContent = text; $("backupState").classList.toggle("err", err); };
+  $("backupSave").addEventListener("click", async () => {
+    const r = await browser.runtime.sendMessage({ type: "dataExport" }).catch(() => null);
+    if (!r || !r.ok) { state(t("o.backupFailed"), true); return; }
+    const url = URL.createObjectURL(new Blob([JSON.stringify(r.data)], { type: "application/json" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `lamha-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60e3);
+    state(t("o.backupSaved"));
+  });
+  $("backupRestore").addEventListener("click", () => $("backupFile").click());
+  $("backupFile").addEventListener("change", async e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = ""; // the same file can be chosen again
+    if (!file) return;
+    let data = null;
+    try { data = file.size <= 50 * 1024 * 1024 ? JSON.parse(await file.text()) : null; } catch (_) { data = null; }
+    if (!data || data.app !== "lamha") { state(t("o.backupBad"), true); return; }
+    const r = await browser.runtime.sendMessage({ type: "dataImport", data }).catch(() => null);
+    if (!r || !r.ok) { state(t(r && r.error === "not_backup" ? "o.backupBad" : "o.backupFailed"), true); return; }
+    state(t("o.backupDone", r.data));
+    renderHistCount();
+    renderReviewStats();
+  });
+}
+
+/**
+ * Privacy → Report a problem: the report (settings, counts and the latest errors, never text; background.js diagnostics())
+ * shown before anything leaves. Copy puts it on the clipboard for an email; Report on GitHub opens a new issue with it in,
+ * which the user reads, completes and submits themselves.
+ */
+const ISSUES = "https://github.com/osamaomer/lamha/issues/new";
+function initReport() {
+  let report = "";
+  const load = async () => {
+    const r = await browser.runtime.sendMessage({ type: "diagnostics" }).catch(() => null);
+    report = r && r.ok ? r.data : "";
+    $("reportText").textContent = report;
+    return report;
+  };
+  const state = text => { $("reportState").textContent = text; };
+  $("reportBox").addEventListener("toggle", () => { if ($("reportBox").open) load(); });
+  $("reportCopy").addEventListener("click", async () => {
+    await load();
+    try { await navigator.clipboard.writeText(report); state(t("o.reportCopied")); } catch (_) { $("reportBox").open = true; }
+  });
+  $("reportSend").addEventListener("click", async () => {
+    await load();
+    // an address has room for about 8,000 characters: a long report is cut at a line (the whole one is under "Show the report")
+    let body = t("o.reportIssue") + "```\n" + report + "\n```";
+    if (encodeURIComponent(body).length > 7000) {
+      const lines = report.split("\n");
+      while (lines.length > 3 && encodeURIComponent(t("o.reportIssue") + "```\n" + lines.join("\n") + "\n…\n```").length > 7000) lines.pop();
+      body = t("o.reportIssue") + "```\n" + lines.join("\n") + "\n…\n```";
+    }
+    const version = (report.match(/^Lamha (\S+)/) || [])[1] || "";
+    browser.tabs.create({ url: `${ISSUES}?${new URLSearchParams({ title: `[${version}] `, body })}` });
+    state(t("o.reportOpened"));
+  });
 }
 
 /** Links to the page's sections, named by their headings (so they follow the interface language). */
