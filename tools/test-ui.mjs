@@ -120,8 +120,8 @@ async function openPage(path, scripts, { extra = {} } = {}) {
     },
     commands: { getAll: async () => [] }
   };
-  w.confirm = () => true;
   w.HTMLElement.prototype.scrollIntoView = () => {};
+  if (src(path).includes("../shared/dialog.js")) w.eval(src("shared/dialog.js")); // the page's own questions (no confirm())
   for (const s of scripts) w.eval(src(s));
   await sleep(150);
   return w;
@@ -291,6 +291,18 @@ await step("options: review section shows deck stats; clearing the deck works", 
   assert.equal(o("cardsAuto").checked, true);
   assert.equal(o("cardsNewPerDay").value, "10");
   o("rvClear").click();
+  const dlg = opt.document.querySelector("dialog.dlg");
+  assert.ok(dlg, "Lamha's own question, not confirm()");
+  assert.equal(text(dlg.querySelector("h2")), "حذف كل بطاقات المراجعة وتقدّمك في حفظها؟");
+  const [del, cancel] = dlg.querySelectorAll("button");
+  assert.deepEqual([text(del), text(cancel)], ["حذف", "إلغاء"]);
+  assert.ok(cancel.autofocus && !del.autofocus, "the keyboard starts on Cancel: Enter can't delete by accident");
+  cancel.click();
+  await sleep(50);
+  assert.equal(Object.keys(local.data.cards).length, 2, "Cancel keeps the cards");
+  assert.equal(opt.document.querySelector("dialog.dlg"), null, "and the question is gone");
+  o("rvClear").click();
+  opt.document.querySelector("dialog.dlg .danger-solid").click();
   await sleep(400); // the background's badge refresh and the page's re-render
   assert.deepEqual(local.data.cards, {});
   assert.doesNotMatch(text(o("rvSummary")), /كلمتان/, "the old counts are gone");
@@ -891,6 +903,21 @@ await step("colours: the card (content/styles.js) and the pages (shared/ui.css) 
   }
 });
 
+await step("one design language: no system boxes (confirm / alert / prompt) in the pages, and dropdowns styled once, in ui.css", async () => {
+  const pages = ["popup/popup.js", "options/options.js", "content/content.js", "desktop/renderer/clipboard/clip-list.js", "desktop/renderer/clipboard/clip-actions.js",
+    "desktop/renderer/clipboard/panel.js", "desktop/renderer/clipboard/tab.js", "desktop/renderer/clipboard/settings.js", "desktop/renderer/wiki-settings.js", "desktop/renderer/wiki/reader.js"];
+  for (const f of pages) {
+    const code = src(f).replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+    assert.doesNotMatch(code, /(^|[^.\w])(window\.)?(confirm|alert|prompt)\(/m, f + " uses a system box: use LamhaDialog");
+  }
+  const css = src("shared/ui.css");
+  assert.match(css, /@supports \(appearance: base-select\)[\s\S]*::picker\(select\)/, "the Windows app draws the open list");
+  assert.match(css, /select option \{ background-color: var\(--surface\); color: var\(--fg\); \}/, "Firefox's list in our colours");
+  for (const f of ["options/options.css", "popup/popup.css", "desktop/renderer/desktop.css", "desktop/renderer/clipboard/clipboard.css"]) {
+    assert.doesNotMatch(src(f), /(^|\})\s*select\s*\{[^}]*background/m, f + " restyles dropdowns: keep them in ui.css");
+  }
+});
+
 await step("popup write: with no AI chosen, the tab says how to set one up (not in red) and the tools wait", async () => {
   await local.set({ popupMode: "write", draft: "She dont like apples.", aiProvider: "claude", aiKeySet: false });
   const p = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
@@ -1207,6 +1234,7 @@ await step("Settings → Privacy: restore a copy (merged), the report to read be
   assert.ok(!/bank|thrive|ضفة/.test(report), "no words in the report");
 
   $o("rvClear").click();
+  o.document.querySelector("dialog.dlg .danger-solid").click();
   await sleep(100);
   assert.deepEqual(Object.keys(local.data.cards), []);
   assert.ok(["bank", "thrive"].every(k => Object.hasOwn(local.data.cardsRemoved, k)), "each noted as removed, so a copy won't bring it back: " + Object.keys(local.data.cardsRemoved));

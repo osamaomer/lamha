@@ -126,3 +126,10 @@
 
 /* ---------- copy → ✓ and the bookmark filling in (popup / card: see motion.js play()) ---------- */
 .copied { color: var(--ok) !important; }
+
+/* ---------- dropdowns, where Lamha draws the open list (the Windows app: base-select in ui.css) ---------- */
+[data-motion="full"] select::picker-icon, [data-motion="subtle"] select::picker-icon { transition: transform .18s var(--m-ease); }
+[data-motion="full"] ::picker(select) { animation: lm-picker .16s var(--m-ease) both; }
+[data-motion="subtle"] ::picker(select) { animation: lm-fade .12s linear both; }
+@keyframes lm-picker { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes lm-fade { from { opacity: 0; } }

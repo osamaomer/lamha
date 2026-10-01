@@ -754,6 +754,7 @@ async function injectClipboardUi(wc, entry, { standalone = false } = {}) {
     ...(standalone ? ["theme.js", "i18n.js", "lamha-ai.js", "motion.js"].map(f => path.join(EXT_DIR, "shared", f)) : []),
     path.join(__dirname, "renderer", "i18n-desktop.js"),
     ...(entry === "settings.js" ? [path.join(EXT_DIR, "shared", "changelog.js")] : []), // Settings → Updates → what's new
+    ...(entry === "settings.js" ? [] : [path.join(EXT_DIR, "shared", "dialog.js")]), // options.html loads it itself
     path.join(EXT_DIR, "shared", "arabic-normalize.js"), path.join(CLIP_UI, "clip-list.js"), path.join(CLIP_UI, "clip-actions.js"), path.join(CLIP_UI, entry),
     ...(entry === "settings.js" ? [path.join(__dirname, "renderer", "wiki-settings.js")] : []) // Settings → Offline Wikipedia
   ];

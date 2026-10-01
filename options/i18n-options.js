@@ -122,6 +122,8 @@
     "o.deleteCards": ["حذف كل البطاقات", "Delete all cards"],
     "o.deleteCardsHint": ["يحذف الكلمات وتقدّمك في حفظها", "Deletes the words and your progress"],
     "o.delete": ["حذف", "Delete"],
+    "o.clear": ["مسح", "Clear"],
+    "o.cancel": ["إلغاء", "Cancel"],
     "o.journal": ["سجل أخطائي", "My mistake journal"],
     "o.journalIntro": ["يُسجَّل هنا ما يجده «التدقيق اللغوي» في كتابتك، لتعرف نقاط ضعفك وتتحسّن.", "What Proofread finds in your writing is recorded here, so you can see your weak points and improve."],
     "o.recentMistakes": ["آخر الأخطاء", "Recent mistakes"],

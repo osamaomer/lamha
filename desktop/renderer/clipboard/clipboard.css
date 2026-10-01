@@ -168,16 +168,7 @@ html[dir="ltr"] .ca-back svg { transform: scaleX(-1); } /* the arrow points back
 .ca-loading { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
 .ca-spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent-soft); border-top-color: var(--accent); }
 
-/* ---------- Phase 5: dialogs, pause banner, settings section (settings.js) ---------- */
-.lc-dialog {
-  border: 0; border-radius: var(--r-lg); padding: 18px 20px; max-width: 360px; width: calc(100% - 40px);
-  background: var(--surface); color: var(--fg); box-shadow: 0 12px 40px rgba(0, 0, 0, .3); font-family: var(--font);
-}
-.lc-dialog::backdrop { background: rgba(0, 0, 0, .35); }
-.lc-dialog h2 { margin: 0 0 6px; font-size: 15px; color: var(--fg); letter-spacing: 0; }
-.lc-dialog p { margin: 0 0 14px; color: var(--muted); font-size: 13px; line-height: 1.7; }
-.lc-dialog-acts { display: flex; gap: 8px; flex-wrap: wrap; }
-.btn.lc-danger { background: #dc2626; color: #fff; } /* one red in both themes: white text at 4.8:1 */
+/* ---------- Phase 5: pause banner, settings section (settings.js); dialogs are .dlg in shared/ui.css ---------- */
 .btn.lc-danger-text { color: var(--danger); background: var(--danger-soft); }
 .cp-banner { border-radius: var(--r-md); margin: 0 0 8px; padding: 8px 12px; }
 .cb-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }

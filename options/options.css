@@ -74,13 +74,7 @@ label.opt { cursor: pointer; }
 .packs li small.err, #appState.err { color: var(--danger); }
 .packs .btn { min-width: 96px; justify-content: center; }
 
-select {
-  font: inherit; color: var(--fg); background: var(--bg);
-  border: 0; border-radius: var(--r-md); padding: 8px 12px; min-width: 170px;
-  box-shadow: inset 0 0 0 1px var(--line);
-  cursor: pointer;
-}
-select:focus-visible { outline: 2px solid var(--accent); }
+/* dropdowns: shared/ui.css (the same everywhere) */
 
 /* trigger-mode cards */
 .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -126,7 +120,6 @@ select:focus-visible { outline: 2px solid var(--accent); }
 }
 .key-row input:focus-visible { outline: 2px solid var(--accent); }
 .key-row .btn, .opt .btn.small { min-height: var(--control-h); flex: none; } /* the same height as the box beside it */
-select { min-height: var(--control-h); }
 .ai-status { font-size: 12.5px; margin: 8px 0 0; min-height: 1.5em; color: var(--muted); }
 .key-row .ai-status { margin: 0; flex: 1; }
 .field-label { display: block; margin-top: 14px; }

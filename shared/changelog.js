@@ -7,7 +7,9 @@ var LamhaChangelog = [
     ["تطبيق Windows: الإعدادات ← التحديثات تعرض ما الجديد في إصدارك فقط؛ الإصدارات السابقة على صفحة لمحة في GitHub.",
       "Windows app: Settings → Updates shows what's new in your version only; earlier versions are on Lamha's GitHub page."],
     ["تطبيق Windows: العناصر المثبّتة في الحافظة تبقى في أعلى القائمة ونتائج البحث، والقائمة السريعة ما زالت تبدأ بآخر ما نسخته.",
-      "Windows app: pinned clipboard items stay at the top of the list and of search results; the quick panel still starts on what you copied last."]
+      "Windows app: pinned clipboard items stay at the top of the list and of search results; the quick panel still starts on what you copied last."],
+    ["القوائم المنسدلة وأسئلة التأكيد صارت بتصميم لمحة نفسه في كل مكان، بدل شكل النظام وأزراره.",
+      "Dropdown menus and confirmation questions now look like the rest of Lamha everywhere, instead of the system's style and buttons."]
   ]},
   { v: "1.9.6", date: "2026-09-29", notes: [
     ["نسخة من بياناتك: احفظ بطاقات المراجعة وتقدّمك وسجل الكلمات وسجل أخطائك في ملف، واسترجعها على هذا الجهاز أو غيره دون أن يُحذف شيء (الإعدادات ← الخصوصية والسجل).",

@@ -295,25 +295,8 @@ var LamhaClipList = (() => {
     return card;
   }
 
-  /**
-   * A small modal question with Arabic buttons (confirm() would show OK / Cancel).
-   * choices: [{ label, value, danger? }]; resolves to the chosen value, or null for Esc / closing.
-   */
-  function ask(title, text, choices) {
-    return new Promise(resolve => {
-      const dlg = h("dialog", { class: "lc-dialog", "aria-labelledby": "lcDlgT" },
-        h("h2", { id: "lcDlgT" }, title),
-        text && h("p", null, text),
-        h("div", { class: "lc-dialog-acts" }, choices.map((c, i) => h("button", {
-          type: "button", class: "btn small" + (c.danger ? " lc-danger" : i ? " ghost" : ""),
-          onclick: () => { dlg.close(); resolve(c.value); }
-        }, c.label))));
-      dlg.addEventListener("cancel", () => resolve(null));
-      dlg.addEventListener("close", () => { dlg.remove(); resolve(null); });
-      document.body.append(dlg);
-      dlg.showModal();
-    });
-  }
+  /** A small modal question with Lamha's buttons: the shared dialog (shared/dialog.js), as in Settings. */
+  const ask = (title, text, choices) => LamhaDialog.ask(title, text, choices);
 
   return { create, optIn, ask, h, icon, relTime, arNum, appName, highlight };
 })();

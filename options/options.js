@@ -7,6 +7,8 @@ const DEFAULTS = {
 };
 const BOOLS = ["enDict", "useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "writeOnDblClick", "saveMistakes", "cardsAuto"];
 const { t, num } = LamhaI18n;
+/** Our own question before deleting something (shared/dialog.js), not the system's confirm() box. */
+const sure = (question, yes) => LamhaDialog.confirmDelete(question, t(yes), t("o.cancel"));
 const OWN_ERRORS = ["ai_bad_key", "ai_no_credit", "ai_forbidden", "ai_model", "ai_rate_limited", "ai_busy", "ai_timeout", "network", "ollama_offline", "ollama_origin", "ollama_model"];
 const aiErrorText = code => (OWN_ERRORS.includes(code) ? t("oerr." + code) : null)
   || (LamhaAI.ERRORS[code] && LamhaAI.errorInfo(code).slice(0, 2).join(" — "))
@@ -78,14 +80,14 @@ async function init() {
   $("dailyGoal").value = String([0, 5, 10, 20, 30].includes(s.dailyGoal) ? s.dailyGoal : 10);
   $("dailyGoal").addEventListener("change", e => save({ dailyGoal: Number(e.target.value) }));
   $("rvClear").addEventListener("click", async () => {
-    if (!confirm(t("o.confirmDeleteCards"))) return;
+    if (!(await sure(t("o.confirmDeleteCards"), "o.delete"))) return;
     await browser.runtime.sendMessage({ type: "cardsClear" }); // the background notes each word as removed (a backup or the other copy won't bring it back)
     saved();
   });
   initBackup();
   initReport();
   $("jClear").addEventListener("click", async () => {
-    if (!confirm(t("o.confirmClearJournal"))) return;
+    if (!(await sure(t("o.confirmClearJournal"), "o.clear"))) return;
     await browser.storage.local.remove("mistakes");
     saved();
   });
@@ -118,7 +120,7 @@ async function init() {
   });
 
   $("clearHist").addEventListener("click", async () => {
-    if (!confirm(t("o.confirmClearHistory"))) return;
+    if (!(await sure(t("o.confirmClearHistory"), "o.clear"))) return;
     await browser.storage.local.set({ history: [] });
     renderHistCount(); saved();
   });
