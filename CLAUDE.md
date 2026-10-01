@@ -19,6 +19,8 @@ User-facing documentation lives in [README.md](README.md). Update it whenever a 
 
 - **Firefox:** the manifest loads `local-dict.js`, `packs.js`, `shared/i18n.js`, `shared/lamha-ai.js` and `background.js` as the background. Content scripts (`shared/*`, `content/styles.js`, `content/page-translator.js`, `content/content.js`) run in every frame.
 - **Desktop:** `desktop/main.js` builds a `browser.*` stand-in, then loads the same background files with `vm.runInThisContext`. `preload.js` gives pages (popup = main window, options = Settings) their `browser.*`. The floating card over other apps is `renderer/card.html` with **the same content scripts injected**, so `content/content.js` must keep working in both (see `window.lamhaDesktop` and `external` messages).
+  - The sentence around a word in another program comes from `lamha-uia.exe` (`desktop/uia-helper.cs`, UI Automation; started by `uia-context.js`). It's built with Windows' own C# compiler (`scripts/build-helper.mjs`, into the git-ignored `bin/`) and shipped as an `extraResources` file next to `app.asar`. Users' PCs never compile anything.
+  - Settings → المظهر → the graphics card is `useGpu` (storage.local, on by default), read from the file by main.js before the app is ready (`GPU`); a change applies at the next start (`app.restart`).
 - **Storage:** `storage.sync` holds settings (`DEFAULT_SETTINGS` in background.js, mirrored in `options.js` and `content.js`). `storage.local` holds per-device data: history, cards, mistakes, API keys, provider choice. On desktop both are JSON files in `%APPDATA%\Lamha` (`desktop/storage.js`).
   - **The deck** is kept in memory by the background (`deckMem`); every write carries `cardsRev`, and a deck change without the number just written (another writer) drops the copy. Only the background writes the deck: Settings' "delete all" is the `cardsClear` message. Each card has `mod` (last change); `cardsRemoved` notes deletions (180 days) so a backup or the other copy doesn't bring a word back. `mergeCards()` joins decks (backups, the Firefox ↔ app sync): the schedule of the copy reviewed last, text fields filled from either.
 - **Interface language:** strings are `[arabic, english]` pairs. Shared ones are in `shared/i18n.js`, settings-page ones in `options/i18n-options.js`, desktop ones in `desktop/renderer/i18n-desktop.js`. Use `LamhaI18n.t(key, vars)`. Never hard-code visible text in one language.
@@ -77,7 +79,8 @@ User-facing documentation lives in [README.md](README.md). Update it whenever a 
 | Firefox ↔ Windows app link | background *the Windows app, from Firefox*; desktop `native-bridge.js`, main.js `BRIDGE_CALLS` |
 | Windows app shell (windows, shortcuts, tray, IPC, permissions) | `desktop/main.js` sections; pure decisions in `desktop/app-rules.js`; `preload.js` |
 | Clipboard history | `desktop/clipboard-*.js`, `desktop/renderer/clipboard/` |
-| Write button on double-click (Windows) | `desktop/double-click.js`, `uia-context.js`, `native.js`; main.js *the Write button* |
+| The sentence around a word in other programs (Windows) | `desktop/uia-helper.cs` (lamha-uia.exe), `uia-context.js`, `scripts/build-helper.mjs`; main.js `startContextHelper()`, `onHotkey()` |
+| The app's memory | `desktop/scripts/memory.ps1` (`npm run memory`), `scripts/memory-use.js`; the graphics card: main.js `GPU`, Settings row in `renderer/clipboard/settings.js` |
 | Updates, changelog | `desktop/updater.js`, `shared/changelog.js`, `tools/release-notes.mjs` |
 | Theme, animation, i18n, AI helpers | `shared/theme.js`, `shared/motion.js`, `shared/i18n.js`, `shared/lamha-ai.js` |
 
@@ -92,7 +95,7 @@ Each test file takes a name filter and `-q` (quiet: only failures and the total;
 | `content/*`, `popup/*`, `options/*`, `shared/*`, `desktop/renderer/wiki/*` | `test-ui` (always runs whole: its steps build on each other) | ~30 s |
 | `desktop/clipboard-*.js`, clip tools | `test-clipboard` | <1 s |
 | `desktop/updater.js` | `test-updater` | <1 s |
-| other `desktop/*.js` (not main.js), `shared/changelog.js`, the version | `test-desktop` | ~4 s |
+| other `desktop/*.js` (not main.js), `desktop/uia-helper.cs`, `shared/changelog.js`, the version | `test-desktop` | ~4 s |
 | `desktop/main.js`, `preload.js` | no unit tests: `npm run smoke` (ask the user first: it takes over the mouse, keyboard and clipboard) | |
 
 - While working, run the matching file with `-q` and a filter. **Before every commit run the whole suite once** (`npm run test:quiet`) and the lint.
@@ -123,6 +126,9 @@ cd desktop && npm install && npm start   # run the Windows app from source
 cd desktop && npm run smoke       # full desktop self-test (needs a real Windows desktop; run before a release)
 cd desktop && npm run shots       # every screen as a PNG, light/dark × ar/en (~5 min; LAMHA_SHOTS_ONLY=dark-ar for one set, LAMHA_SHOTS=folder).
                                   # Uses Ollama when it runs on this PC (real proofread / improve / AI translation); LAMHA_SHOTS_AI=0 skips it
+cd desktop && npm run memory      # the app's memory as Task Manager sees it (every process, lamha-uia.exe too), temporary profile,
+                                  # no registry. Add -- -Use (after a minute of use), -Window, -NoGpu, -Sync '{...}' / -Local '{...}'
+cd desktop && npm run helper      # builds bin/lamha-uia.exe from uia-helper.cs (npm start, dist and release do it themselves)
 ```
 
 - Desktop dependencies on a PC with npm 11: `npm ci` skips install scripts, so afterwards run `node node_modules/electron/install.js` and, in `node_modules/koffi`, `node ./cnoke.cjs -P . -D src/koffi --prebuild --release`. CI uses Node 22 (npm 10), which doesn't need this.
@@ -131,28 +137,33 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-10-01. Latest release: **1.9.7** (tagged 2026-10-01). The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
+_Last updated: 2026-10-01. Latest release: **1.9.7** (tagged 2026-10-01); main has one commit on top of it (quicker offline answers, a leaner Windows app). The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
 
 **At the end of a session:** update the open items below (add new ones, delete finished ones), and add a short dated entry to docs/history.md for substantial work, in the same commit. Keep this file small (under ~25 KB): details belong in history.md.
 
 ### Open items
 
+**Next work**
+- The next version's `shared/changelog.js` entry (not written yet; this work came after 1.9.7): quicker answers with no internet; the double-click button in other programs removed (Alt+Shift+W with nothing selected does the same); the graphics card setting; the app uses less memory (the sentence helper).
+- Optimization, by size of gain (measured in docs/history.md → *After 1.9.7: optimization*): close the main window when it hides to the tray (~−20 MB; reopening reloads it); the app's deck writes (only past ~10,000 cards); Firefox's 163 KB per frame (a small loader).
+
 **Bugs and reports**
-- **The Windows Write button doesn't show in many apps** (user report after 1.9.3, parked). 1.9.6 limited the extension-button search to browsers, a likely cause but not confirmed. Next: a development build in Slack / Teams / WhatsApp, reading its `[write button]` log lines (is the double-click seen? what does `field` answer?). Known: Chromium apps enable accessibility at the first UI Automation question, so the first double-click may show nothing.
+- None open. (The Windows app's double-click Write button, which didn't show in many apps, was removed on 2026-10-01.)
 
 **Hand checks not done yet**
 - Firefox: a multi-paragraph selection keeps its paragraphs; the page bar's "partial" state (go offline mid-translation); the Today card in the 360 px popup; the card's dark scrollbar; Arabic placeholders on the right.
 - Translation service with a Gemini key: Automatic with the Wi-Fi off, the Better translation link, page translation with AI on.
 - Explain words: French with French selected; the switch on a French and an Arabic word (Gemini or Ollama for Arabic).
 - Longer (expand) with Gemini or Claude (Ollama qwen3.5:4b adds vague reasons).
-- Write button by hand: Notepad, WhatsApp, Outlook (should start as Email), Word, Firefox with the extension (one button), Chrome without it (not in the address bar), a 125–150% screen.
+- The graphics card setting (Settings → المظهر): try it off for a day (animations, the card's see-through edges), then choose the default.
 - Language packs: download in Firefox and in the app, look words up with the Wi-Fi off.
 - Offline Wikipedia: download Arabic Top · Mini from Settings (mirror choice, speed), pause/resume, quit mid-download and restart; the reader with a big article, the mouse's side buttons, the card inside the reader.
 - Firefox ↔ app: a real Firefox against the real app (Connect; an English word with the Wi-Fi off; *اقرأ المقالة في لمحة* with the app closed); the shared deck (add / review / delete on both sides); content scripts' cost in about:performance.
 
 **Decisions for the user**
+- The graphics card's default: on today; off saves ~21 MB (Task Manager) after use. A one-word change (`useGpu !== false` in main.js and settings.js).
 - Code signing (Azure Trusted Signing ~$10/month, or the Microsoft Store, which signs it).
 - A card removed from review comes back when the word is looked up again (`cardsAuto`); keep or change?
 - Not done from the design audit: a type scale (text still in half-pixel steps); rewriting Settings' intro paragraphs (their copy).
-- Maybes: the popup's quick translate with the AI badge and "Better translation"; an automatic fallback for the writing tools (Gemini, then Ollama); the Ollama translation-quality run; packs picking the sense that fits the sentence; "don't show in this app" and per-app kind/tone for the Write button; Wikipedia ideas (article of the day, deck words highlighted, Wikidata title bridge…).
+- Maybes: the popup's quick translate with the AI badge and "Better translation"; an automatic fallback for the writing tools (Gemini, then Ollama); the Ollama translation-quality run; packs picking the sense that fits the sentence; Wikipedia ideas (article of the day, deck words highlighted, Wikidata title bridge…).
 - Bigger plans in [docs/ideas.md](docs/ideas.md): the Windows app on Linux, earning from Lamha, less dependence on Google's unofficial endpoint.

@@ -2,11 +2,13 @@
 // VS Code sets for its own processes and which would make Electron behave as plain Node.
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
+import { buildHelper } from "./build-helper.mjs";
 
 const electron = createRequire(import.meta.url)("electron"); // path to electron.exe
 const env = { ...process.env };
 delete env.ELECTRON_RUN_AS_NODE;
 const args = process.argv.slice(2);
+try { buildHelper(); } catch (err) { console.warn(err.message); } // the sentence helper (bin/lamha-uia.exe), when its source changed
 const child = spawn(electron, args.length && !args[0].startsWith("--") ? args : [".", ...args], {
   cwd: new URL("..", import.meta.url), stdio: "inherit", env, windowsHide: false
 });

@@ -34,11 +34,45 @@ function googleAnswer(url) {
 }
 
 /**
+ * The VM's own clock: its timers, Date and the simulated network. When nothing else is left to run, it jumps to the
+ * next timer, so a 12 s timeout takes no real time, and `now()` still says how long the user would have waited: real
+ * time for the work, the jumps for the waiting. (Speeding the timers up instead, then multiplying the whole time,
+ * counted the work as many times over: "the next word" showed 3.8 s for ~3 ms.) Everything the background waits on
+ * must be one of these timers: a real wait would be jumped over.
+ */
+function virtualClock() {
+  const timers = new Map(); // id → { at, fn, args }
+  let offset = 0, seq = 0, driving = false;
+  const now = () => performance.now() + offset;
+  const epoch = Date.now() - performance.now();
+  // setImmediate runs once the promise jobs have run out: then only a timer can move things on
+  const tick = () => {
+    if (!timers.size) { driving = false; return; }
+    let id = 0, next = null;
+    for (const [k, t] of timers) if (!next || t.at < next.at) { id = k; next = t; }
+    timers.delete(id);
+    if (next.at > now()) offset += next.at - now();
+    try { next.fn(...next.args); } finally { setImmediate(tick); }
+  };
+  const set = (fn, t = 0, ...args) => {
+    const id = ++seq;
+    timers.set(id, { at: now() + Math.max(0, Number(t) || 0), fn, args });
+    if (!driving) { driving = true; setImmediate(tick); }
+    return id;
+  };
+  class VDate extends Date {
+    constructor(...a) { if (a.length) super(...a); else super(epoch + now()); }
+    static now() { return Math.floor(epoch + now()); }
+  }
+  return { now, setTimeout: set, clearTimeout: id => { timers.delete(id); }, Date: VDate, sleep: ms => new Promise(r => set(r, ms)) };
+}
+
+/**
  * net.mode: "rtt" (every request answers after `rtt` ms), "dead" (requests never answer: they wait for the caller's
  * timeout, as on a Wi-Fi with no internet behind it), "down" (fail at once: no network at all).
- * `scale` speeds the VM's clock up so the dead network's long timeouts can be measured quickly.
  */
-function makeBackground({ net, sync = {}, local = {}, scale = 1 }) {
+function makeBackground({ net, sync = {}, local = {} }) {
+  const clock = virtualClock();
   const area = data => ({
     data,
     async get(keys) {
@@ -50,15 +84,14 @@ function makeBackground({ net, sync = {}, local = {}, scale = 1 }) {
     async set(o) { Object.assign(data, structuredClone(o)); },
     async remove(k) { [].concat(k).forEach(x => delete data[x]); }
   });
-  const T = f => (fn, t = 0, ...a) => f(fn, t / scale, ...a);
   const fetch = async (url, init = {}) => {
     url = String(url);
     if (url.startsWith("moz-extension://x/dict/")) { try { return json(200, JSON.parse(src(url.slice(18)))); } catch (_) { return json(404, {}); } }
     net.requests.push(url);
     if (net.mode === "down") throw new TypeError("NetworkError when attempting to fetch resource.");
     return new Promise((resolve, reject) => {
-      const t = net.mode === "dead" ? null : setTimeout(() => resolve(googleAnswer(url)), net.rtt / scale);
-      init.signal && init.signal.addEventListener("abort", () => { clearTimeout(t); reject(Object.assign(new Error("aborted"), { name: "AbortError" })); });
+      const t = net.mode === "dead" ? null : clock.setTimeout(() => resolve(googleAnswer(url)), net.rtt);
+      init.signal && init.signal.addEventListener("abort", () => { clock.clearTimeout(t); reject(Object.assign(new Error("aborted"), { name: "AbortError" })); });
     });
   };
   let onMessage;
@@ -70,25 +103,31 @@ function makeBackground({ net, sync = {}, local = {}, scale = 1 }) {
       menus: { removeAll: async () => {}, create() {}, onClicked: noop }, commands: { onCommand: noop },
       tabs: { query: async () => [], sendMessage: async () => {}, create: async () => {} }, permissions: { contains: async () => true }
     },
-    fetch, console, setTimeout: T(setTimeout), clearTimeout, AbortController, URLSearchParams, structuredClone, Audio: class {},
+    fetch, console, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout, Date: clock.Date, AbortController, URLSearchParams, structuredClone, Audio: class {},
     Response, TransformStream, DecompressionStream,
     LamhaPackStore: { get: async () => undefined, setMany: async () => {}, removePrefix: async () => {} },
     ...(net.offline ? { navigator: { onLine: false } } : {})
   });
   for (const f of ["shared/i18n.js", "local-dict.js", "packs.js", "shared/lamha-ai.js", "background.js"]) vm.runInContext(src(f), ctx, { filename: f });
-  return { send: msg => onMessage(msg, {}), ctx };
+  return { send: msg => onMessage(msg, {}), ctx, clock };
 }
 
 const SENTENCE = { before: "Kids are very ", after: " after all." };
 
+/** How long `fn` takes on `bg`'s clock: what the user would wait, work and waiting together. */
+async function felt(bg, fn) {
+  const t0 = bg.clock.now();
+  const value = await fn();
+  return { value, time: bg.clock.now() - t0 };
+}
+
 /** One lookup on a fresh background (nothing cached): its time and how many requests went out. */
-async function timeLookup({ text, context = null, sync = {}, mode = "rtt", rtt = 150, scale = 1 }) {
+async function timeLookup({ text, context = null, sync = {}, mode = "rtt", rtt = 150 }) {
   const net = { mode, rtt, requests: [] };
-  const bg = makeBackground({ net, sync: { dictSource: "local", ...sync }, scale });
+  const bg = makeBackground({ net, sync: { dictSource: "local", ...sync } });
   await bg.send({ type: "getSettings" }); // the background is up
-  const t0 = performance.now();
-  const r = await bg.send({ type: "lookup", text, context });
-  return { time: (performance.now() - t0) * scale, requests: net.requests.length, ok: r.ok, source: r.ok ? r.data.source : r.error };
+  const { value: r, time } = await felt(bg, () => bg.send({ type: "lookup", text, context }));
+  return { time, requests: net.requests.length, ok: r.ok, source: r.ok ? r.data.source : r.error };
 }
 
 section("Lookups, simulated network (150 ms per request, nothing cached)");
@@ -104,24 +143,24 @@ for (const [label, opts] of [
   row(label, ms(r.time), `${r.requests} request(s), ${r.source}`);
 }
 
-section("Lookups when the network is there but answers nothing (clock ×50: times are real-world)");
+section("Lookups when the network is there but answers nothing (the timeouts on the VM's clock: real-world times)");
 for (const [label, opts] of [
   ["word in the offline dictionary, with its sentence (Local first)", { text: "resilient", context: SENTENCE }],
-  ["word in the offline dictionary, Online first, no sentence", { text: "resilient", sync: { dictSource: "online" } }],
+  ["word in the offline dictionary, with its sentence (Online first)", { text: "resilient", context: SENTENCE, sync: { dictSource: "online" } }],
   ["a sentence (nothing offline can answer it)", { text: "Kids are very resilient after all." }]
 ]) {
-  const r = await timeLookup({ ...opts, mode: "dead", scale: 50 });
+  const r = await timeLookup({ ...opts, mode: "dead" });
   row(label, ms(r.time), `${r.requests} request(s), ${r.source}`);
 }
 
 { // the next lookups on the same background, once the first request has given up
   const net = { mode: "dead", rtt: 150, requests: [] };
-  const bg = makeBackground({ net, sync: { dictSource: "local" }, scale: 50 });
+  const bg = makeBackground({ net, sync: { dictSource: "local" } });
   await bg.send({ type: "lookup", text: "resilient", context: SENTENCE });
-  await new Promise(r => setTimeout(r, 13000 / 50));
-  const before = net.requests.length, t0 = performance.now();
-  const r = await bg.send({ type: "lookup", text: "tenacious", context: SENTENCE });
-  row("…the next word, a few seconds later", ms((performance.now() - t0) * 50), `${net.requests.length - before} request(s), ${r.ok ? r.data.source : r.error}`);
+  await bg.clock.sleep(13000); // the first lookup's requests give up meanwhile: Google counts as unreachable
+  const before = net.requests.length;
+  const { value: r, time } = await felt(bg, () => bg.send({ type: "lookup", text: "tenacious", context: SENTENCE }));
+  row("…the next word, a few seconds later", ms(time), `${net.requests.length - before} request(s), ${r.ok ? r.data.source : r.error}`);
 }
 
 section("Lookups with no network at all (fails at once)");
@@ -139,16 +178,22 @@ section("Offline dictionary (local-dict.js)");
   t0 = performance.now();
   await bg.send({ type: "lookup", text: "tenacity" });
   row("a word in another shard", ms(performance.now() - t0));
+  // shards ("re", "te") and forms parts already read: what most lookups cost once someone has used Lamha a while
+  const known = ["result", "return", "record", "reduce", "region", "technical", "temperature", "tennis", "terrible", "tension"];
+  t0 = performance.now();
+  for (const w of known) await bg.send({ type: "lookup", text: w });
+  row("a word whose shard is already read (each, of 10)", ms((performance.now() - t0) / known.length));
+  // each of these starts with two letters not read yet: its forms part and its shard are read and parsed first
   const words = ["house", "running", "studied", "mentioned", "banks", "happier", "children", "went", "better", "quickly"];
   t0 = performance.now();
-  for (const w of words) await bg.send({ type: "lookup", text: w + " " }); // a space: not the cache
-  row("10 more words, shards already read (each)", ms((performance.now() - t0) / words.length));
+  for (const w of words) await bg.send({ type: "lookup", text: w });
+  row("a word in a shard not read yet (each, of 10)", ms((performance.now() - t0) / words.length));
   const parts = readdirSync(new URL("dict/forms/", root)).map(f => statSync(new URL("dict/forms/" + f, root)).size);
   row("inflected forms: parts / largest", `${parts.length} / ${kb(Math.max(...parts))}`, "one part read per first two letters");
 }
 
-section("Review deck (the background's read-modify-write of storage.local.cards)");
-for (const n of [500, 3000]) {
+section("Review deck (kept in memory by the background; each change written to storage.local.cards)");
+for (const n of [50, 500, 3000]) { // 50: a warm-up, not shown, so the first size shown doesn't pay for compiling the code
   const cards = {};
   for (let i = 0; i < n; i++) {
     const q = "word" + i;
@@ -156,6 +201,7 @@ for (const n of [500, 3000]) {
   }
   const bytes = JSON.stringify(cards).length;
   const bg = makeBackground({ net: { mode: "down", requests: [] }, local: { cards } });
+  if (n === 50) { await bg.send({ type: "cardHas", q: "word1" }); await bg.send({ type: "reviewQueue" }); await bg.send({ type: "cardToggle", card: { q: "brandnew", tr: "جديد" } }); continue; }
   let t0 = performance.now();
   for (let i = 0; i < 20; i++) await bg.send({ type: "cardHas", q: "word" + i });
   const has = (performance.now() - t0) / 20;

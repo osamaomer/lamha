@@ -24,6 +24,20 @@ const TRAY_ICON = path.join(__dirname, "assets", "tray-32.png");
 const DESKTOP_CSS = fs.readFileSync(path.join(__dirname, "renderer", "desktop.css"), "utf8");
 
 if (SMOKE) app.setPath("userData", fs.mkdtempSync(path.join(os.tmpdir(), "lamha-smoke-")));
+// from source only: a profile of its own, so a tool can start the app as a user would without touching your data or
+// the registry (scripts/memory.ps1). LAMHA_NO_GPU: without the graphics card's help, to compare the memory it takes.
+const DEV_PROFILE = !app.isPackaged && !SMOKE && process.env.LAMHA_PROFILE;
+if (DEV_PROFILE) app.setPath("userData", DEV_PROFILE);
+// Settings → Appearance → the graphics card (storage.local useGpu, on unless turned off: off saves ~25 MB, measured with
+// scripts/memory.ps1). Chromium can only be told before the app is ready, so it's read from the file here, and a change
+// applies at the next start (Settings offers a restart).
+const GPU = !(!app.isPackaged && process.env.LAMHA_NO_GPU === "1") && localAtStart().useGpu !== false;
+if (!GPU) app.disableHardwareAcceleration();
+
+/** storage.local as it is on disk, before the stores exist (plain values only: the API keys there stay encrypted). */
+function localAtStart() {
+  try { return JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "storage-local.json"), "utf8")) || {}; } catch (_) { return {}; }
+}
 
 let mainWin = null, optionsWin = null, tray = null, quitting = false;
 /** Interface text (shared/i18n.js + renderer/i18n-desktop.js, loaded by startCore). */
@@ -160,7 +174,7 @@ function startCore() {
     version: app.getVersion(), electron: process.versions.electron, windows: os.release(),
     wiki: wikiLibrary ? wikiLibrary.langs() : [],
     memoryMB: Math.round(app.getAppMetrics().reduce((n, m) => n + (m.memory.privateBytes || m.memory.workingSetSize), 0) / 1024),
-    writeButton: writeButtonLog.map(d => ({ ...d }))
+    gpu: GPU
   });
   for (const f of ["local-dict.js", "packs.js", "shared/i18n.js", "shared/lamha-ai.js", "background.js"]) {
     vm.runInThisContext(fs.readFileSync(path.join(EXT_DIR, f), "utf8"), { filename: path.join(EXT_DIR, f) });
@@ -243,9 +257,19 @@ ipcMain.handle("lamha:call", async (e, method, args) => {
     case "update.check": await updater.check(true); return { ...updater.state };
     case "update.restart": updater.restart(); return true;
     case "firefox.status": return { available: !!bridge, connected: !!(bridge && bridge.connected), lastSeen: bridge ? bridge.lastSeen : 0 };
+    case "app.gpu": return GPU; // what this run draws with (Settings compares it with the setting)
+    case "app.restart": restartApp(); return true;
     default: throw new Error("unknown call " + method);
   }
 });
+
+/** Starts Lamha again (Settings, after a change that applies at start). Portable runs from a copy it unpacked: the
+ *  .exe the user started is the one to start again. */
+function restartApp() {
+  const portable = process.env.PORTABLE_EXECUTABLE_FILE;
+  app.relaunch(portable ? { execPath: portable, args: [] } : undefined);
+  app.quit();
+}
 
 /** Settings → Offline Wikipedia (the app's own pages, never the card). Downloads name a catalog id, never a URL. */
 const WIKI_CALLS = {
@@ -469,103 +493,17 @@ const native = process.platform === "win32" ? require("./native") : null;
 const uiaContext = process.platform === "win32" ? new (require("./uia-context").UiaContext)() : null;
 const isWordish = t => t.split(/\s+/).length <= 3 && t.length <= 40 && !/[.!?;:]\s|[\n\r]/.test(t); // as background.js decides
 
-/** Keeps the helper (uia-context.js) running while something needs it (it takes about a second to start): the
- *  sentence setting, or the Write button on a double-click (its setting on and a writing-tools AI set up). */
+/** Keeps the helper (uia-context.js) running while the sentence setting is on, so the first shortcut finds it ready. */
 function startContextHelper() {
   if (!uiaContext || SMOKE) return;
-  let queue = Promise.resolve();
-  const apply = () => { queue = queue.then(async () => {
-    const s = await stores.sync.get({ useContext: true, writeOnDblClick: true });
-    const dbl = s.writeOnDblClick !== false && globalThis.LamhaAI.provider(stores.local.data).ready;
-    if (s.useContext !== false) uiaContext.start();
-    await watchDoubleClicks(dbl);
-    if (s.useContext === false && !dbl) uiaContext.stop();
-  }).catch(err => console.error("helper settings failed:", err && err.name)); };
-  apply();
-  const aiKeys = globalThis.LamhaAI.PROVIDER_KEYS;
+  const apply = async () => {
+    const s = await stores.sync.get({ useContext: true });
+    if (s.useContext !== false) uiaContext.start(); else uiaContext.stop();
+  };
+  apply().catch(err => console.error("helper settings failed:", err && err.name));
   storageListeners.push((changes, area) => {
-    if ((area === "sync" && (changes.useContext || changes.writeOnDblClick)) || (area === "local" && aiKeys.some(k => changes[k]))) apply();
+    if (area === "sync" && changes.useContext) apply().catch(err => console.error("helper settings failed:", err && err.name));
   });
-}
-
-/* ---- the Write button on a double-click in an empty text box, in any program ----
- * The helper's mouse hook reports left-button presses; two close together (double-click.js) in an empty text box
- * (the helper asks UI Automation) show the Write button next to the mouse without taking the focus, so the caret stays
- * in the box. Clicking it opens Write new, whose Insert pastes into that program. In a browser with the Lamha
- * extension, the extension's own button is already there, so this one stays away. */
-const { ClickPairer, composeKind, wantsButton, BROWSERS } = require("./double-click");
-const clickPairer = new ClickPairer();
-const PILL_MS = 5000; // how long the button waits for a click (longer while the mouse is on it)
-let dblEnabled = false, dblToken = 0, pillShown = false, pillTimer = null, cardHover = false;
-
-/** The last double-click decisions, for Settings → Report a problem: the program, what Windows said about the box, and
- *  why the button showed or didn't (never any text). The data the "no button in Slack" kind of report needs. */
-const writeButtonLog = [];
-function noteWriteButton(entry) {
-  writeButtonLog.unshift({ t: Date.now(), ...entry });
-  writeButtonLog.length = Math.min(writeButtonLog.length, 10);
-}
-
-/** Turns the mouse hook on or off; resolves to whether it runs. */
-async function watchDoubleClicks(on) {
-  dblEnabled = !!on;
-  if (!on) hideWritePill();
-  return uiaContext.watchMouse(dblEnabled);
-}
-
-async function onMouseDown(down) {
-  if (pillShown && !cardHover) hideWritePill(); // a click anywhere but on the button
-  if (!dblEnabled || !clickPairer.press(down, native.doubleClickZone())) return;
-  const token = ++dblToken;
-  const hwnd = native.foreground();
-  const exe = native.processNameOf(hwnd);
-  if (!hwnd || exe === "lamha" || native.isTerminal(hwnd)) return; // before asking the helper anything
-  await native.sleep(60); // let the app handle the click first
-  // a classic Windows text box answers directly; anything else (browsers, Word, modern apps) through UI Automation
-  const box = native.focusedTextBox(hwnd);
-  const under = r => r && down.x >= r.left && down.x < r.right && down.y >= r.top && down.y < r.bottom;
-  // Lamha's extension only lives in browsers: elsewhere (Slack, Teams, VS Code…, web content too) the helper neither
-  // waits for its button nor searches the page for it, which on a big page could outlast the answer's time limit
-  const field = box
-    ? (under(box.rect) && !box.readOnly && !box.password ? { empty: box.empty, web: false, lamha: false } : null)
-    : await uiaContext.field(down.x, down.y, BROWSERS.has(exe) ? globalThis.LamhaI18n.pair("c.writeNewHere") : []);
-  if (!app.isPackaged) console.log(`[write button] double-click in ${exe}: ${box ? "text box" : "UI Automation"} → ${JSON.stringify(field)}`); // never the text
-  // another click came meanwhile, or the user moved to another window
-  const why = token !== dblToken ? "another click came" : !dblEnabled ? "turned off" : native.foreground() !== hwnd ? "another window came to the front"
-    : !field ? "no text box under the mouse" : !field.empty ? "the box has text" : field.lamha ? "the browser extension showed its own" : !wantsButton(exe, field) ? "not a box for it (address bar, Windows' own)" : "";
-  noteWriteButton({ exe, via: box ? "text box" : "UI Automation", field: field ? JSON.stringify(field) : "nothing", shown: !why, why });
-  if (why) {
-    if (!app.isPackaged) console.log(`[write button] not shown: ${why}`);
-    return;
-  }
-  await showWritePill({ hwnd, kind: composeKind(exe) });
-}
-
-async function showWritePill(cap) {
-  if (!cardWin || cardWin.isDestroyed()) createCardWin();
-  await cardReady;
-  cardSource = { hwnd: cap.hwnd, text: "", terminal: false }; // Insert pastes into this window
-  const point = placeCardWin({ pill: true });
-  cardWin.setIgnoreMouseEvents(true, { forward: true }); // until the mouse is over the button
-  cardHover = false;
-  pillShown = true;
-  cardWin.showInactive(); // the app keeps the focus, and its caret stays in the box
-  cardWin.webContents.send("lamha:page-message", { type: "showWritePill", external: true, replaceable: true, point, kind: cap.kind });
-  armPillTimer();
-}
-
-function armPillTimer() {
-  clearTimeout(pillTimer);
-  pillTimer = setTimeout(() => { if (cardHover) armPillTimer(); else hideWritePill(); }, PILL_MS);
-  pillTimer.unref();
-}
-
-function hideWritePill() {
-  clearTimeout(pillTimer);
-  pillTimer = null;
-  if (!pillShown) return;
-  pillShown = false;
-  if (cardWin && !cardWin.isDestroyed() && !cardWin.isFocused()) hideCard();
 }
 
 /* ---------------- clipboard history (الحافظة) ----------------
@@ -863,23 +801,15 @@ function createCardWin() {
   }));
   cardWin.loadFile(path.join(__dirname, "renderer", "card.html"));
   cardWin.on("blur", () => { if (Date.now() - cardShownAt > 400) hideCard(); });
-  cardWin.on("focus", () => { // the Write button was clicked: Write new opens in this window
-    if (!pillShown) return;
-    pillShown = false;
-    clearTimeout(pillTimer);
-    cardShownAt = Date.now();
-  });
   cardWin.on("closed", () => { cardWin = null; });
 }
 
 function hideCard() {
-  clearTimeout(pillTimer); // a Write button waiting for a click goes with it
-  pillShown = false;
   if (cardWin && !cardWin.isDestroyed() && cardWin.isVisible()) cardWin.hide();
 }
 
 const fromCard = e => cardWin && !cardWin.isDestroyed() && e.sender === cardWin.webContents;
-ipcMain.on("lamha:card-hover", (e, over) => { if (fromCard(e)) { cardHover = !!over; cardWin.setIgnoreMouseEvents(!over, { forward: true }); } });
+ipcMain.on("lamha:card-hover", (e, over) => { if (fromCard(e)) cardWin.setIgnoreMouseEvents(!over, { forward: true }); });
 ipcMain.on("lamha:card-closed", e => { if (fromCard(e)) hideCard(); });
 ipcMain.handle("lamha:card-replace", async (e, text) => {
   if (!fromCard(e) || !cardSource) return false;
@@ -892,11 +822,10 @@ ipcMain.handle("lamha:card-replace", async (e, text) => {
   return ok;
 });
 
-/** Places the card window next to the mouse; returns where the card should attach inside it.
- *  `pill`: the mouse inside the window with room above it for the Write button, and below it for the card it opens. */
-function placeCardWin({ toast = false, pill = false } = {}) {
+/** Places the card window next to the mouse; returns where the card should attach inside it. */
+function placeCardWin({ toast = false } = {}) {
   const cursor = screen.getCursorScreenPoint();
-  const { bounds, point } = rules.cardPlacement({ cursor, workArea: screen.getDisplayNearestPoint(cursor).workArea, w: CARD_W, h: CARD_H, toast, pill });
+  const { bounds, point } = rules.cardPlacement({ cursor, workArea: screen.getDisplayNearestPoint(cursor).workArea, w: CARD_W, h: CARD_H, toast });
   cardWin.setBounds(bounds);
   return point;
 }
@@ -923,8 +852,6 @@ async function onHotkey(kind) {
 /** The card next to the mouse for `cap` ({ hwnd, text, terminal }); Replace pastes into cap.hwnd when there is one. */
 async function showCard(kind, cap) {
   if (!cardWin || cardWin.isDestroyed()) createCardWin();
-  clearTimeout(pillTimer); // a shortcut replaces a waiting Write button
-  pillShown = false;
   const wc = cardWin.webContents;
   await cardReady;
   cardSource = cap;
@@ -1036,7 +963,7 @@ function startBridge() {
     : { app: process.execPath, args: [app.getAppPath(), "--hidden"] }; // from source: electron.exe and this folder
   bridge = new NativeBridge({
     dir: path.join(app.getPath("userData"), "firefox"), launch, handlers: BRIDGE_CALLS,
-    ...(SMOKE ? { register: async () => {}, unregister: async () => {} } : {}) // the self-test never touches the real registry
+    ...(SMOKE || DEV_PROFILE ? { register: async () => {}, unregister: async () => {} } : {}) // the self-test never touches the real registry
   });
   bridge.on("change", () => { if (optionsWin && !optionsWin.isDestroyed()) optionsWin.webContents.send("lamha:firefox-changed"); });
   const apply = on => (on ? bridge.enable() : bridge.disable()).catch(err => console.error("Firefox link:", err && (err.code || err.message)));
@@ -1161,14 +1088,17 @@ if (!gotLock) {
     globalThis.LamhaI18n.init({ onChange: () => { updateTray(); if (mainWin && !mainWin.isDestroyed()) mainWin.setTitle(T("common.lamha")); } });
     startUpdates();
     startBridge();
-    if (uiaContext) uiaContext.onMouseDown = down => onMouseDown(down).catch(err => console.error("double-click failed:", err && err.name));
     startContextHelper();
     watchMotionHint();
     if (!SMOKE) { createTray(); if (selection) registerHotkeys(); }
+    if (DEV_PROFILE && process.env.LAMHA_MEMORY_USE === "1") { // scripts/memory.ps1 -Use
+      require("./scripts/memory-use")({ showMain, showCard, hideCard, openOptions, getOptionsWin: () => optionsWin, getMainWin: () => mainWin })
+        .catch(err => console.error("memory use failed:", err && err.name));
+    }
     if (SMOKE) {
       return require(SHOTS ? "./scripts/screenshots" : "./scripts/smoke-test")({
         app, mainWin, openOptions, getOptionsWin: () => optionsWin, stores, send: msg => messageHandler(msg, {}),
-        desktop: { onHotkey, uiaContext, watchDoubleClicks, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
+        desktop: { onHotkey, uiaContext, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
           openPanel, hidePanel, getPanelWin: () => panelWin, panelReady: () => panelReady,
           pauseClipboard, resumeClipboard, runClipExpiry, trayTooltip, updateMotionHint, getWikiLibrary: () => wikiLibrary, openReader, getReaderWin: () => readerWin, getBridge: () => bridge }
       });

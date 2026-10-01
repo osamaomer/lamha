@@ -112,17 +112,25 @@ const NET_PAUSE_MS = 20e3;
 let netDownUntil = 0;
 const googleDown = () => Date.now() < netDownUntil;
 
+/* A quick failure just after Google answered is a blip, worth one more try 0.4 s later. With no answer for a while it
+ * is a network that's down (connected, but no internet behind it: the name lookup fails at once); retrying each
+ * address only held the dictionary's answer back (~0.8 s), so then the other address is tried and that's all. */
+const BLIP_MS = 60e3;
+let googleOkAt = 0;
+
 /** GET/POST a translate_a endpoint with automatic failover between providers. */
 async function googleJSON(path, params, init) {
   if (googleDown()) throw new Error("network");
   let lastErr;
+  const retries = Date.now() - googleOkAt < BLIP_MS ? 1 : 0;
   for (const p of providerOrder()) {
     const url = `${p.base}/translate_a/${path}?client=${p.client}&${params}`;
     try {
       // a word or a sentence: someone is waiting for the card; a page's batch may be long
-      const data = await fetchJSON(url, init, { retries: 1, timeout: path === "single" ? 8000 : 12000 });
+      const data = await fetchJSON(url, init, { retries, timeout: path === "single" ? 8000 : 12000 });
       p.strikes = 0; p.until = 0;
       netDownUntil = 0;
+      googleOkAt = Date.now();
       return data;
     } catch (err) {
       lastErr = err;
@@ -492,12 +500,15 @@ async function lookup(rawText, opts = {}) {
   // the word's meaning in its sentence, asked at once: it doesn't depend on the dictionary's answer, so the two
   // requests go out together (Online first: two round trips instead of three). Unused if the word is explained.
   const ctxAsk = context && !english && !force ? contextTranslate(text, context, tl, sl, { tr, offline: mode === "offline" }).catch(() => null) : null;
+  // a dictionary answer waits for it CONTEXT_WAIT_MS from now, however long the lookup itself took (Online first below)
+  const ctxInTime = ctxAsk && within(ctxAsk, CONTEXT_WAIT_MS, "late");
 
   // The offline dictionary covers English → Arabic and Arabic → English single words / short phrases.
   const enLocal = word && tl === "ar" && /^[A-Za-z][A-Za-z'’ -]*$/.test(text);
   const arLocal = word && sl === "ar" && tl === "en" && text.split(" ").length <= 2;
   const local = () => (enLocal ? LocalDict.lookupEn(text, context) : arLocal ? LocalDict.lookupAr(text) : null);
 
+  let onlineLate = false;
   let result = english ? await englishLookup(text, context, settings, mode, tr, tl) : null; // null: Google says it isn't English
   if (!english && (enLocal || arLocal) && mode !== "online" && !force) {
     result = await local();
@@ -512,12 +523,22 @@ async function lookup(rawText, opts = {}) {
     // Google or the AI (Settings → Translation service); on "Local only" just a local AI, if there is one
     const plan = trPlan(tr, word ? "word" : "text", { offline: mode === "offline", force });
     if (!plan.length && mode === "offline") throw new Error((enLocal || arLocal) ? "not_found_offline" : "offline_mode");
-    try {
-      result = await tryEngines(plan, engine => (engine === "google" ? onlineLookup(text, sl, tl, word, settings) : aiLookup(text, sl, tl, word, tr.ai)));
-    } catch (err) {
-      result = (enLocal || arLocal) && !force ? await local() : null; // network down / rate limited → offline dictionary
-      if (!result && word && !force) result = await packLookup(text, tl, settings); // …or a language pack
-      if (!result) throw err;
+    const ask = tryEngines(plan, engine => (engine === "google" ? onlineLookup(text, sl, tl, word, settings) : aiLookup(text, sl, tl, word, tr.ai)));
+    // Online first, for a word the dictionary has: a network that answers nothing held the card for the whole timeout
+    // (8 s). After a short wait the dictionary answers instead, and that answer isn't kept: the next lookup asks again.
+    if (mode === "online" && (enLocal || arLocal) && !force && await within(ask.then(() => false, () => false), ONLINE_WAIT_MS, true)) {
+      ask.catch(() => {});
+      result = await local();
+      onlineLate = !!result;
+    }
+    if (!result) {
+      try {
+        result = await ask;
+      } catch (err) {
+        result = (enLocal || arLocal) && !force ? await local() : null; // network down / rate limited → offline dictionary
+        if (!result && word && !force) result = await packLookup(text, tl, settings); // …or a language pack
+        if (!result) throw err;
+      }
     }
   }
 
@@ -531,7 +552,7 @@ async function lookup(rawText, opts = {}) {
   // answers nothing mustn't hold the card; that answer isn't kept, so the next lookup asks again.
   let contextLate = false;
   if (ctxAsk && result.type === "word" && result.mode !== "explain") {
-    const ctx = result.source === "local" ? await within(ctxAsk, CONTEXT_WAIT_MS, "late") : await ctxAsk;
+    const ctx = result.source === "local" ? await ctxInTime : await ctxAsk;
     if (ctx === "late") contextLate = true;
     else if (ctx) {
       // the sentence's translation kept the word as it is (a name: "Gemini", "Firefox"): say so, don't call it the meaning
@@ -542,7 +563,7 @@ async function lookup(rawText, opts = {}) {
     }
   }
 
-  if (!result.rough && !contextLate) lookupCache.set(key, result); // an AI answer with stray letters is asked again next time
+  if (!result.rough && !contextLate && !onlineLate) lookupCache.set(key, result); // an AI answer with stray letters is asked again next time
   return remember(result, text, word, context, settings);
 }
 
@@ -676,6 +697,7 @@ async function packLookup(text, tl, settings) {
 /** `p`, or `late` if it hasn't settled within `ms`. */
 const within = (p, ms, late) => Promise.race([p, new Promise(done => setTimeout(() => done(late), ms))]);
 const CONTEXT_WAIT_MS = 2500; // how long a dictionary answer waits for the sentence's translation
+const ONLINE_WAIT_MS = 2500; // Online first: how long Google has before the dictionary answers a word it knows
 
 /** How the word reads in Arabic inside its sentence (as the Arabic view shows it), or "" — at most ~2.5 s, never an error. */
 async function contextArabic(text, context, tr) {
@@ -1979,15 +2001,11 @@ async function diagnostics() {
     `Writing tools: ${l.aiProvider || "claude"} (Claude key ${l.aiKeySet ? "saved" : "none"}, Gemini key ${l.geminiKeySet ? "saved" : "none"}, Gemini model ${l.geminiModel || "default"}, Ollama model ${l.ollamaModel || "none"} at ${l.ollamaUrl ? "a custom address" : "the default address"}), in text boxes ${on(s.aiInInputs)}, double-click ${on(s.writeOnDblClick)}`,
     `Data: ${Object.keys(l.cards || {}).length} cards, ${(l.history || []).length} in history, journal ${(l.mistakes && l.mistakes.checks) || 0} checks, packs: ${LamhaPacks.langs().join(",") || "-"}`,
     ...(desktop ? [] : [`Link to the Windows app: ${on(l.appLink)}, deck last shared ${when(l.deckSyncedAt)}`]),
-    ...(desktop ? [`Clipboard history ${on(l.clipboardEnabled)}, Wikipedia downloaded: ${desktop.wiki.join(",") || "-"} (offline first ${on(l.wikiOfflineFirst)}), memory ${desktop.memoryMB} MB`] : []),
+    ...(desktop ? [`Clipboard history ${on(l.clipboardEnabled)}, Wikipedia downloaded: ${desktop.wiki.join(",") || "-"} (offline first ${on(l.wikiOfflineFirst)}), memory ${desktop.memoryMB} MB, graphics card ${on(desktop.gpu)}`] : []),
     "",
     "Recent errors (newest first):",
     ...(errorLog.length ? errorLog.map(e => `  ${when(e.t)}  ${e.where}: ${e.code}`) : ["  none"])
   ];
-  if (desktop && desktop.writeButton.length) {
-    lines.push("", "Write button, the last double-clicks (program → what Windows said about the box):");
-    for (const d of desktop.writeButton) lines.push(`  ${when(d.t)}  ${d.exe} via ${d.via} → ${d.field}; ${d.shown ? "shown" : "not shown: " + d.why}`);
-  }
   return lines.join("\n");
 }
 

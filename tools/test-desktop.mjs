@@ -1,96 +1,23 @@
-// Tests for the desktop app: offline Wikipedia (desktop/zim.js, desktop/wiki-library.js), and the Write button on a
-// double-click (desktop/double-click.js, desktop/uia-context.js):
-// the decisions in plain Node, and on Windows the helper itself: its PowerShell parses, its C# mouse hook compiles,
-// and it answers a text-box question. The real double-click in a real app is in the desktop self-test (npm run smoke).
+// Tests for the desktop app: offline Wikipedia (desktop/zim.js, desktop/wiki-library.js), the decisions in
+// app-rules.js, the Firefox link, and on Windows the helper that reads the sentence around a selection
+// (desktop/uia-helper.cs, uia-context.js): it builds with Windows' own C# compiler and answers.
 //   node tools/test-desktop.mjs
 import { createRequire } from "node:module";
-import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import vm from "node:vm";
 import assert from "node:assert/strict";
 import { quiet, wanted, report, title as printTitle, notRun } from "./test-args.mjs";
 
 const require = createRequire(import.meta.url);
-const { ClickPairer, composeKind, wantsButton } = require("../desktop/double-click.js");
-const { UiaContext, SCRIPT } = require("../desktop/uia-context.js");
+const { UiaContext } = require("../desktop/uia-context.js");
+const { buildHelper } = await import("../desktop/scripts/build-helper.mjs");
 
-const i18n = vm.createContext({});
-vm.runInContext(readFileSync(new URL("../shared/i18n.js", import.meta.url), "utf8"), i18n);
-const L = vm.runInContext("LamhaI18n", i18n);
 
 const queue = [];
 const test = (name, fn, { windows = false } = {}) => queue.push({ name, fn, windows });
 const section = title => queue.push({ title });
 const dir = mkdtempSync(path.join(tmpdir(), "lamha-desktop-test-"));
-
-section("double-clicks (ClickPairer)");
-const zone = { time: 500, width: 4, height: 4 };
-
-test("two presses close in time and place are a double-click", () => {
-  const p = new ClickPairer();
-  assert.equal(p.press({ t: 1000, x: 100, y: 100 }, zone), false);
-  assert.equal(p.press({ t: 1200, x: 101, y: 99 }, zone), true);
-});
-
-test("too slow, or too far apart, is two single clicks", () => {
-  const slow = new ClickPairer();
-  slow.press({ t: 1000, x: 100, y: 100 }, zone);
-  assert.equal(slow.press({ t: 1501, x: 100, y: 100 }, zone), false);
-  const far = new ClickPairer();
-  far.press({ t: 1000, x: 100, y: 100 }, zone);
-  assert.equal(far.press({ t: 1100, x: 103, y: 100 }, zone), false, "3 px right, the rectangle is 4 px wide around the first");
-  assert.equal(far.press({ t: 1300, x: 104, y: 101 }, zone), true, "the slow second click starts a pair that the third completes");
-});
-
-test("a triple-click is one double-click, not two; a fourth press pairs with the third", () => {
-  const p = new ClickPairer();
-  const at = t => p.press({ t, x: 50, y: 50 }, zone);
-  assert.deepEqual([at(0), at(150), at(300), at(450)], [false, true, false, true]);
-});
-
-test("Windows' tick count wrapping around (every 49.7 days) doesn't break a double-click", () => {
-  const p = new ClickPairer();
-  p.press({ t: 4294967290, x: 10, y: 10 }, zone);
-  assert.equal(p.press({ t: 100, x: 10, y: 10 }, zone), true);
-});
-
-section("when the button shows (wantsButton, composeKind)");
-
-test("an empty box in any program: yes; with text, not a box, or no answer: no", () => {
-  assert.equal(wantsButton("notepad.exe", { empty: true, web: false, lamha: false }), true);
-  assert.equal(wantsButton("notepad.exe", { empty: false }), false);
-  assert.equal(wantsButton("notepad.exe", null), false);
-});
-
-test("never in Lamha itself or in Windows' own search and address boxes", () => {
-  for (const exe of ["lamha", "explorer.exe", "searchhost.exe", "startmenuexperiencehost.exe", ""]) {
-    assert.equal(wantsButton(exe, { empty: true, web: false }), false, exe);
-  }
-});
-
-test("browsers: web page boxes only (not the address bar), and never where the Lamha extension showed its own", () => {
-  assert.equal(wantsButton("firefox.exe", { empty: true, web: true, lamha: false }), true, "a browser without the extension");
-  assert.equal(wantsButton("firefox.exe", { empty: true, web: true, lamha: true }), false, "the extension's button is there");
-  assert.equal(wantsButton("chrome.exe", { empty: true, web: true, lamha: true }), false, "any browser, not only Firefox");
-  assert.equal(wantsButton("msedge.exe", { empty: true, web: false }), false, "the address bar");
-  assert.equal(wantsButton("slack.exe", { empty: true, web: true, lamha: false }), true, "web content in an app");
-});
-
-test("Write new starts as an email in mail programs, a message elsewhere", () => {
-  assert.equal(composeKind("outlook.exe"), "email");
-  assert.equal(composeKind("olk.exe"), "email", "the new Outlook");
-  assert.equal(composeKind("thunderbird.exe"), "email");
-  assert.equal(composeKind("whatsapp.exe"), "message");
-  assert.equal(composeKind(""), "message");
-});
-
-test("the extension's button is recognised in both interface languages", () => {
-  assert.deepEqual([...L.pair("c.writeNewHere")], ["اكتب نصًّا جديدًا في هذا المربع", "Write something new in this box"]);
-  L.setLang("en");
-  assert.equal(L.t("c.writeNewHere"), L.pair("c.writeNewHere")[1]);
-});
 
 section("what each window is told and may ask, and where it goes (app-rules.js)");
 const rules = require("../desktop/app-rules.js");
@@ -128,7 +55,7 @@ test("Settings' address: section and welcome", () => {
   assert.deepEqual(rules.optionsTarget(""), { search: "", hash: "" });
 });
 
-test("the card window stays on the mouse's monitor: below the mouse, above it near the bottom, the Write button over it", () => {
+test("the card window stays on the mouse's monitor: below the mouse, above it near the bottom", () => {
   const workArea = { x: 0, y: 0, width: 1920, height: 1040 }, w = 480, h = 620;
   const inside = b => b.x >= workArea.x && b.y >= workArea.y && b.x + b.width <= workArea.x + workArea.width && b.y + b.height <= workArea.y + workArea.height;
   const top = rules.cardPlacement({ cursor: { x: 960, y: 100 }, workArea, w, h });
@@ -137,10 +64,6 @@ test("the card window stays on the mouse's monitor: below the mouse, above it ne
   assert.ok(inside(low.bounds) && low.bounds.y + low.point.y < 1000, "above the mouse near the bottom");
   const corner = rules.cardPlacement({ cursor: { x: 5, y: 5 }, workArea, w, h });
   assert.deepEqual([corner.bounds.x, corner.bounds.y], [0, 21], "never off the screen's left edge");
-  const pill = rules.cardPlacement({ cursor: { x: 960, y: 300 }, workArea, w, h, pill: true });
-  assert.deepEqual(pill.point, { x: 240, y: 72 }, "the Write button: the mouse 72 px from the window's top");
-  const lowPill = rules.cardPlacement({ cursor: { x: 960, y: 1000 }, workArea, w, h, pill: true });
-  assert.ok(inside(lowPill.bounds) && lowPill.point.y > 72 && lowPill.point.y < h, "near the bottom the window stays on screen, the button still under the mouse");
   const second = { x: -1920, y: 0, width: 1920, height: 1040 }; // a monitor to the left
   assert.ok(rules.cardPlacement({ cursor: { x: -10, y: 300 }, workArea: second, w, h }).bounds.x + w <= 0, "on the left monitor, not across two");
   const panel = rules.panelPlacement({ cursor: { x: 1910, y: 1030 }, workArea, w: 380, h: 460 });
@@ -616,35 +539,38 @@ test("Firefox's side, for real: host.bat → PowerShell → the pipe, 4-byte-len
 }, { windows: true });
 
 section("the helper process (Windows)");
-const ps = (args, input) => spawnSync("powershell.exe", ["-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", ...args], { encoding: "utf8", input, timeout: 60000 });
+let helperExe = "";
 
-test("its PowerShell script parses", () => {
-  const file = path.join(dir, "helper.ps1");
-  writeFileSync(file, "﻿" + SCRIPT, "utf8");
-  const r = ps(["-Command", `$e = $null; [void][System.Management.Automation.Language.Parser]::ParseFile('${file}', [ref]$null, [ref]$e); $e | ForEach-Object { $_.Message }`]);
-  assert.equal(r.status, 0, r.stderr);
-  assert.equal(r.stdout.trim(), "", "parse errors");
+test("it builds with Windows' own C# compiler, and the installer takes it along", () => {
+  helperExe = buildHelper({ out: path.join(dir, "bin", "lamha-uia.exe"), force: true });
+  assert.ok(existsSync(helperExe));
+  const extra = JSON.parse(readFileSync(new URL("../desktop/package.json", import.meta.url), "utf8")).build.extraResources || [];
+  assert.ok(extra.some(e => e.from === "bin/lamha-uia.exe" && e.to === "lamha-uia.exe"), "package.json build.extraResources");
 }, { windows: true });
 
-test("its C# mouse hook compiles with Windows' own .NET", () => {
-  const cs = /\$MouseSource = @'\r?\n([\s\S]*?)\r?\n'@/.exec(SCRIPT);
-  assert.ok(cs, "the C# source is in the script");
-  const file = path.join(dir, "mouse.cs");
-  writeFileSync(file, cs[1], "utf8");
-  const r = ps(["-Command", `Add-Type -TypeDefinition ([IO.File]::ReadAllText('${file}')); [LamhaMouse].GetMethod('Start') -ne $null`]);
-  assert.equal(r.status, 0, r.stderr);
-  assert.equal(r.stdout.trim(), "True");
-}, { windows: true });
-
-test("it answers a text-box question; a click on no box gets no button", async () => {
-  const helper = new UiaContext();
+test("it answers each question in order: a window that isn't there or a broken line gets its error's type, and it keeps running", async () => {
+  const helper = new UiaContext({ exe: helperExe });
   try {
-    assert.equal(await helper.field(-30000, -30000, L.pair("c.writeNewHere"), 20000), null);
-    assert.ok(helper.proc, "still running");
+    const t0 = Date.now();
+    assert.equal(await helper.around(1, "word", 5000), null);
+    assert.ok(Date.now() - t0 < 3000, `the first answer took ${Date.now() - t0} ms`);
+    const [gone, empty] = await Promise.all([helper.ask({ hwnd: 1, text: "كلمة" }, 5000), helper.ask({ hwnd: 0, text: "x" }, 5000)]);
+    assert.equal(gone.error, "ElementNotAvailableException", "the type only, never a message");
+    assert.deepEqual(Object.keys(empty), ["id"], "no window: nothing read");
+    helper.proc.stdin.write("not json\n");
+    assert.equal((await helper.ask({ hwnd: 0, text: "x" }, 5000)).id, helper.seq, "still answering after a broken line");
   } finally {
+    const proc = helper.proc;
     helper.stop();
+    if (proc && proc.exitCode === null) await new Promise(r => proc.once("exit", r)); // its .exe is deleted with the folder
   }
 }, { windows: true });
+
+test("no helper program (not built): no sentence, no error", async () => {
+  const helper = new UiaContext({ exe: "" });
+  assert.equal(await helper.around(1, "word"), null);
+  assert.equal(helper.proc, null);
+});
 
 let passed = 0, failed = 0, skipped = 0, filtered = 0;
 for (const { name, fn, title, windows } of queue) {

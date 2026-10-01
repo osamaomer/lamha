@@ -720,31 +720,19 @@ await step("double-click in webmail: Write new starts as an email", async () => 
   assert.equal(text(kinds.querySelector(".chip.on")), "بريد إلكتروني");
 });
 
-await step("desktop card: the app's double-click shows the Write button; Write new starts as the app's kind and Insert goes back to the app", async () => {
-  const c = await cardPage(msg => (msg.type === "ai" ? { ok: true, data: { text: "Dear team, …" } } : msg.type === "lookup" ? { ok: false, error: "network" } : { ok: true }), { ...writerAI, writeTipSeen: true });
+await step("desktop card: the writing shortcut with nothing selected opens Write new, as a message, and Insert goes back to the app", async () => {
+  const c = await cardPage(msg => (msg.type === "ai" ? { ok: true, data: { text: "Dear team, …" } } : { ok: true }), writerAI);
   const pasted = [];
-  let hides = 0; // the app hides its window when told the card is gone
-  c.w.lamhaDesktop = { replace: text => { pasted.push(text); return true; }, closed() { hides++; } };
-  c.show("left over"); // a card from before: in the app, its window was hidden, but the card stayed in the page
+  c.w.lamhaDesktop = { replace: text => { pasted.push(text); return true; }, closed() {} };
+  await c.message({ type: "showWrite", external: true, replaceable: true, point: { x: 240, y: 72 } });
   await sleep(50);
-  await c.message({ type: "showWritePill", external: true, replaceable: true, point: { x: 240, y: 72 }, kind: "email" });
-  await sleep(50);
-  assert.equal(hides, 0, "the old card goes without hiding the window the button is in");
-  const btns = [...c.root().querySelectorAll(".pill .pill-btn")];
-  assert.equal(btns.length, 1);
-  assert.equal(btns[0].getAttribute("aria-label"), "اكتب نصًّا جديدًا في هذا المربع", "what the app looks for in a browser");
-  btns[0].click();
-  await sleep(50);
-  assert.equal(text(c.root().querySelector(".w-out .tools .chip.on")), "بريد إلكتروني", "Outlook: an email");
+  assert.equal(text(c.root().querySelector(".w-out .tools .chip.on")), "رسالة", "another program: a message (the webmail rule is for web pages)");
   c.root().querySelector(".w-input").value = "tell the team the meeting moved";
   c.root().querySelector(".w-out > .btn").click();
   await sleep(50);
   [...c.root().querySelectorAll(".w-actions .btn")].find(b => /إدراج/.test(b.textContent)).click();
   await sleep(250);
   assert.deepEqual(pasted, ["Dear team, …"]);
-  const none = await cardPage(() => ({ ok: true }), {});
-  await none.message({ type: "showWritePill", external: true, replaceable: true, point: { x: 240, y: 72 } });
-  assert.equal(pillOn(none), null, "no writing tools set up: nothing");
 });
 
 await step("card: no stray 'false' text in a sentence's loading state or in the finished page bar", async () => {

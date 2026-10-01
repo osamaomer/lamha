@@ -454,9 +454,7 @@
   /** `restore`: give the focus back to the page if it was in the card (Esc, ✕); not when another card replaces it
    *  or a click elsewhere closed it. `animate`: a short exit (not when another card takes its place); `send`: the
    *  card shrinks back into its point (Replace / Insert). Returns a promise that settles once the card is gone. */
-  /** `notify: false`: something else takes the card's place in the desktop app's window (the Write button), so the
-   *  app mustn't hide the window as it does when the card is gone. */
-  function closeCard({ restore = true, animate = true, send = false, notify = true } = {}) {
+  function closeCard({ restore = true, animate = true, send = false } = {}) {
     reqId++;
     const old = card;
     const back = returnFocus;
@@ -477,7 +475,7 @@
     }
     gone = gone.then(() => old.remove());
     // desktop app: tell it when the card is really gone (not replaced by another one) so it hides its window
-    if (window.lamhaDesktop && notify) gone.then(() => { if (!card) window.lamhaDesktop.closed(); });
+    if (window.lamhaDesktop) gone.then(() => { if (!card) window.lamhaDesktop.closed(); });
     return gone;
   }
   function closeAll() { hidePill(); closeCard(); }
@@ -1131,7 +1129,7 @@
     const ae = document.activeElement;
     return {
       compose: true, text: "", raw: "",
-      kind: msg.kind === "email" || (!msg.external && MAIL_HOSTS.test(location.hostname)) ? "email" : "message",
+      kind: !msg.external && MAIL_HOSTS.test(location.hostname) ? "email" : "message",
       point: msg.point || (isTextField(ae) ? fieldPoint(ae) : lastPointer) || { x: innerWidth / 2, y: 90 },
       editable: msg.external ? (msg.replaceable ? { kind: "external" } : undefined) : composeTarget()
     };
@@ -1327,10 +1325,6 @@
       if (info) { openWriteCard(info, { focus: true }); return; }
       if (msg.text) { openWriteCard(textInfo(msg), { focus: true }); return; }
       openWriteCard(composeInfo(msg), { focus: true }); // nothing selected: write something new
-    } else if (msg.type === "showWritePill") { // desktop app: a double-click in an empty text box in another program
-      if (!msg.external || !aiReady) return;
-      closeCard({ restore: false, animate: false, notify: false }); // a card left from before (its window was hidden) goes quietly
-      showPill({ ...composeInfo(msg), aiOnly: true });
     } else if (msg.type === "summarizePage") {
       if (IS_TOP) summarizePage();
     } else if (msg.type === "togglePage") {

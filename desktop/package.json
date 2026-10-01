@@ -11,10 +11,12 @@
     "start": "node scripts/run.mjs",
     "smoke": "node scripts/run.mjs --smoke-test",
     "shots": "node scripts/run.mjs --screenshots",
+    "memory": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/memory.ps1",
     "icons": "node scripts/run.mjs scripts/make-icons.js",
     "sync": "node scripts/sync-ext.mjs",
-    "dist": "npm run sync && electron-builder --win",
-    "release": "npm run sync && electron-builder --win --publish always"
+    "helper": "node scripts/build-helper.mjs",
+    "dist": "npm run sync && npm run helper && electron-builder --win",
+    "release": "npm run sync && npm run helper && electron-builder --win --publish always"
   },
   "devDependencies": {
     "electron": "^44.4.5",
@@ -34,7 +36,6 @@
       "clipboard-actions.js",
       "clipboard-privacy.js",
       "uia-context.js",
-      "double-click.js",
       "app-rules.js",
       "pack-store.js",
       "zim.js",
@@ -45,6 +46,9 @@
       "assets/**",
       "ext/**",
       "package.json"
+    ],
+    "extraResources": [
+      { "from": "bin/lamha-uia.exe", "to": "lamha-uia.exe" }
     ],
     "publish": [
       {

@@ -1456,6 +1456,45 @@ test("a network that answers nothing: the dictionary's answer shows within secon
   assert.equal(calls.length, sent, "nothing sent while Google is unreachable");
 });
 
+test("Online first on a network that answers nothing: the dictionary answers a word it knows within ~2.5 s, sentence included, and that answer isn't kept", async () => {
+  const SCALE = 50;
+  const net = { up: false };
+  const fetchImpl = async (url, init = {}) => {
+    url = String(url);
+    if (net.up) return url.includes("/translate_a/single") ? json(200, { src: "en", sentences: [{ trans: "مرن", orig: "resilient" }] }) : json(200, [["الأطفال <a i=0>مرنون</a> جدًا.", "en"]]);
+    return new Promise((_, reject) => init.signal && init.signal.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" }))));
+  };
+  const env = makeEnv({ fetchImpl, realDict: true, scale: SCALE, sync: { uiLang: "ar", dictSource: "online", translateDefinitions: false } });
+  const t0 = Date.now();
+  const r = await env.send({ type: "lookup", text: "resilient", context: IN_SENTENCE });
+  assert.equal(r.data.source, "local");
+  assert.ok((Date.now() - t0) * SCALE < 3500, `the card waited ${(Date.now() - t0) * SCALE} ms`);
+  net.up = true; // back before the first request has given up: Google answers the same word now
+  const again = await env.send({ type: "lookup", text: "resilient", context: IN_SENTENCE });
+  assert.equal(again.data.source, "online", "the dictionary's stand-in answer wasn't cached");
+});
+
+test("connected with no internet behind it (every request fails at once): no waiting on retries; just after Google answered, a quick failure is tried again", async () => {
+  const calls = [];
+  const env = makeEnv({ fetchImpl: async url => { calls.push(String(url)); throw new TypeError("NetworkError when attempting to fetch resource."); },
+    realDict: true, sync: { uiLang: "ar", dictSource: "online", translateDefinitions: false } });
+  const t0 = Date.now();
+  const r = await env.send({ type: "lookup", text: "resilient", context: IN_SENTENCE });
+  assert.equal(r.data.source, "local");
+  assert.ok(Date.now() - t0 < 300, `the card waited ${Date.now() - t0} ms`);
+  assert.equal(new Set(calls).size, calls.length, "no address asked twice: " + calls.length + " requests");
+
+  let failNext = 0;
+  const blip = makeEnv({ fetchImpl: async url => {
+    if (failNext > 0) { failNext--; throw new TypeError("NetworkError when attempting to fetch resource."); }
+    return url.includes("/translate_a/single") ? json(200, { src: "en", sentences: [{ trans: "جملة", orig: "x" }] }) : json(404, {});
+  } });
+  assert.equal((await blip.send({ type: "lookup", text: "One sentence here." })).ok, true);
+  failNext = 2; // both addresses fail once, a moment after Google answered
+  const after = await blip.send({ type: "lookup", text: "Another sentence here." });
+  assert.equal(after.ok, true, "a blip is tried again: " + after.error);
+});
+
 test("Online first: the word's sentence is translated alongside the lookup, not after it", async () => {
   const events = [];
   const fetchImpl = async url => {

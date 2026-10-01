@@ -60,6 +60,14 @@ if (info.role === "page") {
   });
 }
 
+/* ---- the app itself (Settings → Appearance → the graphics card): the app's own pages ---- */
+if (info.role === "page") {
+  contextBridge.exposeInMainWorld("lamhaApp", {
+    gpu: () => call("app.gpu"), // whether this run draws with the graphics card
+    restart: () => call("app.restart")
+  });
+}
+
 /* ---- the Firefox extension's link (Settings → Firefox): the app's own pages ---- */
 if (info.role === "page") {
   const firefoxListeners = [];

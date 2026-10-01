@@ -50,16 +50,10 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(v, hi));
 
 /**
  * The card window (w × h) next to the mouse (`cursor`), inside the monitor's `workArea`. Returns { bounds, point }: the
- * window's place, and where in it the card (or the Write button) attaches.
- * `toast`: a short hint just under the mouse. `pill`: the Write button, the mouse ~72 px from the window's top, with room
- * below it for the card it opens.
+ * window's place, and where in it the card attaches. `toast`: a short hint just under the mouse.
  */
-function cardPlacement({ cursor, workArea: wa, w, h, toast = false, pill = false }) {
+function cardPlacement({ cursor, workArea: wa, w, h, toast = false }) {
   const x = clamp(Math.round(cursor.x - w / 2), wa.x, wa.x + wa.width - w);
-  if (pill) {
-    const y = clamp(cursor.y - 72, wa.y, wa.y + wa.height - h);
-    return { bounds: { x, y, width: w, height: h }, point: { x: cursor.x - x, y: cursor.y - y } };
-  }
   const down = !toast && (wa.y + wa.height - cursor.y >= 380 || wa.y + wa.height - cursor.y >= cursor.y - wa.y);
   const y = clamp(down ? cursor.y + 16 : cursor.y + (toast ? 60 : -16) - h, wa.y, wa.y + wa.height - h);
   return { bounds: { x, y, width: w, height: h }, point: { x: cursor.x - x, y: down ? Math.max(12, cursor.y + 16 - y) : Math.min(h - 12, cursor.y - 16 - y) } };

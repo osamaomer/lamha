@@ -24,10 +24,6 @@ var LamhaI18n = (() => {
     return String(v).replace(/\{(\w+)\}/g, (m, k) => (vars && k in vars ? (typeof vars[k] === "number" ? num(vars[k]) : vars[k]) : m));
   }
 
-  /** Both languages of a plain string: [arabic, english]. For recognising Lamha's own text wherever it was shown in
-   *  either language (the desktop app looks for the browser extension's button). */
-  const pair = key => (S[key] ? S[key].slice(0, 2) : [key, key]);
-
   /** Arabic counting: 1 · 2 (dual) · 3–10 plural · 11+ singular with tanween. */
   const arCount = (n, one, two, few, many) => (n === 1 ? one : n === 2 ? two : n >= 3 && n <= 10 ? `${num(n)} ${few}` : `${num(n)} ${many}`);
   const enCount = (n, one, other) => `${num(n)} ${n === 1 ? one : other}`;
@@ -315,5 +311,5 @@ var LamhaI18n = (() => {
     setTimeout(() => document.documentElement.removeAttribute("data-i18n-pending"), 1500);
   }
 
-  return { add, t, pair, num, arCount, enCount, resolve, systemLang, setLang, lang: () => lang, dir, textDir, init, applyDom };
+  return { add, t, num, arCount, enCount, resolve, systemLang, setLang, lang: () => lang, dir, textDir, init, applyDom };
 })();

@@ -92,7 +92,7 @@ Lamha offers the tools that fit the text: English text gets the editing tools, a
 - **Tool numbers:** each tool on the card has a number. Select text, press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>, then <kbd>1</kbd> to proofread, <kbd>2</kbd> to improve, and so on. Arabic digits work too.
 - **استبدال (Replace)** puts the result back where the text was. **نسخ** copies it.
 - **Write new:** with nothing selected, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> opens *كتابة جديدة*. Describe what you want in Arabic or English, choose **Email** or **Message** and a tone (automatic, friendly, formal, **short** or **longer**), and Lamha writes it in English. **إدراج (Insert)** puts it at your cursor.
-- **Double-click an empty box:** on a web page, double-click an empty text box or editor and the **كتابة** button appears. It opens *Write new* for that box: as an **Email** in Gmail, Outlook and other webmail, as a **Message** elsewhere. Typing hides it, and it never shows in password boxes. Turn it off in Settings → زر الكتابة بنقرتين على مربع فارغ.
+- **Double-click an empty box:** on a web page, double-click an empty text box or editor and the **كتابة** button appears. It opens *Write new* for that box: as an **Email** in Gmail, Outlook and other webmail, as a **Message** elsewhere. Typing hides it, and it never shows in password boxes. Turn it off in Settings → زر الكتابة بنقرتين على مربع فارغ. (Firefox only: in the Windows app, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> with nothing selected does the same.)
 - **Mistake journal** (Settings → سجل أخطائي): proofreading notes the *type* of each mistake (articles, prepositions, verb tenses…). Settings shows your most frequent types, with a short rule and examples from your own writing. Your top 3 are passed to the AI so it explains those especially clearly. The journal stays on your device and can be turned off.
 
 #### 🤖 Choosing an AI provider
@@ -233,10 +233,6 @@ Select text in WhatsApp, Word, Outlook, Teams or anything else, then:
 
 **استبدال (Replace)** pastes the result straight back into that program.
 
-**Double-click an empty text box** in any program (WhatsApp, Outlook, Word, Teams, a web form…) and the ✨ **كتابة** button appears next to the mouse. Your cursor stays in the box. Click the button to open *Write new*: it starts as an **Email** in Outlook and Thunderbird and as a **Message** elsewhere, and **إدراج (Insert)** writes into that box. If you don't click it, the button goes away after a few seconds or at your next click. It needs a writing-tools AI, and Settings → زر الكتابة بنقرتين على مربع فارغ turns it off.
-- In a browser that has the Lamha extension, the extension shows its own button, so the app's stays away. Browsers without the extension get the app's button, in the web page only (not in the address bar).
-- It doesn't show in Windows' own search and address boxes, in password boxes, or in apps that draw their own text (for example Google Docs, games and remote desktops).
-
 <details>
 <summary>How does it read another program's selection?</summary>
 
@@ -245,7 +241,6 @@ Lamha presses Ctrl+C for you to read the selection and Ctrl+V to paste the resul
 - Windows' own clipboard history (<kbd>Win</kbd>+<kbd>V</kbd>) may briefly show these copies.
 - In terminals Lamha doesn't press Ctrl+C, because there it would stop the running program.
 - With *فهم الكلمة من سياق الجملة* on, Lamha also reads the sentence around a word through Windows UI Automation, so it can pick the right meaning.
-- For the double-click button, a small mouse hook in Lamha's helper process notices left-button presses (never the keyboard), and UI Automation says whether the box you double-clicked is empty. The box's text is only checked for emptiness; it's never stored or sent anywhere.
 </details>
 
 ### 📖 Wikipedia without internet
@@ -295,6 +290,7 @@ A history of what you copy in any program, with Lamha's language tools on every 
 - **Review reminders:** a Windows notification when cards are waiting, at most every 4 hours.
 - **Ollama** works without the `OLLAMA_ORIGINS` step.
 - **Your data** (settings, cards, the mistake journal) is saved in `%APPDATA%\Lamha`. API keys are encrypted with DPAPI.
+- **Less memory:** Settings → المظهر → الرسم بمعالج الرسوميات. Off, Lamha draws without the graphics card and uses about 25 MB less; animations may be a little less smooth. The change applies when Lamha starts again (Settings offers to restart).
 - **Updates:** the installed app checks [GitHub Releases](https://github.com/osamaomer/lamha/releases) at startup and every 6 hours, downloads new versions in the background and installs them when Lamha restarts. The tray has **التحقق من التحديثات**, and Settings → التحديثات can turn automatic updates off. The Portable version can't replace itself: it tells you a new version is out and links to the download.
 
 ### Installing
@@ -311,6 +307,7 @@ npm install
 npm start          # run from source
 npm run smoke      # self-test: starts with a temporary profile, checks everything, quits
 npm run shots      # a picture of every screen (light/dark × Arabic/English) in %TEMP%\lamha-shots; with Ollama running, the writing tools' results too
+npm run memory     # the app's memory as Task Manager sees it, with a temporary profile (-- -Use, -Window, -NoGpu)
 npm run dist       # builds dist/Lamha-Setup-<version>.exe and dist/Lamha-Portable-<version>.exe
 ```
 
@@ -367,14 +364,14 @@ desktop/                    Windows app (Electron)
   build/installer.nsh       Uninstalling removes Firefox's registry entry for the link
   zim.js                    Reads Wikipedia's offline files (.zim, Kiwix's format): articles, redirects, titles
   wiki-library.js           Offline Wikipedia: Kiwix's catalog, downloads (mirrors, resume, SHA-256), the card's summaries, the reader's articles
-  uia-context.js            A helper process: the sentence around a word in other apps, the double-click mouse hook
-  double-click.js           When a double-click shows the Write button (pairing clicks, which apps)
+  uia-context.js            Starts the helper that reads the sentence around a word in other apps
+  uia-helper.cs             That helper (lamha-uia.exe, UI Automation), built with Windows' own C# compiler: npm run helper
   app-rules.js              What each window is told and may ask, what Firefox may ask, where the floating windows go
   clipboard-*.js            Clipboard history: capture, store, privacy, tools
   updater.js                Updates from GitHub Releases
   renderer/                 Card window, clipboard UI, desktop strings and styles
   renderer/wiki/            The Wikipedia reader: reader.html/js/css, and sanitize.js (rebuilds articles from an allow-list)
-  scripts/                  run, smoke test, icons, copying the extension files in
+  scripts/                  run, smoke test, screenshots, memory, icons, building the helper, copying the extension files in
 dict/                       Offline dictionary data (generated): en/ and forms/ by a word's first two letters, ar/
 tools/                      Tests (zim-fixture.mjs writes small .zim files for them), bench.mjs, and the dictionary builders
 ```
@@ -397,7 +394,7 @@ npm run bench   # performance numbers: lookups on a simulated network (normal, d
 | `tools/test-ui.mjs` | Renders the real popup and settings pages in jsdom and clicks through review, compose and the journal; also the Windows app's Wikipedia reader (its article cleaner, search, links, back and forward) |
 | `tools/test-clipboard.mjs` | Clipboard history: Arabic search, the encrypted store, tools on clips, privacy rules |
 | `tools/test-updater.mjs` | The desktop updater |
-| `tools/test-desktop.mjs` | The Windows app's own parts: offline Wikipedia (reading .zim files, the card's summary, Kiwix's catalog, downloads that break and resume), the double-click Write button (pairing clicks, which apps get it, and on Windows the helper's script and mouse hook), the language-pack store and the changelog. Set `LAMHA_TEST_ZIM` to a real `wikipedia_ar_*.zim` from Kiwix to check it too. |
+| `tools/test-desktop.mjs` | The Windows app's own parts: offline Wikipedia (reading .zim files, the card's summary, Kiwix's catalog, downloads that break and resume), the helper that reads the sentence around a word in other apps, the language-pack store and the changelog. Set `LAMHA_TEST_ZIM` to a real `wikipedia_ar_*.zim` from Kiwix to check it too. |
 | `tools/compare-translation.mjs` | Not a test: runs the same sentences through Google, Gemini and Ollama and writes `translation-report.md`, to judge AI translation quality. Needs `GEMINI_API_KEY` and/or `--ollama <url>`. |
 
 ### Building the language packs

@@ -131,6 +131,26 @@
 
   load();
 
+  /* ---- المظهر → the graphics card: main.js reads useGpu once, at start, so a change waits for the next start ---- */
+  if (window.lamhaApp && document.getElementById("appearance")) {
+    const gpuPending = h("div", { class: "opt", id: "gpuPending", hidden: true },
+      h("div", null, h("small", { role: "status" }, L("d.gpuPending"))),
+      h("button", { class: "btn small", type: "button", id: "gpuRestart", onclick: () => lamhaApp.restart() }, L("d.upRestartNow")));
+    document.getElementById("appearance").append(
+      h("label", { class: "opt" },
+        h("div", null, h("b", null, L("d.gpu")), h("small", null, L("d.gpuHint"))),
+        sw("useGpu", L("d.gpu"))),
+      gpuPending);
+    const renderGpu = async () => {
+      const [{ useGpu }, running] = await Promise.all([local.get({ useGpu: true }), lamhaApp.gpu()]);
+      $("useGpu").checked = useGpu !== false;
+      gpuPending.hidden = (useGpu !== false) === running;
+    };
+    $("useGpu").addEventListener("change", e => local.set({ useGpu: e.target.checked }).then(renderGpu));
+    browser.storage.onChanged.addListener((changes, area) => { if (area === "local" && changes.useGpu) renderGpu(); });
+    renderGpu();
+  }
+
   /* ---- التحديثات: from the GitHub Releases (updater.js) ---- */
   if (window.lamhaUpdates) {
     const upStatus = h("span", { class: "cb-up-status", role: "status" });

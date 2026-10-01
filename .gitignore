@@ -5,6 +5,7 @@ node_modules/
 web-ext-artifacts/
 desktop/dist/
 desktop/ext/
+desktop/bin/
 
 # local files
 *.log
