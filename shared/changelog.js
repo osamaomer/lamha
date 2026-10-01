@@ -4,14 +4,14 @@
 // eslint-disable-next-line no-unused-vars
 var LamhaChangelog = [
   { v: "1.9.8", date: "2026-10-01", notes: [
-    ["تطبيق Windows يستهلك ذاكرة أقل بكثير: نحو ١١٥ ميغابايت بعد الاستخدام بدل ١٧٥، وقراءة الجملة حول الكلمة في البرامج الأخرى صارت أخف وأسرع.",
-      "The Windows app uses much less memory: about 115 MB after use instead of 175, and reading the sentence around a word in other programs is lighter and quicker."],
-    ["تطبيق Windows يرسم دون معالج الرسوميات ليوفّر الذاكرة. لحركة أسلس شغّل الإعدادات ← المظهر ← الرسم بمعالج الرسوميات (يُطبَّق عند إعادة التشغيل).",
-      "The Windows app draws without the graphics card to save memory. For smoother animations, turn on Settings → Appearance → Draw with the graphics card (applies when Lamha restarts)."],
-    ["أسرع دون إنترنت: مع «الإنترنت أولًا» تظهر الكلمة من القاموس المحلي خلال ثانيتين ونصف حين لا تجيب الشبكة، بدل نحو عشر ثوانٍ، وفورًا حين لا يوجد اتصال أصلًا.",
-      "Faster with no internet: with Online first, a word comes from the offline dictionary within two and a half seconds when the network doesn't answer, instead of about ten, and at once when there's no connection at all."],
-    ["تطبيق Windows: أُزيل زر «كتابة» الذي يظهر بنقرتين على مربع فارغ في البرامج الأخرى، لأنه لم يكن يظهر في كثير منها. Alt+Shift+W دون تحديد نص يفتح «كتابة جديدة» كما كان، وإضافة Firefox تحتفظ بزرها.",
-      "Windows app: the Write button that appeared on a double-click in an empty box in other programs is gone, because it didn't show in many of them. Alt+Shift+W with nothing selected opens Write new as before, and the Firefox extension keeps its button."]
+    ["استهلاك أقل للذاكرة في تطبيق ويندوز: صار التطبيق يستهلك نحو ١١٥ ميغابايت بعد الاستخدام بدلًا من ١٧٥ ميغابايت. كما أصبحت قراءة الجملة المحيطة بالكلمة في البرامج الأخرى أخفّ وأسرع.",
+      "Less memory in the Windows app: the app now uses about 115 MB after use instead of 175 MB. Reading the sentence around a word in other programs is also lighter and quicker."],
+    ["استجابة أسرع دون إنترنت: في وضع «الإنترنت أولًا»، تظهر الكلمة من القاموس المحلي خلال ثانيتين ونصف إذا لم تستجب الشبكة، بعد أن كانت تستغرق نحو عشر ثوانٍ. وإذا لم يكن الجهاز متصلًا بالإنترنت أصلًا، تظهر الكلمة فورًا.",
+      "Quicker with no internet: with Online first, a word comes from the offline dictionary within two and a half seconds when the network doesn't respond, where it used to take about ten seconds. And when the PC isn't connected to the internet at all, the word shows at once."],
+    ["الرسم دون معالج الرسوميات: صار تطبيق ويندوز يرسم الواجهة دون معالج الرسوميات لتوفير الذاكرة. إذا أردت حركة أكثر سلاسة، ففعّل هذا الخيار من: الإعدادات ← المظهر ← الرسم بمعالج الرسوميات. ويُطبَّق التغيير بعد إعادة تشغيل التطبيق.",
+      "Drawing without the graphics card: the Windows app now draws its interface without the graphics card to save memory. For smoother animations, turn this on in Settings → Appearance → Draw with the graphics card. The change applies after the app restarts."],
+    ["إزالة زر «كتابة» من تطبيق ويندوز: أزلنا الزر الذي كان يظهر عند النقر مرتين على مربع نص فارغ في البرامج الأخرى، لأنه لم يكن يظهر في كثير منها. وما زال بإمكانك فتح «كتابة جديدة» بالضغط على Alt+Shift+W دون تحديد أي نص، كما كان من قبل. أما إضافة Firefox فما زال زرها موجودًا.",
+      "The Write button is gone from the Windows app: we removed the button that appeared when you double-clicked an empty text box in other programs, because it didn't show in many of them. You can still open Write new with Alt+Shift+W and nothing selected, as before. The Firefox extension keeps its button."]
   ]},
   { v: "1.9.7", date: "2026-10-01", notes: [
     ["تطبيق Windows: الإعدادات ← التحديثات تعرض ما الجديد في إصدارك فقط؛ الإصدارات السابقة على صفحة لمحة في GitHub.",
