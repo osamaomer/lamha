@@ -4,9 +4,9 @@
 #   npm run memory                                            in the tray, after 20 s
 #   npm run memory -- -Window                                 the main window open
 #   npm run memory -- -Use                                    after a minute of use (scripts/memory-use.js), back in the tray
-#   npm run memory -- -NoGpu                                  without the graphics card (LAMHA_NO_GPU; or -Local '{"useGpu":false}')
+#   npm run memory -- -Gpu                                    with the graphics card (off by default; the same as -Local '{"useGpu":true}')
 #   npm run memory -- -Local '{"clipboardEnabled":true}' -Sync '{"useContext":false}'   settings to start with
-param([switch]$Window, [switch]$NoGpu, [switch]$Use, [string]$Sync = "{}", [string]$Local = "{}", [int]$Wait = 20)
+param([switch]$Window, [switch]$Gpu, [switch]$Use, [string]$Sync = "{}", [string]$Local = "{}", [int]$Wait = 20)
 $ErrorActionPreference = "Stop"
 # A PowerShell started from another strips plain quotes ({useGpu:false}), which the app can't read: it would quietly
 # start with the defaults. Windows PowerShell's own ConvertFrom-Json accepts such keys, so they're looked for directly.
@@ -19,12 +19,12 @@ $dir = Join-Path $env:TEMP ("lamha-memory-" + [guid]::NewGuid().ToString("N").Su
 New-Item -ItemType Directory $dir | Out-Null
 $utf8 = New-Object System.Text.UTF8Encoding $false # JSON.parse refuses a byte-order mark
 [IO.File]::WriteAllText((Join-Path $dir "storage-sync.json"), $Sync, $utf8)
+if ($Gpu) { $o = $Local | ConvertFrom-Json; $o | Add-Member -Force -NotePropertyName useGpu -NotePropertyValue $true; $Local = $o | ConvertTo-Json -Compress }
 [IO.File]::WriteAllText((Join-Path $dir "storage-local.json"), $Local, $utf8)
 [IO.File]::WriteAllText((Join-Path $dir "installed.flag"), "memory", $utf8) # not a first run: Settings doesn't open
 
 Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue # set by some tools' shells: electron.exe would be plain Node
 $env:LAMHA_PROFILE = $dir
-$env:LAMHA_NO_GPU = $(if ($NoGpu) { "1" } else { "" })
 $env:LAMHA_MEMORY_USE = $(if ($Use) { "1" } else { "" })
 if ($Use -and $Wait -lt 35) { $Wait = 35 } # the use takes ~20 s, then the app settles
 $appArgs = @("`"$desktop`"") + $(if ($Window) { @() } else { @("--hidden") })

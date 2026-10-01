@@ -54,7 +54,7 @@
     "d.upNewTitle": ["إصدار جديد من لمحة", "New version of Lamha"],
     "d.upNewBody": [v => `الإصدار ${v.v} متاح. نسخة Portable لا تُحدّث نفسها — اضغط لتنزيله.`, v => `Version ${v.v} is available. The Portable version can't update itself — click to download it.`],
     "d.gpu": ["الرسم بمعالج الرسوميات", "Draw with the graphics card"],
-    "d.gpuHint": ["حركة أسلس. أوقِفه لتستهلك لمحة ذاكرة أقل (نحو ٢٥ ميغابايت)", "Smoother animations. Turn it off and Lamha uses less memory (about 25 MB)"],
+    "d.gpuHint": ["حركة أسلس، لكن لمحة تستهلك ذاكرة أكثر (نحو ٢٥ ميغابايت). مُطفأ في الأصل", "Smoother animations, but Lamha uses more memory (about 25 MB). Off unless you turn it on"],
     "d.gpuPending": ["يُطبَّق التغيير عند تشغيل لمحة من جديد", "The change applies when Lamha starts again"],
     "d.upTitle": ["التحديثات", "Updates"],
     "d.upDevBody": ["التحديث التلقائي يعمل في النسخة المثبّتة فقط.", "Automatic updates work in the installed version only."],
@@ -230,7 +230,7 @@
     "d.sClearAllText": ["يُحذف كل ما في الحافظة، بما في ذلك العناصر المثبّتة.", "Everything in the clipboard history is deleted, pinned items too."],
 
     /* ---- Settings → Offline Wikipedia (renderer/wiki-settings.js) ---- */
-    "d.wTitle": ["ويكيبيديا دون إنترنت", "Offline Wikipedia"],
+    "d.wTitle": ["ويكيبيديا بدون إنترنت", "Offline Wikipedia"],
     "d.wIntro": ["نزّل ويكيبيديا على هذا الجهاز لتظهر مقدمات مقالاتها في بطاقة البحث دون إنترنت. الملفات من Kiwix، وأنت تختار ما تنزّله.",
       "Download Wikipedia to this PC, and the lookup card shows its articles' introductions without internet. The files come from Kiwix, and you choose what to download."],
     "d.wHave": ["على هذا الجهاز", "On this PC"],

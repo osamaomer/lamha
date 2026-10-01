@@ -25,13 +25,13 @@ const DESKTOP_CSS = fs.readFileSync(path.join(__dirname, "renderer", "desktop.cs
 
 if (SMOKE) app.setPath("userData", fs.mkdtempSync(path.join(os.tmpdir(), "lamha-smoke-")));
 // from source only: a profile of its own, so a tool can start the app as a user would without touching your data or
-// the registry (scripts/memory.ps1). LAMHA_NO_GPU: without the graphics card's help, to compare the memory it takes.
+// the registry (scripts/memory.ps1).
 const DEV_PROFILE = !app.isPackaged && !SMOKE && process.env.LAMHA_PROFILE;
 if (DEV_PROFILE) app.setPath("userData", DEV_PROFILE);
-// Settings → Appearance → the graphics card (storage.local useGpu, on unless turned off: off saves ~25 MB, measured with
-// scripts/memory.ps1). Chromium can only be told before the app is ready, so it's read from the file here, and a change
-// applies at the next start (Settings offers a restart).
-const GPU = !(!app.isPackaged && process.env.LAMHA_NO_GPU === "1") && localAtStart().useGpu !== false;
+// Settings → Appearance → the graphics card (storage.local useGpu): off unless turned on, which saves ~25 MB (measured
+// with scripts/memory.ps1; since 1.9.8). Chromium can only be told before the app is ready, so it's read from the file
+// here, and a change applies at the next start (Settings offers a restart).
+const GPU = localAtStart().useGpu === true;
 if (!GPU) app.disableHardwareAcceleration();
 
 /** storage.local as it is on disk, before the stores exist (plain values only: the API keys there stay encrypted). */

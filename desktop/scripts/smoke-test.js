@@ -1060,22 +1060,23 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       return r.version;
     });
 
-    await check("Settings → المظهر: the graphics card switch, saved; a change says it waits for the next start", async () => {
+    await check("Settings → المظهر: the graphics card is off by default; turning it on is saved and waits for the next start", async () => {
       const win = getOptionsWin();
       const row = () => js(win, `({ on: document.getElementById("useGpu").checked, pending: !document.getElementById("gpuPending").hidden,
         inAppearance: !!document.querySelector("#appearance #useGpu") })`);
       const running = await js(win, `lamhaApp.gpu()`);
       const before = await row();
-      assert(before.inAppearance && before.on && before.pending === !running, JSON.stringify({ running, ...before })); // LAMHA_NO_GPU runs without it
+      assert(running === false && before.inAppearance && !before.on && !before.pending, JSON.stringify({ running, ...before })); // a new profile
       await js(win, `document.getElementById("useGpu").click(); true`);
       await wait(300);
-      const off = await row();
-      const saved = (await stores.local.get({ useGpu: true })).useGpu;
+      const on = await row();
+      const saved = (await stores.local.get({ useGpu: false })).useGpu;
       await js(win, `document.getElementById("useGpu").click(); true`);
       await wait(300);
       const back = await row();
-      assert(saved === false && !off.on && off.pending === running && back.on && back.pending === !running, JSON.stringify({ saved, off, back }));
-      return running ? "this run uses the graphics card" : "this run draws without it";
+      const after = (await stores.local.get({ useGpu: false })).useGpu;
+      assert(saved === true && on.on && on.pending && !back.on && !back.pending && after === false, JSON.stringify({ saved, on, back, after }));
+      return "this run draws without it; on → «applies at the next start», off again → nothing pending";
     });
 
     await check("offline Wikipedia: a .zim added to Lamha answers the card with no internet (Electron's own Zstandard), and Settings lists it", async () => {

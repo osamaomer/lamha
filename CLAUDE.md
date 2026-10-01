@@ -20,7 +20,7 @@ User-facing documentation lives in [README.md](README.md). Update it whenever a 
 - **Firefox:** the manifest loads `local-dict.js`, `packs.js`, `shared/i18n.js`, `shared/lamha-ai.js` and `background.js` as the background. Content scripts (`shared/*`, `content/styles.js`, `content/page-translator.js`, `content/content.js`) run in every frame.
 - **Desktop:** `desktop/main.js` builds a `browser.*` stand-in, then loads the same background files with `vm.runInThisContext`. `preload.js` gives pages (popup = main window, options = Settings) their `browser.*`. The floating card over other apps is `renderer/card.html` with **the same content scripts injected**, so `content/content.js` must keep working in both (see `window.lamhaDesktop` and `external` messages).
   - The sentence around a word in another program comes from `lamha-uia.exe` (`desktop/uia-helper.cs`, UI Automation; started by `uia-context.js`). It's built with Windows' own C# compiler (`scripts/build-helper.mjs`, into the git-ignored `bin/`) and shipped as an `extraResources` file next to `app.asar`. Users' PCs never compile anything.
-  - Settings → المظهر → the graphics card is `useGpu` (storage.local, on by default), read from the file by main.js before the app is ready (`GPU`); a change applies at the next start (`app.restart`).
+  - Settings → المظهر → the graphics card is `useGpu` (storage.local, **off** unless turned on: `useGpu === true`), read from the file by main.js before the app is ready (`GPU`); a change applies at the next start (`app.restart`).
 - **Storage:** `storage.sync` holds settings (`DEFAULT_SETTINGS` in background.js, mirrored in `options.js` and `content.js`). `storage.local` holds per-device data: history, cards, mistakes, API keys, provider choice. On desktop both are JSON files in `%APPDATA%\Lamha` (`desktop/storage.js`).
   - **The deck** is kept in memory by the background (`deckMem`); every write carries `cardsRev`, and a deck change without the number just written (another writer) drops the copy. Only the background writes the deck: Settings' "delete all" is the `cardsClear` message. Each card has `mod` (last change); `cardsRemoved` notes deletions (180 days) so a backup or the other copy doesn't bring a word back. `mergeCards()` joins decks (backups, the Firefox ↔ app sync): the schedule of the copy reviewed last, text fields filled from either.
 - **Interface language:** strings are `[arabic, english]` pairs. Shared ones are in `shared/i18n.js`, settings-page ones in `options/i18n-options.js`, desktop ones in `desktop/renderer/i18n-desktop.js`. Use `LamhaI18n.t(key, vars)`. Never hard-code visible text in one language.
@@ -127,7 +127,7 @@ cd desktop && npm run smoke       # full desktop self-test (needs a real Windows
 cd desktop && npm run shots       # every screen as a PNG, light/dark × ar/en (~5 min; LAMHA_SHOTS_ONLY=dark-ar for one set, LAMHA_SHOTS=folder).
                                   # Uses Ollama when it runs on this PC (real proofread / improve / AI translation); LAMHA_SHOTS_AI=0 skips it
 cd desktop && npm run memory      # the app's memory as Task Manager sees it (every process, lamha-uia.exe too), temporary profile,
-                                  # no registry. Add -- -Use (after a minute of use), -Window, -NoGpu, -Sync '{...}' / -Local '{...}'
+                                  # no registry. Add -- -Use (after a minute of use), -Window, -Gpu, -Sync '{...}' / -Local '{...}'
 cd desktop && npm run helper      # builds bin/lamha-uia.exe from uia-helper.cs (npm start, dist and release do it themselves)
 ```
 
@@ -144,7 +144,7 @@ _Last updated: 2026-10-01. Latest release: **1.9.7** (tagged 2026-10-01); main h
 ### Open items
 
 **Next work**
-- The next version's `shared/changelog.js` entry (not written yet; this work came after 1.9.7): quicker answers with no internet; the double-click button in other programs removed (Alt+Shift+W with nothing selected does the same); the graphics card setting; the app uses less memory (the sentence helper).
+- The next version's `shared/changelog.js` entry (not written yet; this work came after 1.9.7): quicker answers with no internet; the double-click button in other programs removed (Alt+Shift+W with nothing selected does the same); the graphics card off by default, with a setting to turn it on; the app uses less memory (the sentence helper).
 - Optimization, by size of gain (measured in docs/history.md → *After 1.9.7: optimization*): close the main window when it hides to the tray (~−20 MB; reopening reloads it); the app's deck writes (only past ~10,000 cards); Firefox's 163 KB per frame (a small loader).
 
 **Bugs and reports**
@@ -155,13 +155,11 @@ _Last updated: 2026-10-01. Latest release: **1.9.7** (tagged 2026-10-01); main h
 - Translation service with a Gemini key: Automatic with the Wi-Fi off, the Better translation link, page translation with AI on.
 - Explain words: French with French selected; the switch on a French and an Arabic word (Gemini or Ollama for Arabic).
 - Longer (expand) with Gemini or Claude (Ollama qwen3.5:4b adds vague reasons).
-- The graphics card setting (Settings → المظهر): try it off for a day (animations, the card's see-through edges), then choose the default.
 - Language packs: download in Firefox and in the app, look words up with the Wi-Fi off.
 - Offline Wikipedia: download Arabic Top · Mini from Settings (mirror choice, speed), pause/resume, quit mid-download and restart; the reader with a big article, the mouse's side buttons, the card inside the reader.
 - Firefox ↔ app: a real Firefox against the real app (Connect; an English word with the Wi-Fi off; *اقرأ المقالة في لمحة* with the app closed); the shared deck (add / review / delete on both sides); content scripts' cost in about:performance.
 
 **Decisions for the user**
-- The graphics card's default: on today; off saves ~21 MB (Task Manager) after use. A one-word change (`useGpu !== false` in main.js and settings.js).
 - Code signing (Azure Trusted Signing ~$10/month, or the Microsoft Store, which signs it).
 - A card removed from review comes back when the word is looked up again (`cardsAuto`); keep or change?
 - Not done from the design audit: a type scale (text still in half-pixel steps); rewriting Settings' intro paragraphs (their copy).

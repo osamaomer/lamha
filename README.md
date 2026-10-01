@@ -245,7 +245,7 @@ Lamha presses Ctrl+C for you to read the selection and Ctrl+V to paste the resul
 
 ### 📖 Wikipedia without internet
 
-Settings → **ويكيبيديا دون إنترنت** downloads Wikipedia to your PC, so the card's Wikipedia part keeps working with no connection. It's optional: nothing is downloaded until you choose something.
+Settings → **ويكيبيديا بدون إنترنت** downloads Wikipedia to your PC, so the card's Wikipedia part keeps working with no connection. It's optional: nothing is downloaded until you choose something.
 
 - **What you can download** comes from [Kiwix](https://kiwix.org)'s catalog, in the language you pick: *Top articles* or *All articles*, each as *Mini* (introductions only, all the card needs), *Full, no pictures* or *Full, with pictures*, plus topic sets (medicine, history…). For example, Arabic Top articles · Mini is 226 MB for 231,000 articles; all of Arabic Wikipedia with pictures is 19 GB.
 - **Downloads** come from the fastest of Kiwix's mirrors. They can be paused, resume where they stopped (also after a restart or a dropped connection, from another mirror), and are checked against Kiwix's SHA-256 before they're used. Files over 2 GB ask first.
@@ -290,7 +290,7 @@ A history of what you copy in any program, with Lamha's language tools on every 
 - **Review reminders:** a Windows notification when cards are waiting, at most every 4 hours.
 - **Ollama** works without the `OLLAMA_ORIGINS` step.
 - **Your data** (settings, cards, the mistake journal) is saved in `%APPDATA%\Lamha`. API keys are encrypted with DPAPI.
-- **Less memory:** Settings → المظهر → الرسم بمعالج الرسوميات. Off, Lamha draws without the graphics card and uses about 25 MB less; animations may be a little less smooth. The change applies when Lamha starts again (Settings offers to restart).
+- **Less memory:** Lamha draws without the graphics card, which saves about 25 MB. For smoother animations, turn on Settings → المظهر → الرسم بمعالج الرسوميات. The change applies when Lamha starts again (Settings offers to restart).
 - **Updates:** the installed app checks [GitHub Releases](https://github.com/osamaomer/lamha/releases) at startup and every 6 hours, downloads new versions in the background and installs them when Lamha restarts. The tray has **التحقق من التحديثات**, and Settings → التحديثات can turn automatic updates off. The Portable version can't replace itself: it tells you a new version is out and links to the download.
 
 ### Installing
@@ -307,7 +307,7 @@ npm install
 npm start          # run from source
 npm run smoke      # self-test: starts with a temporary profile, checks everything, quits
 npm run shots      # a picture of every screen (light/dark × Arabic/English) in %TEMP%\lamha-shots; with Ollama running, the writing tools' results too
-npm run memory     # the app's memory as Task Manager sees it, with a temporary profile (-- -Use, -Window, -NoGpu)
+npm run memory     # the app's memory as Task Manager sees it, with a temporary profile (-- -Use, -Window, -Gpu)
 npm run dist       # builds dist/Lamha-Setup-<version>.exe and dist/Lamha-Portable-<version>.exe
 ```
 

@@ -142,9 +142,9 @@
         sw("useGpu", L("d.gpu"))),
       gpuPending);
     const renderGpu = async () => {
-      const [{ useGpu }, running] = await Promise.all([local.get({ useGpu: true }), lamhaApp.gpu()]);
-      $("useGpu").checked = useGpu !== false;
-      gpuPending.hidden = (useGpu !== false) === running;
+      const [{ useGpu }, running] = await Promise.all([local.get({ useGpu: false }), lamhaApp.gpu()]); // off unless turned on
+      $("useGpu").checked = useGpu === true;
+      gpuPending.hidden = (useGpu === true) === running;
     };
     $("useGpu").addEventListener("change", e => local.set({ useGpu: e.target.checked }).then(renderGpu));
     browser.storage.onChanged.addListener((changes, area) => { if (area === "local" && changes.useGpu) renderGpu(); });

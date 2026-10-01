@@ -1126,7 +1126,7 @@ await step("Wikipedia reader: an article is rebuilt from an allow-list: no scrip
 await step("Wikipedia reader: search suggests titles, Enter opens one; links open articles, places or the web; back and forward remember", async () => {
   const r = await readerPage({ articles: ARTICLES });
   const main = r.$("rdMain");
-  assert.match(text(main), /ويكيبيديا دون إنترنت/, "the start page");
+  assert.ok(text(main).includes(r.w.LamhaI18n.t("d.wTitle")), "the start page"); // the title's wording is the user's: read it, don't repeat it
   assert.ok(r.$("rdRandom"));
   const q = r.$("rdQ");
   q.value = "بار";
