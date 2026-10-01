@@ -131,13 +131,12 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-10-01. Latest release: **1.9.6**; **1.9.7** is bumped and committed, not tagged yet. The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
+_Last updated: 2026-10-01. Latest release: **1.9.7** (tagged 2026-10-01). The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
 
 **At the end of a session:** update the open items below (add new ones, delete finished ones), and add a short dated entry to docs/history.md for substantial work, in the same commit. Keep this file small (under ~25 KB): details belong in history.md.
 
 ### Open items
 
-**Before 1.9.7 goes out:** ✅ `npm run smoke` passed 74/74 (2026-10-01); ✅ pushed. Left: tag `v1.9.7` (the release workflow publishes it). If the release day isn't 2026-10-01, change the date in `shared/changelog.js`.
 
 **Bugs and reports**
 - **The Windows Write button doesn't show in many apps** (user report after 1.9.3, parked). 1.9.6 limited the extension-button search to browsers, a likely cause but not confirmed. Next: a development build in Slack / Teams / WhatsApp, reading its `[write button]` log lines (is the double-click seen? what does `field` answer?). Known: Chromium apps enable accessibility at the first UI Automation question, so the first double-click may show nothing.
