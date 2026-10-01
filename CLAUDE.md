@@ -137,7 +137,6 @@ _Last updated: 2026-10-01. Latest release: **1.9.7** (tagged 2026-10-01). The hi
 
 ### Open items
 
-
 **Bugs and reports**
 - **The Windows Write button doesn't show in many apps** (user report after 1.9.3, parked). 1.9.6 limited the extension-button search to browsers, a likely cause but not confirmed. Next: a development build in Slack / Teams / WhatsApp, reading its `[write button]` log lines (is the double-click seen? what does `field` answer?). Known: Chromium apps enable accessibility at the first UI Automation question, so the first double-click may show nothing.
 
