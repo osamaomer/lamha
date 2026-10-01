@@ -606,14 +606,21 @@
     return out;
   }
 
+  /** While the card waits, the Lamha mark shows for what (shared/motion.js wait()); a new wait ends the last one. */
+  let stopWait = () => {};
+  function waitFor(kind) {
+    stopWait();
+    stopWait = LamhaMotion.wait(card && card.querySelector(".brand .dot"), kind);
+  }
+
   /** `opts.engine: "ai"`: the "Better translation" link, which asks the AI whatever the translation setting is. */
   async function load(text, context = null, opts = {}) {
     const token = ++reqId;
     renderSkeleton(text);
-    card.classList.add("thinking"); // the Lamha mark blinks until the answer is here
+    waitFor(isWordish(text) ? "book" : "lens"); // pages turn for a word, a lens reads a sentence
     const res = await send({ type: "lookup", text, context, engine: opts.engine });
     if (token !== reqId || !card) return;
-    card.classList.remove("thinking");
+    stopWait();
     if (!res || !res.ok) { morph(() => renderError(text, res && res.error, opts)); return; }
     const pending = morph(() => render(res.data));
     if (res.data.milestone || res.data.goal) LamhaMotion.burst(card.querySelector(".milestone"), { layer: root });
@@ -962,10 +969,10 @@
       h("div", { class: "sk", style: { height: "14px", width: "80%", marginTop: "8px" } }),
       h("div", { class: "sk", style: { height: "14px", width: "60%", marginTop: "8px" } })
     );
-    card.classList.add("thinking");
+    waitFor("write");
     const res = await send({ type: "ai", tool, text: tool === "compose" ? extra.intent : info.raw, extra });
     if (token !== reqId || !card) return;
-    card.classList.remove("thinking");
+    stopWait();
     morph(() => {
       if (!res || !res.ok) writeOut.replaceChildren(aiError(res && res.error, () => runTool(tool, extra)));
       else if (tool === "proofread") renderProofread(res.data, info);

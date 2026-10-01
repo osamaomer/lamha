@@ -500,9 +500,40 @@ div.pos { display: block; margin-bottom: 6px; }
 .lm-word { display: inline-block; animation: lm-word .22s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes lm-word { from { opacity: 0; transform: translateY(3px); filter: blur(2px); } to { opacity: 1; transform: none; filter: none; } }
 
-/* the Lamha mark blinks while waiting for an answer */
-.root[data-motion="full"] .card.thinking .brand .dot { animation: lm-blink 1.4s ease-in-out infinite; }
-@keyframes lm-blink { 0%, 44%, 56%, 100% { transform: none; } 50% { transform: scaleY(.15); } }
+/* the Lamha mark while the card waits (shared/motion.js wait()): pages turn for a word, a lens reads a sentence,
+   lines are written for the AI. Arabic books turn their pages left → right; the English interface mirrors it */
+.brand .dot { position: relative; overflow: hidden; }
+.dot .wait { position: absolute; inset: 0; margin: auto; width: 13px; height: 13px; overflow: visible; }
+.dot .wait * { transform-box: view-box; }
+.dot.waiting > svg:not(.wait) { opacity: 0; }
+.wait .cover { fill: rgba(255, 255, 255, .22); }
+.wait .pg, .wait .spark { fill: currentColor; stroke: none; }
+.wait .pg { opacity: 0; transform-origin: 12px 12px; }
+.wait .pg:nth-of-type(3) { opacity: 1; } /* without motion ("subtle"): one page lies open */
+.root.en .wait .pg { transform: scaleX(-1); }
+.wait .ln { opacity: .45; }
+.wait .glass circle { fill: rgba(255, 255, 255, .18); }
+.wait .w { transform-origin: 20px 0; }
+.root.en .wait .w { transform-origin: 4px 0; }
+.wait .spark { transform-origin: 20px 5px; }
+.root[data-motion="full"] .wait .pg { animation: lm-turn 1.5s cubic-bezier(.45,.05,.35,1) infinite; }
+.root[data-motion="full"] .wait .pg:nth-of-type(4) { animation-delay: .25s; }
+.root[data-motion="full"] .wait .pg:nth-of-type(5) { animation-delay: .5s; }
+.root.en[data-motion="full"] .wait .pg { animation-name: lm-turn-en; }
+.root[data-motion="full"] .wait .glass { animation: lm-scan 2.1s cubic-bezier(.45,.05,.35,1) infinite; }
+.root.en[data-motion="full"] .wait .glass { animation-name: lm-scan-en; }
+.root[data-motion="full"] .wait .w { animation: lm-write 1.8s cubic-bezier(.3,.6,.3,1) infinite; }
+.root[data-motion="full"] .wait .w:nth-of-type(2) { animation-delay: .3s; }
+.root[data-motion="full"] .wait .w:nth-of-type(3) { animation-delay: .6s; }
+.root[data-motion="full"] .wait .spark { animation: lm-twinkle 1.8s ease-in-out infinite; }
+.root[data-motion="subtle"] .dot .wait { animation: lm-breathe 1.6s ease-in-out infinite; }
+@keyframes lm-turn { 0% { transform: scaleX(1); opacity: 0; } 12% { opacity: 1; } 70% { transform: scaleX(-1); opacity: 1; } 85%, 100% { transform: scaleX(-1); opacity: 0; } }
+@keyframes lm-turn-en { 0% { transform: scaleX(-1); opacity: 0; } 12% { opacity: 1; } 70% { transform: scaleX(1); opacity: 1; } 85%, 100% { transform: scaleX(1); opacity: 0; } }
+@keyframes lm-scan { 0%, 100% { transform: translate(2px, -4px); } 26% { transform: translate(-8px, -4px); } 33% { transform: translate(2px, 0); } 59% { transform: translate(-8px, 0); } 66% { transform: translate(2px, 4px); } 92% { transform: translate(-6px, 4px); } }
+@keyframes lm-scan-en { 0%, 100% { transform: translate(-8px, -4px); } 26% { transform: translate(2px, -4px); } 33% { transform: translate(-8px, 0); } 59% { transform: translate(2px, 0); } 66% { transform: translate(-8px, 4px); } 92% { transform: translate(0, 4px); } }
+@keyframes lm-write { 0% { transform: scaleX(0); opacity: 1; } 35%, 80% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+@keyframes lm-twinkle { 0%, 100% { transform: scale(.4); opacity: .4; } 50% { transform: scale(1) rotate(45deg); opacity: 1; } }
+@keyframes lm-breathe { 50% { opacity: .55; } }
 
 /* a tool picked with its number key lights up */
 .chip.tool.hit { box-shadow: 0 0 0 3px var(--accent-soft); }

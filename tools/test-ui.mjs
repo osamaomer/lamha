@@ -576,6 +576,42 @@ await step("card: selected English text gets Longer right after Shorter; its num
   assert.equal(c.sent.find(m => m.type === "ai").tool, "expand");
 });
 
+await step("card: while it waits, the Lamha mark turns pages (a word), reads lines (a sentence) or writes (the AI); never for a quick answer or with animations off", async () => {
+  const later = (ms, value) => new Promise(done => setTimeout(() => done(value), ms));
+  const word = { ok: true, data: { query: "bank", type: "word", src: "en", tl: "ar", translation: "بنك", source: "local" } };
+  const reply = msg => msg.type === "lookup" ? later(/slow/.test(msg.text) || msg.text.includes(" ") ? 450 : 0, word)
+    : msg.type === "ai" ? later(450, { ok: true, data: { text: "Fine." } }) : { ok: true };
+  const c = await cardPage(reply, { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" });
+  const mark = () => c.root().querySelector(".brand .dot .wait");
+  c.show("slow");
+  await sleep(100);
+  assert.equal(mark(), null, "not in the first 250 ms: a quick answer doesn't flicker");
+  await sleep(250);
+  assert.ok(mark() && mark().classList.contains("book"), "a word: the book");
+  assert.ok(c.root().querySelector(".brand .dot").classList.contains("waiting"), "the logo gives way to it");
+  await sleep(200);
+  assert.equal(mark(), null, "gone with the answer");
+  c.show("The bank is closed today.");
+  await sleep(350);
+  assert.ok(mark() && mark().classList.contains("lens"), "a sentence: the lens");
+  await sleep(250);
+  c.show("bank");
+  await sleep(400);
+  assert.equal(mark(), null, "an answer from the dictionary never shows it");
+  c.write("cant make sunday meeting");
+  await sleep(50);
+  c.root().querySelector(".chip.tool").click();
+  await sleep(350);
+  assert.ok(mark() && mark().classList.contains("write"), "the AI: lines are written");
+  await sleep(250);
+  assert.equal(mark(), null);
+
+  const off = await cardPage(reply, {}, { motion: "off" });
+  off.show("slow");
+  await sleep(350);
+  assert.equal(off.root().querySelector(".brand .dot .wait"), null, "Animations off: nothing is made");
+});
+
 await step("card: Write new offers Longer next to Short, for the message it writes", async () => {
   const c = await cardPage(msg => (msg.type === "ai" ? { ok: true, data: { text: "Hi! I can't make it on Sunday." } } : { ok: true }), { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" });
   c.write(""); // nothing selected: Write new

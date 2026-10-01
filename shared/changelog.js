@@ -9,7 +9,9 @@ var LamhaChangelog = [
     ["تطبيق Windows: العناصر المثبّتة في الحافظة تبقى في أعلى القائمة ونتائج البحث، والقائمة السريعة ما زالت تبدأ بآخر ما نسخته.",
       "Windows app: pinned clipboard items stay at the top of the list and of search results; the quick panel still starts on what you copied last."],
     ["القوائم المنسدلة وأسئلة التأكيد صارت بتصميم لمحة نفسه في كل مكان، بدل شكل النظام وأزراره.",
-      "Dropdown menus and confirmation questions now look like the rest of Lamha everywhere, instead of the system's style and buttons."]
+      "Dropdown menus and confirmation questions now look like the rest of Lamha everywhere, instead of the system's style and buttons."],
+    ["علامة لمحة تُظهر ما تفعله أثناء الانتظار: صفحات كتاب تُقلَّب للكلمة، وعدسة تقرأ الجملة، وأسطر تُكتب حين يعمل الذكاء الاصطناعي.",
+      "While you wait, the Lamha mark shows what it's doing: a book's pages turn for a word, a lens reads a sentence, and lines are written while the AI works."]
   ]},
   { v: "1.9.6", date: "2026-09-29", notes: [
     ["نسخة من بياناتك: احفظ بطاقات المراجعة وتقدّمك وسجل الكلمات وسجل أخطائك في ملف، واسترجعها على هذا الجهاز أو غيره دون أن يُحذف شيء (الإعدادات ← الخصوصية والسجل).",

@@ -136,6 +136,9 @@ $("openOptions").addEventListener("click", () => { browser.runtime.openOptionsPa
 /* ---- quick translate ---- */
 
 let qTimer, qToken = 0;
+// the Lamha logo shows what the window waits for (shared/motion.js wait()); a new wait ends the last one
+let stopWait = () => {};
+const waitFor = kind => { stopWait(); stopWait = LamhaMotion.wait(document.querySelector(".logo"), kind); };
 const q = $("q");
 q.addEventListener("input", () => {
   q.style.height = "auto";
@@ -161,8 +164,10 @@ async function runQuick() {
   const token = ++qToken;
   out.hidden = false;
   out.replaceChildren(h("div", { class: "loading" }, t("common.translating")));
+  waitFor(text.split(/\s+/).length <= 3 && text.length <= 40 ? "book" : "lens"); // a word, or a sentence
   const res = await browser.runtime.sendMessage({ type: "lookup", text }).catch(() => null);
   if (token !== qToken) return;
+  stopWait();
   if (!res || !res.ok) {
     out.replaceChildren(h("div", { class: "error" }, quickError(res && res.error)));
     return;
@@ -333,11 +338,10 @@ async function runWrite(tool, fresh = false) {
   const token = ++wrToken;
   renderTools(tool);
   out.replaceChildren(h("div", { class: "loading" }, h("span", { class: "spin" }), t("common.working")));
-  const logo = document.querySelector(".logo");
-  logo.classList.add("thinking"); // the Lamha logo blinks while the AI works (full animations)
+  waitFor("write"); // lines are written in the Lamha logo while the AI works
   const res = await browser.runtime.sendMessage({ type: "ai", tool, text, extra: fresh ? { fresh: true } : {} }).catch(e => ({ ok: false, error: String(e) }));
   if (token !== wrToken) return;
-  logo.classList.remove("thinking");
+  stopWait();
   if (!res || !res.ok) { out.replaceChildren(wrError(res && res.error, () => runWrite(tool))); return; }
 
   const useIt = result => h("button", {

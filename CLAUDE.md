@@ -38,7 +38,7 @@ User-facing documentation lives in [README.md](README.md). Update it whenever a 
   - Clipboard contents and user text are never logged. Log lengths or error *names* only.
   - Untrusted keys (model output, words used as object keys) are checked with `Object.hasOwn`, or stored in prototype-less objects.
   - Pages never use `innerHTML` with dynamic text. Build nodes with `h()` / `textContent`.
-- **Animations** go through `LamhaMotion` (`shared/motion.js`). They only move transform and opacity, never block a result, and create nothing at level "off".
+- **Animations** go through `LamhaMotion` (`shared/motion.js`). They only move transform and opacity, never block a result, and create nothing at level "off". While waiting for an answer, the Lamha mark shows `LamhaMotion.wait(host, kind)`: "book" (a word), "lens" (a sentence), "write" (the AI), after 250 ms; its motion is in `content/styles.js` (the card) and `motion.css` (the pages), mirrored for English.
 - **Stale async work** is cancelled with request tokens (`reqId`, `qToken`, `wrToken`). Keep that pattern when adding async UI.
 - **New root files** that aren't part of the extension must be added to `ignoreFiles` in `web-ext-config.mjs`. Extension folders the desktop app needs must be in `ITEMS` in `desktop/scripts/sync-ext.mjs`.
 - **Versions** live in three places and move together: `manifest.json`, `desktop/package.json` and `desktop/package-lock.json` (via `npm version … --prefix desktop`).

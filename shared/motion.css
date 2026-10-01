@@ -58,9 +58,40 @@
 .lm-word { display: inline-block; animation: lm-word .22s var(--m-ease) both; }
 @keyframes lm-word { from { opacity: 0; transform: translateY(3px); filter: blur(2px); } to { opacity: 1; transform: none; filter: none; } }
 
-/* ---------- the Lamha logo blinks while the AI is thinking ---------- */
-[data-motion="full"] .logo.thinking img { animation: lm-blink 1.4s ease-in-out infinite; transform-origin: 50% 50%; }
-@keyframes lm-blink { 0%, 44%, 56%, 100% { transform: none; } 50% { transform: scaleY(.12); } }
+/* ---------- the Lamha logo while waiting (motion.js wait()): the card's marks (content/styles.js), here over the logo ----------
+   pages turn for a word, a lens reads a sentence, lines are written for the AI; Arabic turns pages left → right */
+.logo { position: relative; }
+.logo.waiting img { opacity: 0; }
+.logo .wait { position: absolute; inset: 0; width: 100%; height: 100%; padding: 6px; border-radius: var(--r-sm); background: linear-gradient(135deg, #6366f1, #06b6d4); color: #fff; overflow: visible; }
+.logo .wait * { transform-box: view-box; }
+.logo .wait .cover { fill: rgba(255, 255, 255, .22); }
+.logo .wait .pg, .logo .wait .spark { fill: currentColor; stroke: none; }
+.logo .wait .pg { opacity: 0; transform-origin: 12px 12px; }
+.logo .wait .pg:nth-of-type(3) { opacity: 1; } /* without motion ("subtle"): one page lies open */
+[dir="ltr"] .logo .wait .pg { transform: scaleX(-1); }
+.logo .wait .ln { opacity: .45; }
+.logo .wait .glass circle { fill: rgba(255, 255, 255, .18); }
+.logo .wait .w { transform-origin: 20px 0; }
+[dir="ltr"] .logo .wait .w { transform-origin: 4px 0; }
+.logo .wait .spark { transform-origin: 20px 5px; }
+[data-motion="full"] .logo .wait .pg { animation: lm-turn 1.5s cubic-bezier(.45,.05,.35,1) infinite; }
+[data-motion="full"] .logo .wait .pg:nth-of-type(4) { animation-delay: .25s; }
+[data-motion="full"] .logo .wait .pg:nth-of-type(5) { animation-delay: .5s; }
+[data-motion="full"][dir="ltr"] .logo .wait .pg { animation-name: lm-turn-en; }
+[data-motion="full"] .logo .wait .glass { animation: lm-scan 2.1s cubic-bezier(.45,.05,.35,1) infinite; }
+[data-motion="full"][dir="ltr"] .logo .wait .glass { animation-name: lm-scan-en; }
+[data-motion="full"] .logo .wait .w { animation: lm-write 1.8s cubic-bezier(.3,.6,.3,1) infinite; }
+[data-motion="full"] .logo .wait .w:nth-of-type(2) { animation-delay: .3s; }
+[data-motion="full"] .logo .wait .w:nth-of-type(3) { animation-delay: .6s; }
+[data-motion="full"] .logo .wait .spark { animation: lm-twinkle 1.8s ease-in-out infinite; }
+[data-motion="subtle"] .logo .wait { animation: lm-breathe 1.6s ease-in-out infinite; }
+@keyframes lm-turn { 0% { transform: scaleX(1); opacity: 0; } 12% { opacity: 1; } 70% { transform: scaleX(-1); opacity: 1; } 85%, 100% { transform: scaleX(-1); opacity: 0; } }
+@keyframes lm-turn-en { 0% { transform: scaleX(-1); opacity: 0; } 12% { opacity: 1; } 70% { transform: scaleX(1); opacity: 1; } 85%, 100% { transform: scaleX(1); opacity: 0; } }
+@keyframes lm-scan { 0%, 100% { transform: translate(2px, -4px); } 26% { transform: translate(-8px, -4px); } 33% { transform: translate(2px, 0); } 59% { transform: translate(-8px, 0); } 66% { transform: translate(2px, 4px); } 92% { transform: translate(-6px, 4px); } }
+@keyframes lm-scan-en { 0%, 100% { transform: translate(-8px, -4px); } 26% { transform: translate(2px, -4px); } 33% { transform: translate(-8px, 0); } 59% { transform: translate(2px, 0); } 66% { transform: translate(-8px, 4px); } 92% { transform: translate(0, 4px); } }
+@keyframes lm-write { 0% { transform: scaleX(0); opacity: 1; } 35%, 80% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+@keyframes lm-twinkle { 0%, 100% { transform: scale(.4); opacity: .4; } 50% { transform: scale(1) rotate(45deg); opacity: 1; } }
+@keyframes lm-breathe { 50% { opacity: .55; } }
 
 /* ---------- review: the answer flips in ---------- */
 .rv-card { perspective: 900px; }

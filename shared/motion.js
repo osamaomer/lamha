@@ -211,8 +211,42 @@ var LamhaMotion = (() => {
     setTimeout(() => box.remove(), 1000);
   }
 
+  /* ---- the Lamha mark while waiting for an answer: what Lamha is doing, drawn in the mark ----
+   * "book": a word, looked up in the dictionary (pages turn); "lens": a sentence, read line by line;
+   * "write": the AI writing. The motion is CSS (content/styles.js for the card, motion.css for the pages). */
+  const PAGE = "M12 7.5C9.6 6 6.6 6 4 6.6v10.6c2.6-.6 5.6-.6 8 .9z";
+  const MARKS = {
+    book: [["path", { class: "cover", d: "M12 6.5C9 4.5 5.5 4.5 2 5.5v13c3.5-1 7-1 10 1 3-2 6.5-2 10-1v-13c-3.5-1-7-1-10 1z" }], ["path", { d: "M12 6.5v13" }],
+      ["path", { class: "pg", d: PAGE }], ["path", { class: "pg", d: PAGE }], ["path", { class: "pg", d: PAGE }]],
+    lens: [["path", { class: "ln", d: "M3 7.5h16M3 12h18M3 16.5h12" }],
+      ["g", { class: "glass" }, [["circle", { cx: "15", cy: "12", r: "4.4" }], ["path", { d: "M18.2 15.2 21.5 18.5" }]]]],
+    write: [["path", { class: "w", d: "M4 10.5h16" }], ["path", { class: "w", d: "M4 15h16" }], ["path", { class: "w", d: "M8 19.5h12" }],
+      ["path", { class: "spark", d: "M20 1.5l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z" }]]
+  };
+  function markSvg(kind) {
+    const NS = "http://www.w3.org/2000/svg";
+    const make = ([tag, attrs, kids = []]) => {
+      const el = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+      for (const kid of kids) el.append(make(kid));
+      return el;
+    };
+    return make(["svg", { class: "wait " + kind, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": "2.3",
+      "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true" }, MARKS[kind]]);
+  }
+  /**
+   * Shows the waiting mark in `host` (the card's .dot, the popup's .logo) and returns stop(). It appears only after
+   * 250 ms, so an answer from the dictionary (a few ms) doesn't flicker; nothing at all at level "off".
+   */
+  function wait(host, kind) {
+    if (!host || level === "off" || !Object.hasOwn(MARKS, kind)) return () => {};
+    let mark = null;
+    const timer = setTimeout(() => { mark = markSvg(kind); host.append(mark); host.classList.add("waiting"); }, 250);
+    return () => { clearTimeout(timer); if (mark) mark.remove(); host.classList.remove("waiting"); };
+  }
+
   return {
-    SETTINGS, ready, attach, use, play, stagger, exit, countUp, flip, resize, burst, typeIn, sequence, time,
+    SETTINGS, ready, attach, use, play, stagger, exit, countUp, flip, resize, burst, typeIn, sequence, time, wait,
     level: () => level, setting: () => setting, any, full,
     /** Called with the new level whenever it changes. */
     onChange: f => { listeners.add(f); return () => listeners.delete(f); }
