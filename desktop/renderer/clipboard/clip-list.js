@@ -89,7 +89,7 @@ var LamhaClipList = (() => {
    */
   function create({ root, mode, onActivate, onActions, onEscape }) {
     const id = "lc" + ++uid;
-    let query = "", filter = "all", shown = PAGE, items = [], total = 0, sel = 0, loading = null, reloadAgain = false;
+    let query = "", filter = "all", shown = PAGE, items = [], total = 0, sel = 0, toNewest = false, loading = null, reloadAgain = false;
     let entrance = false, pinnedNow = null; // motion: rows come in one after another on opening; a new pin drops in
 
     const search = h("input", {
@@ -107,7 +107,7 @@ var LamhaClipList = (() => {
       list, more, empty, toastBox
     );
 
-    search.addEventListener("input", () => { query = search.value; shown = PAGE; sel = 0; reload(); });
+    search.addEventListener("input", () => { query = search.value; shown = PAGE; sel = 0; toNewest = !query; reload(); });
     root.addEventListener("keydown", onKey);
 
     function setFilter(f) {
@@ -115,6 +115,7 @@ var LamhaClipList = (() => {
       chips.forEach((c, i) => c.setAttribute("aria-pressed", String(["all", "pinned"][i] === f)));
       shown = PAGE;
       sel = 0;
+      toNewest = true;
       reload();
     }
 
@@ -130,7 +131,9 @@ var LamhaClipList = (() => {
           items = r.data.items;
           total = r.data.total;
           const again = keep ? items.findIndex(i => i.id === keep) : -1;
-          sel = again >= 0 && !query ? again : Math.min(sel, Math.max(0, items.length - 1));
+          // pinned clips sit on top, but a fresh list starts on the newest copy: Alt+Shift+V then Enter pastes what was just copied
+          if (toNewest && !query) { sel = Math.max(0, items.findIndex(i => !i.pinned)); toNewest = false; }
+          else sel = again >= 0 && !query ? again : Math.min(sel, Math.max(0, items.length - 1));
           render();
         } while (reloadAgain);
       })().finally(() => { loading = null; });

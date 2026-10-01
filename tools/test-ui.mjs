@@ -978,6 +978,32 @@ await step("clipboard tools: numbered rows with icons and hints, one lit row, nu
   assert.equal(back, 2, "the arrow goes back to the list");
 });
 
+await step("clipboard list: pinned clips sit on top, but the panel opens on the newest copy, so Enter pastes it", async () => {
+  const dom = new JSDOM(`<html dir="rtl"><body><section id="root"></section></body></html>`, { runScripts: "outside-only", url: "https://lamha.test/", pretendToBeVisual: true });
+  const w = dom.window;
+  const store = data => ({ get: async k => ({ ...(k && typeof k === "object" && !Array.isArray(k) ? k : {}), ...data }), set: async () => {} });
+  w.browser = { storage: { sync: store({ uiLang: "ar" }), local: store({}), onChanged: { addListener() {} } }, runtime: { getURL: p => p } };
+  const now = Date.now();
+  const clip = (id, pinned, ago) => ({ id, text: "clip " + id, pinned, sourceApp: "notepad.exe", lang: "en", createdAt: now - ago, lastCopiedAt: now - ago, copyCount: 1, useCount: 0 });
+  const items = [clip("p1", true, 9e5), clip("p2", true, 8e5), clip("n1", false, 1e3), clip("n2", false, 6e4)]; // the store's order
+  w.Element.prototype.scrollIntoView = () => {}; // jsdom has no layout
+  w.lamhaClipboard = { onChanged() {}, list: async ({ filter }) => { const its = filter === "pinned" ? items.filter(i => i.pinned) : items; return { ok: true, data: { items: its, total: its.length } }; } };
+  w.eval(["shared/i18n.js", "desktop/renderer/i18n-desktop.js", "shared/motion.js", "desktop/renderer/clipboard/clip-list.js"]
+    .map(f => readFileSync(new URL(f, EXT), "utf8")).join("\n;\n") + "\n;window.LamhaClipList = LamhaClipList;");
+  await sleep(30);
+  const pasted = [];
+  const list = w.LamhaClipList.create({ root: w.document.getElementById("root"), mode: "panel", onActivate: it => pasted.push(it.id) });
+  list.reset();
+  await sleep(50);
+  const rows = [...w.document.querySelectorAll(".lc-row")];
+  assert.deepEqual(rows.map(r => r.dataset.id), ["p1", "p2", "n1", "n2"]);
+  assert.equal(list.selected.id, "n1", "the newest copy is chosen, not the first pinned clip");
+  assert.equal(rows[2].getAttribute("aria-selected"), "true");
+  list.reset();
+  await sleep(50);
+  assert.equal(list.selected.id, "n1", "each opening starts there again");
+});
+
 /* ---- the Windows app's Wikipedia reader (desktop/renderer/wiki/): the cleaner and the page, with a fake library ---- */
 const PARIS_HTML = `<html><head><title>باريس</title><script>window.__pwned = 1</script></head><body>
 <div id="mw-content-text"><div class="mw-parser-output">

@@ -104,15 +104,31 @@ test("order: newest activity first; using a clip moves it up", () => {
   assert.equal(s.get(a).useCount, 1);
 });
 
+test("pinned clips are always on top (newest first among them), in the list and in search results", () => {
+  const s = newStore();
+  const old = s.ingest(cap("old note"));
+  s.ingest(cap("note two"));
+  const three = s.ingest(cap("note three"));
+  s.setPinned(old, true);
+  assert.deepEqual(texts(s), ["old note", "note three", "note two"]);
+  s.setPinned(three, true);
+  assert.deepEqual(texts(s), ["note three", "old note", "note two"]);
+  s.ingest(cap("note four"));
+  assert.deepEqual(texts(s), ["note three", "old note", "note four", "note two"], "a new copy goes under the pinned ones");
+  assert.deepEqual(s.list({ query: "note" }).items.map(i => i.text), ["note three", "old note", "note four", "note two"]);
+  s.setPinned(three, false);
+  assert.deepEqual(texts(s), ["old note", "note four", "note three", "note two"], "unpinned: back to its place by time");
+});
+
 test("cap: maxItems 5 keeps the newest 5 unpinned; a pinned clip survives", () => {
   const s = newStore({ maxItems: 5 });
   const pinned = s.ingest(cap("keep me"));
   s.setPinned(pinned, true);
   for (let i = 1; i <= 6; i++) s.ingest(cap("clip " + i));
-  assert.deepEqual(texts(s), ["clip 6", "clip 5", "clip 4", "clip 3", "clip 2", "keep me"]);
+  assert.deepEqual(texts(s), ["keep me", "clip 6", "clip 5", "clip 4", "clip 3", "clip 2"]);
   assert.equal(s.list({ filter: "pinned" }).total, 1);
   s.setMaxItems(2);
-  assert.deepEqual(texts(s), ["clip 6", "clip 5", "keep me"]);
+  assert.deepEqual(texts(s), ["keep me", "clip 6", "clip 5"]);
 });
 
 test(`pinning more than ${MAX_PINNED} fails with pin_limit`, () => {
@@ -179,7 +195,7 @@ test("list: previews carry 300 chars; filter pinned; limit / offset", () => {
   assert.equal(long.length, 1000);
   const page = s.list({ limit: 4, offset: 4 });
   assert.equal(page.total, 11);
-  assert.deepEqual(page.items.map(i => i.text), ["n5", "n4", "n3", "n2"]);
+  assert.deepEqual(page.items.map(i => i.text), ["n6", "n5", "n4", "n3"], "the pinned clip comes first, so the pages start after it");
 });
 
 test("search over 1,000 clips takes under 16 ms", () => {

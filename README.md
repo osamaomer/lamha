@@ -267,6 +267,7 @@ Settings → **ويكيبيديا دون إنترنت** downloads Wikipedia to y
 A history of what you copy in any program, with Lamha's language tools on every item. Search understands Arabic: it ignores diacritics and letter variants, so `مصرف` finds `مَصْرِف` and `احمد` finds `أحمد`.
 
 - **Off until you turn it on:** Settings → الحافظة, or the card <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> shows the first time.
+- **Pinned items stay at the top** of the list and of search results. The quick panel still opens on your newest copy, so <kbd>Enter</kbd> pastes what you just copied.
 - **The quick panel** (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) opens at the mouse:
 
   | Keys | Action |

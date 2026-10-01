@@ -26,6 +26,7 @@ function newId() {
 
 const activity = c => Math.max(c.lastCopiedAt, c.lastUsedAt);
 const byRecency = (a, b) => activity(b) - activity(a) || (a.id < b.id ? 1 : -1);
+const pinnedFirst = (a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
 const isWordStart = (s, i) => i === 0 || !/[\p{L}\p{N}]/u.test(s[i - 1]);
 
 class ClipError extends Error {
@@ -187,14 +188,14 @@ class ClipboardStore extends EventEmitter {
     return c.id;
   }
 
-  /** { items: previews (first 300 chars), total } — newest first, or best match first for a query. */
+  /** { items: previews (first 300 chars), total } — pinned clips always on top, then newest first, or best match first for a query. */
   list({ query = "", filter = "all", limit = 100, offset = 0, tl = "ar" } = {}) {
     let pool = [...this.clips.values()];
     if (filter === "pinned") pool = pool.filter(c => c.pinned);
     const q = this.normalize(query);
     let ordered;
     if (!q) {
-      ordered = pool.sort(byRecency);
+      ordered = pool.sort((a, b) => pinnedFirst(a, b) || byRecency(a, b));
     } else {
       const tokens = q.split(" ");
       const scored = [];
@@ -202,7 +203,7 @@ class ClipboardStore extends EventEmitter {
         const s = this.score(this.index.get(c.id), q, tokens);
         if (s >= 0) scored.push({ c, s });
       }
-      scored.sort((a, b) => b.s - a.s || byRecency(a.c, b.c));
+      scored.sort((a, b) => pinnedFirst(a.c, b.c) || b.s - a.s || byRecency(a.c, b.c));
       ordered = scored.map(x => x.c);
     }
     return { items: ordered.slice(offset, offset + limit).map(c => preview(c, tl)), total: ordered.length };
