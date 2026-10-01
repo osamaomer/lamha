@@ -4,18 +4,18 @@
 // eslint-disable-next-line no-unused-vars
 var LamhaChangelog = [
   { v: "1.9.9", date: "2026-10-02", notes: [
-    ["إعدادات أوضح ترتيبًا: تبدأ باللغات، ثم الاختصارات، ثم بطاقة البحث، ثم أدوات الكتابة والترجمة، وفي الآخر ما يُضبط مرة واحدة مثل العمل دون إنترنت والمظهر. ويعرض تطبيق ويندوز اختصاراته في قسم خاص بها.",
-      "Clearer Settings: languages come first, then the shortcuts, the lookup card, the writing tools and translation, and last what you set once, such as working without internet and the appearance. The Windows app shows its shortcuts in a section of their own."],
-    ["إصلاح الحركة «التلقائية»: في الإصدار 1.9.8 صارت خفيفة على كل الأجهزة، فلم تكن علامة لمحة تُظهر الكتابة أثناء عمل الذكاء الاصطناعي. عادت كاملة كما كانت.",
-      "Automatic animations fixed: in 1.9.8 they were Subtle on every computer, so the Lamha mark didn't show the writing while the AI worked. They're full again, as before."],
-    ["المعاني العربية في بطاقة البحث صارت تُفتح بالنقر: اضغط معنى مثل «تجربة» لترى معانيه الإنجليزية، كما تفعل مع المعاني الإنجليزية، وزر الرجوع يعيدك.",
-      "Arabic meanings in the lookup card now open when you click them: click one to see its English meanings, as with English meanings, and the back button takes you back."],
-    ["التبديل بين «العربية» و«الإنجليزية» في البطاقة صار سلسًا: تبقى البطاقة مكانها حتى يظهر الشرح الآخر، بدل أن تنكمش ثم تكبر.",
-      "Switching between Arabic and English in the card is smooth: the card stays in place until the other explanation appears, instead of shrinking and growing again."],
-    ["شرح الكلمات بلغتها: صارت الإنجليزية زرًا بين اللغات الأخرى بدل مفتاح منفصل، ولغة الترجمة تظهر مفعّلة دائمًا.",
-      "Explain words in their own language: English is now a button among the other languages instead of a separate switch, and your translation language always shows as on."],
-    ["علامة الكتابة تبدأ سطورها دون قفزة، وفي الواجهة الإنجليزية يبدأ السطر القصير من اليسار.",
-      "The writing mark starts its lines without a jump, and in the English interface the short line starts on the left."]
+    ["ترتيب أوضح للإعدادات: صارت الإعدادات مرتبة هكذا: اللغات أولًا، ثم الاختصارات، ثم بطاقة البحث، ثم أدوات الكتابة والترجمة. وفي الآخر الإعدادات التي تُضبط مرة واحدة، مثل العمل دون إنترنت والمظهر. كما يعرض تطبيق ويندوز اختصاراته في قسم خاص بها.",
+      "A clearer order in Settings: languages come first, then the shortcuts, the lookup card, and the writing tools and translation. Last come the settings you set once, such as working without internet and the appearance. The Windows app also shows its shortcuts in a section of their own."],
+    ["شرح الكلمات بلغتها: صارت الإنجليزية زرًّا بين أزرار اللغات الأخرى، بدلًا من مفتاح منفصل. كما تظهر لغة الترجمة مفعّلةً دائمًا.",
+      "Explain words in their own language: English is now a button among the other languages' buttons, instead of a separate switch. Your translation language also always shows as on."],
+    ["فتح المعاني العربية بالنقر: يمكنك الآن النقر على أي معنى عربي، مثل «تجربة»، لترى معانيه الإنجليزية، كما تفعل مع المعاني الإنجليزية. وزر الرجوع يعيدك إلى ما كنت فيه.",
+      "Open Arabic meanings with a click: you can now click any Arabic meaning to see its English meanings, as you do with English meanings. The back button takes you back to where you were."],
+    ["تبديل أسلس بين اللغتين: عند التبديل بين «العربية» و«الإنجليزية»، تبقى البطاقة في مكانها حتى يظهر الشرح الآخر، بدلًا من أن تنكمش ثم تكبر.",
+      "Smoother switching between the two languages: when you switch between Arabic and English, the card stays in place until the other explanation appears, instead of shrinking and then growing."],
+    ["إصلاح الحركة «التلقائية»: في الإصدار 1.9.8 صارت هذه الحركة خفيفة على كل الأجهزة، فلم تكن علامة لمحة تُظهر الكتابة أثناء عمل الذكاء الاصطناعي. والآن عادت كاملةً كما كانت.",
+      "Automatic animations fixed: in 1.9.8 they became Subtle on every computer, so the Lamha mark didn't show the writing while the AI worked. Now they're full again, as before."],
+    ["بداية أنعم للسطور: تبدأ علامة الكتابة سطورها دون قفزة. وفي الواجهة الإنجليزية يبدأ السطر القصير من اليسار.",
+      "A smoother start for the lines: the writing mark starts its lines without a jump. In the English interface, the short line starts on the left."]
   ]},
   { v: "1.9.8", date: "2026-10-01", notes: [
     ["استهلاك أقل للذاكرة في تطبيق ويندوز: صار التطبيق يستهلك نحو ١١٥ ميغابايت بعد الاستخدام بدلًا من ١٧٥ ميغابايت. كما أصبحت قراءة الجملة المحيطة بالكلمة في البرامج الأخرى أخفّ وأسرع.",
