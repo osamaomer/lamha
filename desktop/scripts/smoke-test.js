@@ -410,7 +410,8 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       for (let i = 1; i <= 6; i++) await capturesDuring(() => clipboard.writeText("lamha-cap-" + i), 400);
       const now = allTexts(store);
       await stores.local.set({ clipboardMaxItems: 500 });
-      assert(JSON.stringify(now) === JSON.stringify(["lamha-cap-6", "lamha-cap-5", "lamha-cap-4", "lamha-cap-3", "lamha-cap-2", "lamha rich"]), JSON.stringify(now));
+      // the pinned clip is always on top
+      assert(JSON.stringify(now) === JSON.stringify(["lamha rich", "lamha-cap-6", "lamha-cap-5", "lamha-cap-4", "lamha-cap-3", "lamha-cap-2"]), JSON.stringify(now));
       assert(store.get(pinnedId).pinned, "pin lost");
     });
 
@@ -1286,7 +1287,7 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
         await new Promise(r => setTimeout(r, 300));
         document.querySelector("#cbPane .cb-ignore").click();
         await new Promise(r => setTimeout(r, 400));
-        const dlg = document.querySelector(".lc-dialog");
+        const dlg = document.querySelector("dialog.dlg");
         const text = dlg ? dlg.textContent : "";
         if (dlg) dlg.querySelector("button").click(); // حذف
         await new Promise(r => setTimeout(r, 400));
@@ -1312,7 +1313,7 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
         const label = btn.textContent, disabledBefore = btn.disabled;
         btn.click();
         await new Promise(r => setTimeout(r, 300));
-        const dlg = document.querySelector(".lc-dialog");
+        const dlg = document.querySelector("dialog.dlg");
         const question = dlg ? dlg.textContent : "";
         if (dlg) dlg.querySelector("button").click(); // مسح
         await new Promise(r => setTimeout(r, 500));
@@ -1333,7 +1334,7 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
         const sw = document.getElementById("clipboardEnabled");
         sw.click(); // off → the question
         await new Promise(r => setTimeout(r, 300));
-        const dlg = document.querySelector(".lc-dialog");
+        const dlg = document.querySelector("dialog.dlg");
         const t = dlg ? dlg.textContent : "";
         if (dlg) dlg.querySelector("button").click(); // حذف
         await new Promise(r => setTimeout(r, 500));

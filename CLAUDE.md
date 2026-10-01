@@ -137,7 +137,7 @@ _Last updated: 2026-10-01. Latest release: **1.9.6**; **1.9.7** is bumped and co
 
 ### Open items
 
-**Before 1.9.7 goes out:** `cd desktop && npm run smoke` (ask the user: it takes over the mouse and keyboard); then push and tag `v1.9.7`. If the release day isn't 2026-10-01, change the date in `shared/changelog.js`.
+**Before 1.9.7 goes out:** ✅ `npm run smoke` passed 74/74 (2026-10-01); ✅ pushed. Left: tag `v1.9.7` (the release workflow publishes it). If the release day isn't 2026-10-01, change the date in `shared/changelog.js`.
 
 **Bugs and reports**
 - **The Windows Write button doesn't show in many apps** (user report after 1.9.3, parked). 1.9.6 limited the extension-button search to browsers, a likely cause but not confirmed. Next: a development build in Slack / Teams / WhatsApp, reading its `[write button]` log lines (is the double-click seen? what does `field` answer?). Known: Chromium apps enable accessibility at the first UI Automation question, so the first double-click may show nothing.
