@@ -137,14 +137,13 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-10-02. Latest release: **1.9.8** (tagged 2026-10-01); **1.9.9** is bumped and committed, waiting for the self-test and its tag. The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
+_Last updated: 2026-10-02. Latest release: **1.9.9** (tagged 2026-10-02). The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
 
 **At the end of a session:** update the open items below (add new ones, delete finished ones), and add a short dated entry to docs/history.md for substantial work, in the same commit. Keep this file small (under ~25 KB): details belong in history.md.
 
 ### Open items
 
 **Next work**
-- **1.9.9 is prepared, not tagged:** version bumped, changelog drafted (the user writes the Arabic: ask them to review it). Before the tag: `npm run smoke` (two of its checks changed: the Clipboard section's place, Updates last; and the app's shortcut list). Then `git push`, `git tag v1.9.9 && git push origin v1.9.9`, and update the line above.
 - Optimization, by size of gain (measured in docs/history.md → *After 1.9.7: optimization*): close the main window when it hides to the tray (~−20 MB; reopening reloads it); the app's deck writes (only past ~10,000 cards); Firefox's 163 KB per frame (a small loader).
 
 **Bugs and reports**
