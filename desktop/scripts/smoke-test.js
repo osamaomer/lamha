@@ -1244,17 +1244,17 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       }
     });
 
-    await check("Settings → التحديثات: what's new in this version, earlier versions folded under it", async () => {
+    await check("Settings → التحديثات: what's new in this version only (earlier ones are on GitHub)", async () => {
       const win = getOptionsWin();
       const r = await js(win, `({
         title: document.querySelector("#upNews .sub").textContent,
         notes: document.querySelectorAll("#upNews > .up-notes li").length,
-        older: document.querySelectorAll("#upNews .up-older section").length,
-        open: document.querySelector("#upNews .up-older").open
+        lists: document.querySelectorAll("#upNews .up-notes").length,
+        github: !!document.getElementById("upReleases")
       })`);
       assert(r.title.includes("ما الجديد في الإصدار " + app.getVersion()), "title: " + r.title);
-      assert(r.notes > 0 && r.older > 0 && r.open === false, JSON.stringify(r));
-      return `${r.notes} notes, ${r.older} earlier versions`;
+      assert(r.notes > 0 && r.lists === 1 && r.github, JSON.stringify(r));
+      return `${r.notes} notes`;
     });
 
     await check("expiry (mocked clock): old unpinned clips deleted, pinned kept; runs hourly and at startup", async () => {

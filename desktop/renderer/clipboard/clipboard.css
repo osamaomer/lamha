@@ -190,14 +190,12 @@ html[dir="ltr"] .ca-back svg { transform: scaleX(-1); } /* the arrow points back
 .cb-set-acts { display: flex; gap: 6px; flex-wrap: wrap; }
 #cbApps li span { font-family: var(--font-en); direction: ltr; }
 .cb-up-status { display: block; color: var(--muted); font-size: 12.5px; margin-top: 1px; }
-/* Updates → what's new in this version (shared/changelog.js), earlier versions folded under it */
+/* Updates → what's new in this version (shared/changelog.js); earlier versions are on GitHub */
 .up-news { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 2px; }
-.up-news .sub, .up-older h4 { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.up-news .sub { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .up-date { font-weight: 400; font-size: 12px; color: var(--faint); }
 .up-notes { margin: 0 0 10px; padding-inline-start: 20px; font-size: 13px; line-height: 1.7; }
 .up-notes li + li { margin-top: 4px; }
-.up-older { margin: 0 0 10px; }
-.up-older summary { cursor: pointer; color: var(--accent); font-size: 13px; font-weight: 600; padding: 4px 0; }
 
 /* Settings → Offline Wikipedia (wiki-settings.js): rows like the language packs' (.packs, options.css) */
 .wk-files li.empty { display: block; color: var(--faint); font-size: 13px; }
@@ -230,8 +228,6 @@ html[dir="ltr"] .ca-back svg { transform: scaleX(-1); } /* the arrow points back
 .wk-have.wk-pending { color: var(--muted); } /* in the list above, not on this PC yet */
 .wk-topics { margin: 4px 0 8px; }
 .wk-topics summary { cursor: pointer; color: var(--accent); font-size: 13px; font-weight: 600; padding: 6px 0; }
-.up-older summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-sm); }
-.up-older h4 { font-size: 13px; font-weight: 700; margin: 12px 0 4px; }
 
 /* motion: the Animations setting (shared/motion.js → data-motion on <html>; toasts and rows in shared/motion.css) */
 [data-motion="full"] .ca-spin, [data-motion="subtle"] .ca-spin { animation: ca-spin .7s linear infinite; }

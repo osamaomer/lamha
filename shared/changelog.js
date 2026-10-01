@@ -3,6 +3,10 @@
  * stops when the version being released has no entry here. Newest first; each note is [arabic, english]. */
 // eslint-disable-next-line no-unused-vars
 var LamhaChangelog = [
+  { v: "1.9.7", date: "2026-10-01", notes: [
+    ["تطبيق Windows: الإعدادات ← التحديثات تعرض ما الجديد في إصدارك فقط؛ الإصدارات السابقة على صفحة لمحة في GitHub.",
+      "Windows app: Settings → Updates shows what's new in your version only; earlier versions are on Lamha's GitHub page."]
+  ]},
   { v: "1.9.6", date: "2026-09-29", notes: [
     ["نسخة من بياناتك: احفظ بطاقات المراجعة وتقدّمك وسجل الكلمات وسجل أخطائك في ملف، واسترجعها على هذا الجهاز أو غيره دون أن يُحذف شيء (الإعدادات ← الخصوصية والسجل).",
       "A copy of your data: save your review cards and progress, word history and mistake journal in a file, and restore it on this device or another without losing anything (Settings → Privacy & history)."],

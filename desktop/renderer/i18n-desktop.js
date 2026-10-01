@@ -63,8 +63,6 @@
     "d.upDownloadBtn": ["تنزيل", "Download"],
     "d.upAllReleases": ["كل الإصدارات على GitHub", "All releases on GitHub"],
     "d.upNewIn": ["ما الجديد في الإصدار {v}", "What's new in version {v}"],
-    "d.upEarlier": ["الإصدارات السابقة", "Earlier versions"],
-    "d.upVersionN": ["الإصدار {v}", "Version {v}"],
     "d.upCurrent": [v => `الإصدار الحالي: ${v.v}` + (v.portable ? " (Portable)" : ""), v => `Current version: ${v.v}` + (v.portable ? " (Portable)" : "")],
     "d.upSChecking": ["جارٍ التحقق…", "Checking…"],
     "d.upSDownloading": [v => `يُنزَّل الإصدار ${v.v}…`, v => `Downloading version ${v.v}…`],

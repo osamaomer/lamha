@@ -159,8 +159,8 @@
       dev: () => L("d.upDevBody")
     };
     let releases = "", newsFor = "";
-    /** What's new in the installed version (shared/changelog.js, shipped with the app: it works offline), and the
-     *  versions before it, folded. A version missing from the changelog (a build from source) shows the newest. */
+    /** What's new in the installed version (shared/changelog.js, shipped with the app: it works offline). Earlier
+     *  versions are on GitHub (the link under it). A version missing from the changelog (a build from source) shows the newest. */
     const renderNews = current => {
       if (newsFor === current) return;
       newsFor = current;
@@ -169,15 +169,9 @@
       const at = Math.max(0, log.findIndex(e => e.v === current));
       const ui = LamhaI18n.lang() === "en" ? 1 : 0;
       const date = d => new Date(d + "T12:00:00").toLocaleDateString(ui ? "en-US" : "ar-EG", { year: "numeric", month: "long", day: "numeric" });
-      const notes = e => h("ul", { class: "up-notes" }, e.notes.map(n => h("li", null, n[ui])));
       upNews.replaceChildren(
         h("h3", { class: "sub" }, L("d.upNewIn", { v: log[at].v }), h("span", { class: "up-date" }, date(log[at].date))),
-        notes(log[at]),
-        log.length > at + 1 && h("details", { class: "up-older" },
-          h("summary", null, L("d.upEarlier")),
-          log.slice(at + 1).map(e => h("section", null,
-            h("h4", null, L("d.upVersionN", { v: e.v }), h("span", { class: "up-date" }, date(e.date))),
-            notes(e))))
+        h("ul", { class: "up-notes" }, log[at].notes.map(n => h("li", null, n[ui])))
       );
     };
     const renderUpdates = async () => {
