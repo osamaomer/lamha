@@ -3,6 +3,20 @@
  * stops when the version being released has no entry here. Newest first; each note is [arabic, english]. */
 // eslint-disable-next-line no-unused-vars
 var LamhaChangelog = [
+  { v: "1.9.9", date: "2026-10-02", notes: [
+    ["إعدادات أوضح ترتيبًا: تبدأ باللغات، ثم الاختصارات، ثم بطاقة البحث، ثم أدوات الكتابة والترجمة، وفي الآخر ما يُضبط مرة واحدة مثل العمل دون إنترنت والمظهر. ويعرض تطبيق ويندوز اختصاراته في قسم خاص بها.",
+      "Clearer Settings: languages come first, then the shortcuts, the lookup card, the writing tools and translation, and last what you set once, such as working without internet and the appearance. The Windows app shows its shortcuts in a section of their own."],
+    ["إصلاح الحركة «التلقائية»: في الإصدار 1.9.8 صارت خفيفة على كل الأجهزة، فلم تكن علامة لمحة تُظهر الكتابة أثناء عمل الذكاء الاصطناعي. عادت كاملة كما كانت.",
+      "Automatic animations fixed: in 1.9.8 they were Subtle on every computer, so the Lamha mark didn't show the writing while the AI worked. They're full again, as before."],
+    ["المعاني العربية في بطاقة البحث صارت تُفتح بالنقر: اضغط معنى مثل «تجربة» لترى معانيه الإنجليزية، كما تفعل مع المعاني الإنجليزية، وزر الرجوع يعيدك.",
+      "Arabic meanings in the lookup card now open when you click them: click one to see its English meanings, as with English meanings, and the back button takes you back."],
+    ["التبديل بين «العربية» و«الإنجليزية» في البطاقة صار سلسًا: تبقى البطاقة مكانها حتى يظهر الشرح الآخر، بدل أن تنكمش ثم تكبر.",
+      "Switching between Arabic and English in the card is smooth: the card stays in place until the other explanation appears, instead of shrinking and growing again."],
+    ["شرح الكلمات بلغتها: صارت الإنجليزية زرًا بين اللغات الأخرى بدل مفتاح منفصل، ولغة الترجمة تظهر مفعّلة دائمًا.",
+      "Explain words in their own language: English is now a button among the other languages instead of a separate switch, and your translation language always shows as on."],
+    ["علامة الكتابة تبدأ سطورها دون قفزة، وفي الواجهة الإنجليزية يبدأ السطر القصير من اليسار.",
+      "The writing mark starts its lines without a jump, and in the English interface the short line starts on the left."]
+  ]},
   { v: "1.9.8", date: "2026-10-01", notes: [
     ["استهلاك أقل للذاكرة في تطبيق ويندوز: صار التطبيق يستهلك نحو ١١٥ ميغابايت بعد الاستخدام بدلًا من ١٧٥ ميغابايت. كما أصبحت قراءة الجملة المحيطة بالكلمة في البرامج الأخرى أخفّ وأسرع.",
       "Less memory in the Windows app: the app now uses about 115 MB after use instead of 175 MB. Reading the sentence around a word in other programs is also lighter and quicker."],
