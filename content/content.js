@@ -519,7 +519,7 @@
       const mine = card;
       await send({ type: "setWordDict", lang, on: want }); // through the background: the desktop card can't write settings itself
       if (card !== mine) return; // closed (or another card opened) meanwhile: the choice is kept for the next one
-      load(stack[stack.length - 1], stack.length === 1 && cardInfo ? cardInfo.context : null);
+      load(stack[stack.length - 1], stack.length === 1 && cardInfo ? cardInfo.context : null, { keep: true });
     };
     const name = code => (code === "en" ? L("c.dictEn") : langName(code));
     return h("div", { class: "dsw", role: "group", "aria-label": L("c.dictSwitch"), title: L("c.dictSwitch") },
@@ -611,14 +611,18 @@
     stopWait = LamhaMotion.wait(card && card.querySelector(".brand .dot"), kind);
   }
 
-  /** `opts.engine: "ai"`: the "Better translation" link, which asks the AI whatever the translation setting is. */
+  /** `opts.engine: "ai"`: the "Better translation" link, which asks the AI whatever the translation setting is.
+   *  `opts.keep`: the card's language switch: the word's view stays, dimmed, until the other one comes (the placeholder
+   *  card in between made it shrink to its bar and grow back, uncovering what was behind it). */
   async function load(text, context = null, opts = {}) {
     const token = ++reqId;
-    renderSkeleton(text);
+    if (opts.keep && card && bodyEl) card.setAttribute("aria-busy", "true");
+    else renderSkeleton(text);
     waitFor(isWordish(text) ? "book" : "lens"); // pages turn for a word, a lens reads a sentence
     const res = await send({ type: "lookup", text, context, engine: opts.engine });
     if (token !== reqId || !card) return;
     stopWait();
+    card.removeAttribute("aria-busy");
     if (!res || !res.ok) { morph(() => renderError(text, res && res.error, opts)); return; }
     const pending = morph(() => render(res.data));
     if (res.data.milestone || res.data.goal) LamhaMotion.burst(card.querySelector(".milestone"), { layer: root });
@@ -831,11 +835,14 @@
     return wrap;
   }
 
+  /** A meaning opens as a word of its own, in either direction: an Arabic one shows its English meanings (Settings →
+   *  Arabic text into English, on by default; the offline dictionary has them), an English one its Arabic. Arabic
+   *  meanings used to be copied instead, so only half of the chips led anywhere. */
   function termChip(t, d) {
     return h("button", {
       class: "chip" + (dirOf(d.tl) === "ltr" ? " en" : ""),
-      title: t.back && t.back.length ? t.back.join(dirOf(d.src) === "rtl" ? "، " : ", ") : t.hint || L("common.copy"), // back-translations: source language
-      onclick: () => (dirOf(d.tl) === "ltr" ? navigate(t.word) : copyText(t.word))
+      title: t.back && t.back.length ? t.back.join(dirOf(d.src) === "rtl" ? "، " : ", ") : t.hint || L("c.lookUpX", { w: t.word }), // back-translations: source language
+      onclick: () => navigate(t.word)
     }, t.word);
   }
 

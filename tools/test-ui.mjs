@@ -364,7 +364,12 @@ await step("English: settings page translated, language menu shows the choice", 
   assert.equal(enOpt.document.documentElement.dir, "ltr");
   assert.equal(eo("uiLang").value, "en");
   const headings = [...enOpt.document.querySelectorAll(".panel h2")].map(text);
-  assert.ok(headings.includes("Dictionary") && headings.includes("Writing tools") && headings.includes("Appearance"), headings.join(" | "));
+  // in the order users need them: languages first, how Lamha is called, what a lookup shows, the AI, then the rest
+  assert.deepEqual(headings.slice(1, -1), ["Languages", "How it appears", "Keyboard shortcuts", "Excluded websites", "The lookup card", "Writing tools",
+    "Translation", "Word review", "My mistake journal", "Without internet", "Appearance", "Privacy & history", "Lamha for Windows"], headings.join(" | "));
+  assert.ok(eo("languages").contains(eo("uiLang")) && eo("languages").contains(eo("targetLang")) && eo("languages").contains(eo("reverseForArabic")), "the languages together");
+  assert.ok(["useContext", "explainLangs", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs"].every(id => eo("card").contains(eo(id))), "what a lookup shows, together");
+  assert.ok(eo("dictionary").contains(eo("packs")), "the dictionaries to download, with the offline choice");
   const tocLinks = [...enOpt.document.querySelectorAll("#toc a")];
   const journalLink = tocLinks.find(a => a.hash === "#journal");
   enOpt.requestAnimationFrame = f => setTimeout(f, 16); // jsdom has none; the highlight uses it once
@@ -519,6 +524,28 @@ async function cardPage(reply, localData, syncData = {}, url = "https://example.
 }
 const trResult = (engine, extra = {}) => ({ ok: true, data: { query: "It's a piece of cake.", type: "text", src: "en", tl: "ar", translation: engine === "ai" ? "الأمر في غاية السهولة." : "إنها قطعة من الكعكة.", dict: [], definitions: [], examples: [], source: engine === "ai" ? "ai" : "online", ai: engine === "ai" ? "Gemini" : undefined, ...extra } });
 
+await step("card: a meaning chip opens that word, Arabic meanings too (their English meanings), and back returns", async () => {
+  const words = {
+    experience: { query: "experience", type: "word", src: "en", tl: "ar", translation: "خِبْرَة", dict: [{ pos: "اسم", terms: [{ word: "خِبْرَة" }, { word: "تَجْرِبَة" }] }], definitions: [], examples: [], source: "local" },
+    "تَجْرِبَة": { query: "تَجْرِبَة", type: "word", src: "ar", tl: "en", translation: "experience", dict: [{ pos: "اسم", terms: [{ word: "experiment" }, { word: "test" }] }], definitions: [], examples: [], source: "local" },
+    experiment: { query: "experiment", type: "word", src: "en", tl: "ar", translation: "تَجْرِبَة", dict: [], definitions: [], examples: [], source: "local" }
+  };
+  const c = await cardPage(msg => (msg.type === "lookup" ? { ok: true, data: words[msg.text] } : { ok: true }), {});
+  c.show("experience");
+  await sleep(100);
+  const chip = name => [...c.root().querySelectorAll(".chips .chip")].find(b => text(b) === name);
+  chip("تَجْرِبَة").click(); // it only copied the word before
+  await sleep(100);
+  assert.equal(c.sent.filter(m => m.type === "lookup").pop().text, "تَجْرِبَة");
+  assert.match(text(c.root().querySelector(".hero")), /experience/, "its English meanings");
+  chip("experiment").click(); // and on, the other way
+  await sleep(100);
+  assert.equal(c.sent.filter(m => m.type === "lookup").pop().text, "experiment");
+  c.root().querySelector('.bar .icon-btn[aria-label="رجوع"]').click();
+  await sleep(100);
+  assert.equal(c.sent.filter(m => m.type === "lookup").pop().text, "تَجْرِبَة", "back to the Arabic word");
+});
+
 await step("card: Google's translation offers 'Better translation'; the AI's answer carries its badge", async () => {
   const c = await cardPage(msg => (msg.type === "lookup" ? trResult(msg.engine) : { ok: true }), { trProvider: "gemini", geminiKeySet: true });
   c.show("It's a piece of cake.");
@@ -603,7 +630,17 @@ await step("card: while it waits, the Lamha mark turns pages (a word), reads lin
   await until(() => c.root().querySelector(".chip.tool"), "the writing tools");
   c.root().querySelector(".chip.tool").click();
   await until(is("write"), "the AI: lines are written");
+  assert.equal(mark().querySelectorAll(".w")[2].getAttribute("d"), "M8 19.5h12", "Arabic: the short last line ends on the right");
   await until(() => !mark(), "gone with the answer");
+  const en = await cardPage(reply, { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" }, { uiLang: "en" });
+  en.write("cant make sunday meeting");
+  await until(() => en.root().querySelector(".chip.tool"), "the writing tools (English)");
+  en.root().querySelector(".chip.tool").click();
+  const enMark = () => en.root().querySelector(".brand .dot .wait.write");
+  await until(enMark, "the AI, in English");
+  assert.equal(enMark().querySelectorAll(".w")[2].getAttribute("d"), "M4 19.5h12", "English: it starts on the left, where it's written from");
+  // the 2nd and 3rd lines start late: until then they stay unwritten (they showed whole, then vanished and began)
+  for (const css of [src("content/styles.js"), src("shared/motion.css")]) assert.match(css, /\.wait \.w \{ animation: lm-write [^}]* backwards; \}/);
 
   const off = await cardPage(reply, {}, { motion: "off" });
   off.show("slow");
@@ -757,7 +794,8 @@ await step("card: العربية ⇄ English switch flips a word to the English�
   const c = await cardPage(msg => {
     if (msg.type === "setWordDict") { en = msg.lang === "en" && msg.on; return { ok: true }; }
     if (msg.type === "cardToggle") return true;
-    return msg.type === "lookup" ? word() : undefined;
+    if (msg.type !== "lookup") return undefined;
+    return en ? new Promise(done => setTimeout(() => done(word()), 80)) : word(); // the switched view takes a moment
   }, {});
   c.show("resilient");
   await sleep(100);
@@ -768,7 +806,12 @@ await step("card: العربية ⇄ English switch flips a word to the English�
   assert.equal(text(c.root().querySelector(".bar .brand")), "", "with the switch, the logo alone");
   assert.match(text(c.root().querySelector(".hero")), /مَرِن/);
   sw()[1].click();
+  await sleep(20);
+  assert.match(text(c.root().querySelector(".hero")), /مَرِن/, "while the English view comes, the Arabic one stays (the card doesn't shrink to its bar)");
+  assert.equal(c.root().querySelector(".card .sk"), null, "no placeholder in between");
+  assert.equal(c.root().querySelector(".card").getAttribute("aria-busy"), "true", "dimmed while it waits");
   await sleep(150);
+  assert.equal(c.root().querySelector(".card").getAttribute("aria-busy"), null);
   assert.deepEqual(c.sent.filter(m => m.type === "setWordDict").map(m => [m.lang, m.on]), [["en", true]], "remembered through the background, for English words");
   assert.match(text(c.root().querySelector(".hero")), /elastic; rebounds readily.*clean bouncy hair/, "the definition that fits, with its example");
   assert.match(text(c.root().querySelector(".hero .ctx-label")), /^صفة · في هذا السياق$/, "part of speech, then 'in this context'");
@@ -861,21 +904,29 @@ await step("Settings → Lamha for Windows (Firefox on a computer): Connect asks
   assert.deepEqual([text($o("appState")), text($o("appBtn"))], ["غير متصل.", "اتصال"]);
 });
 
-await step("Settings: 'Explain words in their own language' turns languages on and off, and follows the card's switch", async () => {
+await step("Settings: 'Explain words in their own language' has English among its languages, the translation language always on, and follows the card's switch", async () => {
   const o = await openPage("options/options.html", ["shared/theme.js", "shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "options/i18n-options.js", "options/options.js"]);
   const btn = name => [...o.document.querySelectorAll("#explainLangs button")].find(b => text(b) === name);
-  assert.deepEqual([...o.document.querySelectorAll("#explainLangs button")].map(text), ["العربية", "الفرنسية", "التركية", "الأردية", "الفارسية", "الإسبانية", "الألمانية"]);
+  assert.deepEqual([...o.document.querySelectorAll("#explainLangs button")].map(text), ["الإنجليزية", "العربية", "الفرنسية", "التركية", "الأردية", "الفارسية", "الإسبانية", "الألمانية"]);
+  assert.equal(o.document.getElementById("enDict"), null, "no separate English–English switch");
+  assert.ok(btn("العربية").disabled && btn("العربية").getAttribute("aria-pressed") === "true", "Arabic, the translation language: always explained");
+  btn("الإنجليزية").click(); // English keeps its own setting, which older versions read
+  await sleep(50);
+  assert.equal(sync.data.enDict, true);
+  assert.equal(btn("الإنجليزية").getAttribute("aria-pressed"), "true");
   btn("الفرنسية").click();
   await sleep(50);
   assert.deepEqual(sync.data.explainLangs, ["fr"]);
-  assert.equal(btn("الفرنسية").getAttribute("aria-pressed"), "true");
-  await bgHandler({ type: "setWordDict", lang: "ar", on: true }, {}); // the card's switch, with Settings open
+  await bgHandler({ type: "setWordDict", lang: "en", on: false }, {}); // the card's switch, with Settings open
+  await bgHandler({ type: "setWordDict", lang: "de", on: true }, {});
   await sleep(50);
-  assert.equal(btn("العربية").getAttribute("aria-pressed"), "true");
-  btn("الفرنسية").click();
+  assert.equal(btn("الإنجليزية").getAttribute("aria-pressed"), "false");
+  assert.equal(btn("الألمانية").getAttribute("aria-pressed"), "true");
+  assert.deepEqual(sync.data.explainLangs, ["fr", "de"]);
+  await sync.set({ targetLang: "en" }); // translating into English: now English is the one always explained
   await sleep(50);
-  assert.deepEqual(sync.data.explainLangs, ["ar"]);
-  await sync.set({ explainLangs: [] });
+  assert.ok(btn("الإنجليزية").disabled && !btn("العربية").disabled);
+  await sync.set({ explainLangs: [], enDict: false, targetLang: "ar" });
 });
 
 await step("Settings: dictionaries to download — sizes, a download with its progress, a failure explained, Remove", async () => {

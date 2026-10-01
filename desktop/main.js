@@ -197,9 +197,9 @@ function applyThemeSetting() {
 }
 
 /**
- * What "Automatic" animations means on this PC (shared/motion.js reads it): "subtle" without graphics acceleration
- * or on a weak machine (4 GB of memory or less, 2 cores or fewer), "full" otherwise. Windows' own "Animation effects"
- * switch is seen by the pages directly (prefers-reduced-motion) and turns animations off.
+ * What "Automatic" animations means on this PC (rules.motionHint: a weak machine, or a graphics card asked for that
+ * doesn't work, gets "subtle"). Windows' own "Animation effects" switch is seen by the pages directly
+ * (prefers-reduced-motion) and turns animations off.
  * Checked a few seconds after startup: until the GPU process is up, Electron reports every PC as software-only.
  * Until then the hint saved last time applies.
  */
@@ -207,9 +207,7 @@ function updateMotionHint() {
   let hint = "full";
   try {
     const gpu = app.getGPUFeatureStatus() || {};
-    const software = !/^enabled/.test(String(gpu.gpu_compositing || "enabled"));
-    const weak = os.totalmem() <= 4.5 * 1024 ** 3 || os.cpus().length <= 2;
-    if (software || weak) hint = "subtle";
+    hint = rules.motionHint({ gpuWanted: GPU, gpuCompositing: gpu.gpu_compositing, totalMem: os.totalmem(), cores: os.cpus().length });
   } catch (_) { /* keep full */ }
   if (stores.local.data.motionHint !== hint) stores.local.set({ motionHint: hint });
   return hint;
@@ -252,7 +250,8 @@ ipcMain.handle("lamha:call", async (e, method, args) => {
     case "storage.remove": return stores[args[0]].remove(args[1]);
     case "openOptions": openOptions(args[0] || ""); return true;
     case "openUrl": openUrl(args[0]); return true;
-    case "commands": return [];
+    case "commands": // Settings → Shortcuts shows the app's own, in the browser's shape (options.js)
+      return Object.entries(HOTKEYS).map(([shortcut, kind]) => ({ name: { lookup: "lookup-selection", write: "writing-tools", clipboard: "clipboard-panel" }[kind], shortcut }));
     case "update.state": return { ...updater.state, current: app.getVersion(), packaged: app.isPackaged, portable: !!process.env.PORTABLE_EXECUTABLE_DIR, releases: updater.releasesUrl };
     case "update.check": await updater.check(true); return { ...updater.state };
     case "update.restart": updater.restart(); return true;

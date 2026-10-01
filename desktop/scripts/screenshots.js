@@ -237,7 +237,7 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       ow.setPosition(600, 40);
       ow.showInactive();
       await wait(1200);
-      for (const id of [null, "dictionary", "wikiPanel", "translation", "ai", "review", "journal", "appearance", "privacy", "updatesPanel", "clipPanel", "cbAppForm"]) {
+      for (const id of [null, "languages", "keysPanel", "card", "ai", "translation", "review", "journal", "clipPanel", "cbAppForm", "dictionary", "wikiPanel", "appearance", "privacy", "updatesPanel"]) {
         const found = await js(ow, id ? `(() => { const s = document.getElementById("${id}"); if (!s || s.offsetParent === null) return false; s.scrollIntoView({ block: "start" }); return true; })()` : "scrollTo(0, 0); true");
         if (!found) continue;
         await wait(700);

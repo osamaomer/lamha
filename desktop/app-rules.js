@@ -69,4 +69,18 @@ function panelPlacement({ cursor, workArea: wa, w, h }) {
   };
 }
 
-module.exports = { SECRET_KEYS, PAGE_DATA, withoutSecrets, changesFor, OUTSIDE_TEXT_MESSAGES, allowedFromOutsideText, wikiSummaryArgs, optionsTarget, cardPlacement, panelPlacement };
+/**
+ * What "Automatic" animations means on this PC (shared/motion.js reads it as storage.local motionHint): "subtle" on a
+ * weak machine (4 GB of memory or less, 2 cores or fewer), or when Lamha asked for the graphics card (`gpuWanted`) and
+ * drawing still isn't accelerated (`gpuCompositing` from app.getGPUFeatureStatus(): its graphics don't work); "full"
+ * otherwise. Drawing without the graphics card because the user left it off (the default since 1.9.8) says nothing
+ * about the PC: measured, the marks and transitions still run at the screen's full rate. 1.9.8 counted it, and every
+ * PC on Automatic got Subtle animations.
+ */
+function motionHint({ gpuWanted, gpuCompositing = "enabled", totalMem, cores }) {
+  const weak = totalMem <= 4.5 * 1024 ** 3 || cores <= 2;
+  const broken = gpuWanted && !/^enabled/.test(String(gpuCompositing));
+  return weak || broken ? "subtle" : "full";
+}
+
+module.exports = { SECRET_KEYS, PAGE_DATA, withoutSecrets, changesFor, OUTSIDE_TEXT_MESSAGES, allowedFromOutsideText, wikiSummaryArgs, optionsTarget, cardPlacement, panelPlacement, motionHint };

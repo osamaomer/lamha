@@ -48,6 +48,15 @@ test("Firefox's Wikipedia request: at most 6 short titles and a language code, o
   assert.deepEqual(a.titles, ["a", "b", "c", "d", "e", "f"]);
 });
 
+test("Automatic animations: Subtle on a weak PC or a graphics card that doesn't work, not because the user left the card off", () => {
+  const pc = { totalMem: 16 * 1024 ** 3, cores: 16 };
+  assert.equal(rules.motionHint({ ...pc, gpuWanted: false, gpuCompositing: "disabled_software" }), "full", "off by choice (the default): full");
+  assert.equal(rules.motionHint({ ...pc, gpuWanted: true, gpuCompositing: "enabled" }), "full");
+  assert.equal(rules.motionHint({ ...pc, gpuWanted: true, gpuCompositing: "disabled_software" }), "subtle", "asked for, not working");
+  assert.equal(rules.motionHint({ totalMem: 4 * 1024 ** 3, cores: 8, gpuWanted: false }), "subtle", "4 GB");
+  assert.equal(rules.motionHint({ totalMem: 8 * 1024 ** 3, cores: 2, gpuWanted: false }), "subtle", "2 cores");
+});
+
 test("Settings' address: section and welcome", () => {
   assert.deepEqual(rules.optionsTarget("#journal"), { search: "", hash: "journal" });
   assert.deepEqual(rules.optionsTarget("?welcome=1"), { search: "welcome=1", hash: "ai" });

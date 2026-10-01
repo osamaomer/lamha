@@ -503,6 +503,7 @@ div.pos { display: block; margin-bottom: 6px; }
 /* the Lamha mark while the card waits (shared/motion.js wait()): pages turn for a word, a lens reads a sentence,
    lines are written for the AI. Arabic books turn their pages left → right; the English interface mirrors it */
 .brand .dot { position: relative; overflow: hidden; }
+.card[aria-busy="true"] > .body { opacity: .5; pointer-events: none; } /* the language switch: the old view waits for the new one */
 .dot .wait { position: absolute; inset: 0; margin: auto; width: 13px; height: 13px; overflow: visible; }
 .dot .wait * { transform-box: view-box; }
 .dot.waiting > svg:not(.wait) { opacity: 0; }
@@ -522,7 +523,7 @@ div.pos { display: block; margin-bottom: 6px; }
 .root.en[data-motion="full"] .wait .pg { animation-name: lm-turn-en; }
 .root[data-motion="full"] .wait .glass { animation: lm-scan 2.1s cubic-bezier(.45,.05,.35,1) infinite; }
 .root.en[data-motion="full"] .wait .glass { animation-name: lm-scan-en; }
-.root[data-motion="full"] .wait .w { animation: lm-write 1.8s cubic-bezier(.3,.6,.3,1) infinite; }
+.root[data-motion="full"] .wait .w { animation: lm-write 1.8s cubic-bezier(.3,.6,.3,1) infinite backwards; } /* backwards: the 2nd and 3rd lines stay unwritten during their delay */
 .root[data-motion="full"] .wait .w:nth-of-type(2) { animation-delay: .3s; }
 .root[data-motion="full"] .wait .w:nth-of-type(3) { animation-delay: .6s; }
 .root[data-motion="full"] .wait .spark { animation: lm-twinkle 1.8s ease-in-out infinite; }

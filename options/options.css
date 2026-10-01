@@ -43,6 +43,7 @@ label.opt { cursor: pointer; }
 .opt b { display: block; font-weight: 600; }
 .opt small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 1px; }
 /* Dictionary → Explain words in their own language: one toggle per language, looking like the section bar's links */
+html:not(.desktop) .app-only { display: none !important; } /* rows only the Windows app has (it adds .desktop to <html>) */
 .lang-toggles { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .lang-toggles button {
   font: inherit; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border: 0; border-radius: 999px; cursor: pointer;
@@ -51,6 +52,7 @@ label.opt { cursor: pointer; }
 .lang-toggles button:hover { color: var(--fg); }
 .lang-toggles button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .lang-toggles button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lang-toggles button:disabled { cursor: default; opacity: .7; } /* the translation language: always on */
 /* Dictionary → Dictionaries to download: a row per language, its button on the far side (all the same width) */
 .opt > .grow { flex: 1; min-width: 0; }
 /* two buttons on a row's far side (Privacy → A copy of my data, Report a problem): side by side, the row's height */

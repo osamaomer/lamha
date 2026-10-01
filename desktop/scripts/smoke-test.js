@@ -1028,7 +1028,7 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
         cards: document.getElementById("clipboardSkipCards").checked,
         apps: [...document.querySelectorAll("#cbApps li span")].map(s => s.textContent),
         enc: document.getElementById("cbEnc").textContent,
-        order: [...document.querySelectorAll(".panel")].findIndex(p => p.id === "clipPanel") < [...document.querySelectorAll(".panel")].findIndex(p => p.id === "review")
+        order: (ids => ids.indexOf("journal") < ids.indexOf("clipPanel") && ids.indexOf("clipPanel") < ids.indexOf("dictionary"))([...document.querySelectorAll(".panel")].map(p => p.id)) // after the learning sections, before "Without internet"
       })`);
       assert(r.panel && r.order, "section missing or misplaced");
       assert(r.enabled && r.max === "500" && r.expiry === "30" && r.cards, JSON.stringify(r));

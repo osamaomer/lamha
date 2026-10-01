@@ -5,7 +5,7 @@ const DEFAULTS = {
   showInInputs: false, showWikipedia: true, translateDefinitions: true, autoSpeak: false,
   theme: "auto", motion: "auto", saveHistory: true, enDict: false, explainLangs: [], aiModel: "claude-opus-5", aiInInputs: true, writeOnDblClick: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, dailyGoal: 10, disabledSites: []
 };
-const BOOLS = ["enDict", "useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "writeOnDblClick", "saveMistakes", "cardsAuto"];
+const BOOLS = ["useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "writeOnDblClick", "saveMistakes", "cardsAuto"];
 const { t, num } = LamhaI18n;
 /** Our own question before deleting something (shared/dialog.js), not the system's confirm() box. */
 const sure = (question, yes) => LamhaDialog.confirmDelete(question, t(yes), t("o.cancel"));
@@ -67,7 +67,8 @@ async function init() {
     $(k).addEventListener("change", e => save({ [k]: e.target.value }));
   });
 
-  renderExplainLangs(s.explainLangs);
+  Object.assign(explain, { list: s.explainLangs, en: s.enDict, tl: s.targetLang });
+  renderExplainLangs();
   renderPacks();
   renderSites(s.disabledSites);
   renderHistCount();
@@ -103,6 +104,7 @@ async function init() {
   $("k-lookup").replaceChildren(...kbd(get("lookup-selection")));
   $("k-page").replaceChildren(...kbd(get("translate-page")));
   $("k-write").replaceChildren(...kbd(get("writing-tools")));
+  $("k-clip").replaceChildren(...kbd(get("clipboard-panel"))); // the Windows app only (.app-only)
   if (browser.commands.openShortcutSettings) {
     $("shortcuts").hidden = false;
     $("shortcuts").addEventListener("click", () => browser.commands.openShortcutSettings());
@@ -626,20 +628,27 @@ async function renderHistCount() {
   $("histCount").textContent = history.length ? t("o.histCount", { n: history.length }) : t("o.histEmpty");
 }
 
-/** Settings → Dictionary: the languages whose words are explained in that language (English has its own switch above).
- *  The card's switch changes the same list, so it's redrawn when that happens with Settings open. */
-const EXPLAIN_LANGS = ["ar", "fr", "tr", "ur", "fa", "es", "de"];
-function renderExplainLangs(list) {
-  const on = new Set([].concat(list || []));
+/** Settings → Dictionary: the languages whose words are explained in that language, English among them. English keeps
+ *  its own setting (enDict: older versions on the user's other devices read it), the others are explainLangs. The
+ *  translation language is always explained (background.js explains()), so its chip is on and can't be turned off.
+ *  The card's switch changes the same settings, so the chips are redrawn when that happens with Settings open. */
+const EXPLAIN_LANGS = ["en", "ar", "fr", "tr", "ur", "fa", "es", "de"];
+const explain = { list: [], en: false, tl: "ar" };
+function renderExplainLangs() {
+  const on = new Set([].concat(explain.list || []));
+  if (explain.en) on.add("en");
   $("explainLangs").replaceChildren(...EXPLAIN_LANGS.map(code => {
     const b = document.createElement("button");
     b.type = "button";
     b.textContent = t("lang." + code);
-    b.setAttribute("aria-pressed", String(on.has(code)));
+    const always = code === explain.tl;
+    b.setAttribute("aria-pressed", String(always || on.has(code)));
+    if (always) { b.disabled = true; b.title = t("o.explainAlways"); return b; }
     b.addEventListener("click", async () => {
+      if (code === "en") { await save({ enDict: !on.has("en") }); return; } // redrawn by the change listener below
       const { explainLangs = [] } = await browser.storage.sync.get({ explainLangs: [] });
       const rest = [].concat(explainLangs).filter(l => l !== code);
-      await save({ explainLangs: on.has(code) ? rest : [...rest, code] }); // redrawn by the change listener below
+      await save({ explainLangs: on.has(code) ? rest : [...rest, code] });
     });
     return b;
   }));
@@ -688,8 +697,12 @@ async function renderPacks() {
 }
 
 browser.storage.onChanged.addListener((changes, area) => {
-  if (area === "sync" && changes.explainLangs) renderExplainLangs(changes.explainLangs.newValue);
-  if (area === "sync" && changes.enDict) $("enDict").checked = !!changes.enDict.newValue;
+  if (area === "sync" && (changes.explainLangs || changes.enDict || changes.targetLang)) {
+    if (changes.explainLangs) explain.list = changes.explainLangs.newValue || [];
+    if (changes.enDict) explain.en = !!changes.enDict.newValue;
+    if (changes.targetLang) explain.tl = changes.targetLang.newValue;
+    renderExplainLangs();
+  }
   if (area === "sync" && changes.disabledSites) renderSites(changes.disabledSites.newValue || []);
   if (area === "local" && changes.mistakes) renderJournal();
   if (area === "local" && changes.cards) renderReviewStats();

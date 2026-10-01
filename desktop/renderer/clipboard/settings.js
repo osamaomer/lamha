@@ -49,7 +49,7 @@
         h("button", { class: "btn small danger", type: "button", id: "cbClearUnpinned" }, LamhaClipList.icon("trash"), L("d.clearUnpinned")),
         h("button", { class: "btn small danger", type: "button", id: "cbClearAll" }, LamhaClipList.icon("trash"), L("d.sClearAll"))))
   );
-  document.getElementById("review").before(panel);
+  document.getElementById("journal").after(panel); // after the learning sections, before "Without internet"
   const $ = id => document.getElementById(id);
 
   async function load() {
@@ -168,7 +168,7 @@
       upNews,
       h("button", { class: "link", type: "button", id: "upReleases" }, L("d.upAllReleases"))
     );
-    (document.getElementById("privacy") || panel).after(upPanel); // the last section, easy to find (only the credits follow)
+    (document.getElementById("appPanel") || document.getElementById("privacy") || panel).after(upPanel); // the last section, easy to find (only the credits follow); appPanel is Firefox's, hidden here
     const STATUS = {
       checking: () => L("d.upSChecking"),
       downloading: st => L("d.upSDownloading", { v: st.version }),
@@ -224,7 +224,7 @@
       h("label", { class: "opt" },
         h("div", null, h("b", null, L("d.fxLink")), h("small", null, L("d.fxLinkHint")), fxState),
         sw("firefoxLink", L("d.fxLink"))));
-    (document.getElementById("privacy") || panel).after(fxPanel); // Updates stays the last section
+    (document.getElementById("appPanel") || document.getElementById("privacy") || panel).after(fxPanel); // Updates stays the last section
     const renderFx = async () => {
       const [{ firefoxLink }, st] = await Promise.all([local.get({ firefoxLink: true }), lamhaFirefox.status()]);
       $("firefoxLink").checked = firefoxLink !== false;

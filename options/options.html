@@ -39,6 +39,35 @@
       </div>
     </section>
 
+    <section class="panel" id="languages">
+      <h2 data-i18n="o.languages">اللغات</h2>
+      <div class="opt">
+        <div><b data-i18n="o.uiLang">لغة الواجهة</b><small data-i18n="o.uiLangHint">لغة القوائم والأزرار والشروح في لمحة</small></div>
+        <select id="uiLang" data-i18n-attr="aria-label:o.uiLang" aria-label="لغة الواجهة">
+          <option value="auto" data-i18n="o.uiLangAuto">تلقائي (حسب النظام)</option>
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div class="opt">
+        <div><b data-i18n="o.targetLang">لغة الترجمة</b><small data-i18n="o.targetLangHint">اللغة التي تُترجم إليها النصوص</small></div>
+        <select id="targetLang">
+          <option value="ar" data-i18n="lang.ar">العربية</option>
+          <option value="en" data-i18n="lang.en">الإنجليزية</option>
+          <option value="fr" data-i18n="lang.fr">الفرنسية</option>
+          <option value="tr" data-i18n="lang.tr">التركية</option>
+          <option value="ur" data-i18n="lang.ur">الأردية</option>
+          <option value="fa" data-i18n="lang.fa">الفارسية</option>
+          <option value="es" data-i18n="lang.es">الإسبانية</option>
+          <option value="de" data-i18n="lang.de">الألمانية</option>
+        </select>
+      </div>
+      <label class="opt">
+        <div><b data-i18n="o.reverse">ترجمة النص العربي إلى الإنجليزية</b><small data-i18n="o.reverseHint">عند تحديد نص عربي تُعرض ترجمته الإنجليزية</small></div>
+        <span class="switch"><input type="checkbox" id="reverseForArabic"><span class="track"><span class="thumb"></span></span></span>
+      </label>
+    </section>
+
     <section class="panel" id="triggerPanel">
       <h2 data-i18n="o.trigger">طريقة الظهور</h2>
       <div class="choices" role="radiogroup" aria-label="طريقة الظهور" data-i18n-attr="aria-label:o.trigger">
@@ -70,121 +99,33 @@
       <p class="tip" data-i18n-html="o.altTip">نصيحة: في وضع «الزر العائم» يمكنك التحديد مع الضغط على <kbd>Alt</kbd> لفتح الترجمة مباشرة.</p>
     </section>
 
-    <section class="panel" id="dictionary">
-      <h2 data-i18n="o.dictionary">القاموس</h2>
-      <div class="choices" role="radiogroup" aria-label="مصدر القاموس" data-i18n-attr="aria-label:o.dictSource">
-        <label class="choice">
-          <input type="radio" name="dictSource" value="local">
-          <span class="c">
-            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><small>+</small><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span></span>
-            <b data-i18n="o.localFirst">المحلي أولًا</b>
-            <small data-i18n="o.localFirstHint">القاموس المدمج للكلمات، والإنترنت فقط لما ليس فيه (مستحسن)</small>
-          </span>
-        </label>
-        <label class="choice">
-          <input type="radio" name="dictSource" value="offline">
-          <span class="c">
-            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span></span>
-            <b data-i18n="o.localOnly">المحلي فقط</b>
-            <small data-i18n="o.localOnlyHint">بدون أي اتصال بالإنترنت للكلمات. ترجمة الجمل لا تعمل.</small>
-          </span>
-        </label>
-        <label class="choice">
-          <input type="radio" name="dictSource" value="online">
-          <span class="c">
-            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span></span>
-            <b data-i18n="o.onlineFirst">الإنترنت أولًا</b>
-            <small data-i18n="o.onlineFirstHint">نتائج Google، والقاموس المحلي عند انقطاع الاتصال</small>
-          </span>
-        </label>
-      </div>
+    <section class="panel" id="keysPanel">
+      <h2 data-i18n="o.keys">اختصارات لوحة المفاتيح</h2>
+      <div class="opt"><div><b data-i18n="o.keyLookup">بحث / ترجمة النص المحدد</b></div><span id="k-lookup" class="keys"></span></div>
+      <div class="opt ext-only"><div><b data-i18n="o.keyPage">ترجمة الصفحة كاملة</b></div><span id="k-page" class="keys"></span></div>
+      <div class="opt"><div><b data-i18n="o.keyWrite">أدوات الكتابة (للنص المحدد أو لمربع النص كله)</b></div><span id="k-write" class="keys"></span></div>
+      <div class="opt app-only"><div><b data-i18n="o.keyClipboard">سجل الحافظة</b></div><span id="k-clip" class="keys"></span></div>
+      <div class="opt"><div><b data-i18n="o.keyClose">إغلاق البطاقة</b></div><span class="keys"><kbd>Esc</kbd></span></div>
+      <button id="shortcuts" class="link" hidden data-i18n="o.customize">تخصيص الاختصارات</button>
+    </section>
+
+    <section class="panel" id="sitesPanel">
+      <h2 data-i18n="o.sites">المواقع المستثناة</h2>
+      <p class="muted" data-i18n="o.sitesIntro">لن يظهر لمحة على هذه المواقع. يمكنك إضافة موقع من نافذة الإضافة في شريط الأدوات.</p>
+      <ul id="sites" class="sites"></ul>
+    </section>
+
+    <section class="panel" id="card">
+      <h2 data-i18n="o.cardSection">بطاقة البحث</h2>
       <label class="opt">
-        <div><b data-i18n="o.enDict">قاموس إنجليزي–إنجليزي</b><small data-i18n="o.enDictHint">معاني الكلمات الإنجليزية بتعريفات إنجليزية وأمثلة ومرادفات بدل الترجمة، ويعمل دون إنترنت. يعمل تلقائيًا إن كانت الإنجليزية لغة الترجمة، وبدّله من زر «العربية | إنجليزي» في بطاقة البحث أيضًا.</small></div>
-        <span class="switch"><input type="checkbox" id="enDict"><span class="track"><span class="thumb"></span></span></span>
+        <div><b data-i18n="o.context">فهم الكلمة من سياق الجملة</b><small data-i18n="o.contextHint">تُرسَل الجملة المحيطة بالكلمة (وليس الصفحة) لاختيار المعنى المناسب. أوقفه لإرسال الكلمة فقط.</small></div>
+        <span class="switch"><input type="checkbox" id="useContext"><span class="track"><span class="thumb"></span></span></span>
       </label>
       <div class="opt">
         <div><b data-i18n="o.explainLangs">شرح الكلمات بلغتها</b><small data-i18n="o.explainLangsHint">كلمات اللغات التي تختارها هنا تُشرح بلغتها (العربية بالعربية، والفرنسية بالفرنسية…) بدل ترجمتها، والترجمة تحت الشرح. الشرح من تعريفات Google أو من الذكاء الاصطناعي، ودون إنترنت مع Ollama. كلمات لغة الترجمة نفسها تُشرح دائمًا.</small>
           <div class="lang-toggles" id="explainLangs" role="group" aria-label="شرح الكلمات بلغتها" data-i18n-attr="aria-label:o.explainLangs"></div>
         </div>
       </div>
-      <div class="opt">
-        <div class="grow"><b data-i18n="o.packs">قواميس للتنزيل</b><small data-i18n="o.packsHint">لكل لغة قاموس بلغتها (فرنسي–فرنسي…) يُنزَّل مرة واحدة ويُحفظ على هذا الجهاز، فتُشرح كلماتها دون إنترنت ودون ذكاء اصطناعي. من ويكاموس (رخصة CC BY-SA).</small>
-          <ul class="packs" id="packs"></ul>
-        </div>
-      </div>
-      <p class="tip" id="dictInfo" data-i18n="o.dictInfo">القاموس المحلي مدمج في الإضافة ويعمل دون إنترنت.</p>
-    </section>
-
-    <section class="panel" id="translation">
-      <h2 data-i18n="o.translation">الترجمة</h2>
-      <p class="muted" data-i18n="o.trIntro">من يترجم الجمل والفقرات: Google سريع ويحتاج إلى الإنترنت، والذكاء الاصطناعي أدق في التعابير والعامية وأبطأ، ومع Ollama يعمل دون إنترنت.</p>
-      <div class="choices" role="radiogroup" aria-label="خدمة الترجمة" data-i18n-attr="aria-label:o.trService">
-        <label class="choice">
-          <input type="radio" name="trService" value="auto">
-          <span class="c">
-            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><small>+</small><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg></span></span>
-            <b data-i18n="o.trAuto">تلقائي</b>
-            <small data-i18n="o.trAutoHint">Google، والذكاء الاصطناعي حين لا يتوفر الإنترنت أو يتعذّر Google (مستحسن)</small>
-          </span>
-        </label>
-        <label class="choice">
-          <input type="radio" name="trService" value="google">
-          <span class="c">
-            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span></span>
-            <b data-i18n="o.trGoogle">Google فقط</b>
-            <small data-i18n="o.trGoogleHint">سريع ومجاني، ولا يعمل دون إنترنت</small>
-          </span>
-        </label>
-        <label class="choice">
-          <input type="radio" name="trService" value="ai">
-          <span class="c">
-            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg></span></span>
-            <b data-i18n="o.trAi">الذكاء الاصطناعي</b>
-            <small data-i18n="o.trAiHint">ترجمة أكثر طبيعية للجمل، وأبطأ. Google عند تعذّره</small>
-          </span>
-        </label>
-      </div>
-      <div id="trAiBox">
-        <div class="opt">
-          <label for="trProvider"><b data-i18n="o.trProvider">مَن يترجم</b><small data-i18n="o.trProviderHint">يمكن أن يختلف عن أدوات الكتابة، مثلًا Gemini للكتابة و Ollama للترجمة</small></label>
-          <select id="trProvider">
-            <option value="writing" data-i18n="o.trSameAsWriting">مثل أدوات الكتابة</option>
-            <option value="ollama">Ollama</option>
-            <option value="gemini">Gemini</option>
-            <option value="claude">Claude</option>
-          </select>
-        </div>
-        <div class="opt">
-          <label for="trModel"><b data-i18n="o.model">النموذج</b><small id="trModelHint"></small></label>
-          <select id="trModel"></select>
-        </div>
-        <p id="trStatus" class="ai-status" role="status"></p>
-        <label class="opt">
-          <div><b data-i18n="o.trPages">ترجمة الصفحات بالذكاء الاصطناعي أيضًا</b><small data-i18n="o.trPagesHint">الصفحة الكاملة نص كثير: مع Gemini المجاني قد ينفد الحد اليومي سريعًا، ومع Ollama تكون أبطأ بكثير.</small></div>
-          <span class="switch"><input type="checkbox" id="trPages"><span class="track"><span class="thumb"></span></span></span>
-        </label>
-      </div>
-      <div class="opt">
-        <div><b data-i18n="o.targetLang">لغة الترجمة</b><small data-i18n="o.targetLangHint">اللغة التي تُترجم إليها النصوص</small></div>
-        <select id="targetLang">
-          <option value="ar" data-i18n="lang.ar">العربية</option>
-          <option value="en" data-i18n="lang.en">الإنجليزية</option>
-          <option value="fr" data-i18n="lang.fr">الفرنسية</option>
-          <option value="tr" data-i18n="lang.tr">التركية</option>
-          <option value="ur" data-i18n="lang.ur">الأردية</option>
-          <option value="fa" data-i18n="lang.fa">الفارسية</option>
-          <option value="es" data-i18n="lang.es">الإسبانية</option>
-          <option value="de" data-i18n="lang.de">الألمانية</option>
-        </select>
-      </div>
-      <label class="opt">
-        <div><b data-i18n="o.reverse">ترجمة النص العربي إلى الإنجليزية</b><small data-i18n="o.reverseHint">عند تحديد نص عربي تُعرض ترجمته الإنجليزية</small></div>
-        <span class="switch"><input type="checkbox" id="reverseForArabic"><span class="track"><span class="thumb"></span></span></span>
-      </label>
-      <label class="opt">
-        <div><b data-i18n="o.context">فهم الكلمة من سياق الجملة</b><small data-i18n="o.contextHint">تُرسَل الجملة المحيطة بالكلمة (وليس الصفحة) لاختيار المعنى المناسب. أوقفه لإرسال الكلمة فقط.</small></div>
-        <span class="switch"><input type="checkbox" id="useContext"><span class="track"><span class="thumb"></span></span></span>
-      </label>
       <label class="opt">
         <div><b data-i18n="o.translateDefs">ترجمة التعريفات</b><small data-i18n="o.translateDefsHint">عرض التعريفات الإنجليزية مترجمة إلى العربية</small></div>
         <span class="switch"><input type="checkbox" id="translateDefinitions"><span class="track"><span class="thumb"></span></span></span>
@@ -302,6 +243,57 @@
       <p class="muted small" data-i18n="o.aiPrivacy">تُحفظ هذه الإعدادات والمفتاح على هذا الجهاز فقط ولا تُزامَن. مع Ollama لا يغادر النص جهازك. مع Gemini أو Claude لا يُرسَل أي نص إلى Google أو Anthropic إلا عندما تضغط إحدى أدوات الكتابة، ويُرسَل حينها النص المحدد (أو نص الصفحة عند طلب تلخيصها).</p>
     </section>
 
+    <section class="panel" id="translation">
+      <h2 data-i18n="o.translation">الترجمة</h2>
+      <p class="muted" data-i18n="o.trIntro">من يترجم الجمل والفقرات: Google سريع ويحتاج إلى الإنترنت، والذكاء الاصطناعي أدق في التعابير والعامية وأبطأ، ومع Ollama يعمل دون إنترنت.</p>
+      <div class="choices" role="radiogroup" aria-label="خدمة الترجمة" data-i18n-attr="aria-label:o.trService">
+        <label class="choice">
+          <input type="radio" name="trService" value="auto">
+          <span class="c">
+            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><small>+</small><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg></span></span>
+            <b data-i18n="o.trAuto">تلقائي</b>
+            <small data-i18n="o.trAutoHint">Google، والذكاء الاصطناعي حين لا يتوفر الإنترنت أو يتعذّر Google (مستحسن)</small>
+          </span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="trService" value="google">
+          <span class="c">
+            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span></span>
+            <b data-i18n="o.trGoogle">Google فقط</b>
+            <small data-i18n="o.trGoogleHint">سريع ومجاني، ولا يعمل دون إنترنت</small>
+          </span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="trService" value="ai">
+          <span class="c">
+            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg></span></span>
+            <b data-i18n="o.trAi">الذكاء الاصطناعي</b>
+            <small data-i18n="o.trAiHint">ترجمة أكثر طبيعية للجمل، وأبطأ. Google عند تعذّره</small>
+          </span>
+        </label>
+      </div>
+      <div id="trAiBox">
+        <div class="opt">
+          <label for="trProvider"><b data-i18n="o.trProvider">مَن يترجم</b><small data-i18n="o.trProviderHint">يمكن أن يختلف عن أدوات الكتابة، مثلًا Gemini للكتابة و Ollama للترجمة</small></label>
+          <select id="trProvider">
+            <option value="writing" data-i18n="o.trSameAsWriting">مثل أدوات الكتابة</option>
+            <option value="ollama">Ollama</option>
+            <option value="gemini">Gemini</option>
+            <option value="claude">Claude</option>
+          </select>
+        </div>
+        <div class="opt">
+          <label for="trModel"><b data-i18n="o.model">النموذج</b><small id="trModelHint"></small></label>
+          <select id="trModel"></select>
+        </div>
+        <p id="trStatus" class="ai-status" role="status"></p>
+        <label class="opt">
+          <div><b data-i18n="o.trPages">ترجمة الصفحات بالذكاء الاصطناعي أيضًا</b><small data-i18n="o.trPagesHint">الصفحة الكاملة نص كثير: مع Gemini المجاني قد ينفد الحد اليومي سريعًا، ومع Ollama تكون أبطأ بكثير.</small></div>
+          <span class="switch"><input type="checkbox" id="trPages"><span class="track"><span class="thumb"></span></span></span>
+        </label>
+      </div>
+    </section>
+
     <section class="panel" id="review">
       <h2 data-i18n="o.review">مراجعة الكلمات</h2>
       <p class="muted" id="rvSummary" data-i18n="o.reviewIntro">الكلمات الإنجليزية التي تبحث عنها تُضاف إلى بطاقات المراجعة مع الجملة التي وجدتها فيها. راجعها من تبويب «مراجعة» في نافذة لمحة، وستعود كل كلمة في الوقت المناسب قبل أن تنساها.</p>
@@ -353,16 +345,44 @@
       </div>
     </section>
 
+    <section class="panel" id="dictionary">
+      <h2 data-i18n="o.offline">دون إنترنت</h2>
+      <div class="choices" role="radiogroup" aria-label="مصدر القاموس" data-i18n-attr="aria-label:o.dictSource">
+        <label class="choice">
+          <input type="radio" name="dictSource" value="local">
+          <span class="c">
+            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><small>+</small><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span></span>
+            <b data-i18n="o.localFirst">المحلي أولًا</b>
+            <small data-i18n="o.localFirstHint">القاموس المدمج للكلمات، والإنترنت فقط لما ليس فيه (مستحسن)</small>
+          </span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="dictSource" value="offline">
+          <span class="c">
+            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span></span>
+            <b data-i18n="o.localOnly">المحلي فقط</b>
+            <small data-i18n="o.localOnlyHint">بدون أي اتصال بالإنترنت للكلمات. ترجمة الجمل لا تعمل.</small>
+          </span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="dictSource" value="online">
+          <span class="c">
+            <span class="ill"><span class="src-ill"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span></span>
+            <b data-i18n="o.onlineFirst">الإنترنت أولًا</b>
+            <small data-i18n="o.onlineFirstHint">نتائج Google، والقاموس المحلي عند انقطاع الاتصال</small>
+          </span>
+        </label>
+      </div>
+      <div class="opt">
+        <div class="grow"><b data-i18n="o.packs">قواميس للتنزيل</b><small data-i18n="o.packsHint">لكل لغة قاموس بلغتها (فرنسي–فرنسي…) يُنزَّل مرة واحدة ويُحفظ على هذا الجهاز، فتُشرح كلماتها دون إنترنت ودون ذكاء اصطناعي. من ويكاموس (رخصة CC BY-SA).</small>
+          <ul class="packs" id="packs"></ul>
+        </div>
+      </div>
+      <p class="tip" id="dictInfo" data-i18n="o.dictInfo">القاموس المحلي مدمج في الإضافة ويعمل دون إنترنت.</p>
+    </section>
+
     <section class="panel" id="appearance">
       <h2 data-i18n="o.appearance">المظهر</h2>
-      <div class="opt">
-        <div><b data-i18n="o.uiLang">لغة الواجهة</b><small data-i18n="o.uiLangHint">لغة القوائم والأزرار والشروح في لمحة</small></div>
-        <select id="uiLang" data-i18n-attr="aria-label:o.uiLang" aria-label="لغة الواجهة">
-          <option value="auto" data-i18n="o.uiLangAuto">تلقائي (حسب النظام)</option>
-          <option value="ar">العربية</option>
-          <option value="en">English</option>
-        </select>
-      </div>
       <div class="opt">
         <div><b data-i18n="o.theme">السمة</b><small data-i18n="o.themeHint">مظهر لمحة: البطاقة والنافذة والإعدادات</small></div>
         <select id="theme">
@@ -384,31 +404,6 @@
         <div class="md-card" id="mdCard" aria-hidden="true"><span class="md-w">glance</span><span class="md-t">لمحة</span></div>
         <div class="md-side"><div class="md-note" id="mdNote"></div><button id="mdPlay" class="btn small ghost" type="button" data-i18n="o.motionPlay">شاهد</button></div>
       </div>
-    </section>
-
-    <section class="panel" id="keysPanel">
-      <h2 data-i18n="o.keys">اختصارات لوحة المفاتيح</h2>
-      <div class="opt"><div><b data-i18n="o.keyLookup">بحث / ترجمة النص المحدد</b></div><span id="k-lookup" class="keys"></span></div>
-      <div class="opt"><div><b data-i18n="o.keyPage">ترجمة الصفحة كاملة</b></div><span id="k-page" class="keys"></span></div>
-      <div class="opt"><div><b data-i18n="o.keyWrite">أدوات الكتابة (للنص المحدد أو لمربع النص كله)</b></div><span id="k-write" class="keys"></span></div>
-      <div class="opt"><div><b data-i18n="o.keyClose">إغلاق البطاقة</b></div><span class="keys"><kbd>Esc</kbd></span></div>
-      <button id="shortcuts" class="link" hidden data-i18n="o.customize">تخصيص الاختصارات</button>
-    </section>
-
-    <section class="panel" id="sitesPanel">
-      <h2 data-i18n="o.sites">المواقع المستثناة</h2>
-      <p class="muted" data-i18n="o.sitesIntro">لن يظهر لمحة على هذه المواقع. يمكنك إضافة موقع من نافذة الإضافة في شريط الأدوات.</p>
-      <ul id="sites" class="sites"></ul>
-    </section>
-
-    <section class="panel" id="appPanel" hidden>
-      <h2 data-i18n="o.app">لمحة لـ Windows</h2>
-      <p class="muted" data-i18n="o.appIntro">إن كان تطبيق لمحة لـ Windows على هذا الجهاز، يمكن للإضافة أن تستخدم ما نزّلته فيه: ويكيبيديا دون إنترنت في بطاقة البحث، وقراءة المقالات كاملة في قارئ التطبيق.</p>
-      <div class="opt">
-        <div class="grow"><b data-i18n="o.appLink">الاتصال بالتطبيق</b><small id="appState" role="status"></small></div>
-        <button id="appBtn" class="btn small ghost" type="button"></button>
-      </div>
-      <p class="tip" data-i18n="o.appHow">يطلب Firefox إذنك مرة واحدة. في التطبيق: الإعدادات ← Firefox لإيقاف الاتصال من جهته.</p>
     </section>
 
     <section class="panel" id="privacy">
@@ -440,6 +435,16 @@
         </div>
       </div>
       <p class="muted small" data-i18n="o.privacyText">يُرسَل إلى خدمة Google للترجمة: النص الذي تختاره، والجملة المحيطة به (إن كان «فهم السياق» مفعّلًا)، ونص الصفحة عندما تطلب ترجمتها. تُرسَل الكلمة إلى ويكيبيديا للنبذة. في وضع «القاموس المحلي» تُبحث الكلمات دون إرسال. عند استخدام أدوات الكتابة يُرسَل النص إلى المزوّد الذي اخترته: Claude أو Gemini بمفتاحك، أما Ollama فيبقى النص على جهازك. لا تُجمع أي بيانات أخرى.</p>
+    </section>
+
+    <section class="panel" id="appPanel" hidden>
+      <h2 data-i18n="o.app">لمحة لـ Windows</h2>
+      <p class="muted" data-i18n="o.appIntro">إن كان تطبيق لمحة لـ Windows على هذا الجهاز، يمكن للإضافة أن تستخدم ما نزّلته فيه: ويكيبيديا دون إنترنت في بطاقة البحث، وقراءة المقالات كاملة في قارئ التطبيق.</p>
+      <div class="opt">
+        <div class="grow"><b data-i18n="o.appLink">الاتصال بالتطبيق</b><small id="appState" role="status"></small></div>
+        <button id="appBtn" class="btn small ghost" type="button"></button>
+      </div>
+      <p class="tip" data-i18n="o.appHow">يطلب Firefox إذنك مرة واحدة. في التطبيق: الإعدادات ← Firefox لإيقاف الاتصال من جهته.</p>
     </section>
 
     <section class="panel credits">

@@ -223,7 +223,10 @@ var LamhaMotion = (() => {
     write: [["path", { class: "w", d: "M4 10.5h16" }], ["path", { class: "w", d: "M4 15h16" }], ["path", { class: "w", d: "M8 19.5h12" }],
       ["path", { class: "spark", d: "M20 1.5l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z" }]]
   };
-  function markSvg(kind) {
+  // the last, short line of a paragraph ends where the text starts: on the right in Arabic, on the left in English
+  // (written from x=4 there, so it grows from its own start instead of sliding in from the left edge)
+  const LTR_MARKS = { write: MARKS.write.map((part, i) => (i === 2 ? ["path", { class: "w", d: "M4 19.5h12" }] : part)) };
+  function markSvg(kind, ltr) {
     const NS = "http://www.w3.org/2000/svg";
     const make = ([tag, attrs, kids = []]) => {
       const el = document.createElementNS(NS, tag);
@@ -232,7 +235,7 @@ var LamhaMotion = (() => {
       return el;
     };
     return make(["svg", { class: "wait " + kind, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": "2.3",
-      "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true" }, MARKS[kind]]);
+      "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true" }, (ltr && LTR_MARKS[kind]) || MARKS[kind]]);
   }
   /**
    * Shows the waiting mark in `host` (the card's .dot, the popup's .logo) and returns stop(). It appears only after
@@ -241,7 +244,8 @@ var LamhaMotion = (() => {
   function wait(host, kind) {
     if (!host || level === "off" || !Object.hasOwn(MARKS, kind)) return () => {};
     let mark = null;
-    const timer = setTimeout(() => { mark = markSvg(kind); host.append(mark); host.classList.add("waiting"); }, 250);
+    // English: the card's .root.en, or a page with dir="ltr" (the same tests as the CSS that mirrors the marks)
+    const timer = setTimeout(() => { mark = markSvg(kind, !!host.closest('.en, [dir="ltr"]')); host.append(mark); host.classList.add("waiting"); }, 250);
     return () => { clearTimeout(timer); if (mark) mark.remove(); host.classList.remove("waiting"); };
   }
 
