@@ -5,6 +5,7 @@
   "description": "Development tools for the Lamha Firefox extension (not part of the add-on). The desktop app has its own package in desktop/.",
   "scripts": {
     "test": "node tools/test-writing.mjs && node tools/test-ui.mjs && node tools/test-clipboard.mjs && node tools/test-updater.mjs && node tools/test-desktop.mjs",
+    "test:quiet": "node tools/test-writing.mjs -q && node tools/test-ui.mjs -q && node tools/test-clipboard.mjs -q && node tools/test-updater.mjs -q && node tools/test-desktop.mjs -q",
     "lint": "npx --yes web-ext@10.7.0 lint",
     "bench": "node tools/bench.mjs"
   },

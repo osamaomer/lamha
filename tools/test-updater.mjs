@@ -5,6 +5,7 @@ import { EventEmitter } from "node:events";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { quiet, wanted, report, notRun } from "./test-args.mjs";
 
 const { createUpdater, newer } = createRequire(import.meta.url)("../desktop/updater.js");
 
@@ -143,10 +144,11 @@ test("development (not packaged): never checks", async () => {
   assert.equal(t.au.listenerCount("update-available"), 0);
 });
 
-let passed = 0, failed = 0;
+let passed = 0, failed = 0, filtered = 0;
 for (const { name, fn } of queue) {
-  try { await fn(); passed++; console.log("  ✓ " + name); }
-  catch (err) { failed++; console.log("  ✗ " + name + "\n    " + String(err.message).split("\n").join("\n    ")); }
+  if (!wanted(name)) { filtered++; continue; }
+  try { await fn(); passed++; report("  ✓ " + name); }
+  catch (err) { failed++; report("  ✗ " + name + "\n    " + String(err.message).split("\n").join("\n    ")); }
 }
-console.log(`\n${passed}/${passed + failed} passed`);
+console.log(`${quiet ? "" : "\n"}${passed}/${passed + failed} passed${notRun(filtered)}`);
 process.exit(failed ? 1 : 0);

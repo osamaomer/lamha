@@ -383,6 +383,8 @@ tools/                      Tests (zim-fixture.mjs writes small .zim files for t
 ```bash
 npm install     # once: installs jsdom for the UI test
 npm test        # all five test files
+npm run test:quiet                      # the same, printing only failures and the totals
+node tools/test-writing.mjs -q review   # one file, only the tests whose name contains "review" (every file but test-ui)
 npm run lint    # web-ext lint (0 errors, 0 warnings expected)
 npm run bench   # performance numbers: lookups on a simulated network (normal, dead, none), the dictionary, the deck,
                 # and the Windows app's storage, clipboard search and downloaded Wikipedia (not a test: no pass or fail)

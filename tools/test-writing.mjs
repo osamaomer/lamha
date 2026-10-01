@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import vm from "node:vm";
 import assert from "node:assert/strict";
+import { quiet, wanted, report, notRun } from "./test-args.mjs";
 
 const root = new URL("..", import.meta.url);
 const src = p => readFileSync(new URL(p, root), "utf8");
@@ -1507,9 +1508,10 @@ if (process.argv.includes("--gemini")) {
 }
 
 let failed = 0;
-for (const [name, fn] of tests) {
-  try { await fn(); console.log("  ✓ " + name); }
-  catch (err) { failed++; console.log("  ✗ " + name + "\n    " + (err.stack || err).toString().split("\n").slice(0, 4).join("\n    ")); }
+const run = tests.filter(([name]) => wanted(name));
+for (const [name, fn] of run) {
+  try { await fn(); report("  ✓ " + name); }
+  catch (err) { failed++; report("  ✗ " + name + "\n    " + (err.stack || err).toString().split("\n").slice(0, 4).join("\n    ")); }
 }
-console.log(`\n${tests.length - failed}/${tests.length} passed`);
+console.log(`${quiet ? "" : "\n"}${run.length - failed}/${run.length} passed${notRun(tests.length - run.length)}`);
 process.exit(failed ? 1 : 0);

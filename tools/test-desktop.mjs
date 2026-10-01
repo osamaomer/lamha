@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import vm from "node:vm";
 import assert from "node:assert/strict";
+import { quiet, wanted, report, title as printTitle, notRun } from "./test-args.mjs";
 
 const require = createRequire(import.meta.url);
 const { ClickPairer, composeKind, wantsButton } = require("../desktop/double-click.js");
@@ -645,13 +646,14 @@ test("it answers a text-box question; a click on no box gets no button", async (
   }
 }, { windows: true });
 
-let passed = 0, failed = 0, skipped = 0;
+let passed = 0, failed = 0, skipped = 0, filtered = 0;
 for (const { name, fn, title, windows } of queue) {
-  if (title) { console.log(title); continue; }
-  if (windows && process.platform !== "win32") { skipped++; console.log("  - " + name + " (Windows only)"); continue; }
-  try { await fn(); passed++; console.log("  ✓ " + name); }
-  catch (err) { failed++; console.log("  ✗ " + name + "\n    " + String(err.message).split("\n").join("\n    ")); }
+  if (title) { printTitle(title); continue; }
+  if (!wanted(name)) { filtered++; continue; }
+  if (windows && process.platform !== "win32") { skipped++; report("  - " + name + " (Windows only)"); continue; }
+  try { await fn(); passed++; report("  ✓ " + name); }
+  catch (err) { failed++; report("  ✗ " + name + "\n    " + String(err.message).split("\n").join("\n    ")); }
 }
 rmSync(dir, { recursive: true, force: true });
-console.log(`\n${passed}/${passed + failed} passed${skipped ? `, ${skipped} skipped (Windows only)` : ""}`);
+console.log(`${quiet ? "" : "\n"}${passed}/${passed + failed} passed${skipped ? `, ${skipped} skipped (Windows only)` : ""}${notRun(filtered)}`);
 process.exit(failed ? 1 : 0);

@@ -7,6 +7,7 @@ import vm from "node:vm";
 import assert from "node:assert/strict";
 import { JSDOM, VirtualConsole } from "jsdom";
 import { pathToFileURL } from "node:url";
+import { quiet, only, report } from "./test-args.mjs";
 
 // the extension folder: this file's parent, or $env:LAMHA_EXT when run from elsewhere
 const EXT = process.env.LAMHA_EXT ? pathToFileURL(process.env.LAMHA_EXT.replace(/[\\/]?$/, "/")) : new URL("..", import.meta.url);
@@ -129,6 +130,8 @@ const key = (w, k) => w.document.dispatchEvent(new w.KeyboardEvent("keydown", { 
 const text = el => el.textContent.replace(/\s+/g, " ").trim();
 
 const results = [];
+// Steps share the pages opened above and build on each other, so this file always runs whole (no name filter).
+if (only) console.log(`test-ui runs all its steps: they depend on each other (filter "${only}" ignored)`);
 async function step(name, fn) {
   try { await fn(); results.push("  ✓ " + name); }
   catch (e) { results.push("  ✗ " + name + "\n    " + String(e.stack || e).split("\n").slice(0, 3).join("\n    ")); }
@@ -1190,7 +1193,7 @@ await step("Wikipedia reader: with nothing downloaded, the start page says so an
   assert.deepEqual(r.opened, ["lamha://app/options/options.html#wikipedia"]);
 });
 
-console.log(results.join("\n"));
+results.forEach(report);
 const failed = results.filter(r => r.includes("✗")).length;
-console.log(`\n${results.length - failed}/${results.length} passed`);
+console.log(`${quiet ? "" : "\n"}${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);

@@ -7,6 +7,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import vm from "node:vm";
 import assert from "node:assert/strict";
+import { quiet as quietRun, wanted, report, title as printTitle, notRun } from "./test-args.mjs";
 
 const root = new URL("..", import.meta.url);
 const ctx = vm.createContext({});
@@ -571,12 +572,13 @@ test("get() only reads own keys (\"constructor\" is not a setting)", async () =>
   assert.deepEqual(await s.get({ constructor: 1 }), { constructor: 1 });
 });
 
-let passed = 0, failed = 0;
+let passed = 0, failed = 0, filtered = 0;
 for (const { name, fn, title } of queue) {
-  if (title) { console.log(title); continue; }
-  try { await fn(); passed++; console.log("  ✓ " + name); }
-  catch (err) { failed++; console.log("  ✗ " + name + "\n    " + String(err.message).split("\n").join("\n    ")); }
+  if (title) { printTitle(title); continue; }
+  if (!wanted(name)) { filtered++; continue; }
+  try { await fn(); passed++; report("  ✓ " + name); }
+  catch (err) { failed++; report("  ✗ " + name + "\n    " + String(err.message).split("\n").join("\n    ")); }
 }
 rmSync(dir, { recursive: true, force: true });
-console.log(`\n${passed}/${passed + failed} passed`);
+console.log(`${quietRun ? "" : "\n"}${passed}/${passed + failed} passed${notRun(filtered)}`);
 process.exit(failed ? 1 : 0);
