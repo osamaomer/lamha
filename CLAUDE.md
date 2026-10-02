@@ -138,14 +138,14 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-10-02. Latest release: **1.9.9** (tagged 2026-10-02). The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
+_Last updated: 2026-10-02. Latest release: **1.9.9** (tagged 2026-10-02); **2.0.0** is bumped and committed, waiting for its tag. The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
 
 **At the end of a session:** update the open items below (add new ones, delete finished ones), and add a short dated entry to docs/history.md for substantial work, in the same commit. Keep this file small (under ~25 KB): details belong in history.md.
 
 ### Open items
 
 **Next work**
-- **Not released yet (after 1.9.9, on main):** Windows' accent colour and Mica (Settings → المظهر), review by choice (cardsAuto off), the section bar's mouse wheel, Wikipedia on the card (early start, 4 s limit and pause, Lamha's identity). Needs a `shared/changelog.js` entry with the next version (the user writes the Arabic). Drafts awaiting the user's wording: `d.accent`, `d.accentHint`, `d.mica`, `d.micaHint` (i18n-desktop.js), `o.reviewIntro`, `o.cardsAutoHint` (i18n-options.js).
+- **2.0.0 is prepared, not tagged:** version bumped, changelog written (English by Claude, Arabic translated by Claude at the user's request: they may reword it). The code is what `npm run smoke` passed 74/74. To release: `git push`, then `git tag v2.0.0 && git push origin v2.0.0`, and update Latest release below. Drafts still awaiting the user's wording: `d.accent`, `d.accentHint`, `d.mica`, `d.micaHint` (i18n-desktop.js), `o.reviewIntro`, `o.cardsAutoHint` (i18n-options.js).
 - Maybe: one combined Wikipedia request (`prop=langlinks|extracts|pageimages|pageprops`) answers disambiguation pages and words without an Arabic article in one request instead of two (fewer requests against Wikimedia's limit).
 - Optimization, by size of gain (measured in docs/history.md → *After 1.9.7: optimization*): close the main window when it hides to the tray (~−20 MB; reopening reloads it); the app's deck writes (only past ~10,000 cards); Firefox's 163 KB per frame (a small loader).
 

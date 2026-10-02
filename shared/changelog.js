@@ -3,6 +3,18 @@
  * stops when the version being released has no entry here. Newest first; each note is [arabic, english]. */
 // eslint-disable-next-line no-unused-vars
 var LamhaChangelog = [
+  { v: "2.0.0", date: "2026-10-02", notes: [
+    ["لون التمييز من ويندوز: يمكن لتطبيق ويندوز أن يأخذ لون التمييز الذي اخترته في ويندوز لأزراره وروابطه، معدّلًا ليبقى مقروءًا في الوضعين الفاتح والداكن. فعّله من: الإعدادات ← المظهر ← لون التمييز من Windows.",
+      "Windows accent colour: the Windows app can take the accent colour you chose in Windows for its buttons and links, adjusted to stay readable in light and dark. Turn it on in Settings → Appearance → Accent colour from Windows."],
+    ["خلفية سطح المكتب خلف النافذة: في ويندوز 11 يمكن أن تظهر لمسة من خلفية سطح المكتب خلف نافذة لمحة والإعدادات، كما في تطبيقات ويندوز نفسها، وتبقى البطاقات بلونها فيبقى النص واضحًا. فعّلها من: الإعدادات ← المظهر ← إظهار خلفية سطح المكتب خلف النافذة.",
+      "Your wallpaper behind the window: on Windows 11, a touch of your desktop wallpaper can show behind Lamha's window and Settings, as in Windows' own apps, while the cards keep their colour so text stays clear. Turn it on in Settings → Appearance → Show the wallpaper behind the window."],
+    ["أنت تختار ما تراجعه: لم تعد الكلمات التي تبحث عنها تُضاف إلى قائمة المراجعة من تلقاء نفسها. اضغط 🔖 في بطاقة البحث لإضافة الكلمة. ولإضافة كل كلمة كما في السابق، فعّل: الإعدادات ← مراجعة الكلمات ← إضافة الكلمات تلقائيًا.",
+      "You choose what to review: words you look up no longer go into your review list by themselves. Press 🔖 on the lookup card to add a word. To add every word as before, turn on Settings → Word review → Add words automatically."],
+    ["ويكيبيديا أسرع وأوثق: يبدأ تحميل نبذة ويكيبيديا في بطاقة البحث مع الكلمة نفسها، وتظهر بانسيابية بدل أن تقفز فجأة، ولم تعد تُبقي البطاقة في انتظار طويل حين يكون الاتصال بطيئًا.",
+      "Faster, more reliable Wikipedia: the Wikipedia summary on the lookup card starts loading together with the word, appears smoothly instead of popping in, and no longer keeps the card waiting on a slow connection."],
+    ["شريط أقسام أسلس في الإعدادات: صارت عجلة الفأرة تحرّك أزرار الأقسام أفقيًا، فيظهر كل زر كاملًا.",
+      "A smoother section bar in Settings: the mouse wheel now scrolls the section buttons sideways, showing each button whole."]
+  ]},
   { v: "1.9.9", date: "2026-10-02", notes: [
     ["ترتيب أوضح للإعدادات: صارت الإعدادات مرتبة هكذا: اللغات أولًا، ثم الاختصارات، ثم بطاقة البحث، ثم أدوات الكتابة والترجمة. وفي الآخر الإعدادات التي تُضبط مرة واحدة، مثل العمل دون إنترنت والمظهر. كما يعرض تطبيق ويندوز اختصاراته في قسم خاص بها.",
       "A clearer order in Settings: languages come first, then the shortcuts, the lookup card, and the writing tools and translation. Last come the settings you set once, such as working without internet and the appearance. The Windows app also shows its shortcuts in a section of their own."],
