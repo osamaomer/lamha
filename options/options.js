@@ -3,7 +3,7 @@
 const DEFAULTS = {
   enabled: true, targetLang: "ar", triggerMode: "button", reverseForArabic: true, dictSource: "local", useContext: true,
   showInInputs: false, showWikipedia: true, translateDefinitions: true, autoSpeak: false,
-  theme: "auto", motion: "auto", saveHistory: true, enDict: false, explainLangs: [], aiModel: "claude-opus-5", aiInInputs: true, writeOnDblClick: true, saveMistakes: true, cardsAuto: true, cardsNewPerDay: 10, dailyGoal: 10, disabledSites: []
+  theme: "auto", motion: "auto", saveHistory: true, enDict: false, explainLangs: [], aiModel: "claude-opus-5", aiInInputs: true, writeOnDblClick: true, saveMistakes: true, cardsAuto: false, cardsNewPerDay: 10, dailyGoal: 10, disabledSites: []
 };
 const BOOLS = ["useContext", "reverseForArabic", "translateDefinitions", "showWikipedia", "autoSpeak", "showInInputs", "saveHistory", "aiInInputs", "writeOnDblClick", "saveMistakes", "cardsAuto"];
 const { t, num } = LamhaI18n;
@@ -271,8 +271,29 @@ function buildToc() {
   const bringIntoView = a => {
     const r = row.getBoundingClientRect(), b = a.getBoundingClientRect();
     if (pointerIn || (b.left >= r.left && b.right <= r.right)) return;
-    row.scrollBy({ left: b.left < r.left ? b.left - r.left - 32 : b.right - r.right + 32, behavior: LamhaMotion.any() ? "smooth" : "auto" }); // the row only, never the page
+    // past the fade, not into it: a margin narrower than the fade left the link half hidden
+    row.scrollBy({ left: b.left < r.left ? b.left - r.left - TOC_FADE : b.right - r.right + TOC_FADE, behavior: LamhaMotion.any() ? "smooth" : "auto" }); // the row only, never the page
   };
+  // The mouse wheel scrolls the row sideways. It has no scrollbar and a wheel only goes up and down, so the page moved
+  // instead and the last links stayed out of reach, cut by the fade. Each step shows the next hidden link whole, toward
+  // the later sections (to the left in Arabic, to the right in English); at the end of the row the page scrolls as usual.
+  let wheelAt = 0;
+  row.addEventListener("wheel", e => {
+    if (e.ctrlKey || !e.deltaY || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // zooming, or a touchpad's own sideways swipe
+    if (row.scrollWidth <= row.clientWidth + 1) return; // every link fits: nothing to scroll
+    const r = row.getBoundingClientRect();
+    const towardLeft = (e.deltaY > 0) === (getComputedStyle(row).direction === "rtl");
+    const fade = side => parseFloat(row.style.getPropertyValue("--fade-" + side)) || 0;
+    const shown = [...links].map(a => ({ a, b: a.getBoundingClientRect() })).filter(x => x.b.width > 0); // hidden links (the app's) don't count
+    const next = towardLeft
+      ? shown.filter(x => x.b.left < r.left + fade("l") - 1).sort((x, y) => y.b.left - x.b.left)[0]
+      : shown.filter(x => x.b.right > r.right - fade("r") + 1).sort((x, y) => x.b.left - y.b.left)[0];
+    if (!next) return; // the end of the row: the page scrolls
+    e.preventDefault();
+    if (e.timeStamp - wheelAt < 120) return; // a touchpad sends many small steps: one link at a time
+    wheelAt = e.timeStamp;
+    row.scrollBy({ left: towardLeft ? next.b.left - r.left - TOC_FADE : next.b.right - r.right + TOC_FADE, behavior: LamhaMotion.any() ? "smooth" : "auto" });
+  }, { passive: false });
   const mark = id => {
     if (Date.now() < heldUntil && id !== held) return;
     links.forEach(a => {
@@ -292,6 +313,7 @@ function buildToc() {
 }
 
 /** The section links scroll sideways on a narrow window: fade the edge where more links are hidden, so it shows. */
+const TOC_FADE = 48; // px
 function tocEdges() {
   const row = $("toc").querySelector(".toc-links");
   const links = row ? row.querySelectorAll("a") : [];
@@ -299,8 +321,8 @@ function tocEdges() {
   const box = row.getBoundingClientRect();
   const rects = [...links].map(a => a.getBoundingClientRect()).filter(r => r.width > 0); // links hidden in the desktop app don't count
   if (!rects.length) return;
-  row.style.setProperty("--fade-l", Math.min(...rects.map(r => r.left)) < box.left - 1 ? "48px" : "0px");
-  row.style.setProperty("--fade-r", Math.max(...rects.map(r => r.right)) > box.right + 1 ? "48px" : "0px");
+  row.style.setProperty("--fade-l", Math.min(...rects.map(r => r.left)) < box.left - 1 ? TOC_FADE + "px" : "0px");
+  row.style.setProperty("--fade-r", Math.max(...rects.map(r => r.right)) > box.right + 1 ? TOC_FADE + "px" : "0px");
 }
 addEventListener("resize", tocEdges, { passive: true });
 

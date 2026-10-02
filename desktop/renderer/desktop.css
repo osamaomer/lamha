@@ -9,6 +9,9 @@
 .desktop #siteCard,                  /* this site / translate this page (by id: the popup's card order may change) */
 .desktop .foot .dotsep,
 .desktop .foot .hint { display: none !important; }
+/* Settings → Appearance → the wallpaper through the window (main.js windowMica): Windows draws Mica behind the page,
+   so only the page's own background goes; panels, cards and boxes keep theirs */
+.desktop.mica, .desktop.mica body { background: transparent !important; }
 .desktop textarea.draft { min-height: 180px; max-height: 45vh; }
 .desktop .wout .text, .desktop .issues { max-height: none; }
 

@@ -80,6 +80,10 @@ var LAMHA_CSS = `
   --scroll: rgba(255, 255, 255, 0.2);
   color-scheme: dark;
 }
+/* the Windows app, with Settings → Appearance → the accent colour from Windows: its page hands the colours down
+   (desktop/app-rules.js accentCss); without them, these are Lamha's own, as above */
+.root.app { --accent: var(--lamha-app-accent, #4f46e5); --accent-soft: var(--lamha-app-accent-soft, rgba(79, 70, 229, 0.09)); --btn: var(--lamha-app-btn, #4f46e5); }
+.root.app.dark { --accent: var(--lamha-app-accent-dark, #8b93ff); --accent-soft: var(--lamha-app-accent-soft-dark, rgba(139, 147, 255, 0.15)); --btn: var(--lamha-app-btn-dark, #5e5ce6); }
 
 button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; margin: 0; }
 button:focus-visible, a:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }

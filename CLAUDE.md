@@ -20,6 +20,7 @@ User-facing documentation lives in [README.md](README.md). Update it whenever a 
 - **Firefox:** the manifest loads `local-dict.js`, `packs.js`, `shared/i18n.js`, `shared/lamha-ai.js` and `background.js` as the background. Content scripts (`shared/*`, `content/styles.js`, `content/page-translator.js`, `content/content.js`) run in every frame.
 - **Desktop:** `desktop/main.js` builds a `browser.*` stand-in, then loads the same background files with `vm.runInThisContext`. `preload.js` gives pages (popup = main window, options = Settings) their `browser.*`. The floating card over other apps is `renderer/card.html` with **the same content scripts injected**, so `content/content.js` must keep working in both (see `window.lamhaDesktop` and `external` messages).
   - The sentence around a word in another program comes from `lamha-uia.exe` (`desktop/uia-helper.cs`, UI Automation; started by `uia-context.js`). It's built with Windows' own C# compiler (`scripts/build-helper.mjs`, into the git-ignored `bin/`) and shipped as an `extraResources` file next to `app.asar`. Users' PCs never compile anything.
+  - Settings → المظهر → Windows' accent colour (`accentWindows`) and Mica (`windowMica`), storage.local, off by default: main.js `applyLook()` inserts `rules.accentCss(rules.accentPalette(...))` in every app page (insertCSS, after each load) and toggles `html.mica`; the card reads `--lamha-app-*` through its `.root.app` class. Mica is on the main window and Settings only (the card's window is larger than the card). Live: storage changes and `accent-color-changed`.
   - Settings → المظهر → the graphics card is `useGpu` (storage.local, **off** unless turned on: `useGpu === true`), read from the file by main.js before the app is ready (`GPU`); a change applies at the next start (`app.restart`).
 - **Storage:** `storage.sync` holds settings (`DEFAULT_SETTINGS` in background.js, mirrored in `options.js` and `content.js`). `storage.local` holds per-device data: history, cards, mistakes, API keys, provider choice. On desktop both are JSON files in `%APPDATA%\Lamha` (`desktop/storage.js`).
   - **The deck** is kept in memory by the background (`deckMem`); every write carries `cardsRev`, and a deck change without the number just written (another writer) drops the copy. Only the background writes the deck: Settings' "delete all" is the `cardsClear` message. Each card has `mod` (last change); `cardsRemoved` notes deletions (180 days) so a backup or the other copy doesn't bring a word back. `mergeCards()` joins decks (backups, the Firefox ↔ app sync): the schedule of the copy reviewed last, text fields filled from either.
@@ -144,6 +145,8 @@ _Last updated: 2026-10-02. Latest release: **1.9.9** (tagged 2026-10-02). The hi
 ### Open items
 
 **Next work**
+- **Not released yet (after 1.9.9, on main):** Windows' accent colour and Mica (Settings → المظهر), review by choice (cardsAuto off), the section bar's mouse wheel, Wikipedia on the card (early start, 4 s limit and pause, Lamha's identity). Needs a `shared/changelog.js` entry with the next version (the user writes the Arabic). Drafts awaiting the user's wording: `d.accent`, `d.accentHint`, `d.mica`, `d.micaHint` (i18n-desktop.js), `o.reviewIntro`, `o.cardsAutoHint` (i18n-options.js).
+- Maybe: one combined Wikipedia request (`prop=langlinks|extracts|pageimages|pageprops`) answers disambiguation pages and words without an Arabic article in one request instead of two (fewer requests against Wikimedia's limit).
 - Optimization, by size of gain (measured in docs/history.md → *After 1.9.7: optimization*): close the main window when it hides to the tray (~−20 MB; reopening reloads it); the app's deck writes (only past ~10,000 cards); Firefox's 163 KB per frame (a small loader).
 
 **Bugs and reports**
@@ -160,7 +163,6 @@ _Last updated: 2026-10-02. Latest release: **1.9.9** (tagged 2026-10-02). The hi
 
 **Decisions for the user**
 - Code signing (Azure Trusted Signing ~$10/month, or the Microsoft Store, which signs it).
-- A card removed from review comes back when the word is looked up again (`cardsAuto`); keep or change?
 - Not done from the design audit: a type scale (text still in half-pixel steps); rewriting Settings' intro paragraphs (their copy).
 - Maybes: the popup's quick translate with the AI badge and "Better translation"; an automatic fallback for the writing tools (Gemini, then Ollama); the Ollama translation-quality run; packs picking the sense that fits the sentence; Wikipedia ideas (article of the day, deck words highlighted, Wikidata title bridge…).
 - Bigger plans in [docs/ideas.md](docs/ideas.md): the Windows app on Linux, earning from Lamha, less dependence on Google's unofficial endpoint.

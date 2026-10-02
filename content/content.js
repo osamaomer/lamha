@@ -148,7 +148,9 @@
     shadow = host.attachShadow({ mode: "closed" });
     const style = document.createElement("style");
     style.textContent = LAMHA_CSS;
-    root = h("div", { class: "root" + (LamhaI18n.lang() === "en" ? " en" : "") });
+    // "app": the Windows app's own pages (the card, the reader), which may hand down Windows' accent colour (styles.js)
+    const app = !!window.lamhaDesktop || (location.protocol === "file:" && document.documentElement.classList.contains("desktop"));
+    root = h("div", { class: "root" + (LamhaI18n.lang() === "en" ? " en" : "") + (app ? " app" : "") });
     LamhaMotion.attach(root); // data-motion: the Animations setting (never on the page's own elements)
     shadow.append(style, root);
     (document.documentElement || document.body).appendChild(host);
@@ -634,7 +636,7 @@
       const w = await send({ type: "wiki", title: res.data.query, lang: res.data.tl === "en" ? "en" : settings.targetLang,
         alt: wikiTitles(res.data), offline: settings.dictSource === "offline" });
       if (token !== reqId || !bodyEl || !w || !w.data) return;
-      bodyEl.append(wikiSection(w.data));
+      morph(() => bodyEl.append(wikiSection(w.data))); // the card grows to it, as for the rest of the answer (it popped in, the card jumped)
     }
   }
 

@@ -136,11 +136,28 @@
     const gpuPending = h("div", { class: "opt", id: "gpuPending", hidden: true },
       h("div", null, h("small", { role: "status" }, L("d.gpuPending"))),
       h("button", { class: "btn small", type: "button", id: "gpuRestart", onclick: () => lamhaApp.restart() }, L("d.upRestartNow")));
+    const micaRow = h("label", { class: "opt", hidden: true }, // Windows 11 only
+      h("div", null, h("b", null, L("d.mica")), h("small", null, L("d.micaHint"))),
+      sw("windowMica", L("d.mica")));
     document.getElementById("appearance").append(
+      h("label", { class: "opt" },
+        h("div", null, h("b", null, L("d.accent")), h("small", null, L("d.accentHint"))),
+        sw("accentWindows", L("d.accent"))),
+      micaRow,
       h("label", { class: "opt" },
         h("div", null, h("b", null, L("d.gpu")), h("small", null, L("d.gpuHint"))),
         sw("useGpu", L("d.gpu"))),
       gpuPending);
+    // both apply at once (main.js applyLookEverywhere), off unless turned on
+    const renderLook = async () => {
+      const [s, mica] = await Promise.all([local.get({ accentWindows: false, windowMica: false }), lamhaApp.mica()]);
+      $("accentWindows").checked = s.accentWindows === true;
+      $("windowMica").checked = s.windowMica === true;
+      micaRow.hidden = !mica;
+    };
+    for (const id of ["accentWindows", "windowMica"]) $(id).addEventListener("change", e => local.set({ [id]: e.target.checked }));
+    browser.storage.onChanged.addListener((changes, area) => { if (area === "local" && (changes.accentWindows || changes.windowMica)) renderLook(); });
+    renderLook();
     const renderGpu = async () => {
       const [{ useGpu }, running] = await Promise.all([local.get({ useGpu: false }), lamhaApp.gpu()]); // off unless turned on
       $("useGpu").checked = useGpu === true;

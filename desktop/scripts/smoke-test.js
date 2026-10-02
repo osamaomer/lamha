@@ -185,11 +185,14 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
     return r.data[0];
   }, { optional: true });
 
-  await check("looked-up words became flashcards", async () => {
+  await check("looked-up words stay out of review until the user picks one with 🔖 (the card's bookmark)", async () => {
     await wait(300);
+    const before = await send({ type: "reviewQueue" });
+    assert(before.counts.total === 0, `${before.counts.total} cards from lookups alone`);
+    assert(await send({ type: "cardToggle", card: { q: "serendipity", tr: "صدفة سعيدة" } }) === true, "🔖 didn't add it");
     const r = await send({ type: "reviewQueue" });
-    assert(r.counts.total >= 1, "no cards");
-    return `${r.counts.total} cards, ${r.counts.fresh} new today`;
+    assert(r.counts.total === 1, `${r.counts.total} cards after 🔖`);
+    return `none from lookups; 🔖 → ${r.counts.total} card, ${r.counts.fresh} new today`;
   });
 
   await check("settings saved to disk", async () => {
@@ -1077,6 +1080,22 @@ module.exports = async function smoke({ app, mainWin, openOptions, getOptionsWin
       const after = (await stores.local.get({ useGpu: false })).useGpu;
       assert(saved === true && on.on && on.pending && !back.on && !back.pending && after === false, JSON.stringify({ saved, on, back, after }));
       return "this run draws without it; on → «applies at the next start», off again → nothing pending";
+    });
+
+    await check("Settings → المظهر: Windows' accent colour reaches the main window at once; the wallpaper switch marks its page (Windows 11)", async () => {
+      const accent = () => js(mainWin, `getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()`);
+      const mica = () => js(mainWin, `document.documentElement.classList.contains("mica")`);
+      const before = await accent();
+      await stores.local.set({ accentWindows: true, windowMica: true });
+      await wait(500);
+      const on = { accent: await accent(), mica: await mica() };
+      await stores.local.set({ accentWindows: false, windowMica: false });
+      await wait(500);
+      const off = { accent: await accent(), mica: await mica() };
+      const supported = await js(getOptionsWin(), `lamhaApp.mica()`);
+      assert(on.accent && on.accent !== before && off.accent === before, JSON.stringify({ before, on, off }));
+      assert(on.mica === supported && off.mica === false, JSON.stringify({ supported, on, off }));
+      return `--accent ${before} → ${on.accent} (Windows' colour, made readable) → ${off.accent}; Mica ${supported ? "on and off" : "not on this Windows"}`;
     });
 
     await check("offline Wikipedia: a .zim added to Lamha answers the card with no internet (Electron's own Zstandard), and Settings lists it", async () => {

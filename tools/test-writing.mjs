@@ -446,7 +446,7 @@ test("review queue: history imported once, due first, new words limited per day"
   for (let i = 0; i < 15; i++) cards["new" + i] = { ...newCard, q: "new" + i, added: i };
   cards.old = { ...newCard, q: "old", reps: 2, interval: 5, last: past - 5 * DAYMS, due: past };
   cards.later = { ...newCard, q: "later", reps: 1, interval: 2, last: past, due: Date.now() + DAYMS };
-  const env = makeEnv({ fetchImpl: async () => json(200, {}), local: { history, cards }, sync: { cardsNewPerDay: 5 } });
+  const env = makeEnv({ fetchImpl: async () => json(200, {}), local: { history, cards }, sync: { cardsNewPerDay: 5, cardsAuto: true } }); // the history is imported only when lookups add words by themselves
 
   const r = JSON.parse(JSON.stringify(await env.send({ type: "reviewQueue" })));
   assert.equal(r.counts.total, 19, "15 new + old + later + 2 English history words");
@@ -586,6 +586,17 @@ test("word of the day: a word of yours that's due soon, else a new one from the 
   assert.equal((await fresh.send({ type: "today" })).word.q, d.q, "the same word all day");
 });
 
+test("by default a lookup adds nothing to review: the user picks the word with 🔖; the history isn't turned into cards", async () => {
+  const google = recorder(url => (url.includes("/translate_a/single") ? json(200, { src: "en", sentences: [{ trans: "بدلاً", orig: "instead" }] }) : json(200, [["زر <a i=0>بدلاً</a> من مفتاح", "en"]])));
+  const env = makeEnv({ fetchImpl: google.fetchImpl, local: { history: [{ q: "serendipity", tr: "صدفة سعيدة", src: "en", t: 1 }] }, sync: { dictSource: "online", translateDefinitions: false } });
+  await env.send({ type: "lookup", text: "instead", context: { before: "a button ", after: " of a switch" } });
+  await env.flush();
+  assert.equal(await env.send({ type: "cardHas", q: "instead" }), false, "looked up, not added");
+  assert.equal(await env.send({ type: "cardHas", q: "serendipity" }), false, "the history stays the history");
+  assert.equal((await env.send({ type: "cardToggle", card: { q: "instead", tr: "بدلاً" } })), true, "🔖 adds it");
+  assert.equal(await env.send({ type: "cardHas", q: "instead" }), true);
+});
+
 test("a word lookup adds a card with its sentence and in-context meaning", async () => {
   const google = recorder(url => {
     if (url.includes("/translate_a/single")) {
@@ -600,7 +611,7 @@ test("a word lookup adds a card with its sentence and in-context meaning", async
   const env = makeEnv({
     fetchImpl: google.fetchImpl,
     local: { cardsImported: true },
-    sync: { dictSource: "online", translateDefinitions: false }
+    sync: { dictSource: "online", translateDefinitions: false, cardsAuto: true } // Settings → Review → Add words automatically
   });
   const res = await env.send({ type: "lookup", text: "bank", context: { before: "We sat on the ", after: " of the river." } });
   assert.equal(res.ok, true, res.error);
@@ -755,7 +766,7 @@ test("translation, Google only: no AI even when Google fails; AI: the AI first, 
 
 test("translation: words keep Google's dictionary first, even with the AI chosen", async () => {
   const net = trNet();
-  const env = makeEnv({ fetchImpl: net.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini", trService: "ai" }, sync: { uiLang: "ar", dictSource: "online", useContext: false, translateDefinitions: false } });
+  const env = makeEnv({ fetchImpl: net.fetchImpl, local: { geminiKey: "AIza-test", aiProvider: "gemini", trService: "ai" }, sync: { uiLang: "ar", dictSource: "online", useContext: false, translateDefinitions: false, showWikipedia: false } }); // who translates, without the Wikipedia part's own requests
   await env.send({ type: "lookup", text: "resilient" });
   assert.deepEqual(who(net.calls), ["google"]);
 });
@@ -829,7 +840,7 @@ test("translation: its own provider and model, separate from the writing tools",
 
 test("English–English: offline definitions, the one that fits the sentence first, the Arabic kept for review", async () => {
   const net = recorder(() => json(429, {}));
-  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, local: { cardsImported: true }, sync: { uiLang: "ar", enDict: true, dictSource: "offline" } });
+  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, local: { cardsImported: true }, sync: { uiLang: "ar", enDict: true, dictSource: "offline", cardsAuto: true } });
   const plain = await env.send({ type: "lookup", text: "resilient" });
   assert.equal(plain.ok, true, plain.error);
   const d = plain.data;
@@ -1082,6 +1093,52 @@ function wikipediaNet() {
   return Object.assign(net, rec);
 }
 
+test("Wikipedia starts with the lookup (not after it), says it's Lamha, and the card's request finds it on its way", async () => {
+  const events = [];
+  const fetchImpl = async (url, init = {}) => {
+    url = String(url);
+    if (url.includes("wikipedia.org")) {
+      events.push({ at: "wiki", id: (init.headers || {})["Api-User-Agent"] || "" });
+      if (url.includes("/w/api.php")) return json(200, { query: { pages: { 1: { title: "Paris", langlinks: [{ "*": "باريس" }] } } } });
+      return json(200, { type: "standard", title: "باريس", extract: "عاصمة فرنسا.", content_urls: { desktop: { page: "https://ar.wikipedia.org/wiki/x" } } });
+    }
+    if (url.includes("/translate_a/t")) { // the word's sentence: slow, as on a busy network
+      events.push({ at: "sentence asked" });
+      await new Promise(r => setTimeout(r, 200));
+      events.push({ at: "sentence translated" });
+      return json(200, [["أعيش في <a i=0>باريس</a> الآن", "en"]]);
+    }
+    return json(200, { src: "en", sentences: [{ trans: "باريس", orig: "Paris" }] });
+  };
+  const env = makeEnv({ fetchImpl, sync: { uiLang: "ar", dictSource: "online", translateDefinitions: false } });
+  await env.send({ type: "lookup", text: "Paris", context: { before: "I live in ", after: " now" } });
+  const order = events.map(e => e.at);
+  assert.ok(order.indexOf("wiki") >= 0 && order.indexOf("wiki") < order.indexOf("sentence translated"), "on its way while the sentence was translated: " + order.join(", "));
+  assert.match(events.find(e => e.at === "wiki").id, /^Lamha\/\S* \(https:\/\/github\.com\/osamaomer\/lamha\)$/, "Wikimedia limits programs that don't say who they are");
+  const asked = order.filter(x => x === "wiki").length;
+  const w = await env.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"] }); // what the card asks once the answer is shown
+  assert.equal(w.data.extract, "عاصمة فرنسا.");
+  assert.equal(events.filter(e => e.at === "wiki").length, asked, "no second request");
+});
+
+test("a network that answers nothing: Wikipedia gives up after 4 s, then rests (the card's last part waited up to 3 × 8 s, every lookup)", async () => {
+  const SCALE = 50;
+  const calls = [];
+  const dead = async (url, init = {}) => {
+    calls.push(String(url));
+    return new Promise((_, reject) => init.signal && init.signal.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" }))));
+  };
+  const env = makeEnv({ fetchImpl: dead, scale: SCALE });
+  let t0 = Date.now();
+  assert.equal((await env.send({ type: "wiki", title: "Paris", lang: "ar" })).data, null);
+  assert.ok((Date.now() - t0) * SCALE < 5000, `it waited ${(Date.now() - t0) * SCALE} ms`);
+  const sent = calls.length;
+  t0 = Date.now();
+  assert.equal((await env.send({ type: "wiki", title: "London", lang: "ar" })).data, null);
+  assert.equal(calls.length, sent, "not asked again during the pause");
+  assert.ok(Date.now() - t0 < 100, "at once");
+});
+
 test("offline Wikipedia: with no internet the downloaded copy answers, found by the word's translation; it isn't kept, so Wikipedia answers once back online", async () => {
   const wiki = fakeWiki({ "ar|باريس": "باريس عاصمة فرنسا." });
   const net = wikipediaNet();
@@ -1092,9 +1149,13 @@ test("offline Wikipedia: with no internet the downloaded copy answers, found by 
   assert.equal(off.data.offline.date, "2026-07-10", "the card can say it's the downloaded copy");
   assert.deepEqual(plain(wiki.asked), [["ar", "باريس", "Paris"]], "the translation first: no internet to ask Wikipedia for the Arabic title");
   net.online = true;
-  const on = await env.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"] });
-  assert.equal(on.data.extract, "من ويكيبيديا نفسها.");
-  assert.equal(on.data.offline, undefined);
+  const resting = await env.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"] });
+  assert.equal(resting.data.extract, "باريس عاصمة فرنسا.", "Wikipedia failed a moment ago: the copy answers without waiting for it again");
+  await atTime(env, "UTC", new Date(Date.now() + 21000).toISOString(), async () => { // the pause is over
+    const on = await env.send({ type: "wiki", title: "Paris", lang: "ar", alt: ["باريس"] });
+    assert.equal(on.data.extract, "من ويكيبيديا نفسها.");
+    assert.equal(on.data.offline, undefined);
+  });
 });
 
 test("offline Wikipedia: 'offline only' never asks Wikipedia; without a downloaded copy the card gets nothing, still without going online", async () => {
@@ -1121,7 +1182,8 @@ test("offline Wikipedia: the English copy answers when the translation language'
   const r = await env.send({ type: "wiki", title: "Photosynthesis", lang: "ar", alt: ["تركيب ضوئي"], offline: true });
   assert.equal(r.data.lang, "en");
   assert.deepEqual(plain(wiki.asked), [["ar", "تركيب ضوئي", "Photosynthesis"], ["en", "Photosynthesis"]]);
-  const bad = await env.send({ type: "wiki", title: "Photosynthesis", lang: "ar", alt: [{ toString: () => "x" }, "y".repeat(200)], offline: true });
+  const env2 = makeEnv({ fetchImpl: wikipediaNet().fetchImpl, wiki }); // the same word is asked once: a new background
+  const bad = await env2.send({ type: "wiki", title: "Photosynthesis", lang: "ar", alt: [{ toString: () => "x" }, "y".repeat(200)], offline: true });
   assert.equal(bad.data.lang, "en");
   assert.deepEqual(plain(wiki.asked[2]), ["ar", "Photosynthesis"], "only short text titles are passed on");
 });
@@ -1329,7 +1391,7 @@ test("the deck is read from storage once, not for every lookup; deleting all car
   const cards = {};
   for (let i = 0; i < 50; i++) cards["w" + i] = { ...newCard, q: "w" + i, tr: "ك" };
   const google = recorder(() => json(200, { src: "en", sentences: [{ trans: "مرن", orig: "x" }] }));
-  const env = makeEnv({ fetchImpl: google.fetchImpl, local: { cards, cardsImported: true }, sync: { uiLang: "ar", dictSource: "online", translateDefinitions: false }, events: true });
+  const env = makeEnv({ fetchImpl: google.fetchImpl, local: { cards, cardsImported: true }, sync: { uiLang: "ar", dictSource: "online", translateDefinitions: false, cardsAuto: true }, events: true });
   let reads = 0;
   const get = env.browser.storage.local.get.bind(env.browser.storage.local);
   env.browser.storage.local.get = keys => { if ([].concat(keys || []).includes("cards")) reads++; return get(keys); };

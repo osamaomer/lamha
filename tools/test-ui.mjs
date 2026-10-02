@@ -288,7 +288,7 @@ await step("options: clicking a bar shows its rule and only its examples", async
 
 await step("options: review section shows deck stats; clearing the deck works", async () => {
   assert.match(text(o("rvSummary")), /في قائمة مراجعتك كلمتان/);
-  assert.equal(o("cardsAuto").checked, true);
+  assert.equal(o("cardsAuto").checked, false, "off by default: the user picks words for review with 🔖");
   assert.equal(o("cardsNewPerDay").value, "10");
   o("rvClear").click();
   const dlg = opt.document.querySelector("dialog.dlg");
@@ -306,7 +306,7 @@ await step("options: review section shows deck stats; clearing the deck works", 
   await sleep(400); // the background's badge refresh and the page's re-render
   assert.deepEqual(local.data.cards, {});
   assert.doesNotMatch(text(o("rvSummary")), /كلمتان/, "the old counts are gone");
-  assert.match(text(o("rvSummary")), /تُضاف إلى بطاقات المراجعة/, "back to the introduction");
+  assert.match(text(o("rvSummary")), /تصير بطاقات مراجعة/, "back to the introduction");
 });
 
 await step("options: translation service saves per device; model menu and status follow the translator", async () => {
@@ -378,6 +378,20 @@ await step("English: settings page translated, language menu shows the choice", 
   assert.equal(tocLinks.filter(a => a.getAttribute("aria-current") === "true").length, 1);
   const links = tocLinks.map(text);
   assert.ok(links.includes("Privacy & history") && links.includes("Writing tools"), "section links keep their punctuation: " + links.join(" | "));
+  // the mouse wheel over the bar scrolls it sideways (no scrollbar: the wheel moved the page and the last links stayed cut)
+  const row = enOpt.document.querySelector("#toc .toc-links");
+  const scrolled = [];
+  row.getBoundingClientRect = () => ({ left: 0, right: 300, top: 0, bottom: 30, width: 300, height: 30 });
+  tocLinks.forEach((a, i) => { a.getBoundingClientRect = () => ({ left: i * 110, right: i * 110 + 100, top: 0, bottom: 30, width: 100, height: 30 }); });
+  row.scrollBy = o => scrolled.push(o.left);
+  Object.defineProperty(row, "scrollWidth", { configurable: true, value: tocLinks.length * 110 });
+  Object.defineProperty(row, "clientWidth", { configurable: true, value: 300 });
+  const wheel = deltaY => row.dispatchEvent(new enOpt.WheelEvent("wheel", { deltaY, bubbles: true, cancelable: true })); // false: taken by the bar
+  assert.equal(wheel(100), false, "down: the bar, not the page");
+  assert.deepEqual(scrolled, [320 - 300 + 48], "the next hidden link, whole and past the fade (left to right in English)");
+  assert.equal(wheel(-100), true, "up at the row's start: the page scrolls");
+  Object.defineProperty(row, "scrollWidth", { configurable: true, value: 300 });
+  assert.equal(wheel(100), true, "all links fit: the page scrolls");
   assert.match(text(eo("jSummary")), /^You proofread 5 texts and 13 mistakes were found\. Most frequent: Articles/);
   // no visible Arabic, except the native name of Arabic in the language menu
   const visible = [...enOpt.document.querySelectorAll("h1, h2, h3, b, small, p, button, label, option, li, span, footer")]

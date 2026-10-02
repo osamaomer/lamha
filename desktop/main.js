@@ -4,7 +4,7 @@
  *   npm start               run the app
  *   npm run smoke           self-test: starts with a temporary profile, checks everything, quits */
 "use strict";
-const { app, BrowserWindow, Tray, Menu, ipcMain, shell, nativeImage, Notification, globalShortcut, screen, clipboard, safeStorage, nativeTheme, dialog, protocol, net } = require("electron");
+const { app, BrowserWindow, Tray, Menu, ipcMain, shell, nativeImage, Notification, globalShortcut, screen, clipboard, safeStorage, nativeTheme, dialog, protocol, net, systemPreferences } = require("electron");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -196,6 +196,49 @@ function applyThemeSetting() {
   nativeTheme.themeSource = t === "light" || t === "dark" ? t : "system";
 }
 
+/* ---- Settings → Appearance: Windows' accent colour, and the wallpaper through the windows (storage.local) ----
+ * accentWindows: every page of the app (the card too, through its page) gets Lamha's accent tokens in Windows' colour,
+ * made readable for each theme (app-rules.js accentPalette / accentCss). windowMica: the main window and Settings
+ * show Windows 11's Mica material behind the page: only the page's own background goes (desktop.css .mica), the
+ * panels and cards keep their solid surface, so text never sits on the wallpaper. Windows draws the material, and
+ * shows it solid by itself when transparency effects or battery saver are on. The card stays solid: its window is
+ * larger than the card, and the material would fill all of it. Both are off by default. */
+const MICA_SUPPORTED = process.platform === "win32" && Number(os.release().split(".")[2]) >= 22621; // Windows 11 22H2
+const MICA_WINDOWS = () => [mainWin, optionsWin].filter(w => w && !w.isDestroyed());
+const lookKeys = new WeakMap(); // webContents → the key of the accent stylesheet inserted in it
+const micaOn = () => MICA_SUPPORTED && stores.local.data.windowMica === true;
+function lookCss() {
+  if (stores.local.data.accentWindows !== true) return "";
+  try { return rules.accentCss(rules.accentPalette(systemPreferences.getAccentColor())); } catch (_) { return ""; }
+}
+/** Gives `win`'s page the current look (after each load: inserted CSS goes with the document). */
+async function applyLook(win, css = lookCss()) {
+  if (!win || win.isDestroyed()) return;
+  const wc = win.webContents;
+  const old = lookKeys.get(wc);
+  if (old) { lookKeys.delete(wc); await wc.removeInsertedCSS(old).catch(() => {}); }
+  if (css) lookKeys.set(wc, await wc.insertCSS(css));
+  const mica = micaOn() && MICA_WINDOWS().includes(win);
+  await wc.executeJavaScript(`document.documentElement.classList.toggle("mica", ${mica}); true`).catch(() => {});
+}
+function applyMaterial() {
+  for (const w of MICA_WINDOWS()) {
+    const on = micaOn();
+    w.setBackgroundMaterial(on ? "mica" : "none");
+    w.setBackgroundColor(on ? "#00000000" : nativeTheme.shouldUseDarkColors ? "#1c1c1e" : "#f5f5f7");
+  }
+}
+function applyLookEverywhere() {
+  applyMaterial();
+  const css = lookCss();
+  for (const w of BrowserWindow.getAllWindows()) if (!(clipboardMonitor && w === clipboardMonitor.win)) applyLook(w, css).catch(() => {});
+}
+function watchLook() {
+  storageListeners.push((changes, area) => { if (area === "local" && (changes.accentWindows || changes.windowMica)) applyLookEverywhere(); });
+  if (process.platform === "win32") systemPreferences.on("accent-color-changed", () => applyLookEverywhere()); // picked in Windows: follow at once
+  nativeTheme.on("updated", () => { if (!micaOn()) applyMaterial(); }); // the solid colour behind the page follows the theme
+}
+
 /**
  * What "Automatic" animations means on this PC (rules.motionHint: a weak machine, or a graphics card asked for that
  * doesn't work, gets "subtle"). Windows' own "Animation effects" switch is seen by the pages directly
@@ -257,6 +300,7 @@ ipcMain.handle("lamha:call", async (e, method, args) => {
     case "update.restart": updater.restart(); return true;
     case "firefox.status": return { available: !!bridge, connected: !!(bridge && bridge.connected), lastSeen: bridge ? bridge.lastSeen : 0 };
     case "app.gpu": return GPU; // what this run draws with (Settings compares it with the setting)
+    case "app.mica": return MICA_SUPPORTED; // Settings shows the wallpaper switch only on Windows 11
     case "app.restart": restartApp(); return true;
     default: throw new Error("unknown call " + method);
   }
@@ -342,6 +386,7 @@ function prepare(win) {
   const wc = win.webContents;
   wc.on("dom-ready", () => {
     wc.insertCSS(DESKTOP_CSS);
+    applyLook(win).catch(() => {}); // Windows' accent colour and the Mica class (Settings → Appearance)
     // pages call window.close() after opening Settings (popup behaviour) — keep the window open
     wc.executeJavaScript("document.documentElement.classList.add('desktop'); window.close = () => {}; true").catch(() => {});
   });
@@ -404,6 +449,7 @@ function openOptions(suffix) {
       autoHideMenuBar: true, backgroundColor: "#f5f5f7", webPreferences: webPrefs()
     });
     prepare(optionsWin);
+    applyMaterial(); // Mica behind Settings too, when it's on
     if (clipboardMonitor) { // settings → الحافظة: added by the desktop app (options.html is the extension's)
       const wc = optionsWin.webContents;
       wc.on("did-finish-load", () => injectClipboardUi(wc, "settings.js").catch(err => console.error("clipboard settings failed:", err && err.message)));
@@ -1081,6 +1127,8 @@ if (!gotLock) {
     serveWikiAssets();
     applyThemeSetting(); // before the windows open, so they start in the right colours
     createMain();
+    applyMaterial(); // Mica behind the main window, when it's on
+    watchLook();
     if (selection) createCardWin(); // ready before the first shortcut, so it opens instantly
     startClipboard().catch(err => console.error("clipboard history failed to start:", err && err.name)); // runs synchronously up to its await
     // tray, notifications and window titles follow the interface language (pages redraw themselves)

@@ -110,7 +110,7 @@ Lamha offers the tools that fit the text: English text gets the editing tools, a
 
 ### 🗂️ Word review (flashcards)
 
-Every English word you look up becomes a review card, with the sentence you found it in, its meaning in that sentence and a short definition. Words already in your history are imported the first time.
+A word goes into review when you choose it: press **🔖** on the lookup card, and it becomes a review card with the sentence you found it in, its meaning in that sentence and a short definition. To add every English word you look up instead, turn on Settings → مراجعة الكلمات → **إضافة الكلمات تلقائيًا**.
 
 - **Where:** the **مراجعة** (Review) tab. A badge shows how many cards are waiting.
 - **The front** shows the word, a 🔊 button, and your sentence with the word highlighted.
@@ -290,6 +290,7 @@ A history of what you copy in any program, with Lamha's language tools on every 
 - **Review reminders:** a Windows notification when cards are waiting, at most every 4 hours.
 - **Ollama** works without the `OLLAMA_ORIGINS` step.
 - **Your data** (settings, cards, the mistake journal) is saved in `%APPDATA%\Lamha`. API keys are encrypted with DPAPI.
+- **Looks like Windows:** Settings → المظهر → **لون التمييز من Windows** gives buttons and links the accent colour you chose in Windows (adjusted to stay readable, and following your changes at once), and on Windows 11 **إظهار خلفية سطح المكتب خلف النافذة** shows a touch of your wallpaper behind the main window and Settings (Mica), with the cards still solid. Both are off until you turn them on.
 - **Less memory:** Lamha draws without the graphics card, which saves about 25 MB. For smoother animations, turn on Settings → المظهر → الرسم بمعالج الرسوميات. The change applies when Lamha starts again (Settings offers to restart).
 - **Updates:** the installed app checks [GitHub Releases](https://github.com/osamaomer/lamha/releases) at startup and every 6 hours, downloads new versions in the background and installs them when Lamha restarts. The tray has **التحقق من التحديثات**, and Settings → التحديثات can turn automatic updates off. The Portable version can't replace itself: it tells you a new version is out and links to the download.
 

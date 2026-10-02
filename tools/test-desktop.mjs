@@ -57,6 +57,23 @@ test("Automatic animations: Subtle on a weak PC or a graphics card that doesn't 
   assert.equal(rules.motionHint({ totalMem: 8 * 1024 ** 3, cores: 2, gpuWanted: false }), "subtle", "2 cores");
 });
 
+test("Windows' accent colour: readable in both themes whatever was picked; its stylesheet beats the pages' own colours", () => {
+  const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  for (const picked of ["9E6804FF", "FFD700", "FFFFFF", "000000", "0078D4", "00CC6A", "E81123", "#6B69D6"]) {
+    const p = rules.accentPalette(picked);
+    assert.ok(rules.contrast(rgb(p.light.accent), [255, 255, 255]) >= 4.5, picked + ": links on the light cards");
+    assert.ok(rules.contrast(rgb(p.dark.accent), [44, 44, 46]) >= 4.5, picked + ": links on the dark cards");
+    for (const t of ["light", "dark"]) assert.ok(rules.contrast(rgb(p[t].btn), [255, 255, 255]) >= 4.5, picked + ": white text on its buttons");
+  }
+  assert.equal(rules.accentPalette("9E6804FF").light.accent, "#9e6804", "a colour that's readable stays as it was");
+  assert.equal(rules.accentPalette("not a colour"), null);
+  assert.equal(rules.accentCss(null), "", "no palette: Lamha's own colours");
+  const css = rules.accentCss(rules.accentPalette("0078D4"));
+  assert.match(css, /^html:root \{ --accent: #0078d4;/);
+  assert.match(css, /html:root\[data-theme="dark"\] \{ --accent: #/);
+  assert.match(css, /--lamha-app-accent-dark: #/, "the card's shadow root gets both themes' colours");
+});
+
 test("Settings' address: section and welcome", () => {
   assert.deepEqual(rules.optionsTarget("#journal"), { search: "", hash: "journal" });
   assert.deepEqual(rules.optionsTarget("?welcome=1"), { search: "welcome=1", hash: "ai" });

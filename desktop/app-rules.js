@@ -83,4 +83,53 @@ function motionHint({ gpuWanted, gpuCompositing = "enabled", totalMem, cores }) 
   return weak || broken ? "subtle" : "full";
 }
 
-module.exports = { SECRET_KEYS, PAGE_DATA, withoutSecrets, changesFor, OUTSIDE_TEXT_MESSAGES, allowedFromOutsideText, wikiSummaryArgs, optionsTarget, cardPlacement, panelPlacement, motionHint };
+/* ---- Windows' accent colour (Settings → Appearance, accentWindows) ----
+ * Windows lets people pick any colour, light yellow included, so it isn't used as it is: each theme gets a version
+ * that keeps text readable (WCAG 4.5:1). --accent (links, labels, icons) against the cards' surface, --btn (filled
+ * buttons, selected chips) under white text. The page palette's own values stay the fallbacks (shared/ui.css). */
+const SURFACE = { light: [255, 255, 255], dark: [44, 44, 46] }; // --surface in ui.css and the card's --bg
+const lum = rgb => {
+  const c = rgb.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+};
+const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+const mix = (rgb, to, t) => rgb.map((v, i) => Math.round(v + (to[i] - v) * t));
+const hex = rgb => "#" + rgb.map(v => v.toString(16).padStart(2, "0")).join("");
+/** `rgb` moved toward `to` (black or white) just enough to reach 4.5:1 against `against`. */
+function readable(rgb, against, to) {
+  for (let t = 0; t <= 1.0001; t += 0.04) { const c = mix(rgb, to, t); if (contrast(c, against) >= 4.5) return c; }
+  return to;
+}
+
+/**
+ * The accent and button colours for both themes from Windows' accent (systemPreferences.getAccentColor(): "RRGGBB"
+ * or "RRGGBBAA"), or null when it isn't a colour. { light: { accent, accentSoft, btn }, dark: { … } }.
+ */
+function accentPalette(windowsHex) {
+  const m = /^#?([0-9a-f]{6})([0-9a-f]{2})?$/i.exec(String(windowsHex || ""));
+  if (!m) return null;
+  const rgb = [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16));
+  const white = [255, 255, 255], black = [0, 0, 0];
+  const theme = (surface, toward) => {
+    const accent = readable(rgb, surface, toward);
+    const btn = readable(rgb, white, black); // white text on it, in both themes
+    return { accent: hex(accent), accentSoft: `rgba(${accent.join(", ")}, ${toward === white ? 0.15 : 0.09})`, btn: hex(btn) };
+  };
+  return { light: theme(SURFACE.light, black), dark: theme(SURFACE.dark, white) };
+}
+
+/**
+ * The stylesheet a page of the app gets for that palette: the pages' own tokens (stronger than ui.css's :root rules,
+ * for both ways a page turns dark), and --lamha-app-* for the card, whose shadow root takes them from its page
+ * (content/styles.js .root.app). "" without a palette: the pages keep Lamha's colours.
+ */
+function accentCss(p) {
+  if (!p) return "";
+  const vars = t => `--accent: ${t.accent}; --accent-soft: ${t.accentSoft}; --btn: ${t.btn};`;
+  const card = (t, sfx) => `--lamha-app-accent${sfx}: ${t.accent}; --lamha-app-accent-soft${sfx}: ${t.accentSoft}; --lamha-app-btn${sfx}: ${t.btn};`;
+  return `html:root { ${vars(p.light)} ${card(p.light, "")} ${card(p.dark, "-dark")} }
+html:root[data-theme="dark"] { ${vars(p.dark)} }
+@media (prefers-color-scheme: dark) { html:root:not([data-theme="light"]) { ${vars(p.dark)} } }`;
+}
+
+module.exports = { SECRET_KEYS, PAGE_DATA, withoutSecrets, changesFor, OUTSIDE_TEXT_MESSAGES, allowedFromOutsideText, wikiSummaryArgs, optionsTarget, cardPlacement, panelPlacement, motionHint, accentPalette, accentCss, contrast };

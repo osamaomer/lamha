@@ -25,7 +25,7 @@ const DEFAULT_SETTINGS = {
   aiInInputs: true, // show the writing-tools button when text is selected inside text fields
   writeOnDblClick: true, // double-clicking an empty text box shows the Write button (Write new)
   saveMistakes: true, // mistake journal: keep what proofreading finds (storage.local) and personalize explanations
-  cardsAuto: true, // add looked-up English words to the review deck
+  cardsAuto: false, // add every looked-up English word to the review deck; off by default (the user's call, 2026-10-02): they pick words with 🔖
   cardsNewPerDay: 10, // new words introduced per day in review
   dailyGoal: 10, // the day's goal (the popup's ring): words looked up + review answers; 0 = no goal
   uiLang: "auto", // interface language: "auto" (the system's: Arabic or English) | "ar" | "en" — see shared/i18n.js
@@ -496,7 +496,7 @@ async function lookup(rawText, opts = {}) {
   const key = [text.toLowerCase(), sl, tl, word, settings.translateDefinitions, mode, LamhaI18n.lang(),
     context ? context.before + "¦" + context.after : "", tr.key, force, english, [].concat(settings.explainLangs || []).join(","), LamhaPacks.key()].join("|");
   const cached = lookupCache.get(key);
-  if (cached) return remember(cached, text, word, context, settings);
+  if (cached) { prefetchWiki(cached, settings); return remember(cached, text, word, context, settings); }
   // the word's meaning in its sentence, asked at once: it doesn't depend on the dictionary's answer, so the two
   // requests go out together (Online first: two round trips instead of three). Unused if the word is explained.
   const ctxAsk = context && !english && !force ? contextTranslate(text, context, tl, sl, { tr, offline: mode === "offline" }).catch(() => null) : null;
@@ -550,6 +550,7 @@ async function lookup(rawText, opts = {}) {
   // The meaning of the word in *this* sentence: the sentence translated with the word marked (on "Local only", only a
   // local AI may read it: trPlan). An answer from the dictionary waits for it a short while only: a network that
   // answers nothing mustn't hold the card; that answer isn't kept, so the next lookup asks again.
+  prefetchWiki(result, settings); // the card's Wikipedia part: on its way while the sentence is translated
   let contextLate = false;
   if (ctxAsk && result.type === "word" && result.mode !== "explain") {
     const ctx = result.source === "local" ? await ctxInTime : await ctxAsk;
@@ -962,12 +963,52 @@ async function openWikiReader(file, articlePath) {
  * ("offline" dictionary setting). A downloaded Wikipedia answers when Wikipedia can't be reached, or first when the
  * user chose that (wikiOfflineFirst, per device).
  */
+// The summary is an extra under the answer: each request may take this long, and after a failure (no network, a
+// timeout, Wikipedia's "too many requests") Wikipedia rests a while, as Google does (NET_PAUSE_MS): a network that
+// answers nothing held the card's last part for up to 3 × 8 s, on every lookup.
+const WIKI_WAIT_MS = 4000;
+let wikiDownUntil = 0;
+const wikiPending = new Map(); // key → the request on its way (prefetchWiki started it, the card asks again)
+/** Wikimedia asks every program to say who it is, and limits the ones that don't: the Windows app's fetch said only
+ *  "node", and was told "too many requests" after a few lookups. A browser keeps its own User-Agent. */
+function wikiHeaders() {
+  const id = `Lamha/${browser.runtime.getManifest ? browser.runtime.getManifest().version : ""} (https://github.com/osamaomer/lamha)`;
+  return typeof LamhaDesktopInfo === "function" ? { "Api-User-Agent": id, "User-Agent": id } : { "Api-User-Agent": id };
+}
+
+/** The titles a downloaded Wikipedia in the translation language may have for this word: its translation and the first
+ *  word of each meaning ("paris" → باريس). Explained words have no translation to go by. */
+function wikiTitles(d) {
+  if (d.mode === "explain") return [];
+  const out = [];
+  for (const t of [...String(d.translation || "").split(/[،,;؛]/), ...(d.dict || []).map(p => p.terms && p.terms[0] && p.terms[0].word)]) {
+    const v = String(t || "").trim();
+    if (v && v.length <= 60 && !out.includes(v)) out.push(v);
+  }
+  return out.slice(0, 4);
+}
+
+/** Wikipedia for a word the card is about to show, started as soon as the lookup has it: the card asks only once the
+ *  whole lookup is done (the sentence's translation may take a while), and then gets the request already on its way. */
+function prefetchWiki(result, settings) {
+  if (!settings.showWikipedia || !result || result.type !== "word" || result.src !== "en" || String(result.query || "").length <= 2) return;
+  wikiSummary(result.query, result.tl === "en" ? "en" : settings.targetLang, { alt: wikiTitles(result), offline: settings.dictSource === "offline" }).catch(() => {});
+}
+
 async function wikiSummary(title, preferLang = "ar", { alt = [], offline = false } = {}) {
   if (!/^[a-z]{2,3}(-[a-z]{2,8})?$/.test(preferLang)) preferLang = "en"; // it becomes part of a hostname
   alt = (Array.isArray(alt) ? alt : []).filter(t => typeof t === "string" && t.trim() && t.length <= 60).slice(0, 4);
-  const key = [title.toLowerCase(), preferLang, offline ? "off" : "", ...alt].join("|");
+  // the titles for a downloaded copy come from the word's own translation: the same word asks the same thing
+  const key = [title.toLowerCase(), preferLang, offline ? "off" : ""].join("|");
   const hit = wikiCache.get(key);
   if (hit !== undefined) return hit;
+  if (wikiPending.has(key)) return wikiPending.get(key);
+  const p = wikiFind(title, preferLang, alt, offline, key).finally(() => wikiPending.delete(key));
+  wikiPending.set(key, p);
+  return p;
+}
+
+async function wikiFind(title, preferLang, alt, offline, key) {
 
   const local = await offlineWiki();
   const noNet = browserOffline(); // no network at all: only the downloaded copy, without waiting for Wikipedia to fail
@@ -980,31 +1021,39 @@ async function wikiSummary(title, preferLang = "ar", { alt = [], offline = false
     return result;
   }
   let failed = false; // Wikipedia couldn't be reached: the downloaded copy answers, and nothing is kept
+  const ask = url => fetchJSON(url, { headers: wikiHeaders() }, { retries: 1, timeout: WIKI_WAIT_MS });
   try {
+    if (Date.now() < wikiDownUntil) throw new Error("network"); // it failed a moment ago: don't wait for it again
     const q = new URLSearchParams({
       action: "query", titles: title, prop: "langlinks", lllang: preferLang,
       format: "json", redirects: "1", origin: "*"
     });
-    const ll = await fetchJSON(`https://en.wikipedia.org/w/api.php?${q}`, {}, { retries: 1, timeout: 8000 });
+    const ll = await ask(`https://en.wikipedia.org/w/api.php?${q}`);
     const pages = Object.values((ll.query && ll.query.pages) || {});
     const page = pages[0];
     if (page && !("missing" in page)) {
       const arTitle = page.langlinks && page.langlinks[0] && page.langlinks[0]["*"];
       const tryFetch = async (lang, t) => {
         try {
-          const s = await fetchJSON(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t.replace(/ /g, "_"))}`, {}, { retries: 1, timeout: 8000 });
+          const s = await ask(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t.replace(/ /g, "_"))}`);
           if (s.type !== "standard" || !s.extract) return null;
           return {
             lang, title: s.title, extract: s.extract,
             url: httpsOnly(s.content_urls && s.content_urls.desktop && s.content_urls.desktop.page),
             thumb: httpsOnly(s.thumbnail && s.thumbnail.source)
           };
-        } catch (_) { return null; }
+        } catch (err) {
+          if (err.name === "AbortError" || err.name === "TypeError" || err.status === 429) throw err; // the network, not this article
+          return null;
+        }
       };
       if (arTitle && preferLang !== "en") result = await tryFetch(preferLang, arTitle);
       if (!result) result = await tryFetch("en", page.title);
     }
-  } catch (_) { result = null; failed = true; }
+  } catch (err) {
+    result = null; failed = true;
+    if (err.name === "AbortError" || err.name === "TypeError" || err.status === 429 || err.message === "network") wikiDownUntil = Math.max(wikiDownUntil, Date.now() + NET_PAUSE_MS);
+  }
 
   if (failed && local && !first) result = await offlineWikiSummary(title, preferLang, alt);
   if (!failed) wikiCache.set(key, result);
@@ -1590,11 +1639,12 @@ function addCard(c) {
   return withDeck(deck => putCard(deck, c)).then(added => { if (added) updateBadge(); return added; });
 }
 
-/** One-time: words looked up before flashcards existed become cards. */
+/** One-time: words looked up before flashcards existed become cards, when lookups add words by themselves (cardsAuto):
+ *  otherwise the user chooses each word, and the history isn't turned into cards for them. */
 async function importHistory(deck) {
   if (deck.imported) return;
-  const { history = [] } = await browser.storage.local.get("history");
-  history.slice().reverse().forEach(h => { if (h.src === "en") putCard(deck, { q: h.q, tr: h.tr }); });
+  const [{ history = [] }, { cardsAuto }] = await Promise.all([browser.storage.local.get("history"), browser.storage.sync.get({ cardsAuto: DEFAULT_SETTINGS.cardsAuto })]);
+  if (cardsAuto) history.slice().reverse().forEach(h => { if (h.src === "en") putCard(deck, { q: h.q, tr: h.tr }); });
   deck.imported = true;
   deck.dirty = true;
 }

@@ -64,6 +64,7 @@ if (info.role === "page") {
 if (info.role === "page") {
   contextBridge.exposeInMainWorld("lamhaApp", {
     gpu: () => call("app.gpu"), // whether this run draws with the graphics card
+    mica: () => call("app.mica"), // whether Windows can show the wallpaper through the windows (Windows 11)
     restart: () => call("app.restart")
   });
 }
