@@ -296,7 +296,7 @@ A history of what you copy in any program, with Lamha's language tools on every 
 
 ### Installing
 
-Download **Lamha-Setup-&lt;version&gt;.exe** from [Releases](https://github.com/osamaomer/lamha/releases). Only the Setup version updates itself; the Portable one doesn't.
+Download it from [the website](https://osamaomer.github.io/lamha/), or **Lamha-Setup-&lt;version&gt;.exe** from [Releases](https://github.com/osamaomer/lamha/releases). Only the Setup version updates itself; the Portable one doesn't.
 
 The app isn't code-signed, so the first time it runs Windows SmartScreen says "Windows protected your PC". Choose *More info → Run anyway*.
 
@@ -326,8 +326,10 @@ GitHub Actions builds releases ([release.yml](.github/workflows/release.yml)), s
    git push && git push origin v1.8.1
    ```
    Keep `manifest.json`'s `version` in step with it.
-4. The **Release** workflow checks the tag matches the version, runs the tests, builds both installers, and publishes them with `latest.yml` as a GitHub Release, with the changelog entry as its notes. Follow it in the **Actions** tab.
+4. The **Release** workflow checks the tag matches the version, runs the tests, builds both installers, and publishes them with `latest.yml` as a GitHub Release, with the changelog entry as its notes. It also uploads copies named `Lamha-Setup.exe` and `Lamha-Portable.exe`, so `releases/latest/download/Lamha-Setup.exe` is always the newest installer. Follow it in the **Actions** tab.
 5. Installed copies pick it up on their next check.
+
+**The website** ([site/](site/), at <https://osamaomer.github.io/lamha/>) is published by [site.yml](.github/workflows/site.yml) whenever `site/` or the changelog changes on `main`. It needs nothing at release time: its download buttons ask GitHub for the latest release, and its *What's new* shows that version's entry from `shared/changelog.js`. `og.png` is the picture X and other sites show for a shared link (1200×630).
 
 The language packs have their own workflow ([packs.yml](.github/workflows/packs.yml)): pushing a `packs-v*` tag builds them and publishes them as a release that is never marked "latest" (the app's updates come from the latest release).
 

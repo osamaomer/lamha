@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لمحة · Lamha</title>
+<meta name="description" content="لمحة: قاموس ومترجم ومدقّق لكتابتك بالإنجليزية، يعمل في كل برامج ويندوز وفي فايرفوكس. Lamha: an Arabic-first dictionary, translator and English writing coach for Windows and Firefox.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="لمحة · Lamha">
+<meta property="og:description" content="حدّد كلمة، وافهمها في لمحة. Select a word. Get it at a glance.">
+<meta property="og:url" content="https://osamaomer.github.io/lamha/">
+<meta property="og:image" content="https://osamaomer.github.io/lamha/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@Osamaomer97">
+<meta name="twitter:creator" content="@Osamaomer97">
+<meta name="twitter:title" content="لمحة · Lamha">
+<meta name="twitter:description" content="حدّد كلمة، وافهمها في لمحة. Select a word. Get it at a glance.">
+<meta name="twitter:image" content="https://osamaomer.github.io/lamha/og.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: the page opens on a dictionary entry for the product's own name beside a live card demo; every feature
+   below is another entry (headword, pronunciation, part of speech) in one 1120px column. Colours are the app's own
+   (shared/ui.css), so the site looks like what you download. */
+:root {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --fg: #1d1d1f;
+  --muted: #5f5f64;
+  --faint: #707075;
+  --line: rgba(0, 0, 0, 0.08);
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.09);
+  --btn: #4f46e5;
+  --btn-fg: #ffffff;
+  --cyan: #0e7490;
+  --sel: rgba(79, 70, 229, 0.18);
+  --ok: #166534;
+  --ok-soft: rgba(22, 163, 74, 0.12);
+  --danger: #c81e1e;
+  --danger-soft: rgba(220, 38, 38, 0.1);
+  --window-bar: #ededf0;
+  --shadow-lg: 0 30px 60px -30px rgba(30, 27, 75, 0.35), 0 0 0 1px var(--line);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px var(--line);
+  --brand: linear-gradient(135deg, #6366f1, #06b6d4);
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  /* Archivo has no Arabic letters, so in mixed text English uses Archivo and Arabic uses IBM Plex Sans Arabic */
+  --font: "Archivo", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c1c1e;
+    --surface: #2c2c2e;
+    --fg: #f5f5f7;
+    --muted: #a1a1a6;
+    --faint: #98989d;
+    --line: rgba(255, 255, 255, 0.1);
+    --accent: #8b93ff;
+    --accent-soft: rgba(139, 147, 255, 0.15);
+    --btn: #5e5ce6;
+    --btn-fg: #ffffff;
+    --cyan: #22d3ee;
+    --sel: rgba(139, 147, 255, 0.32);
+    --ok: #4ade80;
+    --ok-soft: rgba(74, 222, 128, 0.13);
+    --danger: #f87171;
+    --danger-soft: rgba(248, 113, 113, 0.14);
+    --window-bar: #252527;
+    --shadow-lg: 0 30px 60px -30px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--line);
+    --shadow-sm: 0 0 0 1px var(--line);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1c1c1e;
+  --surface: #2c2c2e;
+  --fg: #f5f5f7;
+  --muted: #a1a1a6;
+  --faint: #98989d;
+  --line: rgba(255, 255, 255, 0.1);
+  --accent: #8b93ff;
+  --accent-soft: rgba(139, 147, 255, 0.15);
+  --btn: #5e5ce6;
+  --btn-fg: #ffffff;
+  --cyan: #22d3ee;
+  --sel: rgba(139, 147, 255, 0.32);
+  --ok: #4ade80;
+  --ok-soft: rgba(74, 222, 128, 0.13);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.14);
+  --window-bar: #252527;
+  --shadow-lg: 0 30px 60px -30px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--line);
+  --shadow-sm: 0 0 0 1px var(--line);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 17px/1.7 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+html[lang="ar"] .en, html[lang="en"] .ar { display: none !important; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+::selection { background: var(--sel); }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+kbd {
+  font: 500 0.78em/1 var(--font);
+  padding: 0.28em 0.45em;
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm), 0 1px 0 var(--line);
+  color: var(--fg);
+  white-space: nowrap;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; }
+.icon { width: 1.15em; height: 1.15em; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* --- header --- */
+.top {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: saturate(1.4) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--fg); font: 700 21px/1 var(--font); }
+.brand:hover { text-decoration: none; }
+.brand img { width: 30px; height: 30px; }
+.brand small { font: 500 14px/1 var(--font); color: var(--faint); }
+.nav { display: flex; gap: 20px; margin-inline-start: auto; font-size: 15px; }
+.nav a { color: var(--muted); }
+.nav a:hover { color: var(--fg); text-decoration: none; }
+.lang-btn {
+  font: 500 14px/1 var(--font);
+  color: var(--fg);
+  background: var(--surface);
+  border: 0;
+  box-shadow: var(--shadow-sm);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.lang-btn:hover { background: var(--accent-soft); }
+@media (max-width: 760px) { .nav { display: none; } .lang-btn { margin-inline-start: auto; } }
+
+/* --- buttons --- */
+.btns { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 10px 22px;
+  border-radius: 12px;
+  font: 600 16px/1.25 var(--font);
+  text-decoration: none !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn.primary { background: var(--btn); color: var(--btn-fg); box-shadow: 0 10px 24px -12px rgba(79, 70, 229, 0.8); }
+.btn.primary:hover { transform: translateY(-1px); }
+.btn.ghost { background: var(--surface); color: var(--fg); box-shadow: var(--shadow-sm); }
+.btn.ghost:hover { background: var(--accent-soft); }
+.btn .sub { display: block; font: 500 12.5px/1.2 var(--font); opacity: 0.85; margin-top: 3px; font-variant-numeric: tabular-nums; }
+.btn .sub:empty { display: none; }
+.fine { font-size: 14px; color: var(--faint); }
+
+/* --- hero --- */
+.hero { padding-block: 64px 40px; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 56px; align-items: center; }
+.hero-copy { display: grid; gap: 24px; min-width: 0; }
+.entry-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; color: var(--muted); font-size: 16px; }
+.entry-line .hw { font: 700 34px/1 var(--font); color: var(--fg); }
+.ipa { font: 500 15px/1 var(--font); color: var(--faint); direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+.pos { font-size: 13.5px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 2px 9px; border-radius: 999px; }
+h1 {
+  font: 700 clamp(40px, 5.6vw, 66px)/1.15 var(--font);
+  letter-spacing: -0.01em;
+}
+html[lang="en"] h1 { line-height: 1.08; letter-spacing: -0.02em; }
+html[lang="ar"] h1 { line-height: 1.35; }
+html[lang="ar"] .entry h2, html[lang="ar"] .band h2, html[lang="ar"] .final h2 { line-height: 1.45; }
+h1 .glance { background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { font-size: 18.5px; color: var(--muted); max-width: 34em; }
+@media (max-width: 920px) { .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 40px; } .hero { padding-block: 40px 24px; } }
+
+/* --- the demo window --- */
+.demo { display: grid; gap: 12px; min-width: 0; }
+.win { background: var(--surface); border-radius: 12px; box-shadow: var(--shadow-lg); overflow: hidden; direction: ltr; text-align: left; }
+.win-bar { display: flex; align-items: center; height: 38px; padding-left: 14px; background: var(--window-bar); font: 400 12.5px/1 "Segoe UI", system-ui, sans-serif; color: var(--muted); }
+.win-bar .ctl { margin-left: auto; display: flex; height: 100%; }
+.win-bar .ctl span { width: 44px; display: grid; place-items: center; }
+.win-bar .ctl svg { width: 10px; height: 10px; stroke: currentColor; stroke-width: 1; fill: none; }
+.mail-head { padding: 16px 22px 0; display: grid; gap: 2px; font: 400 13.5px/1.5 "Segoe UI", system-ui, sans-serif; color: var(--muted); }
+.mail-head b { color: var(--fg); font-weight: 600; font-size: 15px; }
+.demo-body { position: relative; min-height: 430px; padding: 14px 22px 24px; }
+.mail-text { font: 400 16.5px/1.75 "Segoe UI", system-ui, sans-serif; color: var(--fg); }
+.mail-text p + p { margin-top: 10px; }
+.w {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0 1px;
+  margin: 0 -1px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: underline dotted var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.w:hover { background: var(--accent-soft); }
+.w.on { background: var(--sel); text-decoration-color: transparent; }
+.hint { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--faint); }
+.hint .icon { color: var(--accent); }
+
+/* --- the Lamha card (as in the app: content/styles.js) --- */
+.card {
+  position: absolute;
+  left: var(--x, 22px);
+  top: var(--y, 200px);
+  width: 312px;
+  max-width: calc(100% - 24px);
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--line);
+  font: 400 15px/1.55 var(--font);
+  color: var(--fg);
+  transform-origin: var(--ox, 50%) top;
+  z-index: 2;
+}
+.card.pop { animation: pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+@keyframes pop { from { opacity: 0; transform: scale(0.94) translateY(-4px); } }
+.card-head { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-bottom: 1px solid var(--line); font-size: 12.5px; color: var(--faint); }
+.card-head img { width: 16px; height: 16px; }
+.card-head b { color: var(--fg); font-weight: 600; }
+.card-head .x { margin-inline-start: auto; }
+.card-main { padding: 12px 14px 14px; display: grid; gap: 10px; }
+.word-row { display: flex; align-items: center; gap: 10px; direction: ltr; }
+.word-row .word { font: 700 23px/1.1 var(--font); }
+.word-row .ipa { font-size: 13px; }
+.spk { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+.meaning { background: var(--accent-soft); border-radius: var(--r-md); padding: 10px 12px; }
+.meaning .lbl { font-size: 12px; font-weight: 600; color: var(--accent); }
+.meaning .ar-m { font-size: 22px; font-weight: 700; line-height: 1.4; direction: rtl; }
+.defn { display: grid; gap: 2px; font-size: 14px; }
+.defn .d-ar { direction: rtl; text-align: right; }
+.defn .d-en { direction: ltr; text-align: left; color: var(--muted); font-size: 13px; }
+.defn .pos { justify-self: start; font-size: 11.5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; direction: rtl; align-items: center; }
+.chips .lbl { font-size: 12px; color: var(--faint); }
+.chip { font-size: 13px; padding: 2px 10px; border-radius: 999px; background: var(--bg); box-shadow: var(--shadow-sm); }
+html[lang="ar"] .card { direction: rtl; text-align: right; }
+html[lang="en"] .card { direction: ltr; text-align: left; }
+@media (max-width: 560px) {
+  .demo-body { min-height: 0; }
+  .card { position: static; width: auto; max-width: none; margin-top: 16px; }
+}
+
+/* --- steps --- */
+.steps { padding-block: 8px 24px; }
+.steps ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: start; align-content: start; padding: 18px 20px; background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); font-size: 15.5px; color: var(--muted); }
+.steps li::before { content: counter(s); grid-row: span 2; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 700 15px/1 var(--font); color: var(--accent); background: var(--accent-soft); }
+.steps li b { color: var(--fg); font-weight: 600; }
+.apps { margin-top: 18px; font-size: 14.5px; color: var(--faint); text-align: center; }
+.apps span { color: var(--muted); font-weight: 500; }
+@media (max-width: 760px) { .steps ol { grid-template-columns: minmax(0, 1fr); } }
+
+/* --- feature entries --- */
+.entries { padding-block: 48px 24px; display: grid; gap: 104px; }
+.entry { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 56px; align-items: center; }
+.entry:nth-child(even) .copy { order: 2; }
+.entry .copy { display: grid; gap: 16px; min-width: 0; align-content: start; }
+.entry .entry-line .hw { font: 700 20px/1 var(--font); direction: ltr; }
+.entry h2 { font: 700 clamp(28px, 3.4vw, 38px)/1.25 var(--font); }
+.entry .copy > p { color: var(--muted); max-width: 33em; }
+.ticks { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 8px; font-size: 15.5px; }
+.ticks li { display: flex; gap: 10px; align-items: flex-start; }
+.ticks .icon { color: var(--accent); margin-top: 0.3em; }
+.only { justify-self: start; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--cyan); }
+.stage { min-width: 0; padding: 28px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow-sm); display: grid; gap: 14px; }
+@media (max-width: 920px) {
+  .entries { gap: 72px; }
+  .entry { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .entry:nth-child(even) .copy { order: 0; }
+}
+@media (max-width: 480px) { .stage { padding: 18px; } }
+
+/* context */
+.ctx { display: grid; gap: 4px; padding: 14px 16px; border-radius: var(--r-md); background: var(--bg); }
+.ctx .s { font: 400 16px/1.6 var(--font); direction: ltr; text-align: left; }
+.ctx mark { background: var(--sel); color: inherit; border-radius: 3px; padding: 0 2px; }
+.ctx .r { display: flex; align-items: baseline; gap: 10px; font-size: 21px; font-weight: 700; }
+.ctx .r small { font-size: 13px; font-weight: 500; color: var(--faint); }
+
+/* proofread */
+.proof { font: 400 17px/2 var(--font); direction: ltr; text-align: left; }
+.proof del { color: var(--danger); background: var(--danger-soft); text-decoration-thickness: 2px; border-radius: 3px; padding: 0 2px; }
+.proof ins { color: var(--ok); background: var(--ok-soft); text-decoration: none; border-radius: 3px; padding: 0 3px; font-weight: 600; }
+.notes { display: grid; gap: 8px; }
+.note { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; font-size: 14.5px; padding: 10px 12px; border-radius: var(--r-md); background: var(--bg); }
+.note .n { font: 600 13px/1.5 var(--font); color: var(--ok); direction: ltr; }
+.tools { display: flex; flex-wrap: wrap; gap: 6px; }
+.tools span { font-size: 13.5px; padding: 3px 11px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.tools span:first-child { background: var(--btn); color: var(--btn-fg); }
+.journal { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--muted); }
+
+/* translation */
+.src { font: 400 18px/1.6 var(--font); direction: ltr; text-align: left; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.tr { display: grid; gap: 4px; padding: 12px 14px; border-radius: var(--r-md); }
+.tr .who { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; }
+.tr .t { font-size: 19px; direction: rtl; text-align: right; }
+.tr.g { background: var(--bg); }
+.tr.g .who { color: var(--faint); }
+.tr.g .t { color: var(--muted); }
+.tr.ai { background: var(--accent-soft); }
+.tr.ai .who { color: var(--accent); }
+.tr.ai .t { font-weight: 600; }
+.modes { display: flex; flex-wrap: wrap; gap: 6px; font-size: 13px; }
+.modes span { padding: 3px 11px; border-radius: 999px; box-shadow: var(--shadow-sm); color: var(--muted); }
+.modes span.on { background: var(--btn); color: var(--btn-fg); box-shadow: none; }
+
+/* offline */
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.stat { padding: 16px; border-radius: var(--r-md); background: var(--bg); display: grid; gap: 2px; align-content: start; }
+.stat b { font: 700 30px/1.15 var(--font); font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; justify-self: start; }
+.stat span { font-size: 14px; color: var(--muted); }
+.forms { display: flex; flex-wrap: wrap; gap: 8px 16px; font: 500 14px/1.5 var(--font); color: var(--muted); direction: ltr; justify-content: center; }
+.forms i { font-style: normal; color: var(--accent); }
+
+/* review */
+.review { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: start; }
+.flash { display: grid; gap: 10px; padding: 18px; border-radius: var(--r-lg); background: var(--bg); text-align: center; min-height: 236px; align-content: start; }
+.flash .word { font: 700 28px/1.2 var(--font); }
+.flash .s { font: 400 15px/1.6 var(--font); color: var(--muted); direction: ltr; }
+.flash .s mark { background: var(--sel); color: var(--fg); border-radius: 3px; padding: 0 2px; }
+.flash .back { display: grid; gap: 4px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.flash .back b { font-size: 21px; }
+.flash .back span { font-size: 13.5px; color: var(--muted); }
+.grades { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.sbtn { font: 600 14px/1.2 var(--font); padding: 10px 8px; border-radius: var(--r-sm); border: 0; cursor: pointer; background: var(--surface); color: var(--fg); box-shadow: var(--shadow-sm); }
+.sbtn:hover { background: var(--accent-soft); }
+.sbtn.primary { background: var(--btn); color: var(--btn-fg); box-shadow: none; }
+.sbtn.forgot { color: var(--danger); }
+.sbtn.knew { color: var(--ok); }
+.after { font-size: 14px; color: var(--muted); }
+.today { display: grid; gap: 10px; justify-items: center; width: 132px; padding: 16px 10px; border-radius: var(--r-lg); background: var(--bg); text-align: center; font-size: 13px; color: var(--muted); }
+.ring { position: relative; width: 84px; height: 84px; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 8; }
+.ring .track { stroke: var(--line); }
+.ring .done { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 213.6; stroke-dashoffset: 64.1; }
+.ring b { position: absolute; inset: 0; display: grid; place-items: center; font: 700 19px/1 var(--font); color: var(--fg); direction: ltr; }
+.streak { font-weight: 600; color: var(--fg); }
+@media (max-width: 480px) { .review { grid-template-columns: minmax(0, 1fr); } .today { width: auto; grid-template-columns: auto minmax(0, 1fr); justify-items: start; text-align: start; } .ring { grid-row: span 2; } }
+
+/* clipboard */
+.search { display: flex; align-items: center; gap: 10px; height: 42px; padding-inline: 14px; border-radius: var(--r-md); background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--accent); font-size: 16px; }
+.search .icon { color: var(--faint); }
+.clip { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px; border-radius: var(--r-md); background: var(--bg); font-size: 15px; }
+.clip .k { font: 500 12px/1 var(--font); color: var(--faint); direction: ltr; }
+.clip mark { background: var(--sel); color: inherit; border-radius: 3px; padding: 0 2px; }
+.clip .pin { color: var(--accent); }
+.clip-tools { display: flex; flex-wrap: wrap; gap: 6px; font-size: 13px; }
+.clip-tools span { padding: 3px 10px; border-radius: 999px; box-shadow: var(--shadow-sm); color: var(--muted); }
+.never { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--faint); }
+
+/* page translation */
+.page { border-radius: var(--r-md); background: var(--bg); padding: 16px 18px 20px; display: grid; gap: 12px; }
+.pbar { justify-self: center; display: flex; align-items: center; gap: 8px; padding: 5px 6px 5px 12px; border-radius: 999px; background: var(--surface); box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--line); font-size: 13px; }
+html[dir="rtl"] .pbar { padding: 5px 12px 5px 6px; }
+.pbar .icon { color: var(--ok); }
+.seg { display: flex; padding: 2px; border-radius: 999px; background: var(--bg); }
+.seg button { font: 500 13px/1 var(--font); border: 0; background: none; color: var(--muted); padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+.seg button.on { background: var(--surface); color: var(--fg); box-shadow: var(--shadow-sm); }
+.page h3 { font: 700 21px/1.4 var(--font); }
+.page p { font-size: 15px; color: var(--muted); }
+.page .orig { direction: ltr; text-align: left; font-family: var(--font); }
+.page .orig h3 { font-family: var(--font); }
+
+/* --- two versions --- */
+.band { padding-block: 72px; }
+.band h2 { font: 700 clamp(28px, 3.4vw, 38px)/1.25 var(--font); }
+.band .intro { display: grid; gap: 12px; margin-bottom: 32px; max-width: 40em; }
+.band .intro p { color: var(--muted); }
+.table-wrap { overflow-x: auto; border-radius: var(--r-lg); box-shadow: var(--shadow-sm); background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 15.5px; min-width: 520px; }
+th, td { padding: 14px 20px; text-align: start; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+thead th { font-weight: 600; font-size: 15px; background: var(--accent-soft); }
+thead th:first-child { width: 32%; }
+td:first-child { color: var(--muted); }
+.yes { color: var(--ok); font-weight: 600; }
+.no { color: var(--faint); }
+
+/* --- privacy --- */
+.privacy .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.pcard { display: grid; gap: 8px; align-content: start; padding: 22px; border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-sm); }
+.pcard .icon { width: 26px; height: 26px; color: var(--accent); }
+.pcard h3 { font: 600 17px/1.4 var(--font); }
+.pcard p { font-size: 15px; color: var(--muted); }
+@media (max-width: 920px) { .privacy .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .privacy .grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* --- what's new --- */
+.news { display: grid; gap: 14px; padding: 28px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.news-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.news-head .v { font: 700 26px/1 var(--font); direction: ltr; unicode-bidi: isolate; }
+.news-head time { font-size: 14px; color: var(--faint); }
+.news-head a { margin-inline-start: auto; font-size: 15px; }
+.news ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.news li { display: grid; gap: 2px; font-size: 15.5px; color: var(--muted); padding-inline-start: 18px; position: relative; }
+.news li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.7em; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.news li b { color: var(--fg); font-weight: 600; }
+
+/* --- faq --- */
+.faq { display: grid; gap: 10px; }
+.faq details { border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-sm); }
+.faq summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 12px; padding: 18px 22px; font-weight: 600; font-size: 16.5px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary .icon { margin-inline-start: auto; color: var(--faint); transition: transform 0.2s ease; }
+.faq details[open] summary .icon { transform: rotate(180deg); }
+.faq .a { padding: 0 22px 20px; color: var(--muted); font-size: 15.5px; display: grid; gap: 8px; }
+
+/* --- final call --- */
+.final { padding-block: 88px; text-align: center; }
+.final .wrap { display: grid; gap: 22px; justify-items: center; }
+.final img { width: 72px; height: 72px; }
+.final h2 { font: 700 clamp(32px, 4.4vw, 48px)/1.2 var(--font); }
+.final .btns { justify-content: center; }
+
+footer { border-top: 1px solid var(--line); padding-block: 28px; font-size: 14px; color: var(--faint); }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+footer nav { display: flex; gap: 20px; margin-inline-start: auto; }
+footer a { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .card.pop { animation: none; }
+  .btn, .faq summary .icon { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-tap" viewBox="0 0 24 24"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.6a6 6 0 0 1-4.6-2.2L4.6 15.9a1.6 1.6 0 0 1 2.4-2.1L9 15.5"/></symbol>
+  <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Zm4.5 3.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.5 13.8 9l5.7 1.8-5.7 1.9L12 18.5l-1.8-5.8-5.7-1.9L10.2 9 12 3.5ZM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 4 3v2H6v-2l4-3-1-6Zm3 11v6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/></symbol>
+  <symbol id="i-device" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M8.5 20.5h7M12 16.5v4"/></symbol>
+  <symbol id="i-chip" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/><path d="M9.5 3v3.5M14.5 3v3.5M9.5 17.5V21M14.5 17.5V21M3 9.5h3.5M3 14.5h3.5M17.5 9.5H21M17.5 14.5H21"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5.5" y="4.5" width="13" height="16.5" rx="2"/><path d="M9 4.5V3.5h6v1M9 10h6M9 14h4"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m8.5 7-5 5 5 5m7-10 5 5-5 5"/></symbol>
+  <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M3 3l18 18M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 4.6-2.6M19 13a10 10 0 0 0-2.4-1.7M2 9.3a15 15 0 0 1 4.3-2.6M22 9.3A15 15 0 0 0 10.6 5.6M12 20h.01"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M6.5 4.5h11v15h-11A2.5 2.5 0 0 1 4 17V7a2.5 2.5 0 0 1 2.5-2.5ZM4 17a2.5 2.5 0 0 1 2.5-2.5h11"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="icon.svg" alt=""><span class="ar">لمحة</span><span class="en">Lamha</span><small class="ar">Lamha</small><small class="en">لمحة</small></a>
+    <nav class="nav">
+      <a href="#features"><span class="ar">المزايا</span><span class="en">Features</span></a>
+      <a href="#versions"><span class="ar">النسختان</span><span class="en">Versions</span></a>
+      <a href="#privacy"><span class="ar">الخصوصية</span><span class="en">Privacy</span></a>
+      <a href="#faq"><span class="ar">أسئلة</span><span class="en">FAQ</span></a>
+    </nav>
+    <button class="lang-btn" id="lang" type="button"><span class="ar" lang="en">English</span><span class="en" lang="ar">العربية</span></button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="entry-line">
+          <span class="hw">لَمْحَة</span>
+          <span class="ipa">/ˈlam.ħa/</span>
+          <span class="pos"><span class="ar">اسم</span><span class="en">noun</span></span>
+          <span class="ar">نظرة سريعة خاطفة.</span><span class="en">Arabic for a quick glance.</span>
+        </p>
+        <h1>
+          <span class="ar">حدّد كلمة، وافهمها <span class="glance">في لمحة.</span></span>
+          <span class="en">Select a word. Get it <span class="glance">at a glance.</span></span>
+        </h1>
+        <p class="lede">
+          <span class="ar">قاموس ومترجم ومدرّب لكتابتك بالإنجليزية، صُنع للعربية أولًا. حدّد كلمة فيظهر معناها في هذه الجملة، أو فقرة فتُترجم، أو رسالتك فيصحّحها ويشرح لك بالعربية أين أخطأت.</span>
+          <span class="en">An Arabic-first dictionary, translator and English writing coach. Select a word and see what it means in this sentence. Select a paragraph and it's translated. Select your own email and Lamha polishes it and explains, in Arabic, what you got wrong.</span>
+        </p>
+        <div class="btns">
+          <a class="btn primary dl-setup" href="https://github.com/osamaomer/lamha/releases/latest/download/Lamha-Setup.exe">
+            <svg class="icon"><use href="#i-down"/></svg>
+            <span><span class="ar">نزّل لويندوز</span><span class="en">Download for Windows</span><span class="sub dl-meta"></span></span>
+          </a>
+          <a class="btn ghost ff-link" href="https://github.com/osamaomer/lamha#-the-firefox-extension">
+            <svg class="icon"><use href="#i-globe"/></svg>
+            <span><span class="ar">إضافة فايرفوكس</span><span class="en">Firefox extension</span></span>
+          </a>
+        </div>
+        <p class="fine"><span class="ar">مجاني ومفتوح المصدر · بلا حساب · Windows 10 و11 · Firefox 140 وما بعده</span><span class="en">Free and open source · No account · Windows 10 and 11 · Firefox 140+</span></p>
+      </div>
+
+      <div class="demo">
+        <div class="win" aria-label="Demo">
+          <div class="win-bar">
+            <span>Re: Photos from the trip</span>
+            <span class="ctl" aria-hidden="true">
+              <span><svg viewBox="0 0 10 10"><path d="M0 5h10"/></svg></span>
+              <span><svg viewBox="0 0 10 10"><rect x=".5" y=".5" width="9" height="9"/></svg></span>
+              <span><svg viewBox="0 0 10 10"><path d="m0 0 10 10M10 0 0 10"/></svg></span>
+            </span>
+          </div>
+          <div class="mail-head">
+            <b>Re: Photos from the trip</b>
+            <span>Maya Haddad · to me</span>
+          </div>
+          <div class="demo-body" id="demo-body">
+            <div class="mail-text">
+              <p>Thanks for the photos! The caption on the third one is a little <button class="w" data-w="ambiguous" type="button">ambiguous</button>, so could you <button class="w" data-w="clarify" type="button">clarify</button> where it was taken?</p>
+              <p>I was <button class="w" data-w="reluctant" type="button">reluctant</button> to use it at first, but the shot of the river <button class="w" data-w="bank" type="button">bank</button> at sunset is lovely. Finding that spot was pure <button class="w on" data-w="serendipity" type="button">serendipity</button>.</p>
+            </div>
+            <div class="card" id="card" aria-live="polite"></div>
+          </div>
+        </div>
+        <p class="hint"><svg class="icon"><use href="#i-tap"/></svg><span class="ar">جرّبها: اضغط أي كلمة منقّطة.</span><span class="en">Try it: tap any dotted word.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="steps" aria-label="How it works">
+    <div class="wrap">
+      <ol>
+        <li><b><span class="ar">حدّد النص</span><span class="en">Select text</span></b><span class="ar">في أي برنامج: بريد، محادثة، مستند.</span><span class="en">In any program: email, chat, a document.</span></li>
+        <li><b><span class="ar">اضغط <kbd dir="ltr">Alt+Shift+L</kbd></span><span class="en">Press <kbd>Alt+Shift+L</kbd></span></b><span class="ar">وفي فايرفوكس يكفي زر «بحث» فوق النص.</span><span class="en">In Firefox, just tap the Look Up button above it.</span></li>
+        <li><b><span class="ar">اقرأ المعنى</span><span class="en">Read the meaning</span></b><span class="ar">واحفظ الكلمة لتراجعها لاحقًا.</span><span class="en">And save the word to review it later.</span></li>
+      </ol>
+      <p class="apps"><span class="ar">يعمل في </span><span class="en">Works in </span><span>WhatsApp · Word · Outlook · Teams · Firefox</span><span class="ar"> وغيرها</span><span class="en"> and more</span></p>
+    </div>
+  </section>
+
+  <section class="entries wrap" id="features">
+
+    <article class="entry">
+      <div class="copy">
+        <p class="entry-line"><span class="hw">context</span><span class="ipa">/ˈkɒn.tekst/</span><span class="pos"><span class="ar">اسم</span><span class="en">noun</span></span></p>
+        <h2><span class="ar">المعنى الذي تقصده الجملة</span><span class="en">The meaning this sentence needs</span></h2>
+        <p><span class="ar">تقرأ لمحة الجملة حول الكلمة لتختار معناها الصحيح: ‎bank‎ على ضفاف النيل «ضفّة»، وbank الذي فيه مدّخراتك «مصرف». وبقية المعاني قريبة، مرتّبة حسب نوع الكلمة، مع تعريفات مترجمة وأمثلة ومرادفات ونبذة من ويكيبيديا.</span><span class="en">Lamha reads the sentence around a word to pick the meaning you need: a bank by the Nile is ضفّة, a bank with your savings is مصرف. Every other meaning is a tap away, grouped by part of speech, with translated definitions, examples, synonyms and a Wikipedia summary.</span></p>
+        <ul class="ticks">
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">قاموس إنجليزي–إنجليزي بزر واحد</span><span class="en">An English–English dictionary with one switch</span></li>
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">الفرنسية والتركية والإسبانية والألمانية تُشرح بلغتها</span><span class="en">French, Turkish, Spanish and German explained in their own language</span></li>
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">يترجم العربية إلى الإنجليزية أيضًا</span><span class="en">Arabic to English too</span></li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="ctx">
+          <p class="s">We had lunch on the <mark>bank</mark> of the Nile.</p>
+          <p class="r">ضفّة <small><span class="ar">اسم · جانب النهر</span><span class="en">noun · the side of a river</span></small></p>
+        </div>
+        <div class="ctx">
+          <p class="s">I opened a savings account at the <mark>bank</mark>.</p>
+          <p class="r">مصرف <small><span class="ar">اسم · مؤسسة مالية</span><span class="en">noun · a financial institution</span></small></p>
+        </div>
+        <div class="ctx">
+          <p class="s">You can <mark>bank</mark> on her to finish it.</p>
+          <p class="r">يعتمد على <small><span class="ar">فعل · يثق بشخص</span><span class="en">verb · to rely on someone</span></small></p>
+        </div>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="copy">
+        <p class="entry-line"><span class="hw">proofread</span><span class="ipa">/ˈpruːf.riːd/</span><span class="pos"><span class="ar">فعل</span><span class="en">verb</span></span></p>
+        <h2><span class="ar">مدقّق يشرح لك أخطاءك بالعربية</span><span class="en">A writing coach that explains in Arabic</span></h2>
+        <p><span class="ar">حدّد رسالتك الإنجليزية واختر «تدقيق لغوي»: يُشطب كل خطأ ويظهر تصحيحه، مع شرح قصير بالعربية. و«سجل أخطائي» يحفظ أنواع أخطائك الأكثر تكرارًا، فيشرحها لك الذكاء الاصطناعي بوضوح أكبر.</span><span class="en">Select your English message and choose Proofread: each mistake is struck through, its fix appears, and a short note explains it in Arabic. Your mistake journal keeps track of the kinds you make most, so the AI explains those more clearly.</span></p>
+        <ul class="ticks">
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">«اكتبه بالإنجليزية» يحوّل مسودتك العربية إلى إنجليزية طبيعية</span><span class="en">“Write it in English” turns an Arabic draft into natural English</span></li>
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">«استبدال» يعيد النص المصحّح إلى مكانه</span><span class="en">Replace puts the corrected text back where it was</span></li>
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">مع Ollama أو Gemini أو Claude، وOllama مجاني على جهازك</span><span class="en">With Ollama, Gemini or Claude; Ollama is free and runs on your PC</span></li>
+        </ul>
+      </div>
+      <div class="stage">
+        <p class="proof">I <del>am agree</del> <ins>agree</ins> with you, and I'll send the file <del>in</del> <ins>on</ins> Monday.</p>
+        <div class="notes">
+          <div class="note"><span class="n">agree</span><span><span class="ar">‎agree‎ فعل بنفسه، فلا تسبقه am.</span><span class="en">“Agree” is already a verb, so it doesn't take “am”.</span></span></div>
+          <div class="note"><span class="n">on</span><span><span class="ar">مع أيام الأسبوع نستخدم on.</span><span class="en">Days of the week take “on”.</span></span></div>
+        </div>
+        <div class="tools">
+          <span class="ar">تدقيق لغوي</span><span class="en">Proofread</span>
+          <span class="ar">تحسين</span><span class="en">Improve</span>
+          <span class="ar">رسمي</span><span class="en">Formal</span>
+          <span class="ar">ودّي</span><span class="en">Friendly</span>
+          <span class="ar">أقصر</span><span class="en">Shorter</span>
+          <span class="ar">أطول</span><span class="en">Longer</span>
+          <span class="ar">تلخيص</span><span class="en">Summarize</span>
+          <span class="ar">اكتب ردًّا</span><span class="en">Write a reply</span>
+        </div>
+        <p class="journal"><svg class="icon"><use href="#i-book"/></svg><span class="ar">سجل أخطائي: أكثر أخطائك في حروف الجر</span><span class="en">Mistake journal: your most frequent are prepositions</span></p>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="copy">
+        <p class="entry-line"><span class="hw">idiom</span><span class="ipa">/ˈɪd.i.əm/</span><span class="pos"><span class="ar">اسم</span><span class="en">noun</span></span></p>
+        <h2><span class="ar">Google أو الذكاء الاصطناعي: أنت تختار من يترجم</span><span class="en">Google or AI: you choose who translates</span></h2>
+        <p><span class="ar">Google سريع ومجاني، والذكاء الاصطناعي أفهم للتعابير والعامية والنبرة. في الوضع التلقائي يترجم Google، وإن انقطع الإنترنت تولّى الذكاء الاصطناعي. ورابط «ترجمة أدق» يطلب رأيًا ثانيًا متى أردت.</span><span class="en">Google is fast and free; an AI understands idioms, slang and tone. On Automatic, Google translates and the AI takes over when there's no internet. The Better translation link asks the AI for a second opinion whenever you want one.</span></p>
+        <ul class="ticks">
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">ترجم الجمل والفقرات فورًا</span><span class="en">Sentences and paragraphs translate at once</span></li>
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">مع Ollama تُترجم الجمل بلا إنترنت</span><span class="en">With Ollama, sentences translate with no internet</span></li>
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">تفحص لمحة كل ترجمة من الذكاء الاصطناعي قبل عرضها</span><span class="en">Lamha checks every AI translation before showing it</span></li>
+        </ul>
+      </div>
+      <div class="stage">
+        <p class="src">Don't worry, the exam was a piece of cake.</p>
+        <div class="tr g">
+          <span class="who"><svg class="icon"><use href="#i-globe"/></svg>Google</span>
+          <p class="t">لا تقلق، كان الامتحان قطعة من الكعكة.</p>
+        </div>
+        <div class="tr ai">
+          <span class="who"><svg class="icon"><use href="#i-spark"/></svg><span class="ar">ترجمة أدق</span><span class="en">Better translation</span></span>
+          <p class="t">لا تقلق، كان الامتحان في غاية السهولة.</p>
+        </div>
+        <div class="modes">
+          <span class="on"><span class="ar">تلقائي</span><span class="en">Automatic</span></span>
+          <span><span class="ar">Google فقط</span><span class="en">Google only</span></span>
+          <span><span class="ar">الذكاء الاصطناعي</span><span class="en">AI</span></span>
+        </div>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="copy">
+        <p class="entry-line"><span class="hw">offline</span><span class="ipa">/ˌɒfˈlaɪn/</span><span class="pos"><span class="ar">صفة</span><span class="en">adjective</span></span></p>
+        <h2><span class="ar">يعمل بلا إنترنت</span><span class="en">Works without internet</span></h2>
+        <p><span class="ar">القاموس مدمج في لمحة، فالكلمات لا تحتاج اتصالًا، ولمحة تعرف صيغ الكلمات. ويمكنك تنزيل ويكيبيديا وقواميس لغات أخرى، فتبقى البطاقة كاملة في الطائرة أو حين ينقطع الاتصال.</span><span class="en">The dictionary is built in, so words never need a connection, and Lamha knows their forms. Download Wikipedia and dictionaries for other languages, and the card stays complete on a plane or when the connection drops.</span></p>
+        <ul class="ticks">
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">ويكيبيديا بلا إنترنت، مع قارئ للمقالات كاملة (تطبيق ويندوز)</span><span class="en">Wikipedia offline, with a reader for whole articles (Windows app)</span></li>
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">قواميس للتنزيل: الفرنسية والألمانية والإسبانية والتركية</span><span class="en">Dictionaries to download: French, German, Spanish and Turkish</span></li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="stats">
+          <div class="stat"><b>86,000</b><span class="ar">كلمة إنجليزية مدمجة</span><span class="en">English words built in</span></div>
+          <div class="stat"><b>20,000</b><span class="ar">كلمة عربية مدمجة</span><span class="en">Arabic words built in</span></div>
+          <div class="stat"><b>231,000</b><span class="ar">مقالة من ويكيبيديا العربية في 226 ميغابايت</span><span class="en">Arabic Wikipedia articles in 226 MB</span></div>
+          <div class="stat"><b>4</b><span class="ar">قواميس لغات للتنزيل، كلٌّ منها 2–6 ميغابايت</span><span class="en">language dictionaries to download, 2–6 MB each</span></div>
+        </div>
+        <p class="forms"><span>went <i>→</i> go</span><span>mice <i>→</i> mouse</span><span>studied <i>→</i> study</span><span>ging <i>→</i> gehen</span></p>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="copy">
+        <p class="entry-line"><span class="hw">review</span><span class="ipa">/rɪˈvjuː/</span><span class="pos"><span class="ar">فعل</span><span class="en">verb</span></span></p>
+        <h2><span class="ar">راجع الكلمات حتى تحفظها</span><span class="en">Review words until they stick</span></h2>
+        <p><span class="ar">احفظ أي كلمة من البطاقة فتصبح بطاقة مراجعة، ومعها الجملة التي وجدتها فيها. تعود إليك في الوقت المناسب على طريقة Anki، ومعها هدف يومي وسلسلة أيام وكلمة لكل يوم.</span><span class="en">Save any word from the card and it becomes a review card, with the sentence you found it in. It comes back at the right moment, the idea behind Anki, alongside a daily goal, a streak and a word of the day.</span></p>
+        <ul class="ticks">
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">مفاتيح سريعة: المسافة للمعنى، ثم 1 و2 و3</span><span class="en">Quick keys: Space for the meaning, then 1, 2 and 3</span></li>
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">بطاقاتك مشتركة بين فايرفوكس وتطبيق ويندوز</span><span class="en">Your cards are shared between Firefox and the Windows app</span></li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="review">
+          <div class="flash" id="flash"></div>
+          <div class="today">
+            <div class="ring" role="img" aria-label="7 / 10">
+              <svg viewBox="0 0 84 84"><circle class="track" cx="42" cy="42" r="34"/><circle class="done" cx="42" cy="42" r="34"/></svg>
+              <b>7/10</b>
+            </div>
+            <span><span class="ar">هدف اليوم</span><span class="en">Today's goal</span></span>
+            <span class="streak">🔥 <span class="ar">12 يومًا متتاليًا</span><span class="en">12-day streak</span></span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="copy">
+        <p class="entry-line"><span class="hw">clipboard</span><span class="ipa">/ˈklɪp.bɔːd/</span><span class="pos"><span class="ar">اسم</span><span class="en">noun</span></span></p>
+        <span class="only"><svg class="icon"><use href="#i-device"/></svg><span class="ar">في تطبيق ويندوز</span><span class="en">In the Windows app</span></span>
+        <h2><span class="ar">سجل الحافظة، بأدوات لمحة</span><span class="en">Clipboard history, with Lamha's tools</span></h2>
+        <p><span class="ar">كل ما تنسخه في أي برنامج في قائمة واحدة، يفتحها <kbd dir="ltr">Alt+Shift+V</kbd> عند الفأرة. ترجم أي عنصر أو دقّقه أو لخّصه قبل لصقه. والبحث يفهم العربية: «مصرف» يجد «مَصْرِف»، و«احمد» يجد «أحمد».</span><span class="en">Everything you copy, in any program, in one list that <kbd>Alt+Shift+V</kbd> opens at the mouse. Translate, proofread or summarize an item before you paste it. Search understands Arabic: مصرف finds مَصْرِف and احمد finds أحمد.</span></p>
+        <ul class="ticks">
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">مُطفأ حتى تشغّله، ومشفّر على جهازك</span><span class="en">Off until you turn it on, and encrypted on your PC</span></li>
+          <li><svg class="icon"><use href="#i-check"/></svg><span class="ar">العناصر المثبّتة تبقى في الأعلى</span><span class="en">Pinned items stay at the top</span></li>
+        </ul>
+      </div>
+      <div class="stage">
+        <div class="search"><svg class="icon"><use href="#i-search"/></svg><span>مصرف</span></div>
+        <div class="clip"><svg class="icon pin"><use href="#i-pin"/></svg><span>رقم الحساب في <mark>مَصْرِف</mark> الادخار يصلك غدًا</span><span class="k">Ctrl+1</span></div>
+        <div class="clip"><svg class="icon"><use href="#i-clip"/></svg><span dir="ltr" style="text-align:left">The <mark>bank</mark> closes at 3 pm on Thursday.</span><span class="k">Ctrl+2</span></div>
+        <div class="clip-tools">
+          <span class="ar">ترجم</span><span class="en">Translate</span>
+          <span class="ar">اكتبه بالإنجليزية</span><span class="en">Write in English</span>
+          <span class="ar">دقّق</span><span class="en">Proofread</span>
+          <span class="ar">لخّص</span><span class="en">Summarize</span>
+          <span class="ar">أضف للمراجعة</span><span class="en">Add to review</span>
+        </div>
+        <p class="never"><svg class="icon"><use href="#i-lock"/></svg><span class="ar">لا يسجّل أبدًا: مديري كلمات المرور وأرقام البطاقات البنكية</span><span class="en">Never recorded: password managers and bank-card numbers</span></p>
+      </div>
+    </article>
+
+    <article class="entry">
+      <div class="copy">
+        <p class="entry-line"><span class="hw">page</span><span class="ipa">/peɪdʒ/</span><span class="pos"><span class="ar">اسم</span><span class="en">noun</span></span></p>
+        <span class="only"><svg class="icon"><use href="#i-globe"/></svg><span class="ar">في إضافة فايرفوكس</span><span class="en">In the Firefox extension</span></span>
+        <h2><span class="ar">ترجم الصفحة كاملة بضغطة</span><span class="en">Translate a whole page in one click</span></h2>
+        <p><span class="ar">تُترجم الصفحة أثناء التمرير وتحافظ على روابطها وتنسيقها، وشريط صغير يبدّل بين العربية والأصل فورًا. الاختصار: <kbd dir="ltr">Alt+Shift+T</kbd>.</span><span class="en">The page translates as you scroll and keeps its links and layout, and a small bar switches between Arabic and the original instantly. Shortcut: <kbd>Alt+Shift+T</kbd>.</span></p>
+      </div>
+      <div class="stage">
+        <div class="page" id="page">
+          <div class="pbar">
+            <svg class="icon"><use href="#i-check"/></svg>
+            <span class="ar">تُرجمت الصفحة</span><span class="en">Page translated</span>
+            <span class="seg" role="group">
+              <button type="button" class="on" data-v="ar">العربية</button>
+              <button type="button" data-v="orig"><span class="ar">الأصل</span><span class="en">Original</span></button>
+            </span>
+          </div>
+          <div class="tx">
+            <h3>العقل الفضولي</h3>
+            <p>الفضول هو محرّك التعلّم. كل سؤال تطرحه يفتح الباب لشيء جديد، وكل إجابة تدعو إلى سؤال أفضل.</p>
+          </div>
+          <div class="orig" hidden>
+            <h3>The Curious Mind</h3>
+            <p>Curiosity is the engine of learning. Every question you ask opens a door to something new, and every answer invites a better question.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="band" id="versions">
+    <div class="wrap">
+      <div class="intro">
+        <h2><span class="ar">نسختان، وعقل واحد</span><span class="en">Two versions, one brain</span></h2>
+        <p><span class="ar">البحث وأدوات الكتابة والمراجعة تعمل في النسختين بالطريقة نفسها، وتتشاركان بطاقات المراجعة إن ثبّتّهما على الجهاز نفسه.</span><span class="en">Lookups, writing tools and review work the same in both, and they share your review cards when both are on the same PC.</span></p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th></th><th><span class="ar">تطبيق ويندوز</span><span class="en">Windows app</span></th><th><span class="ar">إضافة فايرفوكس</span><span class="en">Firefox extension</span></th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="ar">يعمل في</span><span class="en">Works in</span></td><td><span class="ar">كل البرامج: واتساب وWord وOutlook وTeams…</span><span class="en">Any program: WhatsApp, Word, Outlook, Teams…</span></td><td><span class="ar">صفحات الويب</span><span class="en">Web pages</span></td></tr>
+            <tr><td><span class="ar">تبدأ بـ</span><span class="en">You start it with</span></td><td><span class="ar">تحديد النص ثم اختصار</span><span class="en">Select text, then a shortcut</span></td><td><span class="ar">تحديد النص ثم زر</span><span class="en">Select text, then a button</span></td></tr>
+            <tr><td><span class="ar">البحث وأدوات الكتابة والمراجعة</span><span class="en">Lookups, writing tools, review</span></td><td class="yes"><svg class="icon"><use href="#i-check"/></svg></td><td class="yes"><svg class="icon"><use href="#i-check"/></svg></td></tr>
+            <tr><td><span class="ar">ترجمة الصفحة كاملة</span><span class="en">Whole-page translation</span></td><td class="no">—</td><td class="yes"><svg class="icon"><use href="#i-check"/></svg></td></tr>
+            <tr><td><span class="ar">سجل الحافظة</span><span class="en">Clipboard history</span></td><td class="yes"><svg class="icon"><use href="#i-check"/></svg></td><td class="no">—</td></tr>
+            <tr><td><span class="ar">ويكيبيديا بلا إنترنت</span><span class="en">Offline Wikipedia</span></td><td class="yes"><svg class="icon"><use href="#i-check"/></svg></td><td><span class="ar">عبر تطبيق ويندوز</span><span class="en">Through the Windows app</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="band privacy" id="privacy">
+    <div class="wrap">
+      <div class="intro">
+        <h2><span class="ar">كلماتك تبقى عندك</span><span class="en">Your words stay with you</span></h2>
+      </div>
+      <div class="grid">
+        <div class="pcard"><svg class="icon"><use href="#i-user"/></svg><h3><span class="ar">بلا حساب</span><span class="en">No account</span></h3><p><span class="ar">لا تسجيل ولا بريد إلكتروني. نزّلها واستعملها.</span><span class="en">No sign-up and no email. Download it and use it.</span></p></div>
+        <div class="pcard"><svg class="icon"><use href="#i-device"/></svg><h3><span class="ar">على جهازك</span><span class="en">On your device</span></h3><p><span class="ar">سجل كلماتك وبطاقاتك وسجل أخطائك محفوظة على جهازك، ومفاتيح الذكاء الاصطناعي مشفّرة.</span><span class="en">Your history, cards and mistake journal are saved on your device, and AI keys are encrypted.</span></p></div>
+        <div class="pcard"><svg class="icon"><use href="#i-chip"/></svg><h3><span class="ar">ذكاء اصطناعي محلي</span><span class="en">Local AI</span></h3><p><span class="ar">مع Ollama لا يغادر نصّك جهازك أبدًا.</span><span class="en">With Ollama, your text never leaves your PC.</span></p></div>
+        <div class="pcard"><svg class="icon"><use href="#i-lock"/></svg><h3><span class="ar">حافظة محمية</span><span class="en">A careful clipboard</span></h3><p><span class="ar">مشفّرة بحسابك في ويندوز، ولا تُرسل شيئًا إلا حين تضغط أداة.</span><span class="en">Encrypted with your Windows account, and nothing is sent unless you press a tool.</span></p></div>
+        <div class="pcard"><svg class="icon"><use href="#i-wifi-off"/></svg><h3><span class="ar">دون إنترنت متى شئت</span><span class="en">Offline when you want</span></h3><p><span class="ar">اختر «محلي فقط» فلا تتصل لمحة بالإنترنت للكلمات أبدًا.</span><span class="en">Choose Local only and Lamha never goes online for words.</span></p></div>
+        <div class="pcard"><svg class="icon"><use href="#i-code"/></svg><h3><span class="ar">مفتوح المصدر</span><span class="en">Open source</span></h3><p><span class="ar">كل سطر من الشيفرة على GitHub، برخصة MIT.</span><span class="en">Every line of code is on GitHub, under the MIT license.</span></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="news" hidden>
+    <div class="wrap">
+      <div class="news">
+        <div class="news-head">
+          <span class="ar">الجديد في</span><span class="en">What's new in</span>
+          <span class="v" id="news-v"></span>
+          <time id="news-date"></time>
+          <a href="https://github.com/osamaomer/lamha/releases"><span class="ar">كل الإصدارات</span><span class="en">All versions</span></a>
+        </div>
+        <ul id="news-list"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="faq">
+    <div class="wrap">
+      <div class="intro"><h2><span class="ar">أسئلة</span><span class="en">Questions</span></h2></div>
+      <div class="faq">
+        <details>
+          <summary><span class="ar">ظهرت رسالة «Windows protected your PC». هل البرنامج آمن؟</span><span class="en">Windows says “Windows protected your PC”. Is it safe?</span><svg class="icon"><use href="#i-chev"/></svg></summary>
+          <div class="a">
+            <p><span class="ar">تظهر هذه الرسالة لأن لمحة غير موقّعة رقميًّا بعد (التوقيع اشتراك مدفوع). اضغط «More info» ثم «Run anyway».</span><span class="en">It appears because Lamha isn't digitally signed yet (signing is a paid subscription). Click “More info”, then “Run anyway”.</span></p>
+            <p><span class="ar">ملف التثبيت يُبنى على GitHub من الشيفرة المنشورة نفسها، ويمكنك قراءتها كاملة.</span><span class="en">The installer is built on GitHub from the published code, which you can read in full.</span></p>
+          </div>
+        </details>
+        <details>
+          <summary><span class="ar">ما الفرق بين نسخة التثبيت والنسخة المحمولة؟</span><span class="en">Setup or Portable?</span><svg class="icon"><use href="#i-chev"/></svg></summary>
+          <div class="a"><p><span class="ar">نسخة التثبيت تحدّث نفسها تلقائيًّا. والنسخة المحمولة تعمل دون تثبيت، لكنها تخبرك بالإصدار الجديد فقط ولا تحدّث نفسها.</span><span class="en">Setup updates itself. Portable runs without installing, but it only tells you about a new version; it can't replace itself.</span></p>
+          <p><a class="dl-portable" href="https://github.com/osamaomer/lamha/releases/latest/download/Lamha-Portable.exe"><span class="ar">نزّل النسخة المحمولة</span><span class="en">Download Portable</span></a></p></div>
+        </details>
+        <details>
+          <summary><span class="ar">هل لمحة مجانية؟</span><span class="en">Is Lamha free?</span><svg class="icon"><use href="#i-chev"/></svg></summary>
+          <div class="a"><p><span class="ar">نعم. البحث والترجمة والمراجعة لا تحتاج شيئًا. أدوات الكتابة تحتاج مزوّد ذكاء اصطناعي: Ollama مجاني على جهازك، وGemini له باقة مجانية، وClaude بالدفع حسب الاستخدام بمفتاحك.</span><span class="en">Yes. Lookups, translation and review need nothing else. The writing tools need an AI provider: Ollama is free on your PC, Gemini has a free tier, and Claude is pay-per-use with your own key.</span></p></div>
+        </details>
+        <details>
+          <summary><span class="ar">هل تعمل دون إنترنت؟</span><span class="en">Does it work without internet?</span><svg class="icon"><use href="#i-chev"/></svg></summary>
+          <div class="a"><p><span class="ar">الكلمات نعم، بالقاموس المدمج. وويكيبيديا إن نزّلتها في تطبيق ويندوز. وترجمة الجمل تحتاج الإنترنت أو Ollama على جهازك.</span><span class="en">Words do, with the built-in dictionary. Wikipedia does once you download it in the Windows app. Sentences need the internet, or Ollama on your PC.</span></p></div>
+        </details>
+        <details>
+          <summary><span class="ar">ماذا أحتاج لتشغيلها؟</span><span class="en">What do I need?</span><svg class="icon"><use href="#i-chev"/></svg></summary>
+          <div class="a"><p><span class="ar">Windows 10 أو 11 للتطبيق، أو Firefox 140 وما بعده للإضافة.</span><span class="en">Windows 10 or 11 for the app, or Firefox 140 or later for the extension.</span></p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <img src="icon.svg" alt="">
+      <h2><span class="ar">جرّب لمحة اليوم</span><span class="en">Try Lamha today</span></h2>
+      <div class="btns">
+        <a class="btn primary dl-setup" href="https://github.com/osamaomer/lamha/releases/latest/download/Lamha-Setup.exe">
+          <svg class="icon"><use href="#i-down"/></svg>
+          <span><span class="ar">نزّل لويندوز</span><span class="en">Download for Windows</span><span class="sub dl-meta"></span></span>
+        </a>
+        <a class="btn ghost ff-link" href="https://github.com/osamaomer/lamha#-the-firefox-extension">
+          <svg class="icon"><use href="#i-globe"/></svg>
+          <span><span class="ar">إضافة فايرفوكس</span><span class="en">Firefox extension</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><span class="ar">لمحة · Lamha · برخصة MIT</span><span class="en">Lamha · لمحة · MIT license</span></span>
+    <nav>
+      <a href="https://x.com/Osamaomer97">X · @Osamaomer97</a>
+      <a href="https://github.com/osamaomer/lamha">GitHub</a>
+      <a href="https://github.com/osamaomer/lamha/releases"><span class="ar">الإصدارات</span><span class="en">Releases</span></a>
+    </nav>
+  </div>
+</footer>
+
+<!-- The site's build copies shared/changelog.js next to this page (.github/workflows/site.yml). -->
+<script src="changelog.js"></script>
+<script>
+(() => {
+  "use strict";
+  const REPO = "osamaomer/lamha";
+  const $ = (s, root = document) => root.querySelector(s);
+  const $$ = (s, root = document) => [...root.querySelectorAll(s)];
+
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k === "class") el.className = v;
+      else el.setAttribute(k, v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
+    return el;
+  }
+  const svgUse = (id, cls = "icon") => {
+    const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    s.setAttribute("class", cls);
+    const u = document.createElementNS("http://www.w3.org/2000/svg", "use");
+    u.setAttribute("href", "#" + id);
+    s.append(u);
+    return s;
+  };
+
+  /* --- interface language: [arabic, english] pairs, as in the app --- */
+  let lang = "ar";
+  const t = (pair) => pair[lang === "ar" ? 0 : 1];
+  const T = {
+    langLabel: ["English", "العربية"],
+    inSentence: ["في هذه الجملة", "In this sentence"],
+    others: ["معانٍ أخرى", "Other meanings"],
+    showMeaning: ["اعرض المعنى", "Show meaning"],
+    forgot: ["نسيت", "Forgot"],
+    hard: ["صعبة", "Hard"],
+    knew: ["عرفتها", "Knew it"],
+    backIn: { forgot: ["تعود بعد 10 دقائق.", "Back in 10 minutes."], hard: ["تعود قريبًا.", "Back sooner."], knew: ["تعود بعد يومين.", "Back in 2 days."] },
+    again: ["مرة أخرى", "Again"],
+    meta: ["الإصدار {v} · {mb} ميغابايت", "Version {v} · {mb} MB"]
+  };
+
+  /* --- the demo card --- */
+  const WORDS = {
+    ambiguous: { ipa: "/æmˈbɪɡ.ju.əs/", meaning: "غامض", pos: ["صفة", "adjective"], ar: "يحتمل أكثر من معنى أو تفسير.", en: "open to more than one interpretation." },
+    clarify: { ipa: "/ˈklær.ɪ.faɪ/", meaning: "يوضّح", pos: ["فعل", "verb"], ar: "يجعل الأمر أوضح وأسهل فهمًا.", en: "to make something clearer or easier to understand." },
+    reluctant: { ipa: "/rɪˈlʌk.tənt/", meaning: "متردّد", pos: ["صفة", "adjective"], ar: "غير راغب في فعل شيء ومتردّد فيه.", en: "unwilling and hesitant." },
+    bank: { ipa: "/bæŋk/", meaning: "ضفّة", pos: ["اسم", "noun"], ar: "الأرض المحاذية لنهر أو بحيرة.", en: "the land alongside a river or lake.", others: ["مصرف", "كومة", "يعتمد على"] },
+    serendipity: { ipa: "/ˌser.ənˈdɪp.ə.ti/", meaning: "الصدفة السعيدة", pos: ["اسم", "noun"], ar: "وقوع الأحداث وتطوّرها بالصدفة بطريقة سعيدة أو مفيدة.", en: "the occurrence of events by chance in a happy or beneficial way." }
+  };
+  let current = "serendipity", tallest = 430;
+
+  function renderCard(animate) {
+    const w = WORDS[current], card = $("#card");
+    card.replaceChildren(
+      h("div", { class: "card-head" },
+        h("img", { src: "icon.svg", alt: "" }), h("b", {}, lang === "ar" ? "لمحة" : "Lamha"),
+        h("span", {}, lang === "ar" ? "الإنجليزية ← العربية" : "English → Arabic")),
+      h("div", { class: "card-main" },
+        h("div", { class: "word-row" },
+          h("span", { class: "word" }, current), h("span", { class: "ipa" }, w.ipa),
+          h("span", { class: "spk" }, svgUse("i-speaker"))),
+        h("div", { class: "meaning" },
+          h("div", { class: "lbl" }, t(T.inSentence)),
+          h("div", { class: "ar-m" }, w.meaning)),
+        h("div", { class: "defn" },
+          h("span", { class: "pos" }, t(w.pos)),
+          h("span", { class: "d-ar" }, w.ar),
+          h("span", { class: "d-en" }, w.en)),
+        w.others && h("div", { class: "chips" },
+          h("span", { class: "lbl" }, t(T.others)), w.others.map((o) => h("span", { class: "chip" }, o))))
+    );
+    placeCard();
+    if (animate) {
+      card.classList.remove("pop");
+      void card.offsetWidth; // restart the animation
+      card.classList.add("pop");
+    }
+  }
+
+  // Under the chosen word, so the word stays visible; the window grows to hold the card.
+  function placeCard() {
+    const body = $("#demo-body"), card = $("#card"), sel = body.querySelector(".w.on");
+    if (!sel || getComputedStyle(card).position !== "absolute") { body.style.minHeight = ""; return; }
+    const b = body.getBoundingClientRect(), r = sel.getBoundingClientRect();
+    const cw = card.offsetWidth, ch = card.offsetHeight;
+    let x = r.left - b.left + r.width / 2 - cw / 2;
+    x = Math.max(12, Math.min(x, b.width - cw - 12));
+    const y = r.bottom - b.top + 10;
+    tallest = Math.max(tallest, Math.ceil(y + ch + 22)); // only grows, so the page doesn't jump between words
+    body.style.minHeight = tallest + "px";
+    card.style.setProperty("--x", x + "px");
+    card.style.setProperty("--y", y + "px");
+    card.style.setProperty("--ox", Math.round(r.left - b.left + r.width / 2 - x) + "px");
+  }
+
+  $$(".w").forEach((btn) => btn.addEventListener("click", () => {
+    $$(".w.on").forEach((b) => b.classList.remove("on"));
+    btn.classList.add("on");
+    current = btn.dataset.w;
+    renderCard(true);
+  }));
+  window.addEventListener("resize", placeCard);
+
+  /* --- the review card --- */
+  let flashState = "front", grade = "";
+  function renderFlash() {
+    const f = $("#flash");
+    const kids = [
+      h("div", { class: "word" }, "resilient"),
+      h("p", { class: "s" }, "Kids are surprisingly ", h("mark", {}, "resilient"), " after a move.")
+    ];
+    if (flashState === "front") {
+      kids.push(h("button", { class: "sbtn primary", type: "button", "data-a": "show" }, t(T.showMeaning)));
+    } else {
+      kids.push(h("div", { class: "back" }, h("b", {}, "سريع التعافي، مَرِن"),
+        h("span", {}, lang === "ar" ? "يتعافى بسرعة بعد الصعوبات." : "able to recover quickly from difficulties.")));
+      if (flashState === "back") {
+        kids.push(h("div", { class: "grades" },
+          h("button", { class: "sbtn forgot", type: "button", "data-a": "forgot" }, t(T.forgot)),
+          h("button", { class: "sbtn", type: "button", "data-a": "hard" }, t(T.hard)),
+          h("button", { class: "sbtn knew", type: "button", "data-a": "knew" }, t(T.knew))));
+      } else {
+        kids.push(h("p", { class: "after" }, t(T.backIn[grade]), " ",
+          h("button", { class: "sbtn", type: "button", "data-a": "again" }, t(T.again))));
+      }
+    }
+    f.replaceChildren(...kids);
+  }
+  $("#flash").addEventListener("click", (e) => {
+    const a = e.target.closest("[data-a]")?.dataset.a;
+    if (!a) return;
+    if (a === "show") flashState = "back";
+    else if (a === "again") flashState = "front";
+    else { grade = a; flashState = "done"; }
+    renderFlash();
+  });
+
+  /* --- the page-translation bar --- */
+  $("#page .seg").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    $$("#page .seg button").forEach((x) => x.classList.toggle("on", x === b));
+    $("#page .tx").hidden = b.dataset.v !== "ar";
+    $("#page .orig").hidden = b.dataset.v === "ar";
+  });
+
+  /* --- the latest release, from GitHub (falls back to the fixed links when the API can't be reached) --- */
+  let release = null;
+  function renderRelease() {
+    if (!release) return;
+    const mb = Math.round(release.size / 1048576);
+    const text = t(T.meta).replace("{v}", release.version).replace("{mb}", mb);
+    $$(".dl-meta").forEach((el) => { el.textContent = text; });
+  }
+  fetch(`https://api.github.com/repos/${REPO}/releases/latest`, { headers: { Accept: "application/vnd.github+json" } })
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+    .then((rel) => {
+      const assets = Array.isArray(rel.assets) ? rel.assets : [];
+      const find = (fixed, re) => assets.find((a) => a.name === fixed) || assets.find((a) => re.test(a.name));
+      const setup = find("Lamha-Setup.exe", /^Lamha-Setup-[\d.]+\.exe$/);
+      const portable = find("Lamha-Portable.exe", /^Lamha-Portable-[\d.]+\.exe$/);
+      const version = String(rel.tag_name || "").replace(/^v/, "");
+      if (setup) {
+        $$(".dl-setup").forEach((a) => { a.href = setup.browser_download_url; });
+        release = { version, size: setup.size };
+      }
+      if (portable) $$(".dl-portable").forEach((a) => { a.href = portable.browser_download_url; });
+      renderRelease();
+      renderNews(version);
+    })
+    .catch(() => { renderNews(""); });
+
+  /* --- what's new: shared/changelog.js, the entry of the released version --- */
+  let newsVersion = null;
+  function renderNews(version) {
+    if (version !== undefined) newsVersion = version;
+    const log = typeof LamhaChangelog !== "undefined" && Array.isArray(LamhaChangelog) ? LamhaChangelog : [];
+    const entry = log.find((e) => e.v === newsVersion) || log[0];
+    if (!entry) return;
+    $("#news-v").textContent = entry.v;
+    const date = new Date(entry.date + "T12:00:00Z");
+    $("#news-date").textContent = isNaN(date) ? "" : date.toLocaleDateString(lang === "ar" ? "ar" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
+    $("#news-date").setAttribute("datetime", entry.date);
+    $("#news-list").replaceChildren(...entry.notes.slice(0, 6).map((pair) => {
+      const note = t(pair);
+      const cut = note.indexOf(": ");
+      return cut > 0 && cut < 80
+        ? h("li", {}, h("b", {}, note.slice(0, cut)), h("span", {}, note.slice(cut + 2)))
+        : h("li", {}, note);
+    }));
+    $("#news").hidden = false;
+  }
+
+  /* --- switching language --- */
+  function setLang(l, save) {
+    lang = l === "en" ? "en" : "ar";
+    const root = document.documentElement;
+    root.lang = lang;
+    root.dir = lang === "ar" ? "rtl" : "ltr";
+    document.title = lang === "ar" ? "لمحة · Lamha" : "Lamha · لمحة";
+    if (save) { try { localStorage.setItem("lamha-site-lang", lang); } catch { /* private window */ } }
+    renderCard(false);
+    renderFlash();
+    renderRelease();
+    if (newsVersion !== null) renderNews();
+  }
+  $("#lang").addEventListener("click", () => setLang(lang === "ar" ? "en" : "ar", true));
+
+  let start = "ar";
+  try { start = localStorage.getItem("lamha-site-lang") || "ar"; } catch { /* private window */ }
+  if (location.hash === "#en" || location.hash === "#ar") start = location.hash.slice(1); // links shared on X can pick one
+  setLang(start, false);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeCard);
+})();
+</script>
+</body>
+</html>

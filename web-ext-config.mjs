@@ -5,6 +5,7 @@ export default {
     "store-assets", "store-assets/**",
     "tools", "tools/**",
     "docs", "docs/**",
+    "site", "site/**", // the website (.github/workflows/site.yml)
     "dist-packs", "dist-packs/**",
     "web-ext-artifacts", "web-ext-artifacts/**",
     "node_modules", "node_modules/**",

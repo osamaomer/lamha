@@ -53,6 +53,17 @@ jobs:
           npm ci
           npm run release
 
+      # The same installers under names without the version, so the website's download buttons can always point at
+      # releases/latest/download/Lamha-Setup.exe. The updater reads latest.yml, which names the versioned files.
+      - name: Upload copies with fixed names, for the website
+        shell: bash
+        working-directory: desktop/dist
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          cp "Lamha-Setup-$v.exe" Lamha-Setup.exe
+          cp "Lamha-Portable-$v.exe" Lamha-Portable.exe
+          gh release upload "$GITHUB_REF_NAME" Lamha-Setup.exe Lamha-Portable.exe --clobber
+
       - name: Publish the release
         shell: bash
         run: gh release edit "$GITHUB_REF_NAME" --draft=false --latest
@@ -62,8 +73,9 @@ jobs:
         run: |
           url="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/latest.yml"
           for i in 1 2 3 4 5 6; do
-            if curl -sfL "$url" | grep -q "version: ${GITHUB_REF_NAME#v}"; then echo "OK: $url"; exit 0; fi
+            if curl -sfL "$url" | grep -q "version: ${GITHUB_REF_NAME#v}"; then echo "OK: $url"; break; fi
+            if [ "$i" = 6 ]; then echo "::error::$url does not serve version ${GITHUB_REF_NAME#v}"; exit 1; fi
             sleep 10
           done
-          echo "::error::$url does not serve version ${GITHUB_REF_NAME#v}"
-          exit 1
+          site="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/Lamha-Setup.exe"
+          curl -sfIL "$site" -o /dev/null && echo "OK: $site" || { echo "::error::$site is missing"; exit 1; }

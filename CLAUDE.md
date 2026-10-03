@@ -83,6 +83,7 @@ User-facing documentation lives in [README.md](README.md). Update it whenever a 
 | The sentence around a word in other programs (Windows) | `desktop/uia-helper.cs` (lamha-uia.exe), `uia-context.js`, `scripts/build-helper.mjs`; main.js `startContextHelper()`, `onHotkey()` |
 | The app's memory | `desktop/scripts/memory.ps1` (`npm run memory`), `scripts/memory-use.js`; the graphics card: main.js `GPU`, Settings row in `renderer/clipboard/settings.js` |
 | Updates, changelog | `desktop/updater.js`, `shared/changelog.js`, `tools/release-notes.mjs` |
+| The website (download page) | `site/index.html` (no build; its own `[ar, en]` spans), `site/og.png`; published by `.github/workflows/site.yml` |
 | Theme, animation, i18n, AI helpers | `shared/theme.js`, `shared/motion.js`, `shared/i18n.js`, `shared/lamha-ai.js` |
 
 ## Testing only what changed
@@ -138,14 +139,15 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-10-02. Latest release: **1.9.9** (tagged 2026-10-02); **2.0.0** is bumped and committed, waiting for its tag. The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
+_Last updated: 2026-10-03. Latest release: **2.0.0** (tagged 2026-10-02). The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
 
 **At the end of a session:** update the open items below (add new ones, delete finished ones), and add a short dated entry to docs/history.md for substantial work, in the same commit. Keep this file small (under ~25 KB): details belong in history.md.
 
 ### Open items
 
 **Next work**
-- **2.0.0 is prepared, not tagged:** version bumped, changelog written (English by Claude, Arabic translated by Claude at the user's request: they may reword it). The code is what `npm run smoke` passed 74/74. To release: `git push`, then `git tag v2.0.0 && git push origin v2.0.0`, and update Latest release below. Drafts still awaiting the user's wording: `d.accent`, `d.accentHint`, `d.mica`, `d.micaHint` (i18n-desktop.js), `o.reviewIntro`, `o.cardsAutoHint` (i18n-options.js).
+- **The website** (`site/`, published by `.github/workflows/site.yml` to https://osamaomer.github.io/lamha/; built 2026-10-03, see docs/history.md). Before it goes live: the user turns on Settings → Pages → Source: GitHub Actions. Its copy is Claude's draft (headings partly from the store pictures' own words): the user rewords it. Open: the Firefox button links to the README until the extension is on addons.mozilla.org (`ff-link`); a link to the user's X account; real screen recordings could replace the HTML mock-ups. The release workflow uploads `Lamha-Setup.exe` / `Lamha-Portable.exe` from the next release on (2.0.0 has only the versioned names: the page finds those through GitHub's API, but its no-script fallback link works only from the next release).
+- Drafts still awaiting the user's wording: `d.accent`, `d.accentHint`, `d.mica`, `d.micaHint` (i18n-desktop.js), `o.reviewIntro`, `o.cardsAutoHint` (i18n-options.js), and 2.0.0's Arabic changelog.
 - Maybe: one combined Wikipedia request (`prop=langlinks|extracts|pageimages|pageprops`) answers disambiguation pages and words without an Arabic article in one request instead of two (fewer requests against Wikimedia's limit).
 - Optimization, by size of gain (measured in docs/history.md → *After 1.9.7: optimization*): close the main window when it hides to the tray (~−20 MB; reopening reloads it); the app's deck writes (only past ~10,000 cards); Firefox's 163 KB per frame (a small loader).
 

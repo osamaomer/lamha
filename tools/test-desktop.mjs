@@ -6,6 +6,7 @@ import { createRequire } from "node:module";
 import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import vm from "node:vm";
 import assert from "node:assert/strict";
 import { quiet, wanted, report, title as printTitle, notRun } from "./test-args.mjs";
 
