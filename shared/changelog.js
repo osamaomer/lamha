@@ -3,6 +3,18 @@
  * stops when the version being released has no entry here. Newest first; each note is [arabic, english]. */
 // eslint-disable-next-line no-unused-vars
 var LamhaChangelog = [
+  { v: "2.0.1", date: "2026-10-04", notes: [
+    ["قراءة أسهل واستخدام أيسر: صار النص أوضح في الوضع الداكن، وصارت حواف مربعات النص والقوائم المنسدلة ظاهرة. كما يدعم التطبيق الآن سمات التباين في ويندوز، ويقرأ «الراوي» الترجمة فور ظهورها.",
+      "Easier to read and use: text is clearer in dark mode, and the edges of text boxes and dropdowns are visible. The app now also supports Windows' contrast themes, and Narrator reads the translation as soon as it appears."],
+    ["بداية أوضح: عند تشغيل التطبيق أول مرة، تعرض الإعدادات طريقة استخدامه في ثلاث خطوات.",
+      "A clearer start: the first time you run the app, Settings shows how to use it in three steps."],
+    ["تمييز تخمينات الذكاء الاصطناعي: إذا لم تكن الكلمة في أي قاموس، فإنها تظهر على أنها تخمين من الذكاء الاصطناعي، ولا تُحفظ في سجلك.",
+      "AI guesses are marked: when a word isn't in any dictionary, it shows as a guess from the AI and isn't saved to your history."],
+    ["«ترجمة أدق» في النافذة الرئيسية: صار خيار «ترجمة أدق» متاحًا في النافذة الرئيسية أيضًا.",
+      "Better translation in the main window: the Better translation option is now in the main window too."],
+    ["إصلاحات صغيرة: تظهر عبارة «بعد يومين» الآن بصيغتها الصحيحة، وتحتفظ أسماء الأعلام مثل Paris بحرفها الأول الكبير، وتتسع البطاقة للنص عند تكبير حجم الخط، ويشير شريط الأقسام إلى القسم الصحيح، وصار اسم «استبدال» موحدًا في كل مكان.",
+      "Small fixes: \"in two days\" now shows with the correct Arabic grammar, names such as Paris keep their capital first letter, the card makes room for the text when the font is enlarged, the section bar points to the right section, and the Replace button has one name everywhere."]
+  ]},
   { v: "2.0.0", date: "2026-10-02", notes: [
     ["لون التمييز من ويندوز: يمكن لتطبيق ويندوز أن يأخذ لون التمييز الذي اخترته في ويندوز لأزراره وروابطه، معدّلًا ليبقى مقروءًا في الوضعين الفاتح والداكن. فعّله من: الإعدادات ← المظهر ← لون التمييز من Windows.",
       "Windows accent colour: the Windows app can take the accent colour you chose in Windows for its buttons and links, adjusted to stay readable in light and dark. Turn it on in Settings → Appearance → Accent colour from Windows."],
