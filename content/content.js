@@ -797,6 +797,7 @@
 
   /** Above the main meaning: "in this context"; in the English view also the part of speech ("فعل · في هذا السياق"). */
   function heroLabel(d, ctx) {
+    if (d.aiGuess) return L("c.aiGuess"); // no dictionary has the word: the meaning is the AI's guess
     if (d.mode === "explain") return [d.heroPos, d.contextSense && L("c.inContext")].filter(Boolean).join(" · ");
     return ctx || d.contextSense ? (ctx && ctx.untranslated ? L("c.inContextName") : L("c.inContext")) : "";
   }

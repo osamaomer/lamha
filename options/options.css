@@ -63,6 +63,8 @@ html:not(.desktop) .app-only { display: none !important; } /* rows only the Wind
 /* the report, to read before sending it: in the row's text column, so it keeps the row's edges */
 .report { margin-top: 6px; }
 .report summary { cursor: pointer; color: var(--accent); font-size: 12.5px; font-weight: 600; width: fit-content; }
+.privacy-more { margin-top: 12px; } /* the full list of what is sent, behind one line */
+.privacy-more p { margin: 6px 0 0; }
 .report pre {
   margin: 8px 0 0; padding: 10px 12px; max-height: 240px; overflow: auto; white-space: pre-wrap; word-break: break-word;
   direction: ltr; text-align: left; font: 12px/1.55 ui-monospace, Consolas, monospace; color: var(--fg);

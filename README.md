@@ -63,6 +63,7 @@ Settings → الترجمة decides who translates sentences, paragraphs and the
 - **Pages:** whole-page translation stays on Google unless you allow the AI (a page is a lot of text for a free quota or a small local model).
 - **A safety net:** AI models sometimes slip letters from another alphabet into a translation (we saw Korean and Hebrew in Arabic). Lamha checks every AI answer, asks again, and uses Google instead if it still looks wrong.
 - Words keep the offline dictionary and Google's dictionary data first: for a single word, those beat a translation.
+- **A word no dictionary has:** when only the AI answers, the card says *تخمين من الذكاء الاصطناعي · ليست في القاموس* (AI guess · not in the dictionary), and the word stays out of your history (it could be a typo or a made-up word).
 
 ### 📚 An offline dictionary built in
 

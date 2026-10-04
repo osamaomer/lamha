@@ -138,7 +138,7 @@
         <div><b data-i18n="o.autoSpeak">النطق التلقائي</b><small data-i18n="o.autoSpeakHint">نطق الكلمة تلقائيًا عند البحث عنها</small></div>
         <span class="switch"><input type="checkbox" id="autoSpeak"><span class="track"><span class="thumb"></span></span></span>
       </label>
-      <label class="opt">
+      <label class="opt ext-only"><!-- the browser's button on a selection: the Windows app has none -->
         <div><b data-i18n="o.inInputs">العمل داخل حقول الكتابة</b><small data-i18n="o.inInputsHint">إظهار الزر عند التحديد داخل مربعات النص والمحررات</small></div>
         <span class="switch"><input type="checkbox" id="showInInputs"><span class="track"><span class="thumb"></span></span></span>
       </label>
@@ -146,7 +146,8 @@
 
     <section class="panel" id="ai">
       <h2 data-i18n="o.writingTools">أدوات الكتابة</h2>
-      <p class="muted" data-i18n-html="o.aiIntro">حدّد أي نص — أو اكتب في أي مربع نص — واضغط <span class="mini-pill">✨ كتابة</span> لتدقيقه لغويًا مع شرح الأخطاء بالعربية، أو تحسين أسلوبه، أو جعله رسميًا أو ودّيًا أو أقصر، أو كتابة فكرتك العربية بإنجليزية طبيعية، أو تلخيصه، أو شرحه، أو كتابة ردٍّ عليه.</p>
+      <p class="muted ext-only" data-i18n-html="o.aiIntro">حدّد أي نص — أو اكتب في أي مربع نص — واضغط <span class="mini-pill">✨ كتابة</span> لتدقيقه لغويًا مع شرح الأخطاء بالعربية، أو تحسين أسلوبه، أو جعله رسميًا أو ودّيًا أو أقصر، أو كتابة فكرتك العربية بإنجليزية طبيعية، أو تلخيصه، أو شرحه، أو كتابة ردٍّ عليه.</p>
+      <p class="muted app-only" data-i18n-html="o.aiIntroApp">حدّد أي نص في أي برنامج واضغط <span class="combo"><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd></span> لتدقيقه لغويًا مع شرح الأخطاء بالعربية، أو تحسين أسلوبه، أو جعله رسميًا أو ودّيًا أو أقصر، أو كتابة فكرتك العربية بإنجليزية طبيعية، أو تلخيصه، أو شرحه، أو كتابة ردٍّ عليه.</p>
       <div class="choices providers" role="radiogroup" aria-label="مصدر الذكاء الاصطناعي" data-i18n-attr="aria-label:o.aiProvider">
         <label class="choice">
           <input type="radio" name="aiProvider" value="ollama">
@@ -434,7 +435,8 @@
           <button id="reportSend" class="btn small ghost" type="button" data-i18n="o.reportSend">إبلاغ على GitHub</button>
         </div>
       </div>
-      <p class="muted small" data-i18n="o.privacyText">يُرسَل إلى خدمة Google للترجمة: النص الذي تختاره، والجملة المحيطة به (إن كان «فهم السياق» مفعّلًا)، ونص الصفحة عندما تطلب ترجمتها. تُرسَل الكلمة إلى ويكيبيديا للنبذة. في وضع «القاموس المحلي» تُبحث الكلمات دون إرسال. عند استخدام أدوات الكتابة يُرسَل النص إلى المزوّد الذي اخترته: Claude أو Gemini بمفتاحك، أما Ollama فيبقى النص على جهازك. لا تُجمع أي بيانات أخرى.</p>
+      <details class="report privacy-more"><summary data-i18n="o.privacyMore">ما الذي يُرسَل وإلى أين؟</summary>
+      <p class="muted small" data-i18n="o.privacyText">يُرسَل إلى خدمة Google للترجمة: النص الذي تختاره، والجملة المحيطة به (إن كان «فهم السياق» مفعّلًا)، ونص الصفحة عندما تطلب ترجمتها. تُرسَل الكلمة إلى ويكيبيديا للنبذة. في وضع «القاموس المحلي» تُبحث الكلمات دون إرسال. عند استخدام أدوات الكتابة يُرسَل النص إلى المزوّد الذي اخترته: Claude أو Gemini بمفتاحك، أما Ollama فيبقى النص على جهازك. لا تُجمع أي بيانات أخرى.</p></details>
     </section>
 
     <section class="panel" id="appPanel" hidden>

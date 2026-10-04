@@ -542,6 +542,14 @@ async function lookup(rawText, opts = {}) {
     }
   }
 
+  // A single word only the AI answered: the dictionary's answer wins when it has one (Google down on "Online first"
+  // reached the AI before it); otherwise the AI's answer is a guess, said so on the card and kept out of the history
+  // (it gave a made-up word a meaning, and the history kept it like a real one)
+  if (word && !force && result.source === "ai" && result.type === "word") {
+    const known = (enLocal || arLocal) ? await local() : null;
+    result = known || { ...result, aiGuess: true };
+  }
+
   // A word in a language the user reads in that language (or in the translation language itself): explained, not translated
   if (word && !force && result.type === "word" && result.mode !== "explain" && explains(result.src, tl, settings)) {
     result = await explainWord(result, text, context, mode, tr);
@@ -583,7 +591,8 @@ function asWritten(result, text, context) {
 async function remember(result, text, word, context, settings) {
   result = asWritten(result, text, context);
   const learnable = word && result.translation && result.translation.toLowerCase() !== text.toLowerCase() &&
-    !(result.context && result.context.untranslated); // a name here: not a word to learn
+    !(result.context && result.context.untranslated) && // a name here: not a word to learn
+    !result.aiGuess; // the AI's guess at a word no dictionary has: maybe not a word at all
   const newWord = settings.saveHistory && learnable && addHistory({ q: result.query, tr: (result.mode === "explain" && result.ar) || result.translation, src: result.src });
   // automatic cards are a record of lookups too: "Keep a history" off means none (🔖 still adds one by hand)
   if (settings.saveHistory && settings.cardsAuto && learnable && result.src === "en") addCard(cardFromLookup(result, text, context));

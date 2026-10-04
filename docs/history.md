@@ -472,3 +472,12 @@ The user asked to complete the audit: every stage that needs neither their words
   - Error states captured without an AI.
   - The tray menu and notifications reviewed in code.
 - **Left for the user:** F5, how an AI guess for an unknown word is shown; the copy of F6, F13, F15, F18 and the welcome's drafts. F20 (dictionary data) is a separate job.
+- **Then the user said: go with the recommendations** for what waited on them.
+  - **F5:** a single word only the AI answered gets the dictionary's answer if it has one. Before, "Online first" with Google down reached the AI first. Otherwise the result is `aiGuess`: the card's label (and the main window's note) says *تخمين من الذكاء الاصطناعي · ليست في القاموس*, and `remember()` doesn't count it (no history, milestone or automatic card). 🔖 still works by hand.
+  - **Copy, Claude's wording:**
+    - `rv.emptyText` explains 🔖 and *إضافة الكلمات تلقائيًا*.
+    - "الإضافة" became "لمحة" (`o.dictInfo`, `o.ollamaOk`, `oerr.ollama_origin`).
+    - `write.useIt` is استبدال / Replace, like the card's.
+    - `o.explainLangsHint` is cut to one line.
+    - `o.privacyText` moved behind a "ما الذي يُرسَل وإلى أين؟" fold.
+    - The app gets its own writing-tools intro (`o.aiIntroApp`, Alt+Shift+W instead of the browser's button) and hides "العمل داخل حقول الكتابة" (a browser-only switch).

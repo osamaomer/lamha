@@ -231,7 +231,7 @@ await step("compose: Ctrl+Enter proofreads; diff, issues with type chips; journa
 });
 
 await step("compose: 'use it' puts the correction back in the box; draft saved", async () => {
-  [...$("wrOut").querySelectorAll("button")].find(b => text(b) === "استخدمه").click();
+  [...$("wrOut").querySelectorAll("button")].find(b => text(b) === "استبدال").click();
   await sleep(400);
   assert.equal($("draft").value, "I went to the market.");
   assert.equal(local.data.draft, "I went to the market.");
@@ -570,6 +570,13 @@ await step("card: a meaning chip opens that word, Arabic meanings too (their Eng
   c.root().querySelector('.bar .icon-btn[aria-label="رجوع"]').click();
   await sleep(100);
   assert.equal(c.sent.filter(m => m.type === "lookup").pop().text, "تَجْرِبَة", "back to the Arabic word");
+});
+
+await step("card: the AI's guess at a word no dictionary has says so", async () => {
+  const c = await cardPage(msg => (msg.type === "lookup" ? { ok: true, data: { query: "blorptastic", type: "word", src: "en", tl: "ar", translation: "مذهل للغاية", dict: [], definitions: [], examples: [], source: "ai", ai: "Ollama", aiGuess: true } } : { ok: true }), {});
+  c.show("blorptastic");
+  await sleep(120);
+  assert.equal(text(c.root().querySelector(".hero .ctx-label")), "تخمين من الذكاء الاصطناعي · ليست في القاموس");
 });
 
 await step("card: screen readers hear the answer when it arrives, and the error when there's none", async () => {

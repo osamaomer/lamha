@@ -182,7 +182,8 @@ async function runQuick(engine) {
     h("div", { class: "main" },
       h("div", { style: "flex:1;min-width:0" },
         h("div", { class: "tr" + (main.length > 40 ? " long" : ""), dir: dirOf(d.tl) }, main),
-        d.type === "word" && d.srcTranslit && h("div", { class: "phon" }, `${d.query} · /${d.srcTranslit}/`)
+        d.type === "word" && d.srcTranslit && h("div", { class: "phon" }, `${d.query} · /${d.srcTranslit}/`),
+        d.aiGuess && h("div", { class: "note" }, t("c.aiGuess")) // no dictionary has the word
       ),
       h("button", { class: "icon-btn", title: t("common.copy"), "aria-label": t("common.copy"), onclick: e => copyFrom(e.currentTarget, d.translation) }, copyIcon())
     )

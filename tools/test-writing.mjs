@@ -824,6 +824,20 @@ test("translation offline: 'Local only' translates sentences with a local AI (Ol
   assert.equal((await online.send({ type: "lookup", text: SENTENCE })).error, "offline_mode");
 });
 
+test("a word no dictionary has: the AI's answer is marked a guess and kept out of the history; a known word gets the dictionary", async () => {
+  const net = trNet();
+  const env = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, local: { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" }, sync: { uiLang: "ar", dictSource: "offline" } });
+  const d = (await env.send({ type: "lookup", text: "blorptastic" })).data;
+  assert.deepEqual({ source: d.source, aiGuess: d.aiGuess }, { source: "ai", aiGuess: true });
+  await new Promise(r => setTimeout(r, 20));
+  assert.ok(!(env.browser.storage.local.data.history || []).some(h => h.q === "blorptastic"), "not in the history");
+  // "Online first" with Google down reached the AI before the dictionary: a word the dictionary knows is its answer
+  const down = trNet({ googleUp: false });
+  const online = makeEnv({ fetchImpl: down.fetchImpl, realDict: true, local: { aiProvider: "ollama", ollamaModel: "qwen3.5:4b" }, sync: { uiLang: "ar", dictSource: "online", useContext: false } });
+  const known = (await online.send({ type: "lookup", text: "resilient" })).data;
+  assert.deepEqual({ source: known.source, aiGuess: known.aiGuess }, { source: "local", aiGuess: undefined });
+});
+
 test("translation: its own provider and model, separate from the writing tools", async () => {
   const net = trNet({ googleUp: false });
   const env = makeEnv({ fetchImpl: net.fetchImpl, local: {
