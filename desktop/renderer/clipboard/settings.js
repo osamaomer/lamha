@@ -253,6 +253,18 @@
     renderFx();
   }
 
+  /* ---- first run (?welcome=1): the app's own "how it works"; the page's steps are about a browser's pages ---- */
+  const welcome = document.getElementById("welcome");
+  if (welcome) {
+    const combo = key => h("span", { class: "combo" }, h("kbd", null, "Alt"), "+", h("kbd", null, "Shift"), "+", h("kbd", null, key));
+    const step = (n, title, ...rest) => h("li", null, h("span", { class: "n" }, arNum(n)), h("div", null, h("b", null, title), " ", ...rest));
+    welcome.querySelector(".steps").replaceChildren(
+      step(1, L("d.welcome1"), L("d.welcome1b"), " ", combo("L")),
+      step(2, L("d.welcome2"), L("d.welcome2b"), " ", combo("W")),
+      step(3, L("d.welcome3"), L("d.welcome3b")));
+    welcome.querySelectorAll("#permBox, .try").forEach(el => el.remove()); // no permission to ask; the try word needs a browser page
+  }
+
   const toSection = () => {
     const target = { "#clipboard": panel, "#updates": document.getElementById("updatesPanel") }[location.hash];
     if (target) target.scrollIntoView({ block: "start" });

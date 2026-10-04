@@ -16,7 +16,6 @@
 .desktop .wout .text, .desktop .issues { max-height: none; }
 
 /* settings (options.html) */
-.desktop #welcome,
 .desktop #triggerPanel,  /* floating button on web pages */
 .desktop #sitesPanel,    /* excluded websites */
 .desktop .ext-only { display: none !important; }

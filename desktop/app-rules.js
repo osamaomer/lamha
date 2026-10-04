@@ -39,11 +39,11 @@ function wikiSummaryArgs(msg) {
   return titles.length && /^[a-z]{2,3}$/.test(lang) ? { titles, lang } : null;
 }
 
-/** Settings' address suffix ("?welcome=1", "#ai", "?welcome=1#journal") → loadFile's { search, hash }; a welcome goes
- *  to the writing tools' section. */
+/** Settings' address suffix ("?welcome=1", "#ai", "?welcome=1#journal") → loadFile's { search, hash }. A welcome
+ *  opens at the top, on its "how it works" (it went to the writing tools, past it, when the app had none). */
 function optionsTarget(suffix) {
   const [, search = "", hash = ""] = /^\??([^#]*)#?(.*)$/.exec(suffix || "") || [];
-  return { search, hash: hash || (search.includes("welcome") ? "ai" : "") };
+  return { search, hash };
 }
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(v, hi));
@@ -57,6 +57,13 @@ function cardPlacement({ cursor, workArea: wa, w, h, toast = false }) {
   const down = !toast && (wa.y + wa.height - cursor.y >= 380 || wa.y + wa.height - cursor.y >= cursor.y - wa.y);
   const y = clamp(down ? cursor.y + 16 : cursor.y + (toast ? 60 : -16) - h, wa.y, wa.y + wa.height - h);
   return { bounds: { x, y, width: w, height: h }, point: { x: cursor.x - x, y: down ? Math.max(12, cursor.y + 16 - y) : Math.min(h - 12, cursor.y - 16 - y) } };
+}
+
+/** The card's window: `w` × `h` at 100%, grown with the card page's zoom (at 200% the card is twice as big, and was cut
+ *  by its window), never bigger than the screen's work area. */
+function cardSize({ w, h, zoom = 1, workArea: wa }) {
+  const z = Number.isFinite(zoom) && zoom > 1 ? zoom : 1;
+  return { w: Math.min(Math.round(w * z), wa.width), h: Math.min(Math.round(h * z), wa.height) };
 }
 
 /** The clipboard panel (w × h) under the mouse, or above it when there's no room below, inside the work area. */
@@ -95,9 +102,12 @@ const lum = rgb => {
 const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 const mix = (rgb, to, t) => rgb.map((v, i) => Math.round(v + (to[i] - v) * t));
 const hex = rgb => "#" + rgb.map(v => v.toString(16).padStart(2, "0")).join("");
-/** `rgb` moved toward `to` (black or white) just enough to reach 4.5:1 against `against`. */
-function readable(rgb, against, to) {
-  for (let t = 0; t <= 1.0001; t += 0.04) { const c = mix(rgb, to, t); if (contrast(c, against) >= 4.5) return c; }
+const over = (rgb, alpha, under) => rgb.map((v, i) => Math.round(v * alpha + under[i] * (1 - alpha)));
+/** `rgb` moved toward `to` (black or white) just enough to reach 4.5:1 against `against` and, with `tint`, also on its
+ *  own tint of that alpha over `against` (selected chips, the active section link: accent text on --accent-soft). */
+function readable(rgb, against, to, tint = 0) {
+  const ok = c => contrast(c, against) >= 4.5 && (!tint || contrast(c, over(c, tint, against)) >= 4.5);
+  for (let t = 0; t <= 1.0001; t += 0.04) { const c = mix(rgb, to, t); if (ok(c)) return c; }
   return to;
 }
 
@@ -111,9 +121,10 @@ function accentPalette(windowsHex) {
   const rgb = [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16));
   const white = [255, 255, 255], black = [0, 0, 0];
   const theme = (surface, toward) => {
-    const accent = readable(rgb, surface, toward);
+    const alpha = toward === white ? 0.12 : 0.09; // --accent-soft's, as in ui.css
+    const accent = readable(rgb, surface, toward, alpha);
     const btn = readable(rgb, white, black); // white text on it, in both themes
-    return { accent: hex(accent), accentSoft: `rgba(${accent.join(", ")}, ${toward === white ? 0.15 : 0.09})`, btn: hex(btn) };
+    return { accent: hex(accent), accentSoft: `rgba(${accent.join(", ")}, ${alpha})`, btn: hex(btn) };
   };
   return { light: theme(SURFACE.light, black), dark: theme(SURFACE.dark, white) };
 }
@@ -132,4 +143,4 @@ html:root[data-theme="dark"] { ${vars(p.dark)} }
 @media (prefers-color-scheme: dark) { html:root:not([data-theme="light"]) { ${vars(p.dark)} } }`;
 }
 
-module.exports = { SECRET_KEYS, PAGE_DATA, withoutSecrets, changesFor, OUTSIDE_TEXT_MESSAGES, allowedFromOutsideText, wikiSummaryArgs, optionsTarget, cardPlacement, panelPlacement, motionHint, accentPalette, accentCss, contrast };
+module.exports = { SECRET_KEYS, PAGE_DATA, withoutSecrets, changesFor, OUTSIDE_TEXT_MESSAGES, allowedFromOutsideText, wikiSummaryArgs, optionsTarget, cardPlacement, cardSize, panelPlacement, motionHint, accentPalette, accentCss, contrast };

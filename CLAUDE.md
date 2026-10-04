@@ -127,7 +127,8 @@ npm run bench                     # performance numbers (tools/bench.mjs): looku
 cd desktop && npm install && npm start   # run the Windows app from source
 cd desktop && npm run smoke       # full desktop self-test (needs a real Windows desktop; run before a release)
 cd desktop && npm run shots       # every screen as a PNG, light/dark × ar/en (~5 min; LAMHA_SHOTS_ONLY=dark-ar for one set, LAMHA_SHOTS=folder).
-                                  # Uses Ollama when it runs on this PC (real proofread / improve / AI translation); LAMHA_SHOTS_AI=0 skips it
+                                  # Uses Ollama when it runs on this PC (real proofread / improve / AI translation); LAMHA_SHOTS_AI=0 skips it.
+                                  # LAMHA_SHOTS_AUDIT=1: also 200% zoom, high contrast, and a11y-*.txt (unnamed controls, Tab order)
 cd desktop && npm run memory      # the app's memory as Task Manager sees it (every process, lamha-uia.exe too), temporary profile,
                                   # no registry. Add -- -Use (after a minute of use), -Window, -Gpu, -Sync '{...}' / -Local '{...}'
 cd desktop && npm run helper      # builds bin/lamha-uia.exe from uia-helper.cs (npm start, dist and release do it themselves)
@@ -146,7 +147,11 @@ _Last updated: 2026-10-03. Latest release: **2.0.0** (tagged 2026-10-02). The hi
 ### Open items
 
 **Next work**
-- **The design audit (2026-10-04)**: report at https://claude.ai/artifact/Mkpy2A8QooHXQ2q2PBefjm (summary in docs/history.md). Waiting for the user to pick stages: 1 accessibility (F1 forced colours, F2 dark tints, F3 announcements, F7 Space badge, F10 outlines, F12 targets), 2 bidi and grammar, 3 copy they rewrite, 4 the AI's guesses for unknown words (their decision), 5 layout and flows, 6 dictionary data. Still to check by hand: keyboard, Narrator, error states without an AI, tray/notifications/Mica.
+- **The design audit (2026-10-04)**: report at https://claude.ai/artifact/Mkpy2A8QooHXQ2q2PBefjm; its fixes are done (docs/history.md → *The design audit's fixes*). Waiting for the user:
+  - F5: an AI guess for a word no dictionary knows. Label it ("AI guess · not in the dictionary") and keep it out of the history, or don't ask the AI for single unknown words?
+  - Copy to reword: `rv.emptyText` (still says looked-up words show up in Review), "الإضافة" / "في أي صفحة" in the app (`o.ollamaOk`, `oerr.ollama_origin`, `o.dictInfo`), استبدال vs استخدمه (`c.replace`, `write.useIt`), the four-line hints (`o.explainLangsHint`, `o.privacyText`), and the welcome's drafts `d.welcome1`–`d.welcome3b`.
+  - F20, the offline dictionary's odd meanings (كتاب → bookmaker), is a data job in `tools/build_dict.py`.
+  - Narrator itself was not run (the accessibility tree was checked instead: `LAMHA_SHOTS_AUDIT=1` writes `a11y-*.txt`).
 - **The website** (`site/`, published by `.github/workflows/site.yml` to https://osamaomer.github.io/lamha/; built 2026-10-03, see docs/history.md). Before it goes live: the user turns on Settings → Pages → Source: GitHub Actions. Its copy is Claude's draft (headings partly from the store pictures' own words): the user rewords it. Open: the Firefox button links to the README until the extension is on addons.mozilla.org (`ff-link`); a link to the user's X account; real screen recordings could replace the HTML mock-ups. The release workflow uploads `Lamha-Setup.exe` / `Lamha-Portable.exe` from the next release on (2.0.0 has only the versioned names: the page finds those through GitHub's API, but its no-script fallback link works only from the next release).
 - Drafts still awaiting the user's wording: `d.accent`, `d.accentHint`, `d.mica`, `d.micaHint` (i18n-desktop.js), `o.reviewIntro`, `o.cardsAutoHint` (i18n-options.js), and 2.0.0's Arabic changelog.
 - Maybe: one combined Wikipedia request (`prop=langlinks|extracts|pageimages|pageprops`) answers disambiguation pages and words without an Arabic article in one request instead of two (fewer requests against Wikimedia's limit).

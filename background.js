@@ -568,9 +568,20 @@ async function lookup(rawText, opts = {}) {
   return remember(result, text, word, context, settings);
 }
 
+/** The dictionaries keep their words in small letters: a word with a capital in the middle of its sentence ("we flew
+ *  to Paris") is a name, and keeps it on the card. Typed alone, or starting a sentence, a capital says nothing.
+ *  A copy: the cached result is shared by both spellings. */
+function asWritten(result, text, context) {
+  if (result.type !== "word" || result.query !== text.toLowerCase() || !/^\p{Lu}\p{Ll}+$/u.test(text)) return result;
+  const before = context ? context.before.trim() : "";
+  if (!before || /[.!?…:]["'”’)\]]*$/.test(before)) return result;
+  return { ...result, query: text };
+}
+
 /** What a lookup leaves behind, fresh or from the cache alike (the Windows app keeps its cache for days): the word at
  *  the top of the history, its review card, and the count toward milestones and today's goal. */
 async function remember(result, text, word, context, settings) {
+  result = asWritten(result, text, context);
   const learnable = word && result.translation && result.translation.toLowerCase() !== text.toLowerCase() &&
     !(result.context && result.context.untranslated); // a name here: not a word to learn
   const newWord = settings.saveHistory && learnable && addHistory({ q: result.query, tr: (result.mode === "explain" && result.ar) || result.translation, src: result.src });

@@ -239,7 +239,7 @@ function initReport() {
 /** Links to the page's sections, named by their headings (so they follow the interface language). */
 let tocObserver = null;
 function buildToc() {
-  if (tocObserver) tocObserver.disconnect();
+  if (tocObserver) tocObserver.abort(); // the last bar's listeners
   const sections = [...document.querySelectorAll("section.panel[id]:not(#welcome)")].filter(s => !s.hidden && s.querySelector("h2"));
   const links = sections.map(s => {
     const a = document.createElement("a");
@@ -302,14 +302,28 @@ function buildToc() {
       if (on) { bringIntoView(a); moveInk(a); }
     });
   };
-  links.forEach(a => a.addEventListener("click", () => { held = a.hash.slice(1); heldUntil = Date.now() + 1200; mark(held); }));
+  // A clicked link stays marked until the user scrolls on their own: the page's last sections are short, and the
+  // bottom of the page can't bring them up to the bar
+  let clicked = "";
+  links.forEach(a => a.addEventListener("click", () => { held = clicked = a.hash.slice(1); heldUntil = Date.now() + 1200; mark(held); }));
   setTimeout(tocEdges, 0); // once laid out
-  if (typeof IntersectionObserver !== "function") return;
-  const io = tocObserver = new IntersectionObserver(entries => {
-    const top = entries.filter(e => e.isIntersecting).sort((x, y) => x.boundingClientRect.top - y.boundingClientRect.top)[0];
-    if (top) mark(top.target.id);
-  }, { rootMargin: "-64px 0px -60% 0px" });
-  sections.forEach(s => io.observe(s));
+  // The marked section is the last one whose top has passed just under the bar (the first one inside a band, as
+  // before, marked the section after a short one), or the last section once the page can't scroll further
+  const stop = tocObserver = new AbortController();
+  const pick = () => {
+    if (clicked) return mark(clicked);
+    const line = $("toc").getBoundingClientRect().bottom + 24;
+    let id = sections[0].id;
+    for (const s of sections) if (s.getBoundingClientRect().top <= line) id = s.id;
+    if (scrollY > 0 && innerHeight + scrollY >= document.documentElement.scrollHeight - 2) id = sections[sections.length - 1].id;
+    mark(id);
+  };
+  let frame = 0;
+  addEventListener("scroll", () => { if (!frame) frame = requestAnimationFrame(() => { frame = 0; pick(); }); }, { passive: true, signal: stop.signal });
+  for (const type of ["wheel", "keydown", "touchstart", "pointerdown"]) {
+    addEventListener(type, e => { if (!(type === "pointerdown" && row.contains(e.target))) { clicked = held = ""; heldUntil = 0; } }, { passive: true, signal: stop.signal });
+  }
+  pick();
 }
 
 /** The section links scroll sideways on a narrow window: fade the edge where more links are hidden, so it shows. */
@@ -468,6 +482,8 @@ function el(tag, cls, ...kids) {
   return e;
 }
 
+const dirAuto = e => { e.dir = "auto"; return e; };
+
 async function renderJournal() {
   const { mistakes } = await browser.storage.local.get("mistakes");
   const j = mistakes || { checks: 0, counts: {}, recent: [] };
@@ -507,7 +523,7 @@ async function renderJournal() {
   $("jRecentTitle").textContent = journalCat ? t("o.examplesOf", { cat: LamhaAI.catLabel(journalCat) }) : t("o.recentMistakes");
   $("jRecent").replaceChildren(...list.map(r => el("li", null,
     el("div", "fix", el("del", null, r.original), " → ", el("ins", null, r.fix)),
-    r.why && el("div", "why", r.why)
+    r.why && dirAuto(el("div", "why", r.why)) // the AI explains in either language: English keeps its full stop at the end
   )));
 }
 

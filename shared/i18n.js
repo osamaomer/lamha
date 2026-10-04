@@ -203,11 +203,12 @@ var LamhaI18n = (() => {
     "rv.key": [v => `مفتاح ${v.k}`, v => `Key ${v.k}`],
     "rv.remove": ["إزالة من المراجعة", "Remove from review"],
     "rv.removed": ["أُزيلت الكلمة", "Word removed"],
+    // `after`: following a preposition (بعد يومين), where the dual is يومين, not يومان
     "span.min": [v => `${num(v.n)} د`, v => `${num(v.n)} min`],
-    "span.hours": [v => arCount(v.n, "ساعة", "ساعتان", "ساعات", "ساعة"), v => enCount(v.n, "hour", "hours")],
-    "span.days": [v => arCount(v.n, "يوم", "يومان", "أيام", "يومًا"), v => enCount(v.n, "day", "days")],
-    "span.months": [v => arCount(v.n, "شهر", "شهران", "أشهر", "شهرًا"), v => enCount(v.n, "month", "months")],
-    "span.years": [v => (v.n === 1 ? "سنة" : `${num(v.n)} سنوات`), v => enCount(v.n, "year", "years")],
+    "span.hours": [v => arCount(v.n, "ساعة", v.after ? "ساعتين" : "ساعتان", "ساعات", "ساعة"), v => enCount(v.n, "hour", "hours")],
+    "span.days": [v => arCount(v.n, "يوم", v.after ? "يومين" : "يومان", "أيام", "يومًا"), v => enCount(v.n, "day", "days")],
+    "span.months": [v => arCount(v.n, "شهر", v.after ? "شهرين" : "شهران", "أشهر", "شهرًا"), v => enCount(v.n, "month", "months")],
+    "span.years": [v => arCount(v.n, "سنة", v.after ? "سنتين" : "سنتان", "سنوات", "سنة"), v => enCount(v.n, "year", "years")],
 
     // the card on web pages (content script)
     "c.pill": ["لمحة", "Lamha"],

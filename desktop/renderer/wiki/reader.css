@@ -28,7 +28,7 @@ body { margin: 0; background: var(--bg); color: var(--fg); }
 .rd-search-i { position: absolute; inset-inline-start: 12px; top: 50%; transform: translateY(-50%); color: var(--faint); display: flex; pointer-events: none; }
 .rd-search input {
   width: 100%; box-sizing: border-box; height: var(--control-h, 36px); padding-inline: 36px 12px;
-  border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--fg); font: 14px var(--font);
+  border: 1px solid var(--field-line); border-radius: 999px; background: var(--bg); color: var(--fg); font: 14px var(--font);
 }
 .rd-search input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .rd-search input::-webkit-search-cancel-button { display: none; }

@@ -870,7 +870,9 @@ ipcMain.handle("lamha:card-replace", async (e, text) => {
 /** Places the card window next to the mouse; returns where the card should attach inside it. */
 function placeCardWin({ toast = false } = {}) {
   const cursor = screen.getCursorScreenPoint();
-  const { bounds, point } = rules.cardPlacement({ cursor, workArea: screen.getDisplayNearestPoint(cursor).workArea, w: CARD_W, h: CARD_H, toast });
+  const workArea = screen.getDisplayNearestPoint(cursor).workArea;
+  const { w, h } = rules.cardSize({ w: CARD_W, h: CARD_H, zoom: cardWin.webContents.getZoomFactor(), workArea });
+  const { bounds, point } = rules.cardPlacement({ cursor, workArea, w, h, toast });
   cardWin.setBounds(bounds);
   return point;
 }

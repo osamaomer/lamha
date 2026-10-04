@@ -859,6 +859,16 @@ test("English–English: offline definitions, the one that fits the sentence fir
   assert.equal(inSentence.data.ar, "مَرِن", "a sense without its own Arabic word keeps the word's usual meaning");
 });
 
+test("a name keeps its capital on the card (to Paris), a sentence's first word doesn't", async () => {
+  const env = makeEnv({ fetchImpl: async () => json(429, {}), realDict: true, sync: { uiLang: "ar", dictSource: "offline" } });
+  const q = async (text, context) => (await env.send({ type: "lookup", text, context })).data.query;
+  assert.equal(await q("Paris"), "paris", "typed alone, a capital says nothing");
+  assert.equal(await q("Paris", { before: "We flew to ", after: " last May." }), "Paris", "inside a sentence");
+  assert.equal(await q("River", { before: "It rained. ", after: " banks flooded." }), "river", "only the start of a sentence");
+  assert.equal(await q("paris"), "paris", "as written");
+  assert.equal(await q("PARIS"), "paris", "shouting isn't a name");
+});
+
 test("English–English: automatic when English is the translation language; the card's switch is remembered", async () => {
   const net = recorder(() => json(429, {}));
   const toEnglish = makeEnv({ fetchImpl: net.fetchImpl, realDict: true, sync: { uiLang: "en", targetLang: "en" } });
@@ -1267,6 +1277,18 @@ test("offline Arabic → English results label their word list in the interface 
   assert.equal((await ctx.LocalDict.lookupAr("كتاب")).dict[0].pos, "in English");
   ctx.LamhaI18n.setLang("ar");
   assert.equal((await ctx.LocalDict.lookupAr("كتاب")).dict[0].pos, "بالإنجليزية");
+});
+
+test("Arabic durations: the dual is يومان alone, يومين after بعد (the next review)", () => {
+  const ctx = vm.createContext({});
+  vm.runInContext(src("shared/i18n.js"), ctx, { filename: "i18n.js" });
+  const { t } = ctx.LamhaI18n;
+  ctx.LamhaI18n.setLang("ar");
+  assert.equal(t("span.days", { n: 2 }), "يومان", "under a grade button");
+  assert.equal(t("rv.next", { span: t("span.days", { n: 2, after: true }) }), "المراجعة القادمة بعد يومين.");
+  for (const [k, two] of [["span.hours", "ساعتين"], ["span.months", "شهرين"], ["span.years", "سنتين"]]) assert.equal(t(k, { n: 2, after: true }), two, k);
+  assert.equal(t("span.years", { n: 2 }), "سنتان", "not ٢ سنوات");
+  assert.equal(t("span.days", { n: 5, after: true }), "٥ أيام");
 });
 
 test("Arabic interface: explanations and messages stay Arabic", async () => {

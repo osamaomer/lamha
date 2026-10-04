@@ -57,7 +57,7 @@ Settings → الترجمة decides who translates sentences, paragraphs and the
 | **Google فقط · Google only** | Google, and nothing else. |
 | **الذكاء الاصطناعي · AI** | The AI first: more natural with idioms, slang and tone, but slower. Google steps in if the AI fails. |
 
-- **✨ ترجمة أدق · Better translation:** a link under Google's translation asks the AI for a second opinion. Google turns *"it's a piece of cake"* into "a piece of the cake"; the AI says «الأمر في غاية السهولة».
+- **✨ ترجمة أدق · Better translation:** a link under Google's translation (on the card and in the main window) asks the AI for a second opinion. Google turns *"it's a piece of cake"* into "a piece of the cake"; the AI says «الأمر في غاية السهولة».
 - **Its own translator:** translation can use a different AI from the writing tools, for example Gemini for writing and Ollama for translating. Each provider translates with its quickest model unless you pick another: Gemini Flash-Lite, Claude Haiku, or your Ollama model.
 - **Offline:** with **Ollama** as the translator, sentences translate with no internet at all, even with the dictionary on *Local only*.
 - **Pages:** whole-page translation stays on Google unless you allow the AI (a page is a lot of text for a free quota or a small local model).
@@ -135,6 +135,7 @@ The **ترجمة** tab opens on a **Today** card (it steps aside while you trans
 
 - **Arabic or English interface:** Settings → اللغات → لغة الواجهة. *Automatic* uses Arabic on an Arabic system and English otherwise. In English the layout runs left to right, and proofreading explanations, mistake tips and summaries are in English too. Translations still go to your chosen translation language. Existing users keep Arabic when they update.
 - **Light and dark themes** that follow the system, plus keyboard focus styles.
+- **Accessibility:** text meets WCAG AA contrast in both themes (a test computes every colour pair), text boxes and dropdowns have edges you can see, Windows' high-contrast themes keep every edge and selection, and screen readers (Narrator, NVDA) read each answer when it arrives.
 - **Animations you can switch:** Settings → المظهر → الحركة.
   - **Full:** the card grows out of the word you picked. Proofreading strikes each mistake before showing its fix, and AI answers appear word by word. Review cards flip and fly off the way you graded them. There are small celebrations too: a finished deck, a review streak, your 100th word, today's goal. 🎉 Copy buttons turn into a ✓, the bookmark pops when a word goes into review, and the 🔊 button's sound waves pulse while it speaks.
   - **Subtle:** short, calm fades and slides.
@@ -219,7 +220,7 @@ Then restart Ollama. (The Windows app doesn't need this step.)
 
 ## 🪟 The Windows app
 
-`desktop/` is Lamha as a standalone Windows app built with Electron. It runs the extension's own `background.js`, `local-dict.js` and `shared/` files unchanged, so the lookups, writing tools and review behave exactly the same. The main window has four tabs: **ترجمة · كتابة · مراجعة · الحافظة**. The Today card and up to 12 recent lookups fill the ترجمة tab.
+`desktop/` is Lamha as a standalone Windows app built with Electron. It runs the extension's own `background.js`, `local-dict.js` and `shared/` files unchanged, so the lookups, writing tools and review behave exactly the same. The main window has four tabs: **ترجمة · كتابة · مراجعة · الحافظة**. The Today card and up to 12 recent lookups fill the ترجمة tab. On the first run, Settings opens with a short *how it works*: the three shortcuts, and where Lamha lives (the tray).
 
 ### 🌐 Works in any program
 

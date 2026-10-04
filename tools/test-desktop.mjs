@@ -65,19 +65,24 @@ test("Windows' accent colour: readable in both themes whatever was picked; its s
     assert.ok(rules.contrast(rgb(p.light.accent), [255, 255, 255]) >= 4.5, picked + ": links on the light cards");
     assert.ok(rules.contrast(rgb(p.dark.accent), [44, 44, 46]) >= 4.5, picked + ": links on the dark cards");
     for (const t of ["light", "dark"]) assert.ok(rules.contrast(rgb(p[t].btn), [255, 255, 255]) >= 4.5, picked + ": white text on its buttons");
+    for (const [t, surface] of [["light", [255, 255, 255]], ["dark", [44, 44, 46]]]) { // selected chips: the accent on its own tint
+      const a = Number(/, ([\d.]+)\)$/.exec(p[t].accentSoft)[1]), fg = rgb(p[t].accent);
+      assert.ok(rules.contrast(fg, fg.map((v, i) => Math.round(v * a + surface[i] * (1 - a)))) >= 4.5, `${picked}: ${t} accent on its tint`);
+    }
   }
-  assert.equal(rules.accentPalette("9E6804FF").light.accent, "#9e6804", "a colour that's readable stays as it was");
+  assert.equal(rules.accentPalette("744DA9FF").light.accent, "#744da9", "a colour that's readable stays as it was");
+  assert.equal(rules.accentPalette("9E6804FF").light.accent, "#916004", "readable on white, not on its own tint: a little darker");
   assert.equal(rules.accentPalette("not a colour"), null);
   assert.equal(rules.accentCss(null), "", "no palette: Lamha's own colours");
   const css = rules.accentCss(rules.accentPalette("0078D4"));
-  assert.match(css, /^html:root \{ --accent: #0078d4;/);
+  assert.match(css, /^html:root \{ --accent: #006ec3;/, "Windows' blue, a shade darker to read on its own tint");
   assert.match(css, /html:root\[data-theme="dark"\] \{ --accent: #/);
   assert.match(css, /--lamha-app-accent-dark: #/, "the card's shadow root gets both themes' colours");
 });
 
 test("Settings' address: section and welcome", () => {
   assert.deepEqual(rules.optionsTarget("#journal"), { search: "", hash: "journal" });
-  assert.deepEqual(rules.optionsTarget("?welcome=1"), { search: "welcome=1", hash: "ai" });
+  assert.deepEqual(rules.optionsTarget("?welcome=1"), { search: "welcome=1", hash: "" }, "the top: the welcome");
   assert.deepEqual(rules.optionsTarget("?welcome=1&perm=1#wikipedia"), { search: "welcome=1&perm=1", hash: "wikipedia" });
   assert.deepEqual(rules.optionsTarget(""), { search: "", hash: "" });
 });
@@ -85,6 +90,10 @@ test("Settings' address: section and welcome", () => {
 test("the card window stays on the mouse's monitor: below the mouse, above it near the bottom", () => {
   const workArea = { x: 0, y: 0, width: 1920, height: 1040 }, w = 480, h = 620;
   const inside = b => b.x >= workArea.x && b.y >= workArea.y && b.x + b.width <= workArea.x + workArea.width && b.y + b.height <= workArea.y + workArea.height;
+  assert.deepEqual(rules.cardSize({ w, h, zoom: 1, workArea }), { w, h });
+  assert.deepEqual(rules.cardSize({ w, h, zoom: 1.5, workArea }), { w: Math.round(w * 1.5), h: Math.round(h * 1.5) }, "bigger text, a bigger window");
+  assert.deepEqual(rules.cardSize({ w, h, zoom: 3, workArea }), { w: Math.min(w * 3, workArea.width), h: workArea.height }, "never past the screen");
+  assert.deepEqual(rules.cardSize({ w, h, zoom: 0.5, workArea }), { w, h }, "smaller: the window stays (the card fits)");
   const top = rules.cardPlacement({ cursor: { x: 960, y: 100 }, workArea, w, h });
   assert.deepEqual(top, { bounds: { x: 720, y: 116, width: w, height: h }, point: { x: 240, y: 12 } }, "below the mouse");
   const low = rules.cardPlacement({ cursor: { x: 960, y: 1000 }, workArea, w, h });

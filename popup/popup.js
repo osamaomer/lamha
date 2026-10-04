@@ -157,7 +157,8 @@ $("clearQ").addEventListener("click", () => {
 
 const dirOf = LamhaI18n.textDir;
 
-async function runQuick() {
+/** `engine: "ai"`: the "Better translation" link, which asks the AI translator whatever the setting is (as on the card). */
+async function runQuick(engine) {
   const text = q.value.trim();
   const out = $("result");
   if (!text) { out.hidden = true; return; }
@@ -165,11 +166,12 @@ async function runQuick() {
   out.hidden = false;
   out.replaceChildren(h("div", { class: "loading" }, t("common.translating")));
   waitFor(text.split(/\s+/).length <= 3 && text.length <= 40 ? "book" : "lens"); // a word, or a sentence
-  const res = await browser.runtime.sendMessage({ type: "lookup", text }).catch(() => null);
+  const res = await browser.runtime.sendMessage({ type: "lookup", text, engine: engine === "ai" ? "ai" : undefined }).catch(() => null);
   if (token !== qToken) return;
   stopWait();
   if (!res || !res.ok) {
     out.replaceChildren(h("div", { class: "error" }, quickError(res && res.error)));
+    announce(quickError(res && res.error));
     return;
   }
   const d = res.data;
@@ -193,11 +195,23 @@ async function runQuick() {
   const firstDef = d.definitions && d.definitions[0] && d.definitions[0].entries[0];
   if (firstDef && d.mode !== "explain") kids.push( // explained words: the definition is already the main line
     h("div", { class: "def" }, firstDef.glossTr && h("div", null, firstDef.glossTr), h("div", { class: "en" }, firstDef.gloss)));
+  const tr = LamhaAI.translator(aiLocal);
+  if (tr.ready && d.type === "text" && d.source !== "ai") { // Google's answer: the AI does idioms and slang better
+    kids.push(h("button", { class: "link better", type: "button", title: t("c.betterTrTitle", { p: tr.name }), onclick: () => { clearTimeout(qTimer); runQuick("ai"); } }, t("c.betterTr")));
+  }
   if (d.mode === "explain" && d.ar) kids.push(h("div", { class: "def" }, h("div", { dir: dirOf(d.other || "ar") }, d.ar))); // …and the translation under it
   out.replaceChildren(...kids);
+  announce(main);
   LamhaMotion.stagger([...out.children].filter(k => !k.classList.contains("main")), { each: 45, distance: 4 });
   if (d.milestone || d.goal) LamhaMotion.burst(out.querySelector(".milestone"));
   renderHistory();
+}
+
+/** Screen readers read the translation when it arrives (#said, a live region; the result itself has too much in it). */
+function announce(text) {
+  const said = $("said");
+  said.textContent = "";
+  setTimeout(() => { said.textContent = String(text || "").slice(0, 300); }, 30);
 }
 
 /** Why the quick translation failed, as the card says it: "Local only" has no such word, the AI translator's quota or
@@ -377,7 +391,7 @@ async function runWrite(tool, fresh = false) {
     h("ul", { class: "issues" }, issues.map(i => h("li", null,
       h("div", { class: "fix" }, h("del", null, i.original), " → ", h("ins", null, i.fix)),
       i.category !== "other" && h("span", { class: "cat" }, LamhaAI.catLabel(i.category)),
-      i.why && h("div", { class: "why" }, i.why)
+      i.why && h("div", { class: "why", dir: "auto" }, i.why)
     )))
   );
 }
@@ -424,17 +438,18 @@ browser.storage.onChanged.addListener((changes, area) => {
 let rv = { queue: [], counts: null, nextDue: 0 }, rvShown = false, rvEnter = false, rvHad = false;
 const arNum = n => num(n);
 
-/** "١٠ د" / "ساعة" / "يومان" / "٥ أيام" … or "10 min" / "1 hour" / "5 days" … until the next review. */
-function spanLabel(ms) {
+/** "١٠ د" / "ساعة" / "يومان" / "٥ أيام" … or "10 min" / "1 hour" / "5 days" … until the next review. `after`: it
+ *  follows بعد ("بعد يومين"). */
+function spanLabel(ms, after = false) {
   const min = Math.round(ms / 60e3);
-  if (min < 60) return t("span.min", { n: Math.max(1, min) });
+  if (min < 60) return t("span.min", { n: Math.max(1, min), after });
   const hours = Math.round(min / 60);
-  if (hours < 24) return t("span.hours", { n: hours });
+  if (hours < 24) return t("span.hours", { n: hours, after });
   const days = Math.round(hours / 24);
-  if (days < 30) return t("span.days", { n: days });
+  if (days < 30) return t("span.days", { n: days, after });
   const months = Math.round(days / 30);
-  if (months < 12) return t("span.months", { n: months });
-  return t("span.years", { n: Math.round(days / 365) });
+  if (months < 12) return t("span.months", { n: months, after });
+  return t("span.years", { n: Math.round(days / 365), after });
 }
 
 /** Answers since the popup opened: the progress bar and the summary at the end. */
@@ -471,7 +486,7 @@ function renderReview() {
     const done = counts.total
       ? h("div", { class: "rv-done" }, h("b", null, t("rv.doneTitle")),
         rvSession.n > 0 && h("div", { class: "rv-sum" }, t("rv.session", rvSession)), // what this sitting did
-        rv.nextDue ? t("rv.next", { span: spanLabel(rv.nextDue - Date.now()) }) : "",
+        rv.nextDue ? t("rv.next", { span: spanLabel(rv.nextDue - Date.now(), true) }) : "",
         rv.streak >= 2 && h("div", null, h("span", { class: "rv-streak" }, t("rv.streak", { n: rv.streak }))))
       : h("div", { class: "rv-done" }, h("b", null, t("rv.emptyTitle")), t("rv.emptyText"));
     $("rvCard").replaceChildren(done);

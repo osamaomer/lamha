@@ -104,7 +104,8 @@
       h("div", { class: "grow" },
         h("b", null, fileName(f)),
         h("small", null, info),
-        f.imported && h("small", { class: "wk-path", dir: "ltr", title: L("d.wImported") }, f.file),
+        // the file's name: its whole path ran over three lines; the folder is in the tooltip
+        f.imported && h("small", { class: "wk-path", dir: "ltr", title: `${L("d.wImported")}: ${f.file}` }, String(f.file).split(/[\\/]/).pop()),
         f.missing && h("small", { class: "err" }, L("d.wMissing"))),
       h("div", { class: "cb-set-acts" },
         !f.missing && h("button", { class: "btn small ghost", type: "button", onclick: () => lamhaWiki.openReader(f.id, "") }, L("d.wRead")),

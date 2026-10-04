@@ -51,7 +51,7 @@
       </div>
       <div class="opt">
         <div><b data-i18n="o.targetLang">لغة الترجمة</b><small data-i18n="o.targetLangHint">اللغة التي تُترجم إليها النصوص</small></div>
-        <select id="targetLang">
+        <select id="targetLang" data-i18n-attr="aria-label:o.targetLang" aria-label="لغة الترجمة">
           <option value="ar" data-i18n="lang.ar">العربية</option>
           <option value="en" data-i18n="lang.en">الإنجليزية</option>
           <option value="fr" data-i18n="lang.fr">الفرنسية</option>
@@ -207,7 +207,7 @@
         <p class="tip warn" data-i18n="o.geminiWarn">⚠️ في الخطة المجانية قد تستخدم Google النصوص المرسلة لتحسين منتجاتها. مناسب للتدرّب، لا للرسائل الخاصة أو مستندات العمل.</p>
         <div class="opt">
           <div><b data-i18n="o.model">النموذج</b><small data-i18n="o.geminiModelsHint">Flash أدق، و Flash-Lite أسرع ويسمح بطلبات أكثر</small></div>
-          <select id="geminiModel">
+          <select id="geminiModel" data-i18n-attr="aria-label:o.model" aria-label="النموذج">
             <option value="gemini-3.8-flash" data-i18n="o.gemFlash">Gemini 3.8 Flash — الأدق</option>
             <option value="gemini-3.5-flash-lite" data-i18n="o.gemLite">Gemini 3.5 Flash-Lite — الأسرع</option>
           </select>
@@ -224,7 +224,7 @@
       <p class="tip" data-i18n-html="o.claudeTip">تحتاج إلى <b>مفتاح Claude API</b> من <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com</a>. هذا حساب منفصل عن اشتراك Claude.ai (Pro/Max)، ويُحتسب حسب الاستخدام — تدقيق رسالة عادية يكلّف نحو سنت إلى سنتين مع Opus، وأقل بكثير مع Haiku.</p>
       <div class="opt">
         <div><b data-i18n="o.model">النموذج</b><small data-i18n="o.claudeModelsHint">Opus أدق، و Sonnet و Haiku أسرع وأرخص</small></div>
-        <select id="aiModel">
+        <select id="aiModel" data-i18n-attr="aria-label:o.model" aria-label="النموذج">
           <option value="claude-opus-5" data-i18n="o.opus">Claude Opus 5 — الأدق</option>
           <option value="claude-sonnet-5" data-i18n="o.sonnet">Claude Sonnet 5 — متوازن</option>
           <option value="claude-haiku-4-5" data-i18n="o.haiku">Claude Haiku 4.5 — الأسرع والأرخص</option>
@@ -303,7 +303,7 @@
       </label>
       <div class="opt">
         <div><b data-i18n="o.newPerDay">كلمات جديدة في اليوم</b><small data-i18n="o.newPerDayHint">عدد الكلمات الجديدة التي تظهر للمراجعة كل يوم</small></div>
-        <select id="cardsNewPerDay">
+        <select id="cardsNewPerDay" data-i18n-attr="aria-label:o.newPerDay" aria-label="كلمات جديدة في اليوم">
           <option value="5">٥</option>
           <option value="10">١٠</option>
           <option value="20">٢٠</option>
@@ -312,7 +312,7 @@
       </div>
       <div class="opt">
         <div><b data-i18n="o.dailyGoal">هدف اليوم</b><small data-i18n="o.dailyGoalHint">كلمات تبحث عنها وبطاقات تراجعها كل يوم، في الحلقة على شاشة لمحة الرئيسية</small></div>
-        <select id="dailyGoal">
+        <select id="dailyGoal" data-i18n-attr="aria-label:o.dailyGoal" aria-label="هدف اليوم">
           <option value="0" data-i18n="o.noGoal">بلا هدف</option>
           <option value="5">٥</option>
           <option value="10">١٠</option>
@@ -385,7 +385,7 @@
       <h2 data-i18n="o.appearance">المظهر</h2>
       <div class="opt">
         <div><b data-i18n="o.theme">السمة</b><small data-i18n="o.themeHint">مظهر لمحة: البطاقة والنافذة والإعدادات</small></div>
-        <select id="theme">
+        <select id="theme" data-i18n-attr="aria-label:o.theme" aria-label="السمة">
           <option value="auto" data-i18n="o.themeAuto">تلقائي (حسب النظام)</option>
           <option value="light" data-i18n="o.themeLight">فاتح</option>
           <option value="dark" data-i18n="o.themeDark">داكن</option>

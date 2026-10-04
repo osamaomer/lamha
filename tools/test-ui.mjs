@@ -7,6 +7,7 @@ import vm from "node:vm";
 import assert from "node:assert/strict";
 import { JSDOM, VirtualConsole } from "jsdom";
 import { pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
 import { quiet, only, report } from "./test-args.mjs";
 
 // the extension folder: this file's parent, or $env:LAMHA_EXT when run from elsewhere
@@ -121,6 +122,8 @@ async function openPage(path, scripts, { extra = {} } = {}) {
     commands: { getAll: async () => [] }
   };
   w.HTMLElement.prototype.scrollIntoView = () => {};
+  let frames = 0; // jsdom has no frames without pretendToBeVisual: each one here is a second later, so animations end at once
+  w.requestAnimationFrame ??= f => setTimeout(() => f(++frames * 1000), 0);
   if (src(path).includes("../shared/dialog.js")) w.eval(src("shared/dialog.js")); // the page's own questions (no confirm())
   for (const s of scripts) w.eval(src(s));
   await sleep(150);
@@ -372,7 +375,6 @@ await step("English: settings page translated, language menu shows the choice", 
   assert.ok(eo("dictionary").contains(eo("packs")), "the dictionaries to download, with the offline choice");
   const tocLinks = [...enOpt.document.querySelectorAll("#toc a")];
   const journalLink = tocLinks.find(a => a.hash === "#journal");
-  enOpt.requestAnimationFrame = f => setTimeout(f, 16); // jsdom has none; the highlight uses it once
   journalLink.click(); // a clicked link is marked at once, and stays marked while the page scrolls there
   assert.equal(journalLink.getAttribute("aria-current"), "true");
   assert.equal(tocLinks.filter(a => a.getAttribute("aria-current") === "true").length, 1);
@@ -392,6 +394,16 @@ await step("English: settings page translated, language menu shows the choice", 
   assert.equal(wheel(-100), true, "up at the row's start: the page scrolls");
   Object.defineProperty(row, "scrollWidth", { configurable: true, value: 300 });
   assert.equal(wheel(100), true, "all links fit: the page scrolls");
+  // scrolled by hand to Languages, a short section with the next one close under it: Languages is marked, not the next
+  const secs = [...enOpt.document.querySelectorAll("section.panel[id]")].filter(s => tocLinks.some(a => a.hash === "#" + s.id));
+  const at = id => secs.forEach((s, i) => { const top = (i - secs.findIndex(x => x.id === id)) * 260 + 70; s.getBoundingClientRect = () => ({ top, bottom: top + 250 }); });
+  eo("toc").getBoundingClientRect = () => ({ top: 0, bottom: 50 });
+  const current = () => tocLinks.find(a => a.getAttribute("aria-current") === "true").hash;
+  enOpt.dispatchEvent(new enOpt.WheelEvent("wheel", { deltaY: 100 })); // the user scrolls: the clicked link lets go
+  at("languages"); enOpt.dispatchEvent(new enOpt.Event("scroll")); await sleep(40);
+  assert.equal(current(), "#languages", "the section under the bar");
+  at("keysPanel"); enOpt.dispatchEvent(new enOpt.Event("scroll")); await sleep(40);
+  assert.equal(current(), "#keysPanel");
   assert.match(text(eo("jSummary")), /^You proofread 5 texts and 13 mistakes were found\. Most frequent: Articles/);
   // no visible Arabic, except the native name of Arabic in the language menu
   const visible = [...enOpt.document.querySelectorAll("h1, h2, h3, b, small, p, button, label, option, li, span, footer")]
@@ -558,6 +570,23 @@ await step("card: a meaning chip opens that word, Arabic meanings too (their Eng
   c.root().querySelector('.bar .icon-btn[aria-label="رجوع"]').click();
   await sleep(100);
   assert.equal(c.sent.filter(m => m.type === "lookup").pop().text, "تَجْرِبَة", "back to the Arabic word");
+});
+
+await step("card: screen readers hear the answer when it arrives, and the error when there's none", async () => {
+  const c = await cardPage(msg => (msg.type === "lookup"
+    ? (msg.text === "zzz" ? { ok: false, error: "not_found_offline" } : { ok: true, data: { query: "brave", type: "word", src: "en", tl: "ar", translation: "شجاع", dict: [], definitions: [], examples: [], source: "local" } })
+    : { ok: true }), {});
+  c.show("brave");
+  await sleep(120);
+  const live = c.root().querySelector(".sr[aria-live='polite']");
+  assert.ok(live && !live.closest(".card"), "a live region outside the card, there before the answer");
+  assert.equal(text(live), "brave: شجاع");
+  c.show("zzz");
+  await sleep(120);
+  assert.match(text(c.root().querySelector(".sr[aria-live]")), /^الكلمة غير موجودة في القاموس المحلي$/, "the error's title");
+  // "Local only": trying again would say the same, so the button opens the setting instead
+  c.root().querySelector(".err .btn").click();
+  assert.deepEqual({ ...c.sent.at(-1) }, { type: "openOptions", section: "dictionary" });
 });
 
 await step("card: Google's translation offers 'Better translation'; the AI's answer carries its badge", async () => {
@@ -991,6 +1020,42 @@ await step("colours: the card (content/styles.js) and the pages (shared/ui.css) 
   }
 });
 
+await step("colours: text reaches 4.5:1 and field edges 3:1 in both themes, tints included (WCAG 1.4.3, 1.4.11); high contrast has real edges", async () => {
+  const { contrast } = createRequire(import.meta.url)("../desktop/app-rules.js");
+  const vars = block => Object.fromEntries([...block.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/--([\w-]+):\s*([^;]+);/g)].map(m => [m[1], m[2].trim()]));
+  const cut = (s, from) => s.slice(s.indexOf(from), s.indexOf("}", s.indexOf(from)));
+  const ui = src("shared/ui.css");
+  const rgba = v => { const m = /^#([0-9a-f]{6})$/i.exec(v); if (m) return [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16)).concat(1); const p = /^rgba?\(([^)]+)\)$/.exec(v)[1].split(",").map(Number); return [p[0], p[1], p[2], p[3] ?? 1]; };
+  const over = (top, under) => top.slice(0, 3).map((c, i) => Math.round(c * top[3] + under[i] * (1 - top[3])));
+  for (const [theme, t] of [["light", vars(cut(ui, ":root {"))], ["dark", { ...vars(cut(ui, ":root {")), ...vars(cut(ui, ':root[data-theme="dark"] {')) }]]) {
+    const c = k => rgba(t[k]);
+    const surface = over(c("surface"), [255, 255, 255]), bg = over(c("bg"), surface);
+    const grounds = { bg, surface, "accent-soft": over(c("accent-soft"), surface), "danger-soft": over(c("danger-soft"), surface), "ok-soft": over(c("ok-soft"), surface) };
+    const need = (fg, ground, min = 4.5) => {
+      const r = contrast(over(c(fg), grounds[ground]), grounds[ground]);
+      assert.ok(r >= min, `${theme}: --${fg} on --${ground} is ${r.toFixed(2)}:1, needs ${min}`);
+    };
+    for (const fg of ["fg", "muted", "faint", "accent", "danger", "ok"]) for (const g of ["bg", "surface"]) need(fg, g);
+    for (const fg of ["accent", "muted", "fg"]) need(fg, "accent-soft"); // selected chips, the active section link, "in this context"
+    need("danger", "danger-soft"); need("ok", "ok-soft");
+    // a field's edge, drawn over its own fill (--bg), against the surface around it and the fill inside
+    const edge = over(c("field-line"), bg);
+    for (const g of ["surface", "bg"]) assert.ok(contrast(edge, grounds[g]) >= 3, `${theme}: field edge on --${g} ${contrast(edge, grounds[g]).toFixed(2)}:1`);
+  }
+  for (const f of ["shared/ui.css", "content/styles.js"]) assert.match(src(f), /@media \(forced-colors: active\) \{[^@]*outline: 1px solid CanvasText/, f + ": edges in high contrast");
+});
+
+await step("screen readers: every field, dropdown and button in the pages has a name", async () => {
+  for (const page of ["options/options.html", "popup/popup.html"]) {
+    const doc = new JSDOM(src(page)).window.document;
+    const FILLED_BY_SCRIPT = ["appBtn", "weak"]; // their text comes from options.js / popup.js
+    const nameless = [...doc.querySelectorAll("select, textarea, input:not([type=hidden]), button")].filter(el => !el.hidden && !FILLED_BY_SCRIPT.includes(el.id) &&
+      !el.getAttribute("aria-label") && !el.getAttribute("placeholder") && !el.getAttribute("aria-labelledby") && !el.closest("label") &&
+      !(el.id && doc.querySelector(`label[for="${el.id}"]`)) && !(el.tagName === "BUTTON" && el.textContent.trim()));
+    assert.deepEqual(nameless.map(el => el.outerHTML.slice(0, 80)), [], page);
+  }
+});
+
 await step("one design language: no system boxes (confirm / alert / prompt) in the pages, and dropdowns styled once, in ui.css", async () => {
   const pages = ["popup/popup.js", "options/options.js", "content/content.js", "desktop/renderer/clipboard/clip-list.js", "desktop/renderer/clipboard/clip-actions.js",
     "desktop/renderer/clipboard/panel.js", "desktop/renderer/clipboard/tab.js", "desktop/renderer/clipboard/settings.js", "desktop/renderer/wiki-settings.js", "desktop/renderer/wiki/reader.js"];
@@ -1272,7 +1337,30 @@ await step("popup: the quick translation says why it failed, as the card does ('
   assert.match(await ask("gemini_quota", "hello"), /انتهى الحد المجاني من Gemini/);
   assert.match(await ask("ai_error:bad response", "hello"), /تعذّر الاتصال بـ Gemini — bad response/, "the translating AI, named");
   assert.equal(await ask("network", "hello"), "تعذّرت الترجمة. تحقق من الاتصال.");
+  assert.equal(text(p.document.getElementById("said")), "تعذّرت الترجمة. تحقق من الاتصال.", "said to screen readers too");
   await local.remove("trProvider");
+});
+
+await step("popup: Google's sentence translation offers the AI's 'Better translation', as the card does; the answer is read out", async () => {
+  await local.set({ popupMode: "translate", trProvider: "gemini", geminiKeySet: true });
+  const p = await openPage("popup/popup.html", ["shared/i18n.js", "shared/lamha-ai.js", "shared/motion.js", "popup/popup.js"]);
+  await sleep(100);
+  const asked = [];
+  const real = p.browser.runtime.sendMessage;
+  p.browser.runtime.sendMessage = async msg => (msg.type === "lookup" ? (asked.push(msg.engine), trResult(msg.engine)) : real(msg));
+  const q = p.document.getElementById("q");
+  q.value = "It's a piece of cake.";
+  q.dispatchEvent(new p.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  await sleep(80);
+  assert.equal(text(p.document.getElementById("said")), "إنها قطعة من الكعكة.");
+  const better = p.document.querySelector("#result .better");
+  assert.ok(better && /Gemini/.test(better.title), "the link names the AI");
+  better.click();
+  await sleep(80);
+  assert.deepEqual(asked, [undefined, "ai"]);
+  assert.match(text(p.document.querySelector("#result .tr")), /في غاية السهولة/);
+  assert.ok(!p.document.querySelector("#result .better"), "not again on the AI's own answer");
+  await local.remove(["trProvider", "geminiKeySet"]);
 });
 
 await step("popup 🔊: when Google's voice can't play, or there's no network, the system's voice says the word", async () => {

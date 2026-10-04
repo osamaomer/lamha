@@ -9,6 +9,8 @@
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const { screen } = require("electron");
+const rules = require("../app-rules");
 
 const WORD_CTX = { text: "tools", context: { before: "Can differ from the writing ", after: ", e.g. Gemini for writing and Ollama for translation." } };
 const SENTENCE = "Honestly, finishing the report was a piece of cake once I got the hang of it.";
@@ -117,6 +119,46 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       await dbg.sendCommand("Emulation.setEmulatedMedia", { features: [{ name: "forced-colors", value: on ? "active" : "none" }] });
       if (!on) dbg.detach();
     } catch (err) { console.log("  (forced colours unavailable: " + err.message + ")"); }
+  };
+  /** What Narrator reads (Chromium's accessibility tree): controls without a name, and how many live regions there are;
+   *  then `tabs` presses of Tab, each with what got the focus and whether it shows a ring. Written to a11y-<name>.txt. */
+  const a11y = async (win, name, tabs = 0) => {
+    const out = [];
+    const dbg = win.webContents.debugger;
+    try {
+      if (!dbg.isAttached()) dbg.attach("1.3");
+      await dbg.sendCommand("DOM.getDocument", { depth: -1, pierce: true });
+      const { nodes } = await dbg.sendCommand("Accessibility.getFullAXTree");
+      const CONTROLS = new Set(["button", "link", "textbox", "searchbox", "combobox", "checkbox", "switch", "tab", "radio", "menuitem", "slider", "listbox", "option"]);
+      const unnamed = [];
+      for (const nd of nodes) {
+        if (nd.ignored || !CONTROLS.has(nd.role && nd.role.value) || String((nd.name && nd.name.value) || "").trim()) continue;
+        let tag = "";
+        try { const { node } = await dbg.sendCommand("DOM.describeNode", { backendNodeId: nd.backendDOMNodeId }); tag = `<${node.localName} ${(node.attributes || []).join(" ")}>`.slice(0, 160); } catch (_) { /* gone */ }
+        unnamed.push(`  ${nd.role.value} ${tag}`);
+      }
+      const live = nodes.filter(nd => (nd.properties || []).some(p => p.name === "live" && p.value && p.value.value !== "off")).length;
+      out.push(`unnamed controls: ${unnamed.length}`, ...unnamed, `live regions: ${live}`);
+      dbg.detach();
+    } catch (err) { out.push("accessibility tree: " + err.message); }
+    if (tabs) {
+      win.focus(); win.webContents.focus();
+      await js(win, "document.activeElement && document.activeElement.blur(); true");
+      out.push("Tab order:");
+      for (let i = 0; i < tabs; i++) {
+        for (const type of ["keyDown", "keyUp"]) win.webContents.sendInputEvent({ type, keyCode: "Tab" });
+        await wait(120);
+        out.push("  " + await js(win, `(() => {
+          let a = document.activeElement;
+          while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement;
+          if (!a || a === document.body) return "(page)";
+          const s = getComputedStyle(a), ring = s.outlineStyle !== "none" && parseFloat(s.outlineWidth) > 0 || s.boxShadow !== "none";
+          return (ring ? "ring  " : "NO RING  ") + a.tagName.toLowerCase() + (a.id ? "#" + a.id : "") + "  " + (a.getAttribute("aria-label") || a.textContent || a.value || "").trim().replace(/\\s+/g, " ").slice(0, 50);
+        })()`));
+      }
+    }
+    fs.writeFileSync(path.join(dir, `a11y-${name}.txt`), out.join("\n"));
+    console.log(`  a11y-${name}.txt: ${out[0]}`);
   };
   for (const theme of ["light", "dark"]) {
     for (const lang of ["ar", "en"]) {
@@ -261,12 +303,16 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       await tab("tabTr");
 
       /* settings */
-      openOptions();
+      openOptions("?welcome=1"); // as on the first run: the app's "how it works" on top
       const ow = getOptionsWin();
       await loaded(ow);
       ow.setContentSize(820, 900);
       ow.setPosition(600, 40);
       ow.showInactive();
+      await wait(1200);
+      await save(ow, "settings-welcome");
+      openOptions();
+      await new Promise(r => ow.webContents.once("did-finish-load", r));
       await wait(1200);
       for (const id of [null, "languages", "keysPanel", "card", "ai", "translation", "review", "journal", "clipPanel", "cbAppForm", "dictionary", "wikiPanel", "appearance", "privacy", "updatesPanel"]) {
         const found = await js(ow, id ? `(() => { const s = document.getElementById("${id}"); if (!s || s.offsetParent === null) return false; s.scrollIntoView({ block: "start" }); return true; })()` : "scrollTo(0, 0); true");
@@ -282,7 +328,7 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       await js(ow, `document.getElementById("rvClear").click(); true`);
       await wait(500);
       await save(ow, "settings-dialog"); // a question before deleting (LamhaDialog)
-      await js(ow, `document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); true`);
+      await js(ow, `(() => { const d = document.querySelector("dialog[open]"); if (d) d.close(); return true; })()`); // a script's Esc can't close it
       await wait(400);
       if (desktop.updater && await js(ow, `!!document.getElementById("updatesPanel")`)) {
         await js(ow, `document.getElementById("updatesPanel").scrollIntoView({ block: "start" }); true`);
@@ -306,7 +352,11 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       await typeQ("");
       await stores.local.set({ accentWindows: false });
       await wait(500);
-      if (audit) { // 200% zoom, and Windows' high-contrast mode
+      if (audit) { // what a screen reader and the keyboard meet, 200% zoom, and Windows' high-contrast mode
+        await typeQ("reluctant");
+        await a11y(mainWin, "main", 16);
+        await js(ow, "scrollTo(0, 0); true");
+        await a11y(ow, "settings", 30);
         for (const [win, name] of [[mainWin, "main"], [ow, "settings"]]) {
           win.webContents.setZoomFactor(2);
           if (win === mainWin) await typeQ("reluctant"); else await js(ow, "scrollTo(0, 0); true");
@@ -351,9 +401,15 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
 
       if (audit) {
         cw.showInactive();
+        await card("card-a11y", { type: "showLookup", ...WORD_CTX }, 3000);
+        await a11y(cw, "card");
+        // at 200% the app grows the card's window with it (main.js placeCardWin, rules.cardSize)
+        const big = rules.cardSize({ w: 480, h: 620, zoom: 2, workArea: screen.getPrimaryDisplay().workArea });
+        cw.setBounds({ x: 600, y: 40, width: big.w, height: big.h });
         cw.webContents.setZoomFactor(2);
         await card("card-zoom200", { type: "showLookup", ...WORD_CTX }, 3000);
         cw.webContents.setZoomFactor(1);
+        cw.setBounds({ x: 600, y: 40, width: 480, height: 620 });
         await forcedColors(cw, true);
         await card("card-forced-colors", { type: "showLookup", ...WORD_CTX }, 2500);
         await forcedColors(cw, false);

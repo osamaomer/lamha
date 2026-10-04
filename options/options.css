@@ -118,7 +118,7 @@ html:not(.desktop) .app-only { display: none !important; } /* rows only the Wind
   flex: 1; min-width: 0; height: var(--control-h);
   font: inherit; font-family: var(--font-en); font-size: 13px; color: var(--fg); background: var(--bg);
   border: 0; border-radius: var(--r-md); padding: 8px 12px;
-  box-shadow: inset 0 0 0 1px var(--line);
+  box-shadow: inset 0 0 0 1px var(--field-line);
 }
 .key-row input:focus-visible { outline: 2px solid var(--accent); }
 .key-row .btn, .opt .btn.small { min-height: var(--control-h); flex: none; } /* the same height as the box beside it */

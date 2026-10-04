@@ -13,6 +13,13 @@
     "d.hkWrite": ["أدوات الكتابة في أي برنامج", "Writing tools in any program"],
     "d.hkClipboard": ["الحافظة: الصق من السجل", "Clipboard: paste from history"],
     "d.unavailable": [" (غير متاح)", " (unavailable)"],
+    // Settings' welcome on first run (settings.js): drafts, the user rewords them
+    "d.welcome1": ["ابحث في أي برنامج:", "Look up in any program:"],
+    "d.welcome1b": ["حدّد كلمة أو جملة واضغط", "select a word or sentence and press"],
+    "d.welcome2": ["صحّح ما تكتبه وحسّنه:", "Fix and improve your writing:"],
+    "d.welcome2b": ["حدّد النص واضغط", "select the text and press"],
+    "d.welcome3": ["لمحة بجانب الساعة:", "Lamha lives by the clock:"],
+    "d.welcome3b": ["اضغط أيقونتها في شريط المهام للترجمة السريعة ومراجعة كلماتك.", "click its icon on the taskbar for quick translation and your word review."],
     "d.trayOpen": ["فتح لمحة", "Open Lamha"],
     "d.trayClipboard": ["الحافظة", "Clipboard"],
     "d.trayReview": [v => (v.n ? `مراجعة الكلمات (${num(v.n)})` : "مراجعة الكلمات"), v => (v.n ? `Word review (${num(v.n)})` : "Word review")],

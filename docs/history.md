@@ -443,3 +443,32 @@ The user asked for the most comprehensive UI/UX audit, of the Windows app only, 
 - **`npm run shots`** now also takes review (empty, front, back, done; sample cards through `cardToggle`, since lookups add none), the delete dialog, the saved toast, Updates' ready/error states, the card's offline sentence error (without an AI), the accent colour; `LAMHA_SHOTS_AUDIT=1` adds 200% zoom and forced colours. The reader needs `LAMHA_SHOTS_ZIM` (no .zim on this PC: a sample was written with `tools/zim-fixture.mjs`). Its Clipboard tab shows the opt-in (it turns capture off on purpose), not a bug.
 - **20 findings (2 P0, 8 P1, 10 P2):** P0 high-contrast mode removes the outlines (drawn with box-shadow); dark text on tints 4.03–4.27:1. P1: lookup results not announced, the card at 200%, the AI inventing a meaning for an unknown word (kept in history), the empty Review text from before 2.0.0, the invisible "Space" badge in light, Arabic bidi (inflection line, the journal), no first-run introduction in the app (`#welcome` hidden), faint field outlines 1.19–1.37:1. P2: section bar marks the wrong short section, ~20 px targets, browser wording, "بعد يومان", استبدال/استخدمه, file paths in Offline Wikipedia, "paris", long hints, no better translation in the main window, dictionary data.
 - **Not checked yet:** keyboard and Narrator by hand, error states without an AI, tray/notifications/Mica on screen, flow timings.
+
+## The design audit's fixes (2026-10-04, not released)
+
+The user asked to complete the audit: every stage that needs neither their words nor their decision.
+- **Accessibility:**
+  - Dark tokens: `--accent` #9aa1ff, `--accent-soft` .12, `--muted` #a5a5aa, `--danger` #fc8888.
+  - New `--field-line` (3:1) for text boxes and dropdowns only.
+  - A `forced-colors` block in ui.css (with `:root :is(…)` so it beats popup.css) and in the card: outlines instead of box-shadows, Highlight for what's selected.
+  - Announcements: live regions for the card's answer (`announce()`, outside the card, there from the start) and the main window's (`#said`).
+  - Key badges on filled buttons; 24 px targets for the card's switch and synonym chips.
+  - `accentPalette()` keeps Windows' accent readable on its own tint too (Windows blue becomes #006ec3 in light).
+  - A test in test-ui computes every text/tint pair and the field edges; test-desktop checks the accent on its tint.
+- **Text:**
+  - The dual after بعد (`span.*` take `after`: بعد يومين، سنتين…).
+  - The journal's and the main window's mistake explanations get `dir="auto"`.
+  - A capital in the middle of a sentence ("to Paris") stays on the card (`asWritten()` in background.js); typed alone, the word is still in small letters, as packs expect.
+  - Re-checked: the card's inflection line (`tools ← صيغة من tool`) was correct right-to-left Arabic, so the report's F8 was only the journal.
+- **Layout and flows:**
+  - The card's window grows with the card's zoom (`rules.cardSize`), and footer links wrap whole.
+  - The section bar marks the last section whose top passed under it (scroll + rAF; the IntersectionObserver marked the section after a short one). A clicked link stays until the user scrolls.
+  - The main window has ✨ Better translation.
+  - Offline Wikipedia rows show the file's name (the path is in the tooltip).
+  - A first-run welcome in the app (settings.js replaces the browser steps; the copy is a draft in `d.welcome*`). `optionsTarget` no longer jumps a welcome to #ai.
+  - New: on "Local only", the card's error opens Settings → دون إنترنت instead of a Retry that can't work.
+- **Checked:**
+  - `LAMHA_SHOTS_AUDIT=1` now writes `a11y-<window>.txt`, from Chromium's accessibility tree (what Narrator reads) and a real Tab walk. Result: every Tab stop shows a ring, and the main window and the card name every control. Settings had six dropdowns without a name (F22: targetLang, the Gemini and Claude models, new words a day, the daily goal, the theme), now labelled. A test in test-ui checks every field, dropdown and button in options.html and popup.html. (An open dialog makes the page inert, so the tree hid them in one run: the script now closes it with `dialog.close()`.)
+  - Error states captured without an AI.
+  - The tray menu and notifications reviewed in code.
+- **Left for the user:** F5, how an AI guess for an unknown word is shown; the copy of F6, F13, F15, F18 and the welcome's drafts. F20 (dictionary data) is a separate job.

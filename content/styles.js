@@ -16,6 +16,7 @@ var LAMHA_CSS = `
   --muted: #5f5f64; /* 4.5:1 also on the tinted meaning box */
   --faint: #707075;
   --line: rgba(0, 0, 0, 0.08);
+  --field-line: rgba(0, 0, 0, 0.42);
   --hover: rgba(0, 0, 0, 0.05);
   --accent: #4f46e5;
   --accent-soft: rgba(79, 70, 229, 0.09);
@@ -55,17 +56,18 @@ var LAMHA_CSS = `
   --bg: #2c2c2e;
   --bg-solid: #2c2c2e;
   --fg: #f5f5f7;
-  --muted: #a1a1a6;
+  --muted: #a5a5aa;
   --faint: #98989d;
   --line: rgba(255, 255, 255, 0.1);
+  --field-line: rgba(255, 255, 255, 0.4);
   --hover: rgba(255, 255, 255, 0.07);
-  --accent: #8b93ff;
-  --accent-soft: rgba(139, 147, 255, 0.15);
+  --accent: #9aa1ff;
+  --accent-soft: rgba(154, 161, 255, 0.12);
   --accent-fg: #0b0b12;
   --btn: #5e5ce6;
   --btn-fg: #ffffff;
   --ok-soft: rgba(74, 222, 128, 0.13);
-  --danger-soft: rgba(248, 113, 113, 0.14);
+  --danger-soft: rgba(252, 136, 136, 0.14);
   --toast-bg: rgba(242, 242, 247, 0.96);
   --toast-fg: #1c1c1e;
   --toast-act: #4f46e5;
@@ -76,18 +78,19 @@ var LAMHA_CSS = `
   --pill-fg: #1c1c1e;
   --skeleton: rgba(255, 255, 255, 0.08);
   --ok: #4ade80;
-  --danger: #f87171;
+  --danger: #fc8888;
   --scroll: rgba(255, 255, 255, 0.2);
   color-scheme: dark;
 }
 /* the Windows app, with Settings → Appearance → the accent colour from Windows: its page hands the colours down
    (desktop/app-rules.js accentCss); without them, these are Lamha's own, as above */
 .root.app { --accent: var(--lamha-app-accent, #4f46e5); --accent-soft: var(--lamha-app-accent-soft, rgba(79, 70, 229, 0.09)); --btn: var(--lamha-app-btn, #4f46e5); }
-.root.app.dark { --accent: var(--lamha-app-accent-dark, #8b93ff); --accent-soft: var(--lamha-app-accent-soft-dark, rgba(139, 147, 255, 0.15)); --btn: var(--lamha-app-btn-dark, #5e5ce6); }
+.root.app.dark { --accent: var(--lamha-app-accent-dark, #9aa1ff); --accent-soft: var(--lamha-app-accent-soft-dark, rgba(154, 161, 255, 0.12)); --btn: var(--lamha-app-btn-dark, #5e5ce6); }
 
 button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; margin: 0; }
 button:focus-visible, a:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
 svg { display: block; flex: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } /* for screen readers only */
 [dir="rtl"], .ar { font-family: var(--font-ar); }
 
 /* ---------------- trigger pill ---------------- */
@@ -168,7 +171,7 @@ svg { display: block; flex: none; }
 .spacer { flex: 1; }
 /* العربية ⇄ English on word cards: the meaning translated, or an English–English dictionary */
 .dsw { display: flex; background: var(--chip); border-radius: 999px; padding: 2px; margin-inline-start: 6px; }
-.dsw button { padding: 2px 9px; border-radius: 999px; font-family: var(--font-ar); font-size: 11px; font-weight: 600; color: var(--muted); }
+.dsw button { min-height: 24px; padding: 3px 10px; border-radius: 999px; font-family: var(--font-ar); font-size: 11px; font-weight: 600; color: var(--muted); }
 .dsw button.on { background: var(--bg-solid); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
@@ -304,7 +307,7 @@ div.pos { display: block; margin-bottom: 6px; }
 .def .en-g { direction: ltr; text-align: left; font-size: 13px; color: var(--muted); margin-top: 2px; }
 .def .ex { direction: ltr; text-align: left; font-size: 13px; color: var(--muted); font-style: italic; margin-top: 3px; padding-left: 9px; border-left: 2px solid var(--line); }
 .def .syn { direction: ltr; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
-.def .syn .chip { font-size: 12px; padding: 1px 8px; }
+.def .syn .chip { font-size: 12px; padding: 4px 9px; min-height: 24px; } /* 24 px: big enough to hit (WCAG 2.5.8) */
 /* a word explained in a right-to-left language (Arabic in Arabic): its examples and synonyms read from the right */
 .def .ex[dir="rtl"] { direction: rtl; text-align: right; font-family: var(--font-ar); font-style: normal; padding-left: 0; border-left: 0; padding-right: 9px; border-right: 2px solid var(--line); }
 .def .syn[dir="rtl"] { direction: rtl; }
@@ -322,13 +325,13 @@ div.pos { display: block; margin-bottom: 6px; }
 
 /* footer */
 .foot {
-  display: flex; align-items: center; gap: 4px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px; /* a narrow card (large text): a link moves to a second row whole */
   padding: 6px 8px 6px 12px;
   border-top: 1px solid var(--line);
   direction: rtl;
   font-family: var(--font-ar); font-size: 12px; color: var(--muted);
 }
-.foot a { color: var(--muted); text-decoration: none; display: inline-flex; gap: 5px; align-items: center; padding: 4px 8px; border-radius: var(--r-sm); }
+.foot a { color: var(--muted); text-decoration: none; white-space: nowrap; display: inline-flex; gap: 5px; align-items: center; padding: 4px 8px; border-radius: var(--r-sm); }
 .foot a:hover { background: var(--hover); color: var(--fg); }
 
 /* states */
@@ -403,6 +406,7 @@ div.pos { display: block; margin-bottom: 6px; }
   display: block; width: 100%; min-height: 64px; resize: vertical;
   font-family: var(--font-ar); font-size: 14px; line-height: 1.6; color: var(--fg);
   background: var(--chip); border: 0; border-radius: var(--r-md); padding: 10px 12px;
+  box-shadow: inset 0 0 0 1px var(--field-line);
 }
 .w-input:focus { outline: 2px solid var(--accent); }
 .w-input:placeholder-shown { direction: inherit; } /* an empty box follows the interface (dir="auto" would make it left to right) */
@@ -544,6 +548,14 @@ div.pos { display: block; margin-bottom: 6px; }
 .chip.tool.hit { box-shadow: 0 0 0 3px var(--accent-soft); }
 .root[data-motion] .chip.tool { transition: background .12s, box-shadow .25s; }
 .root[data-motion="full"] .btn:active, .root[data-motion="full"] .chip:active { transform: scale(.96); }
+
+/* Windows' high-contrast themes (forced colours) drop box-shadows, which draw the card's edge, chips and fields:
+   real edges instead, and the system's colours for what's on (as in shared/ui.css) */
+@media (forced-colors: active) {
+  .card, .pill, .hero, .chip, .btn, .w-input, .dsw button, .pbar .seg button { outline: 1px solid CanvasText; outline-offset: -1px; }
+  .chip.on, .dsw button.on, .pbar .seg button.on, .icon-btn.on { forced-color-adjust: none; background: Highlight; color: HighlightText; outline-color: Highlight; }
+  button:focus-visible, a:focus-visible, [role="button"]:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+}
 
 /* before shared/motion.js has read the setting, follow the system's "less motion" wish */
 @media (prefers-reduced-motion: reduce) {

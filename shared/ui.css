@@ -8,6 +8,7 @@
   --muted: #5f5f64; /* 4.5:1 also on the tinted boxes */
   --faint: #707075; /* 4.5:1 on --bg: section headings and hints stay readable */
   --line: rgba(0, 0, 0, 0.08);
+  --field-line: rgba(0, 0, 0, 0.42); /* the edge of text boxes and dropdowns: 3:1, so they can be found (WCAG 1.4.11) */
   --hover: rgba(0, 0, 0, 0.05);
   --accent: #4f46e5; /* links, labels, icons */
   --accent-2: #06b6d4;
@@ -41,20 +42,21 @@
   --bg: #1c1c1e;
   --surface: #2c2c2e;
   --fg: #f5f5f7;
-  --muted: #a1a1a6;
+  --muted: #a5a5aa;
   --faint: #98989d;
   --line: rgba(255, 255, 255, 0.1);
+  --field-line: rgba(255, 255, 255, 0.4);
   --hover: rgba(255, 255, 255, 0.07);
-  --accent: #8b93ff;
-  --accent-soft: rgba(139, 147, 255, 0.15);
+  --accent: #9aa1ff;
+  --accent-soft: rgba(154, 161, 255, 0.12);
   --accent-fg: #0b0b12;
   --btn: #5e5ce6;
   --btn-fg: #ffffff;
   --ok: #4ade80;
   --ok-soft: rgba(74, 222, 128, 0.13);
-  --danger: #f87171;
-  --danger-soft: rgba(248, 113, 113, 0.14);
-  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1a6' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); /* --muted, drawn as a line chevron */
+  --danger: #fc8888;
+  --danger-soft: rgba(252, 136, 136, 0.14);
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a5a5aa' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); /* --muted, drawn as a line chevron */
   --warn-bg: #3a2c12;
   --warn-fg: #f5c46b;
   --toast-bg: rgba(242, 242, 247, 0.96);
@@ -69,20 +71,21 @@
     --bg: #1c1c1e;
     --surface: #2c2c2e;
     --fg: #f5f5f7;
-    --muted: #a1a1a6;
+    --muted: #a5a5aa;
     --faint: #98989d;
     --line: rgba(255, 255, 255, 0.1);
+    --field-line: rgba(255, 255, 255, 0.4);
     --hover: rgba(255, 255, 255, 0.07);
-    --accent: #8b93ff;
-    --accent-soft: rgba(139, 147, 255, 0.15);
+    --accent: #9aa1ff;
+    --accent-soft: rgba(154, 161, 255, 0.12);
     --accent-fg: #0b0b12;
     --btn: #5e5ce6;
     --btn-fg: #ffffff;
     --ok: #4ade80;
     --ok-soft: rgba(74, 222, 128, 0.13);
-    --danger: #f87171;
-    --danger-soft: rgba(248, 113, 113, 0.14);
-    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1a6' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); /* --muted, drawn as a line chevron */
+    --danger: #fc8888;
+    --danger-soft: rgba(252, 136, 136, 0.14);
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a5a5aa' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); /* --muted, drawn as a line chevron */
     --warn-bg: #3a2c12;
     --warn-fg: #f5c46b;
     --toast-bg: rgba(242, 242, 247, 0.96);
@@ -97,6 +100,7 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 .combo { direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } /* for screen readers only */
 html, body { margin: 0; }
 body {
   font-family: var(--font);
@@ -116,6 +120,7 @@ kbd {
   background: var(--surface); box-shadow: 0 0 0 1px var(--line), 0 1px 0 var(--line);
   direction: ltr; display: inline-block;
 }
+.btn kbd { background: color-mix(in srgb, var(--btn-fg) 18%, transparent); color: inherit; box-shadow: none; } /* a key on a filled button: its own colours, in both themes */
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -148,13 +153,13 @@ select {
   font: inherit; color: var(--fg);
   min-width: 170px; min-height: var(--control-h);
   border: 0; border-radius: var(--r-md); padding-block: 7px; padding-inline: 12px 32px;
-  box-shadow: inset 0 0 0 1px var(--line);
+  box-shadow: inset 0 0 0 1px var(--field-line);
   cursor: pointer; appearance: none;
   background: var(--bg) no-repeat;
   background-image: var(--select-arrow); background-size: 14px 14px; background-position: right 11px center;
 }
 select:dir(rtl) { background-position: left 11px center; }
-select:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 22%, transparent); }
+select:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 60%, transparent); }
 select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-md); }
 select option { background-color: var(--surface); color: var(--fg); }
 @supports (appearance: base-select) {
@@ -232,6 +237,21 @@ input[type="search"]::-webkit-search-cancel-button:hover { background: var(--fg)
 }
 .banner b { display: block; font-size: 13px; }
 .banner > div { flex: 1; }
+
+/* Windows' high-contrast themes (forced colours) drop every box-shadow, and Lamha draws edges with them: real edges
+   instead (outlines take no room), and the system's own colours for what's selected or on */
+@media (forced-colors: active) { /* :root in front: stronger than each page's own rules (popup.css's text box, tabs) */
+  :root :is(textarea, input:not([type="checkbox"]):not([type="radio"]), select, kbd, .dlg, .btn, .chip, .lc-chip, .tabs button,
+  .lang-toggles button, .toc a, .choice .c, .pbar .seg button, .switch .track) { outline: 1px solid CanvasText; outline-offset: -1px; }
+  :root :is(.tabs button[aria-selected="true"], [aria-pressed="true"], [aria-current="true"], .choice input:checked + .c, .wtools button.on,
+  .switch input:checked + .track, select option:checked) {
+    forced-color-adjust: none; background: Highlight; color: HighlightText; outline-color: Highlight;
+  }
+  .switch .thumb { forced-color-adjust: none; background: CanvasText; }
+  .switch input:checked + .track .thumb { background: HighlightText; }
+  ::picker(select) { outline: 1px solid CanvasText; } /* its own rule: a browser without it drops only this one */
+  :focus-visible { outline: 2px solid Highlight !important; outline-offset: 2px !important; }
+}
 
 /* the switch slide, fades and spinners: off when the system asks for less motion (as on the card) — until
    shared/motion.js has applied the Animations setting, which decides from then on (data-motion) */

@@ -140,7 +140,14 @@
 
   /* ---------------- shadow host ---------------- */
 
-  let host, shadow, root;
+  let host, shadow, root, live;
+  /** Read out by screen readers (Narrator, NVDA) without moving the focus: the answer when it arrives. Emptied first,
+   *  so the same answer twice is read twice. */
+  function announce(text) {
+    if (!live) return;
+    live.textContent = "";
+    setTimeout(() => { live.textContent = String(text || "").slice(0, 300); }, 30);
+  }
   function ensureHost() {
     if (host && host.isConnected) return root;
     host = document.createElement("lamha-ui");
@@ -152,6 +159,8 @@
     const app = !!window.lamhaDesktop || (location.protocol === "file:" && document.documentElement.classList.contains("desktop"));
     root = h("div", { class: "root" + (LamhaI18n.lang() === "en" ? " en" : "") + (app ? " app" : "") });
     LamhaMotion.attach(root); // data-motion: the Animations setting (never on the page's own elements)
+    live = h("div", { class: "sr", "aria-live": "polite" }); // there before anything changes, or screen readers miss it
+    root.append(live);
     shadow.append(style, root);
     (document.documentElement || document.body).appendChild(host);
     applyTheme();
@@ -592,7 +601,9 @@
         : offline ? L("c.errCheckConn")
         : busy ? L("c.errTooMany")
         : L("c.errService"),
-      h("div", null, h("button", { class: "btn", onclick: () => load(text, stack.length < 2 && cardInfo ? cardInfo.context : null) }, icon("retry", 14), L("common.retry")))
+      h("div", null, notFound || offlineMode // "Local only": trying again gives the same answer; the way out is the setting
+        ? h("button", { class: "btn", onclick: () => send({ type: "openOptions", section: "dictionary" }) }, icon("settings", 14), L("common.settings"))
+        : h("button", { class: "btn", onclick: () => load(text, stack.length < 2 && cardInfo ? cardInfo.context : null) }, icon("retry", 14), L("common.retry")))
     ));
   }
 
@@ -613,6 +624,13 @@
     stopWait = LamhaMotion.wait(card && card.querySelector(".brand .dot"), kind);
   }
 
+  /** What a screen reader says when an answer arrives: the word and its meaning as the card shows it, or the translation. */
+  function spoken(d) {
+    const t = bodyEl && bodyEl.querySelector(".hero .t");
+    const answer = t ? t.textContent : "";
+    return d.type === "word" ? `${d.query}: ${answer}` : answer;
+  }
+
   /** `opts.engine: "ai"`: the "Better translation" link, which asks the AI whatever the translation setting is.
    *  `opts.keep`: the card's language switch: the word's view stays, dimmed, until the other one comes (the placeholder
    *  card in between made it shrink to its bar and grow back, uncovering what was behind it). */
@@ -625,8 +643,13 @@
     if (token !== reqId || !card) return;
     stopWait();
     card.removeAttribute("aria-busy");
-    if (!res || !res.ok) { morph(() => renderError(text, res && res.error, opts)); return; }
+    if (!res || !res.ok) {
+      morph(() => renderError(text, res && res.error, opts));
+      announce(bodyEl && bodyEl.querySelector(".err b") ? bodyEl.querySelector(".err b").textContent : "");
+      return;
+    }
     const pending = morph(() => render(res.data));
+    announce(spoken(res.data));
     if (res.data.milestone || res.data.goal) LamhaMotion.burst(card.querySelector(".milestone"), { layer: root });
     if (settings.autoSpeak && res.data.type === "word") speak(res.data.query, res.data.src, null);
     if (pending.length) fillGlosses(pending, token);
