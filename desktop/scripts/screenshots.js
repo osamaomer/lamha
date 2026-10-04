@@ -3,7 +3,8 @@
  * light and dark × Arabic and English. The system clipboard is never read or written: sample clips go straight
  * into the store. Pictures go to $LAMHA_SHOTS (default: %TEMP%\lamha-shots), one folder per theme and language.
  * With Ollama running on this PC, the writing tools and AI translation use it, so their results are in the pictures
- * too ($LAMHA_SHOTS_AI=0: no AI, the setup screens instead). */
+ * too ($LAMHA_SHOTS_AI=0: no AI, the setup screens instead). $LAMHA_SHOTS_AUDIT=1 adds the design audit's variants: the
+ * main window, Settings and the card at 200% zoom and in Windows' high-contrast mode (forced colours, emulated). */
 "use strict";
 const fs = require("node:fs");
 const os = require("node:os");
@@ -13,6 +14,12 @@ const WORD_CTX = { text: "tools", context: { before: "Can differ from the writin
 const SENTENCE = "Honestly, finishing the report was a piece of cake once I got the hang of it.";
 const PARAGRAPHS = "The new update ships next week.\n\nIt adds offline translation, a darker theme and faster lookups. Tell us what you think!";
 const DRAFT = "i has went to the store yesterday and buyed some apple for my freind.";
+// review cards the user picked with 🔖 (lookups add none by themselves since 2.0.0)
+const SAMPLE_CARDS = [
+  { q: "serendipity", tr: "صدفة سعيدة", ex: "Finding that quiet café was pure serendipity.", def: "luck that takes the form of finding valuable things by accident" },
+  { q: "reluctant", tr: "متردّد", ex: "She was reluctant to leave the party early.", def: "unwilling and hesitant" },
+  { q: "thorough", tr: "شامل", ex: "The doctor gave him a thorough check-up.", def: "complete with regard to every detail" }
+];
 const CLIPS = [
   { text: "She dont like apples and she go to school yesterday.", sourceApp: "WhatsApp" },
   { text: "سأرسل لك التقرير النهائي اليوم قبل الساعة الخامسة", sourceApp: "Outlook" },
@@ -100,6 +107,17 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
   }
 
   const only = process.env.LAMHA_SHOTS_ONLY; // e.g. "dark-ar": one set, for a quick check
+  const audit = process.env.LAMHA_SHOTS_AUDIT === "1";
+  const freshDeck = async () => { await send({ type: "cardsClear" }); for (const c of SAMPLE_CARDS) await send({ type: "cardToggle", card: c }); };
+  /** Windows' high-contrast mode, emulated in `win` (Chromium's forced-colors), or back to normal. */
+  const forcedColors = async (win, on) => {
+    const dbg = win.webContents.debugger;
+    try {
+      if (!dbg.isAttached()) dbg.attach("1.3");
+      await dbg.sendCommand("Emulation.setEmulatedMedia", { features: [{ name: "forced-colors", value: on ? "active" : "none" }] });
+      if (!on) dbg.detach();
+    } catch (err) { console.log("  (forced colours unavailable: " + err.message + ")"); }
+  };
   for (const theme of ["light", "dark"]) {
     for (const lang of ["ar", "en"]) {
       if (only && only !== `${theme}-${lang}`) continue;
@@ -142,6 +160,7 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
       await stores.sync.set({ dictSource: "offline" });
       await wait(300);
       await card("card-error-not-found", { type: "showLookup", text: "blorptastic" }, 1500);
+      if (!ai) await card("card-error-sentence-offline", { type: "showLookup", text: SENTENCE + "  " }, 1500); // no AI to translate it offline
       await stores.sync.set({ dictSource: "local" });
       await card("card-write-selection", { type: "showWrite", text: DRAFT }, 1500);
       if (ai) {
@@ -213,12 +232,24 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
         await save(mainWin, "main-write-no-ai");
       }
       await js(mainWin, `(() => { const d = document.getElementById("draft"); d.value = ""; d.dispatchEvent(new Event("input", { bubbles: true })); return true; })()`);
+      await send({ type: "cardsClear" });
       await tab("tabRv");
-      await wait(600);
+      await wait(700);
+      await save(mainWin, "main-review-empty");
+      await freshDeck();
+      await tab("tabTr");
+      await tab("tabRv");
+      await wait(700);
       await save(mainWin, "main-review-front");
       await js(mainWin, `document.dispatchEvent(new KeyboardEvent("keydown", { key: " " })); true`);
       await wait(600);
       await save(mainWin, "main-review-back");
+      for (let i = 0; i < SAMPLE_CARDS.length + 2; i++) { // "good" for each card, until the done screen
+        await js(mainWin, `(() => { const g = document.querySelectorAll(".rv-grades button"); if (g.length) g[g.length - 1].click(); else document.dispatchEvent(new KeyboardEvent("keydown", { key: " " })); return true; })()`);
+        await wait(500);
+      }
+      await wait(600);
+      await save(mainWin, "main-review-done");
       if (await js(mainWin, `!!document.getElementById("tabCb")`)) {
         await tab("tabCb");
         await wait(800);
@@ -242,6 +273,52 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
         if (!found) continue;
         await wait(700);
         await save(ow, "settings-" + (id || "top").toLowerCase());
+      }
+      await js(ow, `(() => { document.getElementById("review").scrollIntoView({ block: "start" }); document.getElementById("cardsAuto").click(); return true; })()`);
+      await wait(250);
+      await save(ow, "settings-saved-toast"); // what a change says
+      await js(ow, `document.getElementById("cardsAuto").click(); true`);
+      await wait(1500);
+      await js(ow, `document.getElementById("rvClear").click(); true`);
+      await wait(500);
+      await save(ow, "settings-dialog"); // a question before deleting (LamhaDialog)
+      await js(ow, `document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); true`);
+      await wait(400);
+      if (desktop.updater && await js(ow, `!!document.getElementById("updatesPanel")`)) {
+        await js(ow, `document.getElementById("updatesPanel").scrollIntoView({ block: "start" }); true`);
+        for (const [status, extra] of [["ready", { version: "2.1.0" }], ["error", { error: "net::ERR_INTERNET_DISCONNECTED" }]]) {
+          Object.assign(desktop.updater.state, { status, ...extra });
+          ow.webContents.send("lamha:update-changed");
+          await wait(500);
+          await save(ow, "settings-updates-" + status);
+        }
+        Object.assign(desktop.updater.state, { status: "idle", version: null, error: null });
+        ow.webContents.send("lamha:update-changed");
+      }
+      await stores.local.set({ accentWindows: true }); // Windows' accent colour, as this PC has it
+      await wait(700);
+      await js(ow, "scrollTo(0, 0); true");
+      await wait(300);
+      await save(ow, "settings-accent");
+      await tab("tabTr");
+      await typeQ("reluctant");
+      await save(mainWin, "main-accent");
+      await typeQ("");
+      await stores.local.set({ accentWindows: false });
+      await wait(500);
+      if (audit) { // 200% zoom, and Windows' high-contrast mode
+        for (const [win, name] of [[mainWin, "main"], [ow, "settings"]]) {
+          win.webContents.setZoomFactor(2);
+          if (win === mainWin) await typeQ("reluctant"); else await js(ow, "scrollTo(0, 0); true");
+          await wait(800);
+          await save(win, name + "-zoom200");
+          win.webContents.setZoomFactor(1);
+          await forcedColors(win, true);
+          await wait(600);
+          await save(win, name + "-forced-colors");
+          await forcedColors(win, false);
+        }
+        await typeQ("");
       }
       ow.hide();
 
@@ -270,6 +347,18 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
         await wait(700);
         await save(rw, "reader-narrow-section");
         rw.hide();
+      }
+
+      if (audit) {
+        cw.showInactive();
+        cw.webContents.setZoomFactor(2);
+        await card("card-zoom200", { type: "showLookup", ...WORD_CTX }, 3000);
+        cw.webContents.setZoomFactor(1);
+        await forcedColors(cw, true);
+        await card("card-forced-colors", { type: "showLookup", ...WORD_CTX }, 2500);
+        await forcedColors(cw, false);
+        await closeCard();
+        cw.hide();
       }
 
       /* the quick clipboard panel (Win+V-like) */
