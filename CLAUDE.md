@@ -140,7 +140,7 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-10-03. Latest release: **2.0.0** (tagged 2026-10-02). The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
+_Last updated: 2026-10-04. Latest release: **2.0.1** (tagged 2026-10-04). The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
 
 **At the end of a session:** update the open items below (add new ones, delete finished ones), and add a short dated entry to docs/history.md for substantial work, in the same commit. Keep this file small (under ~25 KB): details belong in history.md.
 

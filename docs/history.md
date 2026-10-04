@@ -481,3 +481,4 @@ The user asked to complete the audit: every stage that needs neither their words
     - `o.explainLangsHint` is cut to one line.
     - `o.privacyText` moved behind a "ما الذي يُرسَل وإلى أين؟" fold.
     - The app gets its own writing-tools intro (`o.aiIntroApp`, Alt+Shift+W instead of the browser's button) and hides "العمل داخل حقول الكتابة" (a browser-only switch).
+- **Released as 2.0.1** (tagged 2026-10-04; self-test 74/74, memory 327 MB private after it). The notes are the user's Arabic, with Claude's English. Checks failed twice on `test-desktop`'s helper timing (the first answer took 3.06–3.2 s on GitHub's machines against a 3 s limit; the release itself passed): the limit is now 4.5 s, still under the 5 s timeout it guards.

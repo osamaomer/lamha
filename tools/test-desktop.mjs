@@ -589,7 +589,9 @@ test("it answers each question in order: a window that isn't there or a broken l
   try {
     const t0 = Date.now();
     assert.equal(await helper.around(1, "word", 5000), null);
-    assert.ok(Date.now() - t0 < 3000, `the first answer took ${Date.now() - t0} ms`);
+    // the helper's own answer, not the 5 s timeout's null: under it. GitHub's machines start .NET slowly (3.0–3.2 s
+    // seen), and a 3 s limit failed Checks there now and then
+    assert.ok(Date.now() - t0 < 4500, `the first answer took ${Date.now() - t0} ms`);
     const [gone, empty] = await Promise.all([helper.ask({ hwnd: 1, text: "كلمة" }, 5000), helper.ask({ hwnd: 0, text: "x" }, 5000)]);
     assert.equal(gone.error, "ElementNotAvailableException", "the type only, never a message");
     assert.deepEqual(Object.keys(empty), ["id"], "no window: nothing read");
