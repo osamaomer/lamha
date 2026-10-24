@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The WinUI 3 app: windows, pages, view models, styles, the tray and startup. -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(LamhaWindowsTarget)</TargetFramework>
+    <TargetPlatformMinVersion>$(LamhaWindowsMin)</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>$(LamhaWindowsMin)</SupportedOSPlatformVersion>
+    <RootNamespace>Lamha.App</RootNamespace>
+    <AssemblyName>Lamha</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\Lamha.ico</ApplicationIcon>
+    <UseWinUI>true</UseWinUI>
+    <DefaultLanguage>en</DefaultLanguage>
+
+    <!-- A normal installed app (Velopack), not MSIX; the Windows App SDK ships inside it, so nothing else to install. -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <Platforms>x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-x64</RuntimeIdentifier>
+
+    <!-- Program.cs is the entry point: Velopack and the single-instance check run before any XAML. -->
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+    <OptimizationPreference>Size</OptimizationPreference>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.Foundation" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Velopack" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lamha.Core\Lamha.Core.csproj" />
+    <ProjectReference Include="..\Lamha.Windows\Lamha.Windows.csproj" />
+  </ItemGroup>
+
+  <!-- An unpackaged publish leaves out the app's own resource index (the strings, Lamha.pri): without it
+       ResourceLoader fails at start. -->
+  <Target Name="LamhaPublishPri" AfterTargets="Publish">
+    <Copy SourceFiles="$(OutDir)$(ProjectPriFileName)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <ItemGroup>
+    <Content Include="Assets\Lamha.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\Lamha-256.png" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

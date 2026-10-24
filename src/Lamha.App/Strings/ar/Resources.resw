@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- كل النصوص الظاهرة، بالعربية. توأمها الإنجليزي Strings/en/Resources.resw: أبقِهما متطابقين.
+     النصوص المأخوذة من لمحة 2 بكلماتها (المفتاح الأصلي في التعليق). نصوص "Proto_" للنموذج الأولي في المرحلة 0 فقط. -->
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="Common_Lamha" xml:space="preserve"><value>لمحة</value><comment>common.lamha</comment></data>
+  <data name="Card_Replace.Content" xml:space="preserve"><value>استبدال</value><comment>c.replace</comment></data>
+  <data name="Card_Copy.Content" xml:space="preserve"><value>نسخ</value><comment>common.copy</comment></data>
+  <data name="Card_Close.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>إغلاق (Esc)</value><comment>c.closeEsc</comment></data>
+  <data name="Card_Close.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>إغلاق (Esc)</value><comment>c.closeEsc</comment></data>
+  <data name="Card_SelectFirst" xml:space="preserve"><value>حدّد نصًّا أولًا</value><comment>c.selectFirst</comment></data>
+  <data name="Tray_Quit" xml:space="preserve"><value>خروج</value><comment>d.trayQuit</comment></data>
+
+  <data name="Proto_Tooltip" xml:space="preserve"><value>لمحة 3 (نموذج أولي)</value></data>
+  <data name="Proto_Word" xml:space="preserve"><value>كلمة أو عبارة قصيرة</value></data>
+  <data name="Proto_Sentence" xml:space="preserve"><value>جملة</value></data>
+  <data name="Proto_Result" xml:space="preserve"><value>يعيد «استبدال» هذا النص (بأحرف كبيرة، للتجربة):</value></data>
+  <data name="Proto_Sample" xml:space="preserve"><value>اعرض البطاقة (نص للتجربة)</value></data>
+  <data name="Proto_SampleText" xml:space="preserve"><value>a piece of cake</value></data>
+  <data name="Proto_HotkeyTaken" xml:space="preserve"><value>برنامج آخر يستخدم {0}</value></data>
+</root>

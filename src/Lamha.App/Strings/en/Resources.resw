@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Every visible string, in English. Its Arabic twin is Strings/ar/Resources.resw: keep the two in step.
+     Keys from Lamha 2 keep its wording (the key it came from is in the comment). "Proto_" strings exist only in the
+     phase 0 prototype and go away with it. -->
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="Common_Lamha" xml:space="preserve"><value>Lamha</value><comment>common.lamha</comment></data>
+  <data name="Card_Replace.Content" xml:space="preserve"><value>Replace</value><comment>c.replace</comment></data>
+  <data name="Card_Copy.Content" xml:space="preserve"><value>Copy</value><comment>common.copy</comment></data>
+  <data name="Card_Close.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Close (Esc)</value><comment>c.closeEsc</comment></data>
+  <data name="Card_Close.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Close (Esc)</value><comment>c.closeEsc</comment></data>
+  <data name="Card_SelectFirst" xml:space="preserve"><value>Select some text first</value><comment>c.selectFirst</comment></data>
+  <data name="Tray_Quit" xml:space="preserve"><value>Quit</value><comment>d.trayQuit</comment></data>
+
+  <data name="Proto_Tooltip" xml:space="preserve"><value>Lamha 3 (prototype)</value></data>
+  <data name="Proto_Word" xml:space="preserve"><value>A word or short phrase</value></data>
+  <data name="Proto_Sentence" xml:space="preserve"><value>A sentence</value></data>
+  <data name="Proto_Result" xml:space="preserve"><value>Replace puts this back (in capitals, as a test):</value></data>
+  <data name="Proto_Sample" xml:space="preserve"><value>Show the card (sample text)</value></data>
+  <data name="Proto_SampleText" xml:space="preserve"><value>a piece of cake</value></data>
+  <data name="Proto_HotkeyTaken" xml:space="preserve"><value>Another program uses {0}</value></data>
+</root>

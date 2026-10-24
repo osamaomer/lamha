@@ -1,4 +1,4 @@
-# Builds the downloadable language packs (tools/build_packs.py) and publishes them as a GitHub Release when a packs tag
+# Builds the downloadable language packs (legacy/tools/build_packs.py) and publishes them as a GitHub Release when a packs tag
 # is pushed. packs.js downloads them from the release named in its RELEASE constant:
 #   git tag packs-v1 && git push origin packs-v1
 # The release is never marked "latest": installed copies of the Windows app look for their updates in the latest release.
@@ -24,7 +24,7 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/venv"
           . "$RUNNER_TEMP/venv/bin/activate"
           pip install --quiet wordfreq
-          for lang in tr es de fr; do python tools/build_packs.py "$lang"; done
+          for lang in tr es de fr; do python legacy/tools/build_packs.py "$lang"; done
           ls -l dist-packs
 
       - name: Publish them (not as the latest release)

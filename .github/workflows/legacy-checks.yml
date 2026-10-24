@@ -1,0 +1,27 @@
+# Runs Lamha 2's tests (legacy/) when its code changes. Lamha 3 ports their behaviour, so they must keep passing
+# until the port is finished. Lamha 2's own releases are built from the release/2.x branch, with its own workflows.
+name: Checks (Lamha 2)
+
+on:
+  push:
+    branches: [main]
+    paths: ["legacy/**", ".github/workflows/legacy-checks.yml"]
+  pull_request:
+    paths: ["legacy/**", ".github/workflows/legacy-checks.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: legacy
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test

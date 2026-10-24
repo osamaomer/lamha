@@ -1,0 +1,73 @@
+// The Win32 API Lamha uses. CsWin32 generates the bindings (without marshalling, so they're NativeAOT-safe).
+
+// windows and focus
+GetForegroundWindow
+SetForegroundWindow
+BringWindowToTop
+IsWindow
+GetWindowThreadProcessId
+AttachThreadInput
+GetCurrentThreadId
+GetClassName
+DwmSetWindowAttribute
+DWM_WINDOW_CORNER_PREFERENCE
+
+// keyboard
+GetAsyncKeyState
+SendInput
+RegisterHotKey
+UnregisterHotKey
+
+// clipboard
+OpenClipboard
+CloseClipboard
+EmptyClipboard
+EnumClipboardFormats
+GetClipboardData
+SetClipboardData
+GetClipboardSequenceNumber
+IsClipboardFormatAvailable
+RegisterClipboardFormat
+GlobalAlloc
+GlobalLock
+GlobalUnlock
+GlobalSize
+GlobalFree
+
+// the hidden message window
+RegisterClassEx
+UnregisterClass
+CreateWindowEx
+DestroyWindow
+DefWindowProc
+GetModuleHandle
+RegisterWindowMessage
+PostMessage
+HWND_MESSAGE
+WM_HOTKEY
+WM_COMMAND
+WM_APP
+WM_CONTEXTMENU
+WM_LBUTTONUP
+WM_RBUTTONUP
+
+// the tray icon and its menu
+Shell_NotifyIcon
+LoadImage
+DestroyIcon
+CreatePopupMenu
+AppendMenu
+TrackPopupMenuEx
+DestroyMenu
+NOTIFYICON_VERSION_4
+TRACK_POPUP_MENU_FLAGS
+
+// screens
+GetCursorPos
+MonitorFromPoint
+GetMonitorInfo
+GetDpiForMonitor
+
+// memory
+SetProcessWorkingSetSize
+GetCurrentProcess
