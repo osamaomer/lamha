@@ -40,6 +40,9 @@ jobs:
           global-json-file: global.json
       - run: dotnet tool restore
 
+      - name: The offline dictionary file (shipped next to Lamha.exe as dict/lamha-dict.db)
+        run: dotnet run --project tools/DictionaryBuilder -c Release -- legacy/dict artifacts/dict/lamha-dict.db
+
       - name: Publish (NativeAOT)
         run: dotnet publish src/Lamha.App -c Release -r ${{ matrix.rid }} -o artifacts/publish/${{ matrix.rid }}
 

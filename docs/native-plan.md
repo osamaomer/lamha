@@ -339,11 +339,32 @@ Built on the `native/phase-2` branch (2026-10-24):
 - **The parity tool** (`tools/parity`): a few hundred real words and sentences through Lamha 2's background and the new Core with the same recorded answers, every difference listed.
 - **Recorded answers from LM Studio, OpenRouter and Groq** (decision 0007); the tests use answers written by hand.
 
-**Moved to the phases that use them:** wiring Core and Data into the app, with keys in Credential Locker and Windows' network status (phase 3); the dictionary file in CI and the installer (phase 3); answers streamed word by word (with the card, phase 4); the new error codes' wording (phase 4); language pack files (phase 5); importing Lamha 2's files (phase 6).
+**Moved to the phases that use them:** wiring Core and Data into the app, with keys in Credential Locker and Windows' network status (done in phase 3); the dictionary file in CI and the installer (done in phase 3); answers streamed word by word (with the card, phase 4); the new error codes' wording (phase 4); language pack files (phase 5); importing Lamha 2's files (phase 6).
 
 **Questions from phase 2**
 - **Wording for the new errors** (Arabic and English): `openai_no_key` (OpenAI chosen without a key), `custom_no_server` (a custom server without an address or a model), `custom_insecure` (plain `http://` to an internet address), `custom_offline` (the custom server can't be reached), `google_error` (Google answered with something unexpected). Recommendation: Claude drafts them in Lamha 2's style for you to reword. *(phase 4)*
 - **The writing tools' system prompt** now says Lamha is "an app" where the user selects text "in any program". It's never shown, but it's your wording: keep it? *(phase 4)*
+
+### Phase 3 progress
+
+Built on the `native/phase-3` branch (2026-10-24), on top of phase 2:
+
+- **The brain in the app** (`Services/Brain.cs`): `lamha.db`, the settings and clipboard history open at start; everything a lookup needs (HTTP, the dictionary file, the AI) is built at the first lookup. API keys are in Windows' Credential Manager ("Lamha/claude"…, this PC only), the network state comes from Windows, and the dictionary file ships next to Lamha.exe (`dict\lamha-dict.db`, built by CI before publishing). `--profile=folder` runs Lamha on other data (the memory check uses it).
+- **The shortcuts:** Ctrl+Alt+L looks up the selection on the prototype card, now with the real lookup (dictionary, Google, the AI); Ctrl+Alt+W opens it to edit the text. Replace pastes over the selection; with nothing selected, Insert pastes at the cursor. When pasting fails, the text stays on the clipboard and a notification says so (Lamha 2's words). A shortcut another program holds is announced the same way, and marked in the tray menu.
+- **The sentence around a word:** read through UI Automation before the card takes the focus, on its own thread, at most 700 ms ([decision 0012](decisions/0012-sentence-through-ui-automation-in-process.md)).
+- **Clipboard history:** the listener, Lamha 2's privacy rules in its order (programs' own "don't keep this" marks, excluded programs never read, bank-card numbers), merged duplicates, the size and age limits, Arabic-aware search, pinning, labels, undo; each copy encrypted for the Windows user ([decision 0011](decisions/0011-clipboard-history-encrypted-in-sqlite.md)). Lamha's own Ctrl+C isn't recorded.
+- **The tray:** the shortcuts, clipboard history on/off and its pause (15 minutes, 1 hour, until resumed), Windows' accent colour, Start with Windows (which also respects being switched off in Windows' Startup settings), Quit. The tray icon now comes back after Explorer restarts (phase 0's message-only window never got that broadcast).
+- **Windows' accent colour:** Lamha 2's palette rules (readable in both themes, its exact colours), followed live when the colour changes in Windows.
+- **Tests:** 261 (Core 221, Data 12, Windows 28), all passing; Lamha 2's test-clipboard.mjs store, search and privacy cases and test-desktop.mjs's accent case are ported. Found while porting: phase 2's Arabic normalizer dropped Arabic-Indic digits (its mark range was too wide); fixed, with a test.
+- **Measured** (NativeAOT, x64, `measure.ps1 -Budget`): tray 0 / 48 MB, card open after a real lookup 36 / 77 MB, card closed 1 / 77 MB (Task Manager / commit), all within budget. On disk 95.8 MB, of which the dictionary file is 24 MB.
+
+**Not yet verified:** the shortcuts in real programs, the sentence from Word, Notepad and a browser, Replace and Insert, and clipboard history recording your copies (the tray's switch turns it on). These need a desktop: start the beta from Explorer.
+
+**Moved to phase 4, with the windows that use them:** the clipboard panel and its shortcut (Ctrl+Alt+V in the beta), Lamha's tools on a copy (translate, write in English, summarize, add to review), the review reminder and the tray's Open / Review / Write / Settings items. The tray's clipboard and accent switches (Proto_ strings) move into Settings then.
+
+**Questions from phase 3**
+- **Where the user's data lives.** `lamha.db` is in `%LOCALAPPDATA%\Lamha` (decision 0006), which is also Velopack's install folder: uninstalling Lamha deletes that folder, the review deck with it. Recommendation: keep the data in its own folder (`%LOCALAPPDATA%\Lamha Data`), so an uninstall or a reinstall never takes the deck; "delete my data" becomes a choice in Settings. *(phase 3, before the first beta release)*
+- **Reading the selection without the clipboard** (the UX idea; phase 1's question on 3.0 ideas): the sentence reader already finds the selection through UI Automation, so it could read the selection first and fall back to Ctrl+C. Recommendation unchanged: yes, in 3.0.
 
 ## Moving users from Lamha 2
 
@@ -393,6 +414,7 @@ Phase 0's four and the two it raised, and phase 2's four, are answered (see each
 | 1 | Card background? | Acrylic with a strong tint, plus a solid option |
 | 1 | Settings: own window or a page? | A page in the main window |
 | 1 | Which UX ideas go into 3.0? | Clipboard-free selection, pinned card; OCR right after |
+| 3 | Where the user's data lives (Velopack's uninstall removes `%LOCALAPPDATA%\Lamha`) | Its own folder, `%LOCALAPPDATA%\Lamha Data` |
 | 4 | Wording for phase 2's new error codes | Claude drafts in Lamha 2's style; you reword |
 | 4 | The writing tools' system prompt ("an app… in any program") | Keep |
 | 6 | Code signing? | Yours, once everything else is done (the beta ships unsigned until then) |

@@ -43,6 +43,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lamha.Core\Lamha.Core.csproj" />
+    <ProjectReference Include="..\Lamha.Data\Lamha.Data.csproj" />
     <ProjectReference Include="..\Lamha.Windows\Lamha.Windows.csproj" />
   </ItemGroup>
 
@@ -50,6 +51,19 @@
        ResourceLoader fails at start. -->
   <Target Name="LamhaPublishPri" AfterTargets="Publish">
     <Copy SourceFiles="$(OutDir)$(ProjectPriFileName)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- The offline dictionary, built from Lamha 2's shards by tools/DictionaryBuilder into artifacts/dict (CI does it
+       before publishing; see CLAUDE.md for the command), shipped next to Lamha.exe as dict\lamha-dict.db. Without it
+       Lamha still runs, with Google and the AI only. -->
+  <PropertyGroup>
+    <LamhaDictFile>$(MSBuildThisFileDirectory)../../artifacts/dict/lamha-dict.db</LamhaDictFile>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(LamhaDictFile)')">
+    <Content Include="$(LamhaDictFile)" Link="dict\lamha-dict.db" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="LamhaNoDictionary" BeforeTargets="Build" Condition="!Exists('$(LamhaDictFile)')">
+    <Message Importance="high" Text="Lamha: no offline dictionary in artifacts/dict (dotnet run --project tools/DictionaryBuilder -- legacy/dict artifacts/dict/lamha-dict.db)" />
   </Target>
 
   <ItemGroup>

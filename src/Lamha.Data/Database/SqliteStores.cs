@@ -273,3 +273,58 @@ public sealed class SqliteErrorLogStore(LamhaDatabase db) : IErrorLogStore
     public IReadOnlyList<ErrorLogEntry> Recent() => db.Run(sql => sql.Query(
         "SELECT time, place, code FROM errors ORDER BY id DESC", r => new ErrorLogEntry(r.GetInt64(0), r.GetString(1), r.GetString(2))));
 }
+
+/// <summary>Clipboard history in the <c>clips</c> table: contents encrypted, sorted by when each copy was last active.</summary>
+public sealed class SqliteClipStore(LamhaDatabase db) : IClipStore
+{
+    private const string Columns = "id, text_key, body, source_app, lang, created, last_copied, last_used, copy_count, use_count, pinned";
+
+    /// <summary>The least recent last; the same moment, the older id last (as the list shows them).</summary>
+    private const string ByActivity = "ORDER BY max(last_copied, last_used) DESC, id DESC";
+
+    public ClipRecord? Get(string id) => db.Run(sql => sql.Query($"SELECT {Columns} FROM clips WHERE id = $id", Read, ("$id", id))).FirstOrDefault();
+
+    public ClipRecord? FindByKey(byte[] textKey) =>
+        db.Run(sql => sql.Query($"SELECT {Columns} FROM clips WHERE text_key = $k", Read, ("$k", textKey))).FirstOrDefault();
+
+    public IReadOnlyList<ClipRecord> All() => db.Run(sql => sql.Query($"SELECT {Columns} FROM clips {ByActivity}", Read));
+
+    public void Put(ClipRecord record)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+        db.Run(sql => sql.Execute(
+            $"""
+            INSERT OR REPLACE INTO clips ({Columns})
+            VALUES ($id, $key, $body, $app, $lang, $created, $copied, $used, $copies, $uses, $pinned)
+            """,
+            ("$id", record.Id), ("$key", record.TextKey), ("$body", record.Body), ("$app", record.SourceApp), ("$lang", record.Lang),
+            ("$created", record.CreatedAt), ("$copied", record.LastCopiedAt), ("$used", record.LastUsedAt),
+            ("$copies", record.CopyCount), ("$uses", record.UseCount), ("$pinned", record.Pinned ? 1 : 0)));
+    }
+
+    public bool Delete(string id) => db.Run(sql => sql.Execute("DELETE FROM clips WHERE id = $id", ("$id", id)) > 0);
+
+    public int CountPinned() => db.Run(sql => (int)sql.Long("SELECT count(*) FROM clips WHERE pinned = 1"));
+
+    public int TrimUnpinned(int keep) => db.Run(sql => sql.Execute(
+        $"DELETE FROM clips WHERE pinned = 0 AND id NOT IN (SELECT id FROM clips WHERE pinned = 0 {ByActivity} LIMIT $n)", ("$n", keep)));
+
+    public int ExpireUnpinned(long before) =>
+        db.Run(sql => sql.Execute("DELETE FROM clips WHERE pinned = 0 AND max(last_copied, last_used) < $t", ("$t", before)));
+
+    public int DeleteApp(string app) => db.Run(sql => sql.Execute("DELETE FROM clips WHERE source_app = $a", ("$a", app)));
+
+    public int Clear(bool keepPinned) => db.Run(sql =>
+    {
+        sql.Execute(keepPinned ? "DELETE FROM clips WHERE pinned = 0" : "DELETE FROM clips");
+        return (int)sql.Long("SELECT count(*) FROM clips");
+    });
+
+    public IReadOnlyList<(string App, int Count)> Apps() => db.Run(sql => sql.Query(
+        "SELECT source_app, count(*) AS n FROM clips GROUP BY source_app ORDER BY n DESC, source_app",
+        r => (r.GetString(0), r.GetInt32(1))));
+
+    private static ClipRecord Read(SqliteDataReader r) => new(
+        r.GetString(0), (byte[])r.GetValue(1), (byte[])r.GetValue(2), r.GetString(3), r.GetString(4),
+        r.GetInt64(5), r.GetInt64(6), r.GetInt64(7), r.GetInt32(8), r.GetInt32(9), r.GetInt64(10) != 0);
+}

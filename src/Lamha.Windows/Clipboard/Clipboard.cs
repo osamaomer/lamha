@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using global::Windows.Win32;
 using global::Windows.Win32.Foundation;
 using global::Windows.Win32.System.Memory;
@@ -14,6 +16,9 @@ public static unsafe class Clipboard
 
     /// <summary>A number that changes whenever anything puts something on the clipboard.</summary>
     public static uint SequenceNumber => PInvoke.GetClipboardSequenceNumber();
+
+    /// <summary>The clipboard holds text.</summary>
+    public static bool HasText => PInvoke.IsClipboardFormatAvailable(CfUnicodeText);
 
     /// <summary>The clipboard's text, or null when it holds none or is busy.</summary>
     public static string? ReadText(nint owner)
@@ -90,6 +95,50 @@ public static unsafe class Clipboard
         }
     }
 
+    /// <summary>The clipboard holds the registered format <paramref name="name"/> ("HTML Format").</summary>
+    public static bool HasFormat(string name)
+    {
+        var format = Register(name);
+        return format != 0 && PInvoke.IsClipboardFormatAvailable(format);
+    }
+
+    /// <summary>The first four bytes of format <paramref name="name"/> as a number, or null when it's missing or unreadable.</summary>
+    public static uint? ReadDword(nint owner, string name)
+    {
+        var data = Read(owner, Register(name), 4);
+        return data is { Length: >= 4 } ? BitConverter.ToUInt32(data, 0) : null;
+    }
+
+    /// <summary>
+    /// The copied formatting: the HTML document of the "HTML Format" (CF_HTML) between its StartHTML and EndHTML, or
+    /// null. At most <paramref name="maxBytes"/> are read.
+    /// </summary>
+    public static string? ReadHtml(nint owner, int maxBytes)
+    {
+        var data = Read(owner, Register("HTML Format"), maxBytes + 1024);
+        if (data is null)
+        {
+            return null;
+        }
+
+        var length = Array.IndexOf(data, (byte)0) is var z and >= 0 ? z : data.Length;
+        var header = Encoding.ASCII.GetString(data, 0, Math.Min(length, 512));
+        var start = Offset(header, "StartHTML:");
+        var end = Offset(header, "EndHTML:");
+        if (start < 0 || end <= start || end > length)
+        {
+            // Some programs write -1 or nothing: everything after the header's lines is the HTML.
+            start = header.IndexOf('<', StringComparison.Ordinal);
+            end = length;
+            if (start < 0)
+            {
+                return null;
+            }
+        }
+
+        return Encoding.UTF8.GetString(data, start, end - start);
+    }
+
     /// <summary>Everything on the clipboard now, to put back later with <see cref="Restore"/>.</summary>
     public static ClipboardSnapshot Save(nint owner) => ClipboardSnapshot.Take(owner);
 
@@ -121,6 +170,68 @@ public static unsafe class Clipboard
         {
             PInvoke.CloseClipboard();
         }
+    }
+
+    /// <summary>Up to <paramref name="max"/> bytes of <paramref name="format"/>; null when it's missing, busy or bigger.</summary>
+    private static byte[]? Read(nint owner, uint format, int max)
+    {
+        if (format == 0 || !PInvoke.IsClipboardFormatAvailable(format) || !Open(owner))
+        {
+            return null;
+        }
+
+        try
+        {
+            var handle = (HGLOBAL)(nint)PInvoke.GetClipboardData(format).Value;
+            if (handle == HGLOBAL.Null)
+            {
+                return null;
+            }
+
+            var size = (long)PInvoke.GlobalSize(handle);
+            if (size > max)
+            {
+                return null;
+            }
+
+            var p = PInvoke.GlobalLock(handle);
+            if (p == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                return new ReadOnlySpan<byte>(p, (int)size).ToArray();
+            }
+            finally
+            {
+                PInvoke.GlobalUnlock(handle);
+            }
+        }
+        finally
+        {
+            PInvoke.CloseClipboard();
+        }
+    }
+
+    /// <summary>The number after <paramref name="key"/> in a CF_HTML header ("StartHTML:0000000105"), or -1.</summary>
+    private static int Offset(string header, string key)
+    {
+        var at = header.IndexOf(key, StringComparison.Ordinal);
+        if (at < 0)
+        {
+            return -1;
+        }
+
+        var digits = header.AsSpan(at + key.Length);
+        var n = 0;
+        while (n < digits.Length && char.IsAsciiDigit(digits[n]))
+        {
+            n++;
+        }
+
+        return int.TryParse(digits[..n], CultureInfo.InvariantCulture, out var value) ? value : -1;
     }
 
     /// <summary>Opens the clipboard, retrying while another program holds it (4 × 25 ms: it's rare and short).</summary>

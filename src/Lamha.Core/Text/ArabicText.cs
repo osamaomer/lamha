@@ -15,7 +15,7 @@ public static class ArabicText
         var space = false;
         foreach (var c in text)
         {
-            if (c is (>= 'ً' and <= 'ٰ') or 'ـ')
+            if (c is (>= 'ً' and <= 'ٟ') or 'ٰ' or 'ـ')
             {
                 continue;
             }

@@ -22,3 +22,17 @@ public class ForegroundWindowTests
     [Fact]
     public void NoWindowHasNoClassName() => Assert.Equal("", ForegroundWindow.ClassName(0));
 }
+
+public sealed class ProcessNameTests
+{
+    [Fact]
+    public void AWindowsProgramIsNamedByItsFile()
+    {
+        using var window = new MessageWindow();
+        var expected = Path.GetFileName(Environment.ProcessPath!).ToLowerInvariant();
+        Assert.Equal(expected, ForegroundWindow.ProcessName(window.Handle));
+    }
+
+    [Fact]
+    public void NoWindowHasNoProgram() => Assert.Equal("", ForegroundWindow.ProcessName(0));
+}

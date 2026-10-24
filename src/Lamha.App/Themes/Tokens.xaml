@@ -4,6 +4,29 @@
   <!-- Lamha's design tokens. Phase 0 has only what the prototype card needs; phase 1 brings the full set
        (colours from Lamha 2's shared/ui.css for light, dark and high contrast, type, spacing, motion). -->
 
+  <!-- The accent: Lamha's own colours (Lamha 2's shared/ui.css: accent, accent-soft, btn), or Windows' accent made
+       readable when Settings asks for it. Services/AccentService.cs changes these brushes' colours in place. -->
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="LamhaAccentBrush" Color="#4F46E5" />
+      <SolidColorBrush x:Key="LamhaAccentSoftBrush" Color="#174F46E5" />
+      <SolidColorBrush x:Key="LamhaButtonBrush" Color="#4F46E5" />
+      <SolidColorBrush x:Key="LamhaButtonTextBrush" Color="#FFFFFF" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="LamhaAccentBrush" Color="#9AA1FF" />
+      <SolidColorBrush x:Key="LamhaAccentSoftBrush" Color="#1F9AA1FF" />
+      <SolidColorBrush x:Key="LamhaButtonBrush" Color="#5E5CE6" />
+      <SolidColorBrush x:Key="LamhaButtonTextBrush" Color="#FFFFFF" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="HighContrast">
+      <SolidColorBrush x:Key="LamhaAccentBrush" Color="{ThemeResource SystemColorHotlightColor}" />
+      <SolidColorBrush x:Key="LamhaAccentSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
+      <SolidColorBrush x:Key="LamhaButtonBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="LamhaButtonTextBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+
   <!-- Corners: the same three steps as Lamha 2's r-sm, r-md and r-lg. -->
   <CornerRadius x:Key="LamhaRadiusSmall">8</CornerRadius>
   <CornerRadius x:Key="LamhaRadiusMedium">10</CornerRadius>

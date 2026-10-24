@@ -8,6 +8,15 @@ namespace Lamha.Windows.Shell;
 public sealed record TrayMenuItem(string? Text, Action? Run = null)
 {
     public static TrayMenuItem Separator { get; } = new((string?)null);
+
+    /// <summary>Shown with a check mark (a setting that's on, or the choice made).</summary>
+    public bool Checked { get; init; }
+
+    /// <summary>False: shown greyed out (information, such as the shortcuts).</summary>
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>A submenu's items; the item itself then does nothing.</summary>
+    public IReadOnlyList<TrayMenuItem>? Items { get; init; }
 }
 
 /// <summary>
@@ -25,7 +34,8 @@ public sealed unsafe class TrayIcon : IDisposable
     private readonly MessageWindow _window;
     private readonly HICON _icon;
     private string _tooltip;
-    private IReadOnlyList<TrayMenuItem> _menu = [];
+    private Func<IReadOnlyList<TrayMenuItem>> _menu = () => [];
+    private List<TrayMenuItem> _shown = [];
     private bool _added;
 
     /// <param name="window">Receives the icon's clicks.</param>
@@ -51,7 +61,19 @@ public sealed unsafe class TrayIcon : IDisposable
     /// <summary>A left click (or Enter on the icon).</summary>
     public event Action? Invoked;
 
-    public void SetMenu(IReadOnlyList<TrayMenuItem> items) => _menu = items;
+    /// <summary>The menu, built each time it opens (so checks and counts are current).</summary>
+    public void SetMenu(Func<IReadOnlyList<TrayMenuItem>> build) => _menu = build;
+
+    /// <summary>A notification from the icon (Windows 11 shows it as a toast). Texts are cut to Windows' limits.</summary>
+    public void Notify(string title, string body)
+    {
+        var data = Data(NOTIFY_ICON_DATA_FLAGS.NIF_INFO);
+        title.AsSpan(0, Math.Min(title.Length, 63)).CopyTo(new Span<char>(&data.szInfoTitle, 64));
+        body.AsSpan(0, Math.Min(body.Length, 255)).CopyTo(new Span<char>(&data.szInfo, 256));
+        data.dwInfoFlags = NOTIFY_ICON_INFOTIP_FLAGS.NIIF_USER | NOTIFY_ICON_INFOTIP_FLAGS.NIIF_LARGE_ICON;
+        data.hBalloonIcon = _icon;
+        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_MODIFY, &data);
+    }
 
     public void SetTooltip(string tooltip)
     {
@@ -120,39 +142,61 @@ public sealed unsafe class TrayIcon : IDisposable
 
     private void ShowMenu(int x, int y)
     {
-        var menu = PInvoke.CreatePopupMenu();
+        _shown = [];
+        var menu = Build(_menu());
         try
         {
-            for (var i = 0; i < _menu.Count; i++)
-            {
-                var item = _menu[i];
-                if (item.Text is null)
-                {
-                    PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, (char*)null);
-                    continue;
-                }
-
-                fixed (char* text = item.Text)
-                {
-                    PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, (nuint)(i + 1), text);
-                }
-            }
-
             // The menu closes properly only when its owner is in front (a documented quirk of tray menus).
             PInvoke.SetForegroundWindow(_window.Handle);
             PInvoke.TrackPopupMenuEx(menu, (uint)(TRACK_POPUP_MENU_FLAGS.TPM_RIGHTBUTTON | TRACK_POPUP_MENU_FLAGS.TPM_BOTTOMALIGN), x, y, _window.Handle, null);
         }
         finally
         {
-            PInvoke.DestroyMenu(menu);
+            PInvoke.DestroyMenu(menu); // and its submenus with it
         }
+    }
+
+    /// <summary>A popup menu for <paramref name="items"/>; each item's id is its place in <see cref="_shown"/> + 1.</summary>
+    private HMENU Build(IReadOnlyList<TrayMenuItem> items)
+    {
+        var menu = PInvoke.CreatePopupMenu();
+        foreach (var item in items)
+        {
+            if (item.Text is null)
+            {
+                PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, (char*)null);
+                continue;
+            }
+
+            var flags = MENU_ITEM_FLAGS.MF_STRING
+                | (item.Checked ? MENU_ITEM_FLAGS.MF_CHECKED : 0)
+                | (item.Enabled ? 0 : MENU_ITEM_FLAGS.MF_GRAYED);
+            nuint id;
+            if (item.Items is { } children)
+            {
+                flags |= MENU_ITEM_FLAGS.MF_POPUP;
+                id = (nuint)(nint)Build(children).Value;
+            }
+            else
+            {
+                _shown.Add(item);
+                id = (nuint)_shown.Count;
+            }
+
+            fixed (char* text = item.Text)
+            {
+                PInvoke.AppendMenu(menu, flags, id, text);
+            }
+        }
+
+        return menu;
     }
 
     private void OnCommand(int id)
     {
-        if (id >= 1 && id <= _menu.Count)
+        if (id >= 1 && id <= _shown.Count)
         {
-            _menu[id - 1].Run?.Invoke();
+            _shown[id - 1].Run?.Invoke();
         }
     }
 }

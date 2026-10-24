@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using global::Windows.Win32;
 using global::Windows.Win32.Foundation;
+using global::Windows.Win32.System.Threading;
 
 namespace Lamha.Windows.Shell;
 
@@ -23,6 +24,39 @@ public static partial class ForegroundWindow
         var buffer = stackalloc char[256];
         var length = PInvoke.GetClassName((HWND)hwnd, buffer, 256);
         return length > 0 ? new string(buffer, 0, length) : "";
+    }
+
+    /// <summary>The file name of the program that owns the window, lower case ("notepad.exe"); "" when unknown.</summary>
+    public static unsafe string ProcessName(nint hwnd)
+    {
+        uint id = 0;
+        if (hwnd == 0 || PInvoke.GetWindowThreadProcessId((HWND)hwnd, &id) == 0 || id == 0)
+        {
+            return "";
+        }
+
+        var process = PInvoke.OpenProcess(PROCESS_ACCESS_RIGHTS.PROCESS_QUERY_LIMITED_INFORMATION, false, id);
+        if (process.IsNull)
+        {
+            return ""; // a program running as administrator, or one that just ended
+        }
+
+        try
+        {
+            var buffer = stackalloc char[1024];
+            var size = 1024u;
+            if (!PInvoke.QueryFullProcessImageName(process, PROCESS_NAME_FORMAT.PROCESS_NAME_WIN32, buffer, &size))
+            {
+                return "";
+            }
+
+            var path = new ReadOnlySpan<char>(buffer, (int)size);
+            return path[(path.LastIndexOf('\\') + 1)..].ToString().ToLowerInvariant();
+        }
+        finally
+        {
+            PInvoke.CloseHandle(process);
+        }
     }
 
     /// <summary>Terminals: Ctrl+C would interrupt the program running there instead of copying.</summary>

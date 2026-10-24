@@ -9,18 +9,41 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
 
   <data name="Common_Lamha" xml:space="preserve"><value>Lamha</value><comment>common.lamha</comment></data>
-  <data name="Card_Replace.Content" xml:space="preserve"><value>Replace</value><comment>c.replace</comment></data>
   <data name="Card_Copy.Content" xml:space="preserve"><value>Copy</value><comment>common.copy</comment></data>
   <data name="Card_Close.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Close (Esc)</value><comment>c.closeEsc</comment></data>
   <data name="Card_Close.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Close (Esc)</value><comment>c.closeEsc</comment></data>
   <data name="Card_SelectFirst" xml:space="preserve"><value>Select some text first</value><comment>c.selectFirst</comment></data>
+  <data name="Card_Replace" xml:space="preserve"><value>Replace</value><comment>c.replace</comment></data>
+  <data name="Card_Insert" xml:space="preserve"><value>Insert</value><comment>c.insert</comment></data>
+  <data name="Card_WriteNewHere" xml:space="preserve"><value>Write something new in this box</value><comment>c.writeNewHere</comment></data>
+  <data name="Tray_ShortcutLookup" xml:space="preserve"><value>Look up and translate in any program</value><comment>d.hkLookup</comment></data>
+  <data name="Tray_ShortcutWrite" xml:space="preserve"><value>Writing tools in any program</value><comment>d.hkWrite</comment></data>
+  <data name="Tray_Unavailable" xml:space="preserve"><value> (unavailable)</value><comment>d.unavailable</comment></data>
+  <data name="Tray_StartWithWindows" xml:space="preserve"><value>Start with Windows</value><comment>d.trayLogin</comment></data>
+  <data name="Tray_Pause" xml:space="preserve"><value>Pause clipboard history</value><comment>d.pause</comment></data>
+  <data name="Tray_Pause15" xml:space="preserve"><value>15 minutes</value><comment>d.pause15</comment></data>
+  <data name="Tray_Pause60" xml:space="preserve"><value>1 hour</value><comment>d.pause60</comment></data>
+  <data name="Tray_PauseUntil" xml:space="preserve"><value>Until I resume</value><comment>d.pauseUntil</comment></data>
+  <data name="Tray_Resume" xml:space="preserve"><value>Resume clipboard history (paused)</value><comment>d.resume</comment></data>
+  <data name="Tray_ResumeAt" xml:space="preserve"><value>Resume clipboard history (paused until {0})</value><comment>d.resumeAt</comment></data>
+  <data name="Tray_TipPaused" xml:space="preserve"><value>Clipboard history paused</value><comment>d.tipPaused</comment></data>
+  <data name="Note_HotkeyTaken" xml:space="preserve"><value>Shortcut in use</value><comment>d.hotkeyTaken</comment></data>
+  <data name="Note_HotkeyTakenBody" xml:space="preserve"><value>Another program uses {0} — it won't work in Lamha.</value><comment>d.hotkeyTakenBody</comment></data>
+  <data name="Note_And" xml:space="preserve"><value> and </value><comment>d.hotkeyTakenBody: the keys joined</comment></data>
+  <data name="Note_ReplaceFailed" xml:space="preserve"><value>Couldn't replace</value><comment>d.replaceFailed</comment></data>
+  <data name="Note_ReplaceFailedBody" xml:space="preserve"><value>The text was copied — paste it yourself (Ctrl+V).</value><comment>d.replaceFailedBody</comment></data>
   <data name="Tray_Quit" xml:space="preserve"><value>Quit</value><comment>d.trayQuit</comment></data>
 
   <data name="Proto_Tooltip" xml:space="preserve"><value>Lamha 3 (prototype)</value></data>
   <data name="Proto_Word" xml:space="preserve"><value>A word or short phrase</value></data>
   <data name="Proto_Sentence" xml:space="preserve"><value>A sentence</value></data>
-  <data name="Proto_Result" xml:space="preserve"><value>Replace puts this back (in capitals, as a test):</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>Show the card (sample text)</value></data>
   <data name="Proto_SampleText" xml:space="preserve"><value>a piece of cake</value></data>
-  <data name="Proto_HotkeyTaken" xml:space="preserve"><value>Another program uses {0}</value></data>
+  <data name="Proto_Write" xml:space="preserve"><value>Writing tools come with the real card: edit the text, then Replace</value></data>
+  <data name="Proto_Result" xml:space="preserve"><value>Replace puts this back (you can edit it):</value></data>
+  <data name="Proto_Looking" xml:space="preserve"><value>Looking up…</value></data>
+  <data name="Proto_LookingInSentence" xml:space="preserve"><value>Looking up, with the sentence around the word…</value></data>
+  <data name="Proto_LookupFailed" xml:space="preserve"><value>The lookup failed ({0}). The real card will say why in words.</value></data>
+  <data name="Proto_ClipboardHistory" xml:space="preserve"><value>Clipboard history</value><comment>d.historyLabel</comment></data>
+  <data name="Proto_Accent" xml:space="preserve"><value>Accent colour from Windows</value><comment>d.accent</comment></data>
 </root>

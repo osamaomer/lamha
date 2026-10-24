@@ -76,6 +76,25 @@ internal static class Migrations
             code TEXT NOT NULL
         );
         """,
+
+        // 2: clipboard history. What was copied is in body, encrypted for this Windows user; text_key finds the same
+        // text copied again (an HMAC, so it can't be checked against a guess without the user's key).
+        """
+        CREATE TABLE clips (
+            id TEXT PRIMARY KEY,
+            text_key BLOB NOT NULL UNIQUE,
+            body BLOB NOT NULL,
+            source_app TEXT NOT NULL,
+            lang TEXT NOT NULL,
+            created INTEGER NOT NULL,
+            last_copied INTEGER NOT NULL,
+            last_used INTEGER NOT NULL,
+            copy_count INTEGER NOT NULL,
+            use_count INTEGER NOT NULL,
+            pinned INTEGER NOT NULL
+        ) WITHOUT ROWID;
+        CREATE INDEX clips_by_activity ON clips (max(last_copied, last_used) DESC, id DESC);
+        """,
     ];
 
     /// <summary>The schema version this build of Lamha writes.</summary>

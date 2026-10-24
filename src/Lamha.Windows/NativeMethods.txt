@@ -9,6 +9,9 @@ GetWindowThreadProcessId
 AttachThreadInput
 GetCurrentThreadId
 GetClassName
+OpenProcess
+QueryFullProcessImageName
+CloseHandle
 DwmSetWindowAttribute
 DWM_WINDOW_CORNER_PREFERENCE
 
@@ -28,6 +31,9 @@ SetClipboardData
 GetClipboardSequenceNumber
 IsClipboardFormatAvailable
 RegisterClipboardFormat
+GetClipboardOwner
+AddClipboardFormatListener
+RemoveClipboardFormatListener
 GlobalAlloc
 GlobalLock
 GlobalUnlock
@@ -43,13 +49,14 @@ DefWindowProc
 GetModuleHandle
 RegisterWindowMessage
 PostMessage
-HWND_MESSAGE
 WM_HOTKEY
 WM_COMMAND
 WM_APP
 WM_CONTEXTMENU
 WM_LBUTTONUP
 WM_RBUTTONUP
+WM_CLIPBOARDUPDATE
+WINDOW_EX_STYLE
 
 // the tray icon and its menu
 Shell_NotifyIcon
@@ -61,6 +68,7 @@ TrackPopupMenuEx
 DestroyMenu
 NOTIFYICON_VERSION_4
 TRACK_POPUP_MENU_FLAGS
+NOTIFY_ICON_INFOTIP_FLAGS
 
 // screens
 GetCursorPos
@@ -71,3 +79,31 @@ GetDpiForMonitor
 // memory
 SetProcessWorkingSetSize
 GetCurrentProcess
+
+// keys and clipboard history, kept by Windows for this user
+CredRead
+CredWrite
+CredDelete
+CredFree
+CryptProtectData
+CryptUnprotectData
+CRYPTPROTECT_UI_FORBIDDEN
+LocalFree
+
+// UI Automation: the sentence around a selected word
+CoInitializeEx
+CoUninitialize
+CoCreateInstance
+SysFreeString
+CUIAutomation8
+IUIAutomation2
+IUIAutomationElement
+IUIAutomationElementArray
+IUIAutomationCondition
+IUIAutomationTreeWalker
+IUIAutomationTextPattern
+IUIAutomationTextRange
+IUIAutomationTextRangeArray
+UIA_PATTERN_ID
+UIA_PROPERTY_ID
+UIA_CONTROLTYPE_ID

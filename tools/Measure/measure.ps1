@@ -31,7 +31,9 @@ function Read-Memory($id) {
 # The app's timeline (Services/MeasureTimeline.cs): card at 20 s, closed at 35 s, idle memory handed back 5 s later, quit at 60 s.
 $samples = [ordered]@{ "tray" = 15; "card open" = 30; "card closed" = 55 }
 
-$p = Start-Process -FilePath $exe -ArgumentList (@("--measure") + $AppArgs) -PassThru
+# A profile of its own: the measurement never reads or writes the user's real data (lamha.db, keys, the startup entry).
+$profile = Join-Path ([IO.Path]::GetTempPath()) ("lamha-measure-" + [guid]::NewGuid().ToString("N"))
+$p = Start-Process -FilePath $exe -ArgumentList (@("--measure", "--profile=$profile") + $AppArgs) -PassThru
 $started = Get-Date
 $rows = @()
 try {
@@ -51,6 +53,7 @@ try {
   }
 } finally {
   if (-not $p.WaitForExit(15000)) { Stop-Process -Id $p.Id -Force } # only the process this script started
+  Remove-Item -Recurse -Force $profile -ErrorAction SilentlyContinue
 }
 
 $rows | Format-Table -AutoSize | Out-String -Width 120 | Write-Output

@@ -8,18 +8,41 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
 
   <data name="Common_Lamha" xml:space="preserve"><value>لمحة</value><comment>common.lamha</comment></data>
-  <data name="Card_Replace.Content" xml:space="preserve"><value>استبدال</value><comment>c.replace</comment></data>
   <data name="Card_Copy.Content" xml:space="preserve"><value>نسخ</value><comment>common.copy</comment></data>
   <data name="Card_Close.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>إغلاق (Esc)</value><comment>c.closeEsc</comment></data>
   <data name="Card_Close.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>إغلاق (Esc)</value><comment>c.closeEsc</comment></data>
   <data name="Card_SelectFirst" xml:space="preserve"><value>حدّد نصًّا أولًا</value><comment>c.selectFirst</comment></data>
+  <data name="Card_Replace" xml:space="preserve"><value>استبدال</value><comment>c.replace</comment></data>
+  <data name="Card_Insert" xml:space="preserve"><value>إدراج</value><comment>c.insert</comment></data>
+  <data name="Card_WriteNewHere" xml:space="preserve"><value>اكتب نصًّا جديدًا في هذا المربع</value><comment>c.writeNewHere</comment></data>
+  <data name="Tray_ShortcutLookup" xml:space="preserve"><value>بحث وترجمة في أي برنامج</value><comment>d.hkLookup</comment></data>
+  <data name="Tray_ShortcutWrite" xml:space="preserve"><value>أدوات الكتابة في أي برنامج</value><comment>d.hkWrite</comment></data>
+  <data name="Tray_Unavailable" xml:space="preserve"><value> (غير متاح)</value><comment>d.unavailable</comment></data>
+  <data name="Tray_StartWithWindows" xml:space="preserve"><value>التشغيل مع Windows</value><comment>d.trayLogin</comment></data>
+  <data name="Tray_Pause" xml:space="preserve"><value>إيقاف الحافظة مؤقتًا</value><comment>d.pause</comment></data>
+  <data name="Tray_Pause15" xml:space="preserve"><value>١٥ دقيقة</value><comment>d.pause15</comment></data>
+  <data name="Tray_Pause60" xml:space="preserve"><value>ساعة</value><comment>d.pause60</comment></data>
+  <data name="Tray_PauseUntil" xml:space="preserve"><value>حتى الاستئناف</value><comment>d.pauseUntil</comment></data>
+  <data name="Tray_Resume" xml:space="preserve"><value>استئناف الحافظة (متوقفة)</value><comment>d.resume</comment></data>
+  <data name="Tray_ResumeAt" xml:space="preserve"><value>استئناف الحافظة (متوقفة حتى {0})</value><comment>d.resumeAt</comment></data>
+  <data name="Tray_TipPaused" xml:space="preserve"><value>الحافظة متوقفة مؤقتًا</value><comment>d.tipPaused</comment></data>
+  <data name="Note_HotkeyTaken" xml:space="preserve"><value>اختصار مستخدم</value><comment>d.hotkeyTaken</comment></data>
+  <data name="Note_HotkeyTakenBody" xml:space="preserve"><value>برنامج آخر يستخدم {0} — لن يعمل من لمحة.</value><comment>d.hotkeyTakenBody</comment></data>
+  <data name="Note_And" xml:space="preserve"><value> و </value><comment>d.hotkeyTakenBody: the keys joined</comment></data>
+  <data name="Note_ReplaceFailed" xml:space="preserve"><value>تعذّر الاستبدال</value><comment>d.replaceFailed</comment></data>
+  <data name="Note_ReplaceFailedBody" xml:space="preserve"><value>نُسخ النص — الصقه بنفسك (Ctrl+V).</value><comment>d.replaceFailedBody</comment></data>
   <data name="Tray_Quit" xml:space="preserve"><value>خروج</value><comment>d.trayQuit</comment></data>
 
   <data name="Proto_Tooltip" xml:space="preserve"><value>لمحة 3 (نموذج أولي)</value></data>
   <data name="Proto_Word" xml:space="preserve"><value>كلمة أو عبارة قصيرة</value></data>
   <data name="Proto_Sentence" xml:space="preserve"><value>جملة</value></data>
-  <data name="Proto_Result" xml:space="preserve"><value>يعيد «استبدال» هذا النص (بأحرف كبيرة، للتجربة):</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>اعرض البطاقة (نص للتجربة)</value></data>
   <data name="Proto_SampleText" xml:space="preserve"><value>a piece of cake</value></data>
-  <data name="Proto_HotkeyTaken" xml:space="preserve"><value>برنامج آخر يستخدم {0}</value></data>
+  <data name="Proto_Write" xml:space="preserve"><value>تأتي أدوات الكتابة مع البطاقة الحقيقية: عدّل النص ثم «استبدال»</value></data>
+  <data name="Proto_Result" xml:space="preserve"><value>يعيد «استبدال» هذا النص (يمكنك تعديله):</value></data>
+  <data name="Proto_Looking" xml:space="preserve"><value>جارٍ البحث…</value></data>
+  <data name="Proto_LookingInSentence" xml:space="preserve"><value>جارٍ البحث، مع الجملة التي حول الكلمة…</value></data>
+  <data name="Proto_LookupFailed" xml:space="preserve"><value>تعذّر البحث ({0}). ستقول البطاقة الحقيقية السبب بالكلمات.</value></data>
+  <data name="Proto_ClipboardHistory" xml:space="preserve"><value>سجل الحافظة</value><comment>d.historyLabel</comment></data>
+  <data name="Proto_Accent" xml:space="preserve"><value>لون التمييز من Windows</value><comment>d.accent</comment></data>
 </root>

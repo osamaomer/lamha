@@ -124,6 +124,24 @@ public sealed record LamhaSettings
     /// <summary>The model each provider translates with; missing or "" = its default (<c>trModels</c>).</summary>
     public IReadOnlyDictionary<string, string> TrModels { get; init; } = new Dictionary<string, string>();
 
+    /// <summary>Clipboard history records what the user copies. Off unless turned on (<c>clipboardEnabled</c>).</summary>
+    public bool ClipboardEnabled { get; init; }
+
+    /// <summary>Unpinned copies kept: 100, 250, 500 or 1000 (<c>clipboardMaxItems</c>).</summary>
+    public int ClipboardMaxItems { get; init; } = 500;
+
+    /// <summary>Days an unpinned copy is kept after it was last copied or used: 1, 7, 30, 90, or 0 for ever.</summary>
+    public int ClipboardExpiryDays { get; init; } = 30;
+
+    /// <summary>Bank-card numbers aren't recorded (<c>clipboardSkipCards</c>).</summary>
+    public bool ClipboardSkipCards { get; init; } = true;
+
+    /// <summary>Programs whose copies are never recorded, by file name ("keepassxc.exe").</summary>
+    public IReadOnlyList<string> ClipboardExcludedApps { get; init; } = Clipboard.ClipPrivacy.DefaultExcludedApps;
+
+    /// <summary>Lamha's colours follow Windows' accent colour (<c>accentWindows</c>). Off unless turned on.</summary>
+    public bool AccentWindows { get; init; }
+
     /// <summary>The interface language in use: "ar" or "en", given the system's language (e.g. "ar-SA").</summary>
     public string InterfaceLanguage(string systemLanguage) => UiLang switch
     {

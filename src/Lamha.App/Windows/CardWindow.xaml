@@ -36,7 +36,7 @@
       </Button>
     </Grid>
 
-    <!-- What was selected, and what Replace puts back -->
+    <!-- What was selected, the lookup's answer (or the text to write), and what Replace / Insert puts back -->
     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
       <StackPanel Spacing="{StaticResource LamhaSpace3}">
         <TextBlock Style="{StaticResource SubtitleTextBlockStyle}"
@@ -46,19 +46,52 @@
         <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                    Text="{x:Bind ResultLabel}" />
-        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                   Text="{x:Bind ViewModel.Result, Mode=OneWay}"
+        <TextBox x:Name="ResultBox"
+                 Text="{x:Bind ViewModel.Result, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 TextWrapping="Wrap"
+                 AcceptsReturn="True"
+                 MaxHeight="120"
+                 AutomationProperties.Name="{x:Bind ResultLabel}" />
+        <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
+                   Foreground="{ThemeResource LamhaAccentBrush}"
+                   Text="{x:Bind ViewModel.Status, Mode=OneWay}"
                    TextWrapping="Wrap"
-                   IsTextSelectionEnabled="True" />
+                   AutomationProperties.LiveSetting="Polite" />
       </StackPanel>
     </ScrollViewer>
 
     <!-- Actions -->
     <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
-      <Button x:Uid="Card_Replace"
-              Style="{StaticResource AccentButtonStyle}"
+      <Button Style="{StaticResource AccentButtonStyle}"
               CornerRadius="{StaticResource LamhaRadiusSmall}"
-              Command="{x:Bind ViewModel.ReplaceCommand}" />
+              Content="{x:Bind ViewModel.ReplaceLabel, Mode=OneWay}"
+              Command="{x:Bind ViewModel.ReplaceCommand}">
+        <!-- Lamha's button colour (or Windows' accent, made readable): Services/AccentService.cs. -->
+        <Button.Resources>
+          <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+              <ResourceDictionary x:Key="Default">
+                <StaticResource x:Key="AccentButtonBackground" ResourceKey="LamhaButtonBrush" />
+                <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="LamhaButtonBrush" />
+                <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="LamhaButtonBrush" />
+                <StaticResource x:Key="AccentButtonForeground" ResourceKey="LamhaButtonTextBrush" />
+                <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="LamhaButtonTextBrush" />
+                <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="LamhaButtonTextBrush" />
+              </ResourceDictionary>
+              <ResourceDictionary x:Key="Light">
+                <StaticResource x:Key="AccentButtonBackground" ResourceKey="LamhaButtonBrush" />
+                <StaticResource x:Key="AccentButtonBackgroundPointerOver" ResourceKey="LamhaButtonBrush" />
+                <StaticResource x:Key="AccentButtonBackgroundPressed" ResourceKey="LamhaButtonBrush" />
+                <StaticResource x:Key="AccentButtonForeground" ResourceKey="LamhaButtonTextBrush" />
+                <StaticResource x:Key="AccentButtonForegroundPointerOver" ResourceKey="LamhaButtonTextBrush" />
+                <StaticResource x:Key="AccentButtonForegroundPressed" ResourceKey="LamhaButtonTextBrush" />
+              </ResourceDictionary>
+              <!-- High contrast keeps the system's own button colours. -->
+              <ResourceDictionary x:Key="HighContrast" />
+            </ResourceDictionary.ThemeDictionaries>
+          </ResourceDictionary>
+        </Button.Resources>
+      </Button>
       <Button x:Uid="Card_Copy"
               CornerRadius="{StaticResource LamhaRadiusSmall}"
               Command="{x:Bind ViewModel.CopyCommand}" />
