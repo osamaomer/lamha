@@ -226,7 +226,7 @@ The dictionary data (`dict/`) moves out of the repo. It's generated, so it's bui
 
 Before any screen is built, `Lamha.App/Themes` defines:
 - **Colours:** today's palette from `shared/ui.css` as XAML theme resources for light, dark and high contrast, checked by a test for WCAG AA contrast, as today.
-- **Type:** Segoe UI Variable for Latin and a chosen Arabic face (today's list starts with "SF Arabic", which isn't on Windows).
+- **Type:** Segoe UI Variable for Latin and Segoe UI's Arabic, as today (answered in phase 1).
 - **Spacing:** a 4 px grid.
 - **Corners:** the same three steps as today (8, 10, 14 px).
 - **Motion:** today's four levels (automatic, full, subtle, off), following Windows' *Animation effects*.
@@ -263,11 +263,11 @@ Your Arabic and English product copy moves **word for word** from `shared/i18n.j
 - **A system-wide search entry:** look up a word typed into PowerToys' Command Palette or Windows Search, with no selection needed.
 - **Onboarding by doing:** the first run asks the user to select a word in a sample sentence and press Alt+Shift+L, instead of explaining it.
 
-**Questions**
-- **Which Arabic font?** Candidates: Segoe UI's own Arabic (no download, consistent with Windows), or a bundled face such as Noto Sans Arabic or IBM Plex Sans Arabic (more character, adds ~1 MB). Recommendation: compare all three on the card in phase 1, then you choose. *(phase 1)*
-- **Card background: Mica, Acrylic or solid?** Acrylic shows what's behind the card, which can hurt reading over busy pages. Recommendation: Acrylic with a strong tint, plus a "solid" option under Appearance. *(phase 1)*
-- **Where does Settings live: its own window, or a page in the main window?** Recommendation: a page in the main window (one window to manage, as Windows 11 apps do), opened directly from the tray menu. *(phase 1)*
-- **Which of the ideas above go into 3.0?** Recommendation: reading the selection without the clipboard and pinning the card in 3.0; OCR right after 3.0; the widget, notifications and search entry later. *(phase 1)*
+**Answered at the start of phase 1** (2026-10-24)
+- **Arabic font:** Segoe UI's own Arabic, as today (Lamha 2's list starts with "SF Arabic", which Windows doesn't have, so on Windows it already shows Segoe UI). Nothing to download or ship. Compared on the card against Noto Sans Arabic and IBM Plex Sans Arabic, both shipped with Lamha.
+- **Card background:** Acrylic with a strong tint, plus a "solid" option under Appearance. Acrylic turns solid by itself when Windows' transparency effects are off, on battery saver and in high contrast. To check on the prototype card: Windows draws a window without focus in the backdrop's inactive (solid) look, and the card never takes the focus, so the backdrop has to be told the window is active.
+- **Settings:** a page in the main window, opened directly from the tray menu.
+- **Ideas in 3.0:** reading the selection without the clipboard (UI Automation first, Ctrl+C when the program doesn't say), pinning the card, back and forward on the card, onboarding by doing, prices in your currency, the Windows 11 widget, reviewing from a notification, and the system-wide search entry. **In 3.x:** the compact card mode, designed after the full card is settled. OCR wasn't chosen for 3.0, so it stays right after it.
 
 ## Review and learning
 
@@ -326,6 +326,16 @@ Built on the `native/phase-0` branch:
 - **The beta on GitHub:** CI artifacts only until phase 4; the first GitHub pre-release comes with phase 4. A pre-release is safe for Lamha 2 users (its updater reads only the latest release).
 - **Code signing:** decided after the rest is done. Until then the installer is unsigned, and SmartScreen warns at its first install.
 
+### Phase 1 progress
+
+On the `native/phase-1` branch (2026-10-24), from `native/phase-3`:
+
+- **Answers:** the four phase 1 questions and phase 3's data folder (see *UI and UX* and *Phase 3 progress*). The Arabic font was chosen from the card shown three times (Segoe UI, Noto Sans Arabic, IBM Plex Sans Arabic).
+- **Tokens** (`Themes/Tokens.xaml`): Lamha 2's colours for light and dark (`shared/ui.css`, and the card's chip and skeleton from `content/styles.js`), high contrast in the user's own colours with edges in the text colour, the type scale (Lamha 2's card sizes gathered into ten, as TextBlock styles), the 4 px spacing grid, the three corners and the pill, the control height and the 24 px smallest target, and the card's Acrylic (a strong tint of the surface). The Acrylic numbers are a start, tuned with the card's design. The animation levels and timings are in Core (`Appearance/Motion.cs`: Lamha 2's motion.js and motionHint, with their numbers).
+- **Tests:** 40 new, 301 in all, passing. `TokensTests` reads Tokens.xaml: every colour is Lamha 2's, text reaches 4.5:1 on every ground (tints included), field edges and the switch 3:1, every theme has every token, and high contrast uses only Windows' colours.
+
+**Next:** the screen designs, one at a time with your sign-off, the card first.
+
 ### Phase 2 progress
 
 Built on the `native/phase-2` branch (2026-10-24):
@@ -362,9 +372,9 @@ Built on the `native/phase-3` branch (2026-10-24), on top of phase 2:
 
 **Moved to phase 4, with the windows that use them:** the clipboard panel and its shortcut (Ctrl+Alt+V in the beta), Lamha's tools on a copy (translate, write in English, summarize, add to review), the review reminder and the tray's Open / Review / Write / Settings items. The tray's clipboard and accent switches (Proto_ strings) move into Settings then.
 
-**Questions from phase 3**
-- **Where the user's data lives.** `lamha.db` is in `%LOCALAPPDATA%\Lamha` (decision 0006), which is also Velopack's install folder: uninstalling Lamha deletes that folder, the review deck with it. Recommendation: keep the data in its own folder (`%LOCALAPPDATA%\Lamha Data`), so an uninstall or a reinstall never takes the deck; "delete my data" becomes a choice in Settings. *(phase 3, before the first beta release)*
-- **Reading the selection without the clipboard** (the UX idea; phase 1's question on 3.0 ideas): the sentence reader already finds the selection through UI Automation, so it could read the selection first and fall back to Ctrl+C. Recommendation unchanged: yes, in 3.0.
+**Questions from phase 3, answered 2026-10-24**
+- **Where the user's data lives:** in its own folder, `%LOCALAPPDATA%\Lamha Data` (decision 0006). `%LOCALAPPDATA%\Lamha` is Velopack's install folder, and uninstalling Lamha deletes it; the data folder is never touched by an uninstall or a reinstall, and "delete my data" becomes a choice in Settings. `lamha.db` and the log move there. **To build before the first beta release** (phase 4's pre-release), along with CLAUDE.md's log path.
+- **Reading the selection without the clipboard:** yes, in 3.0. The sentence reader already finds the selection through UI Automation, so it reads the selection first and falls back to Ctrl+C.
 
 ## Moving users from Lamha 2
 
@@ -406,15 +416,10 @@ Held back from 3.0 so the first release has no web view. Ideas for doing it bett
 
 ## Questions by phase
 
-Phase 0's four and the two it raised, and phase 2's four, are answered (see each section). The beta stays in CI artifacts until phase 4, which brings the first GitHub pre-release. The rest:
+Phase 0's four and the two it raised, phase 2's four, phase 1's four and phase 3's two are answered (see each section). The beta stays in CI artifacts until phase 4, which brings the first GitHub pre-release. The rest:
 
 | Phase | Question | Recommendation |
 |---|---|---|
-| 1 | Arabic font? | Compare three on the card; you choose |
-| 1 | Card background? | Acrylic with a strong tint, plus a solid option |
-| 1 | Settings: own window or a page? | A page in the main window |
-| 1 | Which UX ideas go into 3.0? | Clipboard-free selection, pinned card; OCR right after |
-| 3 | Where the user's data lives (Velopack's uninstall removes `%LOCALAPPDATA%\Lamha`) | Its own folder, `%LOCALAPPDATA%\Lamha Data` |
 | 4 | Wording for phase 2's new error codes | Claude drafts in Lamha 2's style; you reword |
 | 4 | The writing tools' system prompt ("an app… in any program") | Keep |
 | 6 | Code signing? | Yours, once everything else is done (the beta ships unsigned until then) |
@@ -424,7 +429,7 @@ Phase 0's four and the two it raised, and phase 2's four, are answered (see each
 
 ## What's needed from you
 
-- **Answers to the questions above** by the phase each one names. Phase 1's come next.
+- **Answers to the questions above** by the phase each one names. Phase 4's come next.
 - **Trying the prototype** on your desktop (phase 0's one unverified step).
 - **Sign-off on the screen designs** (phase 1) and on any copy changes.
 - **Testing the betas on your PCs**, especially Arabic input and the programs you use Lamha in.
