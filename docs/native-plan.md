@@ -2,7 +2,7 @@
 
 The plan for rebuilding Lamha as a native Windows 11 app (WinUI 3 + Windows App SDK) and dropping the Firefox extension and the Linux plan. Written 2026-10-24.
 
-**Where it stands:** phase 0 is done ([results](#phase-0-results)). Next: phase 1 (design) alongside phase 2 (the brain).
+**Where it stands:** phase 0 is done ([results](#phase-0-results)). Phase 2 (the brain) is mostly built ([progress](#phase-2-progress)); phase 1 (design) runs alongside.
 
 Each section ends with **Ideas** (suggestions, not decided) and **Questions** (each with a recommendation and the phase it must be answered by). The [last section](#questions-by-phase) collects the questions by phase.
 
@@ -136,10 +136,10 @@ One interface, `IAiProvider`: send a request (streaming or not), list models, te
 - **Per-tool provider:** e.g. Claude for proofreading, a local model for summaries. Probably too much for Settings; a "power user" expander at most.
 - **Cost hint** for paid providers: the approximate cost of the last request, from the token counts the API returns.
 
-**Questions**
-- **OpenAI's own API: Chat Completions or the newer Responses API?** Recommendation: Chat Completions for everything first. It's what every compatible server speaks, so one code path serves all of them. Move OpenAI itself to Responses later if it offers something Lamha needs. *(phase 2)*
-- **Allow plain `http://` for custom servers?** Recommendation: only for `localhost` and the local network. Anything on the internet must be `https://`, so a key is never sent in the clear. *(phase 2)*
-- **Fallback chain: in 3.0 or later?** Recommendation: in 3.0, only between Google and the AI (as today); between AI providers later. *(phase 2)*
+**Answered at the start of phase 2** (2026-10-24)
+- **OpenAI's own API:** Chat Completions for everything, so one code path serves OpenAI and every compatible server. OpenAI moves to the Responses API later only if it offers something Lamha needs.
+- **Plain `http://` for custom servers:** only for `localhost` and the local network. Anything on the internet must be `https://`, so a key is never sent in the clear.
+- **Fallback chain:** in 3.0 only between Google and the AI, as today; between AI providers in a 3.x update.
 
 ## Folder layout
 
@@ -257,6 +257,7 @@ Your Arabic and English product copy moves **word for word** from `shared/i18n.j
 - **Pin the card:** a pin button keeps the card open while the user reads or writes, and it can be dragged away from the selection.
 - **Back and forward on the card** for synonym chains (today there's ← only).
 - **A compact card mode:** just the meaning in context, one line, for fast readers. The full card is one key away.
+- **Prices in your currency:** select a price ("$49.99", "€20", "1,200 SAR", "٥٠ ريال") and the card shows it converted to your own currency, with the rate's date. Your currency comes from Windows' region settings, and can be changed in Settings. Rates are fetched at most once a day and kept, so a conversion still works offline (marked with the date of the last rate).
 - **Windows 11 widget:** the word of the day and the cards waiting for review on the Widgets board.
 - **Review from a notification:** the reminder toast shows a word with *knew it / forgot* buttons, for one-card reviews without opening the app.
 - **A system-wide search entry:** look up a word typed into PowerToys' Command Palette or Windows Search, with no selection needed.
@@ -278,8 +279,8 @@ Today's deck, Today and the mistake journal move over as they are. Their behavio
 - **Export to Anki** (a `.apkg` or CSV), for users who already have a routine there.
 - **Mistake journal → practice:** a short quiz built from the user's own mistakes ("a / an / the?" with their own sentences).
 
-**Questions**
-- **Keep SM-2 for 3.0, or switch to FSRS?** Recommendation: keep SM-2 for 3.0 so imported decks behave exactly as before; FSRS as a 3.x choice in Settings. *(phase 2)*
+**Answered at the start of phase 2** (2026-10-24)
+- **SM-2 or FSRS:** SM-2 in 3.0, so imported decks behave exactly as before; FSRS as a 3.x choice in Settings.
 
 ## Phases
 
@@ -325,6 +326,25 @@ Built on the `native/phase-0` branch:
 - **The beta on GitHub:** CI artifacts only until phase 4; the first GitHub pre-release comes with phase 4. A pre-release is safe for Lamha 2 users (its updater reads only the latest release).
 - **Code signing:** decided after the rest is done. Until then the installer is unsigned, and SmartScreen warns at its first install.
 
+### Phase 2 progress
+
+Built on the `native/phase-2` branch (2026-10-24):
+
+- **Lamha.Data:** the user's database (`lamha.db`: settings, history, the deck with its removals, the day's practice, the mistake journal, the error log) with numbered schema steps, one connection, WAL, and a 512 KB page cache. The **dictionary file**: Lamha 2's 22 MB of JSON shards become one read-only SQLite file (24 MB, built in 1.2 s by `tools/DictionaryBuilder`), read word by word.
+- **Lamha.Core:** Lamha 2's background.js, local-dict.js and lamha-ai.js ported rule by rule, with their numbers: the lookup (dictionary, Google, the AI, language packs, the word in its sentence, explanations in other languages, the history, automatic cards, milestones and the goal), Google with its two addresses and cooldowns, the translation service with the Google ↔ AI fallback and the stray-letter guard, the **five AI providers** (decision 0010), the writing tools and the mistake journal, the deck (SM-2, the queue, the streak by the calendar), Today and the word of the day, backups in Lamha 2's format (its copies restore here), the Wikipedia summary, and Report a problem. Errors are Lamha 2's codes.
+- **Tests:** 161 in Core and Data (all pass, five runs in a row), most of them Lamha 2's test-writing.mjs cases with the same inputs and answers, on the real dictionary and the real SQLite stores, with a fake network and a fake clock (Lamha 2's timeouts pass without waiting). Not ported, because what they test is gone or comes later: the Firefox link and page translation, the downloaded Wikipedias (on hold), installing packs (phase 5), the Arabic duration wording (with the strings, phase 4), the key-saved flags (Firefox's content scripts), and keeping Arabic for updated users (the importer, phase 6).
+- **Changed from Lamha 2, on purpose:** the Claude models are the current ones (Opus 5.5 by default, Haiku 5.5 for translation); the writing tools' system prompt says "an app … in any program" instead of "a browser extension … on a web page"; Lamha 2's toDateString days are calendar dates (backups still use its format); results carry part-of-speech codes, which the app names in its own strings.
+
+**Left in phase 2**
+- **The parity tool** (`tools/parity`): a few hundred real words and sentences through Lamha 2's background and the new Core with the same recorded answers, every difference listed.
+- **Recorded answers from LM Studio, OpenRouter and Groq** (decision 0007); the tests use answers written by hand.
+
+**Moved to the phases that use them:** wiring Core and Data into the app, with keys in Credential Locker and Windows' network status (phase 3); the dictionary file in CI and the installer (phase 3); answers streamed word by word (with the card, phase 4); the new error codes' wording (phase 4); language pack files (phase 5); importing Lamha 2's files (phase 6).
+
+**Questions from phase 2**
+- **Wording for the new errors** (Arabic and English): `openai_no_key` (OpenAI chosen without a key), `custom_no_server` (a custom server without an address or a model), `custom_insecure` (plain `http://` to an internet address), `custom_offline` (the custom server can't be reached), `google_error` (Google answered with something unexpected). Recommendation: Claude drafts them in Lamha 2's style for you to reword. *(phase 4)*
+- **The writing tools' system prompt** now says Lamha is "an app" where the user selects text "in any program". It's never shown, but it's your wording: keep it? *(phase 4)*
+
 ## Moving users from Lamha 2
 
 - **First run of 3.0** finds `%APPDATA%\Lamha` and imports settings, history, the deck (with `mod` and `cardsRemoved`), the mistake journal and clipboard history.
@@ -365,7 +385,7 @@ Held back from 3.0 so the first release has no web view. Ideas for doing it bett
 
 ## Questions by phase
 
-Phase 0's four, and the two it raised, are answered (see each section). The beta stays in CI artifacts until phase 4, which brings the first GitHub pre-release. The rest:
+Phase 0's four and the two it raised, and phase 2's four, are answered (see each section). The beta stays in CI artifacts until phase 4, which brings the first GitHub pre-release. The rest:
 
 | Phase | Question | Recommendation |
 |---|---|---|
@@ -373,10 +393,8 @@ Phase 0's four, and the two it raised, are answered (see each section). The beta
 | 1 | Card background? | Acrylic with a strong tint, plus a solid option |
 | 1 | Settings: own window or a page? | A page in the main window |
 | 1 | Which UX ideas go into 3.0? | Clipboard-free selection, pinned card; OCR right after |
-| 2 | Chat Completions or Responses API? | Chat Completions for all first |
-| 2 | Plain `http://` for custom servers? | Only localhost and the local network |
-| 2 | Fallback between AI providers in 3.0? | Later; Google ↔ AI only in 3.0 |
-| 2 | SM-2 or FSRS? | SM-2 in 3.0, FSRS as a 3.x choice |
+| 4 | Wording for phase 2's new error codes | Claude drafts in Lamha 2's style; you reword |
+| 4 | The writing tools' system prompt ("an app… in any program") | Keep |
 | 6 | Code signing? | Yours, once everything else is done (the beta ships unsigned until then) |
 | 6 | Warn users with downloaded Wikipedias? | Yes, in the bridge update |
 | 6 | Remove 2.x automatically? | Yes, keep its data for 30 days |

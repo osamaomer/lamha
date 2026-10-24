@@ -14,3 +14,4 @@ changes gets a new record that replaces the old one (the old one says so at the 
 | [0007](0007-openai-compatible-client.md) | One OpenAI-compatible client for OpenAI and custom servers | Accepted, 2026-10-24 (built in phase 2) |
 | [0008](0008-memory-budgets.md) | Memory budgets on commit and Task Manager; idle memory handed back | Accepted, 2026-10-24 |
 | [0009](0009-card-window-kept.md) | The card window is kept hidden between lookups | Accepted, 2026-10-24 |
+| [0010](0010-ai-over-own-http.md) | The AI providers over Lamha's own HTTP, not their SDKs | Accepted, 2026-10-24 (built in phase 2) |

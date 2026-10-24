@@ -4,10 +4,15 @@
       <Platform Project="x64" />
     </Project>
     <Project Path="src/Lamha.Core/Lamha.Core.csproj" />
+    <Project Path="src/Lamha.Data/Lamha.Data.csproj" />
     <Project Path="src/Lamha.Windows/Lamha.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/DictionaryBuilder/DictionaryBuilder.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Lamha.Core.Tests/Lamha.Core.Tests.csproj" />
+    <Project Path="tests/Lamha.Data.Tests/Lamha.Data.Tests.csproj" />
     <Project Path="tests/Lamha.Windows.Tests/Lamha.Windows.Tests.csproj" />
   </Folder>
 </Solution>

@@ -6,17 +6,18 @@ Claude Code loads this file at the start of every session. Keep it short. The pl
 
 An Arabic-first dictionary, translator and English writing coach for Windows 11 (the user's own project; the user is Arabic-speaking and writes the product copy in Arabic and English). **Lamha 3** is a native rewrite: WinUI 3 + Windows App SDK, C# / .NET 10, NativeAOT, installed with Velopack. It replaces Lamha 2 (Electron + a Firefox extension), whose code is in `legacy/` as the reference for the port; `legacy/CLAUDE.md` describes it.
 
-**Status:** phase 0 (foundations) is done: the solution, build rules, CI, the beta installer, memory measurements, and a prototype card (Ctrl+Alt+L → the card → Replace pastes back). **Next: phase 1** (design system and screen designs, with the user's sign-off) alongside **phase 2** (the brain: Core + Data). The open questions per phase are at the end of the plan.
+**Status:** phase 0 (foundations) is done. **Phase 2 (the brain) is mostly built** on `native/phase-2`: Core and Data with Lamha 2's tests ported (see the plan's *Phase 2 progress* for what's left). **Phase 1** (design system and screen designs, with the user's sign-off) runs alongside. The open questions per phase are at the end of the plan.
 
 ## Layout
 
 | Path | What |
 |---|---|
-| `src/Lamha.Core` | The brain, no Windows dependency: today `Layout/CardPlacement` and `Text/TextKind`; phase 2 adds translation, AI, dictionary, review… |
+| `src/Lamha.Core` | The brain, no Windows dependency: `Translation/` (lookup, Google, the AI translator, the router), `Ai/` (the five providers), `Dictionary/`, `Writing/`, `Review/` (deck, Today, history, backups), `Wikipedia/`, `Diagnostics/`, `Settings/`, `Abstractions/` (the storage interfaces), `Text/`, `Net/` |
 | `src/Lamha.Windows` | Win32 through CsWin32 (`NativeMethods.txt`): `Shell/` (message window, tray icon, foreground window, screens, memory), `Input/` (hotkeys, keyboard), `Clipboard/`, `Selection/` |
 | `src/Lamha.App` | WinUI 3: `Program.cs` (Velopack, single instance), `App.xaml.cs` (composition root), `Windows/`, `ViewModels/`, `Services/`, `Themes/Tokens.xaml`, `Strings/ar|en/Resources.resw`, `Assets/` |
-| `src/Lamha.Data` | Phase 2: SQLite, the dictionary readers, the Lamha 2 importer |
-| `tests/` | xUnit v3 on Microsoft.Testing.Platform, one project per `src` project |
+| `src/Lamha.Data` | SQLite: `Database/` (the user's database: schema steps in `Migrations.cs`, the stores) and `Dictionary/` (the read-only dictionary file and its builder). The Lamha 2 importer comes in phase 6 |
+| `tests/` | xUnit v3 on Microsoft.Testing.Platform, one project per `src` project. Core's tests run the brain as it runs (`Support/TestLamha`: real SQLite stores in memory, a fake network that records requests, a fake clock), like Lamha 2's `makeEnv` |
+| `tools/DictionaryBuilder` | Builds the dictionary file from Lamha 2's JSON shards (`legacy/dict`) |
 | `tools/Measure/measure.ps1` | Memory, measured from outside like Task Manager, against the budgets |
 | `legacy/` | Lamha 2, unchanged: run its tests with `npm test` inside it |
 
@@ -25,12 +26,13 @@ Layers: App → Windows, Data → Core. Never the other way. Core never referenc
 ## Rules the code follows
 
 - **Match the style:** `.editorconfig` is enforced by the build, and warnings are errors. File-scoped namespaces, `_camelCase` private fields, braces on multi-line blocks, short "why" comments in plain English, XML doc comments on public types.
-- **NativeAOT-safe only:** no reflection-based serialization (use `System.Text.Json` source generation), MVVM through CommunityToolkit.Mvvm's source generators, `x:Bind` (not `Binding`), CsWin32 without marshalling. A new package must publish with AOT without warnings.
+- **NativeAOT-safe only:** no reflection-based serialization (use `System.Text.Json` source generation, or `JsonNode` for request bodies), MVVM through CommunityToolkit.Mvvm's source generators, `x:Bind` (not `Binding`), CsWin32 without marshalling. A new package must publish with AOT without warnings (the official Anthropic SDK doesn't: decision 0010).
 - **Package versions** live only in `Directory.Packages.props`. Only the Windows App SDK parts Lamha uses (WinUI, Foundation, InteractiveExperiences), not the metapackage (it adds ~60 MB of AI and ML).
 - **Strings:** every visible string is in both `Strings/en/Resources.resw` and `Strings/ar/Resources.resw`; never hard-coded. Strings from Lamha 2 keep its wording, with the old key as the resw comment. `Proto_` strings belong to the prototype and go with it.
 - **Right to left:** every window's root gets `Localization.FlowDirection`.
 - **Privacy:** the log (`Services/AppLog.cs`, `%LOCALAPPDATA%\Lamha\logs\lamha.log`) holds events, lengths and exception *types*, never user text, keys, clipboard contents or exception messages. Lamha's own clipboard writes for a paste are kept out of Windows' clipboard history (`Clipboard.WriteText(..., keepOutOfHistory: true)`); the user's Copy is not.
 - **Memory:** nothing stays alive in the tray but the tray icon, hotkeys and (later) the clipboard listener. Windows tell `IdleMemory` when they open and close. Run `tools/Measure/measure.ps1 -Budget` after anything that could change memory; budgets are in `docs/decisions/0008-memory-budgets.md`.
+- **Errors** are `LamhaException` codes (Lamha 2's: "network", "ai_bad_key"…); the interface turns codes into words, the log keeps only codes.
 - **Porting from Lamha 2:** port behaviour test by test. A rule taken from `legacy/` names its source in the doc comment (e.g. "Lamha 2's `isLookupCandidate()` in background.js") and keeps its numbers.
 - **Decisions:** a choice that shapes the architecture gets a record in `docs/decisions/` (and a line in its README).
 - **Versions:** `VersionPrefix` / `VersionSuffix` in `Directory.Build.props`.
@@ -57,6 +59,7 @@ dotnet test --project tests/Lamha.Core.Tests              # one project
 dotnet run --project src/Lamha.App                        # the app, Debug (tray icon; Ctrl+Alt+L)
 dotnet publish src/Lamha.App -c Release -r win-x64 -o artifacts/publish/win-x64   # NativeAOT
 ./tools/Measure/measure.ps1 -Budget                       # memory of the published build
+dotnet run --project tools/DictionaryBuilder -- legacy/dict artifacts/dict/lamha-dict.db   # the dictionary file
 dotnet tool restore; dotnet vpk pack ...                  # the installer: see .github/workflows/ci.yml
 ```
 
