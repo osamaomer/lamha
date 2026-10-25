@@ -1,5 +1,4 @@
 using System.Globalization;
-using Lamha.Core.Settings;
 using Lamha.Windows.Input;
 using Lamha.Windows.Shell;
 
@@ -11,13 +10,12 @@ public sealed record ShortcutInfo(Hotkey Keys, string LabelKey, bool Registered)
 /// <summary>
 /// The tray icon, its tooltip and its menu: Lamha 2's trayMenu() / trayTooltip() in main.js, with what exists so far.
 /// Clicking the icon opens the main window; the menu's Open, Review, Write and Settings come with the tray's design
-/// (phase 4), updates with phase 5. Until Settings exists, clipboard history and the accent colour have their switches
+/// (phase 4), updates with phase 5. Until Settings → Clipboard exists, clipboard history has its switch
 /// here (Proto_ items, removed with phase 4).
 /// </summary>
 public sealed partial class TrayService : IDisposable
 {
     private readonly TrayIcon _icon;
-    private readonly SettingsService _settings;
     private readonly ClipboardService _clipboard;
     private readonly StartWithWindows _startup;
     private readonly IReadOnlyList<ShortcutInfo> _shortcuts;
@@ -26,7 +24,6 @@ public sealed partial class TrayService : IDisposable
 
     public TrayService(
         MessageWindow window,
-        SettingsService settings,
         ClipboardService clipboard,
         StartWithWindows startup,
         IReadOnlyList<ShortcutInfo> shortcuts,
@@ -34,7 +31,6 @@ public sealed partial class TrayService : IDisposable
         Action sample,
         Action quit)
     {
-        _settings = settings;
         _clipboard = clipboard;
         _startup = startup;
         _shortcuts = shortcuts;
@@ -81,10 +77,6 @@ public sealed partial class TrayService : IDisposable
         items.Add(TrayMenuItem.Separator);
         items.Add(new TrayMenuItem(Localization.Get("Proto_ClipboardHistory"), () => _clipboard.SetOn(!_clipboard.IsOn)) { Checked = _clipboard.IsOn });
         items.AddRange(PauseItems());
-        items.Add(new TrayMenuItem(Localization.Get("Proto_Accent"), () => _settings.Update(s => s with { AccentWindows = !s.AccentWindows }))
-        {
-            Checked = _settings.Current.AccentWindows,
-        });
         items.Add(TrayMenuItem.Separator);
         items.Add(new TrayMenuItem(Localization.Get("Tray_StartWithWindows"), ToggleStartup) { Checked = _startup.IsOn });
         items.Add(TrayMenuItem.Separator);

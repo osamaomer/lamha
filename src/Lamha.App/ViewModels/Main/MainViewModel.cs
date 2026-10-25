@@ -59,10 +59,13 @@ public sealed partial class MainViewModel : ObservableObject
     public List<NavItem> Footer { get; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Title))]
+    [NotifyPropertyChangedFor(nameof(Title), nameof(ShowsTitle))]
     public partial NavItem Page { get; set; }
 
     public string Title => Page.Label;
+
+    /// <summary>The window shows the page's title; Settings shows its own breadcrumb instead.</summary>
+    public bool ShowsTitle => Page.Id != "settings";
 
     /// <summary>The pane is only icons: the window is narrow.</summary>
     [ObservableProperty]

@@ -213,13 +213,17 @@ public sealed partial class WriteViewModel : ObservableObject
     [RelayCommand]
     private void Again() => _ = RunAsync(_tool, fresh: true);
 
-    /// <summary>The error's button: Try again (Settings come with their page).</summary>
+    /// <summary>The error's button: Try again, or Settings at the category that fixes it (Writing tools).</summary>
     [RelayCommand]
     private void RunErrorAction()
     {
         if (Error?.Action == ErrorAction.Retry)
         {
             _ = RunAsync(_tool, fresh: false);
+        }
+        else if (Error is { Action: ErrorAction.Settings } error)
+        {
+            _host.OpenSettings(error.SettingsSection);
         }
     }
 
@@ -396,7 +400,7 @@ public sealed partial class WriteViewModel : ObservableObject
     private void ShowError(LamhaException error)
     {
         var settings = _brain.Settings.Current;
-        Error = ErrorText.ForAi(error, settings.AiProvider, settings).Offering(settings: false);
+        Error = ErrorText.ForAi(error, settings.AiProvider, settings);
         View = WritingView.Error;
         _host.Announce(Error.Title);
     }

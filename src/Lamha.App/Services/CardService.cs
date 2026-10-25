@@ -129,7 +129,10 @@ public sealed partial class CardService(
         }
     }
 
-    public bool CanOpenSettings => false; // Settings come with the main window, next in phase 4
+    /// <summary>Opens Settings at a category ("writing"…) in the main window; set once the main window's service exists.</summary>
+    public Action<string>? SettingsOpener { get; set; }
+
+    public bool CanOpenSettings => SettingsOpener is not null;
 
     async Task ICardHost.ReplaceAsync(string text)
     {
@@ -147,8 +150,11 @@ public sealed partial class CardService(
 
     void ICardHost.OpenLink(Uri uri) => _ = global::Windows.System.Launcher.LaunchUriAsync(uri);
 
+    /// <summary>The card's Settings (its bar, or an error's button): the card goes, Settings opens at the category.</summary>
     void ICardHost.OpenSettings(string section)
     {
+        Hide();
+        SettingsOpener?.Invoke(section);
     }
 
     void ICardHost.Close() => Hide();

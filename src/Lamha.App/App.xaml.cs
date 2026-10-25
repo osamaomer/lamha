@@ -67,11 +67,12 @@ public partial class App : Application
             Theme = _options.Theme,
         };
 
-        _main = new MainWindowService(_brain, idle, LookupHotkey.ToString(), _clipboard)
+        _main = new MainWindowService(_brain, idle, LookupHotkey.ToString(), WriteHotkey.ToString(), _clipboard)
         {
             Theme = _options.Theme,
             Sample = _options.Page is null ? null : _options.Sample,
         };
+        _card.SettingsOpener = section => _main.Show("settings", section);
 
         _hotkeys = new Hotkeys(_messages);
         ShortcutInfo[] shortcuts =
@@ -80,7 +81,7 @@ public partial class App : Application
             Register(WriteHotkey, "Tray_ShortcutWrite", CardMode.Write),
         ];
 
-        _tray = new TrayService(_messages, _brain.Settings, _clipboard, startup, shortcuts, () => _main.Show(), _card.ShowSample, Quit);
+        _tray = new TrayService(_messages, _clipboard, startup, shortcuts, () => _main.Show(), _card.ShowSample, Quit);
         var taken = shortcuts.Where(s => !s.Registered).Select(s => s.Keys.ToString()).ToList();
         if (taken.Count > 0)
         {

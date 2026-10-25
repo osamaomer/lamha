@@ -20,6 +20,7 @@ public class SettingsTests
         Assert.Equal(defaults.ShowWikipedia, s.ShowWikipedia);
         Assert.NotNull(s.TrModels);
         Assert.Equal(defaults.ClipboardExcludedApps, s.ClipboardExcludedApps);
+        Assert.True(s.WindowMica); // on by default, unlike Lamha 2's: the main window is designed on Mica
     }
 
     [Fact]

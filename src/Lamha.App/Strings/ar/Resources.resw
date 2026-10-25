@@ -487,5 +487,175 @@
   <data name="Proto_Tooltip" xml:space="preserve"><value>لمحة 3 (نموذج أولي)</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>اعرض البطاقة (نص للتجربة)</value></data>
   <data name="Proto_ClipboardHistory" xml:space="preserve"><value>سجل الحافظة</value><comment>d.historyLabel</comment></data>
-  <data name="Proto_Accent" xml:space="preserve"><value>لون التمييز من Windows</value><comment>d.accent</comment></data>
+  <data name="Settings_Languages" xml:space="preserve"><value>اللغات</value><comment>o.languages</comment></data>
+  <data name="Settings_Card" xml:space="preserve"><value>بطاقة البحث</value><comment>o.cardSection</comment></data>
+  <data name="Settings_Keys" xml:space="preserve"><value>اختصارات لوحة المفاتيح</value><comment>o.keys</comment></data>
+  <data name="Settings_WritingTools" xml:space="preserve"><value>أدوات الكتابة</value><comment>o.writingTools</comment></data>
+  <data name="Settings_Translation" xml:space="preserve"><value>الترجمة</value><comment>o.translation</comment></data>
+  <data name="Settings_Review" xml:space="preserve"><value>مراجعة الكلمات</value><comment>o.review</comment></data>
+  <data name="Settings_Offline" xml:space="preserve"><value>دون إنترنت</value><comment>o.offline</comment></data>
+  <data name="Settings_Clipboard" xml:space="preserve"><value>الحافظة</value><comment>d.sTitle</comment></data>
+  <data name="Settings_Appearance" xml:space="preserve"><value>المظهر</value><comment>o.appearance</comment></data>
+  <data name="Settings_Privacy" xml:space="preserve"><value>الخصوصية والسجل</value><comment>o.privacy</comment></data>
+  <data name="Settings_UiLang" xml:space="preserve"><value>لغة الواجهة</value><comment>o.uiLang</comment></data>
+  <data name="Settings_UiLangHint" xml:space="preserve"><value>لغة القوائم والأزرار والشروح في لمحة</value><comment>o.uiLangHint</comment></data>
+  <data name="Settings_Automatic" xml:space="preserve"><value>تلقائي (حسب النظام)</value><comment>o.uiLangAuto</comment></data>
+  <data name="Settings_TargetLang" xml:space="preserve"><value>لغة الترجمة</value><comment>o.targetLang</comment></data>
+  <data name="Settings_TargetLangHint" xml:space="preserve"><value>اللغة التي تُترجم إليها النصوص</value><comment>o.targetLangHint</comment></data>
+  <data name="Settings_Reverse" xml:space="preserve"><value>ترجمة النص العربي إلى الإنجليزية</value><comment>o.reverse</comment></data>
+  <data name="Settings_ReverseHint" xml:space="preserve"><value>عند تحديد نص عربي تُعرض ترجمته الإنجليزية</value><comment>o.reverseHint</comment></data>
+  <data name="Settings_RestartPending" xml:space="preserve"><value>يُطبَّق التغيير عند تشغيل لمحة من جديد</value><comment>d.gpuPending</comment></data>
+  <data name="Lang_fr" xml:space="preserve"><value>الفرنسية</value><comment>lang.fr</comment></data>
+  <data name="Lang_tr" xml:space="preserve"><value>التركية</value><comment>lang.tr</comment></data>
+  <data name="Lang_ur" xml:space="preserve"><value>الأردية</value><comment>lang.ur</comment></data>
+  <data name="Lang_fa" xml:space="preserve"><value>الفارسية</value><comment>lang.fa</comment></data>
+  <data name="Lang_es" xml:space="preserve"><value>الإسبانية</value><comment>lang.es</comment></data>
+  <data name="Lang_de" xml:space="preserve"><value>الألمانية</value><comment>lang.de</comment></data>
+  <data name="Settings_Context" xml:space="preserve"><value>فهم الكلمة من سياق الجملة</value><comment>o.context</comment></data>
+  <data name="Settings_ContextHint" xml:space="preserve"><value>تُرسَل الجملة المحيطة بالكلمة (وليس الصفحة) لاختيار المعنى المناسب. أوقفه لإرسال الكلمة فقط.</value><comment>o.contextHint</comment></data>
+  <data name="Settings_Explain" xml:space="preserve"><value>شرح الكلمات بلغتها</value><comment>o.explainLangs</comment></data>
+  <data name="Settings_ExplainHint" xml:space="preserve"><value>تُشرح كلمات هذه اللغات بلغتها بدل ترجمتها، والترجمة تحت الشرح. زر اللغتين في البطاقة يغيّر ذلك أيضًا.</value><comment>o.explainLangsHint</comment></data>
+  <data name="Settings_ExplainAlways" xml:space="preserve"><value>دائمًا: هذه لغة الترجمة</value><comment>o.explainAlways</comment></data>
+  <data name="Settings_TranslateDefs" xml:space="preserve"><value>ترجمة التعريفات</value><comment>o.translateDefs</comment></data>
+  <data name="Settings_TranslateDefsHint" xml:space="preserve"><value>عرض التعريفات الإنجليزية مترجمة إلى العربية</value><comment>o.translateDefsHint</comment></data>
+  <data name="Settings_Wiki" xml:space="preserve"><value>نبذة من ويكيبيديا</value><comment>o.wiki</comment></data>
+  <data name="Settings_WikiHint" xml:space="preserve"><value>عرض ملخص المقالة للمصطلحات والأسماء (بالعربية إن وُجدت)</value><comment>o.wikiHint</comment></data>
+  <data name="Settings_AutoSpeak" xml:space="preserve"><value>النطق التلقائي</value><comment>o.autoSpeak</comment></data>
+  <data name="Settings_AutoSpeakHint" xml:space="preserve"><value>نطق الكلمة تلقائيًا عند البحث عنها</value><comment>o.autoSpeakHint</comment></data>
+  <data name="Settings_TrIntro" xml:space="preserve"><value>من يترجم الجمل والفقرات: Google سريع ويحتاج إلى الإنترنت، والذكاء الاصطناعي أدق في التعابير والعامية وأبطأ، ومع Ollama يعمل دون إنترنت.</value><comment>o.trIntro</comment></data>
+  <data name="Settings_TrAuto" xml:space="preserve"><value>تلقائي</value><comment>o.trAuto</comment></data>
+  <data name="Settings_TrAutoHint" xml:space="preserve"><value>Google، والذكاء الاصطناعي حين لا يتوفر الإنترنت أو يتعذّر Google (مستحسن)</value><comment>o.trAutoHint</comment></data>
+  <data name="Settings_TrGoogle" xml:space="preserve"><value>Google فقط</value><comment>o.trGoogle</comment></data>
+  <data name="Settings_TrGoogleHint" xml:space="preserve"><value>سريع ومجاني، ولا يعمل دون إنترنت</value><comment>o.trGoogleHint</comment></data>
+  <data name="Settings_TrAi" xml:space="preserve"><value>الذكاء الاصطناعي</value><comment>o.trAi</comment></data>
+  <data name="Settings_TrAiHint" xml:space="preserve"><value>ترجمة أكثر طبيعية للجمل، وأبطأ. Google عند تعذّره</value><comment>o.trAiHint</comment></data>
+  <data name="Settings_TrProvider" xml:space="preserve"><value>مَن يترجم</value><comment>o.trProvider</comment></data>
+  <data name="Settings_TrProviderHint" xml:space="preserve"><value>يمكن أن يختلف عن أدوات الكتابة، مثلًا Gemini للكتابة و Ollama للترجمة</value><comment>o.trProviderHint</comment></data>
+  <data name="Settings_TrSameAsWriting" xml:space="preserve"><value>مثل أدوات الكتابة</value><comment>o.trSameAsWriting</comment></data>
+  <data name="Settings_CardsAuto" xml:space="preserve"><value>إضافة الكلمات تلقائيًا</value><comment>o.cardsAuto</comment></data>
+  <data name="Settings_CardsAutoHint" xml:space="preserve"><value>شغّله لتُضاف كل كلمة إنجليزية تبحث عنها إلى المراجعة. وإلا فأنت تختار: أضف الكلمة بزر 🔖 في بطاقة البحث.</value><comment>o.cardsAutoHint</comment></data>
+  <data name="Settings_NewPerDay" xml:space="preserve"><value>كلمات جديدة في اليوم</value><comment>o.newPerDay</comment></data>
+  <data name="Settings_NewPerDayHint" xml:space="preserve"><value>عدد الكلمات الجديدة التي تظهر للمراجعة كل يوم</value><comment>o.newPerDayHint</comment></data>
+  <data name="Settings_Goal" xml:space="preserve"><value>هدف اليوم</value><comment>o.dailyGoal</comment></data>
+  <data name="Settings_GoalHint" xml:space="preserve"><value>كلمات تبحث عنها وبطاقات تراجعها كل يوم، في الحلقة على شاشة لمحة الرئيسية</value><comment>o.dailyGoalHint</comment></data>
+  <data name="Settings_NoGoal" xml:space="preserve"><value>بلا هدف</value><comment>o.noGoal</comment></data>
+  <data name="Settings_DeleteCards" xml:space="preserve"><value>حذف كل البطاقات</value><comment>o.deleteCards</comment></data>
+  <data name="Settings_DeleteCardsHint" xml:space="preserve"><value>يحذف الكلمات وتقدّمك في حفظها</value><comment>o.deleteCardsHint</comment></data>
+  <data name="Settings_DeleteCardsQ" xml:space="preserve"><value>حذف كل بطاقات المراجعة وتقدّمك في حفظها؟</value><comment>o.confirmDeleteCards</comment></data>
+  <data name="Common_Delete" xml:space="preserve"><value>حذف</value><comment>o.delete</comment></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>إلغاء</value><comment>o.cancel</comment></data>
+  <data name="Settings_LocalFirst" xml:space="preserve"><value>المحلي أولًا</value><comment>o.localFirst</comment></data>
+  <data name="Settings_LocalFirstHint" xml:space="preserve"><value>القاموس المدمج للكلمات، والإنترنت فقط لما ليس فيه (مستحسن)</value><comment>o.localFirstHint</comment></data>
+  <data name="Settings_LocalOnly" xml:space="preserve"><value>المحلي فقط</value><comment>o.localOnly</comment></data>
+  <data name="Settings_LocalOnlyHint" xml:space="preserve"><value>بدون أي اتصال بالإنترنت للكلمات. الجمل تُترجم فقط إن كان المترجم Ollama على جهازك.</value><comment>o.localOnlyHint</comment></data>
+  <data name="Settings_OnlineFirst" xml:space="preserve"><value>الإنترنت أولًا</value><comment>o.onlineFirst</comment></data>
+  <data name="Settings_OnlineFirstHint" xml:space="preserve"><value>نتائج Google، والقاموس المحلي عند انقطاع الاتصال</value><comment>o.onlineFirstHint</comment></data>
+  <data name="Settings_Theme" xml:space="preserve"><value>السمة</value><comment>o.theme</comment></data>
+  <data name="Settings_ThemeHint" xml:space="preserve"><value>مظهر لمحة: البطاقة والنافذة والإعدادات</value><comment>o.themeHint</comment></data>
+  <data name="Settings_ThemeLight" xml:space="preserve"><value>فاتح</value><comment>o.themeLight</comment></data>
+  <data name="Settings_ThemeDark" xml:space="preserve"><value>داكن</value><comment>o.themeDark</comment></data>
+  <data name="Settings_Motion" xml:space="preserve"><value>الحركة</value><comment>o.motion</comment></data>
+  <data name="Settings_MotionHint" xml:space="preserve"><value>حركات الانتقال في النوافذ وبطاقة الترجمة. «تلقائية» تختار «خفيفة» على الأجهزة الأبطأ، وتوقفها إن طلب النظام تقليل الحركة.</value><comment>o.motionHint</comment></data>
+  <data name="Settings_MotionAuto" xml:space="preserve"><value>تلقائية</value><comment>motion.auto</comment></data>
+  <data name="Settings_MotionFull" xml:space="preserve"><value>كاملة</value><comment>motion.full</comment></data>
+  <data name="Settings_MotionSubtle" xml:space="preserve"><value>خفيفة</value><comment>motion.subtle</comment></data>
+  <data name="Settings_MotionOff" xml:space="preserve"><value>متوقفة</value><comment>motion.off</comment></data>
+  <data name="Settings_Accent" xml:space="preserve"><value>لون التمييز من Windows</value><comment>d.accent</comment></data>
+  <data name="Settings_AccentHint" xml:space="preserve"><value>تأخذ الأزرار والروابط لون التمييز الذي اخترته في Windows، معدّلًا ليبقى مقروءًا</value><comment>d.accentHint</comment></data>
+  <data name="Settings_Mica" xml:space="preserve"><value>إظهار خلفية سطح المكتب خلف النافذة</value><comment>d.mica</comment></data>
+  <data name="Settings_MicaHint" xml:space="preserve"><value>لمسة من خلفية سطح المكتب خلف نافذة لمحة والإعدادات، كما في تطبيقات Windows 11 نفسها. تبقى البطاقات بلونها فيبقى النص واضحًا</value><comment>d.micaHint</comment></data>
+  <data name="Settings_ReviewIntro" xml:space="preserve"><value>الكلمات التي تضيفها بزر 🔖 في بطاقة البحث تصير بطاقات مراجعة مع الجملة التي وجدتها فيها. راجعها من صفحة «مراجعة» في نافذة لمحة، وستعود كل كلمة في الوقت المناسب قبل أن تنساها.</value><comment>o.reviewIntro reworded 2026-10-25 (approved with the Settings design): Review is a page</comment></data>
+  <data name="Settings_CardBg" xml:space="preserve"><value>خلفية البطاقة</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_CardBgHint" xml:space="preserve"><value>الشفافة تُظهر ما خلف البطاقة قليلًا، والثابتة أوضح فوق الصفحات المزدحمة</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_Translucent" xml:space="preserve"><value>شفافة</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_Solid" xml:space="preserve"><value>ثابتة</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_HkLookup" xml:space="preserve"><value>بحث وترجمة في أي برنامج</value><comment>d.hkLookup</comment></data>
+  <data name="Settings_HkWrite" xml:space="preserve"><value>أدوات الكتابة في أي برنامج</value><comment>d.hkWrite</comment></data>
+  <data name="Settings_HkClip" xml:space="preserve"><value>الحافظة: الصق من السجل</value><comment>d.hkClipboard</comment></data>
+  <data name="Settings_AiProvider" xml:space="preserve"><value>مصدر الذكاء الاصطناعي</value><comment>o.aiProvider</comment></data>
+  <data name="Settings_Model" xml:space="preserve"><value>النموذج</value><comment>o.model</comment></data>
+  <data name="Settings_Packs" xml:space="preserve"><value>قواميس للتنزيل</value><comment>o.packs</comment></data>
+  <data name="Settings_CbEnable" xml:space="preserve"><value>تفعيل سجل الحافظة</value><comment>d.enable</comment></data>
+  <data name="Settings_CbMax" xml:space="preserve"><value>عدد العناصر المحفوظة</value><comment>d.sMax</comment></data>
+  <data name="Settings_CbApps" xml:space="preserve"><value>البرامج المستثناة</value><comment>d.sApps</comment></data>
+  <data name="Settings_SaveHistory" xml:space="preserve"><value>حفظ سجل الكلمات</value><comment>o.saveHistory</comment></data>
+  <data name="Settings_Backup" xml:space="preserve"><value>نسخة من بياناتي</value><comment>o.backup</comment></data>
+  <data name="Settings_Report" xml:space="preserve"><value>الإبلاغ عن مشكلة</value><comment>o.report</comment></data>
+  <data name="Settings_UpAuto" xml:space="preserve"><value>التحديثات التلقائية</value><comment>d.upAuto</comment></data>
+  <data name="Settings_Credits" xml:space="preserve"><value>مصادر القاموس المحلي</value><comment>o.credits</comment></data>
+  <data name="Settings_OllamaFree" xml:space="preserve"><value>Ollama — مجاني</value><comment>o.ollamaFree</comment></data>
+  <data name="Settings_OllamaHint" xml:space="preserve"><value>نموذج يعمل على جهازك: دون تكلفة، ودون إنترنت، ولا يغادر نصّك جهازك</value><comment>o.ollamaHint</comment></data>
+  <data name="Settings_GeminiFree" xml:space="preserve"><value>Gemini — مجاني</value><comment>o.geminiFree</comment></data>
+  <data name="Settings_GeminiHint" xml:space="preserve"><value>من Google عبر الإنترنت، بحدّ يومي مجاني. يعمل على أي جهاز</value><comment>o.geminiHint</comment></data>
+  <data name="Settings_ClaudeBest" xml:space="preserve"><value>Claude — الأدق</value><comment>o.claudeBest</comment></data>
+  <data name="Settings_ClaudeHint" xml:space="preserve"><value>عبر الإنترنت بمفتاح Claude API، مدفوع حسب الاستخدام</value><comment>o.claudeHint</comment></data>
+  <data name="Settings_Ollama1" xml:space="preserve"><value>ثبّت Ollama من &lt;a href=&quot;https://ollama.com/download&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;ollama.com/download&lt;/a&gt;.</value><comment>o.ollama1</comment></data>
+  <data name="Settings_Ollama3" xml:space="preserve"><value>حمّل نموذجًا، مثلًا &lt;b&gt;qwen3.5:4b&lt;/b&gt; (سريع، 3.4 GB — مناسب لبطاقة رسوميات 6 GB):&lt;code dir=&quot;ltr&quot;&gt;ollama pull qwen3.5:4b&lt;/code&gt;أو &lt;b&gt;qwen3.5:9b&lt;/b&gt; لجودة أعلى لكنه أبطأ على هذه البطاقة.</value><comment>o.ollama3</comment></data>
+  <data name="Settings_OllamaUrl" xml:space="preserve"><value>عنوان Ollama</value><comment>o.ollamaUrl</comment></data>
+  <data name="Settings_OllamaUrlHint" xml:space="preserve"><value>اتركه فارغًا إن كان Ollama على هذا الجهاز</value><comment>o.ollamaUrlHint</comment></data>
+  <data name="Settings_RefreshList" xml:space="preserve"><value>تحديث القائمة</value><comment>o.refreshList</comment></data>
+  <data name="Settings_OllamaModelsHint" xml:space="preserve"><value>النماذج المحمّلة في Ollama على هذا الجهاز</value><comment>o.ollamaModelsHint</comment></data>
+  <data name="Settings_Test" xml:space="preserve"><value>اختبار</value><comment>o.test</comment></data>
+  <data name="Settings_SaveVerify" xml:space="preserve"><value>حفظ وتحقق</value><comment>o.saveVerify</comment></data>
+  <data name="Common_Remove" xml:space="preserve"><value>إزالة</value><comment>common.remove</comment></data>
+  <data name="Settings_GeminiTip" xml:space="preserve"><value>أنشئ مفتاحًا مجانيًا من &lt;a href=&quot;https://aistudio.google.com/apikey&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;aistudio.google.com/apikey&lt;/a&gt; بحساب Google — دون بطاقة دفع. للخطة المجانية حد للطلبات في الدقيقة وفي اليوم، تجده في AI Studio.</value><comment>o.geminiTip</comment></data>
+  <data name="Settings_GeminiWarn" xml:space="preserve"><value>⚠️ في الخطة المجانية قد تستخدم Google النصوص المرسلة لتحسين منتجاتها. مناسب للتدرّب، لا للرسائل الخاصة أو مستندات العمل.</value><comment>o.geminiWarn</comment></data>
+  <data name="Settings_GeminiModelsHint" xml:space="preserve"><value>Flash أدق، و Flash-Lite أسرع ويسمح بطلبات أكثر</value><comment>o.geminiModelsHint</comment></data>
+  <data name="Settings_GemFlash" xml:space="preserve"><value>Gemini 3.8 Flash — الأدق</value><comment>o.gemFlash</comment></data>
+  <data name="Settings_GemLite" xml:space="preserve"><value>Gemini 3.5 Flash-Lite — الأسرع</value><comment>o.gemLite</comment></data>
+  <data name="Settings_ClaudeTip" xml:space="preserve"><value>تحتاج إلى &lt;b&gt;مفتاح Claude API&lt;/b&gt; من &lt;a href=&quot;https://console.anthropic.com/settings/keys&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;console.anthropic.com&lt;/a&gt;. هذا حساب منفصل عن اشتراك Claude.ai (Pro/Max)، ويُحتسب حسب الاستخدام — تدقيق رسالة عادية يكلّف نحو سنت إلى سنتين مع Opus، وأقل بكثير مع Haiku.</value><comment>o.claudeTip</comment></data>
+  <data name="Settings_ClaudeModelsHint" xml:space="preserve"><value>Opus أدق، و Sonnet و Haiku أسرع وأرخص</value><comment>o.claudeModelsHint</comment></data>
+  <data name="Settings_KeySaved" xml:space="preserve"><value>✓ المفتاح محفوظ.</value><comment>o.keySaved</comment></data>
+  <data name="Settings_NoKey" xml:space="preserve"><value>لم يُضف مفتاح بعد.</value><comment>o.noKey</comment></data>
+  <data name="Settings_CheckingKey" xml:space="preserve"><value>جارٍ التحقق من المفتاح…</value><comment>o.checkingKey</comment></data>
+  <data name="Settings_KeySavedPlaceholder" xml:space="preserve"><value>•••••••• (محفوظ) — الصق مفتاحًا جديدًا لتغييره</value><comment>o.keySavedPlaceholder</comment></data>
+  <data name="Settings_GeminiBusySaved" xml:space="preserve"><value>✓ المفتاح صحيح وحُفظ — لكن نماذج Gemini مزدحمة الآن، فجرّب أدوات الكتابة بعد قليل.</value><comment>o.geminiBusySaved</comment></data>
+  <data name="Settings_OllamaConnecting" xml:space="preserve"><value>جارٍ الاتصال بـ Ollama…</value><comment>o.ollamaConnecting</comment></data>
+  <data name="Settings_OllamaNoModels" xml:space="preserve"><value>Ollama يعمل لكن لا توجد نماذج بعد — نفّذ الأمر في الخطوة 3 ثم اضغط «تحديث القائمة».</value><comment>o.ollamaNoModels</comment></data>
+  <data name="Settings_OllamaTesting" xml:space="preserve"><value>جارٍ اختبار {0}… (أول تشغيل قد يستغرق دقيقة لتحميل النموذج في الذاكرة)</value><comment>o.ollamaTesting</comment></data>
+  <data name="Settings_OllamaWorks" xml:space="preserve"><value>✓ يعمل ({0} ث) — أدوات الكتابة جاهزة مجانًا على جهازك.</value><comment>o.ollamaWorks</comment></data>
+  <data name="Settings_PickModel" xml:space="preserve"><value>— اختر نموذجًا —</value><comment>o.pickModel</comment></data>
+  <data name="Settings_PickModelFirst" xml:space="preserve"><value>اختر نموذجًا أولًا.</value><comment>o.pickModelFirst</comment></data>
+  <data name="Settings_OllamaPlainHttp" xml:space="preserve"><value> ⚠️ هذا العنوان على جهاز آخر عبر http، فيمرّ نصك على الشبكة دون تشفير.</value><comment>o.ollamaPlainHttp</comment></data>
+  <data name="Settings_TrOllamaSame" xml:space="preserve"><value>مثل أدوات الكتابة ({0})</value><comment>o.trOllamaSame</comment></data>
+  <data name="Settings_TrUses" xml:space="preserve"><value>تُترجم الجمل بـ {0}</value><comment>o.trUses</comment></data>
+  <data name="Settings_TrModelHintClaude" xml:space="preserve"><value>Haiku سريع ورخيص ويكفي للترجمة</value><comment>o.trModelHintClaude</comment></data>
+  <data name="Settings_TrModelHintGemini" xml:space="preserve"><value>Flash-Lite سريع ويسمح بطلبات أكثر في الخطة المجانية، و Flash أدق لكنه ينفد سريعًا</value><comment>o.trModelHintGemini</comment></data>
+  <data name="Settings_TrModelHintOllama" xml:space="preserve"><value>النماذج الأكبر تترجم أفضل وأبطأ</value><comment>o.trModelHintOllama</comment></data>
+  <data name="Settings_AiIntro" xml:space="preserve"><value>حدّد أي نص في أي برنامج واضغط {0} لتدقيقه لغويًا مع شرح الأخطاء بالعربية، أو تحسين أسلوبه، أو جعله رسميًا أو ودّيًا أو أقصر، أو كتابة فكرتك العربية بإنجليزية طبيعية، أو تلخيصه، أو شرحه، أو كتابة ردٍّ عليه.</value><comment>o.aiIntroApp reworded in its markup only: the shortcut is {0}, the one in use</comment></data>
+  <data name="Settings_OpenAi" xml:space="preserve"><value>OpenAI</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_OpenAiHint" xml:space="preserve"><value>عبر الإنترنت بمفتاح OpenAI API، مدفوع حسب الاستخدام</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_OpenAiTip" xml:space="preserve"><value>تحتاج إلى &lt;b&gt;مفتاح OpenAI API&lt;/b&gt; من &lt;a href=&quot;https://platform.openai.com/api-keys&quot;&gt;platform.openai.com&lt;/a&gt;. هذا حساب منفصل عن اشتراك ChatGPT، ويُحتسب حسب الاستخدام.</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_OpenAiModels" xml:space="preserve"><value>النماذج التي يتيحها مفتاحك</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_CustomHint" xml:space="preserve"><value>أي خادم متوافق مع OpenAI: LM Studio أو OpenRouter أو Groq…</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_ServerUrl" xml:space="preserve"><value>عنوان الخادم</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_ServerUrlHint" xml:space="preserve"><value>مثل http://localhost:1234/v1 لـ LM Studio، أو https://openrouter.ai/api/v1</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_ServerKey" xml:space="preserve"><value>المفتاح</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_ServerKeyHint" xml:space="preserve"><value>اختياري: الخوادم على جهازك لا تحتاجه</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_ServerModels" xml:space="preserve"><value>النماذج التي يعرضها الخادم</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_Verified" xml:space="preserve"><value>✓ المفتاح يعمل</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_AiPrivacy" xml:space="preserve"><value>تُحفظ هذه الإعدادات على هذا الجهاز فقط، والمفاتيح في مدير بيانات الاعتماد في Windows. مع Ollama أو خادم على جهازك لا يغادر النص جهازك. مع Gemini أو Claude أو OpenAI أو خادم على الإنترنت لا يُرسَل أي نص إلا عندما تضغط إحدى أدوات الكتابة، ويُرسَل حينها النص المحدد.</value><comment>o.aiPrivacy reworded 2026-10-25 (approved with the Settings design): the five providers and Windows&apos; Credential Manager</comment></data>
+  <data name="Settings_Opus" xml:space="preserve"><value>Claude Opus 5.5 — الأدق</value><comment>o.opus reworded 2026-10-25 (approved with the Settings design): Lamha 3&apos;s model</comment></data>
+  <data name="Settings_Sonnet" xml:space="preserve"><value>Claude Sonnet 5.5 — متوازن</value><comment>o.sonnet reworded 2026-10-25: Lamha 3&apos;s model, as Opus 5.5 in the Settings design</comment></data>
+  <data name="Settings_Haiku" xml:space="preserve"><value>Claude Haiku 5.5 — الأسرع والأرخص</value><comment>o.haiku reworded 2026-10-25: Lamha 3&apos;s model, as Opus 5.5 in the Settings design</comment></data>
+  <data name="Settings_OllamaOkOne" xml:space="preserve"><value>✓ Ollama متصل — نموذج واحد. اضغط «اختبار» للتأكد من أن لمحة تستطيع استخدامه.</value><comment>o.ollamaOk, ported by hand: one model</comment></data>
+  <data name="Settings_OllamaOkTwo" xml:space="preserve"><value>✓ Ollama متصل — نموذجان. اضغط «اختبار» للتأكد من أن لمحة تستطيع استخدامه.</value><comment>o.ollamaOk, ported by hand: two models</comment></data>
+  <data name="Settings_OllamaOkFew" xml:space="preserve"><value>✓ Ollama متصل — {0} نماذج. اضغط «اختبار» للتأكد من أن لمحة تستطيع استخدامه.</value><comment>o.ollamaOk, ported by hand: 3 to 10 models</comment></data>
+  <data name="Settings_OllamaOkMany" xml:space="preserve"><value>✓ Ollama متصل — {0} نموذجًا. اضغط «اختبار» للتأكد من أن لمحة تستطيع استخدامه.</value><comment>o.ollamaOk, ported by hand: 11 models or more</comment></data>
+  <data name="Settings_TrNotReady" xml:space="preserve"><value>{0} غير مُعدّ بعد: أضف مفتاحه أو اختر نموذجه في «أدوات الكتابة». حتى ذلك الحين يترجم Google.</value><comment>o.trNotReady reworded 2026-10-25, a draft to approve: without &quot;below&quot; (Writing tools is its own page now)</comment></data>
+  <data name="Settings_Currency" xml:space="preserve"><value>عملتك</value><comment>new in Lamha 3, a draft to approve: Settings → Languages, for prices in your currency</comment></data>
+  <data name="Settings_CurrencyHint" xml:space="preserve"><value>يظهر بها أيضًا أي سعر تحدّده، بسعر اليوم</value><comment>new in Lamha 3, a draft to approve: Settings → Languages, for prices in your currency</comment></data>
+  <data name="Settings_CurrencyAuto" xml:space="preserve"><value>تلقائي ({0}، حسب منطقة Windows)</value><comment>new in Lamha 3, a draft to approve: Settings → Languages, for prices in your currency</comment></data>
+  <data name="Settings_Err_ai_bad_key" xml:space="preserve"><value>المفتاح غير صالح. تأكد من نسخه كاملًا.</value><comment>oerr.ai_bad_key</comment></data>
+  <data name="Settings_Err_ai_busy" xml:space="preserve"><value>خدمة الذكاء الاصطناعي مشغولة الآن، أعد المحاولة بعد لحظات.</value><comment>oerr.ai_busy</comment></data>
+  <data name="Settings_Err_ai_forbidden" xml:space="preserve"><value>المفتاح لا يملك صلاحية استخدام الـ API.</value><comment>oerr.ai_forbidden</comment></data>
+  <data name="Settings_Err_ai_model" xml:space="preserve"><value>النموذج المختار غير متاح لهذا الحساب. جرّب نموذجًا آخر.</value><comment>oerr.ai_model</comment></data>
+  <data name="Settings_Err_ai_no_credit" xml:space="preserve"><value>المفتاح صحيح لكن رصيد الحساب نفد. أضف رصيدًا من console.anthropic.com.</value><comment>oerr.ai_no_credit</comment></data>
+  <data name="Settings_Err_ai_rate_limited" xml:space="preserve"><value>طلبات كثيرة، انتظر دقيقة ثم أعد المحاولة.</value><comment>oerr.ai_rate_limited</comment></data>
+  <data name="Settings_Err_ai_timeout" xml:space="preserve"><value>انتهت مهلة الاتصال، أعد المحاولة.</value><comment>oerr.ai_timeout</comment></data>
+  <data name="Settings_Err_network" xml:space="preserve"><value>تعذّر الاتصال بالإنترنت.</value><comment>oerr.network</comment></data>
+  <data name="Settings_Err_ollama_model" xml:space="preserve"><value>النموذج غير موجود. حمّله بالأمر ollama pull ثم اضغط «تحديث القائمة».</value><comment>oerr.ollama_model</comment></data>
+  <data name="Settings_Err_ollama_offline" xml:space="preserve"><value>Ollama لا يعمل على هذا العنوان. شغّله من قائمة ابدأ (أو ثبّته من ollama.com).</value><comment>oerr.ollama_offline</comment></data>
+  <data name="Settings_ConnectFailed" xml:space="preserve"><value>تعذّر الاتصال: </value><comment>o.connectFailed</comment></data>
+  <data name="Settings_CustomWorks" xml:space="preserve"><value>✓ يعمل ({0} ث) — أدوات الكتابة جاهزة.</value><comment>o.ollamaWorks reworded 2026-10-25, a draft to approve: another server&apos;s Test, without &quot;free, on your PC&quot;</comment></data>
 </root>

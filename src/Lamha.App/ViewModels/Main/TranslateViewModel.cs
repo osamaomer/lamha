@@ -237,11 +237,15 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
         });
     }
 
-    /// <summary>The error's button: Try again (Settings come with their page).</summary>
+    /// <summary>The error's button: Settings at the category that fixes it, or Try again.</summary>
     [RelayCommand]
     private void RunErrorAction()
     {
-        if (_shown.Text.Length > 0)
+        if (Error is { Action: ErrorAction.Settings } error)
+        {
+            _host.OpenSettings(error.SettingsSection);
+        }
+        else if (_shown.Text.Length > 0)
         {
             LookUp(_shown.Text, _shown.ForceAi);
         }
@@ -335,7 +339,7 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
         catch (LamhaException e) when (!cancel.IsCancellationRequested)
         {
             var settings = _brain.Settings.Current;
-            Error = ErrorText.ForLookup(e, settings.TrProvider ?? settings.AiProvider, settings, !_brain.Network.IsOffline).Offering(settings: false);
+            Error = ErrorText.ForLookup(e, settings.TrProvider ?? settings.AiProvider, settings, !_brain.Network.IsOffline);
             View = TranslateView.Error;
             _host.Announce(Error.Title);
         }

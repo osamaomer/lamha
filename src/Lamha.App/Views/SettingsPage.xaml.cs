@@ -1,0 +1,272 @@
+using Lamha.App.Services;
+using Lamha.App.ViewModels.Main;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+
+namespace Lamha.App.Views;
+
+/// <summary>The main window's Settings page: the categories, and each one's settings cards.</summary>
+public sealed partial class SettingsPage : UserControl
+{
+    private string _left = "";
+
+    public SettingsPage(SettingsViewModel viewModel)
+    {
+        ViewModel = viewModel;
+        InitializeComponent();
+        ViewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(SettingsViewModel.Section))
+            {
+                DispatcherQueue.TryEnqueue(KeepFocus);
+            }
+        };
+    }
+
+    public SettingsViewModel ViewModel { get; }
+
+    /// <summary>"Settings": the home's title, and the breadcrumb's way back.</summary>
+    public string Title { get; } = Localization.Get("Common_Settings");
+
+    public SettingsStrings S { get; } = new();
+
+    /// <summary>
+    /// The tile clicked, or the breadcrumb, goes when the page changes, and the focus would fall to the side pane's
+    /// first page: it goes to the category's breadcrumb instead, and back home to the tile of the category just left.
+    /// </summary>
+    private void KeepFocus()
+    {
+        if (!ViewModel.IsHome)
+        {
+            _left = ViewModel.Section;
+            Crumb.Focus(FocusState.Programmatic);
+        }
+        else if (ViewModel.Tiles.FindIndex(t => t.Id == _left) is var index and >= 0 && Home is { } home)
+        {
+            // The home was made again just now: its tiles may not be laid out yet.
+            if (home.TryGetElement(index) is Control tile)
+            {
+                tile.Focus(FocusState.Programmatic);
+                return;
+            }
+
+            void Prepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs args)
+            {
+                if (args.Index == index && args.Element is Control prepared)
+                {
+                    sender.ElementPrepared -= Prepared;
+                    DispatcherQueue.TryEnqueue(() => prepared.Focus(FocusState.Programmatic));
+                }
+            }
+
+            home.ElementPrepared += Prepared;
+        }
+    }
+
+    /// <summary>Enter in a field: its command (in its Tag) runs: Save &amp; verify for a key, an address is saved and read.</summary>
+    private void OnEnterCommits(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == global::Windows.System.VirtualKey.Enter && sender is FrameworkElement { Tag: System.Windows.Input.ICommand command } && command.CanExecute(null))
+        {
+            e.Handled = true;
+            command.Execute(null);
+        }
+    }
+
+    /// <summary>Leaving an address field saves it, as Lamha 2's change event did.</summary>
+    private void OnLeaveCommits(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: System.Windows.Input.ICommand command } && command.CanExecute(null))
+        {
+            command.Execute(null);
+        }
+    }
+
+    /// <summary>Alt+←: back to the home, as the mouse's back button does in Windows' Settings.</summary>
+    private void OnBack(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (!ViewModel.IsHome)
+        {
+            args.Handled = true;
+            ViewModel.GoHomeCommand.Execute(null);
+        }
+    }
+}
+
+/// <summary>The Settings page's words (x:Bind reads them once).</summary>
+public sealed class SettingsStrings
+{
+    public string UiLang { get; } = Localization.Get("Settings_UiLang");
+
+    public string UiLangHint { get; } = Localization.Get("Settings_UiLangHint");
+
+    public string RestartPending { get; } = Localization.Get("Settings_RestartPending");
+
+    public string TargetLang { get; } = Localization.Get("Settings_TargetLang");
+
+    public string TargetLangHint { get; } = Localization.Get("Settings_TargetLangHint");
+
+    public string Reverse { get; } = Localization.Get("Settings_Reverse");
+
+    public string ReverseHint { get; } = Localization.Get("Settings_ReverseHint");
+
+    public string Currency { get; } = Localization.Get("Settings_Currency");
+
+    public string CurrencyHint { get; } = Localization.Get("Settings_CurrencyHint");
+
+    public string AiProvider { get; } = Localization.Get("Settings_AiProvider");
+
+    public string Model { get; } = Localization.Get("Settings_Model");
+
+    public string Test { get; } = Localization.Get("Settings_Test");
+
+    public string AiPrivacy { get; } = Localization.Get("Settings_AiPrivacy");
+
+    /// <summary>Ollama's steps, numbered as the interface writes numbers.</summary>
+    public string One { get; } = Localization.Number(1) + ".";
+
+    public string Two { get; } = Localization.Number(2) + ".";
+
+    public string OllamaFree { get; } = Localization.Get("Settings_OllamaFree");
+
+    public string OllamaHint { get; } = Localization.Get("Settings_OllamaHint");
+
+    public string Ollama1 { get; } = Localization.Get("Settings_Ollama1");
+
+    public string Ollama3 { get; } = Localization.Get("Settings_Ollama3");
+
+    public string OllamaUrl { get; } = Localization.Get("Settings_OllamaUrl");
+
+    public string OllamaUrlHint { get; } = Localization.Get("Settings_OllamaUrlHint");
+
+    public string RefreshList { get; } = Localization.Get("Settings_RefreshList");
+
+    public string OllamaModelsHint { get; } = Localization.Get("Settings_OllamaModelsHint");
+
+    public string GeminiFree { get; } = Localization.Get("Settings_GeminiFree");
+
+    public string GeminiHint { get; } = Localization.Get("Settings_GeminiHint");
+
+    public string GeminiTip { get; } = Localization.Get("Settings_GeminiTip");
+
+    public string GeminiWarn { get; } = Localization.Get("Settings_GeminiWarn");
+
+    public string GeminiModelsHint { get; } = Localization.Get("Settings_GeminiModelsHint");
+
+    public string ClaudeBest { get; } = Localization.Get("Settings_ClaudeBest");
+
+    public string ClaudeHint { get; } = Localization.Get("Settings_ClaudeHint");
+
+    public string ClaudeTip { get; } = Localization.Get("Settings_ClaudeTip");
+
+    public string ClaudeModelsHint { get; } = Localization.Get("Settings_ClaudeModelsHint");
+
+    public string OpenAiHint { get; } = Localization.Get("Settings_OpenAiHint");
+
+    public string OpenAiTip { get; } = Localization.Get("Settings_OpenAiTip");
+
+    public string OpenAiModels { get; } = Localization.Get("Settings_OpenAiModels");
+
+    public string CustomHint { get; } = Localization.Get("Settings_CustomHint");
+
+    public string ServerUrl { get; } = Localization.Get("Settings_ServerUrl");
+
+    public string ServerUrlHint { get; } = Localization.Get("Settings_ServerUrlHint");
+
+    public string ServerKey { get; } = Localization.Get("Settings_ServerKey");
+
+    public string ServerKeyHint { get; } = Localization.Get("Settings_ServerKeyHint");
+
+    public string ServerModels { get; } = Localization.Get("Settings_ServerModels");
+
+    public string Context { get; } = Localization.Get("Settings_Context");
+
+    public string ContextHint { get; } = Localization.Get("Settings_ContextHint");
+
+    public string Explain { get; } = Localization.Get("Settings_Explain");
+
+    public string ExplainHint { get; } = Localization.Get("Settings_ExplainHint");
+
+    public string TranslateDefs { get; } = Localization.Get("Settings_TranslateDefs");
+
+    public string TranslateDefsHint { get; } = Localization.Get("Settings_TranslateDefsHint");
+
+    public string Wiki { get; } = Localization.Get("Settings_Wiki");
+
+    public string WikiHint { get; } = Localization.Get("Settings_WikiHint");
+
+    public string AutoSpeak { get; } = Localization.Get("Settings_AutoSpeak");
+
+    public string AutoSpeakHint { get; } = Localization.Get("Settings_AutoSpeakHint");
+
+    public string TrIntro { get; } = Localization.Get("Settings_TrIntro");
+
+    public string TrAuto { get; } = Localization.Get("Settings_TrAuto");
+
+    public string TrAutoHint { get; } = Localization.Get("Settings_TrAutoHint");
+
+    public string TrGoogle { get; } = Localization.Get("Settings_TrGoogle");
+
+    public string TrGoogleHint { get; } = Localization.Get("Settings_TrGoogleHint");
+
+    public string TrAi { get; } = Localization.Get("Settings_TrAi");
+
+    public string TrAiHint { get; } = Localization.Get("Settings_TrAiHint");
+
+    public string TrProvider { get; } = Localization.Get("Settings_TrProvider");
+
+    public string TrProviderHint { get; } = Localization.Get("Settings_TrProviderHint");
+
+    public string ReviewIntro { get; } = Localization.Get("Settings_ReviewIntro");
+
+    public string CardsAuto { get; } = Localization.Get("Settings_CardsAuto");
+
+    public string CardsAutoHint { get; } = Localization.Get("Settings_CardsAutoHint");
+
+    public string NewPerDay { get; } = Localization.Get("Settings_NewPerDay");
+
+    public string NewPerDayHint { get; } = Localization.Get("Settings_NewPerDayHint");
+
+    public string Goal { get; } = Localization.Get("Settings_Goal");
+
+    public string GoalHint { get; } = Localization.Get("Settings_GoalHint");
+
+    public string DeleteCards { get; } = Localization.Get("Settings_DeleteCards");
+
+    public string DeleteCardsHint { get; } = Localization.Get("Settings_DeleteCardsHint");
+
+    public string Delete { get; } = Localization.Get("Common_Delete");
+
+    public string LocalFirst { get; } = Localization.Get("Settings_LocalFirst");
+
+    public string LocalFirstHint { get; } = Localization.Get("Settings_LocalFirstHint");
+
+    public string LocalOnly { get; } = Localization.Get("Settings_LocalOnly");
+
+    public string LocalOnlyHint { get; } = Localization.Get("Settings_LocalOnlyHint");
+
+    public string OnlineFirst { get; } = Localization.Get("Settings_OnlineFirst");
+
+    public string OnlineFirstHint { get; } = Localization.Get("Settings_OnlineFirstHint");
+
+    public string Theme { get; } = Localization.Get("Settings_Theme");
+
+    public string ThemeHint { get; } = Localization.Get("Settings_ThemeHint");
+
+    public string Motion { get; } = Localization.Get("Settings_Motion");
+
+    public string MotionHint { get; } = Localization.Get("Settings_MotionHint");
+
+    public string CardBg { get; } = Localization.Get("Settings_CardBg");
+
+    public string CardBgHint { get; } = Localization.Get("Settings_CardBgHint");
+
+    public string Accent { get; } = Localization.Get("Settings_Accent");
+
+    public string AccentHint { get; } = Localization.Get("Settings_AccentHint");
+
+    public string Mica { get; } = Localization.Get("Settings_Mica");
+
+    public string MicaHint { get; } = Localization.Get("Settings_MicaHint");
+}

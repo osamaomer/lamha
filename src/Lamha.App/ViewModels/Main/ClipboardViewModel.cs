@@ -464,6 +464,10 @@ public sealed partial class ClipboardViewModel : ObservableObject
         {
             _ = RunAsync(row, row.Action, fresh: false, row.IsSummary ? (row.SummaryInEnglish ? "en" : "ar") : null);
         }
+        else if (Selected is { Error: { Action: ErrorAction.Settings } error })
+        {
+            _host.OpenSettings(error.SettingsSection);
+        }
     }
 
     partial void OnQueryChanged(string value)
@@ -704,7 +708,6 @@ public sealed partial class ClipboardViewModel : ObservableObject
             : action is ClipAction.English or ClipAction.Proofread or ClipAction.Summary
                 ? ErrorText.ForAi(error, s.AiProvider, s)
                 : ErrorText.ForLookup(error, s.TrProvider ?? s.AiProvider, s, !_brain.Network.IsOffline);
-        row.Error = row.Error.Offering(settings: false); // Settings is the next page to build
         row.View = ClipResultView.Error;
         _host.Announce(row.Error.Title);
     }

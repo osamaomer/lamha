@@ -68,7 +68,7 @@ public static class ErrorText
             _ => Localization.Get($"Error_{code}_Hint"),
         };
         return FixedInSettings.Contains(code)
-            ? new ErrorInfo(title, hint, ErrorAction.Settings, "ai")
+            ? new ErrorInfo(title, hint, ErrorAction.Settings, "writing")
             : new ErrorInfo(title, hint, code == ErrorCodes.AiTooLong ? ErrorAction.None : ErrorAction.Retry);
     }
 
@@ -94,8 +94,8 @@ public static class ErrorText
         return code switch
         {
             // "Offline only": trying again gives the same answer; the way out is the setting.
-            ErrorCodes.NotFoundOffline => new ErrorInfo(Localization.Get("Card_ErrNotFound"), Localization.Get("Card_ErrLocalOnly"), ErrorAction.Settings, "dictionary"),
-            ErrorCodes.OfflineMode => new ErrorInfo(Localization.Get("Card_ErrOfflineMode"), Localization.Get("Card_ErrLocalOnly"), ErrorAction.Settings, "dictionary"),
+            ErrorCodes.NotFoundOffline => new ErrorInfo(Localization.Get("Card_ErrNotFound"), Localization.Get("Card_ErrLocalOnly"), ErrorAction.Settings, "offline"),
+            ErrorCodes.OfflineMode => new ErrorInfo(Localization.Get("Card_ErrOfflineMode"), Localization.Get("Card_ErrLocalOnly"), ErrorAction.Settings, "offline"),
             _ when !online => Network(),
             ErrorCodes.RateLimited => new ErrorInfo(Localization.Get("Card_ErrBusy"), Localization.Get("Card_ErrTooMany"), ErrorAction.Retry),
             _ => new ErrorInfo(Localization.Get("Card_ErrFailed"), Localization.Get("Card_ErrService"), ErrorAction.Retry),

@@ -39,29 +39,33 @@ public sealed partial class MainWindow : Window, IPageHost
 
     private readonly Brain _brain;
     private readonly string _lookupKeys;
+    private readonly string _writeKeys;
     private TranslatePage? _translate;
     private WritePage? _write;
     private HistoryPage? _history;
     private ReviewPage? _review;
     private ClipboardPage? _clipboardPage;
+    private SettingsPage? _settings;
     private readonly ClipboardService _clipboard;
     private bool _choosing;
 
     /// <param name="viewModel">The pages, the one that's open, and the toast.</param>
     /// <param name="brain">Lamha's brain, for the pages.</param>
     /// <param name="lookupKeys">The quick-lookup shortcut ("Ctrl+Alt+L"), for the Translate page's line under its box.</param>
+    /// <param name="writeKeys">The writing tools' shortcut ("Ctrl+Alt+W"), for Settings → Writing tools.</param>
     /// <param name="clipboard">Clipboard history's switch and pause, for the Clipboard page.</param>
-    public MainWindow(MainViewModel viewModel, Brain brain, string lookupKeys, ClipboardService clipboard)
+    public MainWindow(MainViewModel viewModel, Brain brain, string lookupKeys, string writeKeys, ClipboardService clipboard)
     {
         ViewModel = viewModel;
         _brain = brain;
         _lookupKeys = lookupKeys;
+        _writeKeys = writeKeys;
         _clipboard = clipboard;
         InitializeComponent();
         Animations.Refresh(brain.Settings.Current); // the setting may have changed since the last window
         Title = Lamha;
         Root.FlowDirection = Localization.FlowDirection;
-        SystemBackdrop = new MicaBackdrop();
+        UseMica(brain.Settings.Current.WindowMica);
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleBar);
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "Lamha.ico"));
@@ -108,6 +112,8 @@ public sealed partial class MainWindow : Window, IPageHost
             {
                 _clipboardPage?.ViewModel.Detach();
             }
+
+            _settings?.ViewModel.Detach();
         };
     }
 
@@ -136,8 +142,15 @@ public sealed partial class MainWindow : Window, IPageHost
         };
     }
 
-    /// <summary>Opens the page <paramref name="id"/> ("translate", "settings"…).</summary>
-    public void Go(string id)
+    /// <summary>Settings → Appearance → the wallpaper behind the window: Mica, or Lamha's page colour.</summary>
+    public void UseMica(bool on)
+    {
+        SystemBackdrop = on ? SystemBackdrop as MicaBackdrop ?? new MicaBackdrop() : null;
+        Solid.Visibility = on ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    /// <summary>Opens the page <paramref name="id"/> ("translate", "settings"…); Settings at its category <paramref name="section"/>.</summary>
+    public void Go(string id, string section = "")
     {
         var page = ViewModel.Find(id);
         if (ViewModel.Footer.Contains(page))
@@ -147,6 +160,11 @@ public sealed partial class MainWindow : Window, IPageHost
         else
         {
             PageList.SelectedItem = page;
+        }
+
+        if (page.Id == "settings" && section.Length > 0)
+        {
+            _settings?.ViewModel.Open(section);
         }
     }
 
@@ -221,6 +239,23 @@ public sealed partial class MainWindow : Window, IPageHost
 
     public void ReviewChanged() => _ = CountReviewAsync();
 
+    public void OpenSettings(string section) => Go("settings", section);
+
+    public async Task<bool> AskAsync(string question, string confirm)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = Root.XamlRoot,
+            RequestedTheme = Root.ActualTheme,
+            FlowDirection = Localization.FlowDirection,
+            Title = question,
+            PrimaryButtonText = confirm,
+            CloseButtonText = Localization.Get("Common_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+        };
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+    }
+
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
 
     /// <summary>
@@ -273,8 +308,19 @@ public sealed partial class MainWindow : Window, IPageHost
             leaving.ViewModel.Detach();
         }
 
+        if (PageHost.Content is SettingsPage settings && ViewModel.Page.Id != "settings")
+        {
+            settings.ViewModel.Detach();
+        }
+
         switch (ViewModel.Page.Id)
         {
+            case "settings":
+                _settings ??= new SettingsPage(new SettingsViewModel(_brain, this, _writeKeys));
+                _settings.ViewModel.Refresh();
+                _settings.ViewModel.Attach();
+                PageHost.Content = _settings;
+                break;
             case "clipboard":
                 _clipboardPage ??= new ClipboardPage(new ClipboardViewModel(_brain, _clipboard, this));
                 if (!ReferenceEquals(PageHost.Content, _clipboardPage))

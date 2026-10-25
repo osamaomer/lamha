@@ -483,6 +483,203 @@
     <Setter Property="Foreground" Value="{ThemeResource LamhaAccentBrush}" />
   </Style>
 
+  <!-- ===== Settings (phase 1's Settings design) ===== -->
+
+  <!-- A settings card: the surface, its 1 px edge and 8 px corners, 68 px high (a short one sets 48); the text 16 px from
+       the edge, the edge included. A card that holds more than one control is a Border in LamhaSettingsPanelStyle. -->
+  <Style x:Key="LamhaSettingsPanelStyle" TargetType="Border">
+    <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="Padding" Value="15,11" />
+    <Setter Property="MinHeight" Value="68" />
+  </Style>
+  <Style TargetType="controls:SettingsCard">
+    <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="Padding" Value="15,11" />
+    <Setter Property="MinHeight" Value="68" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="controls:SettingsCard">
+          <Grid Padding="{TemplateBinding Padding}" MinHeight="{TemplateBinding MinHeight}" ColumnSpacing="16"
+                Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Spacing="2">
+              <TextBlock Style="{StaticResource LamhaBodyTextStyle}" TextReadingOrder="UseFlowDirection" Text="{TemplateBinding Header}" />
+              <TextBlock x:Name="Description" Style="{StaticResource LamhaCaptionTextStyle}" TextReadingOrder="UseFlowDirection" Text="{TemplateBinding Description}" />
+            </StackPanel>
+            <ContentPresenter Grid.Column="1" VerticalAlignment="Center" Content="{TemplateBinding Content}" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A category on Settings' home: the card's look on a button, tinted under the mouse -->
+  <Style x:Key="LamhaTileButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+    <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="Padding" Value="15,11" />
+    <Setter Property="MinHeight" Value="68" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+
+  <!-- The breadcrumb's "Settings": the page title's size, muted until the mouse is over it -->
+  <Style x:Key="LamhaCrumbButtonStyle" TargetType="HyperlinkButton">
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizePageTitle}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="HyperlinkButton">
+          <ContentPresenter x:Name="Presenter" Padding="{TemplateBinding Padding}" Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
+                            FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}"
+                            Background="Transparent" Control.IsTemplateFocusTarget="True" AutomationProperties.AccessibilityView="Raw">
+            <VisualStateManager.VisualStateGroups>
+              <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="PointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaTextBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Pressed">
+                  <VisualState.Setters>
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaTextBrush}" />
+                    <Setter Target="Presenter.Opacity" Value="0.8" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Disabled" />
+              </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+          </ContentPresenter>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A choice among a few, with its hint (Translation, Without internet): the design's 20 px ring, filled to a 5 px
+       ring in the button colour when chosen; 10 px above and below, so the lines between choices sit in the middle -->
+  <Style x:Key="LamhaRadioStyle" TargetType="RadioButton">
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="0,10" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+    <Setter Property="FocusVisualMargin" Value="-4,2" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Grid x:Name="Root" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" ColumnSpacing="12">
+            <VisualStateManager.VisualStateGroups>
+              <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="PointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Ring.Stroke" Value="{ThemeResource LamhaTextMutedBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Pressed">
+                  <VisualState.Setters>
+                    <Setter Target="Ring.Stroke" Value="{ThemeResource LamhaTextMutedBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Disabled">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Opacity" Value="0.45" />
+                  </VisualState.Setters>
+                </VisualState>
+              </VisualStateGroup>
+              <VisualStateGroup x:Name="CheckStates">
+                <VisualState x:Name="Checked">
+                  <VisualState.Setters>
+                    <Setter Target="Ring.Stroke" Value="{ThemeResource LamhaButtonBrush}" />
+                    <Setter Target="Ring.StrokeThickness" Value="5" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Unchecked" />
+                <VisualState x:Name="Indeterminate" />
+              </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="20" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Ellipse x:Name="Ring" Width="20" Height="20" Margin="0,1,0,0" VerticalAlignment="Top" Fill="Transparent"
+                     Stroke="{ThemeResource LamhaFieldLineBrush}" StrokeThickness="1" />
+            <ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}" AutomationProperties.AccessibilityView="Raw" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A dropdown at the end of a settings card: 36 px high (the text boxes' height), 200 px at least, the inputs' corners -->
+  <Style x:Key="LamhaComboStyle" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
+    <Setter Property="MinWidth" Value="200" />
+    <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+  </Style>
+
+  <!-- A text field and a key field in Settings: 36 px high (the dropdowns' and buttons' height), the inputs' corners -->
+  <Style x:Key="LamhaFieldStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+    <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="IsSpellCheckEnabled" Value="False" />
+  </Style>
+  <Style x:Key="LamhaPasswordStyle" TargetType="PasswordBox" BasedOn="{StaticResource DefaultPasswordBoxStyle}">
+    <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <!-- The chosen AI provider's setup, under its choice: a line above it (the design's .sub), 12 px between its rows -->
+  <Style x:Key="LamhaProviderSetupStyle" TargetType="StackPanel">
+    <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+    <Setter Property="Padding" Value="0,12,0,16" />
+    <Setter Property="Spacing" Value="12" />
+  </Style>
+
+  <!-- A switch at the end of a settings card: only the switch, without Windows' "On" / "Off" beside it. The 12 px
+       Windows keeps between the switch and those words is taken back, so the switch ends where the dropdowns end. -->
+  <Style x:Key="LamhaSettingsSwitchStyle" TargetType="ToggleSwitch" BasedOn="{StaticResource DefaultToggleSwitchStyle}">
+    <Setter Property="OnContent" Value="" />
+    <Setter Property="OffContent" Value="" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="Margin" Value="0,0,-12,0" />
+  </Style>
+
   <!-- A page in the main window's side pane: Windows' navigation item (36 px, 4 px corners, the selection mark at
        the start) in Lamha's colours, on a ListView so Lamha's line icons can be its icons -->
   <Style x:Key="LamhaNavItemStyle" TargetType="ListViewItem">

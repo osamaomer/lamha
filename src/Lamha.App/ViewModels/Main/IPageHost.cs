@@ -25,4 +25,13 @@ public interface IPageHost
 
     /// <summary>A word went into the review list or out of it: the count on Review is read again.</summary>
     void ReviewChanged();
+
+    /// <summary>Settings, at the category <paramref name="section"/> ("writing", "translation", "offline"): an error's Settings button.</summary>
+    void OpenSettings(string section);
+
+    /// <summary>
+    /// Lamha 2's question before deleting something (shared/dialog.js): <paramref name="question"/>, with
+    /// <paramref name="confirm"/> ("Delete") and Cancel, Cancel the default. True when confirmed.
+    /// </summary>
+    Task<bool> AskAsync(string question, string confirm);
 }

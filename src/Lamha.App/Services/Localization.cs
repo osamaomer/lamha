@@ -95,10 +95,13 @@ public static class Localization
     /// <summary>"10:24 AM", "١٠:٢٤ ص" (the main window's design).</summary>
     public static string Time(DateTime time) => Digits(time.ToString("h:mm tt", IsArabic ? ArabicNumbers : EnglishNumbers));
 
+    /// <summary>The languages Lamha 2 named itself (its <c>lang.*</c> strings): the translation language's choices.</summary>
+    public static IReadOnlyList<string> NamedLanguages { get; } = ["ar", "en", "fr", "tr", "ur", "fa", "es", "de"];
+
     /// <summary>A language's name in the interface language ("الإنجليزية", "French"): Lamha 2's <c>langName()</c>.</summary>
     public static string LanguageName(string code)
     {
-        if (code is "ar" or "en")
+        if (NamedLanguages.Contains(code))
         {
             return Get("Lang_" + code);
         }

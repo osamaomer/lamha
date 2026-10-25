@@ -488,5 +488,175 @@
   <data name="Proto_Tooltip" xml:space="preserve"><value>Lamha 3 (prototype)</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>Show the card (sample text)</value></data>
   <data name="Proto_ClipboardHistory" xml:space="preserve"><value>Clipboard history</value><comment>d.historyLabel</comment></data>
-  <data name="Proto_Accent" xml:space="preserve"><value>Accent colour from Windows</value><comment>d.accent</comment></data>
+  <data name="Settings_Languages" xml:space="preserve"><value>Languages</value><comment>o.languages</comment></data>
+  <data name="Settings_Card" xml:space="preserve"><value>The lookup card</value><comment>o.cardSection</comment></data>
+  <data name="Settings_Keys" xml:space="preserve"><value>Keyboard shortcuts</value><comment>o.keys</comment></data>
+  <data name="Settings_WritingTools" xml:space="preserve"><value>Writing tools</value><comment>o.writingTools</comment></data>
+  <data name="Settings_Translation" xml:space="preserve"><value>Translation</value><comment>o.translation</comment></data>
+  <data name="Settings_Review" xml:space="preserve"><value>Word review</value><comment>o.review</comment></data>
+  <data name="Settings_Offline" xml:space="preserve"><value>Without internet</value><comment>o.offline</comment></data>
+  <data name="Settings_Clipboard" xml:space="preserve"><value>Clipboard</value><comment>d.sTitle</comment></data>
+  <data name="Settings_Appearance" xml:space="preserve"><value>Appearance</value><comment>o.appearance</comment></data>
+  <data name="Settings_Privacy" xml:space="preserve"><value>Privacy &amp; history</value><comment>o.privacy</comment></data>
+  <data name="Settings_UiLang" xml:space="preserve"><value>Interface language</value><comment>o.uiLang</comment></data>
+  <data name="Settings_UiLangHint" xml:space="preserve"><value>The language of Lamha&apos;s menus, buttons and explanations</value><comment>o.uiLangHint</comment></data>
+  <data name="Settings_Automatic" xml:space="preserve"><value>Automatic (system)</value><comment>o.uiLangAuto</comment></data>
+  <data name="Settings_TargetLang" xml:space="preserve"><value>Translation language</value><comment>o.targetLang</comment></data>
+  <data name="Settings_TargetLangHint" xml:space="preserve"><value>The language text is translated into</value><comment>o.targetLangHint</comment></data>
+  <data name="Settings_Reverse" xml:space="preserve"><value>Translate Arabic text into English</value><comment>o.reverse</comment></data>
+  <data name="Settings_ReverseHint" xml:space="preserve"><value>When you select Arabic text, show its English translation</value><comment>o.reverseHint</comment></data>
+  <data name="Settings_RestartPending" xml:space="preserve"><value>The change applies when Lamha starts again</value><comment>d.gpuPending</comment></data>
+  <data name="Lang_fr" xml:space="preserve"><value>French</value><comment>lang.fr</comment></data>
+  <data name="Lang_tr" xml:space="preserve"><value>Turkish</value><comment>lang.tr</comment></data>
+  <data name="Lang_ur" xml:space="preserve"><value>Urdu</value><comment>lang.ur</comment></data>
+  <data name="Lang_fa" xml:space="preserve"><value>Persian</value><comment>lang.fa</comment></data>
+  <data name="Lang_es" xml:space="preserve"><value>Spanish</value><comment>lang.es</comment></data>
+  <data name="Lang_de" xml:space="preserve"><value>German</value><comment>lang.de</comment></data>
+  <data name="Settings_Context" xml:space="preserve"><value>Understand words from their sentence</value><comment>o.context</comment></data>
+  <data name="Settings_ContextHint" xml:space="preserve"><value>The sentence around the word (not the page) is sent to pick the right meaning. Turn it off to send only the word.</value><comment>o.contextHint</comment></data>
+  <data name="Settings_Explain" xml:space="preserve"><value>Explain words in their own language</value><comment>o.explainLangs</comment></data>
+  <data name="Settings_ExplainHint" xml:space="preserve"><value>Words in these languages are explained in their own language instead of translated, with the translation under it. The card’s language switch changes this too.</value><comment>o.explainLangsHint</comment></data>
+  <data name="Settings_ExplainAlways" xml:space="preserve"><value>Always: this is your translation language</value><comment>o.explainAlways</comment></data>
+  <data name="Settings_TranslateDefs" xml:space="preserve"><value>Translate definitions</value><comment>o.translateDefs</comment></data>
+  <data name="Settings_TranslateDefsHint" xml:space="preserve"><value>Show English definitions translated into your translation language</value><comment>o.translateDefsHint</comment></data>
+  <data name="Settings_Wiki" xml:space="preserve"><value>Wikipedia summary</value><comment>o.wiki</comment></data>
+  <data name="Settings_WikiHint" xml:space="preserve"><value>Show the article summary for terms and names (in Arabic when available)</value><comment>o.wikiHint</comment></data>
+  <data name="Settings_AutoSpeak" xml:space="preserve"><value>Speak automatically</value><comment>o.autoSpeak</comment></data>
+  <data name="Settings_AutoSpeakHint" xml:space="preserve"><value>Pronounce the word when you look it up</value><comment>o.autoSpeakHint</comment></data>
+  <data name="Settings_TrIntro" xml:space="preserve"><value>Who translates sentences and paragraphs: Google is fast and needs the internet; AI is better with idioms and slang but slower, and with Ollama it works offline.</value><comment>o.trIntro</comment></data>
+  <data name="Settings_TrAuto" xml:space="preserve"><value>Automatic</value><comment>o.trAuto</comment></data>
+  <data name="Settings_TrAutoHint" xml:space="preserve"><value>Google, and AI when there&apos;s no internet or Google can&apos;t answer (recommended)</value><comment>o.trAutoHint</comment></data>
+  <data name="Settings_TrGoogle" xml:space="preserve"><value>Google only</value><comment>o.trGoogle</comment></data>
+  <data name="Settings_TrGoogleHint" xml:space="preserve"><value>Fast and free; doesn&apos;t work offline</value><comment>o.trGoogleHint</comment></data>
+  <data name="Settings_TrAi" xml:space="preserve"><value>AI</value><comment>o.trAi</comment></data>
+  <data name="Settings_TrAiHint" xml:space="preserve"><value>More natural sentences, but slower. Google when it fails</value><comment>o.trAiHint</comment></data>
+  <data name="Settings_TrProvider" xml:space="preserve"><value>Translated by</value><comment>o.trProvider</comment></data>
+  <data name="Settings_TrProviderHint" xml:space="preserve"><value>Can differ from the writing tools, e.g. Gemini for writing and Ollama for translation</value><comment>o.trProviderHint</comment></data>
+  <data name="Settings_TrSameAsWriting" xml:space="preserve"><value>Same as the writing tools</value><comment>o.trSameAsWriting</comment></data>
+  <data name="Settings_CardsAuto" xml:space="preserve"><value>Add words automatically</value><comment>o.cardsAuto</comment></data>
+  <data name="Settings_CardsAutoHint" xml:space="preserve"><value>Turn it on to add every English word you look up to review. Otherwise you choose: add a word with the 🔖 button on the lookup card.</value><comment>o.cardsAutoHint</comment></data>
+  <data name="Settings_NewPerDay" xml:space="preserve"><value>New words per day</value><comment>o.newPerDay</comment></data>
+  <data name="Settings_NewPerDayHint" xml:space="preserve"><value>How many new words come up for review each day</value><comment>o.newPerDayHint</comment></data>
+  <data name="Settings_Goal" xml:space="preserve"><value>Daily goal</value><comment>o.dailyGoal</comment></data>
+  <data name="Settings_GoalHint" xml:space="preserve"><value>Words you look up plus cards you review each day: the ring on Lamha&apos;s main screen</value><comment>o.dailyGoalHint</comment></data>
+  <data name="Settings_NoGoal" xml:space="preserve"><value>No goal</value><comment>o.noGoal</comment></data>
+  <data name="Settings_DeleteCards" xml:space="preserve"><value>Delete all cards</value><comment>o.deleteCards</comment></data>
+  <data name="Settings_DeleteCardsHint" xml:space="preserve"><value>Deletes the words and your progress</value><comment>o.deleteCardsHint</comment></data>
+  <data name="Settings_DeleteCardsQ" xml:space="preserve"><value>Delete all review cards and your progress?</value><comment>o.confirmDeleteCards</comment></data>
+  <data name="Common_Delete" xml:space="preserve"><value>Delete</value><comment>o.delete</comment></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>Cancel</value><comment>o.cancel</comment></data>
+  <data name="Settings_LocalFirst" xml:space="preserve"><value>Offline first</value><comment>o.localFirst</comment></data>
+  <data name="Settings_LocalFirstHint" xml:space="preserve"><value>The built-in dictionary for words, the internet only for what it lacks (recommended)</value><comment>o.localFirstHint</comment></data>
+  <data name="Settings_LocalOnly" xml:space="preserve"><value>Offline only</value><comment>o.localOnly</comment></data>
+  <data name="Settings_LocalOnlyHint" xml:space="preserve"><value>No internet at all for words. Sentences are translated only when the translator is Ollama on your PC.</value><comment>o.localOnlyHint</comment></data>
+  <data name="Settings_OnlineFirst" xml:space="preserve"><value>Online first</value><comment>o.onlineFirst</comment></data>
+  <data name="Settings_OnlineFirstHint" xml:space="preserve"><value>Google&apos;s results, with the offline dictionary when you&apos;re offline</value><comment>o.onlineFirstHint</comment></data>
+  <data name="Settings_Theme" xml:space="preserve"><value>Theme</value><comment>o.theme</comment></data>
+  <data name="Settings_ThemeHint" xml:space="preserve"><value>The look of Lamha: the card, its window and these settings</value><comment>o.themeHint</comment></data>
+  <data name="Settings_ThemeLight" xml:space="preserve"><value>Light</value><comment>o.themeLight</comment></data>
+  <data name="Settings_ThemeDark" xml:space="preserve"><value>Dark</value><comment>o.themeDark</comment></data>
+  <data name="Settings_Motion" xml:space="preserve"><value>Animations</value><comment>o.motion</comment></data>
+  <data name="Settings_MotionHint" xml:space="preserve"><value>Transitions in Lamha&apos;s windows and card. Automatic uses Subtle on slower computers and turns them off when your system asks for less motion.</value><comment>o.motionHint</comment></data>
+  <data name="Settings_MotionAuto" xml:space="preserve"><value>Automatic</value><comment>motion.auto</comment></data>
+  <data name="Settings_MotionFull" xml:space="preserve"><value>Full</value><comment>motion.full</comment></data>
+  <data name="Settings_MotionSubtle" xml:space="preserve"><value>Subtle</value><comment>motion.subtle</comment></data>
+  <data name="Settings_MotionOff" xml:space="preserve"><value>Off</value><comment>motion.off</comment></data>
+  <data name="Settings_Accent" xml:space="preserve"><value>Accent colour from Windows</value><comment>d.accent</comment></data>
+  <data name="Settings_AccentHint" xml:space="preserve"><value>Buttons and links take the accent colour you chose in Windows, adjusted to stay readable</value><comment>d.accentHint</comment></data>
+  <data name="Settings_Mica" xml:space="preserve"><value>Show the wallpaper behind the window</value><comment>d.mica</comment></data>
+  <data name="Settings_MicaHint" xml:space="preserve"><value>A touch of your desktop wallpaper behind Lamha&apos;s window and Settings, as in Windows 11&apos;s own apps. The cards keep their colour, so text stays clear</value><comment>d.micaHint</comment></data>
+  <data name="Settings_ReviewIntro" xml:space="preserve"><value>Words you add with the 🔖 button on the lookup card become review cards, with the sentence you found them in. Review them on the “Review” page of Lamha&apos;s window; each word comes back just before you&apos;d forget it.</value><comment>o.reviewIntro reworded 2026-10-25 (approved with the Settings design): Review is a page</comment></data>
+  <data name="Settings_CardBg" xml:space="preserve"><value>The card&apos;s background</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_CardBgHint" xml:space="preserve"><value>Translucent shows a little of what&apos;s behind the card; solid is clearer over busy pages</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_Translucent" xml:space="preserve"><value>Translucent</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_Solid" xml:space="preserve"><value>Solid</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_HkLookup" xml:space="preserve"><value>Look up and translate in any program</value><comment>d.hkLookup</comment></data>
+  <data name="Settings_HkWrite" xml:space="preserve"><value>Writing tools in any program</value><comment>d.hkWrite</comment></data>
+  <data name="Settings_HkClip" xml:space="preserve"><value>Clipboard: paste from history</value><comment>d.hkClipboard</comment></data>
+  <data name="Settings_AiProvider" xml:space="preserve"><value>AI provider</value><comment>o.aiProvider</comment></data>
+  <data name="Settings_Model" xml:space="preserve"><value>Model</value><comment>o.model</comment></data>
+  <data name="Settings_Packs" xml:space="preserve"><value>Dictionaries to download</value><comment>o.packs</comment></data>
+  <data name="Settings_CbEnable" xml:space="preserve"><value>Turn on clipboard history</value><comment>d.enable</comment></data>
+  <data name="Settings_CbMax" xml:space="preserve"><value>Items to keep</value><comment>d.sMax</comment></data>
+  <data name="Settings_CbApps" xml:space="preserve"><value>Excluded programs</value><comment>d.sApps</comment></data>
+  <data name="Settings_SaveHistory" xml:space="preserve"><value>Keep a history of words</value><comment>o.saveHistory</comment></data>
+  <data name="Settings_Backup" xml:space="preserve"><value>A copy of my data</value><comment>o.backup</comment></data>
+  <data name="Settings_Report" xml:space="preserve"><value>Report a problem</value><comment>o.report</comment></data>
+  <data name="Settings_UpAuto" xml:space="preserve"><value>Automatic updates</value><comment>d.upAuto</comment></data>
+  <data name="Settings_Credits" xml:space="preserve"><value>Offline dictionary sources</value><comment>o.credits</comment></data>
+  <data name="Settings_OllamaFree" xml:space="preserve"><value>Ollama — free</value><comment>o.ollamaFree</comment></data>
+  <data name="Settings_OllamaHint" xml:space="preserve"><value>A model on your computer: no cost, no internet, and your text never leaves your PC</value><comment>o.ollamaHint</comment></data>
+  <data name="Settings_GeminiFree" xml:space="preserve"><value>Gemini — free</value><comment>o.geminiFree</comment></data>
+  <data name="Settings_GeminiHint" xml:space="preserve"><value>From Google over the internet, with a free daily limit. Works on any PC</value><comment>o.geminiHint</comment></data>
+  <data name="Settings_ClaudeBest" xml:space="preserve"><value>Claude — most accurate</value><comment>o.claudeBest</comment></data>
+  <data name="Settings_ClaudeHint" xml:space="preserve"><value>Over the internet with a Claude API key, paid per use</value><comment>o.claudeHint</comment></data>
+  <data name="Settings_Ollama1" xml:space="preserve"><value>Install Ollama from &lt;a href=&quot;https://ollama.com/download&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;ollama.com/download&lt;/a&gt;.</value><comment>o.ollama1</comment></data>
+  <data name="Settings_Ollama3" xml:space="preserve"><value>Download a model, for example &lt;b&gt;qwen3.5:4b&lt;/b&gt; (fast, 3.4 GB — fits a 6 GB graphics card):&lt;code dir=&quot;ltr&quot;&gt;ollama pull qwen3.5:4b&lt;/code&gt;or &lt;b&gt;qwen3.5:9b&lt;/b&gt; for higher quality, though slower on that card.</value><comment>o.ollama3</comment></data>
+  <data name="Settings_OllamaUrl" xml:space="preserve"><value>Ollama address</value><comment>o.ollamaUrl</comment></data>
+  <data name="Settings_OllamaUrlHint" xml:space="preserve"><value>Leave it empty if Ollama runs on this PC</value><comment>o.ollamaUrlHint</comment></data>
+  <data name="Settings_RefreshList" xml:space="preserve"><value>Refresh list</value><comment>o.refreshList</comment></data>
+  <data name="Settings_OllamaModelsHint" xml:space="preserve"><value>The models downloaded in Ollama on this PC</value><comment>o.ollamaModelsHint</comment></data>
+  <data name="Settings_Test" xml:space="preserve"><value>Test</value><comment>o.test</comment></data>
+  <data name="Settings_SaveVerify" xml:space="preserve"><value>Save &amp; verify</value><comment>o.saveVerify</comment></data>
+  <data name="Common_Remove" xml:space="preserve"><value>Remove</value><comment>common.remove</comment></data>
+  <data name="Settings_GeminiTip" xml:space="preserve"><value>Create a free key at &lt;a href=&quot;https://aistudio.google.com/apikey&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;aistudio.google.com/apikey&lt;/a&gt; with a Google account — no payment card needed. The free tier has per-minute and daily limits, shown in AI Studio.</value><comment>o.geminiTip</comment></data>
+  <data name="Settings_GeminiWarn" xml:space="preserve"><value>⚠️ On the free tier Google may use what you send to improve its products. Fine for practice, not for private messages or work documents.</value><comment>o.geminiWarn</comment></data>
+  <data name="Settings_GeminiModelsHint" xml:space="preserve"><value>Flash is more accurate; Flash-Lite is faster and allows more requests</value><comment>o.geminiModelsHint</comment></data>
+  <data name="Settings_GemFlash" xml:space="preserve"><value>Gemini 3.8 Flash — most accurate</value><comment>o.gemFlash</comment></data>
+  <data name="Settings_GemLite" xml:space="preserve"><value>Gemini 3.5 Flash-Lite — fastest</value><comment>o.gemLite</comment></data>
+  <data name="Settings_ClaudeTip" xml:space="preserve"><value>You need a &lt;b&gt;Claude API key&lt;/b&gt; from &lt;a href=&quot;https://console.anthropic.com/settings/keys&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;console.anthropic.com&lt;/a&gt;. It&apos;s separate from a Claude.ai subscription (Pro/Max) and billed per use — proofreading a typical message costs about 1–2 cents with Opus, and much less with Haiku.</value><comment>o.claudeTip</comment></data>
+  <data name="Settings_ClaudeModelsHint" xml:space="preserve"><value>Opus is most accurate; Sonnet and Haiku are faster and cheaper</value><comment>o.claudeModelsHint</comment></data>
+  <data name="Settings_KeySaved" xml:space="preserve"><value>✓ Key saved.</value><comment>o.keySaved</comment></data>
+  <data name="Settings_NoKey" xml:space="preserve"><value>No key added yet.</value><comment>o.noKey</comment></data>
+  <data name="Settings_CheckingKey" xml:space="preserve"><value>Checking the key…</value><comment>o.checkingKey</comment></data>
+  <data name="Settings_KeySavedPlaceholder" xml:space="preserve"><value>•••••••• (saved) — paste a new key to change it</value><comment>o.keySavedPlaceholder</comment></data>
+  <data name="Settings_GeminiBusySaved" xml:space="preserve"><value>✓ The key works and is saved — but Gemini&apos;s models are busy right now, so try the writing tools in a little while.</value><comment>o.geminiBusySaved</comment></data>
+  <data name="Settings_OllamaConnecting" xml:space="preserve"><value>Connecting to Ollama…</value><comment>o.ollamaConnecting</comment></data>
+  <data name="Settings_OllamaNoModels" xml:space="preserve"><value>Ollama is running but has no models yet — run the command in step 3, then click “Refresh list”.</value><comment>o.ollamaNoModels</comment></data>
+  <data name="Settings_OllamaTesting" xml:space="preserve"><value>Testing {0}… (the first run can take a minute to load the model into memory)</value><comment>o.ollamaTesting</comment></data>
+  <data name="Settings_OllamaWorks" xml:space="preserve"><value>✓ Works ({0} s) — the writing tools are ready, free, on your PC.</value><comment>o.ollamaWorks</comment></data>
+  <data name="Settings_PickModel" xml:space="preserve"><value>— choose a model —</value><comment>o.pickModel</comment></data>
+  <data name="Settings_PickModelFirst" xml:space="preserve"><value>Choose a model first.</value><comment>o.pickModelFirst</comment></data>
+  <data name="Settings_OllamaPlainHttp" xml:space="preserve"><value> ⚠️ This address is another computer over http, so your text crosses the network unencrypted.</value><comment>o.ollamaPlainHttp</comment></data>
+  <data name="Settings_TrOllamaSame" xml:space="preserve"><value>Same as the writing tools ({0})</value><comment>o.trOllamaSame</comment></data>
+  <data name="Settings_TrUses" xml:space="preserve"><value>Sentences are translated with {0}</value><comment>o.trUses</comment></data>
+  <data name="Settings_TrModelHintClaude" xml:space="preserve"><value>Haiku is quick, cheap and enough for translation</value><comment>o.trModelHintClaude</comment></data>
+  <data name="Settings_TrModelHintGemini" xml:space="preserve"><value>Flash-Lite is quick and allows more free requests; Flash is more accurate but runs out quickly</value><comment>o.trModelHintGemini</comment></data>
+  <data name="Settings_TrModelHintOllama" xml:space="preserve"><value>Bigger models translate better, and slower</value><comment>o.trModelHintOllama</comment></data>
+  <data name="Settings_AiIntro" xml:space="preserve"><value>Select any text in any program and press {0} to proofread it with explanations of each mistake, improve it, make it formal, friendly or shorter, turn your Arabic idea into natural English, summarize or explain it, or write a reply.</value><comment>o.aiIntroApp reworded in its markup only: the shortcut is {0}, the one in use</comment></data>
+  <data name="Settings_OpenAi" xml:space="preserve"><value>OpenAI</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_OpenAiHint" xml:space="preserve"><value>Over the internet with an OpenAI API key, paid per use</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_OpenAiTip" xml:space="preserve"><value>You need an &lt;b&gt;OpenAI API key&lt;/b&gt; from &lt;a href=&quot;https://platform.openai.com/api-keys&quot;&gt;platform.openai.com&lt;/a&gt;. It&apos;s separate from a ChatGPT subscription and billed per use.</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_OpenAiModels" xml:space="preserve"><value>The models your key can use</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_CustomHint" xml:space="preserve"><value>Any OpenAI-compatible server: LM Studio, OpenRouter, Groq…</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_ServerUrl" xml:space="preserve"><value>Server address</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_ServerUrlHint" xml:space="preserve"><value>Like http://localhost:1234/v1 for LM Studio, or https://openrouter.ai/api/v1</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_ServerKey" xml:space="preserve"><value>Key</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_ServerKeyHint" xml:space="preserve"><value>Optional: servers on your PC don&apos;t need one</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_ServerModels" xml:space="preserve"><value>The models the server offers</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_Verified" xml:space="preserve"><value>✓ The key works</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_AiPrivacy" xml:space="preserve"><value>These settings stay on this PC, and the keys in Windows&apos; Credential Manager. With Ollama or a server on your PC your text never leaves it. With Gemini, Claude, OpenAI or a server on the internet, nothing is sent until you press a writing tool; then the selected text is sent.</value><comment>o.aiPrivacy reworded 2026-10-25 (approved with the Settings design): the five providers and Windows&apos; Credential Manager</comment></data>
+  <data name="Settings_Opus" xml:space="preserve"><value>Claude Opus 5.5 — most accurate</value><comment>o.opus reworded 2026-10-25 (approved with the Settings design): Lamha 3&apos;s model</comment></data>
+  <data name="Settings_Sonnet" xml:space="preserve"><value>Claude Sonnet 5.5 — balanced</value><comment>o.sonnet reworded 2026-10-25: Lamha 3&apos;s model, as Opus 5.5 in the Settings design</comment></data>
+  <data name="Settings_Haiku" xml:space="preserve"><value>Claude Haiku 5.5 — fastest and cheapest</value><comment>o.haiku reworded 2026-10-25: Lamha 3&apos;s model, as Opus 5.5 in the Settings design</comment></data>
+  <data name="Settings_OllamaOkOne" xml:space="preserve"><value>✓ Ollama connected — 1 model. Click “Test” to make sure Lamha can use it.</value><comment>o.ollamaOk, ported by hand: one model</comment></data>
+  <data name="Settings_OllamaOkTwo" xml:space="preserve"><value>✓ Ollama connected — 2 models. Click “Test” to make sure Lamha can use it.</value><comment>o.ollamaOk, ported by hand: two models</comment></data>
+  <data name="Settings_OllamaOkFew" xml:space="preserve"><value>✓ Ollama connected — {0} models. Click “Test” to make sure Lamha can use it.</value><comment>o.ollamaOk, ported by hand: 3 to 10 models</comment></data>
+  <data name="Settings_OllamaOkMany" xml:space="preserve"><value>✓ Ollama connected — {0} models. Click “Test” to make sure Lamha can use it.</value><comment>o.ollamaOk, ported by hand: 11 models or more</comment></data>
+  <data name="Settings_TrNotReady" xml:space="preserve"><value>{0} isn&apos;t set up yet: add its key or choose its model under “Writing tools”. Until then, Google translates.</value><comment>o.trNotReady reworded 2026-10-25, a draft to approve: without &quot;below&quot; (Writing tools is its own page now)</comment></data>
+  <data name="Settings_Currency" xml:space="preserve"><value>Your currency</value><comment>new in Lamha 3, a draft to approve: Settings → Languages, for prices in your currency</comment></data>
+  <data name="Settings_CurrencyHint" xml:space="preserve"><value>A price you select is shown in it too, at the day&apos;s rate</value><comment>new in Lamha 3, a draft to approve: Settings → Languages, for prices in your currency</comment></data>
+  <data name="Settings_CurrencyAuto" xml:space="preserve"><value>Automatic ({0}, from Windows&apos; region)</value><comment>new in Lamha 3, a draft to approve: Settings → Languages, for prices in your currency</comment></data>
+  <data name="Settings_Err_ai_bad_key" xml:space="preserve"><value>The key isn&apos;t valid. Make sure you copied all of it.</value><comment>oerr.ai_bad_key</comment></data>
+  <data name="Settings_Err_ai_busy" xml:space="preserve"><value>The AI service is busy right now — try again in a moment.</value><comment>oerr.ai_busy</comment></data>
+  <data name="Settings_Err_ai_forbidden" xml:space="preserve"><value>The key isn&apos;t allowed to use the API.</value><comment>oerr.ai_forbidden</comment></data>
+  <data name="Settings_Err_ai_model" xml:space="preserve"><value>The chosen model isn&apos;t available to this account. Try another model.</value><comment>oerr.ai_model</comment></data>
+  <data name="Settings_Err_ai_no_credit" xml:space="preserve"><value>The key works, but the account is out of credit. Add credit at console.anthropic.com.</value><comment>oerr.ai_no_credit</comment></data>
+  <data name="Settings_Err_ai_rate_limited" xml:space="preserve"><value>Too many requests — wait a minute and try again.</value><comment>oerr.ai_rate_limited</comment></data>
+  <data name="Settings_Err_ai_timeout" xml:space="preserve"><value>The connection timed out — try again.</value><comment>oerr.ai_timeout</comment></data>
+  <data name="Settings_Err_network" xml:space="preserve"><value>Couldn&apos;t reach the internet.</value><comment>oerr.network</comment></data>
+  <data name="Settings_Err_ollama_model" xml:space="preserve"><value>The model isn&apos;t there. Download it with ollama pull, then click “Refresh list”.</value><comment>oerr.ollama_model</comment></data>
+  <data name="Settings_Err_ollama_offline" xml:space="preserve"><value>Ollama isn&apos;t running at this address. Start it from the Start menu (or install it from ollama.com).</value><comment>oerr.ollama_offline</comment></data>
+  <data name="Settings_ConnectFailed" xml:space="preserve"><value>Couldn&apos;t connect: </value><comment>o.connectFailed</comment></data>
+  <data name="Settings_CustomWorks" xml:space="preserve"><value>✓ Works ({0} s) — the writing tools are ready.</value><comment>o.ollamaWorks reworded 2026-10-25, a draft to approve: another server&apos;s Test, without &quot;free, on your PC&quot;</comment></data>
 </root>

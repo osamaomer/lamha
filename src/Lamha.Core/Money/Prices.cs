@@ -16,12 +16,17 @@ public static partial class Prices
     /// <summary>Longer than this, the selection isn't just a price.</summary>
     private const int MaxLength = 40;
 
-    /// <summary>The ISO codes a selection may name ("1,200 SAR"); the app has their names in both languages.</summary>
-    private static readonly HashSet<string> Codes =
+    /// <summary>
+    /// The ISO codes a selection may name ("1,200 SAR"), and the currencies Settings offers; the app has their names in
+    /// both languages.
+    /// </summary>
+    public static IReadOnlyList<string> Named { get; } =
     [
         "USD", "EUR", "GBP", "SAR", "AED", "EGP", "KWD", "QAR", "BHD", "OMR", "JOD", "MAD", "DZD", "TND", "LYD", "IQD", "LBP",
         "SYP", "YER", "SDG", "TRY", "JPY", "CNY", "INR", "PKR", "CAD", "AUD", "CHF", "KRW", "RUB", "MYR", "IDR",
     ];
+
+    private static readonly HashSet<string> Codes = [.. Named];
 
     /// <summary>Signs and names, longest first where one starts another ("US$" before "$", "ريال سعودي" before "ريال").</summary>
     private static readonly (string Mark, string Currency)[] Marks =

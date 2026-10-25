@@ -30,6 +30,9 @@
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
+    <!-- Lamha's page colour instead of Mica (Settings → Appearance → the wallpaper behind the window) -->
+    <Border x:Name="Solid" Grid.RowSpan="2" Background="{ThemeResource LamhaPageBrush}" Visibility="Collapsed" />
+
     <!-- The title bar: Lamha's mark and name; Windows draws the minimise, maximise and close buttons at its end -->
     <Grid x:Name="TitleBar" Padding="16,0,0,0" Background="Transparent">
       <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
@@ -73,7 +76,7 @@
               </Grid.ColumnDefinitions>
               <StackPanel Padding="32,28,32,40" Spacing="16">
                 <TextBlock Margin="0,0,0,8" Style="{StaticResource LamhaPageTitleTextStyle}" Text="{x:Bind ViewModel.Title, Mode=OneWay}"
-                           AutomationProperties.HeadingLevel="Level1" />
+                           AutomationProperties.HeadingLevel="Level1" Visibility="{x:Bind ViewModel.ShowsTitle, Mode=OneWay}" />
                 <ContentPresenter x:Name="PageHost" HorizontalContentAlignment="Stretch" />
               </StackPanel>
             </Grid>

@@ -149,6 +149,12 @@ public sealed record LamhaSettings
     public bool CardSolid { get; init; }
 
     /// <summary>
+    /// Mica behind the main window (Settings → Appearance; Lamha 2's <c>windowMica</c>). On by default, unlike Lamha 2's:
+    /// phase 1's main window design is drawn on Mica.
+    /// </summary>
+    public bool WindowMica { get; init; } = true;
+
+    /// <summary>
     /// New in Lamha 3: the currency a selected price is shown in (an ISO 4217 code, "SAR"); "" follows Windows' region
     /// (Settings → Languages).
     /// </summary>
