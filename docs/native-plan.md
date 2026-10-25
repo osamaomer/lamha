@@ -2,7 +2,9 @@
 
 The plan for rebuilding Lamha as a native Windows 11 app (WinUI 3 + Windows App SDK) and dropping the Firefox extension and the Linux plan. Written 2026-10-24.
 
-**Where it stands:** phases 0 and 1 are done ([phase 0](#phase-0-results), [phase 1](#phase-1-progress)). Phase 2 (the brain) is built but for the parity tool ([progress](#phase-2-progress)), and phase 3 (Windows integration) is built ([progress](#phase-3-progress)). Phase 4 (the UI) is next.
+**Where it stands:** phases 0 and 1 are done ([phase 0](#phase-0-results), [phase 1](#phase-1-progress)). Phase 2 (the brain) is built but for the parity tool ([progress](#phase-2-progress)), and phase 3 (Windows integration) is built ([progress](#phase-3-progress)). Phase 4 (the UI) is under way: the card is done and out as the first beta ([progress](#phase-4-progress)).
+
+**Branches:** the phases were built on `native/phase-0` … `native/phase-4`, one line of work in the order 0, 2, 3, 1, 4. On 2026-10-25 it was merged into `main` (decision 0003: `main` is Lamha 3) and those branches were deleted; the progress sections below still name the branch each phase was built on. New work goes on short `lamha3/<what>` branches, merged into `main`.
 
 Each section ends with **Ideas** (suggestions, not decided) and **Questions** (each with a recommendation and the phase it must be answered by). The [last section](#questions-by-phase) collects the questions by phase.
 
@@ -468,7 +470,7 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
 - **Narrator:** the meaning chips were named by their gloss, not the word on them; the foot links and the error's Try again had no name.
 - **Measured** (NativeAOT): tray 0 / 49 MB, card open 40 / 84 MB, card closed 1 / 84 MB, within budget but 1 MB under the card's 85 MB commit budget. Applying the card's window settings costs about 3 MB of it.
 
-**Left before the first beta:** the user starts the first run (`beta.yml` must be on `main` first). Listen waits for speech (phase 5).
+**The first beta, v3.0.0-beta.1,** was released from `native/phase-4` before the checks above, so it has the published card's title bar; beta.2, from `main`, has the fixes. Listen waits for speech (phase 5). **Next:** the main window.
 
 ## Moving users from Lamha 2
 
