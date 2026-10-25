@@ -12,9 +12,16 @@
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="16" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
           <controls:LineIcon Glyph="{x:Bind Glyph}" VerticalAlignment="Center" />
           <TextBlock Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{x:Bind Label}" />
+          <!-- The words to review (the design's badge): 16 px high, the button colour -->
+          <Border Grid.Column="2" MinWidth="16" Height="16" Padding="5,0" VerticalAlignment="Center" CornerRadius="8"
+                  Background="{ThemeResource LamhaButtonBrush}" Visibility="{x:Bind controls:Show.IfText(Badge), Mode=OneWay, FallbackValue=Collapsed}">
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeLabel}" FontWeight="SemiBold"
+                       Foreground="{ThemeResource LamhaButtonTextBrush}" Text="{x:Bind Badge, Mode=OneWay}" />
+          </Border>
         </Grid>
       </DataTemplate>
     </Grid.Resources>

@@ -378,6 +378,52 @@
   <data name="Currency_IDR_Short" xml:space="preserve"><value>روبية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
 
 
+  <data name="Review_Due" xml:space="preserve"><value>للمراجعة {0}</value><comment>rv.due</comment></data>
+  <data name="Review_Fresh" xml:space="preserve"><value>جديدة {0}</value><comment>rv.fresh</comment></data>
+  <data name="Review_Totals" xml:space="preserve"><value>{0} · {1} محفوظة</value><comment>rv.totals, ported by hand: the words counted (Review_Words*), then the learned ones</comment></data>
+  <data name="Review_WordsOne" xml:space="preserve"><value>كلمة واحدة</value><comment>rv.totals, ported by hand: 1 word</comment></data>
+  <data name="Review_WordsTwo" xml:space="preserve"><value>كلمتان</value><comment>rv.totals, ported by hand: 2 words</comment></data>
+  <data name="Review_WordsTwoAfter" xml:space="preserve"><value>كلمتين</value><comment>rv.session, ported by hand: 2 words, after a verb</comment></data>
+  <data name="Review_WordsFew" xml:space="preserve"><value>{0} كلمات</value><comment>rv.totals, ported by hand: 3 to 10 words</comment></data>
+  <data name="Review_WordsMany" xml:space="preserve"><value>{0} كلمة</value><comment>rv.totals, ported by hand: 11 words or more</comment></data>
+  <data name="Review_Progress" xml:space="preserve"><value>التقدّم في المراجعة</value><comment>rv.progress</comment></data>
+  <data name="Review_NewWord" xml:space="preserve"><value>كلمة جديدة</value><comment>rv.newWord</comment></data>
+  <data name="Review_Show" xml:space="preserve"><value>أظهر المعنى </value><comment>rv.show</comment></data>
+  <data name="Review_Again" xml:space="preserve"><value>نسيت</value><comment>rv.again</comment></data>
+  <data name="Review_Hard" xml:space="preserve"><value>صعبة</value><comment>rv.hard</comment></data>
+  <data name="Review_Good" xml:space="preserve"><value>عرفتها</value><comment>rv.good</comment></data>
+  <data name="Review_Key" xml:space="preserve"><value>مفتاح {0}</value><comment>rv.key</comment></data>
+  <data name="Review_Remove" xml:space="preserve"><value>إزالة من المراجعة</value><comment>rv.remove</comment></data>
+  <data name="Review_Removed" xml:space="preserve"><value>أُزيلت الكلمة</value><comment>rv.removed</comment></data>
+  <data name="Review_DoneTitle" xml:space="preserve"><value>أحسنت! لا توجد كلمات للمراجعة الآن 🎉</value><comment>rv.doneTitle</comment></data>
+  <data name="Review_Session" xml:space="preserve"><value>راجعت {0} · عرفت {1} · صعبة {2} · نسيت {3}</value><comment>rv.session, ported by hand: the words counted (Review_Words*, Two after a verb)</comment></data>
+  <data name="Review_Next" xml:space="preserve"><value>المراجعة القادمة بعد {0}.</value><comment>rv.next</comment></data>
+  <data name="Review_StreakTwo" xml:space="preserve"><value>🔥 يومان متتاليان من المراجعة</value><comment>rv.streak, ported by hand: 2 days</comment></data>
+  <data name="Review_StreakFew" xml:space="preserve"><value>🔥 {0} أيام متتالية من المراجعة</value><comment>rv.streak, ported by hand: 3 to 10 days</comment></data>
+  <data name="Review_StreakMany" xml:space="preserve"><value>🔥 {0} يومًا متتاليًا من المراجعة</value><comment>rv.streak, ported by hand: 11 days or more</comment></data>
+  <data name="Review_EmptyTitle" xml:space="preserve"><value>لا توجد كلمات بعد</value><comment>rv.emptyTitle</comment></data>
+  <data name="Review_EmptyText" xml:space="preserve"><value>اضغط 🔖 في بطاقة البحث لتضيف الكلمة هنا، أو شغّل «إضافة الكلمات تلقائيًا» في الإعدادات ← مراجعة الكلمات.</value><comment>rv.emptyText</comment></data>
+  <data name="Span_Min" xml:space="preserve"><value>{0} د</value><comment>span.min</comment></data>
+  <data name="Span_HourOne" xml:space="preserve"><value>ساعة</value><comment>span.hours, ported by hand: 1</comment></data>
+  <data name="Span_HourTwo" xml:space="preserve"><value>ساعتان</value><comment>span.hours, ported by hand: 2</comment></data>
+  <data name="Span_HourTwoAfter" xml:space="preserve"><value>ساعتين</value><comment>span.hours, ported by hand: 2, after بعد</comment></data>
+  <data name="Span_HourFew" xml:space="preserve"><value>{0} ساعات</value><comment>span.hours, ported by hand: 3 to 10</comment></data>
+  <data name="Span_HourMany" xml:space="preserve"><value>{0} ساعة</value><comment>span.hours, ported by hand: 11 or more</comment></data>
+  <data name="Span_DayOne" xml:space="preserve"><value>يوم</value><comment>span.days, ported by hand: 1</comment></data>
+  <data name="Span_DayTwo" xml:space="preserve"><value>يومان</value><comment>span.days, ported by hand: 2</comment></data>
+  <data name="Span_DayTwoAfter" xml:space="preserve"><value>يومين</value><comment>span.days, ported by hand: 2, after بعد</comment></data>
+  <data name="Span_DayFew" xml:space="preserve"><value>{0} أيام</value><comment>span.days, ported by hand: 3 to 10</comment></data>
+  <data name="Span_DayMany" xml:space="preserve"><value>{0} يومًا</value><comment>span.days, ported by hand: 11 or more</comment></data>
+  <data name="Span_MonthOne" xml:space="preserve"><value>شهر</value><comment>span.months, ported by hand: 1</comment></data>
+  <data name="Span_MonthTwo" xml:space="preserve"><value>شهران</value><comment>span.months, ported by hand: 2</comment></data>
+  <data name="Span_MonthTwoAfter" xml:space="preserve"><value>شهرين</value><comment>span.months, ported by hand: 2, after بعد</comment></data>
+  <data name="Span_MonthFew" xml:space="preserve"><value>{0} أشهر</value><comment>span.months, ported by hand: 3 to 10</comment></data>
+  <data name="Span_MonthMany" xml:space="preserve"><value>{0} شهرًا</value><comment>span.months, ported by hand: 11 or more</comment></data>
+  <data name="Span_YearOne" xml:space="preserve"><value>سنة</value><comment>span.years, ported by hand: 1</comment></data>
+  <data name="Span_YearTwo" xml:space="preserve"><value>سنتان</value><comment>span.years, ported by hand: 2</comment></data>
+  <data name="Span_YearTwoAfter" xml:space="preserve"><value>سنتين</value><comment>span.years, ported by hand: 2, after بعد</comment></data>
+  <data name="Span_YearFew" xml:space="preserve"><value>{0} سنوات</value><comment>span.years, ported by hand: 3 to 10</comment></data>
+  <data name="Span_YearMany" xml:space="preserve"><value>{0} سنة</value><comment>span.years, ported by hand: 11 or more</comment></data>
   <data name="Proto_Tooltip" xml:space="preserve"><value>لمحة 3 (نموذج أولي)</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>اعرض البطاقة (نص للتجربة)</value></data>
   <data name="Proto_ClipboardHistory" xml:space="preserve"><value>سجل الحافظة</value><comment>d.historyLabel</comment></data>

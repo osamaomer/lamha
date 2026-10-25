@@ -379,6 +379,52 @@
   <data name="Currency_IDR_Short" xml:space="preserve"><value>rupiah</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
 
 
+  <data name="Review_Due" xml:space="preserve"><value>{0} due</value><comment>rv.due</comment></data>
+  <data name="Review_Fresh" xml:space="preserve"><value>{0} new</value><comment>rv.fresh</comment></data>
+  <data name="Review_Totals" xml:space="preserve"><value>{0} · {1} learned</value><comment>rv.totals, ported by hand: the words counted (Review_Words*), then the learned ones</comment></data>
+  <data name="Review_WordsOne" xml:space="preserve"><value>1 word</value><comment>rv.totals, ported by hand: 1 word</comment></data>
+  <data name="Review_WordsTwo" xml:space="preserve"><value>2 words</value><comment>rv.totals, ported by hand: 2 words</comment></data>
+  <data name="Review_WordsTwoAfter" xml:space="preserve"><value>2 words</value><comment>rv.session, ported by hand: 2 words, after a verb</comment></data>
+  <data name="Review_WordsFew" xml:space="preserve"><value>{0} words</value><comment>rv.totals, ported by hand: 3 to 10 words</comment></data>
+  <data name="Review_WordsMany" xml:space="preserve"><value>{0} words</value><comment>rv.totals, ported by hand: 11 words or more</comment></data>
+  <data name="Review_Progress" xml:space="preserve"><value>Review progress</value><comment>rv.progress</comment></data>
+  <data name="Review_NewWord" xml:space="preserve"><value>New word</value><comment>rv.newWord</comment></data>
+  <data name="Review_Show" xml:space="preserve"><value>Show meaning </value><comment>rv.show</comment></data>
+  <data name="Review_Again" xml:space="preserve"><value>Forgot</value><comment>rv.again</comment></data>
+  <data name="Review_Hard" xml:space="preserve"><value>Hard</value><comment>rv.hard</comment></data>
+  <data name="Review_Good" xml:space="preserve"><value>Knew it</value><comment>rv.good</comment></data>
+  <data name="Review_Key" xml:space="preserve"><value>Key {0}</value><comment>rv.key</comment></data>
+  <data name="Review_Remove" xml:space="preserve"><value>Remove from review</value><comment>rv.remove</comment></data>
+  <data name="Review_Removed" xml:space="preserve"><value>Word removed</value><comment>rv.removed</comment></data>
+  <data name="Review_DoneTitle" xml:space="preserve"><value>Well done! Nothing to review right now 🎉</value><comment>rv.doneTitle</comment></data>
+  <data name="Review_Session" xml:space="preserve"><value>Reviewed {0} · knew {1} · hard {2} · forgot {3}</value><comment>rv.session, ported by hand: the words counted (Review_Words*, Two after a verb)</comment></data>
+  <data name="Review_Next" xml:space="preserve"><value>Next review in {0}.</value><comment>rv.next</comment></data>
+  <data name="Review_StreakTwo" xml:space="preserve"><value>🔥 2-day review streak</value><comment>rv.streak, ported by hand: 2 days</comment></data>
+  <data name="Review_StreakFew" xml:space="preserve"><value>🔥 {0}-day review streak</value><comment>rv.streak, ported by hand: 3 to 10 days</comment></data>
+  <data name="Review_StreakMany" xml:space="preserve"><value>🔥 {0}-day review streak</value><comment>rv.streak, ported by hand: 11 days or more</comment></data>
+  <data name="Review_EmptyTitle" xml:space="preserve"><value>No words yet</value><comment>rv.emptyTitle</comment></data>
+  <data name="Review_EmptyText" xml:space="preserve"><value>Press 🔖 on the lookup card to add a word here, or turn on “Add words automatically” in Settings → Word review.</value><comment>rv.emptyText</comment></data>
+  <data name="Span_Min" xml:space="preserve"><value>{0} min</value><comment>span.min</comment></data>
+  <data name="Span_HourOne" xml:space="preserve"><value>1 hour</value><comment>span.hours, ported by hand: 1</comment></data>
+  <data name="Span_HourTwo" xml:space="preserve"><value>2 hours</value><comment>span.hours, ported by hand: 2</comment></data>
+  <data name="Span_HourTwoAfter" xml:space="preserve"><value>2 hours</value><comment>span.hours, ported by hand: 2, after بعد</comment></data>
+  <data name="Span_HourFew" xml:space="preserve"><value>{0} hours</value><comment>span.hours, ported by hand: 3 to 10</comment></data>
+  <data name="Span_HourMany" xml:space="preserve"><value>{0} hours</value><comment>span.hours, ported by hand: 11 or more</comment></data>
+  <data name="Span_DayOne" xml:space="preserve"><value>1 day</value><comment>span.days, ported by hand: 1</comment></data>
+  <data name="Span_DayTwo" xml:space="preserve"><value>2 days</value><comment>span.days, ported by hand: 2</comment></data>
+  <data name="Span_DayTwoAfter" xml:space="preserve"><value>2 days</value><comment>span.days, ported by hand: 2, after بعد</comment></data>
+  <data name="Span_DayFew" xml:space="preserve"><value>{0} days</value><comment>span.days, ported by hand: 3 to 10</comment></data>
+  <data name="Span_DayMany" xml:space="preserve"><value>{0} days</value><comment>span.days, ported by hand: 11 or more</comment></data>
+  <data name="Span_MonthOne" xml:space="preserve"><value>1 month</value><comment>span.months, ported by hand: 1</comment></data>
+  <data name="Span_MonthTwo" xml:space="preserve"><value>2 months</value><comment>span.months, ported by hand: 2</comment></data>
+  <data name="Span_MonthTwoAfter" xml:space="preserve"><value>2 months</value><comment>span.months, ported by hand: 2, after بعد</comment></data>
+  <data name="Span_MonthFew" xml:space="preserve"><value>{0} months</value><comment>span.months, ported by hand: 3 to 10</comment></data>
+  <data name="Span_MonthMany" xml:space="preserve"><value>{0} months</value><comment>span.months, ported by hand: 11 or more</comment></data>
+  <data name="Span_YearOne" xml:space="preserve"><value>1 year</value><comment>span.years, ported by hand: 1</comment></data>
+  <data name="Span_YearTwo" xml:space="preserve"><value>2 years</value><comment>span.years, ported by hand: 2</comment></data>
+  <data name="Span_YearTwoAfter" xml:space="preserve"><value>2 years</value><comment>span.years, ported by hand: 2, after بعد</comment></data>
+  <data name="Span_YearFew" xml:space="preserve"><value>{0} years</value><comment>span.years, ported by hand: 3 to 10</comment></data>
+  <data name="Span_YearMany" xml:space="preserve"><value>{0} years</value><comment>span.years, ported by hand: 11 or more</comment></data>
   <data name="Proto_Tooltip" xml:space="preserve"><value>Lamha 3 (prototype)</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>Show the card (sample text)</value></data>
   <data name="Proto_ClipboardHistory" xml:space="preserve"><value>Clipboard history</value><comment>d.historyLabel</comment></data>

@@ -21,6 +21,11 @@ public static class Show
 
     public static Visibility IfAny(int count) => count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
+    /// <summary>A bar's filled part and the rest, as star widths of a grid (Review's progress, from 0 to 1).</summary>
+    public static GridLength Filled(double part) => new(Math.Clamp(part, 0, 1), GridUnitType.Star);
+
+    public static GridLength Unfilled(double part) => new(1 - Math.Clamp(part, 0, 1), GridUnitType.Star);
+
     /// <summary>A tooltip only when there's something to say (an empty one still pops up).</summary>
     public static string? Tooltip(string? text) => string.IsNullOrEmpty(text) ? null : text;
 

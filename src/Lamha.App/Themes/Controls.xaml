@@ -97,6 +97,15 @@
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
   </Style>
 
+  <!-- Review's answers (Forgot / Hard / Knew it): the answer over when it brings the word back, filling its column;
+       each sets its own tint and colour -->
+  <Style x:Key="LamhaGradeButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Padding" Value="8" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+    <Setter Property="FontWeight" Value="Normal" />
+  </Style>
+
   <!-- Deletes something: never looks like a harmless action (Lamha 2's btn.danger) -->
   <Style x:Key="LamhaDangerButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
     <Setter Property="Background" Value="{ThemeResource LamhaDangerSoftBrush}" />

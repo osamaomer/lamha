@@ -18,6 +18,10 @@ public sealed partial class NavItem(string id, string label, Glyph glyph) : Obse
     [ObservableProperty]
     public partial string? Tooltip { get; set; }
 
+    /// <summary>A count beside the name (the words to review: "١٥"), or "" for none.</summary>
+    [ObservableProperty]
+    public partial string Badge { get; set; } = "";
+
     /// <summary>What Narrator reads for the list item.</summary>
     public override string ToString() => Label;
 }
@@ -89,6 +93,9 @@ public sealed partial class MainViewModel : ObservableObject
         {
         }
     }
+
+    /// <summary>The count on Review: words due and new ones for today (Lamha 2's <c>rvBadge</c>).</summary>
+    public void SetReviewCount(int count) => Find("review").Badge = count > 0 ? Localization.Number(count) : "";
 
     /// <summary>The page <paramref name="id"/> ("translate", "settings"…), or Translate for one that doesn't exist.</summary>
     public NavItem Find(string id) => Pages.Concat(Footer).FirstOrDefault(p => p.Id == id) ?? Pages[0];

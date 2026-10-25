@@ -42,6 +42,7 @@ public sealed partial class MainWindow : Window, IPageHost
     private TranslatePage? _translate;
     private WritePage? _write;
     private HistoryPage? _history;
+    private ReviewPage? _review;
     private bool _choosing;
 
     /// <param name="viewModel">The pages, the one that's open, and the toast.</param>
@@ -53,6 +54,7 @@ public sealed partial class MainWindow : Window, IPageHost
         _brain = brain;
         _lookupKeys = lookupKeys;
         InitializeComponent();
+        Animations.Refresh(brain.Settings.Current); // the setting may have changed since the last window
         Title = Lamha;
         Root.FlowDirection = Localization.FlowDirection;
         SystemBackdrop = new MicaBackdrop();
@@ -68,7 +70,9 @@ public sealed partial class MainWindow : Window, IPageHost
         PageList.SelectedItem = ViewModel.Page;
         ViewModel.PropertyChanged += OnViewModelChanged;
         ShowPage();
-        // The first focus goes to the Translate page's box, ready to type; on other pages to the pane as if clicked:
+        _ = CountReviewAsync();
+        // The first focus goes to the Translate page's box, ready to type (Write's draft, Review's card likewise); on
+        // other pages to the pane as if clicked:
         // the arrow keys work in it, without the keyboard's focus rectangle on a window that was opened with the mouse.
         Root.Loaded += (_, _) =>
         {
@@ -79,6 +83,10 @@ public sealed partial class MainWindow : Window, IPageHost
             else if (PageHost.Content is WritePage write)
             {
                 write.FocusDraft();
+            }
+            else if (PageHost.Content is ReviewPage review)
+            {
+                review.FocusCard(); // so Space shows the meaning at once, not the page under the pane's focus
             }
             else
             {
@@ -202,6 +210,20 @@ public sealed partial class MainWindow : Window, IPageHost
 
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
 
+    /// <summary>The count on Review when the window opens; the Review page keeps it up to date after that.</summary>
+    private async Task CountReviewAsync()
+    {
+        try
+        {
+            var queue = await _brain.Review.QueueAsync().ConfigureAwait(true);
+            ViewModel.SetReviewCount(queue.Due + queue.New);
+        }
+        catch (Exception e) when (e is not OutOfMemoryException)
+        {
+            AppLog.Error("review count", e);
+        }
+    }
+
     /// <summary>One page is open across both lists: choosing in one clears the other.</summary>
     private void OnPageChosen(object sender, SelectionChangedEventArgs e)
     {
@@ -243,6 +265,17 @@ public sealed partial class MainWindow : Window, IPageHost
                 _history ??= new HistoryPage(new HistoryViewModel(_brain, this));
                 _history.ViewModel.Refresh();
                 PageHost.Content = _history;
+                break;
+            case "review":
+                if (_review is null)
+                {
+                    _review = new ReviewPage(new ReviewViewModel(_brain, this));
+                    _review.ViewModel.CountChanged += ViewModel.SetReviewCount;
+                }
+
+                _review.ViewModel.Refresh();
+                PageHost.Content = _review;
+                _review.FocusCard();
                 break;
             default:
                 PageHost.Content = null;
