@@ -96,6 +96,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         Writing = new WritingSetupViewModel(brain, () => _ = LoadTranslatorAsync());
         AiIntro = Localization.Format("Settings_AiIntro", writeKeys);
         Clipboard = new ClipboardSetupViewModel(brain, clipboard, host);
+        Privacy = new PrivacySetupViewModel(brain, host);
         Tiles =
         [
             Tile("languages", Glyph.Translate, "Settings_Languages", "Settings_UiLang", "Settings_TargetLang", "Settings_Reverse"),
@@ -134,7 +135,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     /// <summary>The category open ("languages", "card"…), or "" for the home.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsHome), nameof(SectionTitle), nameof(IsLanguages), nameof(IsCard), nameof(IsWriting), nameof(IsTranslation), nameof(IsClipboard),
+    [NotifyPropertyChangedFor(nameof(IsHome), nameof(SectionTitle), nameof(IsLanguages), nameof(IsCard), nameof(IsWriting), nameof(IsTranslation), nameof(IsClipboard), nameof(IsPrivacy),
         nameof(IsReview), nameof(IsOffline), nameof(IsAppearance))]
     public partial string Section { get; private set; } = "";
 
@@ -154,6 +155,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     public bool IsClipboard => Section == "clipboard";
 
     public ClipboardSetupViewModel Clipboard { get; }
+
+    public bool IsPrivacy => Section == "privacy";
+
+    public PrivacySetupViewModel Privacy { get; }
 
     public bool IsReview => Section == "review";
 
@@ -418,6 +423,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         else if (value == "clipboard")
         {
             Clipboard.Load(_brain.Settings.Current);
+        }
+        else if (value == "privacy")
+        {
+            Privacy.Load(_brain.Settings.Current);
         }
     }
 

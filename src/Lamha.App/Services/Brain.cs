@@ -76,6 +76,9 @@ public sealed partial class Brain : IDisposable
 
     public DiagnosticsReport Diagnostics => _lookups.Value.Diagnostics;
 
+    /// <summary>Settings → A copy of my data: save a copy, and restore one (Lamha 2's format).</summary>
+    public BackupService Backup => _lookups.Value.Backup;
+
     /// <summary>Lamha's tools on a copy in clipboard history (translate, write it in English, proofread, summarize, add to review).</summary>
     public ClipActions ClipActions => _lookups.Value.ClipActions;
 
@@ -146,7 +149,10 @@ public sealed partial class Brain : IDisposable
             Money = new CurrencyService(http, brain.State, network, clock);
             Diagnostics = new DiagnosticsReport(
                 settings, brain.Localization, brain.Secrets, deck, history, mistakes, packs, errorLog, new HostInfo(settings), Version);
+            Backup = new BackupService(Review, deck, history, mistakes, activity, brain.State, today, clock, Version);
         }
+
+        public BackupService Backup { get; }
 
         public DictionaryFile? DictionaryFile { get; }
 

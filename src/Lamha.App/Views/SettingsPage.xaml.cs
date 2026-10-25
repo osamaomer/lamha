@@ -218,6 +218,39 @@ public sealed class SettingsStrings
 
     public string CbEncrypted { get; } = Localization.Get("Settings_CbEncrypted");
 
+    public string SaveHistory { get; } = Localization.Get("Settings_SaveHistory");
+
+    public string SaveHistoryHint { get; } = Localization.Get("Settings_SaveHistoryHint");
+
+    public string ClearHistory { get; } = Localization.Get("Settings_ClearHistory");
+
+    public string Clear { get; } = Localization.Get("Common_ClearShort");
+
+    public string Backup { get; } = Localization.Get("Settings_Backup");
+
+    public string BackupHint { get; } = Localization.Get("Settings_BackupHint");
+
+    public string BackupSave { get; } = Localization.Get("Settings_BackupSave");
+
+    public string BackupRestore { get; } = Localization.Get("Settings_BackupRestore");
+
+    public string Report { get; } = Localization.Get("Settings_Report");
+
+    public string ReportHint { get; } = Localization.Get("Settings_ReportHint");
+
+    public string ReportSend { get; } = Localization.Get("Settings_ReportSend");
+
+    public string ReportShow { get; } = Localization.Get("Settings_ReportShow");
+
+    public string Copy { get; } = Localization.Get("Common_Copy");
+
+    public string MyData { get; } = Localization.Get("Settings_MyData");
+
+    /// <summary>The design's "%LOCALAPPDATA%\Lamha Data · Uninstalling or reinstalling Lamha leaves it", the path kept left to right.</summary>
+    public string MyDataLine { get; } = "‎%LOCALAPPDATA%\\Lamha Data‎ · " + Localization.Get("Settings_MyDataHint");
+
+    public string OpenFolder { get; } = Localization.Get("Settings_OpenFolder");
+
     public string Context { get; } = Localization.Get("Settings_Context");
 
     public string ContextHint { get; } = Localization.Get("Settings_ContextHint");

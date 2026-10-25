@@ -241,6 +241,22 @@ public sealed partial class MainWindow : Window, IPageHost
 
     public void OpenSettings(string section) => Go("settings", section);
 
+    public async Task<string?> PickSaveFileAsync(string name)
+    {
+        var picker = new Microsoft.Windows.Storage.Pickers.FileSavePicker(AppWindow.Id) { SuggestedFileName = name, DefaultFileExtension = ".json" };
+        picker.FileTypeChoices.Add("JSON", [".json"]);
+        return (await picker.PickSaveFileAsync())?.Path;
+    }
+
+    public async Task<string?> PickOpenFileAsync()
+    {
+        var picker = new Microsoft.Windows.Storage.Pickers.FileOpenPicker(AppWindow.Id);
+        picker.FileTypeFilter.Add(".json");
+        return (await picker.PickSingleFileAsync())?.Path;
+    }
+
+    public void OpenFolder(string folder) => _ = global::Windows.System.Launcher.LaunchFolderPathAsync(folder);
+
     public async Task<Answer> AskAsync(string question, string confirm, string text = "", string? other = null)
     {
         var dialog = new ContentDialog

@@ -699,4 +699,40 @@
   <data name="Settings_CbItemsFew" xml:space="preserve"><value>{0} items</value><comment>d.sItemCount, ported by hand: 3 to 10 items</comment></data>
   <data name="Settings_CbItemsMany" xml:space="preserve"><value>{0} items</value><comment>d.sItemCount, ported by hand: 11 items or more</comment></data>
   <data name="Settings_CbRemoveApp" xml:space="preserve"><value>Remove {0}</value><comment>d.sRemoveApp, ported by hand</comment></data>
+  <data name="Settings_SaveHistoryHint" xml:space="preserve"><value>Stored locally on your device only. If this is off, the words you look up aren&apos;t added to review automatically either.</value><comment>o.saveHistoryHint</comment></data>
+  <data name="Settings_ClearHistory" xml:space="preserve"><value>Clear history</value><comment>o.clearHistory</comment></data>
+  <data name="Settings_HistEmpty" xml:space="preserve"><value>History is empty</value><comment>o.histEmpty</comment></data>
+  <data name="Settings_BackupHint" xml:space="preserve"><value>Your review cards and progress, your word history and your mistake journal, in a file you keep. Restoring adds what&apos;s in the file to what&apos;s here, on this device or another, without deleting anything.</value><comment>o.backupHint</comment></data>
+  <data name="Settings_BackupSave" xml:space="preserve"><value>Save a copy</value><comment>o.backupSave</comment></data>
+  <data name="Settings_BackupRestore" xml:space="preserve"><value>Restore</value><comment>o.backupRestore</comment></data>
+  <data name="Settings_BackupSaved" xml:space="preserve"><value>The copy is ready: keep the file somewhere safe.</value><comment>o.backupSaved</comment></data>
+  <data name="Settings_BackupBad" xml:space="preserve"><value>This file isn&apos;t a copy of Lamha&apos;s data.</value><comment>o.backupBad</comment></data>
+  <data name="Settings_BackupFailed" xml:space="preserve"><value>That didn&apos;t work. Try again.</value><comment>o.backupFailed</comment></data>
+  <data name="Settings_ReportHint" xml:space="preserve"><value>A report of your settings and the latest errors, so the developer can see what happened. It holds none of your text, words or keys. Read it first: nothing is sent unless you send it.</value><comment>o.reportHint</comment></data>
+  <data name="Settings_ReportSend" xml:space="preserve"><value>Report on GitHub</value><comment>o.reportSend</comment></data>
+  <data name="Settings_ReportCopied" xml:space="preserve"><value>The report was copied. Paste it into your message.</value><comment>o.reportCopied</comment></data>
+  <data name="Settings_ReportOpened" xml:space="preserve"><value>The report page opened with the report in it. Describe what happened, then submit it.</value><comment>o.reportOpened</comment></data>
+  <data name="Settings_ReportShow" xml:space="preserve"><value>Show the report</value><comment>o.reportShow</comment></data>
+  <data name="Settings_ReportIssue" xml:space="preserve"><value>What happened?
+
+
+What did you expect?
+
+</value><comment>o.reportIssue</comment></data>
+  <data name="Settings_HistCountOne" xml:space="preserve"><value>1 word saved</value><comment>o.histCount, ported by hand: one word</comment></data>
+  <data name="Settings_HistCountTwo" xml:space="preserve"><value>2 words saved</value><comment>o.histCount, ported by hand: two words</comment></data>
+  <data name="Settings_HistCountFew" xml:space="preserve"><value>{0} words saved</value><comment>o.histCount, ported by hand: 3 to 10 words</comment></data>
+  <data name="Settings_HistCountMany" xml:space="preserve"><value>{0} words saved</value><comment>o.histCount, ported by hand: 11 words or more</comment></data>
+  <data name="Settings_BackupDone" xml:space="preserve"><value>Added {0} and {1} to the history.</value><comment>o.backupDone, ported by hand: the cards and the words, counted below</comment></data>
+  <data name="Settings_CardsOne" xml:space="preserve"><value>1 card</value><comment>o.backupDone, ported by hand: one card</comment></data>
+  <data name="Settings_CardsTwo" xml:space="preserve"><value>2 cards</value><comment>o.backupDone, ported by hand: two cards</comment></data>
+  <data name="Settings_CardsFew" xml:space="preserve"><value>{0} cards</value><comment>o.backupDone, ported by hand: 3 to 10 cards</comment></data>
+  <data name="Settings_CardsMany" xml:space="preserve"><value>{0} cards</value><comment>o.backupDone, ported by hand: 11 cards or more</comment></data>
+  <data name="Settings_WordsOne" xml:space="preserve"><value>1 word</value><comment>o.backupDone, ported by hand: one word</comment></data>
+  <data name="Settings_WordsTwo" xml:space="preserve"><value>2 words</value><comment>o.backupDone, ported by hand: two words</comment></data>
+  <data name="Settings_WordsFew" xml:space="preserve"><value>{0} words</value><comment>o.backupDone, ported by hand: 3 to 10 words</comment></data>
+  <data name="Settings_WordsMany" xml:space="preserve"><value>{0} words</value><comment>o.backupDone, ported by hand: 11 words or more</comment></data>
+  <data name="Settings_MyData" xml:space="preserve"><value>My data on this PC</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_MyDataHint" xml:space="preserve"><value>Uninstalling or reinstalling Lamha leaves it</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_OpenFolder" xml:space="preserve"><value>Open the folder</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
 </root>

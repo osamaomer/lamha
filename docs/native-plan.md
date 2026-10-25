@@ -513,7 +513,10 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
   - **Questions** (`IPageHost.AskAsync`) now take Lamha 2's line under the question and a second choice; the destructive choice is the tokens' solid red, and nothing is in Windows' blue (Esc still cancels).
   - **The switch's knob is white when on,** in both themes, as designed (dark had Windows' black knob).
   - **Seen** in both languages and themes through UI Automation: on, a bad name, a name added and removed, off with Keep it, Clear all's question and Cancel. 364 tests.
-  - **Still to build:** Keyboard shortcuts (changing them), Privacy & history (backup, Report a problem, the data folder and Delete my data) and Lamha (version, updates, Start with Windows, the sources); the Animations Preview.
+- **Settings, Privacy & history** (2026-10-25; `ViewModels/Main/PrivacySetupViewModel`): keep a history of words; Clear history with how many words are saved (as the History page's Clear: no question, Undo for 5 s); **a copy of my data** (Save a copy as `lamha-YYYY-MM-DD.json` and Restore, through Windows' file dialogs from the Windows App SDK's Foundation, Core's `BackupService` in Lamha 2's format; Brain now has it); **Report a problem** (Copy, Report on GitHub with the report in a new issue cut to fit an address, and "Show the report" to read it first: Lamha 2's `initReport()`); **my data on this PC** with Open the folder.
+  - **Not built yet, questions for you:** *Delete my data* (what happens after: Lamha quits and starts fresh? the keys in Credential Manager too?) and *What is sent, and where?* (Lamha 2's text names page translation and only Claude and Gemini: it needs your new wording for the app and five providers).
+  - **Seen** in both languages and themes; the Save / Open dialogs themselves are Windows' and weren't driven through UI Automation here: to try on the desktop.
+  - **Still to build:** Keyboard shortcuts (changing them) and Lamha (version, updates, Start with Windows, the sources); the Animations Preview.
 
 ## Moving users from Lamha 2
 

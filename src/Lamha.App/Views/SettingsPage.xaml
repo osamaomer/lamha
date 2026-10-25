@@ -367,6 +367,79 @@
       <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" Text="{x:Bind S.CbEncrypted}" />
     </StackPanel>
 
+    <!-- ===== Privacy & history ===== -->
+    <StackPanel x:Name="PrivacySection" x:Load="{x:Bind ViewModel.IsPrivacy, Mode=OneWay}" Spacing="4">
+      <controls:SettingsCard Header="{x:Bind S.SaveHistory}" Description="{x:Bind S.SaveHistoryHint}">
+        <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.Privacy.SaveHistory, Mode=TwoWay}" />
+      </controls:SettingsCard>
+      <controls:SettingsCard Header="{x:Bind S.ClearHistory}" Description="{x:Bind ViewModel.Privacy.HistoryCount, Mode=OneWay}">
+        <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Privacy.ClearHistoryCommand}" AutomationProperties.Name="{x:Bind S.ClearHistory}">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <controls:LineIcon Glyph="Trash" Width="14" Height="14" VerticalAlignment="Center" />
+            <TextBlock VerticalAlignment="Center" Text="{x:Bind S.Clear}" />
+          </StackPanel>
+        </Button>
+      </controls:SettingsCard>
+
+      <!-- A copy of my data: Save a copy and Restore, and how it went under them -->
+      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
+        <StackPanel Spacing="8">
+          <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Spacing="2">
+              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Backup}" />
+              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.BackupHint}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+              <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.BackupSave}" Command="{x:Bind ViewModel.Privacy.SaveCopyCommand}" />
+              <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.BackupRestore}" Command="{x:Bind ViewModel.Privacy.RestoreCommand}" />
+            </StackPanel>
+          </Grid>
+          <controls:StatusText Text="{x:Bind ViewModel.Privacy.BackupStatus, Mode=OneWay}" Kind="{x:Bind ViewModel.Privacy.BackupStatusKind, Mode=OneWay}" />
+        </StackPanel>
+      </Border>
+
+      <!-- Report a problem: Copy, Report on GitHub, and the report itself to read first -->
+      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
+        <StackPanel Spacing="8">
+          <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Spacing="2">
+              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Report}" />
+              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.ReportHint}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+              <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.Copy}" Command="{x:Bind ViewModel.Privacy.CopyReportCommand}" />
+              <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.ReportSend}" Command="{x:Bind ViewModel.Privacy.SendReportCommand}" />
+            </StackPanel>
+          </Grid>
+          <controls:StatusText Text="{x:Bind ViewModel.Privacy.ReportStatus, Mode=OneWay}" Kind="Ok" />
+          <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" Content="{x:Bind S.ReportShow}" Command="{x:Bind ViewModel.Privacy.ToggleReportCommand}" />
+          <Border Padding="12,8" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaChipBrush}" FlowDirection="LeftToRight"
+                  Visibility="{x:Bind ViewModel.Privacy.IsReportShown, Mode=OneWay}">
+            <TextBlock FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource LamhaTextBrush}"
+                       Text="{x:Bind ViewModel.Privacy.Report, Mode=OneWay}" />
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <!-- My data on this PC: where it is, and Open the folder -->
+      <controls:SettingsCard Header="{x:Bind S.MyData}" Description="{x:Bind S.MyDataLine}">
+        <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.Privacy.OpenFolderCommand}" AutomationProperties.Name="{x:Bind S.OpenFolder}">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <controls:LineIcon Glyph="Folder" Width="14" Height="14" VerticalAlignment="Center" />
+            <TextBlock VerticalAlignment="Center" Text="{x:Bind S.OpenFolder}" />
+          </StackPanel>
+        </Button>
+      </controls:SettingsCard>
+    </StackPanel>
+
     <!-- ===== The lookup card ===== -->
     <StackPanel x:Name="CardSection" x:Load="{x:Bind ViewModel.IsCard, Mode=OneWay}" Spacing="4">
       <controls:SettingsCard Header="{x:Bind S.Context}" Description="{x:Bind S.ContextHint}">

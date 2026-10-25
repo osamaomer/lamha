@@ -698,4 +698,40 @@
   <data name="Settings_CbItemsFew" xml:space="preserve"><value>{0} عناصر</value><comment>d.sItemCount, ported by hand: 3 to 10 items</comment></data>
   <data name="Settings_CbItemsMany" xml:space="preserve"><value>{0} عنصرًا</value><comment>d.sItemCount, ported by hand: 11 items or more</comment></data>
   <data name="Settings_CbRemoveApp" xml:space="preserve"><value>إزالة {0}</value><comment>d.sRemoveApp, ported by hand</comment></data>
+  <data name="Settings_SaveHistoryHint" xml:space="preserve"><value>يُحفظ محليًا على جهازك فقط. إن أوقفته، لا تُضاف الكلمات التي تبحث عنها إلى المراجعة تلقائيًا أيضًا.</value><comment>o.saveHistoryHint</comment></data>
+  <data name="Settings_ClearHistory" xml:space="preserve"><value>مسح السجل</value><comment>o.clearHistory</comment></data>
+  <data name="Settings_HistEmpty" xml:space="preserve"><value>السجل فارغ</value><comment>o.histEmpty</comment></data>
+  <data name="Settings_BackupHint" xml:space="preserve"><value>بطاقات المراجعة وتقدّمك فيها، وسجل الكلمات، وسجل أخطائي، في ملف تحتفظ به. الاسترجاع يضيف ما في الملف إلى ما هنا، على هذا الجهاز أو غيره، دون أن يحذف شيئًا.</value><comment>o.backupHint</comment></data>
+  <data name="Settings_BackupSave" xml:space="preserve"><value>حفظ نسخة</value><comment>o.backupSave</comment></data>
+  <data name="Settings_BackupRestore" xml:space="preserve"><value>استرجاع</value><comment>o.backupRestore</comment></data>
+  <data name="Settings_BackupSaved" xml:space="preserve"><value>النسخة جاهزة: احتفظ بالملف في مكان آمن.</value><comment>o.backupSaved</comment></data>
+  <data name="Settings_BackupBad" xml:space="preserve"><value>هذا الملف ليس نسخة من بيانات لمحة.</value><comment>o.backupBad</comment></data>
+  <data name="Settings_BackupFailed" xml:space="preserve"><value>تعذّر ذلك. أعد المحاولة.</value><comment>o.backupFailed</comment></data>
+  <data name="Settings_ReportHint" xml:space="preserve"><value>تقرير بإعداداتك وآخر الأخطاء، ليعرف المطوّر ما حدث. لا يحتوي على نصوصك ولا كلماتك ولا مفاتيحك. اقرأه أولًا: لا يُرسَل شيء إلا إن أرسلته أنت.</value><comment>o.reportHint</comment></data>
+  <data name="Settings_ReportSend" xml:space="preserve"><value>إبلاغ على GitHub</value><comment>o.reportSend</comment></data>
+  <data name="Settings_ReportCopied" xml:space="preserve"><value>نُسخ التقرير. الصقه في رسالتك.</value><comment>o.reportCopied</comment></data>
+  <data name="Settings_ReportOpened" xml:space="preserve"><value>فُتحت صفحة البلاغ والتقرير فيها. اكتب ما حدث ثم أرسله.</value><comment>o.reportOpened</comment></data>
+  <data name="Settings_ReportShow" xml:space="preserve"><value>عرض التقرير</value><comment>o.reportShow</comment></data>
+  <data name="Settings_ReportIssue" xml:space="preserve"><value>ماذا حدث؟
+
+
+ماذا كنت تتوقع؟
+
+</value><comment>o.reportIssue</comment></data>
+  <data name="Settings_HistCountOne" xml:space="preserve"><value>كلمة واحدة محفوظة</value><comment>o.histCount, ported by hand: one word</comment></data>
+  <data name="Settings_HistCountTwo" xml:space="preserve"><value>كلمتان محفوظتان</value><comment>o.histCount, ported by hand: two words</comment></data>
+  <data name="Settings_HistCountFew" xml:space="preserve"><value>{0} كلمات محفوظة</value><comment>o.histCount, ported by hand: 3 to 10 words</comment></data>
+  <data name="Settings_HistCountMany" xml:space="preserve"><value>{0} كلمة محفوظة</value><comment>o.histCount, ported by hand: 11 words or more</comment></data>
+  <data name="Settings_BackupDone" xml:space="preserve"><value>أُضيفت {0} و{1} إلى السجل.</value><comment>o.backupDone, ported by hand: the cards and the words, counted below</comment></data>
+  <data name="Settings_CardsOne" xml:space="preserve"><value>بطاقة واحدة</value><comment>o.backupDone, ported by hand: one card</comment></data>
+  <data name="Settings_CardsTwo" xml:space="preserve"><value>بطاقتان</value><comment>o.backupDone, ported by hand: two cards</comment></data>
+  <data name="Settings_CardsFew" xml:space="preserve"><value>{0} بطاقات</value><comment>o.backupDone, ported by hand: 3 to 10 cards</comment></data>
+  <data name="Settings_CardsMany" xml:space="preserve"><value>{0} بطاقة</value><comment>o.backupDone, ported by hand: 11 cards or more</comment></data>
+  <data name="Settings_WordsOne" xml:space="preserve"><value>كلمة واحدة</value><comment>o.backupDone, ported by hand: one word</comment></data>
+  <data name="Settings_WordsTwo" xml:space="preserve"><value>كلمتان</value><comment>o.backupDone, ported by hand: two words</comment></data>
+  <data name="Settings_WordsFew" xml:space="preserve"><value>{0} كلمات</value><comment>o.backupDone, ported by hand: 3 to 10 words</comment></data>
+  <data name="Settings_WordsMany" xml:space="preserve"><value>{0} كلمة</value><comment>o.backupDone, ported by hand: 11 words or more</comment></data>
+  <data name="Settings_MyData" xml:space="preserve"><value>بياناتي على هذا الجهاز</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_MyDataHint" xml:space="preserve"><value>لا يحذفها إلغاء تثبيت لمحة ولا إعادة تثبيته</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+  <data name="Settings_OpenFolder" xml:space="preserve"><value>فتح المجلد</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
 </root>

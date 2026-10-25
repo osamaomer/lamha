@@ -38,6 +38,7 @@ public enum Glyph
     Palette,
     Shield,
     Info,
+    Folder,
 }
 
 /// <summary>
@@ -92,6 +93,7 @@ public sealed partial class LineIcon : UserControl
         [Glyph.Palette] = ["M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z", "M12 2v20", "M12 7h7", "M12 12h10", "M12 17h7"],
         [Glyph.Shield] = ["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"],
         [Glyph.Info] = ["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z", "M12 16v-4", "M12 8h.01"],
+        [Glyph.Folder] = ["M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"],
     };
 
     private readonly Canvas _canvas = new() { Width = 24, Height = 24 };

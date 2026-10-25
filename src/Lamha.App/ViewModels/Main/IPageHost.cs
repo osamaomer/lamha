@@ -34,6 +34,15 @@ public interface IPageHost
     /// <summary>A word went into the review list or out of it: the count on Review is read again.</summary>
     void ReviewChanged();
 
+    /// <summary>Windows' Save dialog for a JSON file named <paramref name="name"/>: the path chosen, or null.</summary>
+    Task<string?> PickSaveFileAsync(string name);
+
+    /// <summary>Windows' Open dialog for a JSON file: the path chosen, or null.</summary>
+    Task<string?> PickOpenFileAsync();
+
+    /// <summary>Opens <paramref name="folder"/> in File Explorer.</summary>
+    void OpenFolder(string folder);
+
     /// <summary>Settings, at the category <paramref name="section"/> ("writing", "translation", "offline"): an error's Settings button.</summary>
     void OpenSettings(string section);
 
