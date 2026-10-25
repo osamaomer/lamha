@@ -425,6 +425,66 @@
   <data name="Span_YearTwoAfter" xml:space="preserve"><value>2 years</value><comment>span.years, ported by hand: 2, after بعد</comment></data>
   <data name="Span_YearFew" xml:space="preserve"><value>{0} years</value><comment>span.years, ported by hand: 3 to 10</comment></data>
   <data name="Span_YearMany" xml:space="preserve"><value>{0} years</value><comment>span.years, ported by hand: 11 or more</comment></data>
+  <data name="Clipboard_Search" xml:space="preserve"><value>Search the clipboard…</value><comment>d.search</comment></data>
+  <data name="Clipboard_SearchLabel" xml:space="preserve"><value>Search the clipboard</value><comment>d.searchLabel</comment></data>
+  <data name="Clipboard_All" xml:space="preserve"><value>All</value><comment>d.all</comment></data>
+  <data name="Clipboard_PinnedFilter" xml:space="preserve"><value>Pinned</value><comment>d.pinnedFilter</comment></data>
+  <data name="Clipboard_Filter" xml:space="preserve"><value>Filter</value><comment>d.filter</comment></data>
+  <data name="Clipboard_HistoryLabel" xml:space="preserve"><value>Clipboard history</value><comment>d.historyLabel</comment></data>
+  <data name="Clipboard_ShowMore" xml:space="preserve"><value>Show more</value><comment>d.showMore</comment></data>
+  <data name="Clipboard_NoResults" xml:space="preserve"><value>No results</value><comment>d.noResults</comment></data>
+  <data name="Clipboard_NoPinned" xml:space="preserve"><value>Nothing pinned yet — pin what you use often with Ctrl+P</value><comment>d.noPinned</comment></data>
+  <data name="Clipboard_Empty" xml:space="preserve"><value>Nothing here yet — copy any text and it shows up here</value><comment>d.empty</comment></data>
+  <data name="Clipboard_Now" xml:space="preserve"><value>Just now</value><comment>d.now</comment></data>
+  <data name="Clipboard_Yesterday" xml:space="preserve"><value>Yesterday</value><comment>d.yesterday</comment></data>
+  <data name="Clipboard_MinAgoOne" xml:space="preserve"><value>1 minute ago</value><comment>d.minAgo, ported by hand: 1</comment></data>
+  <data name="Clipboard_MinAgoTwo" xml:space="preserve"><value>2 minutes ago</value><comment>d.minAgo, ported by hand: 2</comment></data>
+  <data name="Clipboard_MinAgoFew" xml:space="preserve"><value>{0} minutes ago</value><comment>d.minAgo, ported by hand: 3 to 10</comment></data>
+  <data name="Clipboard_MinAgoMany" xml:space="preserve"><value>{0} minutes ago</value><comment>d.minAgo, ported by hand: 11 or more</comment></data>
+  <data name="Clipboard_HourAgoOne" xml:space="preserve"><value>1 hour ago</value><comment>d.hourAgo, ported by hand: 1</comment></data>
+  <data name="Clipboard_HourAgoTwo" xml:space="preserve"><value>2 hours ago</value><comment>d.hourAgo, ported by hand: 2</comment></data>
+  <data name="Clipboard_HourAgoFew" xml:space="preserve"><value>{0} hours ago</value><comment>d.hourAgo, ported by hand: 3 to 10</comment></data>
+  <data name="Clipboard_HourAgoMany" xml:space="preserve"><value>{0} hours ago</value><comment>d.hourAgo, ported by hand: 11 or more</comment></data>
+  <data name="Clipboard_DayAgoOne" xml:space="preserve"><value>1 day ago</value><comment>d.dayAgo, ported by hand: 1</comment></data>
+  <data name="Clipboard_DayAgoTwo" xml:space="preserve"><value>2 days ago</value><comment>d.dayAgo, ported by hand: 2</comment></data>
+  <data name="Clipboard_DayAgoFew" xml:space="preserve"><value>{0} days ago</value><comment>d.dayAgo, ported by hand: 3 to 10</comment></data>
+  <data name="Clipboard_DayAgoMany" xml:space="preserve"><value>{0} days ago</value><comment>d.dayAgo, ported by hand: 11 or more</comment></data>
+  <data name="Clipboard_Pinned" xml:space="preserve"><value>Pinned</value><comment>d.pinned</comment></data>
+  <data name="Clipboard_Pin" xml:space="preserve"><value>Pin</value><comment>d.pin</comment></data>
+  <data name="Clipboard_Unpin" xml:space="preserve"><value>Unpin</value><comment>d.unpin</comment></data>
+  <data name="Clipboard_PinKey" xml:space="preserve"><value>Pin (Ctrl+P)</value><comment>d.pinKey</comment></data>
+  <data name="Clipboard_UnpinKey" xml:space="preserve"><value>Unpin (Ctrl+P)</value><comment>d.unpinKey</comment></data>
+  <data name="Clipboard_Delete" xml:space="preserve"><value>Delete</value><comment>d.delete</comment></data>
+  <data name="Clipboard_DeleteKey" xml:space="preserve"><value>Delete (Delete)</value><comment>d.deleteKey</comment></data>
+  <data name="Clipboard_Deleted" xml:space="preserve"><value>Item deleted</value><comment>d.deleted</comment></data>
+  <data name="Clipboard_PinnedToast" xml:space="preserve"><value>Pinned 📌</value><comment>d.pinnedToast</comment></data>
+  <data name="Clipboard_Unpinned" xml:space="preserve"><value>Unpinned</value><comment>d.unpinned</comment></data>
+  <data name="Clipboard_PinLimit" xml:space="preserve"><value>You've reached the maximum of 300 pinned items</value><comment>d.pinLimit</comment></data>
+  <data name="Clipboard_PinFailed" xml:space="preserve"><value>Couldn't pin</value><comment>d.pinFailed</comment></data>
+  <data name="Clipboard_OptInTitle" xml:space="preserve"><value>Clipboard history</value><comment>d.optInTitle</comment></data>
+  <data name="Clipboard_OptInText" xml:space="preserve"><value>Lamha keeps what you copy on this PC only, encrypted, so you can find and paste it later. Nothing is sent anywhere unless you press a tool.</value><comment>d.optInText</comment></data>
+  <data name="Clipboard_Enable" xml:space="preserve"><value>Turn on clipboard history</value><comment>d.enable</comment></data>
+  <data name="Clipboard_PausedText" xml:space="preserve"><value>What you copy isn't being recorded.</value><comment>new in Lamha 3, from the clipboard panel's design signed off 2026-10-25</comment></data>
+  <data name="Clipboard_Resume" xml:space="preserve"><value>Resume</value><comment>new in Lamha 3, from the clipboard panel's design signed off 2026-10-25</comment></data>
+  <data name="Clipboard_ToolsLabel" xml:space="preserve"><value>Lamha's tools</value><comment>d.toolsLabel</comment></data>
+  <data name="Clipboard_Translate" xml:space="preserve"><value>Translate</value><comment>d.aTranslate</comment></data>
+  <data name="Clipboard_English" xml:space="preserve"><value>Write it in English</value><comment>d.aEnglish</comment></data>
+  <data name="Clipboard_Proofread" xml:space="preserve"><value>Proofread</value><comment>d.aProofread</comment></data>
+  <data name="Clipboard_Summary" xml:space="preserve"><value>Summarize</value><comment>d.aSummary</comment></data>
+  <data name="Clipboard_Lookup" xml:space="preserve"><value>Look up</value><comment>d.aLookup</comment></data>
+  <data name="Clipboard_Review" xml:space="preserve"><value>Add to review</value><comment>d.aReview</comment></data>
+  <data name="Clipboard_Redo" xml:space="preserve"><value>Redo</value><comment>d.redo</comment></data>
+  <data name="Clipboard_NewResult" xml:space="preserve"><value>A new result</value><comment>d.newResult</comment></data>
+  <data name="Clipboard_Cached" xml:space="preserve"><value>Saved result — “Redo” asks for a new one</value><comment>d.cached</comment></data>
+  <data name="Clipboard_SummaryLangColon" xml:space="preserve"><value>Summary language:</value><comment>d.summaryLangColon</comment></data>
+  <data name="Clipboard_SummaryLang" xml:space="preserve"><value>Summary language</value><comment>d.summaryLang</comment></data>
+  <data name="Clipboard_ErrNoTranslation" xml:space="preserve"><value>No translation for this text</value><comment>d.errNoTranslation</comment></data>
+  <data name="Clipboard_ErrNoTranslationHint" xml:space="preserve"><value>Try looking it up instead.</value><comment>d.errNoTranslationHint</comment></data>
+  <data name="Clipboard_AddedReview" xml:space="preserve"><value>Added “{0}” to review 🔖</value><comment>d.addedReview</comment></data>
+  <data name="Clipboard_RemovedReview" xml:space="preserve"><value>Removed “{0}” from review</value><comment>d.removedReview</comment></data>
+  <data name="Clipboard_Copied" xml:space="preserve"><value>Copied ✓</value><comment>d.copied</comment></data>
+  <data name="Clipboard_AppLamha" xml:space="preserve"><value>Lamha</value><comment>d.appLamha</comment></data>
+  <data name="Clipboard_AppUnknown" xml:space="preserve"><value>Unknown program</value><comment>d.appUnknown</comment></data>
   <data name="Proto_Tooltip" xml:space="preserve"><value>Lamha 3 (prototype)</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>Show the card (sample text)</value></data>
   <data name="Proto_ClipboardHistory" xml:space="preserve"><value>Clipboard history</value><comment>d.historyLabel</comment></data>

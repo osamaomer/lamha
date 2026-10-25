@@ -76,6 +76,9 @@ public sealed partial class Brain : IDisposable
 
     public DiagnosticsReport Diagnostics => _lookups.Value.Diagnostics;
 
+    /// <summary>Lamha's tools on a copy in clipboard history (translate, write it in English, proofread, summarize, add to review).</summary>
+    public ClipActions ClipActions => _lookups.Value.ClipActions;
+
     /// <summary>The AI: whether the writing tools and the translator are set up, and which.</summary>
     public AiService Ai => _lookups.Value.Ai;
 
@@ -139,6 +142,7 @@ public sealed partial class Brain : IDisposable
             Lookup = new LookupService(
                 settings, brain.Localization, translation, new WordExplainer(ai, packs), packs, History = new HistoryService(history, clock),
                 Review, today, Wikipedia = new WikipediaService(http, network, Version), network, clock, dictionary, errorLog);
+            ClipActions = new ClipActions(brain.ClipboardHistory, Lookup, Writing, Review, settings);
             Money = new CurrencyService(http, brain.State, network, clock);
             Diagnostics = new DiagnosticsReport(
                 settings, brain.Localization, brain.Secrets, deck, history, mistakes, packs, errorLog, new HostInfo(settings), Version);
@@ -157,6 +161,8 @@ public sealed partial class Brain : IDisposable
         public CurrencyService Money { get; }
 
         public LookupService Lookup { get; }
+
+        public ClipActions ClipActions { get; }
 
         public WritingService Writing { get; }
 

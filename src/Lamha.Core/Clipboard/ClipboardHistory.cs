@@ -23,7 +23,13 @@ public sealed record ClipCache
 
     /// <summary>The summary, per summary language ("ar", "en").</summary>
     public IReadOnlyDictionary<string, string> Summary { get; init; } = new Dictionary<string, string>();
+
+    /// <summary>"Proofread": the corrected text and what was wrong (Lamha 2's <c>cache.proofread</c>).</summary>
+    public ClipProofread? Proofread { get; init; }
 }
+
+/// <summary>A copy proofread: the corrected text and each issue.</summary>
+public sealed record ClipProofread(string Corrected, IReadOnlyList<Writing.Issue> Issues);
 
 /// <summary>A copy in clipboard history, whole.</summary>
 public sealed record Clip
@@ -400,13 +406,21 @@ public sealed class ClipboardHistory(IClipStore store, IDataProtector protector,
     }
 
     /// <summary>Keeps the translation into <paramref name="targetLang"/> with the copy.</summary>
-    public void SetTranslation(string id, string targetLang, string translation)
+    public void SetTranslation(string id, string targetLang, string translation) => UpdateCache(id, cache =>
+        cache with { Translation = new Dictionary<string, string>(cache.Translation) { [targetLang] = translation } });
+
+    /// <summary>Keeps a tool's result with the copy (Lamha 2's <c>setCache</c>); a copy deleted meanwhile is left alone.</summary>
+    public void UpdateCache(string id, Func<ClipCache, ClipCache> change)
     {
+        ArgumentNullException.ThrowIfNull(change);
         lock (_gate)
         {
-            var clip = Need(id);
-            var cached = new Dictionary<string, string>(clip.Cache.Translation) { [targetLang] = translation };
-            Save(clip with { Cache = clip.Cache with { Translation = cached } });
+            if (Find(id) is not { } clip)
+            {
+                return;
+            }
+
+            Save(clip with { Cache = change(clip.Cache) });
         }
 
         OnChanged();

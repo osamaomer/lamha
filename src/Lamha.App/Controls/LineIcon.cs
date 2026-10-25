@@ -31,6 +31,7 @@ public enum Glyph
     History,
     Clipboard,
     Trash,
+    Pause,
 }
 
 /// <summary>
@@ -76,6 +77,8 @@ public sealed partial class LineIcon : UserControl
         [Glyph.Clipboard] = ["M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z", "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"],
         // Lamha 2's Settings (options.html): Clear and Delete.
         [Glyph.Trash] = ["M3 6h18", "M8 6V4h8v2", "M6 6l1 14h10l1-14"],
+        // The main window's design: Pause clipboard history.
+        [Glyph.Pause] = ["M9 5v14", "M15 5v14"],
     };
 
     private readonly Canvas _canvas = new() { Width = 24, Height = 24 };

@@ -424,6 +424,66 @@
   <data name="Span_YearTwoAfter" xml:space="preserve"><value>سنتين</value><comment>span.years, ported by hand: 2, after بعد</comment></data>
   <data name="Span_YearFew" xml:space="preserve"><value>{0} سنوات</value><comment>span.years, ported by hand: 3 to 10</comment></data>
   <data name="Span_YearMany" xml:space="preserve"><value>{0} سنة</value><comment>span.years, ported by hand: 11 or more</comment></data>
+  <data name="Clipboard_Search" xml:space="preserve"><value>ابحث في الحافظة…</value><comment>d.search</comment></data>
+  <data name="Clipboard_SearchLabel" xml:space="preserve"><value>ابحث في الحافظة</value><comment>d.searchLabel</comment></data>
+  <data name="Clipboard_All" xml:space="preserve"><value>الكل</value><comment>d.all</comment></data>
+  <data name="Clipboard_PinnedFilter" xml:space="preserve"><value>المثبتة</value><comment>d.pinnedFilter</comment></data>
+  <data name="Clipboard_Filter" xml:space="preserve"><value>تصفية</value><comment>d.filter</comment></data>
+  <data name="Clipboard_HistoryLabel" xml:space="preserve"><value>سجل الحافظة</value><comment>d.historyLabel</comment></data>
+  <data name="Clipboard_ShowMore" xml:space="preserve"><value>عرض المزيد</value><comment>d.showMore</comment></data>
+  <data name="Clipboard_NoResults" xml:space="preserve"><value>لا نتائج</value><comment>d.noResults</comment></data>
+  <data name="Clipboard_NoPinned" xml:space="preserve"><value>لا توجد عناصر مثبّتة بعد — ثبّت ما تحتاجه كثيرًا بـ Ctrl+P</value><comment>d.noPinned</comment></data>
+  <data name="Clipboard_Empty" xml:space="preserve"><value>لا يوجد شيء في الحافظة بعد — انسخ أي نص وسيظهر هنا</value><comment>d.empty</comment></data>
+  <data name="Clipboard_Now" xml:space="preserve"><value>الآن</value><comment>d.now</comment></data>
+  <data name="Clipboard_Yesterday" xml:space="preserve"><value>أمس</value><comment>d.yesterday</comment></data>
+  <data name="Clipboard_MinAgoOne" xml:space="preserve"><value>قبل دقيقة</value><comment>d.minAgo, ported by hand: 1</comment></data>
+  <data name="Clipboard_MinAgoTwo" xml:space="preserve"><value>قبل دقيقتين</value><comment>d.minAgo, ported by hand: 2</comment></data>
+  <data name="Clipboard_MinAgoFew" xml:space="preserve"><value>قبل {0} دقائق</value><comment>d.minAgo, ported by hand: 3 to 10</comment></data>
+  <data name="Clipboard_MinAgoMany" xml:space="preserve"><value>قبل {0} دقيقة</value><comment>d.minAgo, ported by hand: 11 or more</comment></data>
+  <data name="Clipboard_HourAgoOne" xml:space="preserve"><value>قبل ساعة</value><comment>d.hourAgo, ported by hand: 1</comment></data>
+  <data name="Clipboard_HourAgoTwo" xml:space="preserve"><value>قبل ساعتين</value><comment>d.hourAgo, ported by hand: 2</comment></data>
+  <data name="Clipboard_HourAgoFew" xml:space="preserve"><value>قبل {0} ساعات</value><comment>d.hourAgo, ported by hand: 3 to 10</comment></data>
+  <data name="Clipboard_HourAgoMany" xml:space="preserve"><value>قبل {0} ساعة</value><comment>d.hourAgo, ported by hand: 11 or more</comment></data>
+  <data name="Clipboard_DayAgoOne" xml:space="preserve"><value>قبل يوم</value><comment>d.dayAgo, ported by hand: 1</comment></data>
+  <data name="Clipboard_DayAgoTwo" xml:space="preserve"><value>قبل يومين</value><comment>d.dayAgo, ported by hand: 2</comment></data>
+  <data name="Clipboard_DayAgoFew" xml:space="preserve"><value>قبل {0} أيام</value><comment>d.dayAgo, ported by hand: 3 to 10</comment></data>
+  <data name="Clipboard_DayAgoMany" xml:space="preserve"><value>قبل {0} يومًا</value><comment>d.dayAgo, ported by hand: 11 or more</comment></data>
+  <data name="Clipboard_Pinned" xml:space="preserve"><value>مثبّت</value><comment>d.pinned</comment></data>
+  <data name="Clipboard_Pin" xml:space="preserve"><value>تثبيت</value><comment>d.pin</comment></data>
+  <data name="Clipboard_Unpin" xml:space="preserve"><value>إلغاء التثبيت</value><comment>d.unpin</comment></data>
+  <data name="Clipboard_PinKey" xml:space="preserve"><value>تثبيت (Ctrl+P)</value><comment>d.pinKey</comment></data>
+  <data name="Clipboard_UnpinKey" xml:space="preserve"><value>إلغاء التثبيت (Ctrl+P)</value><comment>d.unpinKey</comment></data>
+  <data name="Clipboard_Delete" xml:space="preserve"><value>حذف</value><comment>d.delete</comment></data>
+  <data name="Clipboard_DeleteKey" xml:space="preserve"><value>حذف (Delete)</value><comment>d.deleteKey</comment></data>
+  <data name="Clipboard_Deleted" xml:space="preserve"><value>حُذف العنصر</value><comment>d.deleted</comment></data>
+  <data name="Clipboard_PinnedToast" xml:space="preserve"><value>تم التثبيت 📌</value><comment>d.pinnedToast</comment></data>
+  <data name="Clipboard_Unpinned" xml:space="preserve"><value>أُلغي التثبيت</value><comment>d.unpinned</comment></data>
+  <data name="Clipboard_PinLimit" xml:space="preserve"><value>وصلت إلى الحد الأقصى للعناصر المثبتة (٣٠٠)</value><comment>d.pinLimit</comment></data>
+  <data name="Clipboard_PinFailed" xml:space="preserve"><value>تعذّر التثبيت</value><comment>d.pinFailed</comment></data>
+  <data name="Clipboard_OptInTitle" xml:space="preserve"><value>سجل الحافظة</value><comment>d.optInTitle</comment></data>
+  <data name="Clipboard_OptInText" xml:space="preserve"><value>يحفظ لمحة ما تنسخه على جهازك فقط، مشفّرًا، لتجده وتلصقه لاحقًا. لا يُرسل أي شيء إلا عند ضغطك على أداة.</value><comment>d.optInText</comment></data>
+  <data name="Clipboard_Enable" xml:space="preserve"><value>تفعيل سجل الحافظة</value><comment>d.enable</comment></data>
+  <data name="Clipboard_PausedText" xml:space="preserve"><value>لا يُسجَّل ما تنسخه الآن.</value><comment>new in Lamha 3, from the clipboard panel's design signed off 2026-10-25</comment></data>
+  <data name="Clipboard_Resume" xml:space="preserve"><value>استئناف</value><comment>new in Lamha 3, from the clipboard panel's design signed off 2026-10-25</comment></data>
+  <data name="Clipboard_ToolsLabel" xml:space="preserve"><value>أدوات لمحة</value><comment>d.toolsLabel</comment></data>
+  <data name="Clipboard_Translate" xml:space="preserve"><value>ترجم</value><comment>d.aTranslate</comment></data>
+  <data name="Clipboard_English" xml:space="preserve"><value>اكتبه بالإنجليزية</value><comment>d.aEnglish</comment></data>
+  <data name="Clipboard_Proofread" xml:space="preserve"><value>دقّق لغويًا</value><comment>d.aProofread</comment></data>
+  <data name="Clipboard_Summary" xml:space="preserve"><value>لخّص</value><comment>d.aSummary</comment></data>
+  <data name="Clipboard_Lookup" xml:space="preserve"><value>ابحث</value><comment>d.aLookup</comment></data>
+  <data name="Clipboard_Review" xml:space="preserve"><value>أضف للمراجعة</value><comment>d.aReview</comment></data>
+  <data name="Clipboard_Redo" xml:space="preserve"><value>إعادة</value><comment>d.redo</comment></data>
+  <data name="Clipboard_NewResult" xml:space="preserve"><value>نتيجة جديدة</value><comment>d.newResult</comment></data>
+  <data name="Clipboard_Cached" xml:space="preserve"><value>نتيجة محفوظة من قبل — «إعادة» تطلب نتيجة جديدة</value><comment>d.cached</comment></data>
+  <data name="Clipboard_SummaryLangColon" xml:space="preserve"><value>لغة الملخص:</value><comment>d.summaryLangColon</comment></data>
+  <data name="Clipboard_SummaryLang" xml:space="preserve"><value>لغة الملخص</value><comment>d.summaryLang</comment></data>
+  <data name="Clipboard_ErrNoTranslation" xml:space="preserve"><value>لا توجد ترجمة لهذا النص</value><comment>d.errNoTranslation</comment></data>
+  <data name="Clipboard_ErrNoTranslationHint" xml:space="preserve"><value>جرّب البحث عنه بدل ذلك.</value><comment>d.errNoTranslationHint</comment></data>
+  <data name="Clipboard_AddedReview" xml:space="preserve"><value>أُضيفت «{0}» إلى المراجعة 🔖</value><comment>d.addedReview</comment></data>
+  <data name="Clipboard_RemovedReview" xml:space="preserve"><value>أُزيلت «{0}» من المراجعة</value><comment>d.removedReview</comment></data>
+  <data name="Clipboard_Copied" xml:space="preserve"><value>نُسخ ✓</value><comment>d.copied</comment></data>
+  <data name="Clipboard_AppLamha" xml:space="preserve"><value>لمحة</value><comment>d.appLamha</comment></data>
+  <data name="Clipboard_AppUnknown" xml:space="preserve"><value>برنامج غير معروف</value><comment>d.appUnknown</comment></data>
   <data name="Proto_Tooltip" xml:space="preserve"><value>لمحة 3 (نموذج أولي)</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>اعرض البطاقة (نص للتجربة)</value></data>
   <data name="Proto_ClipboardHistory" xml:space="preserve"><value>سجل الحافظة</value><comment>d.historyLabel</comment></data>

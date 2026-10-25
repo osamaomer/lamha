@@ -22,4 +22,7 @@ public interface IPageHost
 
     /// <summary>The Write page, with <paramref name="text"/> in its draft (Translate's "Writing tools").</summary>
     void Write(string text);
+
+    /// <summary>A word went into the review list or out of it: the count on Review is read again.</summary>
+    void ReviewChanged();
 }

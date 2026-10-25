@@ -43,16 +43,20 @@ public sealed partial class MainWindow : Window, IPageHost
     private WritePage? _write;
     private HistoryPage? _history;
     private ReviewPage? _review;
+    private ClipboardPage? _clipboardPage;
+    private readonly ClipboardService _clipboard;
     private bool _choosing;
 
     /// <param name="viewModel">The pages, the one that's open, and the toast.</param>
     /// <param name="brain">Lamha's brain, for the pages.</param>
     /// <param name="lookupKeys">The quick-lookup shortcut ("Ctrl+Alt+L"), for the Translate page's line under its box.</param>
-    public MainWindow(MainViewModel viewModel, Brain brain, string lookupKeys)
+    /// <param name="clipboard">Clipboard history's switch and pause, for the Clipboard page.</param>
+    public MainWindow(MainViewModel viewModel, Brain brain, string lookupKeys, ClipboardService clipboard)
     {
         ViewModel = viewModel;
         _brain = brain;
         _lookupKeys = lookupKeys;
+        _clipboard = clipboard;
         InitializeComponent();
         Animations.Refresh(brain.Settings.Current); // the setting may have changed since the last window
         Title = Lamha;
@@ -70,7 +74,6 @@ public sealed partial class MainWindow : Window, IPageHost
         PageList.SelectedItem = ViewModel.Page;
         ViewModel.PropertyChanged += OnViewModelChanged;
         ShowPage();
-        _ = CountReviewAsync();
         // The first focus goes to the Translate page's box, ready to type (Write's draft, Review's card likewise); on
         // other pages to the pane as if clicked:
         // the arrow keys work in it, without the keyboard's focus rectangle on a window that was opened with the mouse.
@@ -88,6 +91,10 @@ public sealed partial class MainWindow : Window, IPageHost
             {
                 review.FocusCard(); // so Space shows the meaning at once, not the page under the pane's focus
             }
+            else if (PageHost.Content is ClipboardPage clipboard && clipboard.ViewModel.IsOn)
+            {
+                clipboard.FocusSearch(); // typing searches, and ↑ ↓ choose a copy (Lamha 2's)
+            }
             else
             {
                 (FooterList.SelectedItem is null ? PageList : FooterList).Focus(FocusState.Pointer);
@@ -97,6 +104,10 @@ public sealed partial class MainWindow : Window, IPageHost
         {
             _translate?.ViewModel.Unload();
             _write?.ViewModel.Unload();
+            if (ReferenceEquals(PageHost.Content, _clipboardPage))
+            {
+                _clipboardPage?.ViewModel.Detach();
+            }
         };
     }
 
@@ -208,9 +219,14 @@ public sealed partial class MainWindow : Window, IPageHost
         _write?.ViewModel.Use(text);
     }
 
+    public void ReviewChanged() => _ = CountReviewAsync();
+
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
 
-    /// <summary>The count on Review when the window opens; the Review page keeps it up to date after that.</summary>
+    /// <summary>
+    /// The count on Review: when the window opens and each time another page opens (a word bookmarked on Translate or
+    /// History, or added from the Clipboard page); the Review page keeps it up to date as words are answered.
+    /// </summary>
     private async Task CountReviewAsync()
     {
         try
@@ -249,8 +265,25 @@ public sealed partial class MainWindow : Window, IPageHost
     /// <summary>The open page in the content layer; the pages still to be built show only their title.</summary>
     private void ShowPage()
     {
+        _ = CountReviewAsync();
+
+        // Leaving the Clipboard page: what was copied, decrypted for the list, goes from memory.
+        if (PageHost.Content is ClipboardPage leaving && ViewModel.Page.Id != "clipboard")
+        {
+            leaving.ViewModel.Detach();
+        }
+
         switch (ViewModel.Page.Id)
         {
+            case "clipboard":
+                _clipboardPage ??= new ClipboardPage(new ClipboardViewModel(_brain, _clipboard, this));
+                if (!ReferenceEquals(PageHost.Content, _clipboardPage))
+                {
+                    _clipboardPage.ViewModel.Attach();
+                }
+
+                PageHost.Content = _clipboardPage;
+                break;
             case "translate":
                 _translate ??= new TranslatePage(new TranslateViewModel(_brain, this, _lookupKeys));
                 _translate.ViewModel.Refresh();
