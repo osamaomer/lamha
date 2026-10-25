@@ -119,6 +119,9 @@ public sealed partial class MainWindow : Window, IPageHost
 
     public MainViewModel ViewModel { get; }
 
+    /// <summary>Start with Windows, for Settings → Lamha; set before the window shows a page.</summary>
+    public StartWithWindows? Startup { get; set; }
+
     public nint Handle { get; }
 
     public string Lamha { get; } = Localization.Get("Common_Lamha");
@@ -341,7 +344,7 @@ public sealed partial class MainWindow : Window, IPageHost
         switch (ViewModel.Page.Id)
         {
             case "settings":
-                _settings ??= new SettingsPage(new SettingsViewModel(_brain, this, _writeKeys, _clipboard));
+                _settings ??= new SettingsPage(new SettingsViewModel(_brain, this, _writeKeys, _clipboard, Startup));
                 _settings.ViewModel.Refresh();
                 _settings.ViewModel.Attach();
                 PageHost.Content = _settings;

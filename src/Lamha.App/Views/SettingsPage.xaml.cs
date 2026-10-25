@@ -251,6 +251,18 @@ public sealed class SettingsStrings
 
     public string OpenFolder { get; } = Localization.Get("Settings_OpenFolder");
 
+    public string Login { get; } = Localization.Get("Tray_StartWithWindows");
+
+    public string LoginHint { get; } = Localization.Get("Settings_LoginHint");
+
+    public string UpAll { get; } = Localization.Get("Settings_UpAll");
+
+    public string Credits { get; } = Localization.Get("Settings_Credits");
+
+    public string CreditsList { get; } = Localization.Get("Settings_CreditsList");
+
+    public string CreditsLicense { get; } = Localization.Get("Settings_CreditsLicense");
+
     public string Context { get; } = Localization.Get("Settings_Context");
 
     public string ContextHint { get; } = Localization.Get("Settings_ContextHint");

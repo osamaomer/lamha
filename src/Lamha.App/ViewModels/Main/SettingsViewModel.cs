@@ -6,6 +6,7 @@ using Lamha.Core;
 using Lamha.Core.Ai;
 using Lamha.Core.Money;
 using Lamha.Core.Settings;
+using Lamha.Windows.Shell;
 using Localization = Lamha.App.Services.Localization;
 
 namespace Lamha.App.ViewModels.Main;
@@ -81,6 +82,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     private readonly Brain _brain;
     private readonly IPageHost _host;
+    private readonly StartWithWindows? _startup;
     private bool _loading;
     private bool _attached;
     private int _trVersion;
@@ -89,10 +91,12 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// <param name="host">The main window.</param>
     /// <param name="writeKeys">The writing tools' shortcut ("Ctrl+Alt+W"), for Writing tools' first line.</param>
     /// <param name="clipboard">Clipboard history's switch, for Settings → Clipboard.</param>
-    public SettingsViewModel(Brain brain, IPageHost host, string writeKeys, ClipboardService clipboard)
+    /// <param name="startup">Start with Windows, for Settings → Lamha (none in tests' windows).</param>
+    public SettingsViewModel(Brain brain, IPageHost host, string writeKeys, ClipboardService clipboard, StartWithWindows? startup = null)
     {
         _brain = brain;
         _host = host;
+        _startup = startup;
         Writing = new WritingSetupViewModel(brain, () => _ = LoadTranslatorAsync());
         AiIntro = Localization.Format("Settings_AiIntro", writeKeys);
         Clipboard = new ClipboardSetupViewModel(brain, clipboard, host);
@@ -109,7 +113,8 @@ public sealed partial class SettingsViewModel : ObservableObject
             Tile("clipboard", Glyph.Clipboard, "Settings_Clipboard", "Settings_CbEnable", "Settings_CbMax", "Settings_CbApps"),
             Tile("appearance", Glyph.Palette, "Settings_Appearance", "Settings_Theme", "Settings_Motion", "Settings_CardBg"),
             Tile("privacy", Glyph.Shield, "Settings_Privacy", "Settings_SaveHistory", "Settings_Backup", "Settings_Report"),
-            Tile("about", Glyph.Info, "Common_Lamha", "Settings_UpAuto", "Tray_StartWithWindows", "Settings_Credits"),
+            // The design's summary starts with Automatic updates: back in it with the updates (phase 5).
+            Tile("about", Glyph.Info, "Common_Lamha", "Tray_StartWithWindows", "Settings_UpAll", "Settings_Credits"),
         ];
 
         var settings = brain.Settings.Current;
@@ -135,7 +140,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     /// <summary>The category open ("languages", "card"…), or "" for the home.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsHome), nameof(SectionTitle), nameof(IsLanguages), nameof(IsCard), nameof(IsWriting), nameof(IsTranslation), nameof(IsClipboard), nameof(IsPrivacy),
+    [NotifyPropertyChangedFor(nameof(IsHome), nameof(SectionTitle), nameof(IsLanguages), nameof(IsCard), nameof(IsWriting), nameof(IsTranslation), nameof(IsClipboard), nameof(IsPrivacy), nameof(IsAbout),
         nameof(IsReview), nameof(IsOffline), nameof(IsAppearance))]
     public partial string Section { get; private set; } = "";
 
@@ -159,6 +164,19 @@ public sealed partial class SettingsViewModel : ObservableObject
     public bool IsPrivacy => Section == "privacy";
 
     public PrivacySetupViewModel Privacy { get; }
+
+    // ----- Lamha -----
+
+    public bool IsAbout => Section == "about";
+
+    /// <summary>"Lamha · version 3.0.0-beta.2".</summary>
+    public string Version { get; } = Localization.Format("Settings_Version", "‎" + Brain.Version.Split('+')[0] + "‎"); // "3.0.0-beta.2", not "beta.2-3.0.0", in Arabic
+
+    /// <summary>Lamha starts at sign-in (Windows' Run key, and its Startup switch).</summary>
+    [ObservableProperty]
+    public partial bool StartsWithWindows { get; set; }
+
+    public bool CanStartWithWindows => _startup is not null;
 
     public bool IsReview => Section == "review";
 
@@ -407,6 +425,19 @@ public sealed partial class SettingsViewModel : ObservableObject
         UpdateTrStatus();
     }
 
+    partial void OnStartsWithWindowsChanged(bool value)
+    {
+        if (!_loading && _startup is not null)
+        {
+            _startup.Set(value);
+            AppLog.Info($"start with Windows: {(value ? "on" : "off")}");
+        }
+    }
+
+    /// <summary>All releases on GitHub (Lamha 2's link under Updates).</summary>
+    [RelayCommand]
+    private void OpenReleases() => _host.OpenLink(new Uri("https://github.com/osamaomer/lamha/releases"));
+
     partial void OnCurrencyIndexChanged(int value) => Save(s => s with { Currency = value <= 0 ? "" : Prices.Named[value - 1] });
 
     /// <summary>The section opens: Writing tools reads the keys and the chosen provider's models; Translation its model.</summary>
@@ -427,6 +458,13 @@ public sealed partial class SettingsViewModel : ObservableObject
         else if (value == "privacy")
         {
             Privacy.Load(_brain.Settings.Current);
+        }
+        else if (value == "about" && _startup is not null)
+        {
+            // Read each time: Windows' Startup settings or the tray may have changed it.
+            _loading = true;
+            StartsWithWindows = _startup.IsOn;
+            _loading = false;
         }
     }
 

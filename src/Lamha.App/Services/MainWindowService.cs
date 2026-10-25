@@ -29,6 +29,9 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, stri
         init => _sample = value;
     }
 
+    /// <summary>Start with Windows, for Settings → Lamha (the tray's switch too).</summary>
+    public StartWithWindows? Startup { get; init; }
+
     public bool IsOpen => _window is not null;
 
     /// <summary>
@@ -49,6 +52,7 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, stri
             var started = Environment.TickCount64;
             var window = _window = new MainWindow(new MainViewModel(), brain, lookupKeys, writeKeys, clipboard);
             window.UseTheme(Theme ?? brain.Settings.Current.Theme);
+            window.Startup = Startup;
             window.Go(page, section);
             // Settings → Appearance applies to the open window at once (the card reads it each time it opens).
             void Apply(object? sender, LamhaSettings settings) => window.DispatcherQueue.TryEnqueue(() =>

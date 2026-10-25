@@ -440,6 +440,27 @@
       </controls:SettingsCard>
     </StackPanel>
 
+    <!-- ===== Lamha: the version, Start with Windows, the releases, the dictionary's sources (updates come with phase 5) ===== -->
+    <StackPanel x:Name="AboutSection" x:Load="{x:Bind ViewModel.IsAbout, Mode=OneWay}" Spacing="4">
+      <controls:SettingsCard Header="{x:Bind ViewModel.Version}" MinHeight="48" />
+      <controls:SettingsCard Header="{x:Bind S.Login}" Description="{x:Bind S.LoginHint}" Visibility="{x:Bind ViewModel.CanStartWithWindows}">
+        <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.StartsWithWindows, Mode=TwoWay}" />
+      </controls:SettingsCard>
+      <controls:SettingsCard Header="{x:Bind S.UpAll}" MinHeight="48">
+        <Button Style="{StaticResource LamhaIconButtonStyle}" Width="32" Height="32" Command="{x:Bind ViewModel.OpenReleasesCommand}"
+                ToolTipService.ToolTip="{x:Bind S.UpAll}">
+          <controls:LineIcon Glyph="External" Width="16" Height="16" />
+        </Button>
+      </controls:SettingsCard>
+      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
+        <StackPanel Spacing="8">
+          <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Credits}" AutomationProperties.HeadingLevel="Level2" />
+          <TextBlock FlowDirection="LeftToRight" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" LineHeight="21" controls:Markup.Text="{x:Bind S.CreditsList}" />
+          <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CreditsLicense}" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+
     <!-- ===== The lookup card ===== -->
     <StackPanel x:Name="CardSection" x:Load="{x:Bind ViewModel.IsCard, Mode=OneWay}" Spacing="4">
       <controls:SettingsCard Header="{x:Bind S.Context}" Description="{x:Bind S.ContextHint}">

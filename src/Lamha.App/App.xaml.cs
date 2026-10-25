@@ -71,6 +71,7 @@ public partial class App : Application
         {
             Theme = _options.Theme,
             Sample = _options.Page is null ? null : _options.Sample,
+            Startup = startup,
         };
         _card.SettingsOpener = section => _main.Show("settings", section);
 

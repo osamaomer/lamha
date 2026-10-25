@@ -10,8 +10,8 @@ namespace Lamha.App.Controls;
 
 /// <summary>
 /// Lamha 2's strings with their little HTML, word for word, on a TextBlock: <c>&lt;b&gt;</c> bold, <c>&lt;a href&gt;</c>
-/// a link that opens the browser, <c>&lt;code&gt;</c> a command on a line of its own, left to right. Anything else is
-/// dropped. Set <c>controls:Markup.Text</c> instead of Text.
+/// a link that opens the browser, <c>&lt;code&gt;</c> a command on a line of its own, left to right, <c>&lt;br&gt;</c> a
+/// new line. Anything else is dropped. Set <c>controls:Markup.Text</c> instead of Text.
 /// </summary>
 public static partial class Markup
 {
@@ -66,6 +66,9 @@ public static partial class Markup
                         break;
                     case "code":
                         code = !closing;
+                        block.Inlines.Add(new LineBreak());
+                        break;
+                    case "br":
                         block.Inlines.Add(new LineBreak());
                         break;
                 }
