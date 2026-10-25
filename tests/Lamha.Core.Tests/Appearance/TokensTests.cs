@@ -161,6 +161,53 @@ public partial class TokensTests
         }
     }
 
+    /// <summary>A Lamha resource that doesn't exist fails only when the app runs, so every one the XAML names is checked here.</summary>
+    [Fact]
+    public void EveryLamhaResourceTheAppNamesExists()
+    {
+        var themes = Path.Combine(RealDictionary.RepositoryRoot, "src", "Lamha.App", "Themes");
+        var defined = new[] { "Tokens.xaml", "Controls.xaml" }
+            .SelectMany(f => XDocument.Load(Path.Combine(themes, f)).Descendants())
+            .Select(e => e.Attribute(X + "Key")?.Value)
+            .OfType<string>()
+            .ToHashSet();
+
+        var app = Path.Combine(RealDictionary.RepositoryRoot, "src", "Lamha.App");
+        var sep = Path.DirectorySeparatorChar;
+        var files = Directory.EnumerateFiles(app, "*.xaml", SearchOption.AllDirectories)
+            .Where(f => !f.Contains($"{sep}obj{sep}", StringComparison.Ordinal) && !f.Contains($"{sep}bin{sep}", StringComparison.Ordinal))
+            .ToList();
+        Assert.NotEmpty(files);
+        foreach (var file in files)
+        {
+            foreach (Match m in NamedResource().Matches(File.ReadAllText(file)))
+            {
+                var key = m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value;
+                Assert.True(defined.Contains(key), $"{Path.GetFileName(file)} names {key}, which isn't defined");
+            }
+        }
+    }
+
+    [Fact]
+    public void TheSwitchIsLamhaTwosGreen()
+    {
+        var controls = XDocument.Load(Path.Combine(RealDictionary.RepositoryRoot, "src", "Lamha.App", "Themes", "Controls.xaml")).Root!
+            .Elements().Single(e => e.Name.LocalName == "ResourceDictionary.ThemeDictionaries")
+            .Elements().ToDictionary(d => d.Attribute(X + "Key")!.Value);
+        foreach (var theme in new[] { "Light", "Dark" })
+        {
+            var green = Brush(theme, "LamhaSwitchOnBrush");
+            var fills = controls[theme].Elements().Where(e => e.Attribute(X + "Key")!.Value.StartsWith("ToggleSwitchFillOn", StringComparison.Ordinal)).ToList();
+            Assert.Equal(3, fills.Count);
+            Assert.All(fills, f => Assert.Equal(green, Colour(f.Attribute("Color")!.Value)));
+        }
+
+        Assert.Empty(controls["HighContrast"].Elements()); // Windows' own colours
+    }
+
+    [GeneratedRegex(@"(?:StaticResource|ThemeResource)\s+(Lamha\w+)|ResourceKey=""(Lamha\w+)""")]
+    private static partial Regex NamedResource();
+
     [GeneratedRegex(@"^\{ThemeResource (SystemColor\w+Color)\}$")]
     private static partial Regex SystemColour();
 

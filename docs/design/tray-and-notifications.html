@@ -1,0 +1,259 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lamha 3 Tray and Notifications</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: two parts. The tray menu open over a Windows 11 taskbar (normal, and while paused with an update), then
+   the notifications as Windows shows them. Windows draws both; Lamha gives the words and the choices. */
+:root {
+  --page: #f5f5f7; --ink: #1d1d1f; --ink-2: #5f5f64; --rule: rgba(0, 0, 0, 0.08); --seg: rgba(0, 0, 0, 0.05); --seg-on: #ffffff; --note: #ffffff;
+  --ui: "Segoe UI Variable Text", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --desk: linear-gradient(140deg, #9db8e8 0%, #c6b6e6 45%, #f0c3c9 100%); --taskbar: rgba(243, 243, 243, 0.86); --task-ink: #1b1b1b;
+  --menu: rgba(249, 249, 249, 0.96); --menu-edge: rgba(0, 0, 0, 0.1); --menu-hover: rgba(0, 0, 0, 0.05); --menu-dis: #8a8a8a; --menu-sep: rgba(0, 0, 0, 0.08);
+  --toast: rgba(249, 249, 249, 0.97); --toast-btn: rgba(0, 0, 0, 0.05); --toast-btn-edge: rgba(0, 0, 0, 0.08);
+  --fg: #1b1b1b; --muted: #5d5d5d; --accent: #4f46e5; --accent-soft: rgba(79, 70, 229, 0.09);
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08); --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #1c1c1e; --ink: #f5f5f7; --ink-2: #a5a5aa; --rule: rgba(255, 255, 255, 0.1); --seg: rgba(255, 255, 255, 0.07); --seg-on: #3a3a3c; --note: #2c2c2e;
+    --desk: linear-gradient(140deg, #1e2a48 0%, #33244a 45%, #4a2433 100%); --taskbar: rgba(32, 32, 32, 0.86); --task-ink: #ffffff;
+    --menu: rgba(44, 44, 44, 0.97); --menu-edge: rgba(255, 255, 255, 0.08); --menu-hover: rgba(255, 255, 255, 0.06); --menu-dis: #8a8a8a; --menu-sep: rgba(255, 255, 255, 0.08);
+    --toast: rgba(44, 44, 44, 0.97); --toast-btn: rgba(255, 255, 255, 0.06); --toast-btn-edge: rgba(255, 255, 255, 0.08);
+    --fg: #ffffff; --muted: #c5c5c5; --accent: #9aa1ff; --accent-soft: rgba(154, 161, 255, 0.12);
+    --shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3); --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #1c1c1e; --ink: #f5f5f7; --ink-2: #a5a5aa; --rule: rgba(255, 255, 255, 0.1); --seg: rgba(255, 255, 255, 0.07); --seg-on: #3a3a3c; --note: #2c2c2e;
+  --desk: linear-gradient(140deg, #1e2a48 0%, #33244a 45%, #4a2433 100%); --taskbar: rgba(32, 32, 32, 0.86); --task-ink: #ffffff;
+  --menu: rgba(44, 44, 44, 0.97); --menu-edge: rgba(255, 255, 255, 0.08); --menu-hover: rgba(255, 255, 255, 0.06); --menu-dis: #8a8a8a; --menu-sep: rgba(255, 255, 255, 0.08);
+  --toast: rgba(44, 44, 44, 0.97); --toast-btn: rgba(255, 255, 255, 0.06); --toast-btn-edge: rgba(255, 255, 255, 0.08);
+  --fg: #ffffff; --muted: #c5c5c5; --accent: #9aa1ff; --accent-soft: rgba(154, 161, 255, 0.12);
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3); --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font-family: var(--ui); font-size: 14px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; }
+header .intro { max-width: 70ch; min-width: 0; }
+h1 { font-size: 28px; line-height: 1.2; font-weight: 600; margin: 0 0 8px; text-wrap: balance; }
+h2.part { font-size: 20px; margin: 8px 0 0; }
+header p { margin: 0; color: var(--ink-2); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+.switch-row { display: flex; align-items: center; gap: 8px; }
+.switch-row > span { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.seg { display: inline-flex; background: var(--seg); border-radius: 999px; padding: 3px; }
+.seg button { font: inherit; font-size: 13px; font-weight: 600; color: var(--ink-2); border: 0; background: none; cursor: pointer; padding: 5px 14px; border-radius: 999px; min-height: 30px; }
+.seg button[aria-pressed="true"] { background: var(--seg-on); color: var(--ink); box-shadow: var(--pill-shadow); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 16px; }
+.note { background: var(--note); border-radius: 14px; padding: 20px 22px; box-shadow: 0 0 0 1px var(--rule); min-width: 0; }
+.note h2 { font-size: 15px; margin: 0 0 10px; }
+.note ul, .note ol { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 8px; }
+.note .rec { display: block; color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.legend { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+.legend i { width: 18px; height: 10px; box-shadow: inset 0 -2px 0 #f59e0b; display: inline-block; }
+.draft { box-shadow: inset 0 -2px 0 #f59e0b; }
+.row { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 560px), 1fr)); gap: 24px; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+figcaption { display: flex; flex-direction: column; gap: 2px; padding-inline: 4px; }
+figcaption b { font-size: 15px; font-weight: 600; }
+figcaption span { font-size: 13px; color: var(--ink-2); }
+svg { display: block; flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+[dir="rtl"] { text-align: right; }
+[dir="ltr"] { text-align: left; }
+
+/* the desktop, taskbar and tray menu */
+.desk { position: relative; height: 640px; border-radius: 14px; overflow: hidden; background: var(--desk); box-shadow: 0 0 0 1px var(--rule); font-family: var(--ui); color: var(--fg); }
+.taskbar { position: absolute; inset: auto 0 0; height: 48px; background: var(--taskbar); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); display: flex; align-items: center; gap: 4px; padding-inline: 12px; color: var(--task-ink); border-top: 1px solid var(--menu-edge); }
+.taskbar .grow { flex: 1; }
+.taskbar .tray { display: flex; align-items: center; gap: 2px; }
+.taskbar .ti { width: 32px; height: 40px; display: grid; place-items: center; border-radius: 4px; position: relative; }
+.taskbar .ti.lamha { background: var(--menu-hover); }
+.taskbar .clock { font-size: 12px; text-align: end; line-height: 1.3; padding-inline: 8px; }
+.lamha-ic { width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; position: relative; }
+.lamha-ic svg { width: 10px; height: 10px; stroke-width: 2.8; }
+.lamha-ic.off { filter: grayscale(1); opacity: .55; }
+.lamha-ic .dot { position: absolute; top: -3px; inset-inline-end: -3px; width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 0 1.5px var(--taskbar); }
+.tip { position: absolute; bottom: 56px; padding: 6px 10px; border-radius: 6px; background: var(--menu); box-shadow: var(--shadow), 0 0 0 1px var(--menu-edge); font-size: 12px; white-space: nowrap; }
+.menu { position: absolute; bottom: 56px; width: 300px; padding: 4px; border-radius: 8px; background: var(--menu); -webkit-backdrop-filter: blur(30px); backdrop-filter: blur(30px); box-shadow: var(--shadow), 0 0 0 1px var(--menu-edge); font-size: 14px; }
+.mi { display: flex; align-items: center; gap: 8px; height: 30px; padding-inline: 8px 10px; border-radius: 4px; white-space: nowrap; }
+.mi.hover { background: var(--menu-hover); }
+.mi .chk { width: 16px; display: grid; place-items: center; }
+.mi .chk svg { width: 14px; height: 14px; stroke-width: 2.2; }
+.mi .lab { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.mi .sub svg { width: 12px; height: 12px; stroke-width: 2.2; }
+.mi.dis { color: var(--menu-dis); font-size: 13px; }
+.mi.bold .lab { font-weight: 600; }
+.mi .keys { direction: ltr; unicode-bidi: isolate; }
+.sep { height: 1px; background: var(--menu-sep); margin: 4px 0; }
+.submenu { position: absolute; width: 200px; }
+
+/* notifications */
+.toasts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 20px; align-items: start; }
+.toast-wrap { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.toast-wrap > b { font-size: 14px; }
+.toast-wrap > span { font-size: 12.5px; color: var(--ink-2); }
+.toast { width: 364px; max-width: 100%; border-radius: 8px; background: var(--toast); box-shadow: var(--shadow), 0 0 0 1px var(--menu-edge); color: var(--fg); font-family: var(--ui); overflow: hidden; }
+.t-head { display: flex; align-items: center; gap: 8px; padding: 12px 12px 0 16px; padding-inline: 16px 12px; font-size: 12px; color: var(--muted); }
+.t-head .grow { flex: 1; }
+.t-head .x { width: 24px; height: 24px; display: grid; place-items: center; }
+.t-head .x svg { width: 12px; height: 12px; }
+.t-body { display: flex; gap: 12px; padding: 10px 16px 16px; }
+.t-body .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.t-body .tt { font-size: 14px; font-weight: 600; }
+.t-body .tx { font-size: 14px; color: var(--muted); line-height: 1.45; }
+.t-body .word { font-size: 20px; font-weight: 700; margin-top: 2px; }
+.t-body .ex { font-size: 13px; color: var(--muted); font-style: italic; }
+.t-body .tr { font-size: 16px; font-weight: 700; }
+.t-btns { display: flex; gap: 8px; padding: 0 16px 16px; }
+.t-btns span { flex: 1; min-width: 0; height: 32px; display: grid; place-items: center; border-radius: 4px; background: var(--toast-btn); box-shadow: inset 0 0 0 1px var(--toast-btn-edge); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-inline: 8px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="intro">
+      <h1>The tray menu and notifications</h1>
+      <p>What Lamha shows from the clock: its icon, its menu, and Windows' notifications. Windows draws all three; Lamha gives the words and the choices. Lamha 2's words unless underlined.</p>
+    </div>
+    <div class="switches">
+      <div class="switch-row"><span>Language</span><div class="seg" role="group" aria-label="Language">
+        <button type="button" id="lang-ar" data-lang="ar" aria-pressed="true">العربية</button>
+        <button type="button" id="lang-en" data-lang="en" aria-pressed="false">English</button>
+      </div></div>
+      <div class="switch-row"><span>Theme</span><div class="seg" role="group" aria-label="Theme">
+        <button type="button" id="theme-light" data-theme-set="light" aria-pressed="false">Light</button>
+        <button type="button" id="theme-dark" data-theme-set="dark" aria-pressed="false">Dark</button>
+      </div></div>
+    </div>
+  </header>
+
+  <div class="notes">
+    <section class="note" aria-labelledby="n-changes">
+      <h2 id="n-changes">What changes from Lamha 2</h2>
+      <ul>
+        <li><b>The menu is Lamha 2's,</b> with <b>Enable Lamha</b> moved into it (from the top of Lamha 2's window), and without the downloaded Wikipedia's reader (held back from 3.0).</li>
+        <li><b>The menu is Windows' own,</b> so nothing but the icon stays in memory while Lamha waits (Windows draws it, and mirrors it in Arabic).</li>
+        <li><b>Review from the notification</b> (in 3.0): one word, Show meaning, then Forgot / Hard / Knew it, without opening Lamha. At most one reminder every 4 hours, only when Lamha's window isn't in use (Lamha 2's rule).</li>
+        <li><b>Titles without "لمحة — ":</b> Windows already shows the app's name and icon on each notification.</li>
+      </ul>
+    </section>
+    <section class="note" aria-labelledby="n-questions">
+      <h2 id="n-questions">Questions</h2>
+      <ol>
+        <li><b>The icon tells you more:</b> a dot when words are waiting for review, faded while Lamha is turned off?<span class="rec">Recommended: yes.</span></li>
+        <li><b>After first run, a notification pointing to the icon</b> (Windows 11 hides new icons under ^)?<span class="rec">Recommended: yes.</span></li>
+        <li><b>The review notification:</b> one word with Show meaning (then the three answers), instead of Lamha 2's "5 words are waiting" alone?<span class="rec">Recommended: the word, with "Word review" to open them all.</span></li>
+        <li><b>The new words</b> (underlined): the first-run notification. Keep them, or give me yours.</li>
+      </ol>
+    </section>
+  </div>
+  <span class="legend"><i></i>New wording, a draft for you to reword</span>
+
+  <h2 class="part">The tray menu</h2>
+  <div class="row" id="menus"></div>
+
+  <h2 class="part">Notifications</h2>
+  <div class="toasts" id="toasts"></div>
+</div>
+
+<script>
+const ICON = {
+  translate: ["M5 8l6 6", "M4 14l6-6 2-3", "M2 5h12", "M7 2h1", "M22 22l-5-10-5 10", "M14 18h6"],
+  check: ["M20 6 9 17l-5-5"], subEnd: ["M9 18l6-6-6-6"], subStart: ["M15 18l-6-6 6-6"], x: ["M18 6 6 18", "M6 6l12 12"],
+  wifi: ["M5 12.55a11 11 0 0 1 14.08 0", "M8.53 16.11a6 6 0 0 1 6.95 0", "M12 20h.01"], vol: ["M11 5 6 9H2v6h4l5 4V5z", "M15.54 8.46a5 5 0 0 1 0 7.07"],
+  up: ["M18 15l-6-6-6 6"], more: ["M5 12h.01", "M12 12h.01", "M19 12h.01"],
+};
+const icon = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[n].map(d => `<path d="${d}"/>`).join("")}</svg>`;
+const d = t => `<span class="draft">${t}</span>`;
+
+// Lamha 2's: desktop/renderer/i18n-desktop.js (d.tray…, d.pause…, d.up…, d.review…, d.hk…), shared/i18n.js (p.enableLamha, motion.*, rv.*)
+const S = {
+  ar: { lamha: "لمحة", open: "فتح لمحة", clipboard: "الحافظة", review: n => `مراجعة الكلمات (${n})`, reviewPlain: "مراجعة الكلمات", write: "كتابة ✨", enable: "تفعيل لمحة",
+    pause: "إيقاف الحافظة مؤقتًا", p15: "١٥ دقيقة", p60: "ساعة", pUntil: "حتى الاستئناف", resumeAt: t => `استئناف الحافظة (متوقفة حتى ${t})`, motion: "الحركة",
+    motions: ["تلقائية", "كاملة", "خفيفة", "متوقفة"], settings: "الإعدادات", upCheck: "التحقق من التحديثات", upRestart: v => `أعد التشغيل لتثبيت الإصدار ${v}`,
+    hk: [["L", "بحث وترجمة في أي برنامج"], ["W", "أدوات الكتابة في أي برنامج"], ["V", "الحافظة: الصق من السجل"]], unavailable: " (غير متاح)", login: "التشغيل مع Windows", quit: "خروج",
+    tip: "لمحة — ١٢ للمراجعة", tipPaused: "لمحة — ١٢ للمراجعة — الحافظة متوقفة مؤقتًا", n12: "١٢", time: "٣:٤٥ م", date: "٢٥/١٠/٢٠٢٦", clock: "٢:٤٥ م",
+    reviewTime: "وقت المراجعة", reviewWaiting: "٥ كلمات تنتظر المراجعة.", show: "أظهر المعنى", again: "نسيت", hard: "صعبة", good: "عرفتها",
+    upReadyT: "تحديث جديد جاهز", upReadyB: "الإصدار 3.0.1 — أعد تشغيل لمحة لتثبيته، أو سيُثبَّت عند الخروج. اضغط هنا لإعادة التشغيل الآن.", upRestartNow: "أعد التشغيل الآن",
+    replaceT: "تعذّر الاستبدال", replaceB: "نُسخ النص — الصقه بنفسك (Ctrl+V).", hotT: "اختصار مستخدم", hotB: "برنامج آخر يستخدم Alt+Shift+V — لن يعمل من لمحة.",
+    firstT: d("لمحة بجوار الساعة"), firstB: d("إن لم ترَ أيقونتها فاضغط ^ في شريط المهام. حدّد أي نص في أي برنامج واضغط Alt+Shift+L.") },
+  en: { lamha: "Lamha", open: "Open Lamha", clipboard: "Clipboard", review: n => `Word review (${n})`, reviewPlain: "Word review", write: "Write ✨", enable: "Enable Lamha",
+    pause: "Pause clipboard history", p15: "15 minutes", p60: "1 hour", pUntil: "Until I resume", resumeAt: t => `Resume clipboard history (paused until ${t})`, motion: "Animations",
+    motions: ["Automatic", "Full", "Subtle", "Off"], settings: "Settings", upCheck: "Check for updates", upRestart: v => `Restart to install version ${v}`,
+    hk: [["L", "Look up and translate in any program"], ["W", "Writing tools in any program"], ["V", "Clipboard: paste from history"]], unavailable: " (unavailable)", login: "Start with Windows", quit: "Quit",
+    tip: "Lamha — 12 to review", tipPaused: "Lamha — 12 to review — Clipboard history paused", n12: "12", time: "3:45 PM", date: "10/25/2026", clock: "2:45 PM",
+    reviewTime: "Time to review", reviewWaiting: "5 words are waiting for review.", show: "Show meaning", again: "Forgot", hard: "Hard", good: "Knew it",
+    upReadyT: "Update ready", upReadyB: "Version 3.0.1 — restart Lamha to install it, or it installs when you quit. Click here to restart now.", upRestartNow: "Restart now",
+    replaceT: "Couldn't replace", replaceB: "The text was copied — paste it yourself (Ctrl+V).", hotT: "Shortcut in use", hotB: "Another program uses Alt+Shift+V — it won't work in Lamha.",
+    firstT: d("Lamha is by the clock"), firstB: d("If you don't see its icon, click ^ on the taskbar. Select any text in any program and press Alt+Shift+L.") },
+};
+
+let lang = "ar";
+const ui = () => (lang === "ar" ? "rtl" : "ltr");
+const mi = (lab, { chk = false, sub = false, dis = false, bold = false, hover = false } = {}) =>
+  `<div class="mi${dis ? " dis" : ""}${bold ? " bold" : ""}${hover ? " hover" : ""}"><span class="chk">${chk ? icon("check") : ""}</span><span class="lab">${lab}</span>${sub ? `<span class="sub">${icon(ui() === "rtl" ? "subStart" : "subEnd")}</span>` : ""}</div>`;
+const sep = '<div class="sep"></div>';
+
+function menu(s, { paused, update, taken }) {
+  return mi(s.open, { bold: true }) + mi(s.clipboard) + mi(s.review(s.n12)) + mi(s.write) + sep
+    + mi(s.enable, { chk: true }) + (paused ? mi(s.resumeAt(s.time)) : mi(s.pause, { sub: true, hover: true })) + mi(s.motion, { sub: true }) + mi(s.settings)
+    + mi(update ? s.upRestart("3.0.1") : s.upCheck) + sep
+    + s.hk.map(([k, l]) => mi(`<span class="keys">Alt+Shift+${k}</span> — ${l}${taken && k === "V" ? s.unavailable : ""}`, { dis: true })).join("") + sep
+    + mi(s.login, { chk: true }) + sep + mi(s.quit);
+}
+
+function desk(s, opts) {
+  const side = ui() === "rtl" ? "left" : "right";
+  return `<div class="desk" dir="${ui()}">
+    <div class="menu" style="${side}:96px">${menu(s, opts)}</div>
+    ${opts.paused ? "" : `<div class="menu submenu" style="${side}:392px;bottom:263px">${mi(s.p15, { hover: true })}${mi(s.p60)}${mi(s.pUntil)}</div>`}
+    <div class="taskbar"><span class="grow"></span><div class="tray">
+      <span class="ti">${icon("up")}</span><span class="ti lamha"><span class="lamha-ic${opts.off ? " off" : ""}">${icon("translate")}${opts.dot ? '<span class="dot"></span>' : ""}</span></span>
+      <span class="ti">${icon("wifi")}</span><span class="ti">${icon("vol")}</span></div>
+      <span class="clock">${s.clock}<br>${s.date}</span></div>
+  </div>`;
+}
+
+function toast(s, { title, body, extra = "", btns = [] }) {
+  return `<div class="toast" dir="${ui()}"><div class="t-head"><span class="lamha-ic">${icon("translate")}</span><span>${s.lamha}</span><span class="grow"></span><span class="x">${icon("more")}</span><span class="x">${icon("x")}</span></div>
+    <div class="t-body"><div class="txt"><span class="tt">${title}</span>${body ? `<span class="tx">${body}</span>` : ""}${extra}</div></div>
+    ${btns.length ? `<div class="t-btns">${btns.map(b => `<span>${b}</span>`).join("")}</div>` : ""}</div>`;
+}
+
+function render() {
+  const s = S[lang];
+  document.getElementById("menus").innerHTML = [
+    ["The menu", "Right-click the icon (a click opens Lamha). Its first part opens Lamha's windows; then the switches; the shortcuts are listed, greyed, so they're easy to find. The icon has a dot: words are waiting.", desk(s, { dot: true })],
+    ["While paused, with an update ready", "The pause item says until when; the update item restarts Lamha. A shortcut another program holds is marked (unavailable). The tooltip: " + s.tipPaused + ".", desk(s, { paused: true, update: true, taken: true, dot: true })],
+  ].map(([t, n, h]) => `<figure><figcaption><b>${t}</b><span>${n}</span></figcaption>${h}</figure>`).join("");
+
+  document.getElementById("toasts").innerHTML = [
+    ["Time to review", "Lamha 2's reminder, now with a word to answer. A click on the notification opens Review.",
+      toast(s, { title: s.reviewTime, body: s.reviewWaiting, extra: `<span class="word" dir="ltr">reluctant</span><span class="ex" dir="ltr">“She was reluctant to leave the party so early.”</span>`, btns: [s.show, s.reviewPlain] })],
+    ["After Show meaning", "The answer, and how well you knew it: the card moves on as in Review (Space, 1 / 2 / 3 there).",
+      toast(s, { title: s.reviewTime, body: "", extra: `<span class="word" dir="ltr">reluctant</span><span class="tr" dir="rtl">متردّد · غير راغب</span>`, btns: [s.again, s.hard, s.good] })],
+    ["Update ready", "Velopack downloads it in the background; it installs when Lamha restarts or quits.", toast(s, { title: s.upReadyT, body: s.upReadyB, btns: [s.upRestartNow] })],
+    ["Couldn't replace", "The program didn't take the paste: the text is on the clipboard (phase 3 built this).", toast(s, { title: s.replaceT, body: s.replaceB })],
+    ["Shortcut in use", "At start, for each shortcut another program holds; the tray menu marks it too.", toast(s, { title: s.hotT, body: s.hotB })],
+    ["After first run", "Once, when first run closes: Windows 11 hides new icons under ^, so this says where Lamha is.", toast(s, { title: s.firstT, body: s.firstB })],
+  ].map(([t, n, h]) => `<div class="toast-wrap"><b>${t}</b><span>${n}</span>${h}</div>`).join("");
+}
+
+const root = document.documentElement;
+const press = (sel, attr, value) => document.querySelectorAll(sel).forEach(b => b.setAttribute("aria-pressed", String(b.dataset[attr] === value)));
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => { lang = b.dataset.lang; press("[data-lang]", "lang", lang); render(); }));
+const dark = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+const syncTheme = () => press("[data-theme-set]", "themeSet", dark() ? "dark" : "light");
+document.querySelectorAll("[data-theme-set]").forEach(b => b.addEventListener("click", () => { root.dataset.theme = b.dataset.themeSet; syncTheme(); }));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
+new MutationObserver(syncTheme).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+syncTheme();
+render();
+</script>

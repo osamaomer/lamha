@@ -2,7 +2,7 @@
 
 The plan for rebuilding Lamha as a native Windows 11 app (WinUI 3 + Windows App SDK) and dropping the Firefox extension and the Linux plan. Written 2026-10-24.
 
-**Where it stands:** phase 0 is done ([results](#phase-0-results)). Phase 2 (the brain) is mostly built ([progress](#phase-2-progress)); phase 1 (design) runs alongside.
+**Where it stands:** phases 0 and 1 are done ([phase 0](#phase-0-results), [phase 1](#phase-1-progress)). Phase 2 (the brain) is built but for the parity tool ([progress](#phase-2-progress)), and phase 3 (Windows integration) is built ([progress](#phase-3-progress)). Phase 4 (the UI) is next.
 
 Each section ends with **Ideas** (suggestions, not decided) and **Questions** (each with a recommendation and the phase it must be answered by). The [last section](#questions-by-phase) collects the questions by phase.
 
@@ -236,7 +236,7 @@ Before any screen is built, `Lamha.App/Themes` defines:
 | Window | Contents |
 |---|---|
 | **The card** (the heart of the app) | Word meaning in context, other senses, synonyms, the Wikipedia summary; sentence translation; writing tools with the struck-through corrections; Write new; Replace / Insert / Copy. Borderless, rounded, Mica or Acrylic, appears next to the selection, and **doesn't steal focus** from the program the user is writing in. |
-| **Main window** | NavigationView: Translate + Today, Review, History, Clipboard. Mica, its own title bar. |
+| **Main window** | NavigationView: Translate + Today, Write, Review, History, Clipboard, Settings. Mica, its own title bar. |
 | **Settings** | Windows 11 Settings style (SettingsCard / SettingsExpander), the same sections as today, plus OpenAI and custom servers. |
 | **Clipboard quick panel** | Alt+Shift+V: search, keyboard first, Enter to paste. |
 | **First run** | Language, shortcuts, an optional AI setup, and importing Lamha 2's data. |
@@ -332,9 +332,59 @@ On the `native/phase-1` branch (2026-10-24), from `native/phase-3`:
 
 - **Answers:** the four phase 1 questions and phase 3's data folder (see *UI and UX* and *Phase 3 progress*). The Arabic font was chosen from the card shown three times (Segoe UI, Noto Sans Arabic, IBM Plex Sans Arabic).
 - **Tokens** (`Themes/Tokens.xaml`): Lamha 2's colours for light and dark (`shared/ui.css`, and the card's chip and skeleton from `content/styles.js`), high contrast in the user's own colours with edges in the text colour, the type scale (Lamha 2's card sizes gathered into ten, as TextBlock styles), the 4 px spacing grid, the three corners and the pill, the control height and the 24 px smallest target, and the card's Acrylic (a strong tint of the surface). The Acrylic numbers are a start, tuned with the card's design. The animation levels and timings are in Core (`Appearance/Motion.cs`: Lamha 2's motion.js and motionHint, with their numbers).
-- **Tests:** 40 new, 301 in all, passing. `TokensTests` reads Tokens.xaml: every colour is Lamha 2's, text reaches 4.5:1 on every ground (tints included), field edges and the switch 3:1, every theme has every token, and high contrast uses only Windows' colours.
+- **Tests:** 42 new, 303 in all, passing. `TokensTests` reads Tokens.xaml: every colour is Lamha 2's, text reaches 4.5:1 on every ground (tints included), field edges and the switch 3:1, every theme has every token, and high contrast uses only Windows' colours.
 
-**Next:** the screen designs, one at a time with your sign-off, the card first.
+**Screen designs**, one at a time with your sign-off:
+
+- **The card: signed off 2026-10-25** ([the design](https://claude.ai/artifact/LuyaNEmoXktWruuxMqR7my): eight states in both languages and themes, Acrylic or solid). Lamha 2's card (sections, colours, sizes, wording), with:
+  - **Corners: Windows' own 8 px**, with its edge and shadow (what Acrylic needs; Lamha 2's 14 px would need a see-through window, without Acrylic and with more memory). The 8 / 10 / 14 steps stay for what's inside windows.
+  - **Icons: Lamha 2's line icons** (drawn as paths), not Segoe Fluent Icons.
+  - **Height** follows the answer, up to 540 px (Lamha 2's limit); then the middle scrolls, and the bar and the links stay.
+  - **The bar:** Back and Forward as a pair once a word has been followed (Forward dimmed until you go back), so the bar doesn't jump; **Pin** (a pinned card stays open when you click elsewhere and moves by its bar); Settings; Close.
+  - **Edges:** the bar, the text and the links start 16 px from the edge, on both sides and in both languages; gaps on the 4 px grid.
+  - **Prices in your currency:** the price, the converted amount, and the rate with its date.
+  - **New wording, approved:** Pin "تثبيت البطاقة" / "Pin the card"; pinned "مثبّتة: اضغط لإلغاء التثبيت" / "Pinned: click to unpin"; Forward "للأمام" / "Forward"; the price "بعملتك" / "In your currency", and its rate "١ دولار أمريكي = ٣٫٧٥ ريال · سعر ٢٥ أكتوبر" / "1 US dollar = 3.75 riyals · rate of 25 October".
+  - Built in phase 4, from this design.
+- **The main window: signed off 2026-10-25** ([the design](https://claude.ai/artifact/DKAL61WrTEaDtxdTeMm8XH): the window at its real size, 1000 × 680, clickable, in both languages and themes). One Windows 11 window: Mica, its own title bar, Windows' navigation on the start side (folding to icons when narrow), in Lamha's colours. Pages:
+  - **Translate:** Lamha 2's box and its quick-lookup shortcut, Today (the goal ring, the streak, the word of the day) and the recent lookups; with text in the box, **the whole answer, as on the card** (meaning, other meanings, definitions, Wikipedia, the links).
+  - **Write:** its own page, Lamha 2's Write tab (the draft, its tools, Ctrl+Enter, the corrections, your most frequent mistake), with **the mistake journal under the tools** (moved from Settings; "learn the rule" opens it there).
+  - **Review:** Lamha 2's tab: due and new, the progress, the flashcard, Show meaning (Space), Forgot / Hard / Knew it (1 / 2 / 3) with their intervals, Remove from review. The count is on its navigation item.
+  - **History:** a page of its own, every lookup by day, with search and Clear (Lamha 2 showed the last 12).
+  - **Clipboard:** search, All / Pinned, pause, and Lamha's tools on the selected copy (translate, write it in English, summarize, add to review), pin and delete.
+  - **Settings:** at the bottom of the navigation (its own design, next).
+  - **Lamha 2's on/off switch** moves to the tray menu.
+  - **New wording, approved:** History "السجل" / "History"; its search "ابحث في السجل…" / "Search your history…".
+- **Settings: signed off 2026-10-25** ([the design](https://claude.ai/artifact/D95Szat2w3uQWEe1p1fKoR): a page of the main window, in both languages and themes). A home of **11 categories, each with its own page** (Windows 11's Settings, a breadcrumb back), in Lamha 2's order; each setting a settings card (its name and hint, the control at the end):
+  - **Languages**, **The lookup card**, **Keyboard shortcuts** (each one changeable; Esc closes the card), **Writing tools**, **Translation**, **Word review**, **Without internet** (the dictionary source and the dictionaries to download), **Clipboard**, **Appearance** (theme, animations, the card's background, the accent from Windows, the wallpaper behind the window), **Privacy & history** (with your data's folder, `%LOCALAPPDATA%\Lamha Data`, Open the folder and Delete my data), and **Lamha** (the version, the updates, Start with Windows, the dictionary's sources).
+  - **Writing tools: five providers**, with **OpenAI** (a key, the models it allows) and **another server** (any OpenAI-compatible one: an address, an optional key, its models, Test).
+  - **No writing provider until the user chooses** (as Lamha 2); first run offers the choice.
+  - **Gone with Firefox:** how the card appears, excluded sites, page translation, the buttons inside text fields; the mistake journal moved to Write; drawing with the graphics card was Electron's.
+  - **New wording, approved** (as drafted on the design): OpenAI "عبر الإنترنت بمفتاح OpenAI API، مدفوع حسب الاستخدام" / "Over the internet with an OpenAI API key, paid per use", and its tip; another server "خادم آخر" / "Another server", "أي خادم متوافق مع OpenAI: LM Studio أو OpenRouter أو Groq…" / "Any OpenAI-compatible server: LM Studio, OpenRouter, Groq…", and its address, key and model lines; the card's background "خلفية البطاقة" / "The card's background" (شفافة / ثابتة, Translucent / Solid) and its hint; "بياناتي على هذا الجهاز" / "My data on this PC", "فتح المجلد" / "Open the folder", "حذف بياناتي" / "Delete my data"; Start with Windows' hint; and two edits to Lamha 2's wording: Review is a page ("من صفحة «مراجعة»"), and the privacy note names the five providers and Windows' Credential Manager.
+- **The clipboard quick panel: signed off 2026-10-25** ([the design](https://claude.ai/artifact/Kg1ybqpTMG8LhzajY6hyox): six states in both languages and themes). Lamha 2's panel (380 × 460), keys and words, in the card's kind of window (Windows' 8 px corners and shadow, opening under the mouse, the focus given back to paste):
+  - **The list:** search (Arabic-aware), All / Pinned, the newest copy chosen; each row its text (two lines), a pinned copy's name, an English copy's translation once it's been translated, and the number, program and time; pin and delete on the chosen row.
+  - **Keys:** ↑ ↓, Enter pastes, Shift+Enter as plain text, Ctrl+1…9 that row, Ctrl+P pins, Delete deletes (with Undo), Tab the tools, Esc closes.
+  - **Tools on a copy (Tab):** only those that fit it, numbered 1–9 (translate, write it in English, proofread, summarize, look up, add to review, paste as plain text); a result shows before it's pasted (Enter pastes, Esc back to the tools, Redo).
+  - **Paused** (a banner with Resume) and **not turned on yet** (what it keeps and where, and Turn on).
+  - **Acrylic or solid follows the card's setting** (Appearance → the card's background), one setting for both floating windows.
+  - **Text only in 3.0;** copied pictures are an idea for 3.x.
+- **First run: signed off 2026-10-25** ([the design](https://claude.ai/artifact/HbHwXKVAr97Y4ncKoaoCPN): the first-run window, 640 × 540, at each step, in both languages and themes). Five steps at most, one screen each:
+  1. **Welcome and language** (the interface language first, so the rest is in it).
+  2. **Lamha 2's data,** only when it's found, right after the language: what moves over, counted (review cards, word history, mistake journal, settings and AI keys, clipboard history); Move my data, or Start fresh; Lamha 2's folder stays. Its settings fill the later steps, which are skipped when already set. Whether Lamha 2 is removed stays phase 6's question.
+  3. **Try it** (onboarding by doing): select a word in a sample sentence and press Alt+Shift+L; the real card opens. The writing and clipboard shortcuts are named under it, with Customise shortcuts.
+  4. **Writing tools, optional:** the five providers; Later skips it (no AI until the user chooses).
+  5. **Ready:** Start with Windows (on by default) and clipboard history (offered, off unless turned on); Start closes the window, Lamha waits by the clock.
+  - **New wording, approved** (as drafted on the design): the step names (اللغة / Language, بيانات لمحة 2 / Lamha 2's data, جرّبه / Try it, جاهز / Ready), "أهلًا بك في لمحة" / "Welcome to Lamha", the Lamha 2 step's lines ("وجدنا بياناتك من لمحة 2", "تنتقل كلها إلى لمحة 3 كما هي:", "نقل بياناتي", "البدء من جديد", "يبقى مجلد لمحة 2 كما هو، فلا يضيع شيء." and their English), "جرّب أول بحث" / "Try your first lookup" and its instruction, the optional AI line, "لمحة جاهزة" / "Lamha is ready" and its line, and التالي / رجوع / لاحقًا / ابدأ (Next / Back / Later / Start).
+- **The tray menu and notifications: signed off 2026-10-25** ([the design](https://claude.ai/artifact/W3usYEcZDtTPsbGtXuRmes): the menu open over the taskbar, and six notifications, in both languages and themes). Windows draws all three; Lamha gives the words and the choices.
+  - **The menu** (Windows' own, so nothing but the icon stays in memory): Open Lamha (a click on the icon does it too), Clipboard, Word review (with the count), Write; **Enable Lamha** (moved from the top of Lamha 2's window), Pause clipboard history ▸ 15 minutes / 1 hour / Until I resume (or Resume, saying until when), Animations ▸, Settings, Check for updates (or Restart to install the version that's ready); the three shortcuts, greyed, one held by another program marked (unavailable); Start with Windows; Quit. The downloaded Wikipedia's reader is held back from 3.0.
+  - **The icon:** a dot when words are waiting for review, faded while Lamha is turned off; the tooltip says how many to review and whether clipboard history is paused (Lamha 2's).
+  - **Notifications,** titled without Lamha 2's "لمحة — " (Windows shows the app's name): **Time to review** with one word to answer (Show meaning, then Forgot / Hard / Knew it; Word review opens them all), at most one every 4 hours and only when Lamha's window isn't in use (Lamha 2's rule); **Update ready** (Restart now); **Couldn't replace**; **Shortcut in use**; and once, **after first run**, where the icon is (Windows 11 hides new icons under ^).
+  - **New wording, approved:** "لمحة بجوار الساعة" / "Lamha is by the clock", and "إن لم ترَ أيقونتها فاضغط ^ في شريط المهام. حدّد أي نص في أي برنامج واضغط Alt+Shift+L." / "If you don't see its icon, click ^ on the taskbar. Select any text in any program and press Alt+Shift+L."
+
+**All six screens are designed and signed off** (2026-10-25); the design pages are in [docs/design/](design/). Phase 4 builds them from these designs, with the new wording above going into the .resw files next to Lamha 2's.
+
+**Base controls** (`Themes/Controls.xaml`): Lamha's buttons (filled, quiet, delete, icon), chips (a ToggleButton), the switch in Lamha 2's green, and the boxes the designs repeat (a panel, the meaning's tinted box), all from the tokens, with edges in the text colour in high contrast (a new token, LamhaControlEdgeBrush). App.xaml merges Controls.xaml, which merges the tokens. Tests check that every Lamha resource the XAML names exists and that the switch is the token's green; the app starts with them. Not yet seen on a screen: phase 4's windows are the first to use them. Settings' cards come with CommunityToolkit's SettingsCard in phase 4, once it's checked to publish with NativeAOT.
+
+**Phase 1 is done** (2026-10-25): the questions answered, the tokens and base controls built, and all six screens signed off. Phase 4 (the UI) can start from it.
 
 ### Phase 2 progress
 

@@ -19,6 +19,8 @@
       <SolidColorBrush x:Key="LamhaLineBrush" Color="#14000000" />
       <SolidColorBrush x:Key="LamhaFieldLineBrush" Color="#6B000000" />
       <SolidColorBrush x:Key="LamhaHoverBrush" Color="#0D000000" />
+      <!-- The edge of buttons and chips: none here, the text colour in high contrast (their fills disappear there) -->
+      <SolidColorBrush x:Key="LamhaControlEdgeBrush" Color="#00000000" />
       <!-- Chips and quiet buttons, and the shapes that stand in for an answer while it loads -->
       <SolidColorBrush x:Key="LamhaChipBrush" Color="#0B000000" />
       <SolidColorBrush x:Key="LamhaSkeletonBrush" Color="#0F000000" />
@@ -71,6 +73,7 @@
       <SolidColorBrush x:Key="LamhaLineBrush" Color="#1AFFFFFF" />
       <SolidColorBrush x:Key="LamhaFieldLineBrush" Color="#66FFFFFF" />
       <SolidColorBrush x:Key="LamhaHoverBrush" Color="#12FFFFFF" />
+      <SolidColorBrush x:Key="LamhaControlEdgeBrush" Color="#00000000" />
       <SolidColorBrush x:Key="LamhaChipBrush" Color="#12FFFFFF" />
       <SolidColorBrush x:Key="LamhaSkeletonBrush" Color="#14FFFFFF" />
       <SolidColorBrush x:Key="LamhaAccentBrush" Color="#9AA1FF" />
@@ -115,6 +118,7 @@
       <SolidColorBrush x:Key="LamhaLineBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
       <SolidColorBrush x:Key="LamhaFieldLineBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
       <SolidColorBrush x:Key="LamhaHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="LamhaControlEdgeBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
       <SolidColorBrush x:Key="LamhaChipBrush" Color="{ThemeResource SystemColorWindowColor}" />
       <SolidColorBrush x:Key="LamhaSkeletonBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
       <SolidColorBrush x:Key="LamhaAccentBrush" Color="{ThemeResource SystemColorHotlightColor}" />
@@ -227,7 +231,8 @@
   </Style>
 
   <!-- Corners: Lamha 2's r-sm (buttons, small boxes), r-md (inputs, answer and meaning boxes), r-lg (cards and
-       panels), and the pill (chips, switches). -->
+       panels inside a window), and the pill (chips, switches). The card's own window keeps Windows' 8 px corners,
+       edge and shadow, which Acrylic needs (phase 1's card design). -->
   <CornerRadius x:Key="LamhaRadiusSmall">8</CornerRadius>
   <CornerRadius x:Key="LamhaRadiusMedium">10</CornerRadius>
   <CornerRadius x:Key="LamhaRadiusLarge">14</CornerRadius>

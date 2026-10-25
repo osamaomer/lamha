@@ -1,0 +1,304 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lamha 3 First Run</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: the first-run window (640 × 540, Mica, its own title bar) at each step, two to a row. Colours and sizes
+   are Tokens.xaml's; new wording is underlined. */
+:root {
+  --page: #f5f5f7; --ink: #1d1d1f; --ink-2: #5f5f64; --rule: rgba(0, 0, 0, 0.08); --seg: rgba(0, 0, 0, 0.05); --seg-on: #ffffff; --note: #ffffff;
+  --ui: "Segoe UI Variable Text", "Segoe UI", Tahoma, system-ui, sans-serif; --head: "Palatino Linotype", Georgia, serif;
+  --mica: linear-gradient(135deg, #eceef6 0%, #f3eff3 55%, #eef3f4 100%); --layer: rgba(255, 255, 255, 0.5); --layer-edge: rgba(0, 0, 0, 0.06);
+  --win-edge: rgba(0, 0, 0, 0.16); --win-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.08);
+  --bg: #ffffff; --fg: #1d1d1f; --muted: #5f5f64; --faint: #707075;
+  --line: rgba(0, 0, 0, 0.08); --field-line: rgba(0, 0, 0, 0.42); --chip: rgba(0, 0, 0, 0.045);
+  --accent: #4f46e5; --accent-soft: rgba(79, 70, 229, 0.09); --btn: #4f46e5; --btn-fg: #ffffff;
+  --ok: #166534; --ok-soft: rgba(22, 163, 74, 0.12); --switch-on: #2e9e4f; --sel: #0078d4; --sel-fg: #ffffff;
+  --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.26), 0 2px 8px rgba(0, 0, 0, 0.08); --edge: rgba(0, 0, 0, 0.14); --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #1c1c1e; --ink: #f5f5f7; --ink-2: #a5a5aa; --rule: rgba(255, 255, 255, 0.1); --seg: rgba(255, 255, 255, 0.07); --seg-on: #3a3a3c; --note: #2c2c2e;
+    --mica: linear-gradient(135deg, #1d1e26 0%, #221d22 55%, #1b2123 100%); --layer: rgba(255, 255, 255, 0.03); --layer-edge: rgba(0, 0, 0, 0.25);
+    --win-edge: rgba(255, 255, 255, 0.12); --win-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.7), 0 4px 14px rgba(0, 0, 0, 0.3);
+    --bg: #2c2c2e; --fg: #f5f5f7; --muted: #a5a5aa; --faint: #98989d;
+    --line: rgba(255, 255, 255, 0.1); --field-line: rgba(255, 255, 255, 0.4); --chip: rgba(255, 255, 255, 0.07);
+    --accent: #9aa1ff; --accent-soft: rgba(154, 161, 255, 0.12); --btn: #5e5ce6; --btn-fg: #ffffff;
+    --ok: #4ade80; --ok-soft: rgba(74, 222, 128, 0.13); --switch-on: #2e9e4f; --sel: #4cc2ff; --sel-fg: #000000;
+    --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3); --edge: rgba(255, 255, 255, 0.12); --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #1c1c1e; --ink: #f5f5f7; --ink-2: #a5a5aa; --rule: rgba(255, 255, 255, 0.1); --seg: rgba(255, 255, 255, 0.07); --seg-on: #3a3a3c; --note: #2c2c2e;
+  --mica: linear-gradient(135deg, #1d1e26 0%, #221d22 55%, #1b2123 100%); --layer: rgba(255, 255, 255, 0.03); --layer-edge: rgba(0, 0, 0, 0.25);
+  --win-edge: rgba(255, 255, 255, 0.12); --win-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.7), 0 4px 14px rgba(0, 0, 0, 0.3);
+  --bg: #2c2c2e; --fg: #f5f5f7; --muted: #a5a5aa; --faint: #98989d;
+  --line: rgba(255, 255, 255, 0.1); --field-line: rgba(255, 255, 255, 0.4); --chip: rgba(255, 255, 255, 0.07);
+  --accent: #9aa1ff; --accent-soft: rgba(154, 161, 255, 0.12); --btn: #5e5ce6; --btn-fg: #ffffff;
+  --ok: #4ade80; --ok-soft: rgba(74, 222, 128, 0.13); --switch-on: #2e9e4f; --sel: #4cc2ff; --sel-fg: #000000;
+  --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3); --edge: rgba(255, 255, 255, 0.12); --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font-family: var(--ui); font-size: 14px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+.wrap { max-width: 1340px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; }
+header .intro { max-width: 70ch; min-width: 0; }
+h1 { font-size: 28px; line-height: 1.2; font-weight: 600; margin: 0 0 8px; text-wrap: balance; }
+header p { margin: 0; color: var(--ink-2); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+.switch-row { display: flex; align-items: center; gap: 8px; }
+.switch-row > span { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.seg { display: inline-flex; background: var(--seg); border-radius: 999px; padding: 3px; }
+.seg button { font: inherit; font-size: 13px; font-weight: 600; color: var(--ink-2); border: 0; background: none; cursor: pointer; padding: 5px 14px; border-radius: 999px; min-height: 30px; }
+.seg button[aria-pressed="true"] { background: var(--seg-on); color: var(--ink); box-shadow: var(--pill-shadow); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 16px; }
+.note { background: var(--note); border-radius: 14px; padding: 20px 22px; box-shadow: 0 0 0 1px var(--rule); min-width: 0; }
+.note h2 { font-size: 15px; margin: 0 0 10px; }
+.note ul, .note ol { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 8px; }
+.note .rec { display: block; color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.legend { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+.legend i { width: 18px; height: 10px; box-shadow: inset 0 -2px 0 #f59e0b; display: inline-block; }
+.draft { box-shadow: inset 0 -2px 0 #f59e0b; }
+.states { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 650px), 1fr)); gap: 28px 24px; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+figcaption { display: flex; flex-direction: column; gap: 2px; padding-inline: 4px; }
+figcaption b { font-size: 15px; font-weight: 600; }
+figcaption span { font-size: 13px; color: var(--ink-2); }
+.scroller { overflow-x: auto; padding: 4px 4px 12px; }
+
+/* the window */
+.win { width: 640px; height: 540px; margin-inline: auto; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: var(--mica); box-shadow: var(--win-shadow), 0 0 0 1px var(--win-edge); color: var(--fg); font-family: var(--ui); position: relative; }
+.win svg { display: block; flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.win [dir="rtl"] { text-align: right; }
+.win [dir="ltr"] { text-align: left; }
+.titlebar { height: 40px; flex: none; display: flex; align-items: center; gap: 12px; padding-inline-start: 16px; }
+.titlebar .logo { width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; }
+.titlebar .logo svg { width: 10px; height: 10px; stroke-width: 2.8; }
+.titlebar .name { font-size: 12px; }
+.titlebar .spacer { flex: 1; }
+.caps { display: flex; align-self: flex-start; }
+.caps span { width: 46px; height: 32px; display: grid; place-items: center; }
+.caps svg { width: 10px; height: 10px; stroke-width: 1; stroke-linecap: square; }
+.body { flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 0 8px 8px; border-radius: 8px; background: var(--layer); box-shadow: inset 0 0 0 1px var(--layer-edge); }
+.steps { display: flex; align-items: center; gap: 8px; padding: 16px 28px 0; font-size: 12px; color: var(--faint); }
+.steps .s { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.steps .n { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; background: var(--chip); color: var(--muted); }
+.steps .s.on { color: var(--fg); font-weight: 600; }
+.steps .s.on .n { background: var(--btn); color: var(--btn-fg); }
+.steps .s.done .n { background: var(--ok-soft); color: var(--ok); }
+.steps .s.done .n svg { width: 12px; height: 12px; stroke-width: 3; }
+.steps .line { flex: 1; height: 1px; background: var(--line); min-width: 8px; }
+.main { flex: 1; min-height: 0; padding: 24px 28px 0; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+.main h2 { font-size: 22px; line-height: 1.3; font-weight: 700; margin: 0; }
+.main .lead { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; max-width: 52ch; }
+.actions { display: flex; align-items: center; gap: 8px; padding: 16px 28px 20px; }
+.actions .grow { flex: 1; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 16px; min-height: 36px; border-radius: 10px; background: var(--btn); color: var(--btn-fg); font-weight: 600; font-size: 14px; white-space: nowrap; }
+.btn.ghost { background: var(--chip); color: var(--fg); }
+.btn.link { background: none; color: var(--muted); padding-inline: 8px; font-weight: 500; }
+kbd { font-family: var(--ui); font-size: 12px; padding: 1px 6px; border-radius: 5px; background: var(--bg); box-shadow: inset 0 -1px 0 var(--line), 0 0 0 1px var(--line); direction: ltr; display: inline-block; color: var(--fg); }
+.keys { display: inline-flex; align-items: center; gap: 3px; direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+
+/* step contents */
+.hero { display: flex; align-items: center; gap: 16px; }
+.hero .mark { width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; flex: none; }
+.hero .mark svg { width: 30px; height: 30px; stroke-width: 2.2; }
+.choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 4px; }
+.choice { padding: 14px 16px; border-radius: 10px; background: var(--bg); box-shadow: 0 0 0 1px var(--line); display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; }
+.choice.on { box-shadow: 0 0 0 2px var(--btn); }
+.radio { width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--field-line); flex: none; }
+.on > .radio, .radio.on { box-shadow: inset 0 0 0 5px var(--btn); }
+.sublabel { font-size: 12px; color: var(--muted); }
+.box { background: var(--bg); border-radius: 10px; box-shadow: 0 0 0 1px var(--line); padding: 4px 16px; }
+.li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.li:first-child { border-top: 0; }
+.li .ic { width: 28px; height: 28px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
+.li .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.li .h { font-size: 12px; color: var(--muted); }
+.li .count { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.footnote { font-size: 12.5px; color: var(--muted); }
+.sample { position: relative; min-height: 172px; flex: none; padding: 20px; border-radius: 10px; background: var(--bg); box-shadow: 0 0 0 1px var(--line); font-family: Georgia, serif; font-size: 18px; line-height: 1.6; }
+.sample .sel { background: var(--sel); color: var(--sel-fg); border-radius: 2px; }
+.mini-card { position: absolute; top: 56px; inset-inline-start: 120px; width: 240px; border-radius: 8px; background: var(--bg); box-shadow: var(--shadow), 0 0 0 1px var(--edge); font-family: var(--ui); font-size: 13px; overflow: hidden; }
+.mini-card .mb { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--line); font-size: 11px; font-weight: 700; color: var(--muted); }
+.mini-card .mb .dot { width: 14px; height: 14px; border-radius: 4px; background: linear-gradient(135deg, #6366f1, #06b6d4); }
+.mini-card .mbody { padding: 10px; }
+.mini-card .hw { font-family: var(--head); font-size: 18px; font-weight: 700; direction: ltr; text-align: left; }
+.mini-card .hero2 { margin-top: 6px; padding: 8px 10px; border-radius: 8px; background: var(--accent-soft); font-size: 16px; font-weight: 700; direction: rtl; text-align: right; }
+.mini-card .lbl { display: block; font-size: 10px; color: var(--accent); }
+.okline { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: var(--ok-soft); color: var(--ok); font-weight: 600; font-size: 13.5px; }
+.okline svg { width: 16px; height: 16px; stroke-width: 2.6; }
+.instr { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 14px; }
+.provider { display: flex; align-items: flex-start; gap: 12px; padding: 6px 0; border-top: 1px solid var(--line); }
+.provider:first-child { border-top: 0; }
+.provider .txt { display: flex; flex-direction: column; }
+.provider .t { font-size: 14px; }
+.provider .h { font-size: 12px; color: var(--muted); }
+.keyrow { display: flex; gap: 8px; padding: 0 0 10px; padding-inline-start: 32px; }
+.textbox { flex: 1; display: flex; align-items: center; height: 36px; padding-inline: 12px; border-radius: 10px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--field-line); color: var(--faint); direction: ltr; font-size: 14px; }
+.toggle { width: 40px; height: 20px; border-radius: 10px; position: relative; flex: none; box-shadow: inset 0 0 0 1px var(--field-line); }
+.toggle::after { content: ""; position: absolute; top: 4px; inset-inline-start: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--muted); }
+.toggle.on { background: var(--switch-on); box-shadow: none; }
+.toggle.on::after { inset-inline-start: 23px; top: 3px; width: 14px; height: 14px; background: #fff; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="intro">
+      <h1>First run</h1>
+      <p>What a new Lamha 3 opens with, step by step: the first-run window (640 × 540, Mica) at each step. Someone coming from Lamha 2 gets step 2; everyone else goes from 1 to 3. Almost all the wording is new: it's underlined, for you to reword.</p>
+    </div>
+    <div class="switches">
+      <div class="switch-row"><span>Language</span><div class="seg" role="group" aria-label="Language">
+        <button type="button" id="lang-ar" data-lang="ar" aria-pressed="true">العربية</button>
+        <button type="button" id="lang-en" data-lang="en" aria-pressed="false">English</button>
+      </div></div>
+      <div class="switch-row"><span>Theme</span><div class="seg" role="group" aria-label="Theme">
+        <button type="button" id="theme-light" data-theme-set="light" aria-pressed="false">Light</button>
+        <button type="button" id="theme-dark" data-theme-set="dark" aria-pressed="false">Dark</button>
+      </div></div>
+    </div>
+  </header>
+
+  <div class="notes">
+    <section class="note" aria-labelledby="n-how">
+      <h2 id="n-how">How it goes</h2>
+      <ul>
+        <li><b>Five steps at most, each one screen:</b> the language, Lamha 2's data (only when it's found), a first lookup, the writing tools (optional), and ready.</li>
+        <li><b>Learning by doing:</b> step 3 asks you to select a word in a sentence and press the shortcut; the real card opens. Writing tools and the clipboard are named there with their shortcuts.</li>
+        <li><b>Nothing is chosen for you:</b> no AI until you pick one (it can wait), and clipboard history stays off unless you turn it on (Lamha 2's rule).</li>
+        <li>At the end, the window closes and Lamha waits by the clock.</li>
+      </ul>
+    </section>
+    <section class="note" aria-labelledby="n-questions">
+      <h2 id="n-questions">Questions</h2>
+      <ol>
+        <li><b>Lamha 2's data right after the language,</b> so its settings fill the rest (steps already set are skipped)?<span class="rec">Recommended: yes.</span></li>
+        <li><b>Clipboard history offered on the last step</b> (off unless you turn it on)?<span class="rec">Recommended: yes.</span></li>
+        <li><b>Start with Windows on by default</b> on the last step (you can turn it off there)?<span class="rec">Recommended: yes; Lamha only helps when it's running.</span></li>
+        <li><b>The new words</b> (underlined): keep them, or give me yours. Whether Lamha 2 is removed after the move is phase 6's question; this step only says its folder stays.</li>
+      </ol>
+    </section>
+  </div>
+  <span class="legend"><i></i>New wording, a draft for you to reword</span>
+
+  <div class="states" id="states"></div>
+</div>
+
+<script>
+const ICON = {
+  translate: ["M5 8l6 6", "M4 14l6-6 2-3", "M2 5h12", "M7 2h1", "M22 22l-5-10-5 10", "M14 18h6"],
+  check: ["M20 6 9 17l-5-5"], review: ["M2 6h14a2 2 0 0 1 2 2v12H4a2 2 0 0 1-2-2z", "M6 2h14a2 2 0 0 1 2 2v12"],
+  history: ["M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5", "M12 7v5l3 2"], settings: ["M4 21v-7", "M4 10V3", "M12 21v-9", "M12 8V3", "M20 21v-5", "M20 12V3", "M1 14h6", "M9 8h6", "M17 16h6"],
+  clipboard: ["M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z", "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"],
+  write: ["M12 20h9", "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"], journal: ["M4 19.5A2.5 2.5 0 0 1 6.5 17H20", "M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"],
+  min: ["M1 5h8"], x: ["M1 1l8 8", "M9 1l-8 8"],
+};
+const icon = (n, vb = 24) => `<svg viewBox="0 0 ${vb} ${vb}" aria-hidden="true">${ICON[n].map(d => `<path d="${d}"/>`).join("")}</svg>`;
+const d = t => `<span class="draft">${t}</span>`;
+const keys = (...k) => `<span class="keys">${k.map(x => `<kbd>${x}</kbd>`).join("+")}</span>`;
+
+// Lamha 2's words where they exist (o.heroText, o.uiLang, d.hk*, the providers, d.optInText, d.trayLogin, o.writingTools…); d(): new
+const S = {
+  ar: {
+    lamha: "لمحة", steps: [d("اللغة"), d("بيانات لمحة 2"), d("جرّبه"), "أدوات الكتابة", d("جاهز")],
+    welcome: d("أهلًا بك في لمحة"), hero: "ابحث عن معاني الكلمات الإنجليزية وترجم أي نص إلى العربية بلمسة واحدة.", uiLang: "لغة الواجهة", uiLangHint: "لغة القوائم والأزرار والشروح في لمحة",
+    next: d("التالي"), back: d("رجوع"), later: d("لاحقًا"), start: d("ابدأ"),
+    foundT: d("وجدنا بياناتك من لمحة 2"), foundX: d("تنتقل كلها إلى لمحة 3 كما هي:"),
+    items: [["review", "بطاقات المراجعة وتقدّمك فيها", "٢٤٠ كلمة"], ["history", "سجل الكلمات", "١٬٢٤٨ كلمة"], ["journal", "سجل أخطائي", "٣٢ خطأ"], ["settings", d("الإعدادات ومفاتيح الذكاء الاصطناعي"), ""], ["clipboard", "سجل الحافظة", "١٨٣ عنصرًا"]],
+    move: d("نقل بياناتي"), fresh: d("البدء من جديد"), folderStays: d("يبقى مجلد لمحة 2 كما هو، فلا يضيع شيء."),
+    tryT: d("جرّب أول بحث"), tryX: d("حدّد كلمة في هذه الجملة، ثم اضغط"), tryOk: d("أحسنت! هكذا تعمل لمحة في أي برنامج."),
+    inContext: "في هذا السياق", hkWrite: "أدوات الكتابة في أي برنامج", hkClip: "الحافظة: الصق من السجل", customize: "تخصيص الاختصارات",
+    aiX: d("اختياري: لتدقيق ما تكتبه بالإنجليزية وتحسينه، اختر ذكاءً اصطناعيًا. يمكنك ذلك لاحقًا من الإعدادات."),
+    providers: [["Ollama — مجاني", "نموذج يعمل على جهازك: دون تكلفة، ودون إنترنت، ولا يغادر نصّك جهازك"], ["Gemini — مجاني", "من Google عبر الإنترنت، بحدّ يومي مجاني. يعمل على أي جهاز"],
+      ["Claude — الأدق", "عبر الإنترنت بمفتاح Claude API، مدفوع حسب الاستخدام"], ["OpenAI", "عبر الإنترنت بمفتاح OpenAI API، مدفوع حسب الاستخدام"], ["خادم آخر", "أي خادم متوافق مع OpenAI: LM Studio أو OpenRouter أو Groq…"]],
+    saveVerify: "حفظ وتحقق",
+    readyT: d("لمحة جاهزة"), readyX: d("تعمل لمحة من أيقونتها بجوار الساعة. حدّد أي نص في أي برنامج واضغط"),
+    login: "التشغيل مع Windows", loginHint: "يبدأ لمحة في الخلفية عند تسجيل الدخول، فتعمل الاختصارات فورًا",
+    clip: "تفعيل سجل الحافظة", clipHint: "يحفظ لمحة ما تنسخه على جهازك فقط، مشفّرًا، لتجده وتلصقه لاحقًا. لا يُرسل أي شيء إلا عند ضغطك على أداة.",
+  },
+  en: {
+    lamha: "Lamha", steps: [d("Language"), d("Lamha 2's data"), d("Try it"), "Writing tools", d("Ready")],
+    welcome: d("Welcome to Lamha"), hero: "Look up English words and translate any text in one click.", uiLang: "Interface language", uiLangHint: "The language of Lamha's menus, buttons and explanations",
+    next: d("Next"), back: d("Back"), later: d("Later"), start: d("Start"),
+    foundT: d("We found your data from Lamha 2"), foundX: d("All of it moves to Lamha 3 as it is:"),
+    items: [["review", "Your review cards and progress", "240 words"], ["history", "Your word history", "1,248 words"], ["journal", "Your mistake journal", "32 mistakes"], ["settings", d("Your settings and AI keys"), ""], ["clipboard", "Clipboard history", "183 items"]],
+    move: d("Move my data"), fresh: d("Start fresh"), folderStays: d("Lamha 2's folder stays as it is, so nothing is lost."),
+    tryT: d("Try your first lookup"), tryX: d("Select a word in this sentence, then press"), tryOk: d("That's it: Lamha works like this in any program."),
+    inContext: "In this context", hkWrite: "Writing tools in any program", hkClip: "Clipboard: paste from history", customize: "Customise shortcuts",
+    aiX: d("Optional: to proofread and improve what you write in English, choose an AI. You can do it later in Settings."),
+    providers: [["Ollama — free", "A model on your computer: no cost, no internet, and your text never leaves your PC"], ["Gemini — free", "From Google over the internet, with a free daily limit. Works on any PC"],
+      ["Claude — most accurate", "Over the internet with a Claude API key, paid per use"], ["OpenAI", "Over the internet with an OpenAI API key, paid per use"], ["Another server", "Any OpenAI-compatible server: LM Studio, OpenRouter, Groq…"]],
+    saveVerify: "Save & verify",
+    readyT: d("Lamha is ready"), readyX: d("Lamha works from its icon next to the clock. Select any text in any program and press"),
+    login: "Start with Windows", loginHint: "Lamha starts in the background when you sign in, so the shortcuts work at once",
+    clip: "Turn on clipboard history", clipHint: "Lamha keeps what you copy on this PC only, encrypted, so you can find and paste it later. Nothing is sent anywhere unless you press a tool.",
+  },
+};
+
+function steps(s, at, skipImport) {
+  return `<div class="steps">${s.steps.map((label, i) => {
+    if (skipImport && i === 1) return "";
+    const cls = i < at ? "done" : i === at ? "on" : "";
+    const num = skipImport && i > 1 ? i : i + 1;
+    return `${i && !(skipImport && i === 2) ? '<span class="line"></span>' : ""}<span class="s ${cls}"><span class="n">${i < at ? icon("check") : num}</span>${label}</span>`;
+  }).join("")}</div>`;
+}
+const n = (lang, x) => (lang === "ar" ? x.toLocaleString("ar-EG") : String(x));
+
+const STEPS = [
+  { title: "1. Welcome and language", note: "The interface language first, so everything after it is in yours. Automatic picks Windows' language; this is the choice when it isn't Arabic or English.",
+    at: 0, html: (s, lang) => `<div class="hero"><span class="mark">${icon("translate")}</span><div><h2>${s.welcome}</h2><p class="lead">${s.hero}</p></div></div>
+      <div style="margin-top:8px"><b style="font-size:14px">${s.uiLang}</b><div class="sublabel">${s.uiLangHint}</div></div>
+      <div class="choices"><span class="choice${lang === "ar" ? " on" : ""}"><span class="radio"></span>العربية</span><span class="choice${lang === "en" ? " on" : ""}"><span class="radio"></span>English</span></div>`,
+    actions: s => `<span class="grow"></span><span class="btn">${s.next}</span>` },
+  { title: "2. Lamha 2's data (only when it's found)", note: "Everything moves over as it is, counted so you can see it's all there; the keys too, as long as Windows can still read them. Start fresh leaves Lamha 2's data untouched.",
+    at: 1, html: s => `<h2>${s.foundT}</h2><p class="lead">${s.foundX}</p>
+      <div class="box">${s.items.map(([ic, t, c]) => `<div class="li"><span class="ic">${icon(ic)}</span><span class="txt">${t}</span><span class="count">${c}</span></div>`).join("")}</div>
+      <div class="footnote">${s.folderStays}</div>`,
+    actions: s => `<span class="btn link">${s.fresh}</span><span class="grow"></span><span class="btn ghost">${s.back}</span><span class="btn">${s.move}</span>` },
+  { title: "3. Try it: the first lookup", note: "Learning by doing: select a word and press the shortcut, and the real card opens next to it (drawn here as it opens). The other two shortcuts are named under it.",
+    at: 2, html: (s, lang) => `<h2>${s.tryT}</h2>
+      <div class="instr">${s.tryX} ${keys("Alt", "Shift", "L")}</div>
+      <div class="sample" dir="ltr">We need to <span class="sel">settle</span> the bill before we leave.
+        <div class="mini-card" dir="${lang === "ar" ? "rtl" : "ltr"}"><div class="mb"><span class="dot"></span>${s.lamha}</div><div class="mbody"><div class="hw">settle</div><div class="hero2"><span class="lbl">${s.inContext}</span>يسدّد</div></div></div></div>
+      <div class="box"><div class="li"><span class="txt">${s.hkWrite}</span>${keys("Alt", "Shift", "W")}</div><div class="li"><span class="txt">${s.hkClip}</span>${keys("Alt", "Shift", "V")}</div></div>`,
+    actions: s => `<span class="btn link">${s.customize}</span><span class="grow"></span><span class="btn ghost">${s.back}</span><span class="btn">${s.next}</span>` },
+  { title: "4. Writing tools (optional)", note: "The five providers, in Settings' words; picking one asks for its key (or, for Ollama, finds it on the PC). Later skips it: no AI until you choose.",
+    at: 3, html: s => `<h2>${S[lang].steps[3]}</h2><p class="lead">${s.aiX}</p>
+      <div class="box">${s.providers.map(([t, h], i) => `<div class="provider"><span class="radio${i === 1 ? " on" : ""}"></span><span class="txt"><span class="t">${i >= 3 ? d(t) : t}</span><span class="h">${i >= 3 ? d(h) : h}</span></span></div>${i === 1 ? `<div class="keyrow"><span class="textbox">AIza…</span><span class="btn">${s.saveVerify}</span></div>` : ""}`).join("")}</div>`,
+    actions: s => `<span class="grow"></span><span class="btn ghost">${s.back}</span><span class="btn ghost">${s.later}</span><span class="btn">${s.next}</span>` },
+  { title: "5. Ready", note: "Two last choices, each one switch: Start with Windows (on) and clipboard history (off unless you turn it on). Start closes the window; Lamha waits by the clock.",
+    at: 4, html: s => `<div class="hero"><span class="mark">${icon("check")}</span><div><h2>${s.readyT}</h2><p class="lead">${s.readyX} ${keys("Alt", "Shift", "L")}</p></div></div>
+      <div class="box" style="margin-top:8px"><div class="li"><span class="txt"><span>${s.login}</span><span class="h">${d(s.loginHint)}</span></span><span class="toggle on"></span></div>
+        <div class="li"><span class="txt"><span>${s.clip}</span><span class="h">${s.clipHint}</span></span><span class="toggle"></span></div></div>`,
+    actions: s => `<span class="grow"></span><span class="btn ghost">${s.back}</span><span class="btn">${s.start}</span>` },
+];
+
+let lang = "ar";
+function render() {
+  const s = S[lang], ui = lang === "ar" ? "rtl" : "ltr";
+  document.getElementById("states").innerHTML = STEPS.map(st => `<figure><figcaption><b>${st.title}</b><span>${st.note}</span></figcaption>
+    <div class="scroller"><div class="win" dir="${ui}">
+      <div class="titlebar"><span class="logo">${icon("translate")}</span><span class="name">${s.lamha}</span><span class="spacer"></span><div class="caps"><span>${icon("min", 10)}</span><span>${icon("x", 10)}</span></div></div>
+      <div class="body">${steps(s, st.at, false)}<div class="main">${st.html(s, lang)}</div><div class="actions">${st.actions(s)}</div></div>
+    </div></div></figure>`).join("");
+}
+
+const root = document.documentElement;
+const press = (sel, attr, value) => document.querySelectorAll(sel).forEach(b => b.setAttribute("aria-pressed", String(b.dataset[attr] === value)));
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => { lang = b.dataset.lang; press("[data-lang]", "lang", lang); render(); }));
+const dark = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+const syncTheme = () => press("[data-theme-set]", "themeSet", dark() ? "dark" : "light");
+document.querySelectorAll("[data-theme-set]").forEach(b => b.addEventListener("click", () => { root.dataset.theme = b.dataset.themeSet; syncTheme(); }));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
+new MutationObserver(syncTheme).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+syncTheme();
+render();
+</script>
