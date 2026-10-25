@@ -213,6 +213,24 @@ public sealed partial class PrivacySetupViewModel : ObservableObject
     [RelayCommand]
     private void OpenFolder() => _host.OpenFolder(_brain.DataFolder);
 
+    /// <summary>Delete my data, after its question: everything on this PC and the API keys go, and Lamha closes.</summary>
+    [RelayCommand]
+    private async Task DeleteDataAsync()
+    {
+        if (await _host.AskAsync(Localization.Get("Settings_DeleteDataQ"), Localization.Get("Settings_DeleteData"),
+                Localization.Get("Settings_DeleteDataText")).ConfigureAwait(true) == Answer.Confirm)
+        {
+            _host.DeleteDataAndQuit();
+        }
+    }
+
+    /// <summary>"What is sent, and where?": the answer shown under it, or hidden again.</summary>
+    [ObservableProperty]
+    public partial bool IsPrivacyTextShown { get; set; }
+
+    [RelayCommand]
+    private void TogglePrivacyText() => IsPrivacyTextShown = !IsPrivacyTextShown;
+
     /// <summary>Lamha 2's <c>arCount</c>: one, two, 3 to 10 and the rest each have their own words in Arabic.</summary>
     private static string Counted(string key, int n) => n switch
     {

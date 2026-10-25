@@ -446,13 +446,36 @@
 
       <!-- My data on this PC: where it is, and Open the folder -->
       <controls:SettingsCard Header="{x:Bind S.MyData}" Description="{x:Bind S.MyDataLine}">
-        <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.Privacy.OpenFolderCommand}" AutomationProperties.Name="{x:Bind S.OpenFolder}">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <controls:LineIcon Glyph="Folder" Width="14" Height="14" VerticalAlignment="Center" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind S.OpenFolder}" />
-          </StackPanel>
-        </Button>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.Privacy.OpenFolderCommand}" AutomationProperties.Name="{x:Bind S.OpenFolder}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <controls:LineIcon Glyph="Folder" Width="14" Height="14" VerticalAlignment="Center" />
+              <TextBlock VerticalAlignment="Center" Text="{x:Bind S.OpenFolder}" />
+            </StackPanel>
+          </Button>
+          <Button Style="{StaticResource LamhaDangerButtonStyle}" Content="{x:Bind S.DeleteData}" Command="{x:Bind ViewModel.Privacy.DeleteDataCommand}" />
+        </StackPanel>
       </controls:SettingsCard>
+
+      <!-- What is sent, and where? The answer opens under the row (the design's chevron) -->
+      <Border Style="{StaticResource LamhaSettingsPanelStyle}" MinHeight="48" Padding="0">
+        <StackPanel>
+          <!-- 14 px: the panel's 1 px edge and the button's own make the text 16 px in, as on every card -->
+          <Button Style="{StaticResource LamhaRowButtonStyle}" MinHeight="46" Padding="14,0" Command="{x:Bind ViewModel.Privacy.TogglePrivacyTextCommand}"
+                  AutomationProperties.Name="{x:Bind S.PrivacyMore}">
+            <Grid ColumnSpacing="16">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="32" />
+              </Grid.ColumnDefinitions>
+              <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.PrivacyMore}" />
+              <controls:LineIcon Grid.Column="1" Glyph="Down" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
+            </Grid>
+          </Button>
+          <TextBlock Margin="15,0,15,12" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind S.PrivacyText}"
+                     Visibility="{x:Bind ViewModel.Privacy.IsPrivacyTextShown, Mode=OneWay}" />
+        </StackPanel>
+      </Border>
     </StackPanel>
 
     <!-- ===== Keyboard shortcuts: each one's keys and Change; Esc closes the card ===== -->

@@ -290,6 +290,12 @@ public sealed class SettingsStrings
 
     public string OpenFolder { get; } = Localization.Get("Settings_OpenFolder");
 
+    public string DeleteData { get; } = Localization.Get("Settings_DeleteData");
+
+    public string PrivacyMore { get; } = Localization.Get("Settings_PrivacyMore");
+
+    public string PrivacyText { get; } = Localization.Get("Settings_PrivacyText");
+
     public string KeyClose { get; } = Localization.Get("Settings_KeyClose");
 
     public string Login { get; } = Localization.Get("Tray_StartWithWindows");

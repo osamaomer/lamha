@@ -76,6 +76,7 @@ public partial class App : Application
             Theme = _options.Theme,
             Sample = _options.Page is null ? null : _options.Sample,
             Startup = startup,
+            DeleteData = DeleteDataAndQuit,
         };
         _card.SettingsOpener = section => _main.Show("settings", section);
 
@@ -108,9 +109,42 @@ public partial class App : Application
 
     private void Notify(string title, string body) => _tray?.Notify(title, body);
 
+    /// <summary>
+    /// Settings → Delete my data: the API keys, then, once everything is closed, the data folder (the database, the
+    /// clipboard history, the rates, the log), and Lamha quits; the next start begins fresh. With <c>--profile</c>,
+    /// only that folder.
+    /// </summary>
+    private void DeleteDataAndQuit()
+    {
+        AppLog.Info("delete my data");
+        foreach (var name in new[] { "claude", "gemini", "openai", "custom" })
+        {
+            _brain.Secrets.Set(name, null);
+        }
+
+        Close();
+        try
+        {
+            Directory.Delete(_brain.DataFolder, recursive: true);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Nothing to log to any more: what's left is gone at the next delete or uninstall's choice.
+        }
+
+        Exit();
+    }
+
     private void Quit()
     {
         AppLog.Info("quit");
+        Close();
+        Exit();
+    }
+
+    /// <summary>Everything Lamha holds, closed: windows, shortcuts, the clipboard listener, the tray, the database.</summary>
+    private void Close()
+    {
         _main?.Dispose();
         _card?.Dispose();
         _hotkeys?.Dispose();
@@ -120,6 +154,5 @@ public partial class App : Application
         _tray?.Dispose();
         _messages?.Dispose();
         _brain.Dispose();
-        Exit();
     }
 }

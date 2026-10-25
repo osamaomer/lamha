@@ -43,6 +43,9 @@ public interface IPageHost
     /// <summary>Opens <paramref name="folder"/> in File Explorer.</summary>
     void OpenFolder(string folder);
 
+    /// <summary>Deletes the user's data and the API keys, and quits Lamha (Settings → Delete my data, once confirmed).</summary>
+    void DeleteDataAndQuit();
+
     /// <summary>Settings, at the category <paramref name="section"/> ("writing", "translation", "offline"): an error's Settings button.</summary>
     void OpenSettings(string section);
 

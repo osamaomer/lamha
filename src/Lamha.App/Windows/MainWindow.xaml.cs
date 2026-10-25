@@ -122,6 +122,12 @@ public sealed partial class MainWindow : Window, IPageHost
     /// <summary>Start with Windows, for Settings → Lamha; set before the window shows a page.</summary>
     public StartWithWindows? Startup { get; set; }
 
+    /// <summary>Settings → Delete my data: deletes everything and quits (the app's).</summary>
+    public Action? DeleteData { get; set; }
+
+    // Queued: it closes this window, which shouldn't happen inside the window's own call.
+    public void DeleteDataAndQuit() => DispatcherQueue.TryEnqueue(() => DeleteData?.Invoke());
+
     public nint Handle { get; }
 
     public string Lamha { get; } = Localization.Get("Common_Lamha");

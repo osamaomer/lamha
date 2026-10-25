@@ -31,6 +31,9 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
     /// <summary>Start with Windows, for Settings → Lamha (the tray's switch too).</summary>
     public StartWithWindows? Startup { get; init; }
 
+    /// <summary>Settings → Delete my data, after its question: the app deletes everything and quits.</summary>
+    public Action? DeleteData { get; init; }
+
     public bool IsOpen => _window is not null;
 
     /// <summary>
@@ -52,6 +55,7 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
             var window = _window = new MainWindow(new MainViewModel(), brain, shortcuts, clipboard);
             window.UseTheme(Theme ?? brain.Settings.Current.Theme);
             window.Startup = Startup;
+            window.DeleteData = DeleteData;
             window.Go(page, section);
             // Settings → Appearance applies to the open window at once (the card reads it each time it opens).
             void Apply(object? sender, LamhaSettings settings) => window.DispatcherQueue.TryEnqueue(() =>
