@@ -6,7 +6,6 @@ using Lamha.Windows.Shell;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
 
 namespace Lamha.App.Windows;
@@ -36,7 +35,7 @@ public sealed partial class CardWindow : Window
         Title = Localization.Get("Common_Lamha");
         if (solid)
         {
-            Card.Background = (Brush)Application.Current.Resources["LamhaSurfaceBrush"];
+            Card.ShowSolid();
         }
         else
         {
@@ -110,6 +109,14 @@ public sealed partial class CardWindow : Window
     }
 
     public void Announce(string text) => Card.Announce(text);
+
+    /// <summary>Settings → Appearance → Theme: "light", "dark", or "auto" (Windows').</summary>
+    public void UseTheme(string theme) => Card.RequestedTheme = theme switch
+    {
+        "light" => ElementTheme.Light,
+        "dark" => ElementTheme.Dark,
+        _ => ElementTheme.Default,
+    };
 
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
 

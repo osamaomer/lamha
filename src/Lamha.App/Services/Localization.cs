@@ -51,20 +51,27 @@ public static class Localization
     /// <summary>A number as Lamha 2 wrote it: Arabic-Indic digits in Arabic ("١٢٬٣٤٥"), "12,345" in English.</summary>
     public static string Number(long n)
     {
-        if (!IsArabic)
-        {
-            return n.ToString("#,0", EnglishNumbers);
-        }
-
-        var text = n.ToString("#,0", ArabicNumbers);
-        return string.Create(text.Length, text, (span, s) =>
-        {
-            for (var i = 0; i < s.Length; i++)
-            {
-                span[i] = s[i] is >= '0' and <= '9' ? (char)('٠' + (s[i] - '0')) : s[i];
-            }
-        });
+        return Digits(n.ToString("#,0", IsArabic ? ArabicNumbers : EnglishNumbers));
     }
+
+    /// <summary>Arabic-Indic digits in Arabic (.NET writes ASCII digits whatever the culture).</summary>
+    private static string Digits(string text) => !IsArabic ? text : string.Create(text.Length, text, (span, s) =>
+    {
+        for (var i = 0; i < s.Length; i++)
+        {
+            span[i] = s[i] is >= '0' and <= '9' ? (char)('٠' + (s[i] - '0')) : s[i];
+        }
+    });
+
+    /// <summary>A sum of money as the interface writes it: two decimals ("187.46", "١٨٧٫٤٦").</summary>
+    public static string Money(decimal value) => Digits(value.ToString("#,0.00", IsArabic ? ArabicNumbers : EnglishNumbers));
+
+    /// <summary>An exchange rate: up to four decimals, more for a currency worth far less ("3.75", "0.000027").</summary>
+    public static string Rate(decimal value) =>
+        Digits(value.ToString(value >= 0.01m ? "#,0.####" : "0.########", IsArabic ? ArabicNumbers : EnglishNumbers));
+
+    /// <summary>"25 October", "٢٥ أكتوبر".</summary>
+    public static string DayAndMonth(DateOnly day) => Digits(day.ToString("d MMMM", IsArabic ? ArabicNumbers : EnglishNumbers));
 
     /// <summary>A language's name in the interface language ("الإنجليزية", "French"): Lamha 2's <c>langName()</c>.</summary>
     public static string LanguageName(string code)

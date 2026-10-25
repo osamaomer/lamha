@@ -21,6 +21,12 @@
     <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
     <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-x64</RuntimeIdentifier>
 
+    <!-- NativeAOT and WinUI: C#/WinRT generates what a .NET list needs to cross to WinUI (an ItemsSource) only with
+         unsafe code allowed; without it the published app fails at run time (ArgumentException) while Debug works.
+         Its level 2 warnings (errors here) catch a type it can't pass. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
+
     <!-- Program.cs is the entry point: Velopack and the single-instance check run before any XAML. -->
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
   </PropertyGroup>

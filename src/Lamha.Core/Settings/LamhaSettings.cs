@@ -148,6 +148,12 @@ public sealed record LamhaSettings
     /// </summary>
     public bool CardSolid { get; init; }
 
+    /// <summary>
+    /// New in Lamha 3: the currency a selected price is shown in (an ISO 4217 code, "SAR"); "" follows Windows' region
+    /// (Settings → Languages).
+    /// </summary>
+    public string Currency { get; init; } = "";
+
     /// <summary>The interface language in use: "ar" or "en", given the system's language (e.g. "ar-SA").</summary>
     public string InterfaceLanguage(string systemLanguage) => UiLang switch
     {

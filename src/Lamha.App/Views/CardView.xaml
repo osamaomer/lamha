@@ -52,6 +52,9 @@
       </Style>
     </Grid.Resources>
 
+    <!-- The card's solid background (Settings → Appearance → the card's background); otherwise Acrylic shows through -->
+    <Border x:Name="SolidBackground" Grid.RowSpan="3" Background="{ThemeResource LamhaSurfaceBrush}" Visibility="Collapsed" />
+
     <!-- The hint: "Select some text first", a pill next to the mouse -->
     <Border x:Name="HintBox" Grid.RowSpan="3" x:Load="{x:Bind ViewModel.IsHint, Mode=OneWay}" Padding="16,10">
       <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}"
@@ -144,11 +147,11 @@
                      Visibility="{x:Bind ViewModel.WaitingIsWord, Mode=OneWay, FallbackValue=Collapsed}" FlowDirection="LeftToRight" TextAlignment="{x:Bind controls:Show.LatinAlignment}" />
           <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" MaxLines="3" TextTrimming="CharacterEllipsis"
                      Text="{x:Bind ViewModel.WaitingText, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.WaitingIsWord), Mode=OneWay, FallbackValue=Collapsed}" />
-          <Border Height="52" Margin="0,12,0,0" CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaSkeletonBrush}" />
+          <controls:Skeleton Height="52" Margin="0,12,0,0" CornerRadius="{StaticResource LamhaRadiusMedium}" />
           <StackPanel Visibility="{x:Bind ViewModel.WaitingIsWord, Mode=OneWay, FallbackValue=Collapsed}">
-            <Border Height="12" Width="128" Margin="0,20,0,0" HorizontalAlignment="Left" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaSkeletonBrush}" />
-            <Border Height="12" Margin="0,12,32,0" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaSkeletonBrush}" />
-            <Border Height="12" Margin="0,8,88,0" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaSkeletonBrush}" />
+            <controls:Skeleton Height="12" Width="128" Margin="0,20,0,0" HorizontalAlignment="Left" CornerRadius="{StaticResource LamhaRadiusSmall}" />
+            <controls:Skeleton Height="12" Margin="0,12,32,0" CornerRadius="{StaticResource LamhaRadiusSmall}" />
+            <controls:Skeleton Height="12" Margin="0,8,88,0" CornerRadius="{StaticResource LamhaRadiusSmall}" />
           </StackPanel>
         </StackPanel>
 
@@ -321,7 +324,7 @@
                                          Text="{x:Bind ArabicWords}" Visibility="{x:Bind controls:Show.IfText(ArabicWords), FallbackValue=Collapsed}" />
                               <TextBlock Style="{StaticResource LamhaReadingTextStyle}" FlowDirection="RightToLeft" TextAlignment="{x:Bind controls:Show.ArabicAlignment}"
                                          Text="{x:Bind Translated, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Translated), Mode=OneWay, FallbackValue=Collapsed}" />
-                              <Border Height="12" Margin="0,6,48,6" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaSkeletonBrush}"
+                              <controls:Skeleton Height="12" Margin="0,6,48,6" CornerRadius="{StaticResource LamhaRadiusSmall}"
                                       Visibility="{x:Bind Pending, Mode=OneWay, FallbackValue=Collapsed}" />
                               <TextBlock Margin="0,2,0,0" Style="{x:Bind controls:Show.GlossStyle(GlossIsRightToLeft)}"
                                          FlowDirection="{x:Bind controls:Show.Flow(GlossIsRightToLeft)}" TextAlignment="{x:Bind controls:Show.FlowAlignment(GlossIsRightToLeft)}"
@@ -405,6 +408,31 @@
           </StackPanel>
         </StackPanel>
 
+        <!-- A price, in the user's currency: the price as selected, the amount, the rate and its day -->
+        <StackPanel x:Name="PriceBox" x:Load="{x:Bind ViewModel.IsPrice, Mode=OneWay}">
+          <TextBlock Style="{StaticResource LamhaHeadwordTextStyle}" FontFamily="{StaticResource LamhaFontFamily}" CharacterSpacing="0"
+                     FlowDirection="LeftToRight" TextAlignment="{x:Bind controls:Show.LatinAlignment}"
+                     Text="{x:Bind ViewModel.Price.Selected, Mode=OneWay}" IsTextSelectionEnabled="True" />
+          <Border Margin="0,12,0,0" Style="{StaticResource LamhaTintedBoxStyle}">
+            <Grid ColumnSpacing="8">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <StackPanel>
+                <TextBlock Margin="0,0,0,2" Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}"
+                           Text="{x:Bind ViewModel.Price.Label, Mode=OneWay}" />
+                <TextBlock Style="{StaticResource LamhaHeroTextStyle}" Text="{x:Bind ViewModel.Price.Value, Mode=OneWay}" IsTextSelectionEnabled="True" />
+                <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind ViewModel.Price.RateLine, Mode=OneWay}" />
+              </StackPanel>
+              <Button x:Uid="Card_CopyPrice" Grid.Column="1" VerticalAlignment="Top" Style="{StaticResource LamhaIconButtonStyle}"
+                      Command="{x:Bind ViewModel.CopyAnswerCommand}">
+                <controls:LineIcon Glyph="Copy" Width="15" Height="15" />
+              </Button>
+            </Grid>
+          </Border>
+        </StackPanel>
+
         <!-- ===== The writing tools, and Write new ===== -->
         <StackPanel x:Name="WritingBox" x:Load="{x:Bind ViewModel.IsWriting, Mode=OneWay}">
           <TextBlock x:Name="WritingSource" Style="{StaticResource LamhaSecondaryTextStyle}" MaxLines="2" TextTrimming="CharacterEllipsis"
@@ -433,9 +461,9 @@
           <StackPanel Margin="{x:Bind controls:Show.WritingOutMargin(ViewModel.Writing.IsCompose), Mode=OneWay}">
             <!-- Working -->
             <StackPanel Visibility="{x:Bind ViewModel.Writing.IsWorking, Mode=OneWay, FallbackValue=Collapsed}" Spacing="8">
-              <Border Height="14" Margin="0,0,24,0" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaSkeletonBrush}" />
-              <Border Height="14" Margin="0,0,80,0" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaSkeletonBrush}" />
-              <Border Height="14" Margin="0,0,160,0" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaSkeletonBrush}" />
+              <controls:Skeleton Height="14" Margin="0,0,24,0" CornerRadius="{StaticResource LamhaRadiusSmall}" />
+              <controls:Skeleton Height="14" Margin="0,0,80,0" CornerRadius="{StaticResource LamhaRadiusSmall}" />
+              <controls:Skeleton Height="14" Margin="0,0,160,0" CornerRadius="{StaticResource LamhaRadiusSmall}" />
             </StackPanel>
 
             <!-- A result, with Replace (or Insert), Copy, the other language or the request, and Try again -->
@@ -564,8 +592,8 @@
 
     <!-- ===== The links at the foot ===== -->
     <Border x:Name="Foot" Grid.Row="2" Padding="8,6" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,1,0,0"
-            Visibility="{x:Bind controls:Show.FootVisible(ViewModel.IsAnswer, ViewModel.Answer.Links.Count), Mode=OneWay, FallbackValue=Collapsed}" SizeChanged="OnContentSizeChanged">
-      <ItemsControl ItemsSource="{x:Bind ViewModel.Answer.Links, Mode=OneWay}" IsTabStop="False">
+            Visibility="{x:Bind controls:Show.IfAny(ViewModel.Links.Count), Mode=OneWay, FallbackValue=Collapsed}" SizeChanged="OnContentSizeChanged">
+      <ItemsControl ItemsSource="{x:Bind ViewModel.Links, Mode=OneWay}" IsTabStop="False">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
             <controls:WrapPanel HorizontalSpacing="4" VerticalSpacing="4" />

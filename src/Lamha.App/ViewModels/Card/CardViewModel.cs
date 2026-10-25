@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.Core;
 using Lamha.Core.Dictionary;
+using Lamha.Core.Money;
 using Lamha.Core.Review;
 using Lamha.Core.Settings;
 using Lamha.Core.Text;
@@ -53,6 +55,9 @@ public enum CardView
     /// <summary>The word (or text) at once, and shapes where the answer will be.</summary>
     Waiting,
     Answer,
+
+    /// <summary>A price, in the user's currency.</summary>
+    Price,
     Error,
     Writing,
 }
@@ -89,7 +94,7 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
     private CancellationTokenSource? _toast;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsHint), nameof(IsWaiting), nameof(IsAnswer), nameof(IsError), nameof(IsWriting), nameof(HasBar))]
+    [NotifyPropertyChangedFor(nameof(IsHint), nameof(IsWaiting), nameof(IsAnswer), nameof(IsPrice), nameof(IsError), nameof(IsWriting), nameof(HasBar))]
     public partial CardView View { get; private set; }
 
     public bool IsHint => View == CardView.Hint;
@@ -97,6 +102,8 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
     public bool IsWaiting => View == CardView.Waiting;
 
     public bool IsAnswer => View == CardView.Answer;
+
+    public bool IsPrice => View == CardView.Price;
 
     public bool IsError => View == CardView.Error;
 
@@ -168,6 +175,13 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
 
     [ObservableProperty]
     public partial WordAnswer? Answer { get; private set; }
+
+    [ObservableProperty]
+    public partial PriceAnswer? Price { get; private set; }
+
+    /// <summary>The links at the foot: the answer's, or the price's credit for its rates.</summary>
+    [ObservableProperty]
+    public partial List<LinkItem> Links { get; private set; } = [];
 
     [ObservableProperty]
     public partial ErrorInfo? Error { get; private set; }
@@ -331,7 +345,11 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
     [RelayCommand]
     private void CopyAnswer()
     {
-        if (Answer is { HeroText.Length: > 0 } a)
+        if (IsPrice && Price is { } price)
+        {
+            Copy(price.CopyText);
+        }
+        else if (Answer is { HeroText.Length: > 0 } a)
         {
             Copy(a.HeroText);
         }
@@ -372,6 +390,7 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
         var cancel = _lookup = new CancellationTokenSource();
         Writing?.Cancel();
         Writing = null;
+        Links = [];
         Width = LookupWidth;
         ShowNavigation = _history.Count > 1;
         CanGoBack = _at > 0;
@@ -395,6 +414,12 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
     {
         try
         {
+            // A price alone ("$49.99") in another currency than the user's: what it is in theirs.
+            if (_at == 0 && await ConvertAsync(entry.Text, cancel).ConfigureAwait(true))
+            {
+                return;
+            }
+
             var result = await brain.Lookup.LookupAsync(entry.Text, new LookupOptions { Context = entry.Context, ForceAi = entry.ForceAi }, cancel.Token).ConfigureAwait(true);
             if (cancel.IsCancellationRequested)
             {
@@ -448,8 +473,36 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
         IsBusy = false;
         Error = null;
         Answer = answer;
+        Links = answer.Links;
         View = CardView.Answer;
         host.Announce(answer.Spoken);
+    }
+
+    /// <summary>
+    /// "Prices in your currency" (phase 1's design): true when <paramref name="text"/> is a price in another currency
+    /// and the card shows it; false to look the text up as usual (not a price, already the user's, an unknown currency).
+    /// </summary>
+    private async Task<bool> ConvertAsync(string text, CancellationTokenSource cancel)
+    {
+        var mine = brain.Money.Mine(brain.Settings.Current);
+        if (Prices.Find(text, mine) is not { } price || price.Currency == mine)
+        {
+            return false;
+        }
+
+        var conversion = await brain.Money.ConvertAsync(price, mine, cancel.Token).ConfigureAwait(true);
+        if (conversion is null || cancel.IsCancellationRequested)
+        {
+            return false;
+        }
+
+        Frame("");
+        Error = null;
+        Price = new PriceAnswer(text, conversion);
+        Links = [new LinkItem(Glyph.External, CurrencyService.Credit, "", new RelayCommand(() => host.OpenLink(new Uri(CurrencyService.CreditUrl))))];
+        View = CardView.Price;
+        host.Announce($"{text}: {Price.Value}");
+        return true;
     }
 
     /// <summary>What comes after the answer shows: the review mark, the offline dictionary's glosses, Wikipedia.</summary>
@@ -524,6 +577,7 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
     private void Frame(string title)
     {
         BarTitle = title;
+        Links = [];
         HasDictSwitch = false;
         Badge = AnswerBadge.None;
     }

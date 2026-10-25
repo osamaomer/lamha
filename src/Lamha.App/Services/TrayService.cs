@@ -13,7 +13,7 @@ public sealed record ShortcutInfo(Hotkey Keys, string LabelKey, bool Registered)
 /// Opening Lamha, Review, Write and Settings come with their windows (phase 4), updates with phase 5. Until Settings
 /// exists, clipboard history and the accent colour have their switches here (Proto_ items, removed with phase 4).
 /// </summary>
-public sealed class TrayService : IDisposable
+public sealed partial class TrayService : IDisposable
 {
     private readonly TrayIcon _icon;
     private readonly SettingsService _settings;

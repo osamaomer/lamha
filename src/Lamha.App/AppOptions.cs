@@ -22,7 +22,8 @@ public enum CardLifetime
 /// the writing tools on it, <c>--sample=write:</c> Write new. For screenshots of the card's states.
 /// </param>
 /// <param name="Language"><c>--lang=ar</c> or <c>--lang=en</c>: the interface language for this run, not saved.</param>
-public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null)
+/// <param name="Theme"><c>--theme=light</c> or <c>--theme=dark</c>: the windows' theme for this run, not saved.</param>
+public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null)
 {
     public static AppOptions FromArgs(IReadOnlyList<string> args)
     {
@@ -31,7 +32,8 @@ public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string?
         var profile = Value(args, "--profile=");
         var sample = Value(args, "--sample=");
         var language = Value(args, "--lang=") is "ar" or "en" ? Value(args, "--lang=") : null;
-        return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language);
+        var theme = Value(args, "--theme=") is "light" or "dark" ? Value(args, "--theme=") : null;
+        return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language, theme);
     }
 
     private static string? Value(IReadOnlyList<string> args, string name) =>

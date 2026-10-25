@@ -190,7 +190,7 @@ public sealed partial class WritingPanel : ObservableObject
     public partial IReadOnlyList<DiffPart>? Diff { get; private set; }
 
     [ObservableProperty]
-    public partial IReadOnlyList<IssueItem> Issues { get; private set; } = [];
+    public partial List<IssueItem> Issues { get; private set; } = [];
 
     [ObservableProperty]
     public partial string CorrectionsTitle { get; private set; } = "";

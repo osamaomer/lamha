@@ -57,7 +57,7 @@ public sealed partial class DefinitionItem : ObservableObject
 
     public string Example { get; init; } = "";
 
-    public IReadOnlyList<ChipItem> Synonyms { get; init; } = [];
+    public List<ChipItem> Synonyms { get; init; } = [];
 
     public bool Best { get; init; }
 
@@ -73,7 +73,7 @@ public sealed partial class DefinitionItem : ObservableObject
 }
 
 /// <summary>A part of speech's definitions.</summary>
-public sealed record DefinitionGroupItem(string Pos, IReadOnlyList<DefinitionItem> Entries);
+public sealed record DefinitionGroupItem(string Pos, List<DefinitionItem> Entries);
 
 /// <summary>The Wikipedia summary, under the answer when it arrives.</summary>
 public sealed record WikiItem(string Extract, FlowDirection Flow, Uri? Url, Uri? Thumb, IRelayCommand Read);
@@ -189,7 +189,7 @@ public sealed partial class WordAnswer : ObservableObject
                     Best = e.Best,
                 };
             })]))];
-        Examples = Definitions.Count == 0 ? d.Examples : [];
+        Examples = Definitions.Count == 0 ? [.. d.Examples] : [];
 
         Milestone = d.Milestone > 0 ? Localization.Format("Card_Milestone", d.Milestone) : d.Goal > 0 ? Localization.Format("Card_GoalDone", d.Goal) : "";
         Links = Footer(d, translator, writingTools);
@@ -261,9 +261,9 @@ public sealed partial class WordAnswer : ObservableObject
 
     public ObservableCollection<MeaningLine> OtherMeanings { get; } = [];
 
-    public IReadOnlyList<DefinitionGroupItem> Definitions { get; }
+    public List<DefinitionGroupItem> Definitions { get; }
 
-    public IReadOnlyList<string> Examples { get; }
+    public List<string> Examples { get; }
 
     [ObservableProperty]
     public partial WikiItem? Wikipedia { get; set; }
@@ -271,7 +271,7 @@ public sealed partial class WordAnswer : ObservableObject
     /// <summary>"🎉 That's word number 50…" or today's goal reached.</summary>
     public string Milestone { get; }
 
-    public IReadOnlyList<LinkItem> Links { get; }
+    public List<LinkItem> Links { get; }
 
     /// <summary>What Narrator says when the answer arrives: the word and its meaning, or the translation (Lamha 2's <c>spoken()</c>).</summary>
     public string Spoken => IsWord ? $"{Query}: {HeroText}" : HeroText;

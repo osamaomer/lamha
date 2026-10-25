@@ -24,6 +24,8 @@
       <!-- Chips and quiet buttons, and the shapes that stand in for an answer while it loads -->
       <SolidColorBrush x:Key="LamhaChipBrush" Color="#0B000000" />
       <SolidColorBrush x:Key="LamhaSkeletonBrush" Color="#0F000000" />
+      <!-- The light that sweeps across a skeleton while it waits (content/styles.js .sk::after) -->
+      <Color x:Key="LamhaShimmerColor">#59FFFFFF</Color>
       <!-- The accent: links, labels, icons; its tint behind what's selected; filled buttons and selected chips.
            Services/AccentService.cs repaints these four with Windows' accent, made readable, when Settings asks. -->
       <SolidColorBrush x:Key="LamhaAccentBrush" Color="#4F46E5" />
@@ -76,6 +78,7 @@
       <SolidColorBrush x:Key="LamhaControlEdgeBrush" Color="#00000000" />
       <SolidColorBrush x:Key="LamhaChipBrush" Color="#12FFFFFF" />
       <SolidColorBrush x:Key="LamhaSkeletonBrush" Color="#14FFFFFF" />
+      <Color x:Key="LamhaShimmerColor">#14FFFFFF</Color>
       <SolidColorBrush x:Key="LamhaAccentBrush" Color="#9AA1FF" />
       <SolidColorBrush x:Key="LamhaAccentSoftBrush" Color="#1F9AA1FF" />
       <SolidColorBrush x:Key="LamhaButtonBrush" Color="#5E5CE6" />
@@ -121,6 +124,8 @@
       <SolidColorBrush x:Key="LamhaControlEdgeBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
       <SolidColorBrush x:Key="LamhaChipBrush" Color="{ThemeResource SystemColorWindowColor}" />
       <SolidColorBrush x:Key="LamhaSkeletonBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
+      <!-- The skeleton's own colour: no sweep in high contrast -->
+      <StaticResource x:Key="LamhaShimmerColor" ResourceKey="SystemColorGrayTextColor" />
       <SolidColorBrush x:Key="LamhaAccentBrush" Color="{ThemeResource SystemColorHotlightColor}" />
       <SolidColorBrush x:Key="LamhaAccentSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
       <SolidColorBrush x:Key="LamhaButtonBrush" Color="{ThemeResource SystemColorHighlightColor}" />

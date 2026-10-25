@@ -74,9 +74,6 @@ public static class Show
     /// <summary>Definitions are 12 px apart; the tinted one reaches past the text like a sense.</summary>
     public static Thickness DefinitionMargin(bool best) => best ? new Thickness(-8, 0, -8, 12) : new Thickness(0, 0, 0, 12);
 
-    /// <summary>The links show under an answer that has some.</summary>
-    public static Visibility FootVisible(bool answer, int links) => If(answer && links > 0);
-
     /// <summary>The writing tools' output is 16 px under the tools; Write new has no tools above it.</summary>
     public static Thickness WritingOutMargin(bool compose) => compose ? new Thickness(0) : new Thickness(0, 16, 0, 0);
 

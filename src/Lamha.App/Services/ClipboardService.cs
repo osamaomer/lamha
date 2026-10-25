@@ -11,7 +11,7 @@ namespace Lamha.App.Services;
 /// Lamha 2's startClipboard() / pauseClipboard() / runClipExpiry() in main.js. The log gets lengths and reasons, never
 /// what was copied.
 /// </summary>
-public sealed class ClipboardService : IDisposable
+public sealed partial class ClipboardService : IDisposable
 {
     private readonly ClipboardHistory _history;
     private readonly SettingsService _settings;

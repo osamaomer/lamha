@@ -97,7 +97,5 @@ public sealed partial class DiffText : UserControl
         _text.TextHighlighters.Add(highlight);
     }
 
-    private Brush? Brush(string key) =>
-        Resources.TryGetValue(key, out var own) ? own as Brush
-        : Application.Current.Resources.TryGetValue(key, out var app) ? app as Brush : null;
+    private Brush? Brush(string key) => ThemeLookup.Get(this, key) as Brush;
 }

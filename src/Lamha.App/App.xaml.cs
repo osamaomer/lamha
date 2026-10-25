@@ -63,6 +63,7 @@ public partial class App : Application
         _card = new CardService(new SelectionService(_messages), _sentences, _clipboard, _brain, _options.CardLifetime, idle, Notify)
         {
             Sample = _options.Sample,
+            Theme = _options.Theme,
         };
 
         _hotkeys = new Hotkeys(_messages);

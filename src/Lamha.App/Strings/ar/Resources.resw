@@ -204,6 +204,108 @@
   <data name="Error_custom_offline_Hint" xml:space="preserve"><value>تأكد أن الخادم يعمل وأن عنوانه صحيح في الإعدادات، ثم أعد المحاولة.</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
   <data name="Ai_Custom" xml:space="preserve"><value>خادم آخر</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
 
+  <!-- Prices in your currency (phase 4) -->
+  <data name="Card_CopyPrice.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>نسخ</value><comment>common.copy</comment></data>
+  <data name="Card_CopyPrice.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>نسخ</value><comment>common.copy</comment></data>
+  <data name="Card_InYourCurrency" xml:space="preserve"><value>بعملتك</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
+  <data name="Card_RateLine" xml:space="preserve"><value>{0} = {1} · سعر {2}</value><comment>new in Lamha 3, approved with the card's design 2026-10-25: 1 US dollar = 3.75 riyals · rate of 25 October</comment></data>
+  <data name="Currency_USD_One" xml:space="preserve"><value>دولار أمريكي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_USD_Many" xml:space="preserve"><value>دولار أمريكي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_USD_Short" xml:space="preserve"><value>دولار</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EUR_One" xml:space="preserve"><value>يورو</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EUR_Many" xml:space="preserve"><value>يورو</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EUR_Short" xml:space="preserve"><value>يورو</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_GBP_One" xml:space="preserve"><value>جنيه إسترليني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_GBP_Many" xml:space="preserve"><value>جنيه إسترليني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_GBP_Short" xml:space="preserve"><value>جنيه</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SAR_One" xml:space="preserve"><value>ريال سعودي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SAR_Many" xml:space="preserve"><value>ريال سعودي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SAR_Short" xml:space="preserve"><value>ريال</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AED_One" xml:space="preserve"><value>درهم إماراتي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AED_Many" xml:space="preserve"><value>درهم إماراتي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AED_Short" xml:space="preserve"><value>درهم</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EGP_One" xml:space="preserve"><value>جنيه مصري</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EGP_Many" xml:space="preserve"><value>جنيه مصري</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EGP_Short" xml:space="preserve"><value>جنيه</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KWD_One" xml:space="preserve"><value>دينار كويتي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KWD_Many" xml:space="preserve"><value>دينار كويتي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KWD_Short" xml:space="preserve"><value>دينار</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_QAR_One" xml:space="preserve"><value>ريال قطري</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_QAR_Many" xml:space="preserve"><value>ريال قطري</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_QAR_Short" xml:space="preserve"><value>ريال</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_BHD_One" xml:space="preserve"><value>دينار بحريني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_BHD_Many" xml:space="preserve"><value>دينار بحريني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_BHD_Short" xml:space="preserve"><value>دينار</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_OMR_One" xml:space="preserve"><value>ريال عماني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_OMR_Many" xml:space="preserve"><value>ريال عماني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_OMR_Short" xml:space="preserve"><value>ريال</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JOD_One" xml:space="preserve"><value>دينار أردني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JOD_Many" xml:space="preserve"><value>دينار أردني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JOD_Short" xml:space="preserve"><value>دينار</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MAD_One" xml:space="preserve"><value>درهم مغربي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MAD_Many" xml:space="preserve"><value>درهم مغربي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MAD_Short" xml:space="preserve"><value>درهم</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_DZD_One" xml:space="preserve"><value>دينار جزائري</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_DZD_Many" xml:space="preserve"><value>دينار جزائري</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_DZD_Short" xml:space="preserve"><value>دينار</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TND_One" xml:space="preserve"><value>دينار تونسي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TND_Many" xml:space="preserve"><value>دينار تونسي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TND_Short" xml:space="preserve"><value>دينار</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LYD_One" xml:space="preserve"><value>دينار ليبي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LYD_Many" xml:space="preserve"><value>دينار ليبي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LYD_Short" xml:space="preserve"><value>دينار</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IQD_One" xml:space="preserve"><value>دينار عراقي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IQD_Many" xml:space="preserve"><value>دينار عراقي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IQD_Short" xml:space="preserve"><value>دينار</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LBP_One" xml:space="preserve"><value>ليرة لبنانية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LBP_Many" xml:space="preserve"><value>ليرة لبنانية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LBP_Short" xml:space="preserve"><value>ليرة</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SYP_One" xml:space="preserve"><value>ليرة سورية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SYP_Many" xml:space="preserve"><value>ليرة سورية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SYP_Short" xml:space="preserve"><value>ليرة</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_YER_One" xml:space="preserve"><value>ريال يمني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_YER_Many" xml:space="preserve"><value>ريال يمني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_YER_Short" xml:space="preserve"><value>ريال</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SDG_One" xml:space="preserve"><value>جنيه سوداني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SDG_Many" xml:space="preserve"><value>جنيه سوداني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SDG_Short" xml:space="preserve"><value>جنيه</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TRY_One" xml:space="preserve"><value>ليرة تركية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TRY_Many" xml:space="preserve"><value>ليرة تركية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TRY_Short" xml:space="preserve"><value>ليرة</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JPY_One" xml:space="preserve"><value>ين ياباني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JPY_Many" xml:space="preserve"><value>ين ياباني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JPY_Short" xml:space="preserve"><value>ين</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CNY_One" xml:space="preserve"><value>يوان صيني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CNY_Many" xml:space="preserve"><value>يوان صيني</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CNY_Short" xml:space="preserve"><value>يوان</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_INR_One" xml:space="preserve"><value>روبية هندية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_INR_Many" xml:space="preserve"><value>روبية هندية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_INR_Short" xml:space="preserve"><value>روبية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_PKR_One" xml:space="preserve"><value>روبية باكستانية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_PKR_Many" xml:space="preserve"><value>روبية باكستانية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_PKR_Short" xml:space="preserve"><value>روبية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CAD_One" xml:space="preserve"><value>دولار كندي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CAD_Many" xml:space="preserve"><value>دولار كندي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CAD_Short" xml:space="preserve"><value>دولار</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AUD_One" xml:space="preserve"><value>دولار أسترالي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AUD_Many" xml:space="preserve"><value>دولار أسترالي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AUD_Short" xml:space="preserve"><value>دولار</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CHF_One" xml:space="preserve"><value>فرنك سويسري</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CHF_Many" xml:space="preserve"><value>فرنك سويسري</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CHF_Short" xml:space="preserve"><value>فرنك</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KRW_One" xml:space="preserve"><value>وون كوري جنوبي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KRW_Many" xml:space="preserve"><value>وون كوري جنوبي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KRW_Short" xml:space="preserve"><value>وون</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_RUB_One" xml:space="preserve"><value>روبل روسي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_RUB_Many" xml:space="preserve"><value>روبل روسي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_RUB_Short" xml:space="preserve"><value>روبل</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MYR_One" xml:space="preserve"><value>رينغيت ماليزي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MYR_Many" xml:space="preserve"><value>رينغيت ماليزي</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MYR_Short" xml:space="preserve"><value>رينغيت</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IDR_One" xml:space="preserve"><value>روبية إندونيسية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IDR_Many" xml:space="preserve"><value>روبية إندونيسية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IDR_Short" xml:space="preserve"><value>روبية</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+
 
   <data name="Proto_Tooltip" xml:space="preserve"><value>لمحة 3 (نموذج أولي)</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>اعرض البطاقة (نص للتجربة)</value></data>

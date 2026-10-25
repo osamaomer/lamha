@@ -49,37 +49,10 @@ public sealed partial class CardBackdrop : SystemBackdrop
 
         var theme = root.ActualTheme;
         _configuration.Theme = theme == ElementTheme.Dark ? SystemBackdropTheme.Dark : SystemBackdropTheme.Light;
-        var resources = ThemeResources(theme);
+        var resources = ThemeLookup.Dictionary(theme);
         _controller.TintColor = resources["LamhaCardTintColor"] is Color tint ? tint : default;
         _controller.FallbackColor = resources["LamhaCardFallbackColor"] is Color fallback ? fallback : default;
         _controller.TintOpacity = resources["LamhaCardTintOpacity"] is double tintOpacity ? (float)tintOpacity : 0.85f;
         _controller.LuminosityOpacity = resources["LamhaCardLuminosityOpacity"] is double luminosity ? (float)luminosity : 0.9f;
-    }
-
-    /// <summary>The tokens' theme dictionary ("Light" or "Dark") among the app's merged resources.</summary>
-    private static ResourceDictionary ThemeResources(ElementTheme theme)
-    {
-        var key = theme == ElementTheme.Dark ? "Dark" : "Light";
-        foreach (var dictionary in Flatten(Application.Current.Resources))
-        {
-            if (dictionary.ThemeDictionaries.TryGetValue(key, out var found) && found is ResourceDictionary themed && themed.ContainsKey("LamhaCardTintColor"))
-            {
-                return themed;
-            }
-        }
-
-        return Application.Current.Resources;
-    }
-
-    private static IEnumerable<ResourceDictionary> Flatten(ResourceDictionary dictionary)
-    {
-        yield return dictionary;
-        foreach (var merged in dictionary.MergedDictionaries)
-        {
-            foreach (var inner in Flatten(merged))
-            {
-                yield return inner;
-            }
-        }
     }
 }

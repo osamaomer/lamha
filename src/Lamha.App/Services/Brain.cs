@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Lamha.Core.Ai;
 using Lamha.Core.Clipboard;
 using Lamha.Core.Diagnostics;
+using Lamha.Core.Money;
 using Lamha.Core.Dictionary;
 using Lamha.Core.Net;
 using Lamha.Core.Review;
@@ -23,7 +24,7 @@ namespace Lamha.App.Services;
 /// tests build it in <c>TestLamha</c>. The database, the settings and clipboard history open at start (the tray needs
 /// them). Everything a lookup needs (HTTP, the dictionary file, the AI) is built at the first lookup and kept.
 /// </summary>
-public sealed class Brain : IDisposable
+public sealed partial class Brain : IDisposable
 {
     private readonly Lazy<Lookups> _lookups;
 
@@ -80,6 +81,9 @@ public sealed class Brain : IDisposable
     /// <summary>Windows' network state (online, metered…).</summary>
     public INetworkStatus Network => _lookups.Value.Network;
 
+    /// <summary>Prices in the user's currency, with the day's rates kept for offline.</summary>
+    public CurrencyService Money => _lookups.Value.Money;
+
     /// <summary>Whether the offline dictionary file shipped with Lamha could be opened (after the first lookup).</summary>
     public bool HasDictionary => _lookups.IsValueCreated && _lookups.Value.DictionaryFile is not null;
 
@@ -94,7 +98,7 @@ public sealed class Brain : IDisposable
     }
 
     /// <summary>What a lookup needs, made together at the first lookup.</summary>
-    private sealed class Lookups : IDisposable
+    private sealed partial class Lookups : IDisposable
     {
         private readonly HttpClient _client;
 
@@ -129,6 +133,7 @@ public sealed class Brain : IDisposable
             Lookup = new LookupService(
                 settings, brain.Localization, translation, new WordExplainer(ai, packs), packs, new HistoryService(history, clock),
                 Review, today, Wikipedia = new WikipediaService(http, network, Version), network, clock, dictionary, errorLog);
+            Money = new CurrencyService(http, brain.State, network, clock);
             Diagnostics = new DiagnosticsReport(
                 settings, brain.Localization, brain.Secrets, deck, history, mistakes, packs, errorLog, new HostInfo(settings), Version);
         }
@@ -142,6 +147,8 @@ public sealed class Brain : IDisposable
         public WikipediaService Wikipedia { get; }
 
         public INetworkStatus Network { get; }
+
+        public CurrencyService Money { get; }
 
         public LookupService Lookup { get; }
 

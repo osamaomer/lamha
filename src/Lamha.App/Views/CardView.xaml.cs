@@ -100,6 +100,9 @@ public sealed partial class CardView : UserControl
         }
     }
 
+    /// <summary>A solid background instead of the window's Acrylic.</summary>
+    public void ShowSolid() => SolidBackground.Visibility = Visibility.Visible;
+
     /// <summary>A new card starts at the top.</summary>
     public void ScrollToTop() => Scroller.ChangeView(null, 0, null, disableAnimation: true);
 

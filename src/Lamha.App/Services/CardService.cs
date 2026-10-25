@@ -12,7 +12,7 @@ namespace Lamha.App.Services;
 /// Copy, links, Close). Lamha 2's onHotkey / showCard / card-replace in main.js. <c>notify</c> shows a notification
 /// (title, body) when Replace couldn't paste.
 /// </summary>
-public sealed class CardService(
+public sealed partial class CardService(
     SelectionService selection,
     SentenceReader sentences,
     ClipboardService clipboard,
@@ -78,12 +78,23 @@ public sealed class CardService(
     /// <summary><c>--sample</c>: the sample card's text, or "write:" and the text for the writing tools.</summary>
     public string? Sample { get; init; }
 
+    /// <summary><c>--theme</c>: the card's theme for this run instead of the setting.</summary>
+    public string? Theme { get; init; }
+
     /// <summary>The card with sample text and nowhere to paste (the tray's test item, and tools/Measure).</summary>
     public void ShowSample()
     {
         var sample = Sample ?? Localization.Get("Card_SampleText");
         var write = sample.StartsWith("write:", StringComparison.Ordinal);
-        Show(new SelectionCapture(0, write ? sample["write:".Length..] : sample, IsTerminal: false), write ? CardMode.Write : CardMode.Lookup, null);
+        try
+        {
+            Show(new SelectionCapture(0, write ? sample["write:".Length..] : sample, IsTerminal: false), write ? CardMode.Write : CardMode.Lookup, null);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            // Called from the tray's menu and a timer: an exception there would end Lamha without a word in the log.
+            AppLog.Error("sample card", ex);
+        }
     }
 
     public void Hide()
@@ -153,8 +164,10 @@ public sealed class CardService(
             Dispose();
         }
 
+        Animations.Refresh(brain.Settings.Current);
         var created = _window is null;
         var window = _window ??= Create(solid);
+        window.UseTheme(Theme ?? brain.Settings.Current.Theme);
         window.ViewModel.Load(capture, mode, context);
 
         var cursor = Screens.Cursor;

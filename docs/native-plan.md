@@ -440,6 +440,7 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
   - `google_error`: Lamha 2's general error, حدث خطأ · أعد المحاولة. / Something went wrong · Try again.
 - **Lamha 2's errors that name Claude** (`ai_bad_key`, `ai_no_credit`, `ai_forbidden`) name the provider in use, and its site for credit (Claude: console.anthropic.com, OpenAI: platform.openai.com, another server: "the service's website"); `ai_no_key` lists the five providers.
 - **The writing tools' system prompt** ("an app… in any program"): kept.
+- **The first beta without Settings** (answered 2026-10-25): it ships with lookups only (the dictionary, Google, Wikipedia); the writing tools say they aren't set up yet. AI keys come with Settings, in the next beta.
 
 **Foundations**
 - **Lamha 2's strings:** `tools/Strings/lamha2-strings.mjs` reads Lamha 2's four string files into `tools/Strings/lamha2-strings.json` (722 strings; 92 more are functions, mostly Arabic counting, ported by hand), finds a string, and writes the `.resw` lines for a key. `ResourcesTests` checks that both languages have the same strings and placeholders, and that every string whose comment names a Lamha 2 key keeps its wording (an approved rewording says "reworded" in its comment).
@@ -454,7 +455,12 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
 - **The window:** Acrylic with the tokens' tint, always drawn active (`CardBackdrop`), or solid (a new setting, `cardSolid`, for Appearance); its height follows the card up to 540 px, then the body scrolls (`CardPlacement.Resize`: a card under the mouse grows down, one above it grows up).
 - **Seen** on screenshots in both languages (a word from the offline dictionary, a phrase, the writing tools not set up yet); **measured** (NativeAOT, x64): tray 0 / 49 MB, card open 35 / 77 MB, card closed 1 / 77 MB, within budget. `--sample=text` (or `write:text`) and `--lang=ar|en` set the sample card for screenshots.
 
-**Left on the card before the first beta:** prices in your currency (Core: finding a price, the day's rate kept for offline), the shimmer and the motion levels, and a look at the dark and light themes, pinned and followed words, the sentence and an error. Listen waits for speech (phase 5).
+- **Prices in your currency** (Core's `Money/`): a selected price alone ("$49.99", "1,200 SAR", "٥٠ ريال", "20 dollars") shows in the user's currency (the new `currency` setting, else Windows' country or region) with the rate and its day. Rates from ExchangeRate-API's open service (chosen 2026-10-25: free, no key, ~160 currencies), fetched at most once a day and kept, so prices convert offline; its credit, "Rates By Exchange Rate API", is the link at the foot (its terms ask for it). Currency names for 32 currencies in both languages (new wording, to review). 36 tests.
+- **The shimmer** (Lamha 2's `.sk`), still when animations are off; **the theme setting** (light, dark, auto) on the card; `--theme=light|dark` for screenshots.
+- **Found by running the published build:** C#/WinRT needs `AllowUnsafeBlocks` to pass a .NET list to WinUI under NativeAOT; without it the card failed only when published. Its AOT warnings are now errors, so the build catches it.
+- **Seen** in both languages and themes: a word, a phrase, a sentence, a price, the writing tools not set up, the hint. **Measured** (NativeAOT): tray 0 / 49 MB, card open 39 / 81 MB, card closed 1 / 81 MB, within budget. 344 tests.
+
+**Left before the first beta:** the release itself (Velopack's beta channel, a GitHub pre-release from CI). Listen waits for speech (phase 5); the error state and a pinned, followed card are still to be seen on screen.
 
 ## Moving users from Lamha 2
 

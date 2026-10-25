@@ -14,7 +14,7 @@ namespace Lamha.App.Services;
 /// readable for each theme (<see cref="AccentPalette"/>). It follows a new pick in Windows at once, as Lamha 2 did on
 /// accent-color-changed. The brushes are changed in place, so whatever shows them updates.
 /// </summary>
-public sealed class AccentService : IDisposable
+public sealed partial class AccentService : IDisposable
 {
     /// <summary>Lamha's own colours: Lamha 2's shared/ui.css (--accent, --accent-soft, --btn) for each theme.</summary>
     private static readonly (ThemeAccent Light, ThemeAccent Dark) Own = (
