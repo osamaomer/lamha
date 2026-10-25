@@ -774,4 +774,25 @@ What did you expect?
   <data name="Settings_DeleteData" xml:space="preserve"><value>Delete my data</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
   <data name="Settings_DeleteDataQ" xml:space="preserve"><value>Delete my data?</value><comment>new in Lamha 3, approved 2026-10-25 (&quot;go with your recommendation&quot;)</comment></data>
   <data name="Settings_DeleteDataText" xml:space="preserve"><value>Your review cards, word history, mistake journal, clipboard history, settings and API keys are deleted from this PC, and Lamha closes. This can&apos;t be undone.</value><comment>new in Lamha 3, approved 2026-10-25 (&quot;go with your recommendation&quot;)</comment></data>
+  <data name="FirstRun_StepLanguage" xml:space="preserve"><value>Language</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_StepTry" xml:space="preserve"><value>Try it</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_StepReady" xml:space="preserve"><value>Ready</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Welcome" xml:space="preserve"><value>Welcome to Lamha</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Hero" xml:space="preserve"><value>Look up English words and translate any text in one click.</value><comment>o.heroText</comment></data>
+  <data name="FirstRun_Next" xml:space="preserve"><value>Next</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Back" xml:space="preserve"><value>Back</value><comment>common.back</comment></data>
+  <data name="FirstRun_Later" xml:space="preserve"><value>Later</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Start" xml:space="preserve"><value>Start</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_TryTitle" xml:space="preserve"><value>Try your first lookup</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_TryText" xml:space="preserve"><value>Select a word in this sentence, then press</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_TryOk" xml:space="preserve"><value>That&apos;s it: Lamha works like this in any program.</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Sample" xml:space="preserve"><value>We need to settle the bill before we leave.</value><comment>the sentence to try the first lookup on, from the first-run design: English in both languages</comment></data>
+  <data name="FirstRun_Customize" xml:space="preserve"><value>Customise shortcuts</value><comment>o.customize</comment></data>
+  <data name="FirstRun_AiText" xml:space="preserve"><value>Optional: to proofread and improve what you write in English, choose an AI. You can do it later in Settings.</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_ReadyTitle" xml:space="preserve"><value>Lamha is ready</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_ReadyText" xml:space="preserve"><value>Lamha works from its icon next to the clock. Select any text in any program and press</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="Note_ByTheClock" xml:space="preserve"><value>Lamha is by the clock</value><comment>new in Lamha 3, approved with the tray and notifications design 2026-10-25</comment></data>
+  <data name="Note_ByTheClockBody" xml:space="preserve"><value>If you don&apos;t see its icon, click ^ on the taskbar. Select any text in any program and press {0}.</value><comment>new in Lamha 3, approved with the tray and notifications design 2026-10-25; {0} is the lookup shortcut (Alt+Shift+L in the design)</comment></data>
+  <data name="FirstRun_Arabic" xml:space="preserve"><value>العربية</value><comment>step 1's choice: each language in its own name, the same in both languages</comment></data>
+  <data name="FirstRun_English" xml:space="preserve"><value>English</value><comment>step 1's choice: each language in its own name, the same in both languages</comment></data>
 </root>

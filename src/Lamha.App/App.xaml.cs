@@ -1,5 +1,6 @@
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Card;
+using Lamha.App.ViewModels.FirstRun;
 using Lamha.Windows.Input;
 using Lamha.Windows.Selection;
 using Lamha.Windows.Shell;
@@ -33,13 +34,17 @@ public partial class App : Application
     private CardService? _card;
     private ClipPanelService? _panel;
     private MainWindowService? _main;
+    private FirstRunService? _firstRun;
+    private readonly bool _hadDatabase;
 
     public App(AppOptions options, AppInstance instance)
     {
         _options = options;
         _instance = instance;
         // The settings decide the interface language, so they open before anything shows.
-        _brain = new Brain(DataFolder.For(options.Profile), options.Profile is null ? "Lamha/" : "Lamha-profile/");
+        var folder = DataFolder.For(options.Profile);
+        _hadDatabase = File.Exists(Path.Combine(folder, "lamha.db")); // a new one means a first start (first run)
+        _brain = new Brain(folder, options.Profile is null ? "Lamha/" : "Lamha-profile/");
         Localization.Apply(options.Language ?? _brain.Localization.Language);
         InitializeComponent();
         // The tray keeps Lamha running with no window open; only Quit ends it.
@@ -82,6 +87,15 @@ public partial class App : Application
                 {
                     _panel.Toggle();
                 }
+                else if (kind == Shortcut.Lookup && _firstRun?.Selection() is { } sample)
+                {
+                    // First run's Try it: the word selected in its own sentence.
+                    _card.LookUp(sample.Text, 0, sample.Context);
+                    if (sample.Text.Length > 0)
+                    {
+                        _firstRun.Tried();
+                    }
+                }
                 else
                 {
                     _ = _card.OpenAsync(kind == Shortcut.Write ? CardMode.Write : CardMode.Lookup);
@@ -97,8 +111,20 @@ public partial class App : Application
         };
         _card.SettingsOpener = section => _main.Show("settings", section);
         _panel.SettingsOpener = section => _main.Show("settings", section);
+        _firstRun = new FirstRunService(_brain, shortcuts, _clipboard, idle, Notify)
+        {
+            Theme = _options.Theme,
+            Startup = _options.Profile is null ? startup : null,
+            SettingsOpener = section => _main.Show("settings", section),
+            LanguageChanged = () =>
+            {
+                _tray?.RefreshTooltip();
+                _card.Dispose(); // made again in the new language at the next lookup
+                _panel.Dispose();
+            },
+        };
 
-        _tray = new TrayService(_messages, _clipboard, startup, shortcuts, () => _main.Show(), () => _panel.Toggle(fromTray: true), _card.ShowSample, Quit);
+        _tray = new TrayService(_messages, _clipboard, startup, shortcuts, OpenMain, () => _panel.Toggle(fromTray: true), _card.ShowSample, Quit);
         var taken = shortcuts.All.Where(s => !s.Registered).Select(s => s.Keys.ToString()).ToList();
         if (taken.Count > 0)
         {
@@ -106,7 +132,7 @@ public partial class App : Application
         }
 
         // A second start of Lamha lands here (on a background thread): it opens the main window.
-        _instance.Activated += (_, _) => queue.TryEnqueue(() => _main.Show());
+        _instance.Activated += (_, _) => queue.TryEnqueue(OpenMain);
 
         if (_options.Page is { } page)
         {
@@ -115,6 +141,14 @@ public partial class App : Application
         else if (_options.Panel)
         {
             _panel.Toggle(fromTray: true);
+        }
+        else if (_options.FirstRun is { } step)
+        {
+            _firstRun.Show(Enum.TryParse<FirstRunStep>(step, ignoreCase: true, out var at) ? at : FirstRunStep.Language);
+        }
+        else if (!_options.Measure && _options.Sample is null && FirstRunService.IsDue(_brain.DataFolder, _hadDatabase))
+        {
+            _firstRun.Show();
         }
 
         if (_options.Measure)
@@ -130,6 +164,15 @@ public partial class App : Application
     }
 
     private void Notify(string title, string body) => _tray?.Notify(title, body);
+
+    /// <summary>The tray icon and a second start: the main window, or first run while it's open.</summary>
+    private void OpenMain()
+    {
+        if (_firstRun?.BringToFront() != true)
+        {
+            _main?.Show();
+        }
+    }
 
     /// <summary>
     /// Settings → Delete my data: the API keys, then, once everything is closed, the data folder (the database, the
@@ -167,6 +210,7 @@ public partial class App : Application
     /// <summary>Everything Lamha holds, closed: windows, shortcuts, the clipboard listener, the tray, the database.</summary>
     private void Close()
     {
+        _firstRun?.Dispose();
         _main?.Dispose();
         _panel?.Dispose();
         _card?.Dispose();

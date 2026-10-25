@@ -41,6 +41,9 @@ public sealed partial class TrayService : IDisposable
         _clipboard.PauseChanged += () => _icon.SetTooltip(Tooltip());
     }
 
+    /// <summary>The tooltip again, in the interface language (first run's language step changes it while Lamha runs).</summary>
+    public void RefreshTooltip() => _icon.SetTooltip(Tooltip());
+
     /// <summary>A notification from the tray icon.</summary>
     public void Notify(string title, string body) => _icon.Notify(title, body);
 

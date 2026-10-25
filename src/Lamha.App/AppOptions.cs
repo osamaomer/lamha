@@ -27,7 +27,12 @@ public enum CardLifetime
 /// <param name="Theme"><c>--theme=light</c> or <c>--theme=dark</c>: the windows' theme for this run, not saved.</param>
 /// <param name="Page"><c>--page=translate</c> (write, review, history, clipboard, settings): the main window on that page at start, for screenshots.</param>
 /// <param name="Panel"><c>--panel</c>: the clipboard panel at start (with nothing to paste into), for screenshots.</param>
-public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false)
+/// <param name="FirstRun">
+/// <c>--first-run</c>: first run at start even when it's done (<c>--first-run=try</c>, <c>writing</c> or <c>ready</c> at
+/// that step), for screenshots. Without it, first run shows only at the first start, and never with <c>--measure</c>,
+/// <c>--page</c>, <c>--panel</c> or <c>--sample</c>.
+/// </param>
+public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null)
 {
     public static AppOptions FromArgs(IReadOnlyList<string> args)
     {
@@ -38,7 +43,8 @@ public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string?
         var language = Value(args, "--lang=") is "ar" or "en" ? Value(args, "--lang=") : null;
         var theme = Value(args, "--theme=") is "light" or "dark" ? Value(args, "--theme=") : null;
         var page = Value(args, "--page=");
-        return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language, theme, string.IsNullOrWhiteSpace(page) ? null : page, args.Contains("--panel", StringComparer.OrdinalIgnoreCase));
+        var firstRun = args.Contains("--first-run", StringComparer.OrdinalIgnoreCase) ? "" : Value(args, "--first-run=");
+        return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language, theme, string.IsNullOrWhiteSpace(page) ? null : page, args.Contains("--panel", StringComparer.OrdinalIgnoreCase), firstRun);
     }
 
     private static string? Value(IReadOnlyList<string> args, string name) =>

@@ -69,7 +69,7 @@ public sealed partial class ShortcutsSetupViewModel : ObservableObject
         foreach (var row in Rows)
         {
             var info = _shortcuts.All.First(s => s.Kind == row.Kind);
-            row.Keys = Parts(info.Keys);
+            row.Keys = KeyPart.Of(info.Keys);
             row.Status = info.Registered ? "" : Localization.Format("Note_HotkeyTakenBody", info.Keys.ToString());
             row.StatusKind = StatusKind.Bad;
         }
@@ -109,7 +109,7 @@ public sealed partial class ShortcutsSetupViewModel : ObservableObject
         row.IsCapturing = false;
         if (_shortcuts.TryChange(row.Kind, hotkey))
         {
-            row.Keys = Parts(hotkey);
+            row.Keys = KeyPart.Of(hotkey);
             row.Status = "";
         }
         else
@@ -145,22 +145,5 @@ public sealed partial class ShortcutsSetupViewModel : ObservableObject
         }
 
         Capturing = null;
-    }
-
-    /// <summary>"Ctrl+Alt+L" as the design draws it: Ctrl, +, Alt, +, L.</summary>
-    private static List<KeyPart> Parts(Hotkey keys)
-    {
-        var parts = new List<KeyPart>();
-        foreach (var key in keys.ToString().Split('+'))
-        {
-            if (parts.Count > 0)
-            {
-                parts.Add(new KeyPart("+", false));
-            }
-
-            parts.Add(new KeyPart(key, true));
-        }
-
-        return parts;
     }
 }

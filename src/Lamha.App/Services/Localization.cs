@@ -27,11 +27,15 @@ public static class Localization
     /// <summary>Right to left in Arabic, for every window's root.</summary>
     public static FlowDirection FlowDirection => IsArabic ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
 
-    /// <summary>Sets the language ("ar" or "en"); call it before any window or string loads.</summary>
+    /// <summary>
+    /// Sets the language ("ar" or "en"): at start, before any window or string loads, and on first run's language step,
+    /// where windows made afterwards are in the new language.
+    /// </summary>
     public static void Apply(string language)
     {
         IsArabic = language == "ar";
         ApplicationLanguages.PrimaryLanguageOverride = Language;
+        s_loader = null; // a loader reads the language when it's made
         // Language names (CultureInfo.DisplayName) follow the interface language, as Intl.DisplayNames did in Lamha 2.
         CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(Language);
     }

@@ -7,6 +7,7 @@ using Lamha.Core;
 using Lamha.Core.Review;
 using Lamha.Core.Text;
 using Lamha.Core.Translation;
+using Lamha.Windows.Input;
 using Microsoft.UI.Xaml;
 using Localization = Lamha.App.Services.Localization;
 
@@ -41,7 +42,25 @@ public sealed record RecentItem(string Word, string Meaning, FlowDirection WordF
 }
 
 /// <summary>A part of a shortcut as it's drawn (the quick lookup's line, Settings → Keyboard shortcuts): a key ("Ctrl") or the "+" between keys.</summary>
-public sealed record KeyPart(string Text, bool IsKey);
+public sealed record KeyPart(string Text, bool IsKey)
+{
+    /// <summary>"Ctrl+Alt+L" as the design draws it: Ctrl, +, Alt, +, L.</summary>
+    public static List<KeyPart> Of(Hotkey keys)
+    {
+        var parts = new List<KeyPart>();
+        foreach (var key in keys.ToString().Split('+'))
+        {
+            if (parts.Count > 0)
+            {
+                parts.Add(new KeyPart("+", false));
+            }
+
+            parts.Add(new KeyPart(key, true));
+        }
+
+        return parts;
+    }
+}
 
 /// <summary>
 /// The main window's Translate page (phase 1's design): Lamha 2's box (popup.js's quick translate) with the whole

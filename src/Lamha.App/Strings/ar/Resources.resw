@@ -773,4 +773,25 @@
   <data name="Settings_DeleteData" xml:space="preserve"><value>حذف بياناتي</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
   <data name="Settings_DeleteDataQ" xml:space="preserve"><value>حذف بياناتي؟</value><comment>new in Lamha 3, approved 2026-10-25 (&quot;go with your recommendation&quot;)</comment></data>
   <data name="Settings_DeleteDataText" xml:space="preserve"><value>تُحذف من هذا الجهاز بطاقات المراجعة وسجل الكلمات وسجل أخطائي وسجل الحافظة والإعدادات ومفاتيح API، ثم يُغلق لمحة. لا يمكن التراجع عن ذلك.</value><comment>new in Lamha 3, approved 2026-10-25 (&quot;go with your recommendation&quot;)</comment></data>
+  <data name="FirstRun_StepLanguage" xml:space="preserve"><value>اللغة</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_StepTry" xml:space="preserve"><value>جرّبه</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_StepReady" xml:space="preserve"><value>جاهز</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Welcome" xml:space="preserve"><value>أهلًا بك في لمحة</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Hero" xml:space="preserve"><value>ابحث عن معاني الكلمات الإنجليزية وترجم أي نص إلى العربية بلمسة واحدة.</value><comment>o.heroText</comment></data>
+  <data name="FirstRun_Next" xml:space="preserve"><value>التالي</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Back" xml:space="preserve"><value>رجوع</value><comment>common.back</comment></data>
+  <data name="FirstRun_Later" xml:space="preserve"><value>لاحقًا</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Start" xml:space="preserve"><value>ابدأ</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_TryTitle" xml:space="preserve"><value>جرّب أول بحث</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_TryText" xml:space="preserve"><value>حدّد كلمة في هذه الجملة، ثم اضغط</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_TryOk" xml:space="preserve"><value>أحسنت! هكذا تعمل لمحة في أي برنامج.</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Sample" xml:space="preserve"><value>We need to settle the bill before we leave.</value><comment>the sentence to try the first lookup on, from the first-run design: English in both languages</comment></data>
+  <data name="FirstRun_Customize" xml:space="preserve"><value>تخصيص الاختصارات</value><comment>o.customize</comment></data>
+  <data name="FirstRun_AiText" xml:space="preserve"><value>اختياري: لتدقيق ما تكتبه بالإنجليزية وتحسينه، اختر ذكاءً اصطناعيًا. يمكنك ذلك لاحقًا من الإعدادات.</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_ReadyTitle" xml:space="preserve"><value>لمحة جاهزة</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_ReadyText" xml:space="preserve"><value>تعمل لمحة من أيقونتها بجوار الساعة. حدّد أي نص في أي برنامج واضغط</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="Note_ByTheClock" xml:space="preserve"><value>لمحة بجوار الساعة</value><comment>new in Lamha 3, approved with the tray and notifications design 2026-10-25</comment></data>
+  <data name="Note_ByTheClockBody" xml:space="preserve"><value>إن لم ترَ أيقونتها فاضغط ^ في شريط المهام. حدّد أي نص في أي برنامج واضغط {0}.</value><comment>new in Lamha 3, approved with the tray and notifications design 2026-10-25; {0} is the lookup shortcut (Alt+Shift+L in the design)</comment></data>
+  <data name="FirstRun_Arabic" xml:space="preserve"><value>العربية</value><comment>step 1's choice: each language in its own name, the same in both languages</comment></data>
+  <data name="FirstRun_English" xml:space="preserve"><value>English</value><comment>step 1's choice: each language in its own name, the same in both languages</comment></data>
 </root>

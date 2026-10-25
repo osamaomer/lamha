@@ -109,17 +109,18 @@ public sealed partial class CardService(
 
     /// <summary>
     /// The card on <paramref name="text"/>, as the lookup shortcut opens it: the clipboard panel's Look up (Lamha 2's
-    /// <c>lookupClip</c>). Its Replace pastes into <paramref name="window"/>, the program the panel was opened over.
+    /// <c>lookupClip</c>), and first run's sample sentence (with the sentence around the word). Its Replace pastes into
+    /// <paramref name="window"/>, the program the panel was opened over; 0 for nowhere.
     /// </summary>
-    public void LookUp(string text, nint window)
+    public void LookUp(string text, nint window, WordContext? context = null)
     {
         try
         {
-            Show(new SelectionCapture(window, text, IsTerminal: window != 0 && ForegroundWindow.IsTerminal(window)), CardMode.Lookup, null);
+            Show(new SelectionCapture(window, text, IsTerminal: window != 0 && ForegroundWindow.IsTerminal(window)), CardMode.Lookup, context);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            AppLog.Error("card from the clipboard panel", ex);
+            AppLog.Error("card from Lamha's own text", ex);
         }
     }
 
