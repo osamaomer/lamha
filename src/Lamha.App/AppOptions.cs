@@ -20,7 +20,8 @@ public enum CardLifetime
 /// <param name="Sample">
 /// <c>--sample=text</c>: the sample card's text (the tray's item, <c>--measure</c>); <c>--sample=write:text</c> opens
 /// the writing tools on it, <c>--sample=write:</c> Write new, <c>--sample=error:code</c> the error a lookup would show
-/// for that code (<c>network</c>, <c>rate_limited</c>…). For screenshots of the card's states.
+/// for that code (<c>network</c>, <c>rate_limited</c>…). For screenshots of the card's states. With <c>--page=translate</c>,
+/// the text looked up in the main window's box instead.
 /// </param>
 /// <param name="Language"><c>--lang=ar</c> or <c>--lang=en</c>: the interface language for this run, not saved.</param>
 /// <param name="Theme"><c>--theme=light</c> or <c>--theme=dark</c>: the windows' theme for this run, not saved.</param>

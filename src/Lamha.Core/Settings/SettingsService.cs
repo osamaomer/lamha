@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Lamha.Core.Abstractions;
 
 namespace Lamha.Core.Settings;
@@ -60,7 +61,16 @@ public sealed class SettingsService(IStateStore state)
 
         try
         {
-            return JsonSerializer.Deserialize(json, SettingsJson.Default.LamhaSettings) ?? new LamhaSettings();
+            // Settings saved before a setting existed don't have it: it takes its default, as Lamha 2's
+            // { ...DEFAULT_SETTINGS, ...stored } did. Read alone, it would be null or 0 (the source generator sets every
+            // init property, missing ones included).
+            var merged = JsonSerializer.SerializeToNode(new LamhaSettings(), SettingsJson.Default.LamhaSettings)!.AsObject();
+            foreach (var (name, value) in JsonNode.Parse(json) as JsonObject ?? throw new JsonException("not an object"))
+            {
+                merged[name] = value?.DeepClone();
+            }
+
+            return merged.Deserialize(SettingsJson.Default.LamhaSettings) ?? new LamhaSettings();
         }
         catch (JsonException)
         {

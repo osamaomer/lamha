@@ -56,13 +56,36 @@
       <!-- The page, on Windows' content layer over Mica -->
       <Border Grid.Column="1" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
               BorderThickness="1,1,0,0" CornerRadius="8,0,0,0">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
-          <StackPanel MaxWidth="760" HorizontalAlignment="Left" Padding="32,28,32,40" Spacing="16">
-            <TextBlock Margin="0,0,0,8" Style="{StaticResource LamhaPageTitleTextStyle}" Text="{x:Bind ViewModel.Title, Mode=OneWay}"
-                       AutomationProperties.HeadingLevel="Level1" />
-            <ContentPresenter x:Name="PageHost" />
-          </StackPanel>
-        </ScrollViewer>
+        <Grid>
+          <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
+            <!-- The page fills the layer up to 760 px (the design's), from the start side -->
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MaxWidth="760" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <StackPanel Padding="32,28,32,40" Spacing="16">
+                <TextBlock Margin="0,0,0,8" Style="{StaticResource LamhaPageTitleTextStyle}" Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+                           AutomationProperties.HeadingLevel="Level1" />
+                <ContentPresenter x:Name="PageHost" HorizontalContentAlignment="Stretch" />
+              </StackPanel>
+            </Grid>
+          </ScrollViewer>
+
+          <!-- "Copied", "History cleared · Undo": a moment at the foot of the page (Lamha 2's flash) -->
+          <Border Margin="0,0,0,16" Padding="14,6" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                  controls:Pill.IsPill="True" Background="{ThemeResource LamhaToastBackgroundBrush}"
+                  Visibility="{x:Bind controls:Show.IfText(ViewModel.Toast), Mode=OneWay, FallbackValue=Collapsed}">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <TextBlock VerticalAlignment="Center" FontSize="12.5" FontWeight="SemiBold" Foreground="{ThemeResource LamhaToastTextBrush}"
+                         Text="{x:Bind ViewModel.Toast, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
+              <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" Command="{x:Bind ViewModel.RunToastActionCommand}"
+                               Visibility="{x:Bind controls:Show.IfText(ViewModel.ToastAction), Mode=OneWay, FallbackValue=Collapsed}">
+                <TextBlock FontWeight="Bold" Foreground="{ThemeResource LamhaToastActionBrush}" Text="{x:Bind ViewModel.ToastAction, Mode=OneWay}" />
+              </HyperlinkButton>
+            </StackPanel>
+          </Border>
+        </Grid>
       </Border>
     </Grid>
   </Grid>

@@ -38,6 +38,28 @@
   <data name="Main_Review" xml:space="preserve"><value>مراجعة</value><comment>p.tabReview</comment></data>
   <data name="Main_History" xml:space="preserve"><value>السجل</value><comment>new in Lamha 3, approved with the main window's design 2026-10-25</comment></data>
   <data name="Main_Clipboard" xml:space="preserve"><value>الحافظة</value><comment>d.trayClipboard</comment></data>
+  <data name="Common_Clear" xml:space="preserve"><value>مسح</value><comment>common.clear</comment></data>
+  <data name="Common_Undo" xml:space="preserve"><value>تراجع</value><comment>common.undo</comment></data>
+  <data name="Translate_Clear.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>مسح</value><comment>common.clear</comment></data>
+  <data name="Translate_Clear.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>مسح</value><comment>common.clear</comment></data>
+  <data name="Translate_Placeholder" xml:space="preserve"><value>اكتب كلمة أو جملة للترجمة…</value><comment>p.qPlaceholder</comment></data>
+  <data name="Translate_QuickLookup" xml:space="preserve"><value>بحث سريع</value><comment>p.quickLookup</comment></data>
+  <data name="Translate_Recent" xml:space="preserve"><value>آخر عمليات البحث</value><comment>p.recent</comment></data>
+  <data name="Translate_Again" xml:space="preserve"><value>ترجم مجددًا</value><comment>p.translateAgain</comment></data>
+  <data name="Translate_HistoryCleared" xml:space="preserve"><value>مُسح السجل</value><comment>p.histCleared</comment></data>
+  <data name="Today_Label" xml:space="preserve"><value>اليوم</value><comment>td.label</comment></data>
+  <data name="Today_Ring" xml:space="preserve"><value>{0} من {1}</value><comment>td.ring</comment></data>
+  <data name="Today_Progress" xml:space="preserve"><value>{0} من {1} اليوم</value><comment>td.progress</comment></data>
+  <data name="Today_Left" xml:space="preserve"><value>بقي {0} لهدف اليوم: ابحث عن كلمات أو راجع بطاقاتك</value><comment>td.left</comment></data>
+  <data name="Today_Met" xml:space="preserve"><value>حققت هدف اليوم. أحسنت!</value><comment>td.met</comment></data>
+  <data name="Today_StreakTitle" xml:space="preserve"><value>أيام متتالية من التعلّم</value><comment>td.streakTitle</comment></data>
+  <data name="Today_WordNew" xml:space="preserve"><value>كلمة اليوم</value><comment>td.wordNew</comment></data>
+  <data name="Today_WordDeck" xml:space="preserve"><value>كلمة اليوم · من كلماتك</value><comment>td.wordDeck</comment></data>
+  <data name="Today_WordDeckTitle" xml:space="preserve"><value>كلمة بحثت عنها من قبل وحان وقت مراجعتها</value><comment>td.wordDeckTitle</comment></data>
+  <data name="Today_LookUp" xml:space="preserve"><value>اعرض معناها</value><comment>td.lookUp</comment></data>
+  <data name="Today_StreakTwo" xml:space="preserve"><value>🔥 يومان</value><comment>td.streak, a function in Lamha 2 (Arabic counting), ported by hand: 2 days</comment></data>
+  <data name="Today_StreakFew" xml:space="preserve"><value>🔥 {0} أيام</value><comment>td.streak, ported by hand: 3 to 10 days</comment></data>
+  <data name="Today_StreakMany" xml:space="preserve"><value>🔥 {0} يومًا</value><comment>td.streak, ported by hand: 11 days or more</comment></data>
   <data name="Common_Retry" xml:space="preserve"><value>إعادة المحاولة</value><comment>common.retry</comment></data>
   <data name="Common_Copy" xml:space="preserve"><value>نسخ</value><comment>common.copy</comment></data>
   <data name="Lang_ar" xml:space="preserve"><value>العربية</value><comment>lang.ar</comment></data>

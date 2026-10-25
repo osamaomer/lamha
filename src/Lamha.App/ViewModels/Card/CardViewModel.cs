@@ -1,12 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.Core;
 using Lamha.Core.Dictionary;
-using Lamha.Core.Money;
 using Lamha.Core.Review;
-using Lamha.Core.Settings;
 using Lamha.Core.Text;
 using Lamha.Core.Translation;
 using Lamha.Core.Writing;
@@ -342,24 +339,11 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
         }
     }
 
-    [RelayCommand]
-    private void CopyAnswer()
-    {
-        if (IsPrice && Price is { } price)
-        {
-            Copy(price.CopyText);
-        }
-        else if (Answer is { HeroText.Length: > 0 } a)
-        {
-            Copy(a.HeroText);
-        }
-    }
-
     /// <summary>The bookmark: the word into the review deck, or out of it (Lamha 2's <c>reviewBtn()</c>).</summary>
-    [RelayCommand]
-    private async Task ToggleReview()
+    public async Task ToggleReviewAsync(WordAnswer answer)
     {
-        if (Answer is not { CanReview: true } answer)
+        ArgumentNullException.ThrowIfNull(answer);
+        if (!answer.CanReview || answer != Answer)
         {
             return;
         }
@@ -427,7 +411,7 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
             }
 
             Show(result);
-            await FillAsync(Answer!, cancel).ConfigureAwait(true);
+            await Answer!.FillAsync(brain, cancel.Token).ConfigureAwait(true);
         }
         catch (LamhaException e) when (!cancel.IsCancellationRequested)
         {
@@ -435,6 +419,12 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
         }
         catch (OperationCanceledException)
         {
+        }
+        catch (Exception e) when (e is not OutOfMemoryException && !cancel.IsCancellationRequested)
+        {
+            // A fault of Lamha's own: said, and logged by its type, rather than shapes waiting for ever.
+            AppLog.Error("card lookup", e);
+            ShowError(ErrorText.Unexpected);
         }
     }
 
@@ -444,12 +434,16 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
     /// </summary>
     public void ShowError(LamhaException error)
     {
+        var online = !brain.Network.IsOffline;
+        ShowError(ErrorText.ForLookup(error, brain.Settings.Current.TrProvider ?? brain.Settings.Current.AiProvider, brain.Settings.Current, online));
+    }
+
+    private void ShowError(ErrorInfo error)
+    {
         _lookup?.Cancel();
         IsBusy = false;
         Frame("");
-        var online = !brain.Network.IsOffline;
-        Error = ErrorText.ForLookup(error, brain.Settings.Current.TrProvider ?? brain.Settings.Current.AiProvider, brain.Settings.Current, online)
-            .Offering(host.CanOpenSettings);
+        Error = error.Offering(host.CanOpenSettings);
         View = CardView.Error;
         host.Announce(Error.Title);
     }
@@ -457,13 +451,7 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
     private void Show(LookupResult result)
     {
         var settings = brain.Settings.Current;
-        var translator = brain.Ai.TranslatorConfig();
-        var answer = new WordAnswer(
-            result,
-            this,
-            translator is null ? null : AiNames.Of(translator.Provider, settings),
-            WritingReady() is null && _capture.Text.Trim().Length > 0,
-            settings.TranslateDefinitions && settings.DictSource != DictSource.Offline);
+        var answer = WordAnswer.For(brain, result, this, WritingReady() is null && _capture.Text.Trim().Length > 0);
 
         // The bar: the language switch for a word in another language than the one it translates into, else the languages.
         var translatedInto = (result.Explain ? result.Other : result.Target) is { Length: > 0 } t ? t : settings.TargetLang;
@@ -494,67 +482,18 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
     /// </summary>
     private async Task<bool> ConvertAsync(string text, CancellationTokenSource cancel)
     {
-        var mine = brain.Money.Mine(brain.Settings.Current);
-        if (Prices.Find(text, mine) is not { } price || price.Currency == mine)
-        {
-            return false;
-        }
-
-        var conversion = await brain.Money.ConvertAsync(price, mine, cancel.Token).ConfigureAwait(true);
-        if (conversion is null || cancel.IsCancellationRequested)
+        if (await PriceAnswer.ForAsync(brain, text, this, cancel.Token).ConfigureAwait(true) is not { } price)
         {
             return false;
         }
 
         Frame("");
         Error = null;
-        Price = new PriceAnswer(text, conversion);
-        Links = [new LinkItem(Glyph.External, CurrencyService.Credit, "", new RelayCommand(() => host.OpenLink(new Uri(CurrencyService.CreditUrl))))];
+        Price = price;
+        Links = price.Links;
         View = CardView.Price;
-        host.Announce($"{text}: {Price.Value}");
+        host.Announce(price.Spoken);
         return true;
-    }
-
-    /// <summary>What comes after the answer shows: the review mark, the offline dictionary's glosses, Wikipedia.</summary>
-    private async Task FillAsync(WordAnswer answer, CancellationTokenSource cancel)
-    {
-        var d = answer.Result;
-        if (answer.CanReview)
-        {
-            answer.InReview = await brain.Review.HasAsync(d.Query).ConfigureAwait(true);
-        }
-
-        var pending = answer.PendingGlosses;
-        if (pending.Count > 0)
-        {
-            try
-            {
-                var done = await brain.Translation.TranslateAsync([.. pending.Select(p => p.Gloss)], d.Target, "en", kind: TranslationKind.Gloss, cancel: cancel.Token).ConfigureAwait(true);
-                for (var i = 0; i < pending.Count; i++)
-                {
-                    pending[i].Translated = i < done.Texts.Count ? done.Texts[i] : "";
-                    pending[i].Pending = false;
-                }
-            }
-            catch (LamhaException)
-            {
-                // The English definitions stay; the lines waiting for their translation go.
-                foreach (var p in pending)
-                {
-                    p.Pending = false;
-                }
-            }
-        }
-
-        var s = brain.Settings.Current;
-        if (s.ShowWikipedia && d.IsWord && d.Source == "en" && d.Query.Length > 2 && !cancel.IsCancellationRequested)
-        {
-            var wiki = await brain.Wikipedia.SummaryAsync(d.Query, d.Target == "en" ? "en" : s.TargetLang, s.DictSource == DictSource.Offline).ConfigureAwait(true);
-            if (wiki is not null && !cancel.IsCancellationRequested && Answer == answer)
-            {
-                answer.ShowWikipedia(wiki);
-            }
-        }
     }
 
     private void ShowWriting(string text)

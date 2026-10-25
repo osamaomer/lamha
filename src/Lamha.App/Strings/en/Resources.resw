@@ -39,6 +39,28 @@
   <data name="Main_Review" xml:space="preserve"><value>Review</value><comment>p.tabReview</comment></data>
   <data name="Main_History" xml:space="preserve"><value>History</value><comment>new in Lamha 3, approved with the main window's design 2026-10-25</comment></data>
   <data name="Main_Clipboard" xml:space="preserve"><value>Clipboard</value><comment>d.trayClipboard</comment></data>
+  <data name="Common_Clear" xml:space="preserve"><value>Clear</value><comment>common.clear</comment></data>
+  <data name="Common_Undo" xml:space="preserve"><value>Undo</value><comment>common.undo</comment></data>
+  <data name="Translate_Clear.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Clear</value><comment>common.clear</comment></data>
+  <data name="Translate_Clear.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Clear</value><comment>common.clear</comment></data>
+  <data name="Translate_Placeholder" xml:space="preserve"><value>Type a word or sentence to translate…</value><comment>p.qPlaceholder</comment></data>
+  <data name="Translate_QuickLookup" xml:space="preserve"><value>Quick lookup</value><comment>p.quickLookup</comment></data>
+  <data name="Translate_Recent" xml:space="preserve"><value>Recent lookups</value><comment>p.recent</comment></data>
+  <data name="Translate_Again" xml:space="preserve"><value>Translate again</value><comment>p.translateAgain</comment></data>
+  <data name="Translate_HistoryCleared" xml:space="preserve"><value>History cleared</value><comment>p.histCleared</comment></data>
+  <data name="Today_Label" xml:space="preserve"><value>Today</value><comment>td.label</comment></data>
+  <data name="Today_Ring" xml:space="preserve"><value>{0} of {1}</value><comment>td.ring</comment></data>
+  <data name="Today_Progress" xml:space="preserve"><value>{0} of {1} today</value><comment>td.progress</comment></data>
+  <data name="Today_Left" xml:space="preserve"><value>{0} to go: look up words or review your cards</value><comment>td.left</comment></data>
+  <data name="Today_Met" xml:space="preserve"><value>Today's goal is done. Well done!</value><comment>td.met</comment></data>
+  <data name="Today_StreakTitle" xml:space="preserve"><value>Days in a row of practice</value><comment>td.streakTitle</comment></data>
+  <data name="Today_WordNew" xml:space="preserve"><value>Word of the day</value><comment>td.wordNew</comment></data>
+  <data name="Today_WordDeck" xml:space="preserve"><value>Word of the day · one of yours</value><comment>td.wordDeck</comment></data>
+  <data name="Today_WordDeckTitle" xml:space="preserve"><value>A word you looked up before, due for review</value><comment>td.wordDeckTitle</comment></data>
+  <data name="Today_LookUp" xml:space="preserve"><value>See its meaning</value><comment>td.lookUp</comment></data>
+  <data name="Today_StreakTwo" xml:space="preserve"><value>🔥 2 days</value><comment>td.streak, a function in Lamha 2 (Arabic counting), ported by hand: 2 days</comment></data>
+  <data name="Today_StreakFew" xml:space="preserve"><value>🔥 {0} days</value><comment>td.streak, ported by hand: 3 to 10 days</comment></data>
+  <data name="Today_StreakMany" xml:space="preserve"><value>🔥 {0} days</value><comment>td.streak, ported by hand: 11 days or more</comment></data>
   <data name="Common_Retry" xml:space="preserve"><value>Try again</value><comment>common.retry</comment></data>
   <data name="Common_Copy" xml:space="preserve"><value>Copy</value><comment>common.copy</comment></data>
   <data name="Lang_ar" xml:space="preserve"><value>Arabic</value><comment>lang.ar</comment></data>

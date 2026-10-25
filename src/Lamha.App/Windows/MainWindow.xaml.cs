@@ -1,23 +1,27 @@
+using System.ComponentModel;
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Main;
+using Lamha.App.Views;
 using Lamha.Core.Layout;
 using Lamha.Windows.Shell;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
 using WinRT;
+using ClipboardApi = Lamha.Windows.Clipboard.Clipboard;
 
 namespace Lamha.App.Windows;
 
 /// <summary>
 /// Lamha's main window (phase 1's design): one Windows 11 window, Mica behind, its own title bar, the pages on the
 /// start side, folding to icons when the window is narrow. Opened from the tray and by starting Lamha again; closing it
-/// ends it (made again next time), so nothing of it stays in the tray.
+/// ends it (made again next time), so nothing of it stays in the tray. Each page is made the first time it's opened.
 /// </summary>
-public sealed partial class MainWindow : Window
+public sealed partial class MainWindow : Window, IPageHost
 {
     /// <summary>Its size when it opens, at 100 % (the design's).</summary>
     public const int StartWidth = 1000;
@@ -33,11 +37,19 @@ public sealed partial class MainWindow : Window
     private const double PaneWidth = 260;
     private const double FoldedPaneWidth = 48;
 
+    private readonly Brain _brain;
+    private readonly string _lookupKeys;
+    private TranslatePage? _translate;
     private bool _choosing;
 
-    public MainWindow(MainViewModel viewModel)
+    /// <param name="viewModel">The pages, the one that's open, and the toast.</param>
+    /// <param name="brain">Lamha's brain, for the pages.</param>
+    /// <param name="lookupKeys">The quick-lookup shortcut ("Ctrl+Alt+L"), for the Translate page's line under its box.</param>
+    public MainWindow(MainViewModel viewModel, Brain brain, string lookupKeys)
     {
         ViewModel = viewModel;
+        _brain = brain;
+        _lookupKeys = lookupKeys;
         InitializeComponent();
         Title = Lamha;
         Root.FlowDirection = Localization.FlowDirection;
@@ -52,9 +64,22 @@ public sealed partial class MainWindow : Window
         }
 
         PageList.SelectedItem = ViewModel.Page;
-        // The first focus goes to the pane as if clicked: the arrow keys work in it, without the keyboard's focus
-        // rectangle on a window that was opened with the mouse.
-        Root.Loaded += (_, _) => (FooterList.SelectedItem is null ? PageList : FooterList).Focus(FocusState.Pointer);
+        ViewModel.PropertyChanged += OnViewModelChanged;
+        ShowPage();
+        // The first focus goes to the Translate page's box, ready to type; on other pages to the pane as if clicked:
+        // the arrow keys work in it, without the keyboard's focus rectangle on a window that was opened with the mouse.
+        Root.Loaded += (_, _) =>
+        {
+            if (PageHost.Content is TranslatePage translate)
+            {
+                translate.FocusBox();
+            }
+            else
+            {
+                (FooterList.SelectedItem is null ? PageList : FooterList).Focus(FocusState.Pointer);
+            }
+        };
+        Closed += (_, _) => _translate?.ViewModel.Unload();
     }
 
     public MainViewModel ViewModel { get; }
@@ -124,6 +149,31 @@ public sealed partial class MainWindow : Window
         ForegroundWindow.ForceForeground(Handle);
     }
 
+    /// <summary><c>--sample=text</c> with <c>--page=translate</c>: the text in the box, looked up, for screenshots.</summary>
+    public void TypeSample(string text)
+    {
+        if (PageHost.Content is TranslatePage translate)
+        {
+            translate.ViewModel.Navigate(text);
+        }
+    }
+
+    // ----- IPageHost -----
+
+    public void Copy(string text) => ClipboardApi.WriteText(Handle, text, keepOutOfHistory: false);
+
+    public void OpenLink(Uri uri) => _ = global::Windows.System.Launcher.LaunchUriAsync(uri);
+
+    public void Announce(string text)
+    {
+        if (text.Length > 0 && FrameworkElementAutomationPeer.FromElement(Root) is { } peer)
+        {
+            peer.RaiseNotificationEvent(AutomationNotificationKind.Other, AutomationNotificationProcessing.ImportantMostRecent, text, "LamhaMain");
+        }
+    }
+
+    public void Toast(string text, string? action = null, Action? run = null) => ViewModel.ShowToast(text, action, run);
+
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
 
     /// <summary>One page is open across both lists: choosing in one clears the other.</summary>
@@ -138,6 +188,30 @@ public sealed partial class MainWindow : Window
         (ReferenceEquals(sender, PageList) ? FooterList : PageList).SelectedItem = null;
         _choosing = false;
         ViewModel.Page = page;
+    }
+
+    private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MainViewModel.Page))
+        {
+            ShowPage();
+        }
+    }
+
+    /// <summary>The open page in the content layer; the pages still to be built show only their title.</summary>
+    private void ShowPage()
+    {
+        switch (ViewModel.Page.Id)
+        {
+            case "translate":
+                _translate ??= new TranslatePage(new TranslateViewModel(_brain, this, _lookupKeys));
+                _translate.ViewModel.Refresh();
+                PageHost.Content = _translate;
+                break;
+            default:
+                PageHost.Content = null;
+                break;
+        }
     }
 
     private void OnRootSizeChanged(object sender, SizeChangedEventArgs e)

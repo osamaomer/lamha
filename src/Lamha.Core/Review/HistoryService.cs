@@ -18,4 +18,10 @@ public sealed class HistoryService(IHistoryStore store, TimeProvider time)
     public int Count() => store.Count();
 
     public void Clear() => store.Clear();
+
+    /// <summary>
+    /// Undo after <see cref="Clear"/> (Lamha 2's "History cleared · Undo"): the cleared words come back where they were
+    /// by time, and words looked up since stay. Returns how many came back.
+    /// </summary>
+    public int Restore(IReadOnlyList<HistoryEntry> cleared) => store.Merge(cleared, Keep);
 }

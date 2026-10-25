@@ -67,7 +67,11 @@ public partial class App : Application
             Theme = _options.Theme,
         };
 
-        _main = new MainWindowService(_brain, idle) { Theme = _options.Theme };
+        _main = new MainWindowService(_brain, idle, LookupHotkey.ToString())
+        {
+            Theme = _options.Theme,
+            Sample = _options.Page is null ? null : _options.Sample,
+        };
 
         _hotkeys = new Hotkeys(_messages);
         ShortcutInfo[] shortcuts =

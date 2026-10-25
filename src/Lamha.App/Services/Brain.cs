@@ -68,6 +68,12 @@ public sealed partial class Brain : IDisposable
 
     public ReviewService Review => _lookups.Value.Review;
 
+    /// <summary>Today: the day's goal, the streak and the word of the day.</summary>
+    public TodayService Today => _lookups.Value.Today;
+
+    /// <summary>The words looked up, newest first.</summary>
+    public HistoryService History => _lookups.Value.History;
+
     public DiagnosticsReport Diagnostics => _lookups.Value.Diagnostics;
 
     /// <summary>The AI: whether the writing tools and the translator are set up, and which.</summary>
@@ -127,11 +133,11 @@ public sealed partial class Brain : IDisposable
             var ai = Ai = new AiService(settings, brain.Secrets, http);
             var packs = new NoLanguagePacks(); // phase 5
             var translation = Translation = new TranslationService(settings, ai, new GoogleTranslate(http), new AiTranslator(ai), network);
-            var today = new TodayService(activity, brain.State, deck, history, settings, clock, dictionary);
+            var today = Today = new TodayService(activity, brain.State, deck, history, settings, clock, dictionary);
             Review = new ReviewService(deck, brain.State, history, settings, today, clock);
             Writing = new WritingService(ai, settings, mistakes, brain.Localization, clock, errorLog);
             Lookup = new LookupService(
-                settings, brain.Localization, translation, new WordExplainer(ai, packs), packs, new HistoryService(history, clock),
+                settings, brain.Localization, translation, new WordExplainer(ai, packs), packs, History = new HistoryService(history, clock),
                 Review, today, Wikipedia = new WikipediaService(http, network, Version), network, clock, dictionary, errorLog);
             Money = new CurrencyService(http, brain.State, network, clock);
             Diagnostics = new DiagnosticsReport(
@@ -155,6 +161,10 @@ public sealed partial class Brain : IDisposable
         public WritingService Writing { get; }
 
         public ReviewService Review { get; }
+
+        public TodayService Today { get; }
+
+        public HistoryService History { get; }
 
         public DiagnosticsReport Diagnostics { get; }
 

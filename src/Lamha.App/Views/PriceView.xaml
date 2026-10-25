@@ -1,0 +1,32 @@
+<UserControl
+    x:Class="Lamha.App.Views.PriceView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Lamha.App.Controls">
+  <!-- A price in the user's currency, as signed off in phase 1 (docs/design/card.html): the price as selected, the
+       amount, the rate and its day. The card shows it, and so does the Translate page; the credit link is theirs. -->
+
+  <StackPanel>
+    <TextBlock Style="{StaticResource LamhaHeadwordTextStyle}" FontFamily="{StaticResource LamhaFontFamily}" CharacterSpacing="0"
+               FlowDirection="LeftToRight" TextAlignment="{x:Bind controls:Show.LatinAlignment}"
+               Text="{x:Bind Price.Selected, Mode=OneWay}" IsTextSelectionEnabled="True" />
+    <Border Margin="0,12,0,0" Style="{StaticResource LamhaTintedBoxStyle}">
+      <Grid ColumnSpacing="8">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel>
+          <TextBlock Margin="0,0,0,2" Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}"
+                     Text="{x:Bind Price.Label, Mode=OneWay}" />
+          <TextBlock Style="{StaticResource LamhaHeroTextStyle}" Text="{x:Bind Price.Value, Mode=OneWay}" IsTextSelectionEnabled="True" />
+          <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Price.RateLine, Mode=OneWay}" />
+        </StackPanel>
+        <Button x:Uid="Card_CopyPrice" Grid.Column="1" VerticalAlignment="Top" Style="{StaticResource LamhaIconButtonStyle}"
+                Command="{x:Bind Price.Copy, Mode=OneWay}">
+          <controls:LineIcon Glyph="Copy" Width="15" Height="15" />
+        </Button>
+      </Grid>
+    </Border>
+  </StackPanel>
+</UserControl>

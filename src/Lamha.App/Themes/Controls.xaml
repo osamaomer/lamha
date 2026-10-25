@@ -439,6 +439,41 @@
     <Setter Property="Padding" Value="16,12" />
   </Style>
 
+  <!-- A section's heading with the line after it ("Other meanings ———"): a Grid of the heading and a 1 px line -->
+  <Style x:Key="LamhaSectionRowStyle" TargetType="Grid">
+    <Setter Property="ColumnSpacing" Value="8" />
+    <Setter Property="Margin" Value="0,20,0,8" />
+  </Style>
+
+  <!-- Chips in lines that wrap: meanings, synonyms, choices -->
+  <ItemsPanelTemplate x:Key="LamhaWrapChipsPanel">
+    <controls:WrapPanel HorizontalSpacing="6" VerticalSpacing="4" />
+  </ItemsPanelTemplate>
+
+  <!-- A row that does something (a recent lookup): the whole row is the button, tinted under the mouse. Its text is
+       10 px in, the 1 px edge (seen in high contrast) included, so it lines up with the text around it. -->
+  <Style x:Key="LamhaRowButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="Padding" Value="9,7" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+
+  <!-- A link in a line of text (Clear, See its meaning): the accent colour, 12.5 px semibold (Lamha 2's .link) -->
+  <Style x:Key="LamhaLinkButtonStyle" TargetType="HyperlinkButton">
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaAccentBrush}" />
+  </Style>
+
   <!-- A page in the main window's side pane: Windows' navigation item (36 px, 4 px corners, the selection mark at
        the start) in Lamha's colours, on a ListView so Lamha's line icons can be its icons -->
   <Style x:Key="LamhaNavItemStyle" TargetType="ListViewItem">

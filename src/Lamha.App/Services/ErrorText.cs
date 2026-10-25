@@ -102,6 +102,9 @@ public static class ErrorText
         };
     }
 
+    /// <summary>What Lamha didn't expect (a fault of its own): Lamha 2's general error, with Try again.</summary>
+    public static ErrorInfo Unexpected => Other();
+
     private static ErrorInfo Network() =>
         new(Localization.Get("Card_ErrOffline"), Localization.Get("Card_ErrCheckConn"), ErrorAction.Retry);
 

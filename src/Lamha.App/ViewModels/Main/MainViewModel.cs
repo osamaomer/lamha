@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Lamha.App.Controls;
 using Lamha.App.Services;
 
@@ -27,6 +28,13 @@ public sealed partial class NavItem(string id, string label, Glyph glyph) : Obse
 /// </summary>
 public sealed partial class MainViewModel : ObservableObject
 {
+    /// <summary>How long a short message stays, and one with an action (Undo): Lamha 2's <c>flash()</c> in popup.js.</summary>
+    private static readonly TimeSpan ToastTime = TimeSpan.FromMilliseconds(1200);
+    private static readonly TimeSpan ToastActionTime = TimeSpan.FromSeconds(5);
+
+    private CancellationTokenSource? _toast;
+    private Action? _toastRun;
+
     public MainViewModel()
     {
         Pages =
@@ -56,8 +64,50 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsFolded { get; set; }
 
+    /// <summary>"Copied", "History cleared": at the foot of the window for a moment.</summary>
+    [ObservableProperty]
+    public partial string Toast { get; private set; } = "";
+
+    /// <summary>The toast's button ("Undo"), or "".</summary>
+    [ObservableProperty]
+    public partial string ToastAction { get; private set; } = "";
+
+    /// <summary>Shows <paramref name="text"/>, with <paramref name="action"/> to <paramref name="run"/> if given; a new one replaces it.</summary>
+    public async void ShowToast(string text, string? action = null, Action? run = null)
+    {
+        _toast?.Cancel();
+        var mine = _toast = new CancellationTokenSource();
+        Toast = text;
+        ToastAction = run is null ? "" : action ?? "";
+        _toastRun = run;
+        try
+        {
+            await Task.Delay(run is null ? ToastTime : ToastActionTime, mine.Token).ConfigureAwait(true);
+            HideToast();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
     /// <summary>The page <paramref name="id"/> ("translate", "settings"…), or Translate for one that doesn't exist.</summary>
     public NavItem Find(string id) => Pages.Concat(Footer).FirstOrDefault(p => p.Id == id) ?? Pages[0];
+
+    [RelayCommand]
+    private void RunToastAction()
+    {
+        var run = _toastRun;
+        _toast?.Cancel();
+        HideToast();
+        run?.Invoke();
+    }
+
+    private void HideToast()
+    {
+        Toast = "";
+        ToastAction = "";
+        _toastRun = null;
+    }
 
     partial void OnIsFoldedChanged(bool value)
     {

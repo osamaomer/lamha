@@ -6,7 +6,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Windows.System;
@@ -55,29 +54,12 @@ public sealed partial class CardView : UserControl
     public double ContentHeight =>
         Bar.ActualHeight + Body.ActualHeight + (Foot.Visibility == Visibility.Visible ? Foot.ActualHeight : 0);
 
-    /// <summary>The interface's direction, for lines inside a box that runs right to left in both languages.</summary>
-    public FlowDirection InterfaceFlow { get; } = Localization.FlowDirection;
-
     // The card's own words (x:Bind reads them once).
     public string Lamha { get; } = Localization.Get("Common_Lamha");
 
     public string DictSwitchName { get; } = Localization.Get("Card_DictSwitch");
 
     public string ShowAll { get; } = Localization.Get("Card_ShowAll");
-
-    public string DidYouMean { get; } = Localization.Get("Card_DidYouMean");
-
-    public string DidYouMeanEnd { get; } = Localization.Get("Card_DidYouMeanEnd");
-
-    public string OtherMeaningsHeading { get; } = Localization.Get("Card_OtherMeanings");
-
-    public string DefinitionHeading { get; } = Localization.Get("Card_Definition");
-
-    public string ExamplesHeading { get; } = Localization.Get("Card_Examples");
-
-    public string WikipediaHeading { get; } = Localization.Get("Card_Wikipedia");
-
-    public string ReadWiki { get; } = Localization.Get("Card_ReadWiki");
 
     public string WritingToolsName { get; } = Localization.Get("Card_WritingTools");
 
@@ -199,16 +181,14 @@ public sealed partial class CardView : UserControl
         return false;
     }
 
-    /// <summary>The selected text, clamped to a few lines, shows all of it on a click (Lamha 2's <c>expandable()</c>).</summary>
+    /// <summary>The selected text, clamped to two lines, shows all of it on a click (Lamha 2's <c>expandable()</c>).</summary>
     private void OnSourceTapped(object sender, TappedRoutedEventArgs e)
     {
         if (sender is TextBlock text)
         {
-            text.MaxLines = text.MaxLines == 0 ? (ReferenceEquals(text, FindName("WritingSource")) ? 2 : 3) : 0;
+            text.MaxLines = text.MaxLines == 0 ? 2 : 0;
         }
     }
-
-    private void OnSpellClick(Hyperlink sender, HyperlinkClickEventArgs args) => ViewModel.Answer?.OpenSpellCommand.Execute(null);
 
     private void OnWriteKey(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {

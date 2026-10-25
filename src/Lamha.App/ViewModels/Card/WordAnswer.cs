@@ -3,17 +3,26 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lamha.App.Controls;
 using Lamha.App.Services;
+using Lamha.Core;
+using Lamha.Core.Settings;
 using Lamha.Core.Translation;
 using Lamha.Core.Wikipedia;
 using Microsoft.UI.Xaml;
+using Localization = Lamha.App.Services.Localization;
 
 namespace Lamha.App.ViewModels.Card;
 
-/// <summary>What an answer on the card can ask of the card.</summary>
+/// <summary>What an answer can ask of what shows it: the card, or the main window's Translate page.</summary>
 public interface IAnswerActions
 {
     /// <summary>Looks up a meaning, a synonym or "did you mean" as a word of its own (Back returns).</summary>
     void Navigate(string word);
+
+    /// <summary>The bookmark: the word into the review deck, or out of it.</summary>
+    Task ToggleReviewAsync(WordAnswer answer);
+
+    /// <summary>Copies the meaning, and says so.</summary>
+    void Copy(string text);
 
     void OpenLink(Uri uri);
 
@@ -195,6 +204,27 @@ public sealed partial class WordAnswer : ObservableObject
         Links = Footer(d, translator, writingTools);
     }
 
+    /// <summary>
+    /// The answer for <paramref name="result"/> as Lamha's settings show it: "Better translation" with the AI translator
+    /// when one is set up, and the offline dictionary's definitions translated after it shows.
+    /// </summary>
+    /// <param name="brain">Lamha's brain: its settings, and the AI translator.</param>
+    /// <param name="result">The lookup's answer.</param>
+    /// <param name="actions">What shows the answer, which follows words and opens links.</param>
+    /// <param name="writingTools">"Writing tools" at the foot for a text.</param>
+    public static WordAnswer For(Brain brain, LookupResult result, IAnswerActions actions, bool writingTools)
+    {
+        ArgumentNullException.ThrowIfNull(brain);
+        var settings = brain.Settings.Current;
+        var translator = brain.Ai.TranslatorConfig();
+        return new WordAnswer(
+            result,
+            actions,
+            translator is null ? null : AiNames.Of(translator.Provider, settings),
+            writingTools,
+            settings.TranslateDefinitions && settings.DictSource != DictSource.Offline);
+    }
+
     public LookupResult Result { get; }
 
     public bool IsWord { get; }
@@ -279,7 +309,60 @@ public sealed partial class WordAnswer : ObservableObject
     /// <summary>The definitions whose translation is still to come.</summary>
     public IReadOnlyList<DefinitionItem> PendingGlosses => [.. Definitions.SelectMany(g => g.Entries).Where(e => e.Pending)];
 
+    /// <summary>
+    /// What comes after the answer shows: the review mark, the offline dictionary's glosses, Wikipedia. A newer lookup
+    /// cancels <paramref name="cancel"/>, and nothing more arrives.
+    /// </summary>
+    public async Task FillAsync(Brain brain, CancellationToken cancel)
+    {
+        ArgumentNullException.ThrowIfNull(brain);
+        var d = Result;
+        if (CanReview)
+        {
+            InReview = await brain.Review.HasAsync(d.Query).ConfigureAwait(true);
+        }
+
+        var pending = PendingGlosses;
+        if (pending.Count > 0)
+        {
+            try
+            {
+                var done = await brain.Translation.TranslateAsync([.. pending.Select(p => p.Gloss)], d.Target, "en", kind: TranslationKind.Gloss, cancel: cancel).ConfigureAwait(true);
+                for (var i = 0; i < pending.Count; i++)
+                {
+                    pending[i].Translated = i < done.Texts.Count ? done.Texts[i] : "";
+                    pending[i].Pending = false;
+                }
+            }
+            catch (LamhaException)
+            {
+                // The English definitions stay; the lines waiting for their translation go.
+                foreach (var p in pending)
+                {
+                    p.Pending = false;
+                }
+            }
+        }
+
+        var s = brain.Settings.Current;
+        if (s.ShowWikipedia && d.IsWord && d.Source == "en" && d.Query.Length > 2 && !cancel.IsCancellationRequested)
+        {
+            var wiki = await brain.Wikipedia.SummaryAsync(d.Query, d.Target == "en" ? "en" : s.TargetLang, s.DictSource == DictSource.Offline).ConfigureAwait(true);
+            if (wiki is not null && !cancel.IsCancellationRequested)
+            {
+                ShowWikipedia(wiki);
+            }
+        }
+    }
+
     partial void OnInReviewChanged(bool value) => OnPropertyChanged(nameof(ReviewTooltip));
+
+    [RelayCommand]
+    private Task ToggleReview() => _actions.ToggleReviewAsync(this);
+
+    /// <summary>The hero's Copy.</summary>
+    [RelayCommand]
+    private void CopyMeaning() => _actions.Copy(HeroText);
 
     [RelayCommand]
     private void OpenFormOf() => _actions.Navigate(FormOfWord);

@@ -198,6 +198,22 @@ public class ReviewTests
     }
 
     [Fact]
+    public void ClearingTheHistoryCanBeUndoneAndWordsLookedUpSinceStay()
+    {
+        using var lamha = Lamha();
+        lamha.HistoryService.Add("bank", "مصرف", "en");
+        lamha.Clock.Advance(TimeSpan.FromMinutes(1));
+        lamha.HistoryService.Add("river", "نهر", "en");
+        var cleared = lamha.HistoryService.Recent();
+        lamha.HistoryService.Clear();
+        lamha.Clock.Advance(TimeSpan.FromMinutes(1));
+        lamha.HistoryService.Add("settle", "يسدّد", "en");
+
+        Assert.Equal(2, lamha.HistoryService.Restore(cleared));
+        Assert.Equal(["settle", "river", "bank"], lamha.HistoryService.Recent().Select(e => e.Word));
+    }
+
+    [Fact]
     public async Task DaysGoByTheCalendarTheNightTheClocksGoForwardBreaksNoStreak()
     {
         // Egypt moved its clocks forward at midnight on Friday 24 April 2026; it's 00:30 on Saturday (still Friday in UTC).

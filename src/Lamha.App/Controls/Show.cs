@@ -52,6 +52,19 @@ public static class Show
 
     public static TextAlignment ArabicAlignment => StartAligned(FlowDirection.RightToLeft);
 
+    /// <summary>
+    /// A line that starts where the interface starts, whatever its own language: a meaning next to its word in a row
+    /// (an English meaning in the Arabic window stays on the right, by its word).
+    /// </summary>
+    public static TextAlignment InterfaceAligned(FlowDirection lineFlow) =>
+        lineFlow == Localization.FlowDirection ? TextAlignment.Left : TextAlignment.Right;
+
+    /// <summary>
+    /// A text box's text lines up as its language reads (English on the left in the Arabic window); an empty box starts
+    /// where the interface starts, where Windows would otherwise put the caret on the left.
+    /// </summary>
+    public static TextAlignment BoxAlignment(bool hasText) => hasText ? TextAlignment.DetectFromContent : TextAlignment.Left;
+
     // ----- the card's sizes and styles -----
 
     /// <summary>Chips in English are a size smaller (Lamha 2's <c>.chip.en</c>, 13 px).</summary>
