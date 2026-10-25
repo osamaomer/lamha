@@ -7,6 +7,7 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Windows.Graphics;
+using WinRT;
 
 namespace Lamha.App.Windows;
 
@@ -44,14 +45,14 @@ public sealed partial class CardWindow : Window
 
         AppWindow.IsShownInSwitchers = false;
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "Lamha.ico"));
-        if (AppWindow.Presenter is OverlappedPresenter presenter)
-        {
-            presenter.IsResizable = false;
-            presenter.IsMaximizable = false;
-            presenter.IsMinimizable = false;
-            presenter.IsAlwaysOnTop = true;
-            presenter.SetBorderAndTitleBar(hasBorder: true, hasTitleBar: false);
-        }
+        // As<T>, not `AppWindow.Presenter is OverlappedPresenter`: published with NativeAOT that test is false (C#/WinRT
+        // returns the base type), and the card had a title bar, a resizable edge and no "on top".
+        var presenter = AppWindow.Presenter.As<OverlappedPresenter>();
+        presenter.IsResizable = false;
+        presenter.IsMaximizable = false;
+        presenter.IsMinimizable = false;
+        presenter.IsAlwaysOnTop = true;
+        presenter.SetBorderAndTitleBar(hasBorder: true, hasTitleBar: false);
 
         Handle = Win32Interop.GetWindowFromWindowId(AppWindow.Id);
         Screens.RoundCorners(Handle);

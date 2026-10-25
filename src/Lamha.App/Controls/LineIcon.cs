@@ -68,6 +68,10 @@ public sealed partial class LineIcon : UserControl
 
     private readonly Canvas _canvas = new() { Width = 24, Height = 24 };
 
+    /// <summary>Whose foreground the lines are drawn in: the button's around the icon, or null for its own.</summary>
+    private FrameworkElement? _colour;
+    private long _watch;
+
     public LineIcon()
     {
         Width = 16;
@@ -75,6 +79,8 @@ public sealed partial class LineIcon : UserControl
         IsTabStop = false;
         Content = new Viewbox { Child = _canvas };
         RegisterPropertyChangedCallback(ForegroundProperty, (_, _) => Paint());
+        Loaded += (_, _) => Watch();
+        Unloaded += (_, _) => Unwatch();
     }
 
     public Glyph Glyph
@@ -125,13 +131,67 @@ public sealed partial class LineIcon : UserControl
 
     private void Paint()
     {
+        var colour = _colour switch
+        {
+            ContentPresenter presenter => presenter.Foreground,
+            Control control => control.Foreground,
+            _ => Foreground,
+        };
         foreach (var path in _canvas.Children.OfType<Path>())
         {
-            path.Stroke = Foreground;
-            path.Fill = Filled ? Foreground : null;
+            path.Stroke = colour;
+            path.Fill = Filled ? colour : null;
             path.StrokeThickness = StrokeWidth;
             path.StrokeStartLineCap = path.StrokeEndLineCap = PenLineCap.Round;
             path.StrokeLineJoin = PenLineJoin.Round;
         }
+    }
+
+    /// <summary>
+    /// An icon without a colour of its own takes its button's, and follows it (Pin's accent when on, a disabled
+    /// button's, the window's theme): its own Foreground is the app's theme's default, which is white in a light card
+    /// when Windows is dark, where the button's text is the card's grey. A callback, not a Binding: Bindings made in
+    /// code cost the published card 1 MB.
+    /// </summary>
+    private void Watch()
+    {
+        Unwatch();
+        _colour = ReadLocalValue(ForegroundProperty) == DependencyProperty.UnsetValue ? Button() : null;
+        _watch = _colour switch
+        {
+            ContentPresenter presenter => presenter.RegisterPropertyChangedCallback(ContentPresenter.ForegroundProperty, (_, _) => Paint()),
+            Control control => control.RegisterPropertyChangedCallback(ForegroundProperty, (_, _) => Paint()),
+            _ => 0,
+        };
+        Paint();
+    }
+
+    private void Unwatch()
+    {
+        switch (_colour)
+        {
+            case ContentPresenter presenter:
+                presenter.UnregisterPropertyChangedCallback(ContentPresenter.ForegroundProperty, _watch);
+                break;
+            case Control control:
+                control.UnregisterPropertyChangedCallback(ForegroundProperty, _watch);
+                break;
+        }
+
+        _colour = null;
+    }
+
+    /// <summary>The content presenter (or control) the icon is drawn in: its button's.</summary>
+    private FrameworkElement? Button()
+    {
+        for (var parent = VisualTreeHelper.GetParent(this); parent is not null; parent = VisualTreeHelper.GetParent(parent))
+        {
+            if (parent is ContentPresenter or Control)
+            {
+                return (FrameworkElement)parent;
+            }
+        }
+
+        return null;
     }
 }

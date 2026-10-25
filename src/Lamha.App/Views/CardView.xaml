@@ -28,7 +28,7 @@
       <DataTemplate x:Key="ChipTemplate" x:DataType="card:ChipItem">
         <Button Style="{StaticResource LamhaChipButtonStyle}" Command="{x:Bind Open}"
                 FlowDirection="{x:Bind Flow}" Content="{x:Bind Text}" FontSize="{x:Bind controls:Show.ChipSize(Small)}"
-                ToolTipService.ToolTip="{x:Bind Tooltip}" AutomationProperties.Name="{x:Bind Tooltip}" />
+                ToolTipService.ToolTip="{x:Bind Tooltip}" AutomationProperties.HelpText="{x:Bind Tooltip}" />
       </DataTemplate>
       <DataTemplate x:Key="HintTemplate" x:DataType="card:HintItem">
         <TextBlock VerticalAlignment="Center" FlowDirection="LeftToRight" Style="{StaticResource LamhaCaptionTextStyle}"
@@ -162,7 +162,8 @@
           <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}"
                      Text="{x:Bind ViewModel.Error.Hint, Mode=OneWay}" />
           <Button Margin="0,8,0,0" HorizontalAlignment="Center" Style="{StaticResource LamhaButtonStyle}"
-                  Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.RunErrorActionCommand}">
+                  Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.RunErrorActionCommand}"
+                  AutomationProperties.Name="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}">
             <StackPanel Orientation="Horizontal" Spacing="6">
               <controls:LineIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Error), Mode=OneWay}" Width="14" Height="14" />
               <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}" />
@@ -338,7 +339,7 @@
                                 <ItemsControl.ItemTemplate>
                                   <DataTemplate x:DataType="card:ChipItem">
                                     <Button Style="{StaticResource LamhaChipButtonStyle}" Padding="9,3" FontSize="{StaticResource LamhaFontSizeCaption}"
-                                            Command="{x:Bind Open}" Content="{x:Bind Text}" ToolTipService.ToolTip="{x:Bind Tooltip}" />
+                                            Command="{x:Bind Open}" Content="{x:Bind Text}" ToolTipService.ToolTip="{x:Bind Tooltip}" AutomationProperties.HelpText="{x:Bind Tooltip}" />
                                   </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                               </ItemsControl>
@@ -541,7 +542,8 @@
               <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind ViewModel.Writing.Error.Title, Mode=OneWay}" />
               <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind ViewModel.Writing.Error.Hint, Mode=OneWay}" />
               <Button Margin="0,8,0,0" HorizontalAlignment="Center" Style="{StaticResource LamhaButtonStyle}"
-                      Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Writing.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.Writing.RunErrorActionCommand, Mode=OneWay}">
+                      Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Writing.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.Writing.RunErrorActionCommand, Mode=OneWay}"
+                      AutomationProperties.Name="{x:Bind controls:Show.ErrorLabel(ViewModel.Writing.Error), Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                   <controls:LineIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Writing.Error), Mode=OneWay}" Width="14" Height="14" />
                   <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.Writing.Error), Mode=OneWay}" />
@@ -601,7 +603,8 @@
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="card:LinkItem">
-            <Button Style="{StaticResource LamhaFootLinkStyle}" Command="{x:Bind Open}" ToolTipService.ToolTip="{x:Bind controls:Show.Tooltip(Tooltip)}">
+            <Button Style="{StaticResource LamhaFootLinkStyle}" Command="{x:Bind Open}" ToolTipService.ToolTip="{x:Bind controls:Show.Tooltip(Tooltip)}"
+                    AutomationProperties.Name="{x:Bind Label}">
               <StackPanel Orientation="Horizontal" Spacing="6">
                 <controls:LineIcon Glyph="{x:Bind Glyph}" Width="13" Height="13" />
                 <TextBlock Text="{x:Bind Label}" />

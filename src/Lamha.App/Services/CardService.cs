@@ -1,5 +1,6 @@
 using Lamha.App.ViewModels.Card;
 using Lamha.App.Windows;
+using Lamha.Core;
 using Lamha.Core.Dictionary;
 using Lamha.Core.Text;
 using Lamha.Windows.Selection;
@@ -75,7 +76,10 @@ public sealed partial class CardService(
         }
     }
 
-    /// <summary><c>--sample</c>: the sample card's text, or "write:" and the text for the writing tools.</summary>
+    /// <summary>
+    /// <c>--sample</c>: the sample card's text, "write:" and the text for the writing tools, or "error:" and an error
+    /// code for the error the sample text's lookup would show.
+    /// </summary>
     public string? Sample { get; init; }
 
     /// <summary><c>--theme</c>: the card's theme for this run instead of the setting.</summary>
@@ -86,9 +90,15 @@ public sealed partial class CardService(
     {
         var sample = Sample ?? Localization.Get("Card_SampleText");
         var write = sample.StartsWith("write:", StringComparison.Ordinal);
+        var error = sample.StartsWith("error:", StringComparison.Ordinal) ? sample["error:".Length..] : null;
         try
         {
-            Show(new SelectionCapture(0, write ? sample["write:".Length..] : sample, IsTerminal: false), write ? CardMode.Write : CardMode.Lookup, null);
+            var text = write ? sample["write:".Length..] : error is null ? sample : Localization.Get("Card_SampleText");
+            Show(new SelectionCapture(0, text, IsTerminal: false), write ? CardMode.Write : CardMode.Lookup, null);
+            if (error is not null)
+            {
+                _window?.ViewModel.ShowError(new LamhaException(error));
+            }
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {

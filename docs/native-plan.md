@@ -462,7 +462,13 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
 
 **The beta release** (`.github/workflows/beta.yml`): started by hand (Actions → Beta → Run workflow, on the branch to release), it builds, tests, publishes and packs as CI does, then publishes **v3.0.0-beta.N** as a GitHub pre-release with the x64 and ARM64 installers (Velopack's `beta-win-x64` / `beta-win-arm64` channels) and the notes typed when starting it. Lamha shows the same number. GitHub offers "Run workflow" only once the file is on `main`.
 
-**Left before the first beta:** the user starts the first run. Listen waits for speech (phase 5); the error state and a pinned, followed card are still to be seen on screen.
+**The last checks before the beta** (2026-10-25): the error state (`--sample=error:code` shows a code's error through the card's own path; Try again then looks up for real) and a followed, pinned card, clicked through UI Automation, seen in both languages and themes, Debug and published. Found and fixed:
+- **The published card had a title bar,** could be resized and wasn't on top: under NativeAOT `AppWindow.Presenter is OverlappedPresenter` is false (C#/WinRT returns the base type), so none of its settings applied. `As<OverlappedPresenter>()` works. Phase 4's earlier published screenshots were cropped below it.
+- **Icons in a card whose theme isn't Windows'** (a light card on a dark Windows) were white, and a disabled Forward didn't dim: an icon took the app's theme's default colour, not its button's. It now follows its button.
+- **Narrator:** the meaning chips were named by their gloss, not the word on them; the foot links and the error's Try again had no name.
+- **Measured** (NativeAOT): tray 0 / 49 MB, card open 40 / 84 MB, card closed 1 / 84 MB, within budget but 1 MB under the card's 85 MB commit budget. Applying the card's window settings costs about 3 MB of it.
+
+**Left before the first beta:** the user starts the first run (`beta.yml` must be on `main` first). Listen waits for speech (phase 5).
 
 ## Moving users from Lamha 2
 

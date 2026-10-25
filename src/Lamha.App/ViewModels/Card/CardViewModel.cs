@@ -431,17 +431,27 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
         }
         catch (LamhaException e) when (!cancel.IsCancellationRequested)
         {
-            IsBusy = false;
-            Frame("");
-            var online = !brain.Network.IsOffline;
-            Error = ErrorText.ForLookup(e, brain.Settings.Current.TrProvider ?? brain.Settings.Current.AiProvider, brain.Settings.Current, online)
-                .Offering(host.CanOpenSettings);
-            View = CardView.Error;
-            host.Announce(Error.Title);
+            ShowError(e);
         }
         catch (OperationCanceledException)
         {
         }
+    }
+
+    /// <summary>
+    /// The lookup's error in words, with the button that helps. Public for <c>--sample=error:code</c>, which shows an
+    /// error without breaking the network; Try again then looks the text up for real.
+    /// </summary>
+    public void ShowError(LamhaException error)
+    {
+        _lookup?.Cancel();
+        IsBusy = false;
+        Frame("");
+        var online = !brain.Network.IsOffline;
+        Error = ErrorText.ForLookup(error, brain.Settings.Current.TrProvider ?? brain.Settings.Current.AiProvider, brain.Settings.Current, online)
+            .Offering(host.CanOpenSettings);
+        View = CardView.Error;
+        host.Announce(Error.Title);
     }
 
     private void Show(LookupResult result)
