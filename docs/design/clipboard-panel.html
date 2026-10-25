@@ -1,0 +1,290 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lamha 3 Clipboard Panel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: the quick panel (Lamha 2's 380 × 460) in each of its states, side by side over a mock desktop so the
+   Acrylic shows. Colours and sizes are Tokens.xaml's. */
+:root {
+  --page: #f5f5f7; --ink: #1d1d1f; --ink-2: #5f5f64; --rule: rgba(0, 0, 0, 0.08); --seg: rgba(0, 0, 0, 0.05); --seg-on: #ffffff; --note: #ffffff;
+  --stage: #ffffff; --stage-ink: #3a3a3e; --stage-ink-2: #8a8a90;
+  --ui: "Segoe UI Variable Text", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --bg: #ffffff; --fg: #1d1d1f; --muted: #5f5f64; --faint: #707075;
+  --line: rgba(0, 0, 0, 0.08); --field-line: rgba(0, 0, 0, 0.42); --hover: rgba(0, 0, 0, 0.05); --chip: rgba(0, 0, 0, 0.045);
+  --accent: #4f46e5; --accent-soft: rgba(79, 70, 229, 0.09); --btn: #4f46e5; --btn-fg: #ffffff;
+  --ok: #166534; --ok-soft: rgba(22, 163, 74, 0.12); --danger: #c81e1e; --warn-bg: #fff7e6; --warn-fg: #8a5300;
+  --edge: rgba(0, 0, 0, 0.14); --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.26), 0 2px 8px rgba(0, 0, 0, 0.08); --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --mark: rgba(245, 158, 11, 0.3);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #1c1c1e; --ink: #f5f5f7; --ink-2: #a5a5aa; --rule: rgba(255, 255, 255, 0.1); --seg: rgba(255, 255, 255, 0.07); --seg-on: #3a3a3c; --note: #2c2c2e;
+    --stage: #202024; --stage-ink: #c9c9ce; --stage-ink-2: #7c7c82;
+    --bg: #2c2c2e; --fg: #f5f5f7; --muted: #a5a5aa; --faint: #98989d;
+    --line: rgba(255, 255, 255, 0.1); --field-line: rgba(255, 255, 255, 0.4); --hover: rgba(255, 255, 255, 0.07); --chip: rgba(255, 255, 255, 0.07);
+    --accent: #9aa1ff; --accent-soft: rgba(154, 161, 255, 0.12); --btn: #5e5ce6; --btn-fg: #ffffff;
+    --ok: #4ade80; --ok-soft: rgba(74, 222, 128, 0.13); --danger: #fc8888; --warn-bg: #3a2c12; --warn-fg: #f5c46b;
+    --edge: rgba(255, 255, 255, 0.12); --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3); --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --mark: rgba(245, 158, 11, 0.32);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #1c1c1e; --ink: #f5f5f7; --ink-2: #a5a5aa; --rule: rgba(255, 255, 255, 0.1); --seg: rgba(255, 255, 255, 0.07); --seg-on: #3a3a3c; --note: #2c2c2e;
+  --stage: #202024; --stage-ink: #c9c9ce; --stage-ink-2: #7c7c82;
+  --bg: #2c2c2e; --fg: #f5f5f7; --muted: #a5a5aa; --faint: #98989d;
+  --line: rgba(255, 255, 255, 0.1); --field-line: rgba(255, 255, 255, 0.4); --hover: rgba(255, 255, 255, 0.07); --chip: rgba(255, 255, 255, 0.07);
+  --accent: #9aa1ff; --accent-soft: rgba(154, 161, 255, 0.12); --btn: #5e5ce6; --btn-fg: #ffffff;
+  --ok: #4ade80; --ok-soft: rgba(74, 222, 128, 0.13); --danger: #fc8888; --warn-bg: #3a2c12; --warn-fg: #f5c46b;
+  --edge: rgba(255, 255, 255, 0.12); --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3); --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --mark: rgba(245, 158, 11, 0.32);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font-family: var(--ui); font-size: 14px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+.wrap { max-width: 1260px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; }
+header .intro { max-width: 70ch; min-width: 0; }
+h1 { font-size: 28px; line-height: 1.2; font-weight: 600; margin: 0 0 8px; text-wrap: balance; }
+header p { margin: 0; color: var(--ink-2); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+.switch-row { display: flex; align-items: center; gap: 8px; }
+.switch-row > span { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.seg { display: inline-flex; background: var(--seg); border-radius: 999px; padding: 3px; }
+.seg button { font: inherit; font-size: 13px; font-weight: 600; color: var(--ink-2); border: 0; background: none; cursor: pointer; padding: 5px 14px; border-radius: 999px; min-height: 30px; }
+.seg button[aria-pressed="true"] { background: var(--seg-on); color: var(--ink); box-shadow: var(--pill-shadow); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 16px; }
+.note { background: var(--note); border-radius: 14px; padding: 20px 22px; box-shadow: 0 0 0 1px var(--rule); min-width: 0; }
+.note h2 { font-size: 15px; margin: 0 0 10px; }
+.note ul, .note ol { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 8px; }
+.note .rec { display: block; color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.states { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); gap: 28px 20px; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+figcaption { display: flex; flex-direction: column; gap: 2px; padding-inline: 4px; }
+figcaption b { font-size: 15px; font-weight: 600; }
+figcaption span { font-size: 13px; color: var(--ink-2); }
+.stage { position: relative; overflow: hidden; border-radius: 14px; background: var(--stage); box-shadow: 0 0 0 1px var(--rule); padding: 36px 10px 24px; display: grid; justify-items: center; }
+.backdrop { position: absolute; inset: 0; padding: 18px 20px; pointer-events: none; display: flex; flex-direction: column; gap: 10px; }
+.backdrop .img { height: 110px; border-radius: 10px; background: linear-gradient(115deg, #0ea5e9 0%, #22c55e 35%, #f59e0b 70%, #ef4444 100%); }
+.backdrop p { margin: 0; color: var(--stage-ink); font-family: Georgia, serif; font-size: 15px; line-height: 1.75; }
+
+/* ---------- the panel ---------- */
+.panel { position: relative; z-index: 1; width: 380px; max-width: 100%; height: 460px; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden;
+  background: color-mix(in srgb, var(--bg) 85%, transparent); -webkit-backdrop-filter: blur(30px) saturate(1.3); backdrop-filter: blur(30px) saturate(1.3);
+  box-shadow: var(--shadow), 0 0 0 1px var(--edge); color: var(--fg); font-family: var(--ui); font-size: 14px; }
+.panel.solid { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.panel svg { display: block; flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.panel [dir="rtl"] { text-align: right; }
+.panel [dir="ltr"] { text-align: left; }
+.p-head { display: flex; align-items: baseline; gap: 8px; padding: 12px 16px 0; flex: none; }
+.p-head b { font-size: 14px; }
+.p-head span { font-size: 12px; color: var(--muted); }
+.p-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; flex: none; }
+.search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 36px; padding-inline: 10px 12px; border-radius: 10px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--field-line), 0 0 0 2px var(--accent); color: var(--faint); font-size: 14px; }
+.search .q { color: var(--fg); }
+.search .caret { width: 1px; height: 18px; background: var(--fg); margin-inline-start: -6px; }
+.segsm { display: inline-flex; background: var(--chip); border-radius: 999px; padding: 2px; flex: none; }
+.segsm span { min-height: 28px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--muted); display: grid; place-items: center; }
+.segsm span.on { background: var(--bg); color: var(--fg); box-shadow: var(--pill-shadow); }
+.p-list { flex: 1; min-height: 0; overflow: hidden; padding: 0 8px; display: flex; flex-direction: column; gap: 2px; }
+.row { display: flex; align-items: flex-start; gap: 8px; padding: 8px; border-radius: 8px; }
+.row.sel { background: var(--accent-soft); }
+.row .main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.row .label { font-size: 13px; font-weight: 700; }
+.row .txt { font-size: 13px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.row .tr { font-size: 12.5px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.row .meta { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--faint); }
+.row .meta kbd { font-family: var(--ui); font-size: 10.5px; min-width: 16px; padding: 0 4px; border-radius: 4px; background: var(--chip); color: var(--muted); text-align: center; box-shadow: 0 0 0 1px var(--line); }
+.row .meta svg { width: 12px; height: 12px; color: var(--accent); }
+.row .tools { display: flex; gap: 2px; visibility: hidden; }
+.row.sel .tools { visibility: visible; }
+.row mark { background: var(--mark); color: inherit; border-radius: 3px; }
+.icon-btn { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: var(--muted); flex: none; }
+.p-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 8px 16px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--muted); flex: none; }
+.p-foot kbd, .k kbd { font-family: var(--ui); font-size: 10.5px; padding: 0 5px; border-radius: 4px; background: var(--chip); box-shadow: 0 0 0 1px var(--line); color: var(--fg); direction: ltr; display: inline-block; }
+.combo { direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+.banner { display: flex; align-items: center; gap: 12px; margin: 10px 16px 0; padding: 10px 12px; border-radius: 10px; background: var(--warn-bg); color: var(--warn-fg); font-size: 12.5px; flex: none; }
+.banner > div { flex: 1; display: flex; flex-direction: column; }
+.banner b { font-size: 13px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; min-height: 32px; border-radius: 8px; background: var(--btn); color: var(--btn-fg); font-weight: 600; font-size: 13px; white-space: nowrap; }
+.btn svg { width: 14px; height: 14px; }
+.btn.ghost { background: var(--chip); color: var(--fg); }
+.btn .kbd { font-size: 11px; font-weight: 500; opacity: 0.75; margin-inline-start: 4px; }
+
+/* tools on a copy */
+.t-head { display: flex; align-items: center; gap: 4px; padding: 10px 12px 0; flex: none; }
+.t-head b { font-size: 14px; }
+.t-clip { margin: 8px 16px 8px; padding: 10px 12px; border-radius: 10px; background: var(--chip); flex: none; display: flex; flex-direction: column; gap: 2px; }
+.t-clip .txt { font-size: 14px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.t-clip .meta { font-size: 11.5px; color: var(--faint); }
+.menu { flex: 1; min-height: 0; padding: 0 8px; display: flex; flex-direction: column; gap: 2px; }
+.item { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 8px; border-radius: 8px; }
+.item.sel { background: var(--accent-soft); }
+.item .num { font-size: 11px; font-weight: 700; color: var(--muted); width: 14px; text-align: center; }
+.item .ic { width: 28px; height: 28px; border-radius: 8px; background: var(--chip); color: var(--accent); display: grid; place-items: center; flex: none; }
+.item .lab { font-size: 14px; flex: 1; min-width: 0; }
+.item .hint { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.out { flex: 1; min-height: 0; padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+.out .res { font-size: 16.5px; font-weight: 700; line-height: 1.6; padding: 12px 16px; border-radius: 10px; background: var(--accent-soft); }
+.out .acts { display: flex; align-items: center; gap: 6px; }
+.out .muted { font-size: 12px; color: var(--muted); }
+
+/* opt-in and empty */
+.center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; padding: 24px 28px; }
+.center .ic { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin-bottom: 4px; }
+.center .ic svg { width: 22px; height: 22px; }
+.center b { font-size: 15px; }
+.center p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 34ch; }
+.center .acts { display: flex; gap: 8px; margin-top: 8px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="intro">
+      <h1>The clipboard quick panel</h1>
+      <p>Alt+Shift+V in any program: what you copied, to search and paste, with Lamha's tools on a copy. Lamha 2's panel (380 × 460) in each of its states, drawn with the tokens over a desktop so the Acrylic shows.</p>
+    </div>
+    <div class="switches">
+      <div class="switch-row"><span>Language</span><div class="seg" role="group" aria-label="Language">
+        <button type="button" id="lang-ar" data-lang="ar" aria-pressed="true">العربية</button>
+        <button type="button" id="lang-en" data-lang="en" aria-pressed="false">English</button>
+      </div></div>
+      <div class="switch-row"><span>Theme</span><div class="seg" role="group" aria-label="Theme">
+        <button type="button" id="theme-light" data-theme-set="light" aria-pressed="false">Light</button>
+        <button type="button" id="theme-dark" data-theme-set="dark" aria-pressed="false">Dark</button>
+      </div></div>
+      <div class="switch-row"><span>Background</span><div class="seg" role="group" aria-label="Background">
+        <button type="button" id="bg-acrylic" data-bg="acrylic" aria-pressed="true">Acrylic</button>
+        <button type="button" id="bg-solid" data-bg="solid" aria-pressed="false">Solid</button>
+      </div></div>
+    </div>
+  </header>
+
+  <div class="notes">
+    <section class="note" aria-labelledby="n-changes">
+      <h2 id="n-changes">What changes from Lamha 2</h2>
+      <ul>
+        <li><b>The same panel and keys:</b> type to search, ↑ ↓ to choose, Enter pastes, Shift+Enter pastes plain text, Ctrl+1…9 pastes that row, Ctrl+P pins, Delete deletes (with Undo), Tab opens the tools, Esc closes.</li>
+        <li><b>The card's window:</b> Windows' 8 px corners and shadow, Acrylic behind; it opens under the mouse, and gives the focus back to your program to paste.</li>
+        <li><b>Tools on a copy:</b> only the ones that fit it (translate, write it in English, proofread, summarize, look up, add to review, paste as plain text), numbered 1–9. An AI result is never pasted without its preview.</li>
+        <li>All the words are Lamha 2's: nothing new to word.</li>
+      </ul>
+    </section>
+    <section class="note" aria-labelledby="n-questions">
+      <h2 id="n-questions">Questions</h2>
+      <ol>
+        <li><b>Acrylic or solid:</b> does the panel follow the card's setting (Appearance → the card's background)?<span class="rec">Recommended: yes, one setting for both floating windows.</span></li>
+        <li><b>Text only in 3.0?</b> Lamha 2 kept copied text, not pictures or files.<span class="rec">Recommended: text only in 3.0; pictures are an idea for 3.x.</span></li>
+        <li><b>The translation under an English copy</b> (once you've translated it, as in Lamha 2): keep it in the list?<span class="rec">Recommended: yes.</span></li>
+      </ol>
+    </section>
+  </div>
+
+  <div class="states" id="states"></div>
+</div>
+
+<script>
+const ICON = {
+  search: ["M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z", "M20 20l-3.5-3.5"],
+  pin: ["M12 17v5", "M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"],
+  trash: ["M3 6h18", "M8 6V4h8v2", "M19 6l-1 14H6L5 6"],
+  back: ["M9 18l6-6-6-6"],
+  translate: ["M5 8l6 6", "M4 14l6-6 2-3", "M2 5h12", "M7 2h1", "M22 22l-5-10-5 10", "M14 18h6"],
+  check: ["M20 6 9 17l-5-5"], book: ["M4 19.5A2.5 2.5 0 0 1 6.5 17H20", "M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"],
+  bookmark: ["M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"], plain: ["M4 7V4h16v3", "M9 20h6", "M12 4v16"],
+  clipboard: ["M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z", "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"],
+  copy: ["M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z", "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"],
+  retry: ["M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5"],
+};
+const icon = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[n].map(d => `<path d="${d}"/>`).join("")}</svg>`;
+
+// Lamha 2's words: desktop/renderer/i18n-desktop.js and shared/i18n.js
+const S = {
+  ar: { title: "الحافظة", hint: "اختر نصًا لتلصقه", search: "ابحث في الحافظة…", all: "الكل", pinned: "المثبتة", paste: "لصق", plain: "نص عادي", tools: "أدوات", close: "إغلاق",
+    now: "الآن", min5: "قبل ٥ دقائق", hour: "قبل ساعة", hours3: "قبل ٣ ساعات", yesterday: "أمس", pin: "تثبيت (Ctrl+P)", unpin: "إلغاء التثبيت (Ctrl+P)", del: "حذف (Delete)",
+    pausedT: "الحافظة متوقفة مؤقتًا", pausedX: "لا يُسجَّل ما تنسخه الآن.", resume: "استئناف",
+    toolsTitle: "أدوات النص", back: "العودة إلى القائمة", english: "الإنجليزية",
+    acts: [["translate", "ترجم", "إلى العربية"], ["check", "دقّق لغويًا", "صحّح الأخطاء واشرحها"], ["book", "ابحث", "في القاموس"], ["bookmark", "أضف للمراجعة", "في بطاقات المراجعة"], ["plain", "الصق كنص عادي", "بدون تنسيق"]],
+    run: "تشغيل", shortcut: "اختصار", kBack: "رجوع", kTools: "الأدوات", pasteBtn: "لصق", copy: "نسخ", redo: "إعادة", n: x => x.toLocaleString("ar-EG"),
+    optT: "سجل الحافظة", optX: "يحفظ لمحة ما تنسخه على جهازك فقط، مشفّرًا، لتجده وتلصقه لاحقًا. لا يُرسل أي شيء إلا عند ضغطك على أداة.", enable: "تفعيل سجل الحافظة", cancel: "إلغاء",
+    empty: "لا يوجد شيء في الحافظة بعد — انسخ أي نص وسيظهر هنا", noResults: "لا نتائج", label: "عنوان البيت" },
+  en: { title: "Clipboard", hint: "Pick something to paste", search: "Search the clipboard…", all: "All", pinned: "Pinned", paste: "paste", plain: "plain text", tools: "tools", close: "close",
+    now: "Just now", min5: "5 minutes ago", hour: "1 hour ago", hours3: "3 hours ago", yesterday: "Yesterday", pin: "Pin (Ctrl+P)", unpin: "Unpin (Ctrl+P)", del: "Delete (Delete)",
+    pausedT: "Clipboard history is paused", pausedX: "What you copy isn't being recorded.", resume: "Resume",
+    toolsTitle: "Text tools", back: "Back to the list", english: "English",
+    acts: [["translate", "Translate", "Into Arabic"], ["check", "Proofread", "Fix the mistakes, with reasons"], ["book", "Look up", "In the dictionary"], ["bookmark", "Add to review", "In your review cards"], ["plain", "Paste as plain text", "Without formatting"]],
+    run: "run", shortcut: "shortcut", kBack: "back", kTools: "tools", pasteBtn: "Paste", copy: "Copy", redo: "Redo", n: x => String(x),
+    optT: "Clipboard history", optX: "Lamha keeps what you copy on this PC only, encrypted, so you can find and paste it later. Nothing is sent anywhere unless you press a tool.", enable: "Turn on clipboard history", cancel: "Cancel",
+    empty: "Nothing here yet — copy any text and it shows up here", noResults: "No results", label: "Home address" },
+};
+
+const dirOf = t => (/[؀-ۿ]/.test(t) ? "rtl" : "ltr");
+let lang = "ar", bg = "acrylic";
+
+const CLIPS = s => [
+  { text: "شارع الملك فهد، الرياض ١٢٢٧١", label: s.label, app: "Notepad", when: s.yesterday, pinned: true },
+  { text: "Could you send me the final version of the report by Thursday? I'd like to go through it before the meeting.", tr: "هل يمكنك إرسال النسخة النهائية من التقرير بحلول الخميس؟", app: "Outlook", when: s.now },
+  { text: "meticulous", app: "Word", when: s.min5 },
+  { text: "https://learn.microsoft.com/windows/apps/winui/", app: "Microsoft Edge", when: s.hour },
+  { text: "اجتماع الفريق يوم الأحد الساعة العاشرة", app: "WhatsApp", when: s.yesterday },
+];
+
+function row(s, c, i, sel, q) {
+  const hl = t => (q ? t.replace(new RegExp(`(${q})`, "i"), "<mark>$1</mark>") : t);
+  return `<div class="row${sel ? " sel" : ""}"><div class="main">
+      ${c.label ? `<span class="label" dir="${dirOf(c.label)}">${c.label}</span>` : ""}
+      <span class="txt" dir="${dirOf(c.text)}">${hl(c.text)}</span>
+      ${c.tr ? `<span class="tr" dir="rtl">${c.tr}</span>` : ""}
+      <span class="meta"><kbd>${i + 1}</kbd><span dir="ltr">${c.app}</span><span>·</span><span>${c.when}</span>${c.pinned ? icon("pin") : ""}</span></div>
+    <div class="tools"><span class="icon-btn" title="${c.pinned ? s.unpin : s.pin}">${icon("pin")}</span><span class="icon-btn" title="${s.del}">${icon("trash")}</span></div></div>`;
+}
+const head = s => `<div class="p-head"><b>${s.title}</b><span>${s.hint}</span></div>`;
+const bar = (s, q = "") => `<div class="p-bar"><div class="search">${icon("search")}${q ? `<span class="q" dir="ltr">${q}</span>` : `<span>${s.search}</span>`}<span class="caret"></span></div>
+  <div class="segsm"><span class="on">${s.all}</span><span>${s.pinned}</span></div></div>`;
+const foot = s => `<div class="p-foot"><span><kbd>Enter</kbd> ${s.paste}</span><span><span class="combo"><kbd>Shift</kbd>+<kbd>Enter</kbd></span> ${s.plain}</span><span><kbd>Tab</kbd> ${s.tools}</span><span><kbd>Esc</kbd> ${s.close}</span></div>`;
+const keyline = (...k) => `<div class="p-foot">${k.map(([a, b]) => `<span><kbd>${a}</kbd> ${b}</span>`).join("")}</div>`;
+const toolsHead = (s, ui) => `<div class="t-head"><span class="icon-btn" title="${s.back}" style="${ui === "ltr" ? "transform:scaleX(-1)" : ""}">${icon("back")}</span><b>${s.toolsTitle}</b></div>
+  <div class="t-clip"><span class="txt" dir="ltr">meticulous</span><span class="meta"><span dir="ltr">Word</span> · ${s.min5} · ${s.english}</span></div>`;
+
+const STATES = [
+  { title: "The list", note: "Opens with the search box ready and the newest copy chosen; its pin and delete show on the chosen row. A pinned copy can have a name.",
+    html: (s, ui) => head(s) + bar(s) + `<div class="p-list">${CLIPS(s).map((c, i) => row(s, c, i, i === 1)).join("")}</div>` + foot(s) },
+  { title: "Searching", note: "Every word you type narrows the list (Arabic-aware: with or without hamza and harakat); the match is marked.",
+    html: (s, ui) => head(s) + bar(s, "report") + `<div class="p-list">${[CLIPS(s)[1], { text: "The weekly report is attached. Let me know if anything is missing.", app: "Teams", when: s.hours3 }].map((c, i) => row(s, c, i, i === 0, "report")).join("")}</div>` + foot(s) },
+  { title: "Tab: the tools on a copy", note: "Only the tools that fit this copy: an English word gets translate, proofread, look up, add to review and paste as plain text. 1–5 runs one.",
+    html: (s, ui) => toolsHead(s, ui) + `<div class="menu">${s.acts.map(([ic, l, h], i) => `<div class="item${i === 0 ? " sel" : ""}"><span class="num">${s.n(i + 1)}</span><span class="ic">${icon(ic)}</span><span class="lab">${l}</span><span class="hint">${h}</span></div>`).join("")}</div>`
+      + keyline(["Enter", s.run], [`${s.n(1)}–${s.n(5)}`, s.shortcut], ["Esc", s.kBack]) },
+  { title: "A result, before it's pasted", note: "Enter pastes it into your program; Esc goes back to the tools. Redo asks again.",
+    html: (s, ui) => toolsHead(s, ui) + `<div class="out"><div class="res" dir="rtl">دقيق للغاية · شديد العناية بالتفاصيل</div>
+      <div class="acts"><span class="btn">${icon("check")}${s.pasteBtn}<span class="kbd">Enter</span></span><span class="btn ghost">${icon("copy")}${s.copy}</span><span class="btn ghost">${icon("retry")}${s.redo}</span></div></div>`
+      + keyline(["Enter", s.paste], ["Esc", s.kTools]) },
+  { title: "Paused", note: "From the tray (15 minutes, an hour, or until you resume): a banner says so, and Resume is one click.",
+    html: (s, ui) => head(s) + `<div class="banner"><div><b>${s.pausedT}</b>${s.pausedX}</div><span class="btn">${s.resume}</span></div>` + bar(s)
+      + `<div class="p-list">${CLIPS(s).slice(0, 3).map((c, i) => row(s, c, i, i === 0)).join("")}</div>` + foot(s) },
+  { title: "Not turned on yet", note: "Clipboard history is off until you choose: the panel says what it keeps and where, and turns it on.",
+    html: (s, ui) => head(s) + `<div class="center"><span class="ic">${icon("clipboard")}</span><b>${s.optT}</b><p>${s.optX}</p><div class="acts"><span class="btn">${s.enable}</span><span class="btn ghost">${s.cancel}</span></div></div>` },
+];
+
+function render() {
+  const s = S[lang], ui = lang === "ar" ? "rtl" : "ltr";
+  document.getElementById("states").innerHTML = STATES.map((st, i) => `<figure><figcaption><b>${i + 1}. ${st.title}</b><span>${st.note}</span></figcaption>
+    <div class="stage"><div class="backdrop" aria-hidden="true"><div class="img"></div><p>Quarterly planning: please review the budget and send your notes before Thursday's meeting.</p></div>
+      <div class="panel${bg === "solid" ? " solid" : ""}" dir="${ui}">${st.html(s, ui)}</div></div></figure>`).join("");
+}
+
+const root = document.documentElement;
+const press = (sel, attr, value) => document.querySelectorAll(sel).forEach(b => b.setAttribute("aria-pressed", String(b.dataset[attr] === value)));
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => { lang = b.dataset.lang; press("[data-lang]", "lang", lang); render(); }));
+document.querySelectorAll("[data-bg]").forEach(b => b.addEventListener("click", () => { bg = b.dataset.bg; press("[data-bg]", "bg", bg); render(); }));
+const dark = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+const syncTheme = () => press("[data-theme-set]", "themeSet", dark() ? "dark" : "light");
+document.querySelectorAll("[data-theme-set]").forEach(b => b.addEventListener("click", () => { root.dataset.theme = b.dataset.themeSet; syncTheme(); }));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
+new MutationObserver(syncTheme).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+syncTheme();
+render();
+</script>

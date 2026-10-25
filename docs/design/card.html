@@ -1,0 +1,499 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lamha 3 Card</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: quiet page chrome (Windows' own face) on Lamha's page grey; each card state sits on a mock web page so the
+   Acrylic has something to show through. Colours, sizes and corners are Tokens.xaml's. */
+:root {
+  --page: #f5f5f7; --ink: #1d1d1f; --ink-2: #5f5f64; --rule: rgba(0, 0, 0, 0.08); --seg: rgba(0, 0, 0, 0.05); --seg-on: #ffffff;
+  --stage: #ffffff; --stage-ink: #3a3a3e; --stage-ink-2: #8a8a90; --stage-hl: rgba(79, 70, 229, 0.22);
+  --ui: "Segoe UI Variable Text", "Segoe UI", Tahoma, system-ui, sans-serif;
+
+  /* Tokens.xaml, Light */
+  --bg: #ffffff; --fg: #1d1d1f; --muted: #5f5f64; --faint: #707075;
+  --line: rgba(0, 0, 0, 0.08); --field-line: rgba(0, 0, 0, 0.42); --hover: rgba(0, 0, 0, 0.05);
+  --chip: rgba(0, 0, 0, 0.045); --skeleton: rgba(0, 0, 0, 0.06);
+  --accent: #4f46e5; --accent-soft: rgba(79, 70, 229, 0.09); --btn: #4f46e5; --btn-fg: #ffffff;
+  --ok: #166534; --ok-soft: rgba(22, 163, 74, 0.12); --danger: #c81e1e;
+  --edge: rgba(0, 0, 0, 0.14); --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.26), 0 2px 8px rgba(0, 0, 0, 0.08);
+  --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); --shimmer: rgba(255, 255, 255, 0.5);
+  --head: "Palatino Linotype", Georgia, serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #1c1c1e; --ink: #f5f5f7; --ink-2: #a5a5aa; --rule: rgba(255, 255, 255, 0.1); --seg: rgba(255, 255, 255, 0.07); --seg-on: #3a3a3c;
+    --stage: #202024; --stage-ink: #c9c9ce; --stage-ink-2: #7c7c82; --stage-hl: rgba(154, 161, 255, 0.3);
+    --bg: #2c2c2e; --fg: #f5f5f7; --muted: #a5a5aa; --faint: #98989d;
+    --line: rgba(255, 255, 255, 0.1); --field-line: rgba(255, 255, 255, 0.4); --hover: rgba(255, 255, 255, 0.07);
+    --chip: rgba(255, 255, 255, 0.07); --skeleton: rgba(255, 255, 255, 0.08);
+    --accent: #9aa1ff; --accent-soft: rgba(154, 161, 255, 0.12); --btn: #5e5ce6; --btn-fg: #ffffff;
+    --ok: #4ade80; --ok-soft: rgba(74, 222, 128, 0.13); --danger: #fc8888;
+    --edge: rgba(255, 255, 255, 0.12); --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3);
+    --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); --shimmer: rgba(255, 255, 255, 0.08);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #1c1c1e; --ink: #f5f5f7; --ink-2: #a5a5aa; --rule: rgba(255, 255, 255, 0.1); --seg: rgba(255, 255, 255, 0.07); --seg-on: #3a3a3c;
+  --stage: #202024; --stage-ink: #c9c9ce; --stage-ink-2: #7c7c82; --stage-hl: rgba(154, 161, 255, 0.3);
+  --bg: #2c2c2e; --fg: #f5f5f7; --muted: #a5a5aa; --faint: #98989d;
+  --line: rgba(255, 255, 255, 0.1); --field-line: rgba(255, 255, 255, 0.4); --hover: rgba(255, 255, 255, 0.07);
+  --chip: rgba(255, 255, 255, 0.07); --skeleton: rgba(255, 255, 255, 0.08);
+  --accent: #9aa1ff; --accent-soft: rgba(154, 161, 255, 0.12); --btn: #5e5ce6; --btn-fg: #ffffff;
+  --ok: #4ade80; --ok-soft: rgba(74, 222, 128, 0.13); --danger: #fc8888;
+  --edge: rgba(255, 255, 255, 0.12); --shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); --shimmer: rgba(255, 255, 255, 0.08);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--page); color: var(--ink); font-family: var(--ui); font-size: 14px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+
+/* page header and switches */
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; }
+header .intro { max-width: 70ch; min-width: 0; }
+h1 { font-size: 28px; line-height: 1.2; font-weight: 600; margin: 0 0 8px; text-wrap: balance; }
+header p { margin: 0; color: var(--ink-2); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+.switch-row { display: flex; align-items: center; gap: 8px; }
+.switch-row > span { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.seg { display: inline-flex; background: var(--seg); border-radius: 999px; padding: 3px; }
+.seg button { font: inherit; font-size: 13px; font-weight: 600; color: var(--ink-2); border: 0; background: none; cursor: pointer; padding: 5px 14px; border-radius: 999px; min-height: 30px; }
+.seg button[aria-pressed="true"] { background: var(--seg-on); color: var(--ink); box-shadow: var(--pill-shadow); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* notes: what changes, questions */
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+.note { background: var(--stage); border-radius: 14px; padding: 20px 22px; box-shadow: 0 0 0 1px var(--rule); min-width: 0; }
+.note h2 { font-size: 15px; margin: 0 0 10px; }
+.note ul, .note ol { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--stage-ink); }
+.note li b { color: var(--ink); }
+.note .rec { display: block; color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+
+/* the states */
+.states { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); gap: 28px; align-items: start; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+figcaption { display: flex; flex-direction: column; gap: 2px; padding-inline: 4px; }
+figcaption b { font-size: 15px; font-weight: 600; }
+figcaption span { font-size: 13px; color: var(--ink-2); }
+.stage { position: relative; overflow: hidden; border-radius: 14px; background: var(--stage); box-shadow: 0 0 0 1px var(--rule); padding: 64px 24px 28px; display: grid; justify-items: center; }
+.backdrop { position: absolute; inset: 0; padding: 20px 24px; pointer-events: none; display: flex; flex-direction: column; gap: 12px; }
+.backdrop .bar-mock { height: 10px; width: 38%; border-radius: 5px; background: var(--stage-ink-2); opacity: .45; }
+.backdrop .img { height: 120px; border-radius: 10px; background: linear-gradient(115deg, #f59e0b 0%, #ef4444 30%, #8b5cf6 62%, #06b6d4 100%); }
+.backdrop p { margin: 0; color: var(--stage-ink); font-family: Georgia, serif; font-size: 15px; line-height: 1.75; }
+.backdrop mark { background: var(--stage-hl); color: inherit; border-radius: 3px; }
+
+/* ---------- the card: Tokens.xaml's sizes ---------- */
+.card {
+  position: relative; z-index: 1;
+  width: 384px; max-width: 100%; max-height: 540px;
+  display: flex; flex-direction: column;
+  background: var(--bg); color: var(--fg);
+  border-radius: 8px; box-shadow: var(--shadow), 0 0 0 1px var(--edge); overflow: hidden;
+  font-family: var(--ui); font-size: 14px; line-height: 1.5; text-align: start;
+}
+.card.acrylic { background: color-mix(in srgb, var(--bg) 85%, transparent); -webkit-backdrop-filter: blur(30px) saturate(1.3); backdrop-filter: blur(30px) saturate(1.3); }
+.card.write { width: 440px; }
+.card svg { display: block; flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.card [dir="rtl"] { text-align: right; }
+.card [dir="ltr"] { text-align: left; }
+.card[dir="ltr"] .def [dir="rtl"] { text-align: left; } /* Lamha 2: in English, the Arabic lines of a meaning start on the left too */
+
+.bar { display: flex; align-items: center; gap: 4px; padding-block: 8px; padding-inline: 16px 10px; border-bottom: 1px solid var(--line); flex: none; }
+.bar > * { white-space: nowrap; flex-shrink: 0; }
+.bar > .spacer { flex: 1; flex-shrink: 1; }
+.bar .sep { width: 1px; height: 16px; background: var(--line); margin-inline: 2px; }
+.brand { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.brand .dot { width: 18px; height: 18px; border-radius: 5px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; }
+.brand .dot svg { width: 11px; height: 11px; stroke-width: 2.6; }
+.lang { font-size: 11.5px; color: var(--faint); margin-inline-start: 4px; }
+.dsw { display: flex; background: var(--chip); border-radius: 999px; padding: 2px; margin-inline-start: 6px; }
+.dsw span { min-height: 24px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; color: var(--muted); }
+.dsw span.on { background: var(--bg); color: var(--fg); box-shadow: var(--pill-shadow); }
+.badge { display: inline-grid; place-items: center; padding: 4px; border-radius: 999px; margin-inline-start: 4px; color: var(--ok); background: var(--ok-soft); }
+.badge svg { width: 12px; height: 12px; stroke-width: 2.4; }
+.icon-btn { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: var(--muted); }
+.icon-btn.on { color: var(--accent); background: var(--accent-soft); }
+.icon-btn.on svg { fill: currentColor; }
+.icon-btn.off { opacity: .35; }
+.card[dir="ltr"] .flip svg { transform: scaleX(-1); }
+
+.body { overflow-y: auto; padding: 16px; scrollbar-width: thin; }
+.head { display: flex; align-items: flex-start; gap: 8px; }
+.head .w { flex: 1; min-width: 0; }
+.headword { font-family: var(--head); font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
+.headword.price { font-family: var(--ui); letter-spacing: 0; }
+.phon { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.round { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.round.speak { background: var(--accent-soft); color: var(--accent); }
+.round.mark { color: var(--muted); }
+.round.mark.on { color: var(--accent); }
+.round.mark.on svg { fill: currentColor; }
+.round svg { width: 17px; height: 17px; }
+
+.hero { margin-top: 12px; padding: 12px 16px; border-radius: 10px; background: var(--accent-soft); display: flex; align-items: center; gap: 8px; }
+.hero .main { flex: 1; min-width: 0; }
+.ctx-label { display: block; font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+.hero .t { font-size: 22px; font-weight: 700; line-height: 1.35; }
+.hero .t.long { font-size: 16.5px; font-weight: 500; line-height: 1.75; }
+.hero .ctx { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 13px; line-height: 1.75; color: var(--muted); }
+.hero .ctx mark { background: transparent; color: var(--fg); font-weight: 700; box-shadow: inset 0 -0.45em 0 var(--accent-soft); }
+.hero .rate { margin-top: 4px; font-size: 12px; color: var(--muted); }
+.hero .actions { display: flex; flex-direction: column; gap: 2px; align-self: flex-start; }
+.src-row { display: flex; align-items: flex-start; gap: 8px; }
+.source { flex: 1; min-width: 0; font-size: 13px; color: var(--muted); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.source.two { -webkit-line-clamp: 2; }
+
+.sec { margin-top: 20px; }
+.sec-h { display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 700; color: var(--faint); letter-spacing: 0.02em; margin-bottom: 8px; }
+.sec-h::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.pos-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-bottom: 8px; }
+.pos { font-size: 12px; font-weight: 700; color: var(--accent); margin-inline-end: 2px; }
+.chip { font-size: 14px; padding: 3px 10px; border-radius: 999px; background: var(--chip); color: var(--fg); white-space: nowrap; }
+.chip.en { font-size: 13px; }
+.chip.more { color: var(--muted); font-size: 12px; }
+.defs { list-style: none; margin: 0; padding: 0; counter-reset: d; }
+.def { position: relative; padding-inline-start: 26px; margin-bottom: 12px; counter-increment: d; }
+.def:last-child { margin-bottom: 0; }
+.def::before { content: counter(d); position: absolute; inset-inline-start: 0; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--chip); color: var(--muted); font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.def.best { background: var(--accent-soft); border-radius: 10px; padding-block: 8px; padding-inline: 34px 8px; margin-inline: -8px; }
+.def.best::before { inset-inline-start: 8px; top: 11px; background: var(--btn); color: var(--btn-fg); }
+.def .ar-w { font-size: 15px; font-weight: 700; color: var(--accent); line-height: 1.6; }
+.def .ar-g { font-size: 14.5px; line-height: 1.7; }
+.def .en-g { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.def .ex { font-size: 13px; color: var(--muted); font-style: italic; margin-top: 4px; padding-inline-start: 8px; border-inline-start: 2px solid var(--line); }
+.def .syn { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+.def .syn .chip { font-size: 12px; padding: 3px 9px; min-height: 24px; }
+
+.wiki { display: flex; gap: 12px; align-items: flex-start; }
+.wiki .thumb { width: 64px; height: 64px; border-radius: 10px; flex: none; background: linear-gradient(160deg, #a7d3a1 0%, #5fa55a 35%, #2f7fb5 50%, #e9d39c 70%, #d8b46a 100%); }
+.wiki .x { font-size: 14.5px; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.wiki .link { color: var(--accent); font-size: 12px; font-weight: 600; display: inline-flex; gap: 4px; align-items: center; margin-top: 4px; }
+.wiki .link svg { width: 12px; height: 12px; }
+.wiki-col { min-width: 0; }
+
+.foot { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 8px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); flex: none; }
+.foot span { display: inline-flex; gap: 6px; align-items: center; padding: 4px 8px; border-radius: 8px; white-space: nowrap; }
+.foot svg { width: 13px; height: 13px; }
+
+/* writing tools and Write new */
+.tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.tools.tight { margin-top: 6px; }
+.chip.on { background: var(--btn); color: var(--btn-fg); }
+.chip .num { font-size: 11px; font-weight: 700; opacity: 0.65; margin-inline-end: 5px; }
+.w-out { margin-top: 16px; }
+.w-text { font-size: 14.5px; line-height: 1.65; padding: 12px 16px; border-radius: 10px; background: var(--accent-soft); }
+ins { text-decoration: none; color: var(--ok); background: var(--ok-soft); border-radius: 3px; font-weight: 600; }
+del { color: var(--danger); }
+.w-actions { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.w-actions .spacer { flex: 1; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; min-height: 32px; border-radius: 10px; background: var(--btn); color: var(--btn-fg); font-weight: 600; font-size: 13px; white-space: nowrap; }
+.btn svg { width: 14px; height: 14px; }
+.btn.ghost { background: var(--chip); color: var(--fg); }
+.btn.go { margin-top: 12px; }
+.btn .kbd { font-size: 11px; font-weight: 500; opacity: 0.75; margin-inline-start: 4px; }
+.issues { list-style: none; margin: 0; padding: 0; }
+.issues li { padding: 8px 0; border-top: 1px solid var(--line); }
+.issues li:first-child { border-top: 0; padding-top: 0; }
+.issues .fix { font-size: 14px; }
+.issues .cat { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 1px 8px; border-radius: 999px; }
+.issues .why { font-size: 13px; line-height: 1.6; color: var(--muted); margin-top: 2px; }
+.w-input { width: 100%; min-height: 72px; font: inherit; font-size: 14px; line-height: 1.6; color: var(--fg); background: var(--chip); border-radius: 10px; padding: 10px 12px; box-shadow: inset 0 0 0 1px var(--field-line); outline: 2px solid var(--accent); outline-offset: 0; }
+.w-input .caret { display: inline-block; width: 1px; height: 1.1em; background: var(--fg); vertical-align: text-bottom; margin-inline-start: 1px; }
+.w-note { font-size: 11.5px; font-weight: 700; color: var(--faint); margin-top: 12px; }
+
+/* waiting and errors */
+.sk { background: var(--skeleton); border-radius: 8px; position: relative; overflow: hidden; }
+.sk::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--shimmer), transparent); animation: shimmer 1.1s infinite; }
+@keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .sk::after { animation: none; } }
+.err { text-align: center; padding: 16px 8px 8px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.err b { display: block; color: var(--fg); font-size: 15px; margin-bottom: 4px; }
+.err .btn { margin-top: 12px; }
+
+.draft { box-shadow: inset 0 -2px 0 #f59e0b; }
+.legend { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+.legend i { width: 18px; height: 10px; box-shadow: inset 0 -2px 0 #f59e0b; display: inline-block; }
+
+@media (max-width: 480px) { h1 { font-size: 24px; } .stage { padding: 48px 12px 20px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="intro">
+      <h1>The card</h1>
+      <p>Lamha 3's card in each of its states, drawn with the design tokens, over a web page so the Acrylic shows. View it on Windows at 100% zoom: the sizes are the real ones.</p>
+    </div>
+    <div class="switches">
+      <div class="switch-row"><span>Language</span><div class="seg" role="group" aria-label="Language">
+        <button type="button" id="lang-ar" data-lang="ar" aria-pressed="true">العربية</button>
+        <button type="button" id="lang-en" data-lang="en" aria-pressed="false">English</button>
+      </div></div>
+      <div class="switch-row"><span>Theme</span><div class="seg" role="group" aria-label="Theme">
+        <button type="button" id="theme-light" data-theme-set="light" aria-pressed="false">Light</button>
+        <button type="button" id="theme-dark" data-theme-set="dark" aria-pressed="false">Dark</button>
+      </div></div>
+      <div class="switch-row"><span>Background</span><div class="seg" role="group" aria-label="Background">
+        <button type="button" id="bg-acrylic" data-bg="acrylic" aria-pressed="true">Acrylic</button>
+        <button type="button" id="bg-solid" data-bg="solid" aria-pressed="false">Solid</button>
+      </div></div>
+    </div>
+  </header>
+
+  <div class="notes">
+    <section class="note" aria-labelledby="n-changes">
+      <h2 id="n-changes">What changes from Lamha 2</h2>
+      <ul>
+        <li><b>The window:</b> Windows draws its corners, edge and shadow, with Acrylic behind (or solid, under Appearance).</li>
+        <li><b>Its height follows the answer,</b> up to 540 px (Lamha 2's limit); then the middle scrolls, and the bar and the links stay.</li>
+        <li><b>New in the bar:</b> Forward next to Back, and Pin. A pinned card stays open when you click elsewhere, and you can drag it by its bar.</li>
+        <li><b>Prices in your currency</b> (new in 3.0).</li>
+        <li><b>Edges line up:</b> the bar, the text and the links all start 16 px from the edge, on both sides and in both languages. Gaps are on the 4 px grid.</li>
+        <li>Everything else is Lamha 2's: the sections, colours, sizes and words.</li>
+      </ul>
+    </section>
+    <section class="note" aria-labelledby="n-questions">
+      <h2 id="n-questions">Questions</h2>
+      <ol>
+        <li><b>Corners: 8 px or 14 px?</b><span class="rec">Recommended: 8 px, drawn by Windows. It's what Acrylic and Windows' shadow need; 14 px (as in Lamha 2) needs a see-through window, without Acrylic and with more memory.</span></li>
+        <li><b>Icons: Lamha 2's, or Windows' (Segoe Fluent Icons)?</b><span class="rec">Recommended: Lamha 2's line icons, as today (drawn here).</span></li>
+        <li><b>Back and Forward:</b> shown as a pair once you've followed a word (Forward dimmed until you go back), so the bar doesn't jump?<span class="rec">Recommended: yes.</span></li>
+        <li><b>The new words</b> (underlined in orange): Pin, Forward and the price lines are drafts. Keep them, or give me yours.</li>
+      </ol>
+    </section>
+  </div>
+
+  <span class="legend"><i></i>New wording, a draft for you to reword</span>
+
+  <div class="states" id="states"></div>
+</div>
+
+<script>
+const ICON = {
+  speak: ["M11 5 6 9H2v6h4l5 4V5z", "M15.54 8.46a5 5 0 0 1 0 7.07", "M19.07 4.93a10 10 0 0 1 0 14.14"],
+  speakSm: ["M11 5 6 9H2v6h4l5 4V5z", "M15.54 8.46a5 5 0 0 1 0 7.07"],
+  copy: ["M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z", "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"],
+  close: ["M18 6 6 18", "M6 6l12 12"],
+  settings: ["M4 21v-7", "M4 10V3", "M12 21v-9", "M12 8V3", "M20 21v-5", "M20 12V3", "M1 14h6", "M9 8h6", "M17 16h6"],
+  back: ["M9 18l6-6-6-6"],
+  forward: ["M15 18l-6-6 6-6"],
+  external: ["M15 3h6v6", "M10 14 21 3", "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"],
+  translate: ["M5 8l6 6", "M4 14l6-6 2-3", "M2 5h12", "M7 2h1", "M22 22l-5-10-5 10", "M14 18h6"],
+  check: ["M20 6 9 17l-5-5"],
+  retry: ["M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5"],
+  book: ["M4 19.5A2.5 2.5 0 0 1 6.5 17H20", "M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"],
+  sparkle: ["M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z", "M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"],
+  bookmark: ["M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"],
+  pin: ["M12 17v5", "M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"],
+};
+const icon = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[n].map(d => `<path d="${d}"/>`).join("")}</svg>`;
+
+// Lamha 2's words (shared/i18n.js) where they exist; d: new, a draft
+const S = {
+  ar: {
+    lamha: "لمحة", arabic: "العربية", english: "إنجليزي", langs: "الإنجليزية ← العربية",
+    inContext: "في هذا السياق", otherMeanings: "معانٍ أخرى", definition: "التعريف", wikipedia: "ويكيبيديا", readWiki: "اقرأ المزيد في ويكيبيديا",
+    google: "ترجمة Google", cambridge: "قاموس كامبريدج", betterTr: "ترجمة أدق", writeTools: "أدوات الكتابة",
+    verb: "فعل", noun: "اسم", writeTitle: "أدوات الكتابة · Claude", composeTitle: "كتابة جديدة · Claude",
+    tools: ["تدقيق لغوي", "تحسين الأسلوب", "رسمي", "ودّي", "أقصر", "أطول", "تلخيص", "اشرح بالعربية", "اكتب ردًّا"],
+    digits: n => n.toLocaleString("ar-EG"), replace: "استبدال", copy: "نسخ", corrections: n => `التصحيحات (${n})`,
+    tense: "أزمنة الأفعال", prepositions: "حروف الجر (in / on / at …)",
+    why1: "مع وقت محدد في الماضي مثل yesterday نستخدم الماضي البسيط went، لا have went.",
+    why2: "الفعل discuss يأخذ مفعولًا به مباشرة، دون حرف جر.",
+    kind: "النوع:", message: "رسالة", email: "بريد إلكتروني", tone: "النبرة:", tones: ["تلقائي", "ودّي", "رسمي", "مختصر", "مفصّل"], write: "اكتب",
+    errOffline: "لا يوجد اتصال بالإنترنت", errCheck: "تحقق من اتصالك ثم حاول مجددًا.", retry: "إعادة المحاولة",
+    priceLabel: "بعملتك", priceValue: "١٨٧٫٤٦ ريال سعودي", priceRate: "١ دولار أمريكي = ٣٫٧٥ ريال · سعر ٢٥ أكتوبر",
+  },
+  en: {
+    lamha: "Lamha", arabic: "Arabic", english: "English", langs: "English → Arabic",
+    inContext: "In this context", otherMeanings: "Other meanings", definition: "Definition", wikipedia: "Wikipedia", readWiki: "Read more on Wikipedia",
+    google: "Google Translate", cambridge: "Cambridge Dictionary", betterTr: "Better translation", writeTools: "Writing tools",
+    verb: "verb", noun: "noun", writeTitle: "Writing tools · Claude", composeTitle: "Write new · Claude",
+    tools: ["Proofread", "Improve", "Formal", "Friendly", "Shorter", "Longer", "Summarize", "Explain", "Write a reply"],
+    digits: n => String(n), replace: "Replace", copy: "Copy", corrections: n => `Corrections (${n})`,
+    tense: "Verb tenses", prepositions: "Prepositions (in / on / at …)",
+    why1: "With a finished time like yesterday, use the past simple went, not have went.",
+    why2: "Discuss takes its object directly, with no preposition.",
+    kind: "Type:", message: "Message", email: "Email", tone: "Tone:", tones: ["Automatic", "Friendly", "Formal", "Short", "Longer"], write: "Write",
+    errOffline: "No internet connection", errCheck: "Check your connection and try again.", retry: "Try again",
+    priceLabel: "In your currency", priceValue: "187.46 Saudi riyals", priceRate: "1 US dollar = 3.75 riyals · rate of 25 October",
+  },
+};
+const TIPS = {
+  ar: { pin: "تثبيت البطاقة", pinned: "مثبّتة: اضغط لإلغاء التثبيت", back: "رجوع", forward: "للأمام", settings: "الإعدادات", close: "إغلاق (Esc)" },
+  en: { pin: "Pin the card", pinned: "Pinned: click to unpin", back: "Back", forward: "Forward", settings: "Settings", close: "Close (Esc)" },
+};
+
+const btn = (name, tip, cls = "") => `<span class="icon-btn ${cls}" title="${tip}">${icon(name)}</span>`;
+
+/** The bar: the mark and what the card shows on the start side; Back / Forward, Pin, Settings, Close on the end side. */
+function bar(t, k, { start, nav = false, pinned = false }) {
+  return `<div class="bar">${start}<span class="spacer"></span>
+    ${nav ? btn("back", k.back, "flip") + btn("forward", k.forward, "flip off draft") + `<span class="sep"></span>` : ""}
+    ${btn("pin", pinned ? k.pinned : k.pin, (pinned ? "on " : "") + "draft-tip")}${btn("settings", k.settings)}${btn("close", k.close)}</div>`;
+}
+const brand = (t, withName = true) => `<div class="brand"><span class="dot">${icon("translate")}</span>${withName ? t.lamha : ""}</div>`;
+const dictSwitch = t => `<div class="dsw"><span class="on">${t.arabic}</span><span>${t.english}</span></div>`;
+const foot = links => `<div class="foot">${links.map(([i, l]) => `<span>${icon(i)}${l}</span>`).join("")}</div>`;
+const heroActions = `<div class="actions"><span class="icon-btn">${icon("speakSm")}</span><span class="icon-btn">${icon("copy")}</span></div>`;
+
+const STATES = [
+  {
+    title: "A word, in its sentence",
+    note: "The meaning that fits the sentence first; the others under it. From the offline dictionary (the green book). Taller than 540 px, so the middle scrolls.",
+    card: (t, k, ui) => `<div class="card" dir="${ui}">
+      ${bar(t, k, { start: brand(t, false) + dictSwitch(t) + `<span class="badge">${icon("book")}</span>` })}
+      <div class="body">
+        <div class="head" dir="ltr"><div class="w"><div class="headword">settle</div><div class="phon">/ˈset.əl/</div></div>
+          <span class="round mark on">${icon("bookmark")}</span><span class="round speak">${icon("speak")}</span></div>
+        <div class="hero" dir="rtl"><div class="main"><span class="ctx-label" dir="${ui}">${t.inContext}</span>
+          <div class="t">يسدّد</div>
+          <div class="ctx">علينا أن <mark>نسدّد</mark> الفاتورة قبل أن نغادر.</div></div>${heroActions}</div>
+        <div class="sec"><div class="sec-h">${t.otherMeanings}</div>
+          <div class="pos-row" dir="${ui}"><span class="pos">${t.verb}</span><span class="chip" dir="rtl">يستقرّ</span><span class="chip" dir="rtl">يسوّي</span><span class="chip" dir="rtl">يحسم</span><span class="chip" dir="rtl">يهدأ</span><span class="chip more" dir="ltr">+3</span></div></div>
+        <div class="sec"><div class="sec-h">${t.definition}</div>
+          <div class="pos-row" dir="${ui}"><span class="pos">${t.verb}</span></div>
+          <ol class="defs">
+            <li class="def best" dir="${ui}"><div class="ar-w" dir="rtl">يسدّد · يدفع</div><div class="ar-g" dir="rtl">أن تدفع كل المال الذي تدين به</div>
+              <div class="en-g" dir="ltr">to pay all the money that you owe</div><div class="ex" dir="ltr">“Please settle your bill before leaving.”</div>
+              <div class="syn" dir="ltr"><span class="chip">pay</span><span class="chip">clear</span><span class="chip">square</span></div></li>
+            <li class="def" dir="${ui}"><div class="ar-w" dir="rtl">يستقرّ · يستوطن</div><div class="ar-g" dir="rtl">أن تذهب إلى مكان جديد وتعيش فيه</div>
+              <div class="en-g" dir="ltr">to go and live in a new place</div><div class="ex" dir="ltr">“They settled in Alexandria in 1998.”</div>
+              <div class="syn" dir="ltr"><span class="chip">move</span><span class="chip">live</span></div></li>
+          </ol></div>
+      </div>
+      ${foot([["external", t.google], ["external", t.cambridge]])}</div>`,
+    page: `We need to <mark>settle</mark> the bill before we leave, said Maya, already reaching for her coat.`,
+  },
+  {
+    title: "Pinned, after following a word",
+    note: "Pinned (the filled pin): it stays when you click elsewhere and moves by its bar. Back returns to the word before; Forward is dimmed until you go back.",
+    card: (t, k, ui) => `<div class="card" dir="${ui}">
+      ${bar(t, k, { start: brand(t, false) + dictSwitch(t), nav: true, pinned: true })}
+      <div class="body">
+        <div class="head" dir="ltr"><div class="w"><div class="headword">Nile</div><div class="phon">/naɪl/</div></div>
+          <span class="round mark">${icon("bookmark")}</span><span class="round speak">${icon("speak")}</span></div>
+        <div class="hero" dir="rtl"><div class="main"><div class="t">النيل</div></div>${heroActions}</div>
+        <div class="sec"><div class="sec-h">${t.otherMeanings}</div>
+          <div class="pos-row" dir="${ui}"><span class="pos">${t.noun}</span><span class="chip" dir="rtl">نهر النيل</span></div></div>
+        <div class="sec"><div class="sec-h">${t.wikipedia}</div>
+          <div class="wiki" dir="rtl"><span class="thumb" role="img" aria-label=""></span><div class="wiki-col">
+            <div class="x">النيل نهر في شمال شرق أفريقيا، وهو من أطول أنهار العالم إذ يبلغ طوله نحو ٦٬٦٥٠ كيلومترًا. يجري في إحدى عشرة دولة، ويصبّ في البحر الأبيض المتوسط.</div>
+            <span class="link">${t.readWiki}${icon("external")}</span></div></div></div>
+      </div>
+      ${foot([["external", t.google], ["external", t.cambridge]])}</div>`,
+    page: `The river towns along the <mark>Nile</mark> grew rich on its floods, which left the fields dark and fertile each year.`,
+  },
+  {
+    title: "A sentence",
+    note: "The text as selected (three lines, then a click shows it all), its translation, and the AI's better translation and the writing tools in the links.",
+    card: (t, k, ui) => `<div class="card" dir="${ui}">
+      ${bar(t, k, { start: brand(t) + `<span class="lang">${t.langs}</span>` })}
+      <div class="body">
+        <div class="src-row" dir="ltr"><div class="source">The meeting has been pushed back to next Thursday, so we have more time to prepare.</div><span class="icon-btn">${icon("speakSm")}</span></div>
+        <div class="hero" dir="rtl"><div class="main"><div class="t long">تأجّل الاجتماع إلى يوم الخميس المقبل، لذا لدينا وقت أطول للاستعداد.</div></div>${heroActions}</div>
+      </div>
+      ${foot([["external", t.google], ["sparkle", t.betterTr], ["sparkle", t.writeTools]])}</div>`,
+    page: `<mark>The meeting has been pushed back to next Thursday, so we have more time to prepare.</mark> Please send your slides by Monday.`,
+  },
+  {
+    title: "Writing tools: proofread",
+    note: "Each mistake struck through and its fix, Replace puts the text back in the program, and the list says why. Keys 1 to 9 run the tools.",
+    card: (t, k, ui) => `<div class="card write" dir="${ui}">
+      ${bar(t, k, { start: brand(t) + `<span class="lang">${t.writeTitle}</span>` })}
+      <div class="body">
+        <div class="source two" dir="ltr">I have went to the meeting yesterday and we discussed on the new budget.</div>
+        <div class="tools" dir="${ui}">${t.tools.map((x, i) => `<span class="chip${i === 0 ? " on" : ""}"><span class="num">${t.digits(i + 1)}</span>${x}</span>`).join("")}</div>
+        <div class="w-out">
+          <div class="w-text" dir="ltr">I <del>have went</del> <ins>went</ins> to the meeting yesterday and we discussed <del>on</del> the new budget.</div>
+          <div class="w-actions" dir="${ui}"><span class="btn">${icon("check")}${t.replace}</span><span class="btn ghost">${icon("copy")}${t.copy}</span><span class="spacer"></span><span class="icon-btn">${icon("retry")}</span></div>
+          <div class="sec"><div class="sec-h">${t.corrections(t.digits(2))}</div>
+            <ul class="issues">
+              <li dir="${ui}"><div class="fix" dir="ltr"><del>have went</del> → <ins>went</ins></div><span class="cat">${t.tense}</span><div class="why">${t.why1}</div></li>
+              <li dir="${ui}"><div class="fix" dir="ltr"><del>discussed on</del> → <ins>discussed</ins></div><span class="cat">${t.prepositions}</span><div class="why">${t.why2}</div></li>
+            </ul></div>
+        </div>
+      </div></div>`,
+    page: `<mark>I have went to the meeting yesterday and we discussed on the new budget.</mark>`,
+  },
+  {
+    title: "Write new",
+    note: "Nothing selected: describe what to write, in Arabic or English. Insert puts the result where the cursor is.",
+    card: (t, k, ui) => `<div class="card write" dir="${ui}">
+      ${bar(t, k, { start: brand(t) + `<span class="lang">${t.composeTitle}</span>` })}
+      <div class="body">
+        <div class="w-input" dir="rtl">بريد لمديري أطلب فيه إجازة يوم الأحد<span class="caret"></span></div>
+        <div class="w-note" dir="${ui}">${t.kind}</div>
+        <div class="tools tight" dir="${ui}"><span class="chip">${t.message}</span><span class="chip on">${t.email}</span></div>
+        <div class="w-note" dir="${ui}">${t.tone}</div>
+        <div class="tools tight" dir="${ui}">${t.tones.map((x, i) => `<span class="chip${i === 0 ? " on" : ""}">${x}</span>`).join("")}</div>
+        <div dir="${ui}"><span class="btn go">${icon("sparkle")}${t.write}<span class="kbd">Ctrl+Enter</span></span></div>
+      </div></div>`,
+    page: `To: Sara Hamdan<br>Subject: Sunday<br><br>`,
+  },
+  {
+    title: "A price, in your currency",
+    note: "New in 3.0. The currency comes from Windows' region (Settings can change it); the rate is fetched at most once a day, and its date is shown.",
+    card: (t, k, ui) => `<div class="card" dir="${ui}">
+      ${bar(t, k, { start: brand(t) })}
+      <div class="body">
+        <div class="head" dir="ltr"><div class="w"><div class="headword price">$49.99</div></div></div>
+        <div class="hero" dir="${ui}"><div class="main"><span class="ctx-label draft">${t.priceLabel}</span>
+          <div class="t">${t.priceValue}</div><div class="rate draft">${t.priceRate}</div></div>
+          <div class="actions"><span class="icon-btn">${icon("copy")}</span></div></div>
+      </div></div>`,
+    page: `Wireless earbuds, noise cancelling, 30-hour battery. Now <mark>$49.99</mark>, was $79.99.`,
+  },
+  {
+    title: "Waiting",
+    note: "The word at once and shapes where the answer will be; Lamha's mark shows what it's doing after 250 ms (pages turning for a word).",
+    card: (t, k, ui) => `<div class="card" dir="${ui}">
+      ${bar(t, k, { start: brand(t) })}
+      <div class="body">
+        <div class="head" dir="ltr"><div class="w"><div class="headword">settle</div></div></div>
+        <div class="sk" style="height:52px;margin-top:12px;border-radius:10px"></div>
+        <div class="sk" style="height:12px;width:40%;margin-top:20px"></div>
+        <div class="sk" style="height:12px;width:90%;margin-top:12px"></div>
+        <div class="sk" style="height:12px;width:75%;margin-top:8px"></div>
+      </div></div>`,
+    page: `We need to <mark>settle</mark> the bill before we leave, said Maya.`,
+  },
+  {
+    title: "No internet",
+    note: "What happened and what to do, in Lamha 2's words, with one button. The offline dictionary still answers single words.",
+    card: (t, k, ui) => `<div class="card" dir="${ui}">
+      ${bar(t, k, { start: brand(t) })}
+      <div class="body"><div class="err"><b>${t.errOffline}</b>${t.errCheck}<div><span class="btn">${icon("retry")}${t.retry}</span></div></div></div></div>`,
+    page: `<mark>The meeting has been pushed back to next Thursday.</mark>`,
+  },
+];
+
+let lang = "ar", bg = "acrylic";
+function render() {
+  const t = S[lang], k = TIPS[lang], ui = lang === "ar" ? "rtl" : "ltr";
+  document.getElementById("states").innerHTML = STATES.map((s, i) => `
+    <figure><figcaption><b>${i + 1}. ${s.title}</b><span>${s.note}</span></figcaption>
+      <div class="stage"><div class="backdrop" aria-hidden="true"><div class="bar-mock"></div><div class="img"></div><p>${s.page}</p></div>${s.card(t, k, ui)}</div></figure>`).join("");
+  document.querySelectorAll("#states .card").forEach(c => c.classList.toggle("acrylic", bg === "acrylic"));
+  document.querySelectorAll("#states .draft-tip").forEach(e => e.classList.add("draft"));
+}
+
+const root = document.documentElement;
+const press = (sel, attr, value) => document.querySelectorAll(sel).forEach(b => b.setAttribute("aria-pressed", String(b.dataset[attr] === value)));
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => { lang = b.dataset.lang; press("[data-lang]", "lang", lang); render(); }));
+document.querySelectorAll("[data-bg]").forEach(b => b.addEventListener("click", () => { bg = b.dataset.bg; press("[data-bg]", "bg", bg); render(); }));
+const dark = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+const syncTheme = () => press("[data-theme-set]", "themeSet", dark() ? "dark" : "light");
+document.querySelectorAll("[data-theme-set]").forEach(b => b.addEventListener("click", () => { root.dataset.theme = b.dataset.themeSet; syncTheme(); }));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
+new MutationObserver(syncTheme).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+syncTheme();
+render();
+</script>

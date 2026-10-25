@@ -1,0 +1,32 @@
+<Project>
+  <!-- Build rules shared by every project. Package versions live in Directory.Packages.props. -->
+
+  <PropertyGroup>
+    <Product>Lamha</Product>
+    <Company>Artwork Lab</Company>
+    <Copyright>© Artwork Lab. MIT License.</Copyright>
+    <VersionPrefix>3.0.0</VersionPrefix>
+    <VersionSuffix>alpha.0</VersionSuffix>
+
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <!-- Needed for the build to report unused usings (IDE0005); missing doc comments aren't errors. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <Deterministic>true</Deterministic>
+    <SatelliteResourceLanguages>ar;en</SatelliteResourceLanguages>
+
+    <!-- The app is published with NativeAOT: every library must stay trim- and AOT-safe. -->
+    <IsAotCompatible Condition="'$(IsTestProject)' != 'true'">true</IsAotCompatible>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- One Windows target for every Windows project: Windows 11 only (22H2 and later). -->
+    <LamhaWindowsTarget>net10.0-windows10.0.26100.0</LamhaWindowsTarget>
+    <LamhaWindowsMin>10.0.22621.0</LamhaWindowsMin>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,460 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lamha 3 Settings</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: the main window at its real size with Settings open: a home of categories, each opening a page of
+   Windows 11 settings cards (with a breadcrumb back). Colours and sizes are Tokens.xaml's. */
+:root {
+  --page: #f5f5f7; --ink: #1d1d1f; --ink-2: #5f5f64; --rule: rgba(0, 0, 0, 0.08); --seg: rgba(0, 0, 0, 0.05); --seg-on: #ffffff; --note: #ffffff;
+  --ui: "Segoe UI Variable Text", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --mica: linear-gradient(135deg, #eceef6 0%, #f3eff3 55%, #eef3f4 100%);
+  --layer: rgba(255, 255, 255, 0.5); --layer-edge: rgba(0, 0, 0, 0.06); --nav-hover: rgba(0, 0, 0, 0.04); --nav-sel: rgba(0, 0, 0, 0.06);
+  --win-edge: rgba(0, 0, 0, 0.16); --win-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.08);
+  --bg: #ffffff; --fg: #1d1d1f; --muted: #5f5f64; --faint: #707075;
+  --line: rgba(0, 0, 0, 0.08); --field-line: rgba(0, 0, 0, 0.42); --hover: rgba(0, 0, 0, 0.05);
+  --chip: rgba(0, 0, 0, 0.045); --accent: #4f46e5; --accent-soft: rgba(79, 70, 229, 0.09); --btn: #4f46e5; --btn-fg: #ffffff;
+  --ok: #166534; --ok-soft: rgba(22, 163, 74, 0.12); --danger: #c81e1e; --danger-soft: rgba(220, 38, 38, 0.1);
+  --switch-on: #2e9e4f; --warn-bg: #fff7e6; --warn-fg: #8a5300;
+  --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #1c1c1e; --ink: #f5f5f7; --ink-2: #a5a5aa; --rule: rgba(255, 255, 255, 0.1); --seg: rgba(255, 255, 255, 0.07); --seg-on: #3a3a3c; --note: #2c2c2e;
+    --mica: linear-gradient(135deg, #1d1e26 0%, #221d22 55%, #1b2123 100%);
+    --layer: rgba(255, 255, 255, 0.03); --layer-edge: rgba(0, 0, 0, 0.25); --nav-hover: rgba(255, 255, 255, 0.05); --nav-sel: rgba(255, 255, 255, 0.07);
+    --win-edge: rgba(255, 255, 255, 0.12); --win-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.7), 0 4px 14px rgba(0, 0, 0, 0.3);
+    --bg: #2c2c2e; --fg: #f5f5f7; --muted: #a5a5aa; --faint: #98989d;
+    --line: rgba(255, 255, 255, 0.1); --field-line: rgba(255, 255, 255, 0.4); --hover: rgba(255, 255, 255, 0.07);
+    --chip: rgba(255, 255, 255, 0.07); --accent: #9aa1ff; --accent-soft: rgba(154, 161, 255, 0.12); --btn: #5e5ce6; --btn-fg: #ffffff;
+    --ok: #4ade80; --ok-soft: rgba(74, 222, 128, 0.13); --danger: #fc8888; --danger-soft: rgba(252, 136, 136, 0.14);
+    --switch-on: #2e9e4f; --warn-bg: #3a2c12; --warn-fg: #f5c46b;
+    --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #1c1c1e; --ink: #f5f5f7; --ink-2: #a5a5aa; --rule: rgba(255, 255, 255, 0.1); --seg: rgba(255, 255, 255, 0.07); --seg-on: #3a3a3c; --note: #2c2c2e;
+  --mica: linear-gradient(135deg, #1d1e26 0%, #221d22 55%, #1b2123 100%);
+  --layer: rgba(255, 255, 255, 0.03); --layer-edge: rgba(0, 0, 0, 0.25); --nav-hover: rgba(255, 255, 255, 0.05); --nav-sel: rgba(255, 255, 255, 0.07);
+  --win-edge: rgba(255, 255, 255, 0.12); --win-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.7), 0 4px 14px rgba(0, 0, 0, 0.3);
+  --bg: #2c2c2e; --fg: #f5f5f7; --muted: #a5a5aa; --faint: #98989d;
+  --line: rgba(255, 255, 255, 0.1); --field-line: rgba(255, 255, 255, 0.4); --hover: rgba(255, 255, 255, 0.07);
+  --chip: rgba(255, 255, 255, 0.07); --accent: #9aa1ff; --accent-soft: rgba(154, 161, 255, 0.12); --btn: #5e5ce6; --btn-fg: #ffffff;
+  --ok: #4ade80; --ok-soft: rgba(74, 222, 128, 0.13); --danger: #fc8888; --danger-soft: rgba(252, 136, 136, 0.14);
+  --switch-on: #2e9e4f; --warn-bg: #3a2c12; --warn-fg: #f5c46b;
+  --pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font-family: var(--ui); font-size: 14px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; }
+header .intro { max-width: 70ch; min-width: 0; }
+h1 { font-size: 28px; line-height: 1.2; font-weight: 600; margin: 0 0 8px; text-wrap: balance; }
+header p { margin: 0; color: var(--ink-2); }
+.switches { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+.switch-row { display: flex; align-items: center; gap: 8px; }
+.switch-row > span { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.seg { display: inline-flex; background: var(--seg); border-radius: 999px; padding: 3px; }
+.seg button { font: inherit; font-size: 13px; font-weight: 600; color: var(--ink-2); border: 0; background: none; cursor: pointer; padding: 5px 14px; border-radius: 999px; min-height: 30px; }
+.seg button[aria-pressed="true"] { background: var(--seg-on); color: var(--ink); box-shadow: var(--pill-shadow); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 16px; }
+.note { background: var(--note); border-radius: 14px; padding: 20px 22px; box-shadow: 0 0 0 1px var(--rule); min-width: 0; }
+.note h2 { font-size: 15px; margin: 0 0 10px; }
+.note ul, .note ol { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 8px; }
+.note .rec { display: block; color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.legend { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+.legend i { width: 18px; height: 10px; box-shadow: inset 0 -2px 0 #f59e0b; display: inline-block; }
+.draft { box-shadow: inset 0 -2px 0 #f59e0b; }
+.scroller { overflow-x: auto; padding: 8px 4px 24px; }
+
+/* the window */
+.win { width: 1000px; height: 680px; margin-inline: auto; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: var(--mica); box-shadow: var(--win-shadow), 0 0 0 1px var(--win-edge); color: var(--fg); font-family: var(--ui); }
+.win svg { display: block; flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.win [dir="rtl"] { text-align: right; }
+.win [dir="ltr"] { text-align: left; }
+.titlebar { height: 48px; flex: none; display: flex; align-items: center; gap: 12px; padding-inline-start: 16px; }
+.titlebar .logo { width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; }
+.titlebar .logo svg { width: 10px; height: 10px; stroke-width: 2.8; }
+.titlebar .name { font-size: 12px; }
+.titlebar .spacer { flex: 1; }
+.caps { display: flex; align-self: flex-start; }
+.caps span { width: 46px; height: 32px; display: grid; place-items: center; }
+.caps svg { width: 10px; height: 10px; stroke-width: 1; stroke-linecap: square; }
+.frame { flex: 1; min-height: 0; display: flex; }
+.pane { width: 260px; flex: none; display: flex; flex-direction: column; padding: 4px 0 8px; }
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav span.item { position: relative; display: flex; align-items: center; gap: 16px; height: 36px; margin-inline: 4px; padding-inline: 12px; border-radius: 4px; font-size: 14px; }
+.nav span.item.on { background: var(--nav-sel); }
+.nav span.item.on::before { content: ""; position: absolute; inset-inline-start: 0; top: 10px; width: 3px; height: 16px; border-radius: 2px; background: var(--accent); }
+.nav .label { flex: 1; }
+.nav .badge { min-width: 16px; height: 16px; padding: 0 5px; border-radius: 8px; background: var(--btn); color: var(--btn-fg); font-size: 11px; font-weight: 600; display: grid; place-items: center; line-height: 1; }
+.pane .grow { flex: 1; }
+.content { flex: 1; min-width: 0; background: var(--layer); border-start-start-radius: 8px; box-shadow: inset 0 0 0 1px var(--layer-edge); overflow-y: auto; scrollbar-width: thin; }
+.pagebox { max-width: 760px; padding: 28px 32px 40px; display: flex; flex-direction: column; }
+
+/* breadcrumb and headings */
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 28px; line-height: 1.25; font-weight: 600; margin: 0 0 24px; }
+.crumbs button { font: inherit; color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; }
+.crumbs button:hover { color: var(--fg); }
+.crumbs svg { width: 16px; height: 16px; color: var(--muted); stroke-width: 2.4; }
+.intro-p { margin: -8px 0 20px; color: var(--muted); font-size: 13px; line-height: 1.7; max-width: 64ch; }
+.group-h { font-size: 14px; font-weight: 600; margin: 24px 0 8px; }
+.group-h:first-child { margin-top: 0; }
+
+/* the home: categories */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+.tile { display: flex; align-items: center; gap: 16px; min-height: 68px; padding: 12px 16px; background: var(--bg); border-radius: 8px; box-shadow: 0 0 0 1px var(--line); cursor: pointer; text-align: start; border: 0; font: inherit; color: var(--fg); }
+.tile:hover { background: color-mix(in srgb, var(--bg) 92%, var(--fg)); }
+.tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tile .ic { width: 32px; height: 32px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
+.tile .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tile .t { font-size: 14px; }
+.tile .s { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .chev { color: var(--muted); }
+
+/* settings cards */
+.cards { display: flex; flex-direction: column; gap: 4px; }
+.sc { display: flex; align-items: center; gap: 16px; min-height: 68px; padding: 12px 16px; background: var(--bg); border-radius: 8px; box-shadow: 0 0 0 1px var(--line); }
+.sc.short { min-height: 48px; }
+.sc .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sc .t { font-size: 14px; }
+.sc .h { font-size: 12px; color: var(--muted); line-height: 1.55; }
+.sc .ctl { flex: none; display: flex; align-items: center; gap: 8px; }
+.sc.col { flex-direction: column; align-items: stretch; gap: 12px; }
+.sc .sub { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.sc .rowline { display: flex; align-items: center; gap: 16px; }
+.sc .rowline .txt { flex: 1; }
+
+/* controls */
+.toggle { width: 40px; height: 20px; border-radius: 10px; position: relative; flex: none; box-shadow: inset 0 0 0 1px var(--field-line); }
+.toggle::after { content: ""; position: absolute; top: 4px; inset-inline-start: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--muted); }
+.toggle.on { background: var(--switch-on); box-shadow: none; }
+.toggle.on::after { inset-inline-start: 23px; top: 3px; width: 14px; height: 14px; background: #fff; }
+.combo { display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 200px; height: 36px; padding-inline: 12px 10px; border-radius: 10px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--field-line); font-size: 14px; white-space: nowrap; }
+.combo svg { width: 14px; height: 14px; color: var(--muted); stroke-width: 2.4; }
+.textbox { display: flex; align-items: center; height: 36px; padding-inline: 12px; border-radius: 10px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--field-line); font-size: 14px; color: var(--faint); flex: 1; min-width: 0; justify-content: flex-start; }
+.textbox.val { color: var(--fg); }
+.keyrow { display: flex; align-items: center; gap: 8px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; min-height: 32px; border-radius: 8px; background: var(--btn); color: var(--btn-fg); font-weight: 600; font-size: 13px; white-space: nowrap; }
+.btn svg { width: 14px; height: 14px; }
+.btn.ghost { background: var(--chip); color: var(--fg); }
+.btn.danger { background: var(--danger-soft); color: var(--danger); }
+kbd { font-family: var(--ui); font-size: 12px; padding: 2px 7px; border-radius: 6px; background: var(--chip); box-shadow: inset 0 -1px 0 var(--line), 0 0 0 1px var(--line); direction: ltr; display: inline-block; color: var(--fg); }
+.keys { display: inline-flex; align-items: center; gap: 4px; direction: ltr; }
+.icon-btn { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 13px; padding: 4px 12px; border-radius: 999px; background: var(--chip); }
+.chip.on { background: var(--btn); color: var(--btn-fg); }
+.radios { display: flex; flex-direction: column; }
+.radio { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; cursor: pointer; }
+.radio + .radio { border-top: 1px solid var(--line); }
+.radio .dot { width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--field-line); flex: none; margin-top: 1px; position: relative; }
+.radio.on .dot { box-shadow: inset 0 0 0 5px var(--btn); }
+.radio .txt { display: flex; flex-direction: column; gap: 1px; }
+.radio .t { font-size: 14px; }
+.radio .h { font-size: 12px; color: var(--muted); }
+.tip { font-size: 12.5px; color: var(--muted); line-height: 1.7; }
+.tip b { color: var(--fg); }
+.tip a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.warn { background: var(--warn-bg); color: var(--warn-fg); border-radius: 8px; padding: 8px 12px; font-size: 12.5px; line-height: 1.6; }
+.steps { margin: 0; padding-inline-start: 20px; font-size: 13px; line-height: 1.7; color: var(--fg); display: flex; flex-direction: column; gap: 6px; }
+.steps code { display: block; font-family: Consolas, monospace; font-size: 12.5px; background: var(--chip); border-radius: 6px; padding: 4px 8px; margin-top: 4px; direction: ltr; text-align: left; }
+.state { font-size: 12px; color: var(--ok); font-weight: 600; }
+.list { display: flex; flex-direction: column; }
+.list .li { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.list .li:first-child { border-top: 0; }
+.list .li .grow { flex: 1; }
+.note-line { font-size: 12.5px; color: var(--muted); margin-top: 12px; }
+.credits { margin: 0; padding-inline-start: 18px; font-size: 12.5px; color: var(--muted); line-height: 1.7; direction: ltr; text-align: left; }
+.credits b { color: var(--fg); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="intro">
+      <h1>Settings</h1>
+      <p>Settings as a page of Lamha 3's main window: a home of categories, each opening its own page, as in Windows 11's Settings. Click a category; the title takes you back. Every setting is Lamha 2's unless it's underlined.</p>
+    </div>
+    <div class="switches">
+      <div class="switch-row"><span>Language</span><div class="seg" role="group" aria-label="Language">
+        <button type="button" id="lang-ar" data-lang="ar" aria-pressed="true">العربية</button>
+        <button type="button" id="lang-en" data-lang="en" aria-pressed="false">English</button>
+      </div></div>
+      <div class="switch-row"><span>Theme</span><div class="seg" role="group" aria-label="Theme">
+        <button type="button" id="theme-light" data-theme-set="light" aria-pressed="false">Light</button>
+        <button type="button" id="theme-dark" data-theme-set="dark" aria-pressed="false">Dark</button>
+      </div></div>
+    </div>
+  </header>
+
+  <div class="notes">
+    <section class="note" aria-labelledby="n-changes">
+      <h2 id="n-changes">What changes from Lamha 2</h2>
+      <ul>
+        <li><b>Categories, each with its own page,</b> instead of one long page: Lamha 2's sections, in its order. Each setting is a Windows 11 settings card: its name and hint, the control at the end.</li>
+        <li><b>Writing tools:</b> five providers, with <b>OpenAI</b> and <b>another server</b> (any OpenAI-compatible one: LM Studio, OpenRouter, Groq…). Click one to see its setup.</li>
+        <li><b>New:</b> the card's background (Acrylic or solid), your data's folder and "delete my data", and the updates and Start with Windows (from Lamha 2's tray and its app settings) under "Lamha".</li>
+        <li><b>Gone, with Firefox:</b> how the card appears (the floating button), excluded sites, page translation, and the buttons inside text fields. The mistake journal moved to Write; drawing with the graphics card is Electron's.</li>
+      </ul>
+    </section>
+    <section class="note" aria-labelledby="n-questions">
+      <h2 id="n-questions">Questions</h2>
+      <ol>
+        <li><b>Categories with their own pages,</b> or one long page as in Lamha 2?<span class="rec">Recommended: categories (11 sections are a long page; Windows 11 does it this way).</span></li>
+        <li><b>Start with Windows and the updates</b> under a "Lamha" category with the version and the dictionary's sources?<span class="rec">Recommended: yes.</span></li>
+        <li><b>The default writing provider</b> for a new user: none until they choose (as Lamha 2), or Gemini, which is free?<span class="rec">Recommended: none until they choose; first run offers the choice.</span></li>
+        <li><b>The new words</b> (underlined): OpenAI's and the other server's lines, the card's background, your data's folder, and two small updates to your wording (Review is now a page, not a tab; the privacy note names all five providers). Keep them, or give me yours.</li>
+      </ol>
+    </section>
+  </div>
+  <span class="legend"><i></i>New wording, a draft for you to reword</span>
+
+  <div class="scroller"><div class="win" id="win"></div></div>
+</div>
+
+<script>
+const ICON = {
+  translate: ["M5 8l6 6", "M4 14l6-6 2-3", "M2 5h12", "M7 2h1", "M22 22l-5-10-5 10", "M14 18h6"],
+  write: ["M12 20h9", "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"],
+  review: ["M2 6h14a2 2 0 0 1 2 2v12H4a2 2 0 0 1-2-2z", "M6 2h14a2 2 0 0 1 2 2v12"],
+  history: ["M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5", "M12 7v5l3 2"],
+  clipboard: ["M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z", "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"],
+  settings: ["M4 21v-7", "M4 10V3", "M12 21v-9", "M12 8V3", "M20 21v-5", "M20 12V3", "M1 14h6", "M9 8h6", "M17 16h6"],
+  card: ["M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z", "M6 9h8", "M6 13h12"],
+  keyboard: ["M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z", "M6 10h.01", "M10 10h.01", "M14 10h.01", "M18 10h.01", "M7 14h10"],
+  sparkle: ["M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z", "M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"],
+  globe: ["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z", "M2 12h20", "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"],
+  book: ["M4 19.5A2.5 2.5 0 0 1 6.5 17H20", "M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"],
+  palette: ["M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z", "M12 2v20", "M12 7h7", "M12 12h10", "M12 17h7"],
+  shield: ["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"],
+  info: ["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z", "M12 16v-4", "M12 8h.01"],
+  chevEnd: ["M9 18l6-6-6-6"], chevStart: ["M15 18l-6-6 6-6"], down: ["M6 9l6 6 6-6"],
+  edit: ["M12 20h9", "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"], trash: ["M3 6h18", "M8 6V4h8v2", "M19 6l-1 14H6L5 6"],
+  folder: ["M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"], external: ["M15 3h6v6", "M10 14 21 3", "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"],
+  min: ["M1 5h8"], max: ["M1.5 1.5h7v7h-7z"], x: ["M1 1l8 8", "M9 1l-8 8"],
+};
+const icon = (n, vb = 24) => `<svg viewBox="0 0 ${vb} ${vb}" aria-hidden="true">${ICON[n].map(d => `<path d="${d}"/>`).join("")}</svg>`;
+
+// [Arabic, English]; Lamha 2's (options/i18n-options.js, desktop/renderer/i18n-desktop.js, shared/i18n.js) unless in DRAFT
+const W = {
+  lamha: ["لمحة", "Lamha"], translate: ["ترجمة", "Translate"], write: ["كتابة", "Write"], review: ["مراجعة", "Review"], history: ["السجل", "History"], clipboard: ["الحافظة", "Clipboard"], settings: ["الإعدادات", "Settings"],
+  languages: ["اللغات", "Languages"], uiLang: ["لغة الواجهة", "Interface language"], uiLangHint: ["لغة القوائم والأزرار والشروح في لمحة", "The language of Lamha's menus, buttons and explanations"], auto: ["تلقائي (حسب النظام)", "Automatic (system)"],
+  targetLang: ["لغة الترجمة", "Translation language"], targetLangHint: ["اللغة التي تُترجم إليها النصوص", "The language text is translated into"], arabic: ["العربية", "Arabic"],
+  reverse: ["ترجمة النص العربي إلى الإنجليزية", "Translate Arabic text into English"], reverseHint: ["عند تحديد نص عربي تُعرض ترجمته الإنجليزية", "When you select Arabic text, show its English translation"],
+  cardSection: ["بطاقة البحث", "The lookup card"], context: ["فهم الكلمة من سياق الجملة", "Understand words from their sentence"], contextHint: ["تُرسَل الجملة المحيطة بالكلمة (وليس الصفحة) لاختيار المعنى المناسب. أوقفه لإرسال الكلمة فقط.", "The sentence around the word (not the page) is sent to pick the right meaning. Turn it off to send only the word."],
+  explain: ["شرح الكلمات بلغتها", "Explain words in their own language"], explainHint: ["تُشرح كلمات هذه اللغات بلغتها بدل ترجمتها، والترجمة تحت الشرح. زر اللغتين في البطاقة يغيّر ذلك أيضًا.", "Words in these languages are explained in their own language instead of translated, with the translation under it. The card’s language switch changes this too."],
+  langs: [["الإنجليزية", "الفرنسية", "التركية", "الإسبانية", "الألمانية"], ["English", "French", "Turkish", "Spanish", "German"]],
+  translateDefs: ["ترجمة التعريفات", "Translate definitions"], translateDefsHint: ["عرض التعريفات الإنجليزية مترجمة إلى العربية", "Show English definitions translated into your translation language"],
+  wiki: ["نبذة من ويكيبيديا", "Wikipedia summary"], wikiHint: ["عرض ملخص المقالة للمصطلحات والأسماء (بالعربية إن وُجدت)", "Show the article summary for terms and names (in Arabic when available)"],
+  autoSpeak: ["النطق التلقائي", "Speak automatically"], autoSpeakHint: ["نطق الكلمة تلقائيًا عند البحث عنها", "Pronounce the word when you look it up"],
+  keys: ["اختصارات لوحة المفاتيح", "Keyboard shortcuts"], hkLookup: ["بحث وترجمة في أي برنامج", "Look up and translate in any program"], hkWrite: ["أدوات الكتابة في أي برنامج", "Writing tools in any program"],
+  hkClip: ["الحافظة: الصق من السجل", "Clipboard: paste from history"], keyClose: ["إغلاق البطاقة", "Close the card"], change: ["تغيير", "Change"],
+  writingTools: ["أدوات الكتابة", "Writing tools"],
+  aiIntro: ["حدّد أي نص في أي برنامج واضغط {k} لتدقيقه لغويًا مع شرح الأخطاء بالعربية، أو تحسين أسلوبه، أو جعله رسميًا أو ودّيًا أو أقصر، أو كتابة فكرتك العربية بإنجليزية طبيعية، أو تلخيصه، أو شرحه، أو كتابة ردٍّ عليه.", "Select any text in any program and press {k} to proofread it with explanations of each mistake, improve it, make it formal, friendly or shorter, turn your Arabic idea into natural English, summarize or explain it, or write a reply."],
+  aiProvider: ["مصدر الذكاء الاصطناعي", "AI provider"],
+  ollama: ["Ollama — مجاني", "Ollama — free"], ollamaHint: ["نموذج يعمل على جهازك: دون تكلفة، ودون إنترنت، ولا يغادر نصّك جهازك", "A model on your computer: no cost, no internet, and your text never leaves your PC"],
+  gemini: ["Gemini — مجاني", "Gemini — free"], geminiHint: ["من Google عبر الإنترنت، بحدّ يومي مجاني. يعمل على أي جهاز", "From Google over the internet, with a free daily limit. Works on any PC"],
+  claude: ["Claude — الأدق", "Claude — most accurate"], claudeHint: ["عبر الإنترنت بمفتاح Claude API، مدفوع حسب الاستخدام", "Over the internet with a Claude API key, paid per use"],
+  openai: ["OpenAI", "OpenAI"], openaiHint: ["عبر الإنترنت بمفتاح OpenAI API، مدفوع حسب الاستخدام", "Over the internet with an OpenAI API key, paid per use"],
+  custom: ["خادم آخر", "Another server"], customHint: ["أي خادم متوافق مع OpenAI: LM Studio أو OpenRouter أو Groq…", "Any OpenAI-compatible server: LM Studio, OpenRouter, Groq…"],
+  ollama1: ["ثبّت Ollama من <a>ollama.com/download</a>.", "Install Ollama from <a>ollama.com/download</a>."],
+  ollama3: ["حمّل نموذجًا، مثلًا <b>qwen3.5:4b</b> (سريع، 3.4 GB — مناسب لبطاقة رسوميات 6 GB):<code>ollama pull qwen3.5:4b</code>أو <b>qwen3.5:9b</b> لجودة أعلى لكنه أبطأ على هذه البطاقة.", "Download a model, for example <b>qwen3.5:4b</b> (fast, 3.4 GB — fits a 6 GB graphics card):<code>ollama pull qwen3.5:4b</code>or <b>qwen3.5:9b</b> for higher quality, though slower on that card."],
+  ollamaUrl: ["عنوان Ollama", "Ollama address"], ollamaUrlHint: ["اتركه فارغًا إن كان Ollama على هذا الجهاز", "Leave it empty if Ollama runs on this PC"], refresh: ["تحديث القائمة", "Refresh list"],
+  model: ["النموذج", "Model"], ollamaModels: ["النماذج المحمّلة في Ollama على هذا الجهاز", "The models downloaded in Ollama on this PC"], test: ["اختبار", "Test"], saveVerify: ["حفظ وتحقق", "Save & verify"], remove: ["إزالة", "Remove"],
+  geminiTip: ["أنشئ مفتاحًا مجانيًا من <a>aistudio.google.com/apikey</a> بحساب Google — دون بطاقة دفع. للخطة المجانية حد للطلبات في الدقيقة وفي اليوم، تجده في AI Studio.", "Create a free key at <a>aistudio.google.com/apikey</a> with a Google account — no payment card needed. The free tier has per-minute and daily limits, shown in AI Studio."],
+  geminiWarn: ["⚠️ في الخطة المجانية قد تستخدم Google النصوص المرسلة لتحسين منتجاتها. مناسب للتدرّب، لا للرسائل الخاصة أو مستندات العمل.", "⚠️ On the free tier Google may use what you send to improve its products. Fine for practice, not for private messages or work documents."],
+  geminiModels: ["Flash أدق، و Flash-Lite أسرع ويسمح بطلبات أكثر", "Flash is more accurate; Flash-Lite is faster and allows more requests"], gemFlash: ["Gemini 3.8 Flash — الأدق", "Gemini 3.8 Flash — most accurate"],
+  claudeTip: ["تحتاج إلى <b>مفتاح Claude API</b> من <a>console.anthropic.com</a>. هذا حساب منفصل عن اشتراك Claude.ai (Pro/Max)، ويُحتسب حسب الاستخدام — تدقيق رسالة عادية يكلّف نحو سنت إلى سنتين مع Opus، وأقل بكثير مع Haiku.", "You need a <b>Claude API key</b> from <a>console.anthropic.com</a>. It's separate from a Claude.ai subscription (Pro/Max) and billed per use — proofreading a typical message costs about 1–2 cents with Opus, and much less with Haiku."],
+  claudeModels: ["Opus أدق، و Sonnet و Haiku أسرع وأرخص", "Opus is most accurate; Sonnet and Haiku are faster and cheaper"], opus: ["Claude Opus 5.5 — الأدق", "Claude Opus 5.5 — most accurate"],
+  openaiTip: ["تحتاج إلى <b>مفتاح OpenAI API</b> من <a>platform.openai.com</a>. هذا حساب منفصل عن اشتراك ChatGPT، ويُحتسب حسب الاستخدام.", "You need an <b>OpenAI API key</b> from <a>platform.openai.com</a>. It's separate from a ChatGPT subscription and billed per use."],
+  openaiModels: ["النماذج التي يتيحها مفتاحك", "The models your key can use"],
+  serverUrl: ["عنوان الخادم", "Server address"], serverUrlHint: ["مثل http://localhost:1234/v1 لـ LM Studio، أو https://openrouter.ai/api/v1", "Like http://localhost:1234/v1 for LM Studio, or https://openrouter.ai/api/v1"],
+  serverKey: ["المفتاح", "Key"], serverKeyHint: ["اختياري: الخوادم على جهازك لا تحتاجه", "Optional: servers on your PC don't need one"], serverModels: ["النماذج التي يعرضها الخادم", "The models the server offers"],
+  verified: ["✓ المفتاح يعمل", "✓ The key works"],
+  aiPrivacy: ["تُحفظ هذه الإعدادات على هذا الجهاز فقط، والمفاتيح في مدير بيانات الاعتماد في Windows. مع Ollama أو خادم على جهازك لا يغادر النص جهازك. مع Gemini أو Claude أو OpenAI أو خادم على الإنترنت لا يُرسَل أي نص إلا عندما تضغط إحدى أدوات الكتابة، ويُرسَل حينها النص المحدد.", "These settings stay on this PC, and the keys in Windows' Credential Manager. With Ollama or a server on your PC your text never leaves it. With Gemini, Claude, OpenAI or a server on the internet, nothing is sent until you press a writing tool; then the selected text is sent."],
+  translation: ["الترجمة", "Translation"], trIntro: ["من يترجم الجمل والفقرات: Google سريع ويحتاج إلى الإنترنت، والذكاء الاصطناعي أدق في التعابير والعامية وأبطأ، ومع Ollama يعمل دون إنترنت.", "Who translates sentences and paragraphs: Google is fast and needs the internet; AI is better with idioms and slang but slower, and with Ollama it works offline."],
+  trAuto: ["تلقائي", "Automatic"], trAutoHint: ["Google، والذكاء الاصطناعي حين لا يتوفر الإنترنت أو يتعذّر Google (مستحسن)", "Google, and AI when there's no internet or Google can't answer (recommended)"],
+  trGoogle: ["Google فقط", "Google only"], trGoogleHint: ["سريع ومجاني، ولا يعمل دون إنترنت", "Fast and free; doesn't work offline"],
+  trAi: ["الذكاء الاصطناعي", "AI"], trAiHint: ["ترجمة أكثر طبيعية للجمل، وأبطأ. Google عند تعذّره", "More natural sentences, but slower. Google when it fails"],
+  trProvider: ["مَن يترجم", "Translated by"], trProviderHint: ["يمكن أن يختلف عن أدوات الكتابة، مثلًا Gemini للكتابة و Ollama للترجمة", "Can differ from the writing tools, e.g. Gemini for writing and Ollama for translation"], sameAsWriting: ["مثل أدوات الكتابة", "Same as the writing tools"],
+  rv: ["مراجعة الكلمات", "Word review"], rvIntro: ["الكلمات التي تضيفها بزر 🔖 في بطاقة البحث تصير بطاقات مراجعة مع الجملة التي وجدتها فيها. راجعها من صفحة «مراجعة» في نافذة لمحة، وستعود كل كلمة في الوقت المناسب قبل أن تنساها.", "Words you add with the 🔖 button on the lookup card become review cards, with the sentence you found them in. Review them on the “Review” page of Lamha's window; each word comes back just before you'd forget it."],
+  cardsAuto: ["إضافة الكلمات تلقائيًا", "Add words automatically"], cardsAutoHint: ["شغّله لتُضاف كل كلمة إنجليزية تبحث عنها إلى المراجعة. وإلا فأنت تختار: أضف الكلمة بزر 🔖 في بطاقة البحث.", "Turn it on to add every English word you look up to review. Otherwise you choose: add a word with the 🔖 button on the lookup card."],
+  newPerDay: ["كلمات جديدة في اليوم", "New words per day"], newPerDayHint: ["عدد الكلمات الجديدة التي تظهر للمراجعة كل يوم", "How many new words come up for review each day"],
+  goal: ["هدف اليوم", "Daily goal"], goalHint: ["كلمات تبحث عنها وبطاقات تراجعها كل يوم، في الحلقة على شاشة لمحة الرئيسية", "Words you look up plus cards you review each day: the ring on Lamha's main screen"],
+  deleteCards: ["حذف كل البطاقات", "Delete all cards"], deleteCardsHint: ["يحذف الكلمات وتقدّمك في حفظها", "Deletes the words and your progress"], del: ["حذف", "Delete"],
+  offline: ["دون إنترنت", "Without internet"], localFirst: ["المحلي أولًا", "Offline first"], localFirstHint: ["القاموس المدمج للكلمات، والإنترنت فقط لما ليس فيه (مستحسن)", "The built-in dictionary for words, the internet only for what it lacks (recommended)"],
+  localOnly: ["المحلي فقط", "Offline only"], localOnlyHint: ["بدون أي اتصال بالإنترنت للكلمات. الجمل تُترجم فقط إن كان المترجم Ollama على جهازك.", "No internet at all for words. Sentences are translated only when the translator is Ollama on your PC."],
+  onlineFirst: ["الإنترنت أولًا", "Online first"], onlineFirstHint: ["نتائج Google، والقاموس المحلي عند انقطاع الاتصال", "Google's results, with the offline dictionary when you're offline"],
+  packs: ["قواميس للتنزيل", "Dictionaries to download"], packsHint: ["لكل لغة قاموس بلغتها (فرنسي–فرنسي…) يُنزَّل مرة واحدة ويُحفظ على هذا الجهاز، فتُشرح كلماتها دون إنترنت ودون ذكاء اصطناعي. من ويكاموس (رخصة CC BY-SA).", "A dictionary in each language (French–French…), downloaded once and kept on this device, so its words are explained with no internet and no AI. From Wiktionary (CC BY-SA licence)."],
+  download: ["تنزيل", "Download"],
+  cbIntroA: ["سجل لما تنسخه في أي برنامج، تفتحه بـ ", "A history of what you copy in any program. Open it with "], cbIntroB: [" لتبحث فيه وتلصق. يبقى على جهازك فقط.", " to search and paste. It stays on your PC."],
+  cbEnable: ["تفعيل سجل الحافظة", "Turn on clipboard history"], cbEnableHint: ["متوقف افتراضيًا. لا يُرسل أي نص إلا عندما تضغط إحدى أدوات لمحة عليه.", "Off by default. No text is sent anywhere unless you press one of Lamha's tools on it."],
+  cbMax: ["عدد العناصر المحفوظة", "Items to keep"], cbMaxHint: ["تُحذف الأقدم عند تجاوزه. المثبّتة لا تُحسب.", "The oldest go when there are more. Pinned items don't count."],
+  cbExpiry: ["الحذف التلقائي لغير المثبّت بعد", "Delete unpinned items after"], cbExpiryHint: ["منذ آخر نسخ أو استخدام", "Since they were last copied or used"], d30: ["٣٠ يومًا", "30 days"],
+  cbCards: ["تجاهل أرقام البطاقات البنكية", "Skip bank card numbers"], cbCardsHint: ["لا يُحفظ رقم بطاقة (١٣–١٩ رقمًا) منسوخ وحده.", "A card number (13–19 digits) copied on its own is never saved."],
+  cbApps: ["البرامج المستثناة", "Excluded programs"], cbAppsHint: ["لا يُسجَّل شيء تنسخه من هذه البرامج. مديرو كلمات المرور مستثنون من البداية.", "Nothing you copy from these programs is recorded. Password managers are excluded from the start."],
+  cbAppName: ["اسم البرنامج (exe)", "Program name (exe)"], add: ["إضافة", "Add"], cbClear: ["مسح السجل", "Clear the history"], cbClearHint: ["لا يمكن التراجع عن المسح", "This can't be undone"], cbClearAll: ["مسح الكل", "Clear all"],
+  cbEncrypted: ["🔒 السجل مشفّر على هذا الجهاز", "🔒 The history is encrypted on this PC"],
+  appearance: ["المظهر", "Appearance"], theme: ["السمة", "Theme"], themeHint: ["مظهر لمحة: البطاقة والنافذة والإعدادات", "The look of Lamha: the card, its window and these settings"],
+  motion: ["الحركة", "Animations"], motionHint: ["حركات الانتقال في النوافذ وبطاقة الترجمة. «تلقائية» تختار «خفيفة» على الأجهزة الأبطأ، وتوقفها إن طلب النظام تقليل الحركة.", "Transitions in Lamha's windows and card. Automatic uses Subtle on slower computers and turns them off when your system asks for less motion."],
+  motionAuto: ["تلقائية", "Automatic"], preview: ["شاهد", "Preview"],
+  accent: ["لون التمييز من Windows", "Accent colour from Windows"], accentHint: ["تأخذ الأزرار والروابط لون التمييز الذي اخترته في Windows، معدّلًا ليبقى مقروءًا", "Buttons and links take the accent colour you chose in Windows, adjusted to stay readable"],
+  mica: ["إظهار خلفية سطح المكتب خلف النافذة", "Show the wallpaper behind the window"], micaHint: ["لمسة من خلفية سطح المكتب خلف نافذة لمحة والإعدادات، كما في تطبيقات Windows 11 نفسها. تبقى البطاقات بلونها فيبقى النص واضحًا", "A touch of your desktop wallpaper behind Lamha's window and Settings, as in Windows 11's own apps. The cards keep their colour, so text stays clear"],
+  cardBg: ["خلفية البطاقة", "The card's background"], cardBgHint: ["الشفافة تُظهر ما خلف البطاقة قليلًا، والثابتة أوضح فوق الصفحات المزدحمة", "Translucent shows a little of what's behind the card; solid is clearer over busy pages"], translucent: ["شفافة", "Translucent"],
+  privacy: ["الخصوصية والسجل", "Privacy & history"], saveHistory: ["حفظ سجل الكلمات", "Keep a history of words"], saveHistoryHint: ["يُحفظ محليًا على جهازك فقط. إن أوقفته، لا تُضاف الكلمات التي تبحث عنها إلى المراجعة تلقائيًا أيضًا.", "Stored locally on your device only. If this is off, the words you look up aren't added to review automatically either."],
+  clearHistory: ["مسح السجل", "Clear history"], clear: ["مسح", "Clear"], words248: ["٢٤٨ كلمة", "248 words"],
+  backup: ["نسخة من بياناتي", "A copy of my data"], backupHint: ["بطاقات المراجعة وتقدّمك فيها، وسجل الكلمات، وسجل أخطائي، في ملف تحتفظ به. الاسترجاع يضيف ما في الملف إلى ما هنا، على هذا الجهاز أو غيره، دون أن يحذف شيئًا.", "Your review cards and progress, your word history and your mistake journal, in a file you keep. Restoring adds what's in the file to what's here, on this device or another, without deleting anything."],
+  backupSave: ["حفظ نسخة", "Save a copy"], backupRestore: ["استرجاع", "Restore"],
+  report: ["الإبلاغ عن مشكلة", "Report a problem"], reportHint: ["تقرير بإعداداتك وآخر الأخطاء، ليعرف المطوّر ما حدث. لا يحتوي على نصوصك ولا كلماتك ولا مفاتيحك. اقرأه أولًا: لا يُرسَل شيء إلا إن أرسلته أنت.", "A report of your settings and the latest errors, so the developer can see what happened. It holds none of your text, words or keys. Read it first: nothing is sent unless you send it."],
+  copy: ["نسخ", "Copy"], reportSend: ["إبلاغ على GitHub", "Report on GitHub"],
+  myData: ["بياناتي على هذا الجهاز", "My data on this PC"], myDataHint: ["لا يحذفها إلغاء تثبيت لمحة ولا إعادة تثبيته", "Uninstalling or reinstalling Lamha leaves it"], openFolder: ["فتح المجلد", "Open the folder"], deleteData: ["حذف بياناتي", "Delete my data"],
+  privacyMore: ["ما الذي يُرسَل وإلى أين؟", "What is sent, and where?"],
+  about: ["لمحة", "Lamha"], version: ["لمحة · الإصدار 3.0.0", "Lamha · version 3.0.0"], upLatest: ["لديك أحدث إصدار ✓", "You're up to date ✓"],
+  upAuto: ["التحديثات التلقائية", "Automatic updates"], upAutoHint: ["يتحقق لمحة من وجود إصدار جديد عند التشغيل وكل ٦ ساعات، وينزّله في الخلفية، ويثبّته عند إعادة التشغيل.", "Lamha checks for a new version at startup and every 6 hours, downloads it in the background, and installs it when it restarts."],
+  upCheck: ["التحقق من وجود تحديث", "Check for an update"], upCheckNow: ["التحقق الآن", "Check now"], upAll: ["كل الإصدارات على GitHub", "All releases on GitHub"],
+  login: ["التشغيل مع Windows", "Start with Windows"], loginHint: ["يبدأ لمحة في الخلفية عند تسجيل الدخول، فتعمل الاختصارات فورًا", "Lamha starts in the background when you sign in, so the shortcuts work at once"],
+  credits: ["مصادر القاموس المحلي", "Offline dictionary sources"],
+};
+const DRAFT = new Set(["openai", "openaiHint", "custom", "customHint", "openaiTip", "openaiModels", "serverUrl", "serverUrlHint", "serverKey", "serverKeyHint", "serverModels", "aiPrivacy", "rvIntro",
+  "cardBg", "cardBgHint", "translucent", "myData", "myDataHint", "openFolder", "deleteData", "loginHint", "change", "verified"]);
+let lang = "ar", section = null, provider = "claude";
+const w = k => { const v = W[k][lang === "ar" ? 0 : 1]; return DRAFT.has(k) ? `<span class="draft">${v}</span>` : v; };
+const n = x => (lang === "ar" ? x.toLocaleString("ar-EG") : String(x));
+const ui = () => (lang === "ar" ? "rtl" : "ltr");
+
+// controls
+const toggle = on => `<span class="toggle${on ? " on" : ""}" role="img" aria-label="${on ? "on" : "off"}"></span>`;
+const combo = text => `<span class="combo"><span>${text}</span>${icon("down")}</span>`;
+const btn = (text, cls = "", ic = "") => `<span class="btn ${cls}">${ic ? icon(ic) : ""}${text}</span>`;
+const keys = (...k) => `<span class="keys">${k.map(x => `<kbd>${x}</kbd>`).join("+")}</span>`;
+const card = (t, h, ctl, cls = "") => `<div class="sc${cls ? " " + cls : ""}"><div class="txt"><span class="t">${w(t)}</span>${h ? `<span class="h">${typeof h === "string" && W[h] ? w(h) : h}</span>` : ""}</div><div class="ctl">${ctl}</div></div>`;
+const radio = (id, on, t, h, attr = "") => `<div class="radio${on ? " on" : ""}" ${attr}><span class="dot"></span><span class="txt"><span class="t">${w(t)}</span><span class="h">${w(h)}</span></span></div>`;
+const tip = k => `<div class="tip">${w(k).replace(/<a>/g, '<a href="#">')}</div>`;
+const field = (ph, val = false) => `<span class="textbox${val ? " val" : ""}" dir="${/[؀-ۿ]/.test(ph) ? "rtl" : "ltr"}">${ph}</span>`;
+
+const PROVIDERS = [["ollama", "ollama", "ollamaHint"], ["gemini", "gemini", "geminiHint"], ["claude", "claude", "claudeHint"], ["openai", "openai", "openaiHint"], ["custom", "custom", "customHint"]];
+const SETUP = {
+  ollama: () => `<ol class="steps"><li>${w("ollama1").replace(/<a>/g, '<a href="#" style="color:var(--accent)">')}</li><li>${w("ollama3")}</li></ol>
+    <div class="rowline"><div class="txt"><span class="t">${w("ollamaUrl")}</span><span class="h">${w("ollamaUrlHint")}</span></div></div>
+    <div class="keyrow">${field("http://localhost:11434")}${btn(w("refresh"), "ghost")}</div>
+    <div class="rowline"><div class="txt"><span class="t">${w("model")}</span><span class="h">${w("ollamaModels")}</span></div>${combo("qwen3.5:4b")}</div>
+    <div class="keyrow">${btn(w("test"))}</div>`,
+  gemini: () => `<div class="keyrow">${field("AIza…")}${btn(w("saveVerify"))}</div>${tip("geminiTip")}<div class="warn">${w("geminiWarn")}</div>
+    <div class="rowline"><div class="txt"><span class="t">${w("model")}</span><span class="h">${w("geminiModels")}</span></div>${combo(w("gemFlash"))}</div>`,
+  claude: () => `<div class="keyrow">${field("••••••••••••••••••••", true)}${btn(w("saveVerify"))}${btn(w("remove"), "ghost")}</div><span class="state">${w("verified")}</span>${tip("claudeTip")}
+    <div class="rowline"><div class="txt"><span class="t">${w("model")}</span><span class="h">${w("claudeModels")}</span></div>${combo(w("opus"))}</div>`,
+  openai: () => `<div class="keyrow">${field("sk-proj-…")}${btn(w("saveVerify"))}</div>${tip("openaiTip")}
+    <div class="rowline"><div class="txt"><span class="t">${w("model")}</span><span class="h">${w("openaiModels")}</span></div>${combo("—")}</div>`,
+  custom: () => `<div class="rowline"><div class="txt"><span class="t">${w("serverUrl")}</span><span class="h">${w("serverUrlHint")}</span></div></div>
+    <div class="keyrow">${field("http://localhost:1234/v1")}</div>
+    <div class="rowline"><div class="txt"><span class="t">${w("serverKey")}</span><span class="h">${w("serverKeyHint")}</span></div></div>
+    <div class="keyrow">${field("—")}</div>
+    <div class="rowline"><div class="txt"><span class="t">${w("model")}</span><span class="h">${w("serverModels")}</span></div>${combo("—")}</div>
+    <div class="keyrow">${btn(w("test"))}</div>`,
+};
+
+const SECTIONS = [
+  { id: "languages", icon: "translate", sum: ["uiLang", "targetLang", "reverse"], body: () => `<div class="cards">
+      ${card("uiLang", "uiLangHint", combo(w("auto")))}${card("targetLang", "targetLangHint", combo(w("arabic")))}${card("reverse", "reverseHint", toggle(true))}</div>` },
+  { id: "cardSection", icon: "card", sum: ["context", "explain", "wiki"], body: () => `<div class="cards">
+      ${card("context", "contextHint", toggle(true))}
+      <div class="sc col"><div class="txt"><span class="t">${w("explain")}</span><span class="h">${w("explainHint")}</span></div>
+        <div class="chips">${W.langs[lang === "ar" ? 0 : 1].map((x, i) => `<span class="chip${i === 0 ? " on" : ""}">${x}</span>`).join("")}</div></div>
+      ${card("translateDefs", "translateDefsHint", toggle(true))}${card("wiki", "wikiHint", toggle(true))}${card("autoSpeak", "autoSpeakHint", toggle(false))}</div>` },
+  { id: "keys", icon: "keyboard", sum: ["hkLookup", "hkWrite", "hkClip"], body: () => `<div class="cards">
+      ${card("hkLookup", "", keys("Alt", "Shift", "L") + `<span class="icon-btn" title="${W.change[lang === "ar" ? 0 : 1]}">${icon("edit")}</span>`, "short")}
+      ${card("hkWrite", "", keys("Alt", "Shift", "W") + `<span class="icon-btn">${icon("edit")}</span>`, "short")}
+      ${card("hkClip", "", keys("Alt", "Shift", "V") + `<span class="icon-btn">${icon("edit")}</span>`, "short")}
+      ${card("keyClose", "", keys("Esc") + `<span class="icon-btn" style="visibility:hidden"></span>`, "short")}</div>` },
+  { id: "writingTools", icon: "sparkle", sum: ["aiProvider", "model"], intro: () => w("aiIntro").replace("{k}", keys("Alt", "Shift", "W")), body: () => `
+      <div class="group-h">${w("aiProvider")}</div>
+      <div class="cards"><div class="sc col"><div class="radios">${PROVIDERS.map(([id, t, h]) =>
+        radio(id, provider === id, t, h, `data-provider="${id}"`) + (provider === id ? `<div class="sub">${SETUP[id]()}</div>` : "")).join("")}</div></div></div>
+      <p class="note-line">${w("aiPrivacy")}</p>` },
+  { id: "translation", icon: "globe", sum: ["trAuto", "trProvider", "model"], intro: () => w("trIntro"), body: () => `<div class="cards">
+      <div class="sc col"><div class="radios">${radio("auto", true, "trAuto", "trAutoHint")}${radio("google", false, "trGoogle", "trGoogleHint")}${radio("ai", false, "trAi", "trAiHint")}</div></div>
+      ${card("trProvider", "trProviderHint", combo(w("sameAsWriting")))}${card("model", "", combo(w("opus")), "short")}</div>` },
+  { id: "rv", icon: "review", sum: ["cardsAuto", "newPerDay", "goal"], intro: () => w("rvIntro"), body: () => `<div class="cards">
+      ${card("cardsAuto", "cardsAutoHint", toggle(true))}${card("newPerDay", "newPerDayHint", combo(n(10)))}${card("goal", "goalHint", combo(n(10)))}
+      ${card("deleteCards", "deleteCardsHint", btn(w("del"), "danger", "trash"))}</div>` },
+  { id: "offline", icon: "book", sum: ["localFirst", "packs"], body: () => `<div class="cards">
+      <div class="sc col"><div class="radios">${radio("lf", true, "localFirst", "localFirstHint")}${radio("lo", false, "localOnly", "localOnlyHint")}${radio("of", false, "onlineFirst", "onlineFirstHint")}</div></div>
+      <div class="sc col"><div class="txt"><span class="t">${w("packs")}</span><span class="h">${w("packsHint")}</span></div>
+        <div class="list">${W.langs[lang === "ar" ? 0 : 1].slice(1).map((x, i) => `<div class="li"><span>${x}</span><span class="grow"></span>${i === 0 ? btn(w("remove"), "ghost") : btn(w("download"), "ghost")}</div>`).join("")}</div></div></div>` },
+  { id: "clipboard", icon: "clipboard", sum: ["cbEnable", "cbMax", "cbApps"], intro: () => `${w("cbIntroA")}${keys("Alt", "Shift", "V")}${w("cbIntroB")}`, body: () => `<div class="cards">
+      ${card("cbEnable", "cbEnableHint", toggle(true))}${card("cbMax", "cbMaxHint", combo(n(200)))}${card("cbExpiry", "cbExpiryHint", combo(w("d30")))}${card("cbCards", "cbCardsHint", toggle(true))}
+      <div class="sc col"><div class="txt"><span class="t">${w("cbApps")}</span><span class="h">${w("cbAppsHint")}</span></div>
+        <div class="list">${["KeePassXC.exe", "1Password.exe", "Bitwarden.exe"].map(x => `<div class="li"><span dir="ltr">${x}</span><span class="grow"></span><span class="icon-btn">${icon("trash")}</span></div>`).join("")}</div>
+        <div class="keyrow">${field(W.cbAppName[lang === "ar" ? 0 : 1])}${btn(w("add"), "ghost")}</div></div>
+      ${card("cbClear", "cbClearHint", btn(w("cbClearAll"), "danger", "trash"))}</div>
+      <p class="note-line">${w("cbEncrypted")}</p>` },
+  { id: "appearance", icon: "palette", sum: ["theme", "motion", "cardBg"], body: () => `<div class="cards">
+      ${card("theme", "themeHint", combo(w("auto")))}${card("motion", "motionHint", btn(w("preview"), "ghost") + combo(w("motionAuto")))}
+      ${card("cardBg", "cardBgHint", combo(w("translucent")))}${card("accent", "accentHint", toggle(false))}${card("mica", "micaHint", toggle(true))}</div>` },
+  { id: "privacy", icon: "shield", sum: ["saveHistory", "backup", "report"], body: () => `<div class="cards">
+      ${card("saveHistory", "saveHistoryHint", toggle(true))}${card("clearHistory", w("words248"), btn(w("clear"), "danger", "trash"))}
+      ${card("backup", "backupHint", btn(w("backupSave"), "ghost") + btn(w("backupRestore"), "ghost"))}
+      ${card("report", "reportHint", btn(w("copy"), "ghost") + btn(w("reportSend"), "ghost"))}
+      ${card("myData", `<span dir="ltr" style="unicode-bidi:isolate">%LOCALAPPDATA%\\Lamha Data</span> · ${w("myDataHint")}`, btn(w("openFolder"), "ghost", "folder") + btn(w("deleteData"), "danger"))}
+      ${card("privacyMore", "", `<span class="icon-btn">${icon("down")}</span>`, "short")}</div>` },
+  { id: "about", icon: "info", sum: ["upAuto", "login", "credits"], body: () => `<div class="cards">
+      ${card("version", `<span class="state">${w("upLatest")}</span>`, btn(w("upCheckNow"), "ghost"))}
+      ${card("upAuto", "upAutoHint", toggle(true))}${card("login", "loginHint", toggle(true))}
+      ${card("upAll", "", `<span class="icon-btn">${icon("external")}</span>`, "short")}
+      <div class="sc col"><div class="txt"><span class="t">${w("credits")}</span></div>
+        <ul class="credits"><li><b>WordNet 3.0</b> — Princeton University (WordNet License)</li><li><b>Arabic WordNet v2</b> — via Open Multilingual Wordnet (CC BY-SA 3.0)</li>
+          <li><b>English Wiktionary</b> — kaikki.org / wiktextract (CC BY-SA 4.0)</li><li><b>CMU Pronouncing Dictionary</b> — Carnegie Mellon University (BSD)</li><li><b>wordfreq</b> — Robyn Speer (CC BY-SA 4.0)</li></ul></div></div>` },
+];
+
+function home() {
+  return `<div class="crumbs"><span>${w("settings")}</span></div>
+    <div class="tiles">${SECTIONS.map(s => `<button class="tile" data-section="${s.id}"><span class="ic">${icon(s.icon)}</span>
+      <span class="txt"><span class="t">${W[s.id === "about" ? "about" : s.id][lang === "ar" ? 0 : 1]}</span><span class="s">${s.sum.map(k => W[k][lang === "ar" ? 0 : 1]).join(" · ")}</span></span>
+      <span class="chev">${icon(ui() === "rtl" ? "chevStart" : "chevEnd")}</span></button>`).join("")}</div>`;
+}
+
+function page(s) {
+  return `<div class="crumbs"><button data-section="">${w("settings")}</button>${icon(ui() === "rtl" ? "chevStart" : "chevEnd")}<span>${w(s.id === "about" ? "about" : s.id)}</span></div>
+    ${s.intro ? `<p class="intro-p">${s.intro()}</p>` : ""}${s.body()}`;
+}
+
+const NAV = [["translate", "translate"], ["write", "write"], ["review", "review", 15], ["history", "history"], ["clipboard", "clipboard"]];
+function render() {
+  const win = document.getElementById("win");
+  win.setAttribute("dir", ui());
+  const s = SECTIONS.find(x => x.id === section);
+  win.innerHTML = `
+    <div class="titlebar"><span class="logo">${icon("translate")}</span><span class="name">${w("lamha")}</span><span class="spacer"></span>
+      <div class="caps"><span>${icon("min", 10)}</span><span>${icon("max", 10)}</span><span>${icon("x", 10)}</span></div></div>
+    <div class="frame">
+      <nav class="pane"><div class="nav">${NAV.map(([id, ic, badge]) => `<span class="item">${icon(ic)}<span class="label">${w(id)}</span>${badge ? `<span class="badge">${n(badge)}</span>` : ""}</span>`).join("")}</div>
+        <span class="grow"></span><div class="nav"><span class="item on">${icon("settings")}<span class="label">${w("settings")}</span></span></div></nav>
+      <main class="content"><div class="pagebox">${s ? page(s) : home()}</div></main>
+    </div>`;
+}
+
+document.getElementById("win").addEventListener("click", e => {
+  const el = e.target.closest("[data-section],[data-provider]");
+  if (!el) return;
+  if ("section" in el.dataset) { section = el.dataset.section || null; document.querySelector(".content").scrollTop = 0; }
+  else provider = el.dataset.provider;
+  render();
+});
+
+const root = document.documentElement;
+const press = (sel, attr, value) => document.querySelectorAll(sel).forEach(b => b.setAttribute("aria-pressed", String(b.dataset[attr] === value)));
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => { lang = b.dataset.lang; press("[data-lang]", "lang", lang); render(); }));
+const dark = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+const syncTheme = () => press("[data-theme-set]", "themeSet", dark() ? "dark" : "light");
+document.querySelectorAll("[data-theme-set]").forEach(b => b.addEventListener("click", () => { root.dataset.theme = b.dataset.themeSet; syncTheme(); }));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
+new MutationObserver(syncTheme).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+syncTheme();
+render();
+</script>

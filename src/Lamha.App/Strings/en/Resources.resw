@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Every visible string, in English. Its Arabic twin is Strings/ar/Resources.resw: keep the two in step.
+     Keys from Lamha 2 keep its wording (the key it came from is in the comment). "Proto_" strings exist only in the
+     phase 0 prototype and go away with it. -->
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="Common_Lamha" xml:space="preserve"><value>Lamha</value><comment>common.lamha</comment></data>
+  <data name="Card_Close.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Close (Esc)</value><comment>c.closeEsc</comment></data>
+  <data name="Card_Close.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Close (Esc)</value><comment>c.closeEsc</comment></data>
+  <data name="Card_SelectFirst" xml:space="preserve"><value>Select some text first</value><comment>c.selectFirst</comment></data>
+  <data name="Card_Replace" xml:space="preserve"><value>Replace</value><comment>c.replace</comment></data>
+  <data name="Card_Insert" xml:space="preserve"><value>Insert</value><comment>c.insert</comment></data>
+  <data name="Tray_ShortcutLookup" xml:space="preserve"><value>Look up and translate in any program</value><comment>d.hkLookup</comment></data>
+  <data name="Tray_ShortcutWrite" xml:space="preserve"><value>Writing tools in any program</value><comment>d.hkWrite</comment></data>
+  <data name="Tray_Unavailable" xml:space="preserve"><value> (unavailable)</value><comment>d.unavailable</comment></data>
+  <data name="Tray_StartWithWindows" xml:space="preserve"><value>Start with Windows</value><comment>d.trayLogin</comment></data>
+  <data name="Tray_Pause" xml:space="preserve"><value>Pause clipboard history</value><comment>d.pause</comment></data>
+  <data name="Tray_Pause15" xml:space="preserve"><value>15 minutes</value><comment>d.pause15</comment></data>
+  <data name="Tray_Pause60" xml:space="preserve"><value>1 hour</value><comment>d.pause60</comment></data>
+  <data name="Tray_PauseUntil" xml:space="preserve"><value>Until I resume</value><comment>d.pauseUntil</comment></data>
+  <data name="Tray_Resume" xml:space="preserve"><value>Resume clipboard history (paused)</value><comment>d.resume</comment></data>
+  <data name="Tray_ResumeAt" xml:space="preserve"><value>Resume clipboard history (paused until {0})</value><comment>d.resumeAt</comment></data>
+  <data name="Tray_TipPaused" xml:space="preserve"><value>Clipboard history paused</value><comment>d.tipPaused</comment></data>
+  <data name="Note_HotkeyTaken" xml:space="preserve"><value>Shortcut in use</value><comment>d.hotkeyTaken</comment></data>
+  <data name="Note_HotkeyTakenBody" xml:space="preserve"><value>Another program uses {0} — it won't work in Lamha.</value><comment>d.hotkeyTakenBody</comment></data>
+  <data name="Note_And" xml:space="preserve"><value> and </value><comment>d.hotkeyTakenBody: the keys joined</comment></data>
+  <data name="Note_ReplaceFailed" xml:space="preserve"><value>Couldn't replace</value><comment>d.replaceFailed</comment></data>
+  <data name="Note_ReplaceFailedBody" xml:space="preserve"><value>The text was copied — paste it yourself (Ctrl+V).</value><comment>d.replaceFailedBody</comment></data>
+  <data name="Tray_Quit" xml:space="preserve"><value>Quit</value><comment>d.trayQuit</comment></data>
+
+  <!-- The card (phase 4) -->
+  <data name="Common_Settings" xml:space="preserve"><value>Settings</value><comment>common.settings</comment></data>
+  <data name="Common_Retry" xml:space="preserve"><value>Try again</value><comment>common.retry</comment></data>
+  <data name="Common_Copy" xml:space="preserve"><value>Copy</value><comment>common.copy</comment></data>
+  <data name="Lang_ar" xml:space="preserve"><value>Arabic</value><comment>lang.ar</comment></data>
+  <data name="Lang_en" xml:space="preserve"><value>English</value><comment>lang.en</comment></data>
+  <data name="Card_Back.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Back</value><comment>common.back</comment></data>
+  <data name="Card_Back.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Back</value><comment>common.back</comment></data>
+  <data name="Card_Forward.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Forward</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
+  <data name="Card_Forward.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Forward</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
+  <data name="Card_Settings.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Settings</value><comment>common.settings</comment></data>
+  <data name="Card_Settings.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Settings</value><comment>common.settings</comment></data>
+  <data name="Card_Pin" xml:space="preserve"><value>Pin the card</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
+  <data name="Card_Pinned" xml:space="preserve"><value>Pinned: click to unpin</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
+  <data name="Card_DictSwitch" xml:space="preserve"><value>Word meaning: translated, or explained in its own language</value><comment>c.dictSwitch</comment></data>
+  <data name="Card_DictEn" xml:space="preserve"><value>English</value><comment>c.dictEn</comment></data>
+  <data name="Card_LocalBadgeTitle" xml:space="preserve"><value>Offline dictionary: from the built-in dictionary, works without internet</value><comment>c.localBadgeTitle</comment></data>
+  <data name="Card_AiBadgeTitle" xml:space="preserve"><value>Translated by AI ({0})</value><comment>c.aiBadgeTitle</comment></data>
+  <data name="Card_SampleText" xml:space="preserve"><value>a piece of cake</value><comment>the tray's sample card and tools/Measure: English in both languages</comment></data>
+  <data name="Card_FormOf" xml:space="preserve"><value> → a form of </value><comment>c.formOf</comment></data>
+  <data name="Card_FormOfPlain" xml:space="preserve"><value>A form of </value><comment>c.formOfPlain</comment></data>
+  <data name="Card_InContext" xml:space="preserve"><value>In this context</value><comment>c.inContext</comment></data>
+  <data name="Card_InContextName" xml:space="preserve"><value>In this context: a name, kept as is</value><comment>c.inContextName</comment></data>
+  <data name="Card_AiGuess" xml:space="preserve"><value>AI guess · not in the dictionary</value><comment>c.aiGuess</comment></data>
+  <data name="Card_NoArSense" xml:space="preserve"><value>The offline dictionary has no Arabic meaning for this use. The meaning here:</value><comment>c.noArSense</comment></data>
+  <data name="Card_NoArDirect" xml:space="preserve"><value>No direct Arabic meaning in the offline dictionary — see the definition below.</value><comment>c.noArDirect</comment></data>
+  <data name="Card_NoDef" xml:space="preserve"><value>No {0} definition for this word — try the translation.</value><comment>c.noDef</comment></data>
+  <data name="Card_NoExplainAI" xml:space="preserve"><value>No {0} explanation for this word here. To explain words in their own language, choose an AI provider in Settings.</value><comment>c.noExplainAI</comment></data>
+  <data name="Card_Root" xml:space="preserve"><value>Root: {0}</value><comment>c.root</comment></data>
+  <data name="Card_Plural" xml:space="preserve"><value>Plural: {0}</value><comment>c.plural</comment></data>
+  <data name="Card_LookUpX" xml:space="preserve"><value>Look up {0}</value><comment>c.lookUpX</comment></data>
+  <data name="Card_Milestone" xml:space="preserve"><value>🎉 That's word number {0} you've looked up with Lamha!</value><comment>ms.lookups</comment></data>
+  <data name="Card_GoalDone" xml:space="preserve"><value>🎯 Today's goal reached: {0}!</value><comment>td.goalDone</comment></data>
+  <data name="Card_InReview" xml:space="preserve"><value>In your review list — click to remove</value><comment>c.inReview</comment></data>
+  <data name="Card_AddReview" xml:space="preserve"><value>Add to review</value><comment>c.addReview</comment></data>
+  <data name="Card_AddedReview" xml:space="preserve"><value>Added to review</value><comment>c.addedReview</comment></data>
+  <data name="Card_RemovedReview" xml:space="preserve"><value>Removed from review</value><comment>c.removedReview</comment></data>
+  <data name="Card_BestSense" xml:space="preserve"><value>The meaning closest to this sentence</value><comment>c.bestSense</comment></data>
+  <data name="Card_ShowMore" xml:space="preserve"><value>Show more</value><comment>c.showMore</comment></data>
+  <data name="Card_ShowAll" xml:space="preserve"><value>Click to show the whole text</value><comment>c.showAll</comment></data>
+  <data name="Card_MoreMeanings" xml:space="preserve"><value>Other meanings ({0})</value><comment>c.moreMeanings</comment></data>
+  <data name="Card_DidYouMean" xml:space="preserve"><value>Did you mean: </value><comment>c.didYouMean</comment></data>
+  <data name="Card_DidYouMeanEnd" xml:space="preserve"><value>?</value><comment>c.didYouMeanEnd</comment></data>
+  <data name="Card_OtherMeanings" xml:space="preserve"><value>Other meanings</value><comment>c.otherMeanings</comment></data>
+  <data name="Card_Definition" xml:space="preserve"><value>Definition</value><comment>c.definition</comment></data>
+  <data name="Card_Examples" xml:space="preserve"><value>Examples</value><comment>c.examples</comment></data>
+  <data name="Card_Wikipedia" xml:space="preserve"><value>Wikipedia</value><comment>c.wikipedia</comment></data>
+  <data name="Card_ReadWiki" xml:space="preserve"><value>Read more on Wikipedia</value><comment>c.readWiki</comment></data>
+  <data name="Card_Google" xml:space="preserve"><value>Google Translate</value><comment>c.google</comment></data>
+  <data name="Card_Cambridge" xml:space="preserve"><value>Cambridge Dictionary</value><comment>c.cambridge</comment></data>
+  <data name="Card_BetterTr" xml:space="preserve"><value>Better translation</value><comment>c.betterTr</comment></data>
+  <data name="Card_BetterTrTitle" xml:space="preserve"><value>Translate again with {0}: better with idioms and slang, but slower</value><comment>c.betterTrTitle</comment></data>
+  <data name="Card_Copied" xml:space="preserve"><value>Copied</value><comment>c.copiedToast</comment></data>
+  <data name="Card_CopyTr.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copy</value><comment>common.copy</comment></data>
+  <data name="Card_CopyTr.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Copy the translation</value><comment>c.copyTr</comment></data>
+  <data name="Card_ErrNotFound" xml:space="preserve"><value>The word isn't in the offline dictionary</value><comment>c.errNotFound</comment></data>
+  <data name="Card_ErrLocalOnly" xml:space="preserve"><value>You're in “Offline only” mode. Change the dictionary source in Settings to search online.</value><comment>c.errLocalOnly</comment></data>
+  <data name="Card_ErrOfflineMode" xml:space="preserve"><value>Translating sentences needs the internet</value><comment>c.errOfflineMode</comment></data>
+  <data name="Card_ErrBusy" xml:space="preserve"><value>The translation service is busy</value><comment>c.errBusy</comment></data>
+  <data name="Card_ErrTooMany" xml:space="preserve"><value>Too many requests in a short time. Wait a minute and try again.</value><comment>c.errTooMany</comment></data>
+  <data name="Card_ErrFailed" xml:space="preserve"><value>Couldn't translate</value><comment>c.errFailed</comment></data>
+  <data name="Card_ErrService" xml:space="preserve"><value>Something went wrong reaching the translation service.</value><comment>c.errService</comment></data>
+  <data name="Card_ErrOffline" xml:space="preserve"><value>No internet connection</value><comment>c.errOffline</comment></data>
+  <data name="Card_ErrCheckConn" xml:space="preserve"><value>Check your connection and try again.</value><comment>c.errCheckConn</comment></data>
+  <data name="Card_WritingTools" xml:space="preserve"><value>Writing tools</value><comment>p.writeTools</comment></data>
+  <data name="Card_WriteTitle" xml:space="preserve"><value>Writing tools · {0}</value><comment>c.writeTitle</comment></data>
+  <data name="Card_ComposeTitle" xml:space="preserve"><value>Write new · {0}</value><comment>c.composeTitle</comment></data>
+  <data name="Card_ToolKey" xml:space="preserve"><value>Press {0} to run it</value><comment>c.toolKey</comment></data>
+  <data name="Tool_Proofread" xml:space="preserve"><value>Proofread</value><comment>tool.proofread</comment></data>
+  <data name="Tool_Improve" xml:space="preserve"><value>Improve</value><comment>tool.improve</comment></data>
+  <data name="Tool_Formal" xml:space="preserve"><value>Formal</value><comment>tool.formal</comment></data>
+  <data name="Tool_Friendly" xml:space="preserve"><value>Friendly</value><comment>tool.friendly</comment></data>
+  <data name="Tool_Concise" xml:space="preserve"><value>Shorter</value><comment>tool.concise</comment></data>
+  <data name="Tool_Expand" xml:space="preserve"><value>Longer</value><comment>tool.expand</comment></data>
+  <data name="Tool_ToEnglish" xml:space="preserve"><value>Write it in English</value><comment>tool.toEnglish</comment></data>
+  <data name="Tool_Summarize" xml:space="preserve"><value>Summarize</value><comment>tool.summarize</comment></data>
+  <data name="Tool_Explain" xml:space="preserve"><value>Explain</value><comment>tool.explain</comment></data>
+  <data name="Tool_Reply" xml:space="preserve"><value>Write a reply</value><comment>tool.reply</comment></data>
+  <data name="Card_KindMessage" xml:space="preserve"><value>Message</value><comment>c.kindMessage</comment></data>
+  <data name="Card_KindEmail" xml:space="preserve"><value>Email</value><comment>c.kindEmail</comment></data>
+  <data name="Card_Kind" xml:space="preserve"><value>Type:</value><comment>c.kind</comment></data>
+  <data name="Card_Tone" xml:space="preserve"><value>Tone:</value><comment>c.tone</comment></data>
+  <data name="Card_ToneAuto" xml:space="preserve"><value>Automatic</value><comment>c.toneAuto</comment></data>
+  <data name="Card_ToneShort" xml:space="preserve"><value>Short</value><comment>c.toneShort</comment></data>
+  <data name="Card_ToneLong" xml:space="preserve"><value>Longer</value><comment>c.toneLong</comment></data>
+  <data name="Card_InArabic" xml:space="preserve"><value>In Arabic</value><comment>c.inArabic</comment></data>
+  <data name="Card_InEnglish" xml:space="preserve"><value>In English</value><comment>c.inEnglish</comment></data>
+  <data name="Card_EditRequest" xml:space="preserve"><value>Edit the request</value><comment>c.editRequest</comment></data>
+  <data name="Card_NoMistakes" xml:space="preserve"><value>No mistakes — your text is fine</value><comment>write.noErrors</comment></data>
+  <data name="Card_Corrections" xml:space="preserve"><value>Corrections ({0})</value><comment>c.corrections</comment></data>
+  <data name="Card_ComposePlaceholder" xml:space="preserve"><value>What do you want to write? Describe it in English or Arabic — e.g. an email to my manager asking for Sunday off</value><comment>c.composePlaceholder</comment></data>
+  <data name="Card_ComposeLabel" xml:space="preserve"><value>What do you want to write?</value><comment>c.composeLabel</comment></data>
+  <data name="Card_ReplyPlaceholder" xml:space="preserve"><value>What do you want to say? Write your idea in English or Arabic (optional)</value><comment>c.replyPlaceholder</comment></data>
+  <data name="Card_ComposeGo" xml:space="preserve"><value>Write</value><comment>c.composeGo</comment></data>
+  <data name="Card_WriteReply" xml:space="preserve"><value>Write the reply</value><comment>c.writeReply</comment></data>
+  <data name="Card_Again.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Try again</value><comment>write.again</comment></data>
+  <data name="Card_Again.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Try again</value><comment>write.again</comment></data>
+  <data name="Category_articles" xml:space="preserve"><value>Articles (a / an / the)</value><comment>CATEGORIES.articles.label</comment></data>
+  <data name="Category_prepositions" xml:space="preserve"><value>Prepositions (in / on / at …)</value><comment>CATEGORIES.prepositions.label</comment></data>
+  <data name="Category_verb_tense" xml:space="preserve"><value>Verb tenses</value><comment>CATEGORIES.verb_tense.label</comment></data>
+  <data name="Category_agreement" xml:space="preserve"><value>Subject–verb agreement</value><comment>CATEGORIES.agreement.label</comment></data>
+  <data name="Category_plurals" xml:space="preserve"><value>Singular and plural nouns</value><comment>CATEGORIES.plurals.label</comment></data>
+  <data name="Category_word_choice" xml:space="preserve"><value>Word choice</value><comment>CATEGORIES.word_choice.label</comment></data>
+  <data name="Category_spelling" xml:space="preserve"><value>Spelling</value><comment>CATEGORIES.spelling.label</comment></data>
+  <data name="Category_punctuation" xml:space="preserve"><value>Punctuation and capitals</value><comment>CATEGORIES.punctuation.label</comment></data>
+  <data name="Category_word_order" xml:space="preserve"><value>Word order</value><comment>CATEGORIES.word_order.label</comment></data>
+  <data name="Category_sentence_structure" xml:space="preserve"><value>Sentence structure</value><comment>CATEGORIES.sentence_structure.label</comment></data>
+  <data name="Pos_n" xml:space="preserve"><value>noun</value><comment>local-dict.js POS_AR / POS_EN: n</comment></data>
+  <data name="Pos_v" xml:space="preserve"><value>verb</value><comment>local-dict.js POS_AR / POS_EN: v</comment></data>
+  <data name="Pos_a" xml:space="preserve"><value>adjective</value><comment>local-dict.js POS_AR / POS_EN: a</comment></data>
+  <data name="Pos_r" xml:space="preserve"><value>adverb</value><comment>local-dict.js POS_AR / POS_EN: r</comment></data>
+  <data name="Pos_p" xml:space="preserve"><value>preposition</value><comment>local-dict.js POS_AR / POS_EN: p</comment></data>
+  <data name="Pos_o" xml:space="preserve"><value>pronoun</value><comment>local-dict.js POS_AR / POS_EN: o</comment></data>
+  <data name="Pos_c" xml:space="preserve"><value>conjunction</value><comment>local-dict.js POS_AR / POS_EN: c</comment></data>
+  <data name="Pos_i" xml:space="preserve"><value>interjection</value><comment>local-dict.js POS_AR / POS_EN: i</comment></data>
+  <data name="Pos_d" xml:space="preserve"><value>determiner</value><comment>local-dict.js POS_AR / POS_EN: d</comment></data>
+  <data name="Pos_u" xml:space="preserve"><value>number</value><comment>local-dict.js POS_AR / POS_EN: u</comment></data>
+  <data name="Pos_h" xml:space="preserve"><value>phrase</value><comment>local-dict.js POS_AR / POS_EN: h</comment></data>
+  <data name="Pos_m" xml:space="preserve"><value>proper noun</value><comment>local-dict.js POS_AR / POS_EN: m</comment></data>
+  <data name="Pos_t" xml:space="preserve"><value>article</value><comment>local-dict.js POS_AR / POS_EN: t</comment></data>
+  <data name="Pos_e" xml:space="preserve"><value>in English</value><comment>local-dict.js POS_AR / POS_EN: e</comment></data>
+  <data name="Error_ai_model_Title" xml:space="preserve"><value>The chosen model isn't available to your account</value><comment>ERRORS.ai_model.title</comment></data>
+  <data name="Error_ai_model_Hint" xml:space="preserve"><value>Choose another model in Settings.</value><comment>ERRORS.ai_model.hint</comment></data>
+  <data name="Error_ai_rate_limited_Title" xml:space="preserve"><value>Too many requests in a short time</value><comment>ERRORS.ai_rate_limited.title</comment></data>
+  <data name="Error_ai_rate_limited_Hint" xml:space="preserve"><value>Wait a little and try again.</value><comment>ERRORS.ai_rate_limited.hint</comment></data>
+  <data name="Error_ai_busy_Title" xml:space="preserve"><value>The AI service is busy right now</value><comment>ERRORS.ai_busy.title</comment></data>
+  <data name="Error_ai_busy_Hint" xml:space="preserve"><value>Try again in a moment.</value><comment>ERRORS.ai_busy.hint</comment></data>
+  <data name="Error_ai_timeout_Title" xml:space="preserve"><value>The reply took too long</value><comment>ERRORS.ai_timeout.title</comment></data>
+  <data name="Error_ai_timeout_Hint" xml:space="preserve"><value>Try again, or use a shorter text.</value><comment>ERRORS.ai_timeout.hint</comment></data>
+  <data name="Error_ai_too_long_Title" xml:space="preserve"><value>The text is too long</value><comment>ERRORS.ai_too_long.title</comment></data>
+  <data name="Error_ai_too_long_Hint" xml:space="preserve"><value>Use a shorter part of the text.</value><comment>ERRORS.ai_too_long.hint</comment></data>
+  <data name="Error_ai_refused_Title" xml:space="preserve"><value>This text couldn't be processed</value><comment>ERRORS.ai_refused.title</comment></data>
+  <data name="Error_ai_refused_Hint" xml:space="preserve"><value>The AI couldn't work on this text.</value><comment>ERRORS.ai_refused.hint</comment></data>
+  <data name="Error_ollama_no_model_Title" xml:space="preserve"><value>Choose an Ollama model</value><comment>ERRORS.ollama_no_model.title</comment></data>
+  <data name="Error_ollama_no_model_Hint" xml:space="preserve"><value>Choose a model in Settings to turn on the writing tools.</value><comment>ERRORS.ollama_no_model.hint</comment></data>
+  <data name="Error_ollama_offline_Title" xml:space="preserve"><value>Ollama isn't running</value><comment>ERRORS.ollama_offline.title</comment></data>
+  <data name="Error_ollama_offline_Hint" xml:space="preserve"><value>Start Ollama from the Start menu, then try again.</value><comment>ERRORS.ollama_offline.hint</comment></data>
+  <data name="Error_ollama_origin_Title" xml:space="preserve"><value>Ollama refuses the extension's connection</value><comment>ERRORS.ollama_origin.title</comment></data>
+  <data name="Error_ollama_origin_Hint" xml:space="preserve"><value>Add the OLLAMA_ORIGINS environment variable as in the Settings steps, then restart Ollama.</value><comment>ERRORS.ollama_origin.hint</comment></data>
+  <data name="Error_ollama_model_Title" xml:space="preserve"><value>The model isn't in Ollama</value><comment>ERRORS.ollama_model.title</comment></data>
+  <data name="Error_ollama_model_Hint" xml:space="preserve"><value>Download it first (ollama pull …) or choose another model in Settings.</value><comment>ERRORS.ollama_model.hint</comment></data>
+  <data name="Error_gemini_no_key_Title" xml:space="preserve"><value>Add a Gemini key</value><comment>ERRORS.gemini_no_key.title</comment></data>
+  <data name="Error_gemini_no_key_Hint" xml:space="preserve"><value>Create a free key at aistudio.google.com and add it in Settings.</value><comment>ERRORS.gemini_no_key.hint</comment></data>
+  <data name="Error_gemini_bad_key_Title" xml:space="preserve"><value>The Gemini key isn't valid</value><comment>ERRORS.gemini_bad_key.title</comment></data>
+  <data name="Error_gemini_bad_key_Hint" xml:space="preserve"><value>Check the key in Settings, or create a new one at aistudio.google.com.</value><comment>ERRORS.gemini_bad_key.hint</comment></data>
+  <data name="Error_gemini_quota_Title" xml:space="preserve"><value>Gemini's free limit is used up for now</value><comment>ERRORS.gemini_quota.title</comment></data>
+  <data name="Error_gemini_quota_Hint" xml:space="preserve"><value>The free tier has per-minute and daily limits. Wait a little, try the Flash-Lite model, or use Ollama.</value><comment>ERRORS.gemini_quota.hint</comment></data>
+  <data name="Error_gemini_busy_Title" xml:space="preserve"><value>Gemini's models are busy right now</value><comment>ERRORS.gemini_busy.title</comment></data>
+  <data name="Error_gemini_busy_Hint" xml:space="preserve"><value>Google's servers are busy (common with new models on the free tier). Try again in a minute, or use Ollama.</value><comment>ERRORS.gemini_busy.hint</comment></data>
+  <data name="Error_gemini_region_Title" xml:space="preserve"><value>Gemini isn't available in your country</value><comment>ERRORS.gemini_region.title</comment></data>
+  <data name="Error_gemini_region_Hint" xml:space="preserve"><value>The Gemini API doesn't work from your location. Use Ollama or Claude.</value><comment>ERRORS.gemini_region.hint</comment></data>
+  <data name="Error_ai_no_key_Title" xml:space="preserve"><value>Turn on the writing tools</value><comment>ERRORS.ai_no_key.title</comment></data>
+  <data name="Error_ai_no_key_Hint" xml:space="preserve"><value>In Settings, choose Ollama (free, on your PC), Gemini (free, with a key), Claude or OpenAI (with an API key), or another server.</value><comment>ERRORS.ai_no_key.hint reworded 2026-10-25 (approved at the start of phase 4): the five providers</comment></data>
+  <data name="Error_ai_bad_key_Title" xml:space="preserve"><value>The {0} key isn't valid</value><comment>ERRORS.ai_bad_key.title reworded 2026-10-25 (approved at the start of phase 4): the provider in use</comment></data>
+  <data name="Error_ai_bad_key_Hint" xml:space="preserve"><value>Check the key in Settings, or create a new one.</value><comment>ERRORS.ai_bad_key.hint</comment></data>
+  <data name="Error_ai_no_credit_Title" xml:space="preserve"><value>The {0} API account is out of credit</value><comment>ERRORS.ai_no_credit.title reworded 2026-10-25 (approved at the start of phase 4): the provider in use</comment></data>
+  <data name="Error_ai_no_credit_Hint" xml:space="preserve"><value>Add credit at {0}, then try again.</value><comment>ERRORS.ai_no_credit.hint reworded 2026-10-25 (approved at the start of phase 4): the provider's site</comment></data>
+  <data name="Error_ai_forbidden_Title" xml:space="preserve"><value>The key isn't allowed to do this</value><comment>ERRORS.ai_forbidden.title</comment></data>
+  <data name="Error_ai_forbidden_Hint" xml:space="preserve"><value>Check the key's permissions on the service's website ({0}).</value><comment>ERRORS.ai_forbidden.hint reworded 2026-10-25 (approved at the start of phase 4): the provider in use</comment></data>
+  <data name="Error_ServiceSite" xml:space="preserve"><value>the service's website</value><comment>another server's credit site (Error_ai_no_credit_Hint), approved 2026-10-25</comment></data>
+  <data name="Error_ai_error_Title" xml:space="preserve"><value>Couldn't reach {0}</value><comment>lamha-ai.js errorInfo(): an ai_error's title</comment></data>
+  <data name="Error_other_Title" xml:space="preserve"><value>Something went wrong</value><comment>ERRORS.other.title</comment></data>
+  <data name="Error_other_Hint" xml:space="preserve"><value>Try again.</value><comment>ERRORS.other.hint</comment></data>
+  <data name="Error_openai_no_key_Title" xml:space="preserve"><value>Add an OpenAI key</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_openai_no_key_Hint" xml:space="preserve"><value>Create a key at platform.openai.com and add it in Settings.</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_no_server_Title" xml:space="preserve"><value>Finish setting up the server</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_no_server_Hint" xml:space="preserve"><value>Add the server's address and choose a model in Settings.</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_insecure_Title" xml:space="preserve"><value>The server's address can't be used</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_insecure_Hint" xml:space="preserve"><value>Use an address that starts with https:// (http:// works only on this PC and your local network).</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_offline_Title" xml:space="preserve"><value>The server isn't answering</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_offline_Hint" xml:space="preserve"><value>Make sure the server is running and its address in Settings is right, then try again.</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Ai_Custom" xml:space="preserve"><value>Another server</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+
+  <!-- Prices in your currency (phase 4) -->
+  <data name="Card_CopyPrice.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copy</value><comment>common.copy</comment></data>
+  <data name="Card_CopyPrice.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Copy</value><comment>common.copy</comment></data>
+  <data name="Card_InYourCurrency" xml:space="preserve"><value>In your currency</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
+  <data name="Card_RateLine" xml:space="preserve"><value>{0} = {1} · rate of {2}</value><comment>new in Lamha 3, approved with the card's design 2026-10-25: 1 US dollar = 3.75 riyals · rate of 25 October</comment></data>
+  <data name="Currency_USD_One" xml:space="preserve"><value>US dollar</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_USD_Many" xml:space="preserve"><value>US dollars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_USD_Short" xml:space="preserve"><value>dollars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EUR_One" xml:space="preserve"><value>euro</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EUR_Many" xml:space="preserve"><value>euros</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EUR_Short" xml:space="preserve"><value>euros</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_GBP_One" xml:space="preserve"><value>pound sterling</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_GBP_Many" xml:space="preserve"><value>pounds sterling</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_GBP_Short" xml:space="preserve"><value>pounds</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SAR_One" xml:space="preserve"><value>Saudi riyal</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SAR_Many" xml:space="preserve"><value>Saudi riyals</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SAR_Short" xml:space="preserve"><value>riyals</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AED_One" xml:space="preserve"><value>UAE dirham</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AED_Many" xml:space="preserve"><value>UAE dirhams</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AED_Short" xml:space="preserve"><value>dirhams</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EGP_One" xml:space="preserve"><value>Egyptian pound</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EGP_Many" xml:space="preserve"><value>Egyptian pounds</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_EGP_Short" xml:space="preserve"><value>pounds</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KWD_One" xml:space="preserve"><value>Kuwaiti dinar</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KWD_Many" xml:space="preserve"><value>Kuwaiti dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KWD_Short" xml:space="preserve"><value>dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_QAR_One" xml:space="preserve"><value>Qatari riyal</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_QAR_Many" xml:space="preserve"><value>Qatari riyals</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_QAR_Short" xml:space="preserve"><value>riyals</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_BHD_One" xml:space="preserve"><value>Bahraini dinar</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_BHD_Many" xml:space="preserve"><value>Bahraini dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_BHD_Short" xml:space="preserve"><value>dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_OMR_One" xml:space="preserve"><value>Omani rial</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_OMR_Many" xml:space="preserve"><value>Omani rials</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_OMR_Short" xml:space="preserve"><value>rials</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JOD_One" xml:space="preserve"><value>Jordanian dinar</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JOD_Many" xml:space="preserve"><value>Jordanian dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JOD_Short" xml:space="preserve"><value>dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MAD_One" xml:space="preserve"><value>Moroccan dirham</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MAD_Many" xml:space="preserve"><value>Moroccan dirhams</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MAD_Short" xml:space="preserve"><value>dirhams</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_DZD_One" xml:space="preserve"><value>Algerian dinar</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_DZD_Many" xml:space="preserve"><value>Algerian dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_DZD_Short" xml:space="preserve"><value>dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TND_One" xml:space="preserve"><value>Tunisian dinar</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TND_Many" xml:space="preserve"><value>Tunisian dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TND_Short" xml:space="preserve"><value>dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LYD_One" xml:space="preserve"><value>Libyan dinar</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LYD_Many" xml:space="preserve"><value>Libyan dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LYD_Short" xml:space="preserve"><value>dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IQD_One" xml:space="preserve"><value>Iraqi dinar</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IQD_Many" xml:space="preserve"><value>Iraqi dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IQD_Short" xml:space="preserve"><value>dinars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LBP_One" xml:space="preserve"><value>Lebanese pound</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LBP_Many" xml:space="preserve"><value>Lebanese pounds</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_LBP_Short" xml:space="preserve"><value>pounds</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SYP_One" xml:space="preserve"><value>Syrian pound</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SYP_Many" xml:space="preserve"><value>Syrian pounds</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SYP_Short" xml:space="preserve"><value>pounds</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_YER_One" xml:space="preserve"><value>Yemeni rial</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_YER_Many" xml:space="preserve"><value>Yemeni rials</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_YER_Short" xml:space="preserve"><value>rials</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SDG_One" xml:space="preserve"><value>Sudanese pound</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SDG_Many" xml:space="preserve"><value>Sudanese pounds</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_SDG_Short" xml:space="preserve"><value>pounds</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TRY_One" xml:space="preserve"><value>Turkish lira</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TRY_Many" xml:space="preserve"><value>Turkish lira</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_TRY_Short" xml:space="preserve"><value>lira</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JPY_One" xml:space="preserve"><value>Japanese yen</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JPY_Many" xml:space="preserve"><value>Japanese yen</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_JPY_Short" xml:space="preserve"><value>yen</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CNY_One" xml:space="preserve"><value>Chinese yuan</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CNY_Many" xml:space="preserve"><value>Chinese yuan</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CNY_Short" xml:space="preserve"><value>yuan</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_INR_One" xml:space="preserve"><value>Indian rupee</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_INR_Many" xml:space="preserve"><value>Indian rupees</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_INR_Short" xml:space="preserve"><value>rupees</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_PKR_One" xml:space="preserve"><value>Pakistani rupee</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_PKR_Many" xml:space="preserve"><value>Pakistani rupees</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_PKR_Short" xml:space="preserve"><value>rupees</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CAD_One" xml:space="preserve"><value>Canadian dollar</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CAD_Many" xml:space="preserve"><value>Canadian dollars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CAD_Short" xml:space="preserve"><value>dollars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AUD_One" xml:space="preserve"><value>Australian dollar</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AUD_Many" xml:space="preserve"><value>Australian dollars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_AUD_Short" xml:space="preserve"><value>dollars</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CHF_One" xml:space="preserve"><value>Swiss franc</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CHF_Many" xml:space="preserve"><value>Swiss francs</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_CHF_Short" xml:space="preserve"><value>francs</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KRW_One" xml:space="preserve"><value>South Korean won</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KRW_Many" xml:space="preserve"><value>South Korean won</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_KRW_Short" xml:space="preserve"><value>won</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_RUB_One" xml:space="preserve"><value>Russian ruble</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_RUB_Many" xml:space="preserve"><value>Russian rubles</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_RUB_Short" xml:space="preserve"><value>rubles</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MYR_One" xml:space="preserve"><value>Malaysian ringgit</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MYR_Many" xml:space="preserve"><value>Malaysian ringgit</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_MYR_Short" xml:space="preserve"><value>ringgit</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IDR_One" xml:space="preserve"><value>Indonesian rupiah</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IDR_Many" xml:space="preserve"><value>Indonesian rupiah</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+  <data name="Currency_IDR_Short" xml:space="preserve"><value>rupiah</value><comment>new in Lamha 3 (phase 4): a currency's name, for prices in your currency</comment></data>
+
+
+  <data name="Proto_Tooltip" xml:space="preserve"><value>Lamha 3 (prototype)</value></data>
+  <data name="Proto_Sample" xml:space="preserve"><value>Show the card (sample text)</value></data>
+  <data name="Proto_ClipboardHistory" xml:space="preserve"><value>Clipboard history</value><comment>d.historyLabel</comment></data>
+  <data name="Proto_Accent" xml:space="preserve"><value>Accent colour from Windows</value><comment>d.accent</comment></data>
+</root>

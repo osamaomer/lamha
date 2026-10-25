@@ -1,0 +1,441 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Lamha.App.Controls">
+  <!-- Lamha's base controls, from the tokens (merged here so the styles can name them) and phase 1's signed-off
+       designs: buttons (filled, quiet, delete, icon), chips, the switch in Lamha 2's green, and the boxes the screens
+       repeat. tests/Lamha.Core.Tests/Appearance/TokensTests.cs checks that every Lamha resource named exists. -->
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="ms-appx:///Themes/Tokens.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- The switch: Lamha 2's green when on (LamhaSwitchOnBrush, 3:1 on both themes' surfaces); high contrast keeps
+       Windows' own. -->
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#2E9E4F" />
+      <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#2E9E4F" />
+      <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#2E9E4F" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#2E9E4F" />
+      <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#2E9E4F" />
+      <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#2E9E4F" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="HighContrast" />
+  </ResourceDictionary.ThemeDictionaries>
+
+  <!-- Buttons: one template, coloured by the style. A hover tint over the fill, a little faded when pressed,
+       Lamha 2's 0.45 when it can't be used; Windows draws the focus ring. -->
+  <ControlTemplate x:Key="LamhaButtonTemplate" TargetType="Button">
+    <Grid x:Name="Root"
+          Background="{TemplateBinding Background}"
+          BorderBrush="{TemplateBinding BorderBrush}"
+          BorderThickness="{TemplateBinding BorderThickness}"
+          CornerRadius="{TemplateBinding CornerRadius}"
+          Control.IsTemplateFocusTarget="True">
+      <VisualStateManager.VisualStateGroups>
+        <VisualStateGroup x:Name="CommonStates">
+          <VisualState x:Name="Normal" />
+          <VisualState x:Name="PointerOver">
+            <VisualState.Setters>
+              <Setter Target="Hover.Opacity" Value="1" />
+            </VisualState.Setters>
+          </VisualState>
+          <VisualState x:Name="Pressed">
+            <VisualState.Setters>
+              <Setter Target="Hover.Opacity" Value="1" />
+              <Setter Target="Presenter.Opacity" Value="0.8" />
+            </VisualState.Setters>
+          </VisualState>
+          <VisualState x:Name="Disabled">
+            <VisualState.Setters>
+              <Setter Target="Root.Opacity" Value="0.45" />
+            </VisualState.Setters>
+          </VisualState>
+        </VisualStateGroup>
+      </VisualStateManager.VisualStateGroups>
+      <Border x:Name="Hover" Background="{ThemeResource LamhaHoverBrush}" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" />
+      <ContentPresenter x:Name="Presenter"
+                        Padding="{TemplateBinding Padding}"
+                        HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                        VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                        Content="{TemplateBinding Content}"
+                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                        ContentTransitions="{TemplateBinding ContentTransitions}"
+                        FontFamily="{TemplateBinding FontFamily}"
+                        FontSize="{TemplateBinding FontSize}"
+                        FontWeight="{TemplateBinding FontWeight}"
+                        Foreground="{TemplateBinding Foreground}"
+                        AutomationProperties.AccessibilityView="Raw" />
+    </Grid>
+  </ControlTemplate>
+
+  <!-- Filled: the one action that matters (Replace, Save & verify, Next). The card's sizes: 32 px high, 13 px
+       semibold, the inputs' 10 px corners. -->
+  <Style x:Key="LamhaButtonStyle" TargetType="Button">
+    <Setter Property="Template" Value="{StaticResource LamhaButtonTemplate}" />
+    <Setter Property="Background" Value="{ThemeResource LamhaButtonBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+    <Setter Property="Padding" Value="12,5" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeSecondary}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+  </Style>
+
+  <!-- Quiet: everything next to the filled one (Copy, Restore, Cancel) -->
+  <Style x:Key="LamhaQuietButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+    <Setter Property="Background" Value="{ThemeResource LamhaChipBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
+  </Style>
+
+  <!-- Deletes something: never looks like a harmless action (Lamha 2's btn.danger) -->
+  <Style x:Key="LamhaDangerButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+    <Setter Property="Background" Value="{ThemeResource LamhaDangerSoftBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaDangerBrush}" />
+  </Style>
+
+  <!-- An icon alone (the card's bar, Copy, Listen): 28 px, the name in its tooltip and AutomationProperties.Name -->
+  <Style x:Key="LamhaIconButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="MinHeight" Value="28" />
+  </Style>
+
+  <!-- A round button next to the headword (the review bookmark, Listen): 34 px (the card's design) -->
+  <Style x:Key="LamhaRoundButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaIconButtonStyle}">
+    <Setter Property="Width" Value="34" />
+    <Setter Property="Height" Value="34" />
+    <Setter Property="MinHeight" Value="34" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusPill}" />
+  </Style>
+
+  <!-- A chip that does something once (a meaning or synonym to look up, "+3"): the chip's look on a button -->
+  <Style x:Key="LamhaChipButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+    <Setter Property="Background" Value="{ThemeResource LamhaChipBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusPill}" />
+    <Setter Property="Padding" Value="10,3" />
+    <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+    <Setter Property="FontWeight" Value="Normal" />
+  </Style>
+
+  <!-- A link at the foot of the card (Google Translate, Better translation): an icon and a word, quiet until hovered -->
+  <Style x:Key="LamhaFootLinkStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
+    <Setter Property="FontWeight" Value="Normal" />
+  </Style>
+
+  <!-- An icon that stays on (Pin, the review bookmark): muted, and in the accent colour on its tint when on -->
+  <Style x:Key="LamhaIconToggleStyle" TargetType="ToggleButton">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Grid x:Name="Root"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Control.IsTemplateFocusTarget="True">
+            <VisualStateManager.VisualStateGroups>
+              <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="PointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Hover.Opacity" Value="1" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Pressed">
+                  <VisualState.Setters>
+                    <Setter Target="Hover.Opacity" Value="1" />
+                    <Setter Target="Presenter.Opacity" Value="0.8" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Disabled">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Opacity" Value="0.45" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Checked">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaAccentBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedPointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaAccentBrush}" />
+                    <Setter Target="Hover.Opacity" Value="1" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedPressed">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaAccentBrush}" />
+                    <Setter Target="Presenter.Opacity" Value="0.8" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedDisabled">
+                  <VisualState.Setters>
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaAccentBrush}" />
+                    <Setter Target="Root.Opacity" Value="0.45" />
+                  </VisualState.Setters>
+                </VisualState>
+              </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <Border x:Name="Hover" Background="{ThemeResource LamhaHoverBrush}" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" />
+            <ContentPresenter x:Name="Presenter"
+                              Padding="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              AutomationProperties.AccessibilityView="Raw" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- The review bookmark next to the headword: round, 34 px; in the accent colour when the word is in review -->
+  <Style x:Key="LamhaRoundToggleStyle" TargetType="ToggleButton" BasedOn="{StaticResource LamhaIconToggleStyle}">
+    <Setter Property="Width" Value="34" />
+    <Setter Property="Height" Value="34" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusPill}" />
+  </Style>
+
+  <!-- A segment of a two-way switch in a pill (the card's العربية ⇄ English): the chosen one raised on the surface -->
+  <Style x:Key="LamhaSwitchSegmentStyle" TargetType="ToggleButton">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusPill}" />
+    <Setter Property="Padding" Value="10,2" />
+    <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
+    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeLabel}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Grid x:Name="Root"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Control.IsTemplateFocusTarget="True">
+            <VisualStateManager.VisualStateGroups>
+              <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="PointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaTextBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Pressed">
+                  <VisualState.Setters>
+                    <Setter Target="Presenter.Opacity" Value="0.8" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Checked">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Background" Value="{ThemeResource LamhaSurfaceBrush}" />
+                    <Setter Target="Root.BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaTextBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedPointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Background" Value="{ThemeResource LamhaSurfaceBrush}" />
+                    <Setter Target="Root.BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaTextBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedPressed">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Background" Value="{ThemeResource LamhaSurfaceBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaTextBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+              </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <ContentPresenter x:Name="Presenter"
+                              Padding="{TemplateBinding Padding}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              Content="{TemplateBinding Content}"
+                              FontFamily="{TemplateBinding FontFamily}"
+                              FontSize="{TemplateBinding FontSize}"
+                              FontWeight="{TemplateBinding FontWeight}"
+                              Foreground="{TemplateBinding Foreground}"
+                              AutomationProperties.AccessibilityView="Raw" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Chips: a meaning, a synonym, a writing tool, a choice. On (checked) in the button colour. -->
+  <Style x:Key="LamhaChipStyle" TargetType="ToggleButton">
+    <Setter Property="Background" Value="{ThemeResource LamhaChipBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusPill}" />
+    <Setter Property="Padding" Value="10,2" />
+    <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
+    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Grid x:Name="Root"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Control.IsTemplateFocusTarget="True">
+            <VisualStateManager.VisualStateGroups>
+              <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="PointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Hover.Opacity" Value="1" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Pressed">
+                  <VisualState.Setters>
+                    <Setter Target="Hover.Opacity" Value="1" />
+                    <Setter Target="Presenter.Opacity" Value="0.8" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Disabled">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Opacity" Value="0.45" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Checked">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Background" Value="{ThemeResource LamhaButtonBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedPointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Background" Value="{ThemeResource LamhaButtonBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
+                    <Setter Target="Hover.Opacity" Value="1" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedPressed">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Background" Value="{ThemeResource LamhaButtonBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
+                    <Setter Target="Presenter.Opacity" Value="0.8" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedDisabled">
+                  <VisualState.Setters>
+                    <Setter Target="Root.Background" Value="{ThemeResource LamhaButtonBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
+                    <Setter Target="Root.Opacity" Value="0.45" />
+                  </VisualState.Setters>
+                </VisualState>
+              </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <Border x:Name="Hover" Background="{ThemeResource LamhaHoverBrush}" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" />
+            <ContentPresenter x:Name="Presenter"
+                              Padding="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              FontFamily="{TemplateBinding FontFamily}"
+                              FontSize="{TemplateBinding FontSize}"
+                              FontWeight="{TemplateBinding FontWeight}"
+                              Foreground="{TemplateBinding Foreground}"
+                              AutomationProperties.AccessibilityView="Raw" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A skeleton: the grey shape of what's coming, with a light sweeping across it (Controls/Skeleton.cs moves it) -->
+  <Style TargetType="controls:Skeleton">
+    <Setter Property="Background" Value="{ThemeResource LamhaSkeletonBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="controls:Skeleton">
+          <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+            <Rectangle x:Name="Shine" Visibility="Collapsed">
+              <Rectangle.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                  <GradientStop Offset="0" Color="#00FFFFFF" />
+                  <GradientStop Offset="0.5" Color="{ThemeResource LamhaShimmerColor}" />
+                  <GradientStop Offset="1" Color="#00FFFFFF" />
+                </LinearGradientBrush>
+              </Rectangle.Fill>
+              <Rectangle.RenderTransform>
+                <TranslateTransform x:Name="Move" />
+              </Rectangle.RenderTransform>
+            </Rectangle>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Boxes the screens repeat: a panel (Today, the answer, a group of settings) and the tinted box the meaning
+       sits in (the card's hero, the corrected text) -->
+  <Style x:Key="LamhaPanelStyle" TargetType="Border">
+    <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusLarge}" />
+    <Setter Property="Padding" Value="20" />
+  </Style>
+  <Style x:Key="LamhaTintedBoxStyle" TargetType="Border">
+    <Setter Property="Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+    <Setter Property="Padding" Value="16,12" />
+  </Style>
+</ResourceDictionary>

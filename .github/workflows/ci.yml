@@ -1,0 +1,67 @@
+# Lamha 3: builds, tests, publishes with NativeAOT (x64 and ARM64) and packs the beta installer on every push and pull
+# request. The installer is kept as a build artifact; nothing is released from here.
+name: CI
+
+on:
+  push:
+    branches: [main, "native/**"]
+    paths-ignore: ["legacy/**", "site/**", "docs/**", "**.md"]
+  pull_request:
+    paths-ignore: ["legacy/**", "site/**", "docs/**", "**.md"]
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet build Lamha.slnx -c Release
+      - run: dotnet test --solution Lamha.slnx -c Release --no-build
+
+  publish:
+    needs: test
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        rid: [win-x64, win-arm64]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+
+      - name: The offline dictionary file (shipped next to Lamha.exe as dict/lamha-dict.db)
+        run: dotnet run --project tools/DictionaryBuilder -c Release -- legacy/dict artifacts/dict/lamha-dict.db
+
+      - name: Publish (NativeAOT)
+        run: dotnet publish src/Lamha.App -c Release -r ${{ matrix.rid }} -o artifacts/publish/${{ matrix.rid }}
+
+      - name: Memory budgets (x64 only; informational until the runner's numbers are known)
+        if: matrix.rid == 'win-x64'
+        continue-on-error: true
+        shell: pwsh
+        run: ./tools/Measure/measure.ps1 -Exe artifacts/publish/win-x64/Lamha.exe -Budget
+
+      - name: Pack the beta installer
+        shell: pwsh
+        run: >
+          dotnet vpk pack --packId Lamha --packVersion 3.0.0-alpha.${{ github.run_number }} --packTitle Lamha
+          --packAuthors "Artwork Lab" --packDir artifacts/publish/${{ matrix.rid }} --mainExe Lamha.exe
+          --icon src/Lamha.App/Assets/Lamha.ico --channel beta-${{ matrix.rid }} --exclude '.*\.pdb$'
+          --outputDir artifacts/releases/${{ matrix.rid }}
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lamha-beta-${{ matrix.rid }}
+          path: artifacts/releases/${{ matrix.rid }}
+          retention-days: 14

@@ -1,17 +1,29 @@
-# dependencies
-node_modules/
+# .NET build output
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+artifacts/
 
-# build output (extension packages, desktop installers, the extension copy made by `npm run sync`)
-web-ext-artifacts/
-desktop/dist/
-desktop/ext/
-desktop/bin/
+# Velopack output
+Releases/
 
 # local files
 *.log
 *.tmp
 Thumbs.db
 desktop.ini
+
+# ---- Lamha 2 (legacy/) ----
+# dependencies
+node_modules/
+
+# build output (extension packages, desktop installers, the extension copy made by `npm run sync`)
+legacy/web-ext-artifacts/
+legacy/desktop/dist/
+legacy/desktop/ext/
+legacy/desktop/bin/
 
 # tools/compare-translation.mjs output
 translation-report.md

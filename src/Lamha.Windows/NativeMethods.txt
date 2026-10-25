@@ -1,0 +1,113 @@
+// The Win32 API Lamha uses. CsWin32 generates the bindings (without marshalling, so they're NativeAOT-safe).
+
+// windows and focus
+GetForegroundWindow
+SetForegroundWindow
+BringWindowToTop
+IsWindow
+GetWindowThreadProcessId
+AttachThreadInput
+GetCurrentThreadId
+GetClassName
+OpenProcess
+QueryFullProcessImageName
+CloseHandle
+DwmSetWindowAttribute
+DWM_WINDOW_CORNER_PREFERENCE
+ReleaseCapture
+SendMessage
+WM_NCLBUTTONDOWN
+HTCAPTION
+
+// keyboard
+GetAsyncKeyState
+SendInput
+RegisterHotKey
+UnregisterHotKey
+
+// clipboard
+OpenClipboard
+CloseClipboard
+EmptyClipboard
+EnumClipboardFormats
+GetClipboardData
+SetClipboardData
+GetClipboardSequenceNumber
+IsClipboardFormatAvailable
+RegisterClipboardFormat
+GetClipboardOwner
+AddClipboardFormatListener
+RemoveClipboardFormatListener
+GlobalAlloc
+GlobalLock
+GlobalUnlock
+GlobalSize
+GlobalFree
+
+// the hidden message window
+RegisterClassEx
+UnregisterClass
+CreateWindowEx
+DestroyWindow
+DefWindowProc
+GetModuleHandle
+RegisterWindowMessage
+PostMessage
+WM_HOTKEY
+WM_COMMAND
+WM_APP
+WM_CONTEXTMENU
+WM_LBUTTONUP
+WM_RBUTTONUP
+WM_CLIPBOARDUPDATE
+WINDOW_EX_STYLE
+
+// the tray icon and its menu
+Shell_NotifyIcon
+LoadImage
+DestroyIcon
+CreatePopupMenu
+AppendMenu
+TrackPopupMenuEx
+DestroyMenu
+NOTIFYICON_VERSION_4
+TRACK_POPUP_MENU_FLAGS
+NOTIFY_ICON_INFOTIP_FLAGS
+
+// screens
+GetCursorPos
+MonitorFromPoint
+GetMonitorInfo
+GetDpiForMonitor
+
+// memory
+SetProcessWorkingSetSize
+GetCurrentProcess
+
+// keys and clipboard history, kept by Windows for this user
+CredRead
+CredWrite
+CredDelete
+CredFree
+CryptProtectData
+CryptUnprotectData
+CRYPTPROTECT_UI_FORBIDDEN
+LocalFree
+
+// UI Automation: the sentence around a selected word
+CoInitializeEx
+CoUninitialize
+CoCreateInstance
+SysFreeString
+CUIAutomation8
+IUIAutomation2
+IUIAutomationElement
+IUIAutomationElementArray
+IUIAutomationCondition
+IUIAutomationTreeWalker
+IUIAutomationTextPattern
+IUIAutomationTextRange
+IUIAutomationTextRangeArray
+UIA_PATTERN_ID
+UIA_PROPERTY_ID
+UIA_CONTROLTYPE_ID

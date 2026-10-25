@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The WinUI 3 app: windows, pages, view models, styles, the tray and startup. -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(LamhaWindowsTarget)</TargetFramework>
+    <TargetPlatformMinVersion>$(LamhaWindowsMin)</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>$(LamhaWindowsMin)</SupportedOSPlatformVersion>
+    <RootNamespace>Lamha.App</RootNamespace>
+    <AssemblyName>Lamha</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\Lamha.ico</ApplicationIcon>
+    <UseWinUI>true</UseWinUI>
+    <DefaultLanguage>en</DefaultLanguage>
+
+    <!-- A normal installed app (Velopack), not MSIX; the Windows App SDK ships inside it, so nothing else to install. -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <Platforms>x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-x64</RuntimeIdentifier>
+
+    <!-- NativeAOT and WinUI: C#/WinRT generates what a .NET list needs to cross to WinUI (an ItemsSource) only with
+         unsafe code allowed; without it the published app fails at run time (ArgumentException) while Debug works.
+         Its level 2 warnings (errors here) catch a type it can't pass. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
+
+    <!-- Program.cs is the entry point: Velopack and the single-instance check run before any XAML. -->
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+    <OptimizationPreference>Size</OptimizationPreference>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.Foundation" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Velopack" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lamha.Core\Lamha.Core.csproj" />
+    <ProjectReference Include="..\Lamha.Data\Lamha.Data.csproj" />
+    <ProjectReference Include="..\Lamha.Windows\Lamha.Windows.csproj" />
+  </ItemGroup>
+
+  <!-- An unpackaged publish leaves out the app's own resource index (the strings, Lamha.pri): without it
+       ResourceLoader fails at start. -->
+  <Target Name="LamhaPublishPri" AfterTargets="Publish">
+    <Copy SourceFiles="$(OutDir)$(ProjectPriFileName)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- The offline dictionary, built from Lamha 2's shards by tools/DictionaryBuilder into artifacts/dict (CI does it
+       before publishing; see CLAUDE.md for the command), shipped next to Lamha.exe as dict\lamha-dict.db. Without it
+       Lamha still runs, with Google and the AI only. -->
+  <PropertyGroup>
+    <LamhaDictFile>$(MSBuildThisFileDirectory)../../artifacts/dict/lamha-dict.db</LamhaDictFile>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(LamhaDictFile)')">
+    <Content Include="$(LamhaDictFile)" Link="dict\lamha-dict.db" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="LamhaNoDictionary" BeforeTargets="Build" Condition="!Exists('$(LamhaDictFile)')">
+    <Message Importance="high" Text="Lamha: no offline dictionary in artifacts/dict (dotnet run --project tools/DictionaryBuilder -- legacy/dict artifacts/dict/lamha-dict.db)" />
+  </Target>
+
+  <ItemGroup>
+    <Content Include="Assets\Lamha.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\Lamha-256.png" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
