@@ -30,6 +30,7 @@ public enum Glyph
     Review,
     History,
     Clipboard,
+    Trash,
 }
 
 /// <summary>
@@ -73,6 +74,8 @@ public sealed partial class LineIcon : UserControl
         [Glyph.Review] = ["M2 6h14a2 2 0 0 1 2 2v12H4a2 2 0 0 1-2-2z", "M6 2h14a2 2 0 0 1 2 2v12"],
         [Glyph.History] = ["M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5", "M12 7v5l3 2"],
         [Glyph.Clipboard] = ["M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z", "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"],
+        // Lamha 2's Settings (options.html): Clear and Delete.
+        [Glyph.Trash] = ["M3 6h18", "M8 6V4h8v2", "M6 6l1 14h10l1-14"],
     };
 
     private readonly Canvas _canvas = new() { Width = 24, Height = 24 };

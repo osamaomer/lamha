@@ -182,10 +182,8 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
 
     public void OpenLink(Uri uri) => _host.OpenLink(uri);
 
-    // The answer's "Writing tools" link isn't offered here until the Write page exists (WordAnswer.For's writingTools).
-    public void OpenWritingTools()
-    {
-    }
+    /// <summary>"Writing tools" under a text's answer: the text in the Write page's draft.</summary>
+    public void OpenWritingTools() => _host.Write(_shown.Text);
 
     public void BetterTranslation()
     {
@@ -325,7 +323,7 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
                 return;
             }
 
-            var answer = WordAnswer.For(_brain, result, this, writingTools: false);
+            var answer = WordAnswer.For(_brain, result, this, writingTools: WritingReady());
             Error = null;
             Answer = answer;
             Links = answer.Links;
@@ -351,6 +349,20 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
             Error = ErrorText.Unexpected;
             View = TranslateView.Error;
             _host.Announce(Error.Title);
+        }
+    }
+
+    /// <summary>The writing tools are set up, so "Writing tools" can be offered under a text (as on the card).</summary>
+    private bool WritingReady()
+    {
+        try
+        {
+            _brain.Ai.Config();
+            return true;
+        }
+        catch (LamhaException)
+        {
+            return false;
         }
     }
 

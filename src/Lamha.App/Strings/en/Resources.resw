@@ -54,6 +54,44 @@
   <data name="History_NoResults" xml:space="preserve"><value>No results</value><comment>d.noResults</comment></data>
   <data name="History_Empty" xml:space="preserve"><value>No words yet</value><comment>rv.emptyTitle</comment></data>
   <data name="History_EmptyHint" xml:space="preserve"><value>Every word you look up appears here, by day.</value><comment>new in Lamha 3, approved with the History page 2026-10-25</comment></data>
+  <data name="Write_Placeholder" xml:space="preserve"><value>Write your message here in English — or in Arabic to turn it into natural English…</value><comment>p.draftPlaceholder</comment></data>
+  <data name="Tool_ImproveShort" xml:space="preserve"><value>Improve</value><comment>tool.improveShort</comment></data>
+  <data name="Tool_ToEnglishShort" xml:space="preserve"><value>In English</value><comment>tool.toEnglishShort</comment></data>
+  <data name="Write_UseIt" xml:space="preserve"><value>Replace</value><comment>write.useIt</comment></data>
+  <data name="Write_UseItTitle" xml:space="preserve"><value>Put the result in the compose box to keep working on it</value><comment>write.useItTitle</comment></data>
+  <data name="Write_TopMistake" xml:space="preserve"><value>Your most frequent mistake: </value><comment>write.topMistake</comment></data>
+  <data name="Write_LearnRule" xml:space="preserve"><value> ({0}) — learn the rule →</value><comment>write.learnRule</comment></data>
+  <data name="Journal_Title" xml:space="preserve"><value>My mistake journal</value><comment>o.journal</comment></data>
+  <data name="Journal_Empty" xml:space="preserve"><value>What Proofread finds in your writing is recorded here, so you can see your weak points and improve. You haven't proofread anything yet.</value><comment>o.jEmpty</comment></data>
+  <data name="Journal_Top" xml:space="preserve"><value> Most frequent: {0}.</value><comment>o.jTop</comment></data>
+  <data name="Journal_Rule" xml:space="preserve"><value>The rule: </value><comment>o.rule</comment></data>
+  <data name="Journal_Recent" xml:space="preserve"><value>Recent mistakes</value><comment>o.recentMistakes</comment></data>
+  <data name="Journal_ExamplesOf" xml:space="preserve"><value>Examples from your writing — {0}</value><comment>o.examplesOf</comment></data>
+  <data name="Journal_Save" xml:space="preserve"><value>Record my mistakes</value><comment>o.saveMistakes</comment></data>
+  <data name="Journal_SaveHint" xml:space="preserve"><value>Kept on your device only. Your 3 most frequent mistake types are sent with proofreading requests, so the AI explains them more clearly.</value><comment>o.saveMistakesHint</comment></data>
+  <data name="Journal_Clear" xml:space="preserve"><value>Clear the journal</value><comment>o.clearJournal</comment></data>
+  <data name="Journal_StartOver" xml:space="preserve"><value>Start over</value><comment>o.startOver</comment></data>
+  <data name="Journal_Cleared" xml:space="preserve"><value>Mistake journal cleared</value><comment>new in Lamha 3, a draft (2026-10-25): Clear the journal offers Undo, as History does; worded as p.histCleared</comment></data>
+  <data name="Category_other" xml:space="preserve"><value>Other</value><comment>CATEGORIES.other.label</comment></data>
+  <data name="Category_articles_Tip" xml:space="preserve"><value>Use a/an with a singular countable noun the first time you mention it, and the for something known or already mentioned. Don't put the before general nouns: Life is short, not The life is short.</value><comment>CATEGORIES.articles.tip</comment></data>
+  <data name="Category_prepositions_Tip" xml:space="preserve"><value>Prepositions often don't translate word for word: in for months, years and cities; on for days and dates; at for times and exact places. Some verbs take no preposition: discuss the plan, not discuss about the plan.</value><comment>CATEGORIES.prepositions.tip</comment></data>
+  <data name="Category_verb_tense_Tip" xml:space="preserve"><value>Use the past simple for something finished at a known time (I finished yesterday), and the present perfect for something with an effect now or no set time (I have finished). Don't use the continuous with state verbs: I know, not I am knowing.</value><comment>CATEGORIES.verb_tense.tip</comment></data>
+  <data name="Category_agreement_Tip" xml:space="preserve"><value>With he / she / it or a singular noun, the present-tense verb takes s: She works, The team is. With plurals it doesn't: They work, The results are.</value><comment>CATEGORIES.agreement.tip</comment></data>
+  <data name="Category_plurals_Tip" xml:space="preserve"><value>Use the plural after numbers and words like many / several / one of the: three days, one of the best places. Some nouns have no plural: information, advice, equipment.</value><comment>CATEGORIES.plurals.tip</comment></data>
+  <data name="Category_word_choice_Tip" xml:space="preserve"><value>Literal translations give words that are correct but unnatural. Learn common combinations as a whole: make a decision, not do a decision; take a photo, not make a photo.</value><comment>CATEGORIES.word_choice.tip</comment></data>
+  <data name="Category_spelling_Tip" xml:space="preserve"><value>Watch words that sound alike: their / there / they're, your / you're, its / it's.</value><comment>CATEGORIES.spelling.tip</comment></data>
+  <data name="Category_punctuation_Tip" xml:space="preserve"><value>Start sentences, names, days, months and I with a capital letter. Put a space after commas and full stops, not before them.</value><comment>CATEGORIES.punctuation.tip</comment></data>
+  <data name="Category_word_order_Tip" xml:space="preserve"><value>Adjectives come before the noun (a big house), and indirect questions use statement order: Can you tell me where the station is, not where is the station.</value><comment>CATEGORIES.word_order.tip</comment></data>
+  <data name="Category_sentence_structure_Tip" xml:space="preserve"><value>English sentences are shorter than Arabic ones. Don't join two full sentences with just a comma; use a full stop or and / but / so / because.</value><comment>CATEGORIES.sentence_structure.tip</comment></data>
+  <data name="Journal_Summary" xml:space="preserve"><value>You proofread {0} and {1} found.{2} Click a type to see its rule and examples from your writing.</value><comment>o.jSummary, a function in Lamha 2 (Arabic counting), ported by hand: {0} the texts, {1} the mistakes, {2} Journal_Top or nothing</comment></data>
+  <data name="Journal_TextsOne" xml:space="preserve"><value>1 text</value><comment>o.jSummary, ported by hand: 1 text</comment></data>
+  <data name="Journal_TextsTwo" xml:space="preserve"><value>2 texts</value><comment>o.jSummary, ported by hand: 2 texts</comment></data>
+  <data name="Journal_TextsFew" xml:space="preserve"><value>{0} texts</value><comment>o.jSummary, ported by hand: 3 to 10 texts</comment></data>
+  <data name="Journal_TextsMany" xml:space="preserve"><value>{0} texts</value><comment>o.jSummary, ported by hand: 0, or 11 texts or more</comment></data>
+  <data name="Journal_MistakesOne" xml:space="preserve"><value>1 mistake was</value><comment>o.jSummary, ported by hand: 1 mistake</comment></data>
+  <data name="Journal_MistakesTwo" xml:space="preserve"><value>2 mistakes were</value><comment>o.jSummary, ported by hand: 2 mistakes</comment></data>
+  <data name="Journal_MistakesFew" xml:space="preserve"><value>{0} mistakes were</value><comment>o.jSummary, ported by hand: 3 to 10 mistakes</comment></data>
+  <data name="Journal_MistakesMany" xml:space="preserve"><value>{0} mistakes were</value><comment>o.jSummary, ported by hand: 0, or 11 mistakes or more</comment></data>
   <data name="Today_Label" xml:space="preserve"><value>Today</value><comment>td.label</comment></data>
   <data name="Today_Ring" xml:space="preserve"><value>{0} of {1}</value><comment>td.ring</comment></data>
   <data name="Today_Progress" xml:space="preserve"><value>{0} of {1} today</value><comment>td.progress</comment></data>

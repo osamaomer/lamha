@@ -53,6 +53,44 @@
   <data name="History_NoResults" xml:space="preserve"><value>لا نتائج</value><comment>d.noResults</comment></data>
   <data name="History_Empty" xml:space="preserve"><value>لا توجد كلمات بعد</value><comment>rv.emptyTitle</comment></data>
   <data name="History_EmptyHint" xml:space="preserve"><value>تظهر هنا كل كلمة تبحث عنها، مرتّبة حسب اليوم.</value><comment>new in Lamha 3, approved with the History page 2026-10-25</comment></data>
+  <data name="Write_Placeholder" xml:space="preserve"><value>اكتب رسالتك هنا بالإنجليزية — أو بالعربية لتحويلها إلى إنجليزية طبيعية…</value><comment>p.draftPlaceholder</comment></data>
+  <data name="Tool_ImproveShort" xml:space="preserve"><value>تحسين</value><comment>tool.improveShort</comment></data>
+  <data name="Tool_ToEnglishShort" xml:space="preserve"><value>بالإنجليزية</value><comment>tool.toEnglishShort</comment></data>
+  <data name="Write_UseIt" xml:space="preserve"><value>استبدال</value><comment>write.useIt</comment></data>
+  <data name="Write_UseItTitle" xml:space="preserve"><value>ضع النتيجة في مربع الكتابة لتكمل عليها</value><comment>write.useItTitle</comment></data>
+  <data name="Write_TopMistake" xml:space="preserve"><value>أكثر أخطائك: </value><comment>write.topMistake</comment></data>
+  <data name="Write_LearnRule" xml:space="preserve"><value> ({0}) — اعرف القاعدة ←</value><comment>write.learnRule</comment></data>
+  <data name="Journal_Title" xml:space="preserve"><value>سجل أخطائي</value><comment>o.journal</comment></data>
+  <data name="Journal_Empty" xml:space="preserve"><value>يُسجَّل هنا ما يجده «التدقيق اللغوي» في كتابتك، لتعرف نقاط ضعفك وتتحسّن. لم تدقّق أي نص بعد.</value><comment>o.jEmpty</comment></data>
+  <data name="Journal_Top" xml:space="preserve"><value> أكثر أخطائك: {0}.</value><comment>o.jTop</comment></data>
+  <data name="Journal_Rule" xml:space="preserve"><value>القاعدة: </value><comment>o.rule</comment></data>
+  <data name="Journal_Recent" xml:space="preserve"><value>آخر الأخطاء</value><comment>o.recentMistakes</comment></data>
+  <data name="Journal_ExamplesOf" xml:space="preserve"><value>أمثلة من كتابتك — {0}</value><comment>o.examplesOf</comment></data>
+  <data name="Journal_Save" xml:space="preserve"><value>تسجيل أخطائي</value><comment>o.saveMistakes</comment></data>
+  <data name="Journal_SaveHint" xml:space="preserve"><value>يُحفظ على جهازك فقط. تُرسَل أكثر ٣ أنواع تكرارًا مع طلب التدقيق ليشرحها الذكاء الاصطناعي بوضوح أكبر.</value><comment>o.saveMistakesHint</comment></data>
+  <data name="Journal_Clear" xml:space="preserve"><value>مسح السجل</value><comment>o.clearJournal</comment></data>
+  <data name="Journal_StartOver" xml:space="preserve"><value>البدء من جديد</value><comment>o.startOver</comment></data>
+  <data name="Journal_Cleared" xml:space="preserve"><value>مُسح سجل أخطائي</value><comment>new in Lamha 3, a draft (2026-10-25): Clear the journal offers Undo, as History does; worded as p.histCleared</comment></data>
+  <data name="Category_other" xml:space="preserve"><value>أخرى</value><comment>CATEGORIES.other.label</comment></data>
+  <data name="Category_articles_Tip" xml:space="preserve"><value>استخدم a/an مع الاسم المفرد المعدود عند ذكره أول مرة، و the لشيء معروف أو ذُكر من قبل. لا تضع the قبل الأسماء العامة: Life is short وليس The life is short.</value><comment>CATEGORIES.articles.tip</comment></data>
+  <data name="Category_prepositions_Tip" xml:space="preserve"><value>حروف الجر لا تُترجم حرفيًا من العربية: in للشهور والسنوات والمدن، on للأيام والتواريخ، at للساعات والأماكن المحددة. وبعض الأفعال لا تأخذ حرف جر: discuss the plan وليس discuss about the plan.</value><comment>CATEGORIES.prepositions.tip</comment></data>
+  <data name="Category_verb_tense_Tip" xml:space="preserve"><value>الماضي البسيط لحدث انتهى في وقت محدد (I finished yesterday)، والمضارع التام لحدث له أثر الآن أو بلا وقت محدد (I have finished). ولا تستخدم المضارع المستمر مع أفعال الحالة: I know وليس I am knowing.</value><comment>CATEGORIES.verb_tense.tip</comment></data>
+  <data name="Category_agreement_Tip" xml:space="preserve"><value>مع he / she / it أو اسم مفرد يأخذ الفعل في المضارع s: She works, The team is. ومع الجمع بدون s: They work, The results are.</value><comment>CATEGORIES.agreement.tip</comment></data>
+  <data name="Category_plurals_Tip" xml:space="preserve"><value>بعد الأعداد وكلمات مثل many / several / one of the يأتي الجمع: three days, one of the best places. وبعض الكلمات لا تُجمع: information, advice, equipment.</value><comment>CATEGORIES.plurals.tip</comment></data>
+  <data name="Category_word_choice_Tip" xml:space="preserve"><value>الترجمة الحرفية من العربية تُنتج كلمات صحيحة لكنها غير طبيعية. تعلّم التراكيب الشائعة كاملة: make a decision وليس do a decision، و take a photo وليس make a photo.</value><comment>CATEGORIES.word_choice.tip</comment></data>
+  <data name="Category_spelling_Tip" xml:space="preserve"><value>انتبه للكلمات المتشابهة في النطق: their / there / they're، و your / you're، و its / it's.</value><comment>CATEGORIES.spelling.tip</comment></data>
+  <data name="Category_punctuation_Tip" xml:space="preserve"><value>ابدأ الجملة وأسماء الأعلام والأيام والشهور و I بحرف كبير. وضع مسافة بعد الفاصلة والنقطة، لا قبلهما.</value><comment>CATEGORIES.punctuation.tip</comment></data>
+  <data name="Category_word_order_Tip" xml:space="preserve"><value>الصفة قبل الاسم (a big house)، والسؤال غير المباشر بترتيب الجملة الخبرية: Can you tell me where the station is وليس where is the station.</value><comment>CATEGORIES.word_order.tip</comment></data>
+  <data name="Category_sentence_structure_Tip" xml:space="preserve"><value>الجمل الإنجليزية أقصر من العربية. لا تربط جملتين كاملتين بفاصلة فقط؛ استخدم نقطة أو and / but / so / because.</value><comment>CATEGORIES.sentence_structure.tip</comment></data>
+  <data name="Journal_Summary" xml:space="preserve"><value>دقّقت {0} ووُجد فيها {1}.{2} اضغط نوعًا لترى قاعدته وأمثلة من كتابتك.</value><comment>o.jSummary, a function in Lamha 2 (Arabic counting), ported by hand: {0} the texts, {1} the mistakes, {2} Journal_Top or nothing</comment></data>
+  <data name="Journal_TextsOne" xml:space="preserve"><value>نصًّا واحدًا</value><comment>o.jSummary, ported by hand: 1 text</comment></data>
+  <data name="Journal_TextsTwo" xml:space="preserve"><value>نصّين</value><comment>o.jSummary, ported by hand: 2 texts</comment></data>
+  <data name="Journal_TextsFew" xml:space="preserve"><value>{0} نصوص</value><comment>o.jSummary, ported by hand: 3 to 10 texts</comment></data>
+  <data name="Journal_TextsMany" xml:space="preserve"><value>{0} نصًّا</value><comment>o.jSummary, ported by hand: 0, or 11 texts or more</comment></data>
+  <data name="Journal_MistakesOne" xml:space="preserve"><value>خطأ واحد</value><comment>o.jSummary, ported by hand: 1 mistake</comment></data>
+  <data name="Journal_MistakesTwo" xml:space="preserve"><value>خطآن</value><comment>o.jSummary, ported by hand: 2 mistakes</comment></data>
+  <data name="Journal_MistakesFew" xml:space="preserve"><value>{0} أخطاء</value><comment>o.jSummary, ported by hand: 3 to 10 mistakes</comment></data>
+  <data name="Journal_MistakesMany" xml:space="preserve"><value>{0} خطأً</value><comment>o.jSummary, ported by hand: 0, or 11 mistakes or more</comment></data>
   <data name="Today_Label" xml:space="preserve"><value>اليوم</value><comment>td.label</comment></data>
   <data name="Today_Ring" xml:space="preserve"><value>{0} من {1}</value><comment>td.ring</comment></data>
   <data name="Today_Progress" xml:space="preserve"><value>{0} من {1} اليوم</value><comment>td.progress</comment></data>

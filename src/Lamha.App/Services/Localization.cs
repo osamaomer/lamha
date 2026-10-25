@@ -44,6 +44,19 @@ public static class Localization
         return string.IsNullOrEmpty(value) ? key : value;
     }
 
+    /// <summary>
+    /// A mistake kind's name ("حروف الجر (in / on / at …)") with its English part in brackets isolated, as Lamha 2's
+    /// <c>labelParts()</c> did with a bdi: otherwise the brackets and the "…" land on the wrong side in Arabic.
+    /// </summary>
+    public static string Category(string id)
+    {
+        var name = Get("Category_" + id);
+        var open = name.LastIndexOf('(');
+        return open > 0 && name.EndsWith(')') && name[open..].Any(char.IsAsciiLetter)
+            ? name[..open] + "‎" + name[open..] + "‎" // left-to-right marks: the whole bracket reads left to right
+            : name;
+    }
+
     /// <summary>The string with its {0}, {1}… filled in; numbers as the interface writes them (<see cref="Number"/>).</summary>
     public static string Format(string key, params object[] args) =>
         string.Format(CultureInfo.CurrentCulture, Get(key), [.. args.Select(a => a is int or long ? Number(Convert.ToInt64(a, CultureInfo.InvariantCulture)) : a)]);

@@ -341,7 +341,7 @@ public sealed partial class WritingPanel : ObservableObject
         Issues = [.. result.Issues.Select(i => new IssueItem(
             i.Original,
             i.Fix,
-            i.Category == MistakeCategories.Other || !MistakeCategories.IsKnown(i.Category) ? "" : Localization.Get("Category_" + i.Category),
+            i.Category == MistakeCategories.Other || !MistakeCategories.IsKnown(i.Category) ? "" : Localization.Category(i.Category),
             i.Why,
             Scripts.IsArabicText(i.Why) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight))];
         View = WritingView.Proofread;

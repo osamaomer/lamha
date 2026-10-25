@@ -19,4 +19,7 @@ public interface IPageHost
 
     /// <summary>The Translate page, with <paramref name="text"/> in its box and looked up (a word in the history).</summary>
     void Translate(string text);
+
+    /// <summary>The Write page, with <paramref name="text"/> in its draft (Translate's "Writing tools").</summary>
+    void Write(string text);
 }

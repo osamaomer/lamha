@@ -154,6 +154,34 @@ public class WritingToolTests
     }
 
     [Fact]
+    public void TheMostFrequentMistakeIsNeverOtherAndTheJournalClears()
+    {
+        using var lamha = new TestLamha(new FakeNet(_ => Replies.Claude(Replies.Proof)), keys: ClaudeKey);
+        Assert.Null(lamha.Writing.MostFrequent());
+        lamha.Mistakes.Replace(new(4, new Dictionary<string, int> { ["other"] = 30, ["constructor"] = 50, ["spelling"] = 2 }, [], 0));
+        Assert.Equal(("spelling", 2), lamha.Writing.MostFrequent());
+        lamha.Mistakes.Replace(new(9, new Dictionary<string, int> { ["articles"] = 3, ["prepositions"] = 7, ["other"] = 30 }, [], 0));
+        Assert.Equal(("prepositions", 7), lamha.Writing.MostFrequent());
+
+        lamha.Mistakes.Record([new("articles", "a hour", "an hour", "why", lamha.Now)], lamha.Now, 200);
+        var cleared = lamha.Writing.ClearJournal();
+        var journal = lamha.Writing.Journal();
+        Assert.Equal(0, journal.Checks);
+        Assert.Empty(journal.Counts);
+        Assert.Empty(journal.Recent);
+        Assert.Equal(lamha.Now, journal.Since);
+        Assert.Null(lamha.Writing.MostFrequent());
+
+        // Undo: the journal as it was, its latest mistake included.
+        lamha.Writing.RestoreJournal(cleared);
+        journal = lamha.Writing.Journal();
+        Assert.Equal(10, journal.Checks);
+        Assert.Equal(4, journal.Counts["articles"]);
+        Assert.Equal("an hour", Assert.Single(journal.Recent).Fix);
+        Assert.Equal(("prepositions", 7), lamha.Writing.MostFrequent());
+    }
+
+    [Fact]
     public void CategoriesAreOwnKeysOnly()
     {
         Assert.False(MistakeCategories.IsKnown("constructor"));

@@ -120,6 +120,46 @@ public sealed class WritingService(AiService ai, SettingsService settings, IMist
         .Take(3)
         .Select(c => MistakeCategories.PromptName(c.Key)));
 
+    /// <summary>The mistake journal as it is now.</summary>
+    public MistakeJournal Journal() => journal.Read();
+
+    /// <summary>
+    /// The user's most frequent mistake kind and how often it was found, for the line under the Write page's box;
+    /// never "other", and null when there's none yet (Lamha 2's <c>renderWeak()</c> in popup.js).
+    /// </summary>
+    public (string Category, int Count)? MostFrequent()
+    {
+        var top = journal.Read().Counts
+            .Where(c => c.Key != MistakeCategories.Other && MistakeCategories.IsKnown(c.Key) && c.Value > 0)
+            .OrderByDescending(c => c.Value)
+            .FirstOrDefault();
+        return top.Key is null ? null : (top.Key, top.Value);
+    }
+
+    /// <summary>
+    /// Clear the journal (Lamha 2's, in its Settings): the statistics start again from now. Returns the journal as it
+    /// was, for Undo.
+    /// </summary>
+    public MistakeJournal ClearJournal() => ReplaceJournal(MistakeJournal.Empty(time.GetUtcNow().ToUnixTimeMilliseconds()));
+
+    /// <summary>Puts back a journal <see cref="ClearJournal"/> returned (Undo).</summary>
+    public void RestoreJournal(MistakeJournal cleared) => ReplaceJournal(cleared);
+
+    private MistakeJournal ReplaceJournal(MistakeJournal next)
+    {
+        _journalGate.Wait();
+        try
+        {
+            var before = journal.Read();
+            journal.Replace(next);
+            return before;
+        }
+        finally
+        {
+            _journalGate.Release();
+        }
+    }
+
     /// <summary>The changes that are changes, each with a known category ("other" when the model made one up).</summary>
     private static List<Issue> Issues(JsonNode? node) => [.. (node as JsonArray ?? [])
         .OfType<JsonObject>()

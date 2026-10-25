@@ -40,6 +40,7 @@ public sealed partial class MainWindow : Window, IPageHost
     private readonly Brain _brain;
     private readonly string _lookupKeys;
     private TranslatePage? _translate;
+    private WritePage? _write;
     private HistoryPage? _history;
     private bool _choosing;
 
@@ -75,12 +76,20 @@ public sealed partial class MainWindow : Window, IPageHost
             {
                 translate.FocusBox();
             }
+            else if (PageHost.Content is WritePage write)
+            {
+                write.FocusDraft();
+            }
             else
             {
                 (FooterList.SelectedItem is null ? PageList : FooterList).Focus(FocusState.Pointer);
             }
         };
-        Closed += (_, _) => _translate?.ViewModel.Unload();
+        Closed += (_, _) =>
+        {
+            _translate?.ViewModel.Unload();
+            _write?.ViewModel.Unload();
+        };
     }
 
     public MainViewModel ViewModel { get; }
@@ -185,6 +194,12 @@ public sealed partial class MainWindow : Window, IPageHost
         }
     }
 
+    public void Write(string text)
+    {
+        Go("write");
+        _write?.ViewModel.Use(text);
+    }
+
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
 
     /// <summary>One page is open across both lists: choosing in one clears the other.</summary>
@@ -218,6 +233,11 @@ public sealed partial class MainWindow : Window, IPageHost
                 _translate ??= new TranslatePage(new TranslateViewModel(_brain, this, _lookupKeys));
                 _translate.ViewModel.Refresh();
                 PageHost.Content = _translate;
+                break;
+            case "write":
+                _write ??= new WritePage(new WriteViewModel(_brain, this));
+                _write.ViewModel.Refresh();
+                PageHost.Content = _write;
                 break;
             case "history":
                 _history ??= new HistoryPage(new HistoryViewModel(_brain, this));
