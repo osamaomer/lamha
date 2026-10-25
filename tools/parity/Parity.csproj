@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The parity tool's Lamha 3 half: runs Core's lookups for parity.mjs, which answers every request it makes exactly as
+       it answered Lamha 2's. Start it through parity.mjs (node tools/parity/parity.mjs), not on its own. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Lamha.Tools.Parity</RootNamespace>
+    <IsAotCompatible>false</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Lamha.Core\Lamha.Core.csproj" />
+    <ProjectReference Include="..\..\src\Lamha.Data\Lamha.Data.csproj" />
+  </ItemGroup>
+</Project>
