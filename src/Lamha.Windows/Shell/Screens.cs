@@ -3,6 +3,7 @@ using global::Windows.Win32.Foundation;
 using global::Windows.Win32.Graphics.Dwm;
 using global::Windows.Win32.Graphics.Gdi;
 using global::Windows.Win32.UI.HiDpi;
+using global::Windows.Win32.UI.WindowsAndMessaging;
 using Lamha.Core.Layout;
 
 namespace Lamha.Windows.Shell;
@@ -41,6 +42,19 @@ public static unsafe class Screens
     {
         var preference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
         PInvoke.DwmSetWindowAttribute((HWND)hwnd, DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE, &preference, sizeof(DWM_WINDOW_CORNER_PREFERENCE));
+    }
+
+    /// <summary>
+    /// Lays a window out right to left (Arabic): Windows then puts its minimise, maximise and close buttons on the left,
+    /// as in Windows' own Arabic programs.
+    /// </summary>
+    public static void LayOutRightToLeft(nint hwnd)
+    {
+        var window = (HWND)hwnd;
+        var style = PInvoke.GetWindowLong(window, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+        PInvoke.SetWindowLong(window, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, style | (int)WINDOW_EX_STYLE.WS_EX_LAYOUTRTL);
+        PInvoke.SetWindowPos(window, HWND.Null, 0, 0, 0, 0,
+            SET_WINDOW_POS_FLAGS.SWP_FRAMECHANGED | SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE);
     }
 
     /// <summary>

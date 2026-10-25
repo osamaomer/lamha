@@ -34,6 +34,11 @@
 
   <!-- The card (phase 4) -->
   <data name="Common_Settings" xml:space="preserve"><value>Settings</value><comment>common.settings</comment></data>
+  <data name="Main_Translate" xml:space="preserve"><value>Translate</value><comment>p.tabTranslate</comment></data>
+  <data name="Main_Write" xml:space="preserve"><value>Write</value><comment>p.tabWrite</comment></data>
+  <data name="Main_Review" xml:space="preserve"><value>Review</value><comment>p.tabReview</comment></data>
+  <data name="Main_History" xml:space="preserve"><value>History</value><comment>new in Lamha 3, approved with the main window's design 2026-10-25</comment></data>
+  <data name="Main_Clipboard" xml:space="preserve"><value>Clipboard</value><comment>d.trayClipboard</comment></data>
   <data name="Common_Retry" xml:space="preserve"><value>Try again</value><comment>common.retry</comment></data>
   <data name="Common_Copy" xml:space="preserve"><value>Copy</value><comment>common.copy</comment></data>
   <data name="Lang_ar" xml:space="preserve"><value>Arabic</value><comment>lang.ar</comment></data>

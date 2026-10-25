@@ -25,6 +25,9 @@ public sealed class IdleMemory
             _timer.Stop();
             if (_open == 0)
             {
+                // First what .NET keeps for reuse after a window's objects are gone: an aggressive collection gives it
+                // back to Windows, so commit goes down too (the trim alone only moves pages out of the working set).
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
                 ProcessMemory.TrimIdle();
                 AppLog.Info("idle: memory handed back to Windows");
             }

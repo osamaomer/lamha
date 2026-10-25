@@ -1,5 +1,6 @@
 # How much memory Lamha 3 takes, measured from outside the way Task Manager sees it ("Memory" = private working set),
-# plus commit (private bytes). Runs the app's --measure timeline: tray, card open, card closed, then Lamha quits.
+# plus commit (private bytes). Runs the app's --measure timeline: tray, card open and closed, main window open and
+# closed, then Lamha quits.
 #
 #   pwsh tools/Measure/measure.ps1                          the published build (artifacts/publish/win-x64)
 #   pwsh tools/Measure/measure.ps1 -Exe path\to\Lamha.exe   another build
@@ -14,11 +15,14 @@ param(
 
 $ErrorActionPreference = "Stop"
 # MB. Task Manager's number drops to almost nothing once idle memory is handed back to Windows, so commit (the memory
-# Lamha actually holds) has its own budget: it's the honest one. Set from phase 0's measurements (docs/native-plan.md).
+# Lamha actually holds) has its own budget: it's the honest one. Set from phase 0's measurements (docs/native-plan.md);
+# the main window's in decision 0013 (provisional until its pages are built).
 $budgets = [ordered]@{
   "tray"        = @{ TaskManager = 35; Commit = 55 }
   "card open"   = @{ TaskManager = 70; Commit = 85 }
   "card closed" = @{ TaskManager = 45; Commit = 85 }
+  "main window open"   = @{ TaskManager = 90; Commit = 110 }
+  "main window closed" = @{ TaskManager = 45; Commit = 95 }
 }
 $exe = (Resolve-Path $Exe).Path
 
@@ -28,8 +32,9 @@ function Read-Memory($id) {
   [pscustomobject]@{ TaskManager = [math]::Round($c.WorkingSetPrivate / 1MB); Commit = [math]::Round($c.PrivateBytes / 1MB) }
 }
 
-# The app's timeline (Services/MeasureTimeline.cs): card at 20 s, closed at 35 s, idle memory handed back 5 s later, quit at 60 s.
-$samples = [ordered]@{ "tray" = 15; "card open" = 30; "card closed" = 55 }
+# The app's timeline (Services/MeasureTimeline.cs): card at 20 s, closed at 35 s, main window at 60 s, closed at 75 s
+# (idle memory is handed back 5 s after each closes), quit at 100 s.
+$samples = [ordered]@{ "tray" = 15; "card open" = 30; "card closed" = 55; "main window open" = 70; "main window closed" = 95 }
 
 # A profile of its own: the measurement never reads or writes the user's real data (lamha.db, keys, the startup entry).
 $profile = Join-Path ([IO.Path]::GetTempPath()) ("lamha-measure-" + [guid]::NewGuid().ToString("N"))

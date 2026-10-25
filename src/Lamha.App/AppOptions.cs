@@ -24,7 +24,8 @@ public enum CardLifetime
 /// </param>
 /// <param name="Language"><c>--lang=ar</c> or <c>--lang=en</c>: the interface language for this run, not saved.</param>
 /// <param name="Theme"><c>--theme=light</c> or <c>--theme=dark</c>: the windows' theme for this run, not saved.</param>
-public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null)
+/// <param name="Page"><c>--page=translate</c> (write, review, history, clipboard, settings): the main window on that page at start, for screenshots.</param>
+public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null)
 {
     public static AppOptions FromArgs(IReadOnlyList<string> args)
     {
@@ -34,7 +35,8 @@ public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string?
         var sample = Value(args, "--sample=");
         var language = Value(args, "--lang=") is "ar" or "en" ? Value(args, "--lang=") : null;
         var theme = Value(args, "--theme=") is "light" or "dark" ? Value(args, "--theme=") : null;
-        return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language, theme);
+        var page = Value(args, "--page=");
+        return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language, theme, string.IsNullOrWhiteSpace(page) ? null : page);
     }
 
     private static string? Value(IReadOnlyList<string> args, string name) =>

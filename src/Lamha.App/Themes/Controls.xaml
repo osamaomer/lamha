@@ -438,4 +438,48 @@
     <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
     <Setter Property="Padding" Value="16,12" />
   </Style>
+
+  <!-- A page in the main window's side pane: Windows' navigation item (36 px, 4 px corners, the selection mark at
+       the start) in Lamha's colours, on a ListView so Lamha's line icons can be its icons -->
+  <Style x:Key="LamhaNavItemStyle" TargetType="ListViewItem">
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+    <Setter Property="Margin" Value="4,2" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="MinHeight" Value="36" />
+    <Setter Property="Height" Value="36" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+    <Setter Property="FocusVisualMargin" Value="0" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListViewItem">
+          <ListViewItemPresenter
+              Control.IsTemplateFocusTarget="True"
+              ContentMargin="{TemplateBinding Padding}"
+              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+              CornerRadius="{TemplateBinding CornerRadius}"
+              FocusVisualMargin="{TemplateBinding FocusVisualMargin}"
+              SelectionCheckMarkVisualEnabled="False"
+              SelectionIndicatorVisualEnabled="True"
+              SelectionIndicatorMode="Inline"
+              SelectionIndicatorCornerRadius="1.5"
+              SelectionIndicatorBrush="{ThemeResource LamhaAccentBrush}"
+              SelectionIndicatorPointerOverBrush="{ThemeResource LamhaAccentBrush}"
+              SelectionIndicatorPressedBrush="{ThemeResource LamhaAccentBrush}"
+              PointerOverBackground="{ThemeResource LamhaNavHoverBrush}"
+              PointerOverForeground="{ThemeResource LamhaTextBrush}"
+              PressedBackground="{ThemeResource LamhaNavHoverBrush}"
+              SelectedBackground="{ThemeResource LamhaNavSelectedBrush}"
+              SelectedForeground="{ThemeResource LamhaNavSelectedTextBrush}"
+              SelectedPointerOverBackground="{ThemeResource LamhaNavSelectedBrush}"
+              SelectedPressedBackground="{ThemeResource LamhaNavSelectedBrush}"
+              DisabledOpacity="0.45" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
 </ResourceDictionary>

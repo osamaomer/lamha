@@ -26,6 +26,10 @@ public enum Glyph
     Sparkle,
     Bookmark,
     Pin,
+    Write,
+    Review,
+    History,
+    Clipboard,
 }
 
 /// <summary>
@@ -64,6 +68,11 @@ public sealed partial class LineIcon : UserControl
         [Glyph.Bookmark] = ["M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"],
         // Phase 1's card design (new in Lamha 3).
         [Glyph.Pin] = ["M12 17v5", "M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"],
+        // Phase 1's main window design: its pages (new in Lamha 3).
+        [Glyph.Write] = ["M12 20h9", "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"],
+        [Glyph.Review] = ["M2 6h14a2 2 0 0 1 2 2v12H4a2 2 0 0 1-2-2z", "M6 2h14a2 2 0 0 1 2 2v12"],
+        [Glyph.History] = ["M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5", "M12 7v5l3 2"],
+        [Glyph.Clipboard] = ["M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z", "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"],
     };
 
     private readonly Canvas _canvas = new() { Width = 24, Height = 24 };

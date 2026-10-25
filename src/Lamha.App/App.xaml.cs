@@ -11,8 +11,8 @@ namespace Lamha.App;
 
 /// <summary>
 /// Lamha lives in the tray: no window at start, only the tray icon, the shortcuts and the clipboard listener (while
-/// clipboard history is on). Windows are created when they open. Phase 3: the brain wired in, the lookup and writing
-/// shortcuts, clipboard history, the tray menu, starting with Windows and the accent colour, on the prototype card.
+/// clipboard history is on). Windows are created when they open: the card from the shortcuts, the main window from
+/// the tray icon or by starting Lamha again.
 /// </summary>
 public partial class App : Application
 {
@@ -30,6 +30,7 @@ public partial class App : Application
     private ClipboardService? _clipboard;
     private TrayService? _tray;
     private CardService? _card;
+    private MainWindowService? _main;
 
     public App(AppOptions options, AppInstance instance)
     {
@@ -66,6 +67,8 @@ public partial class App : Application
             Theme = _options.Theme,
         };
 
+        _main = new MainWindowService(_brain, idle) { Theme = _options.Theme };
+
         _hotkeys = new Hotkeys(_messages);
         ShortcutInfo[] shortcuts =
         [
@@ -73,19 +76,24 @@ public partial class App : Application
             Register(WriteHotkey, "Tray_ShortcutWrite", CardMode.Write),
         ];
 
-        _tray = new TrayService(_messages, _brain.Settings, _clipboard, startup, shortcuts, _card.ShowSample, Quit);
+        _tray = new TrayService(_messages, _brain.Settings, _clipboard, startup, shortcuts, () => _main.Show(), _card.ShowSample, Quit);
         var taken = shortcuts.Where(s => !s.Registered).Select(s => s.Keys.ToString()).ToList();
         if (taken.Count > 0)
         {
             Notify(Localization.Get("Note_HotkeyTaken"), Localization.Format("Note_HotkeyTakenBody", string.Join(Localization.Get("Note_And"), taken)));
         }
 
-        // A second start of Lamha lands here (on a background thread). Phase 4: it opens the main window.
-        _instance.Activated += (_, _) => queue.TryEnqueue(_card.ShowSample);
+        // A second start of Lamha lands here (on a background thread): it opens the main window.
+        _instance.Activated += (_, _) => queue.TryEnqueue(() => _main.Show());
+
+        if (_options.Page is { } page)
+        {
+            _main.Show(page);
+        }
 
         if (_options.Measure)
         {
-            MeasureTimeline.Start(queue, _card, Quit);
+            MeasureTimeline.Start(queue, _card, _main, Quit);
         }
         else if (_brain.Settings.Current.UseContext)
         {
@@ -107,6 +115,7 @@ public partial class App : Application
     private void Quit()
     {
         AppLog.Info("quit");
+        _main?.Dispose();
         _card?.Dispose();
         _hotkeys?.Dispose();
         _clipboard?.Dispose();

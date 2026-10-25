@@ -97,8 +97,8 @@ No web view anywhere in 3.0. That alone removes the biggest memory risk.
    |---|---|---|---|
    | In the tray, just started | ~150 · ~320 MB | 29 · 46 MB | **35 / 55 MB** |
    | Card open after a lookup | ~165 · ~330 MB | 55 · 73 MB | **70 / 85 MB** |
-   | Main window open | ~155 · ~313 MB | not built yet | **90 / 110 MB** (to confirm in phase 4) |
-   | Back in the tray after use | ~165 · ~355 MB | ~0 after the idle trim · 73 MB | **45 / 85 MB** |
+   | Main window open | ~155 · ~313 MB | not built yet (its frame: 18 · 86 MB) | **90 / 110 MB** (to confirm in phase 4) |
+   | Back in the tray after use | ~165 · ~355 MB | ~0 after the idle trim · 73 MB | **45 / 85 MB** after the card; **45 / 95 MB** after the main window, provisional ([decision 0013](decisions/0013-main-window-memory.md)) |
 
    Measured in phase 0 ([decision 0008](decisions/0008-memory-budgets.md)).
 5. **Idle memory goes back to Windows** 5 seconds after the last window closes (`Services/IdleMemory.cs`). That's why Task Manager shows almost nothing in the tray, and why commit has its own budget: it's the honest number.
@@ -470,7 +470,12 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
 - **Narrator:** the meaning chips were named by their gloss, not the word on them; the foot links and the error's Try again had no name.
 - **Measured** (NativeAOT): tray 0 / 49 MB, card open 40 / 84 MB, card closed 1 / 84 MB, within budget but 1 MB under the card's 85 MB commit budget. Applying the card's window settings costs about 3 MB of it.
 
-**The first beta, v3.0.0-beta.1,** was released from `native/phase-4` before the checks above, so it has the published card's title bar; beta.2, from `main`, has the fixes. Listen waits for speech (phase 5). **Next:** the main window.
+**The first beta, v3.0.0-beta.1,** was released from `native/phase-4` before the checks above, so it has the published card's title bar; beta.2, from `main`, has the fixes. Listen waits for speech (phase 5).
+
+**The main window** (built from the signed-off design, a slice at a time on `lamha3/main-window`; `Windows/MainWindow`, `ViewModels/Main`, `Services/MainWindowService`):
+- **The frame** (2026-10-25): Mica, its own title bar (Lamha's mark and name; Windows' buttons at its end, on the left in Arabic, where the window is laid out right to left as Windows' Arabic programs are), the pages on the start side (Translate, Write, Review, History, Clipboard; Settings at the foot) and the page's title on Windows' content layer. The side pane is a list in Windows' navigation style rather than `NavigationView`, so its icons are Lamha's line icons as designed; narrower than 720 px it folds to icons, with the names as tooltips. Opened by clicking the tray icon or starting Lamha again (until now both opened the sample card), in front of other windows; closing it ends it. `--page=translate` (or write, review, history, clipboard, settings) opens it at start for screenshots.
+- **Seen** in both languages and themes, Debug and published, wide and folded; in Arabic the title bar drags, its buttons answer on the left, and clicks and UI Automation land where things are drawn. **Measured:** open 18 / 86 MB, back in the tray after it 4 / 86 MB, within the provisional budget (decision 0013, which also gives .NET's spare memory back when Lamha goes idle: the card closed is 82 MB now).
+- **Next:** Translate + Today, then History, Write, Review and the Clipboard page.
 
 ## Moving users from Lamha 2
 

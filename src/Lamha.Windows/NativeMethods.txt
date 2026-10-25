@@ -13,6 +13,9 @@ OpenProcess
 QueryFullProcessImageName
 CloseHandle
 DwmSetWindowAttribute
+GetWindowLong
+SetWindowLong
+SetWindowPos
 DWM_WINDOW_CORNER_PREFERENCE
 ReleaseCapture
 SendMessage

@@ -10,8 +10,9 @@ public sealed record ShortcutInfo(Hotkey Keys, string LabelKey, bool Registered)
 
 /// <summary>
 /// The tray icon, its tooltip and its menu: Lamha 2's trayMenu() / trayTooltip() in main.js, with what exists so far.
-/// Opening Lamha, Review, Write and Settings come with their windows (phase 4), updates with phase 5. Until Settings
-/// exists, clipboard history and the accent colour have their switches here (Proto_ items, removed with phase 4).
+/// Clicking the icon opens the main window; the menu's Open, Review, Write and Settings come with the tray's design
+/// (phase 4), updates with phase 5. Until Settings exists, clipboard history and the accent colour have their switches
+/// here (Proto_ items, removed with phase 4).
 /// </summary>
 public sealed partial class TrayService : IDisposable
 {
@@ -29,6 +30,7 @@ public sealed partial class TrayService : IDisposable
         ClipboardService clipboard,
         StartWithWindows startup,
         IReadOnlyList<ShortcutInfo> shortcuts,
+        Action open,
         Action sample,
         Action quit)
     {
@@ -40,7 +42,7 @@ public sealed partial class TrayService : IDisposable
         _quit = quit;
         _icon = new TrayIcon(window, Path.Combine(AppContext.BaseDirectory, "Assets", "Lamha.ico"), Tooltip());
         _icon.SetMenu(Menu);
-        _icon.Invoked += sample; // phase 4: opens the main window
+        _icon.Invoked += open;
         _clipboard.PauseChanged += () => _icon.SetTooltip(Tooltip());
     }
 
