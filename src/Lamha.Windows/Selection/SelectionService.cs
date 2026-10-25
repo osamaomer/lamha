@@ -94,6 +94,31 @@ public sealed class SelectionService(MessageWindow owner)
         return true;
     }
 
+    /// <summary>
+    /// The clipboard panel's paste (Lamha 2's <c>pasteClip</c>): the copy goes on the clipboard, with its formatting
+    /// unless <paramref name="html"/> is null, and stays there afterwards (like Win+V); then Ctrl+V in
+    /// <paramref name="window"/>. False when it could only be copied: the window is gone, is a terminal (no keystrokes
+    /// there, as with Replace), or refused the focus.
+    /// </summary>
+    public async Task<bool> PasteClipAsync(nint window, string text, string? html)
+    {
+        if (!ClipboardApi.WriteClip(Owner, text, html))
+        {
+            return false;
+        }
+
+        if (!ForegroundWindow.IsWindow(window) || ForegroundWindow.IsTerminal(window) || !await ForegroundWindow.FocusAsync(window).ConfigureAwait(true))
+        {
+            return false;
+        }
+
+        await Keyboard.ReleaseModifiersAsync(TimeSpan.FromMilliseconds(300)).ConfigureAwait(true);
+        await Task.Delay(40).ConfigureAwait(true);
+        Keyboard.CtrlChord(VirtualKey.V);
+        await Task.Delay(350).ConfigureAwait(true); // the program reads the clipboard now
+        return true;
+    }
+
     /// <summary>Puts <paramref name="text"/> on the clipboard as the user's own copy (Copy, or when Replace couldn't paste).</summary>
     public bool Copy(string text) => ClipboardApi.WriteText(Owner, text, keepOutOfHistory: false);
 }

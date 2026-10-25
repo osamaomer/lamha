@@ -2,16 +2,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lamha.App.Controls;
 using Lamha.App.Services;
-using Lamha.App.ViewModels.Card;
 using Lamha.Windows.Input;
 using Localization = Lamha.App.Services.Localization;
 
 namespace Lamha.App.ViewModels.Main;
 
 /// <summary>A shortcut in Settings: what it does, its keys, and Change (then the keys pressed next).</summary>
-public sealed partial class ShortcutRow(CardMode mode, string label, IRelayCommand<ShortcutRow> change) : ObservableObject
+public sealed partial class ShortcutRow(Shortcut kind, string label, IRelayCommand<ShortcutRow> change) : ObservableObject
 {
-    public CardMode Mode { get; } = mode;
+    public Shortcut Kind { get; } = kind;
 
     public string Label { get; } = label;
 
@@ -41,7 +40,7 @@ public sealed partial class ShortcutRow(CardMode mode, string label, IRelayComma
 
 /// <summary>
 /// Settings → Keyboard shortcuts (phase 1's design: each one changeable; new in Lamha 3, Lamha 2's were fixed). The
-/// quick lookup and the writing tools; Esc closes the card. The clipboard panel's shortcut comes with the panel.
+/// quick lookup, the writing tools and the clipboard panel; Esc closes the card.
 /// </summary>
 public sealed partial class ShortcutsSetupViewModel : ObservableObject
 {
@@ -51,7 +50,7 @@ public sealed partial class ShortcutsSetupViewModel : ObservableObject
     {
         _shortcuts = shortcuts;
         var change = new RelayCommand<ShortcutRow>(Start);
-        Rows = [.. shortcuts.All.Select(s => new ShortcutRow(s.Mode, Localization.Get(s.LabelKey), change))];
+        Rows = [.. shortcuts.All.Select(s => new ShortcutRow(s.Kind, Localization.Get(s.LabelKey), change))];
         Load();
     }
 
@@ -69,7 +68,7 @@ public sealed partial class ShortcutsSetupViewModel : ObservableObject
         Cancel();
         foreach (var row in Rows)
         {
-            var info = _shortcuts.All.First(s => s.Mode == row.Mode);
+            var info = _shortcuts.All.First(s => s.Kind == row.Kind);
             row.Keys = Parts(info.Keys);
             row.Status = info.Registered ? "" : Localization.Format("Note_HotkeyTakenBody", info.Keys.ToString());
             row.StatusKind = StatusKind.Bad;
@@ -108,7 +107,7 @@ public sealed partial class ShortcutsSetupViewModel : ObservableObject
 
         Capturing = null;
         row.IsCapturing = false;
-        if (_shortcuts.TryChange(row.Mode, hotkey))
+        if (_shortcuts.TryChange(row.Kind, hotkey))
         {
             row.Keys = Parts(hotkey);
             row.Status = "";

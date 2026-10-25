@@ -73,6 +73,24 @@ public sealed class ClipboardTests : IDisposable
     }
 
     [Fact]
+    public void ACopyFromTheHistoryGoesBackWithItsFormattingAndStaysOutOfClipboardHistory()
+    {
+        Assert.True(ClipboardApi.WriteClip(_owner.Handle, "bold لمحة", "<html><body><b>bold</b> لمحة</body></html>"));
+        Assert.Equal("bold لمحة", ClipboardApi.ReadText(_owner.Handle));
+        Assert.Contains("<b>bold</b> لمحة", ClipboardApi.ReadHtml(_owner.Handle, 4096), StringComparison.Ordinal);
+        var history = ClipboardApi.Register("CanIncludeInClipboardHistory");
+        Assert.Single(ClipboardApi.Save(_owner.Handle).Formats, f => f.Format == history);
+    }
+
+    [Fact]
+    public void ACopyAsPlainTextHasNoFormatting()
+    {
+        Assert.True(ClipboardApi.WriteClip(_owner.Handle, "plain", null));
+        Assert.Equal("plain", ClipboardApi.ReadText(_owner.Handle));
+        Assert.False(ClipboardApi.HasFormat("HTML Format"));
+    }
+
+    [Fact]
     public void TheUsersOwnCopiesStayInClipboardHistory()
     {
         ClipboardApi.WriteText(_owner.Handle, "Copy", keepOutOfHistory: false);

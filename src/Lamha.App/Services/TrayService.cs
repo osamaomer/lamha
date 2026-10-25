@@ -5,8 +5,9 @@ namespace Lamha.App.Services;
 
 /// <summary>
 /// The tray icon, its tooltip and its menu: Lamha 2's trayMenu() / trayTooltip() in main.js, with what exists so far.
-/// Clicking the icon opens the main window; the menu's Open, Review, Write and Settings come with the tray's design
-/// (phase 4), updates with phase 5. Clipboard history is turned on in Settings → Clipboard; the tray pauses it.
+/// Clicking the icon opens the main window; Clipboard opens the clipboard panel (nothing to paste into from here: a paste
+/// only copies). The menu's Open, Review, Write and Settings come with the tray's design (phase 4), updates with
+/// phase 5. Clipboard history is turned on in Settings → Clipboard; the tray pauses it.
 /// </summary>
 public sealed partial class TrayService : IDisposable
 {
@@ -14,6 +15,7 @@ public sealed partial class TrayService : IDisposable
     private readonly ClipboardService _clipboard;
     private readonly StartWithWindows _startup;
     private readonly ShortcutService _shortcuts;
+    private readonly Action _panel;
     private readonly Action _sample;
     private readonly Action _quit;
 
@@ -23,12 +25,14 @@ public sealed partial class TrayService : IDisposable
         StartWithWindows startup,
         ShortcutService shortcuts,
         Action open,
+        Action panel,
         Action sample,
         Action quit)
     {
         _clipboard = clipboard;
         _startup = startup;
         _shortcuts = shortcuts;
+        _panel = panel;
         _sample = sample;
         _quit = quit;
         _icon = new TrayIcon(window, Path.Combine(AppContext.BaseDirectory, "Assets", "Lamha.ico"), Tooltip());
@@ -58,6 +62,7 @@ public sealed partial class TrayService : IDisposable
     {
         var items = new List<TrayMenuItem>
         {
+            new(Localization.Get("Tray_Clipboard"), _panel),
             new(Localization.Get("Proto_Sample"), _sample),
             TrayMenuItem.Separator,
         };

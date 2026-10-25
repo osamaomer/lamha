@@ -299,6 +299,8 @@
 
     <!-- ===== Clipboard ===== -->
     <StackPanel x:Name="ClipboardSection" x:Load="{x:Bind ViewModel.IsClipboard, Mode=OneWay}" Spacing="4">
+      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,-8,0,16" MaxWidth="560" HorizontalAlignment="Left" Style="{StaticResource LamhaSecondaryTextStyle}"
+                 Text="{x:Bind ViewModel.ClipboardIntro, Mode=OneWay}" />
       <controls:SettingsCard Header="{x:Bind S.CbEnable}" Description="{x:Bind S.CbEnableHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.Clipboard.IsOn, Mode=TwoWay}" />
       </controls:SettingsCard>

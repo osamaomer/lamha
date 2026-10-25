@@ -1,6 +1,7 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Card;
 using Lamha.Core;
@@ -25,8 +26,18 @@ public enum ClipResultView
     Error,
 }
 
-/// <summary>One of Lamha's tools on the chosen copy, as a button.</summary>
-public sealed record ClipTool(ClipAction Action, string Label, IRelayCommand Run);
+/// <summary>
+/// One of Lamha's tools on the chosen copy: a button on the Clipboard page; in the clipboard panel's menu also its
+/// number (1–9 runs it), its icon and what it does in a few words (Lamha 2's clip-actions.js <c>HINTS</c>).
+/// </summary>
+public sealed record ClipTool(ClipAction Action, string Label, IRelayCommand Run)
+{
+    public string Number { get; init; } = "";
+
+    public Glyph Glyph { get; init; }
+
+    public string Hint { get; init; } = "";
+}
 
 /// <summary>
 /// A copy in the list: its text (two lines), its name, an English copy's translation, the program and when; the chosen
@@ -47,12 +58,23 @@ public sealed partial class ClipRow : ObservableObject
     /// <summary>The page, whose commands act on the chosen copy (pin, delete, copy, redo).</summary>
     public ClipboardViewModel Owner { get; }
 
+    /// <summary>The clipboard panel's number for the copy, 1–9 (Ctrl+1…9 pastes it); "" past the ninth and on the page.</summary>
+    [ObservableProperty]
+    public partial string Number { get; set; } = "";
+
+    /// <summary>What's searched for, marked in the copy's text and name.</summary>
+    [ObservableProperty]
+    public partial string Query { get; set; } = "";
+
     /// <summary>The list's first copy: no line above it.</summary>
     [ObservableProperty]
     public partial bool IsFirst { get; set; }
 
     /// <summary>The text as the copy shows it, and for the tools.</summary>
     public string FullText { get; private set; } = "";
+
+    /// <summary>"ar", "en", "mixed" or "other" (Core's <c>ClipPreview.Lang</c>).</summary>
+    public string Lang { get; private set; } = "";
 
     [ObservableProperty]
     public partial string Text { get; private set; } = "";
@@ -107,8 +129,11 @@ public sealed partial class ClipRow : ObservableObject
     // ----- a tool's result -----
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsWorking), nameof(IsResult), nameof(IsProofread), nameof(IsNoMistakes), nameof(IsDone), nameof(IsError))]
+    [NotifyPropertyChangedFor(nameof(IsIdle), nameof(IsWorking), nameof(IsResult), nameof(IsProofread), nameof(IsNoMistakes), nameof(IsDone), nameof(IsError))]
     public partial ClipResultView View { get; set; }
+
+    /// <summary>No tool has answered yet: the clipboard panel shows its menu of tools.</summary>
+    public bool IsIdle => View == ClipResultView.None;
 
     public bool IsWorking => View == ClipResultView.Working;
 
@@ -166,7 +191,8 @@ public sealed partial class ClipRow : ObservableObject
     public void Update(ClipPreview clip)
     {
         FullText = clip.Text;
-        Text = clip.Text.TrimStart()[..Math.Min(clip.Text.TrimStart().Length, 300)];
+        Lang = clip.Lang;
+        Text =clip.Text.TrimStart()[..Math.Min(clip.Text.TrimStart().Length, 300)];
         TextFlow = clip.Lang == "ar" || (clip.Lang == "mixed" && Scripts.IsArabicText(clip.Text)) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
         Label = clip.Label;
         LabelFlow = Scripts.IsArabicText(clip.Label) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
@@ -223,7 +249,9 @@ public sealed partial class ClipRow : ObservableObject
 /// <summary>
 /// The main window's Clipboard page (phase 1's design): search, All / Pinned, pause; the history, newest first with
 /// pinned copies on top; and on the chosen copy, Lamha's tools that fit it, pin and delete (Lamha 2's clipboard tab,
-/// clip-list.js and clip-actions.js). Off until the user turns clipboard history on; a banner while it's paused.
+/// clip-list.js and clip-actions.js). Off until the user turns clipboard history on; a banner while it's paused. The
+/// clipboard panel's list is the same, in its panel mode: the copies numbered 1–9, and Paste as plain text among the
+/// tools (Lamha 2's <c>mode: "panel"</c>).
 /// </summary>
 public sealed partial class ClipboardViewModel : ObservableObject
 {
@@ -235,10 +263,12 @@ public sealed partial class ClipboardViewModel : ObservableObject
 
     private readonly Brain _brain;
     private readonly ClipboardService _clipboard;
-    private readonly IPageHost _host;
+    private readonly IClipHost _host;
+    private readonly bool _panel;
     private readonly DispatcherQueue _queue;
     private readonly Dictionary<string, ClipRow> _rows = [];
     private int _shown = Page;
+    private bool _attached;
     private bool _reloading;
     private bool _reloadAgain;
     private CancellationTokenSource? _run;
@@ -251,14 +281,19 @@ public sealed partial class ClipboardViewModel : ObservableObject
 
     /// <param name="brain">Lamha's brain: clipboard history and the tools.</param>
     /// <param name="clipboard">Clipboard history's switch and pause.</param>
-    /// <param name="host">The main window.</param>
-    public ClipboardViewModel(Brain brain, ClipboardService clipboard, IPageHost host)
+    /// <param name="host">The main window, or the clipboard panel.</param>
+    /// <param name="panel">The clipboard panel's list: numbered copies, and Paste as plain text.</param>
+    public ClipboardViewModel(Brain brain, ClipboardService clipboard, IClipHost host, bool panel = false)
     {
         _brain = brain;
         _clipboard = clipboard;
         _host = host;
+        _panel = panel;
         _queue = DispatcherQueue.GetForCurrentThread();
     }
+
+    /// <summary>The clipboard panel's Paste as plain text, on this copy.</summary>
+    public event Action<ClipRow>? PlainRequested;
 
     /// <summary>Clipboard history is on (the setting); off, the page offers to turn it on.</summary>
     [ObservableProperty]
@@ -298,6 +333,7 @@ public sealed partial class ClipboardViewModel : ObservableObject
     /// <summary>The page shows: on or off, paused or not, and the list read again; it follows new copies while open.</summary>
     public void Attach()
     {
+        _attached = true;
         _brain.ClipboardHistory.Changed += OnHistoryChanged;
         _clipboard.PauseChanged += OnPauseChanged;
         _brain.Settings.Changed += OnSettingsChanged;
@@ -312,6 +348,7 @@ public sealed partial class ClipboardViewModel : ObservableObject
     /// </summary>
     public void Detach()
     {
+        _attached = false;
         _brain.ClipboardHistory.Changed -= OnHistoryChanged;
         _clipboard.PauseChanged -= OnPauseChanged;
         _brain.Settings.Changed -= OnSettingsChanged;
@@ -320,6 +357,19 @@ public sealed partial class ClipboardViewModel : ObservableObject
         Rows = [];
         Selected = null;
         _brain.ClipboardHistory.Unload();
+    }
+
+    /// <summary>
+    /// The clipboard panel opens afresh (Lamha 2's <c>reset()</c>): no search, All, the first page, and the newest
+    /// copy chosen. Before <see cref="Attach"/>, which reads the list.
+    /// </summary>
+    public void Reset()
+    {
+        Query = "";
+        PinnedOnly = false;
+        _shown = Page;
+        _chooseAt = -1;
+        _toNewest = true;
     }
 
     /// <summary>↑ / ↓ (and Page Up / Down by six) choose another copy.</summary>
@@ -332,6 +382,13 @@ public sealed partial class ClipboardViewModel : ObservableObject
 
         var at = Selected is null ? -1 : Rows.IndexOf(Selected);
         Choose(Rows[Math.Clamp(at + by, 0, Rows.Count - 1)]);
+    }
+
+    /// <summary>The copy's tools show again, without a result; a tool still working is let go.</summary>
+    public void Dismiss(ClipRow row)
+    {
+        _run?.Cancel();
+        row.View = ClipResultView.None;
     }
 
     /// <summary>A click on a copy: it's chosen, with its tools.</summary>
@@ -474,6 +531,7 @@ public sealed partial class ClipboardViewModel : ObservableObject
     {
         _shown = Page;
         _toNewest = value.Length == 0;
+        _chooseAt = value.Length == 0 ? -1 : 0; // what's typed chooses its first match (Lamha 2's sel = 0)
         Reload();
     }
 
@@ -502,6 +560,11 @@ public sealed partial class ClipboardViewModel : ObservableObject
     /// <summary>Reads the page of copies again; changes while it reads collapse into one more read (Lamha 2's).</summary>
     private void Reload()
     {
+        if (!_attached)
+        {
+            return; // read when the page or the panel shows
+        }
+
         if (_reloading)
         {
             _reloadAgain = true;
@@ -564,6 +627,8 @@ public sealed partial class ClipboardViewModel : ObservableObject
         for (var i = 0; i < rows.Count; i++)
         {
             rows[i].IsFirst = i == 0;
+            rows[i].Query = Query.Trim();
+            rows[i].Number = _panel && i < 9 ? (i + 1).ToString(CultureInfo.InvariantCulture) : "";
         }
 
         Rows = rows;
@@ -596,22 +661,51 @@ public sealed partial class ClipboardViewModel : ObservableObject
     private ClipRow NewRow(ClipPreview clip)
     {
         ClipRow? row = null;
-        var tools = ClipActions.Available(clip.Text, clip.Lang, clip.Length, panel: false)
-            .Select(a => new ClipTool(a, Localization.Get("Clipboard_" + a), new RelayCommand(() => _ = RunAsync(row!, a, fresh: false, null))))
+        var tools = ClipActions.Available(clip.Text, clip.Lang, clip.Length, _panel)
+            .Select((a, i) => new ClipTool(a, Localization.Get("Clipboard_" + a), new RelayCommand(() => _ = RunAsync(row!, a, fresh: false, null)))
+            {
+                Number = _panel && i < 9 ? Localization.Number(i + 1) : "",
+                Glyph = ToolGlyph(a),
+                Hint = _panel ? ToolHint(a) : "",
+            })
             .ToList();
         row = new ClipRow(clip, tools, this);
         return row;
     }
 
+    /// <summary>Each tool's icon (Lamha 2's clip-list.js <c>ICONS</c>).</summary>
+    private static Glyph ToolGlyph(ClipAction action) => action switch
+    {
+        ClipAction.Translate => Glyph.Translate,
+        ClipAction.English => Glyph.Sparkle,
+        ClipAction.Proofread => Glyph.Check,
+        ClipAction.Summary => Glyph.List,
+        ClipAction.Lookup => Glyph.Search,
+        ClipAction.Review => Glyph.Bookmark,
+        _ => Glyph.Text,
+    };
+
+    /// <summary>What a tool does, in a few words: "Into Arabic", "In the dictionary" (Lamha 2's <c>HINTS</c>, <c>hintFor()</c>).</summary>
+    private string ToolHint(ClipAction action) => action == ClipAction.Translate
+        ? Localization.Format("Panel_HintTranslate", Localization.LanguageName(_brain.Settings.Current.TargetLang))
+        : Localization.Get("Panel_Hint" + action);
+
     /// <summary>
-    /// A tool on the copy: Look up opens it on Translate; the others answer under the tools (Lamha 2's
-    /// <c>run()</c> in clip-actions.js, tab mode). Another tool or another copy chosen meanwhile wins.
+    /// A tool on the copy: Look up opens it on Translate (the card, from the panel); Paste as plain text is the panel's;
+    /// the others answer under the tools (Lamha 2's <c>run()</c> in clip-actions.js). Another tool or another copy
+    /// chosen meanwhile wins.
     /// </summary>
     private async Task RunAsync(ClipRow row, ClipAction action, bool fresh, string? lang)
     {
         if (action == ClipAction.Lookup)
         {
             _host.Translate(row.FullText.Trim());
+            return;
+        }
+
+        if (action == ClipAction.Plain)
+        {
+            PlainRequested?.Invoke(row);
             return;
         }
 

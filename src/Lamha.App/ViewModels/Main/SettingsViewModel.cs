@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lamha.App.Controls;
 using Lamha.App.Services;
-using Lamha.App.ViewModels.Card;
 using Lamha.Core;
 using Lamha.Core.Ai;
 using Lamha.Core.Money;
@@ -218,6 +217,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// <summary>"Select any text in any program and press Ctrl+Alt+W to proofread it…", with the keys as they are now.</summary>
     [ObservableProperty]
     public partial string AiIntro { get; private set; } = "";
+
+    /// <summary>"A history of what you copy in any program. Open it with Ctrl+Alt+V…", with the keys as they are now.</summary>
+    [ObservableProperty]
+    public partial string ClipboardIntro { get; private set; } = "";
 
     // ----- Keyboard shortcuts -----
 
@@ -456,7 +459,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         if (value == "writing")
         {
-            AiIntro = Localization.Format("Settings_AiIntro", _shortcutService.Keys(CardMode.Write).ToString());
+            AiIntro = Localization.Format("Settings_AiIntro", _shortcutService.Keys(Shortcut.Write).ToString());
             Writing.Load(_brain.Settings.Current);
         }
         else if (value == "keys")
@@ -469,6 +472,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
         else if (value == "clipboard")
         {
+            ClipboardIntro = Localization.Format("Settings_CbIntro", _shortcutService.Keys(Shortcut.Clipboard).ToString());
             Clipboard.Load(_brain.Settings.Current);
         }
         else if (value == "privacy")

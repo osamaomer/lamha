@@ -1,6 +1,7 @@
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Card;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 
@@ -14,6 +15,14 @@ public static class Show
     public static Visibility IfNot(bool value) => value ? Visibility.Collapsed : Visibility.Visible;
 
     public static bool Not(bool value) => !value;
+
+    public static Visibility IfBoth(bool first, bool second) => If(first && second);
+
+    /// <summary>Seen or not, keeping its room either way (CSS's <c>visibility: hidden</c>): the text beside it doesn't reflow.</summary>
+    public static double Opaque(bool shown) => shown ? 1 : 0;
+
+    /// <summary>What <see cref="Opaque"/> hides is hidden from Narrator too.</summary>
+    public static AccessibilityView Reachable(bool shown) => shown ? AccessibilityView.Content : AccessibilityView.Raw;
 
     public static Visibility IfText(string? value) => string.IsNullOrEmpty(value) ? Visibility.Collapsed : Visibility.Visible;
 

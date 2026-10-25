@@ -95,6 +95,79 @@ public static unsafe class Clipboard
         }
     }
 
+    /// <summary>
+    /// Puts a copy from clipboard history back on the clipboard: its text, and its formatting as "HTML Format" when it
+    /// has some (Lamha 2's <c>writeClip</c>), kept out of Windows' clipboard history (it's already in it). False when the
+    /// clipboard was busy.
+    /// </summary>
+    public static bool WriteClip(nint owner, string text, string? html)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        if (!Open(owner))
+        {
+            return false;
+        }
+
+        try
+        {
+            PInvoke.EmptyClipboard();
+            var bytes = new byte[(text.Length + 1) * sizeof(char)];
+            fixed (char* source = text)
+            {
+                new ReadOnlySpan<byte>(source, text.Length * sizeof(char)).CopyTo(bytes);
+            }
+
+            var ok = Set(CfUnicodeText, bytes);
+            if (html is { Length: > 0 } && Register("HTML Format") is var format and not 0)
+            {
+                Set(format, CfHtml(html));
+            }
+
+            MarkPrivate([]);
+            return ok;
+        }
+        finally
+        {
+            PInvoke.CloseClipboard();
+        }
+    }
+
+    /// <summary>
+    /// <paramref name="html"/> as Windows' "HTML Format": a header giving the byte offsets of the document and of the
+    /// fragment, which is the whole body (or the whole text when it has no body), in UTF-8 and ending in a zero.
+    /// </summary>
+    internal static byte[] CfHtml(string html)
+    {
+        const string Header = "Version:0.9\r\nStartHTML:{0:D10}\r\nEndHTML:{1:D10}\r\nStartFragment:{2:D10}\r\nEndFragment:{3:D10}\r\n";
+        var headerLength = string.Format(CultureInfo.InvariantCulture, Header, 0, 0, 0, 0).Length;
+
+        // A copy keeps the document between StartHTML and EndHTML (ReadHtml); a fragment of it is marked again here.
+        var body = html.IndexOf("<body", StringComparison.OrdinalIgnoreCase) is var b and >= 0 && html.IndexOf('>', b) is var open and >= 0 ? open + 1 : -1;
+        var bodyEnd = body >= 0 ? html.LastIndexOf("</body", StringComparison.OrdinalIgnoreCase) : -1;
+        string document;
+        int fragmentStart, fragmentEnd;
+        if (body >= 0 && bodyEnd >= body)
+        {
+            document = html.Insert(bodyEnd, "<!--EndFragment-->").Insert(body, "<!--StartFragment-->");
+            fragmentStart = Encoding.UTF8.GetByteCount(document.AsSpan(0, body + "<!--StartFragment-->".Length));
+            fragmentEnd = Encoding.UTF8.GetByteCount(document.AsSpan(0, bodyEnd + "<!--StartFragment-->".Length));
+        }
+        else
+        {
+            const string Open = "<html><body><!--StartFragment-->";
+            document = Open + html + "<!--EndFragment--></body></html>";
+            fragmentStart = Encoding.UTF8.GetByteCount(Open);
+            fragmentEnd = fragmentStart + Encoding.UTF8.GetByteCount(html);
+        }
+
+        var length = Encoding.UTF8.GetByteCount(document);
+        var header = string.Format(CultureInfo.InvariantCulture, Header, headerLength, headerLength + length, headerLength + fragmentStart, headerLength + fragmentEnd);
+        var bytes = new byte[headerLength + length + 1];
+        Encoding.ASCII.GetBytes(header, bytes);
+        Encoding.UTF8.GetBytes(document, bytes.AsSpan(headerLength));
+        return bytes;
+    }
+
     /// <summary>The clipboard holds the registered format <paramref name="name"/> ("HTML Format").</summary>
     public static bool HasFormat(string name)
     {

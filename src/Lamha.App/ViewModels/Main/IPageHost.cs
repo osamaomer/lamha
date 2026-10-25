@@ -8,13 +8,14 @@ public enum Answer
     Other,
 }
 
-/// <summary>What a page of the main window asks of the window.</summary>
-public interface IPageHost
+/// <summary>
+/// What clipboard history's list asks of the window it's in: the main window (its Clipboard page), or the clipboard
+/// panel.
+/// </summary>
+public interface IClipHost
 {
     /// <summary>The user's Copy: on the clipboard and in Windows' clipboard history, as any program's.</summary>
     void Copy(string text);
-
-    void OpenLink(Uri uri);
 
     /// <summary>Narrator says it.</summary>
     void Announce(string text);
@@ -25,14 +26,26 @@ public interface IPageHost
     /// </summary>
     void Toast(string text, string? action = null, Action? run = null);
 
-    /// <summary>The Translate page, with <paramref name="text"/> in its box and looked up (a word in the history).</summary>
+    /// <summary>
+    /// <paramref name="text"/> looked up: the Translate page with it in its box (a word in the history, a copy's Look
+    /// up), or the card from the clipboard panel.
+    /// </summary>
     void Translate(string text);
-
-    /// <summary>The Write page, with <paramref name="text"/> in its draft (Translate's "Writing tools").</summary>
-    void Write(string text);
 
     /// <summary>A word went into the review list or out of it: the count on Review is read again.</summary>
     void ReviewChanged();
+
+    /// <summary>Settings, at the category <paramref name="section"/> ("writing", "translation", "offline"): an error's Settings button.</summary>
+    void OpenSettings(string section);
+}
+
+/// <summary>What a page of the main window asks of the window.</summary>
+public interface IPageHost : IClipHost
+{
+    void OpenLink(Uri uri);
+
+    /// <summary>The Write page, with <paramref name="text"/> in its draft (Translate's "Writing tools").</summary>
+    void Write(string text);
 
     /// <summary>Windows' Save dialog for a JSON file named <paramref name="name"/>: the path chosen, or null.</summary>
     Task<string?> PickSaveFileAsync(string name);
@@ -45,9 +58,6 @@ public interface IPageHost
 
     /// <summary>Deletes the user's data and the API keys, and quits Lamha (Settings → Delete my data, once confirmed).</summary>
     void DeleteDataAndQuit();
-
-    /// <summary>Settings, at the category <paramref name="section"/> ("writing", "translation", "offline"): an error's Settings button.</summary>
-    void OpenSettings(string section);
 
     /// <summary>
     /// Lamha 2's question before deleting something (shared/dialog.js <c>ask()</c>): <paramref name="question"/> and the

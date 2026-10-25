@@ -19,6 +19,7 @@ public partial class App : Application
     /// <summary>The beta's shortcuts, so it runs next to Lamha 2 (which owns Alt+Shift+L / W / V) until 3.0.</summary>
     private static readonly Hotkey LookupHotkey = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, VirtualKey.L);
     private static readonly Hotkey WriteHotkey = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, VirtualKey.W);
+    private static readonly Hotkey ClipboardHotkey = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, VirtualKey.V);
 
     private readonly AppOptions _options;
     private readonly AppInstance _instance;
@@ -30,6 +31,7 @@ public partial class App : Application
     private ClipboardService? _clipboard;
     private TrayService? _tray;
     private CardService? _card;
+    private ClipPanelService? _panel;
     private MainWindowService? _main;
 
     public App(AppOptions options, AppInstance instance)
@@ -61,15 +63,30 @@ public partial class App : Application
             startup.Refresh(); // a new install folder (an update keeps it, a reinstall may not)
         }
 
-        _card = new CardService(new SelectionService(_messages), _sentences, _clipboard, _brain, _options.CardLifetime, idle, Notify)
+        var selection = new SelectionService(_messages);
+        _card = new CardService(selection, _sentences, _clipboard, _brain, _options.CardLifetime, idle, Notify)
         {
             Sample = _options.Sample,
             Theme = _options.Theme,
         };
+        _panel = new ClipPanelService(selection, _clipboard, _brain, _card, _options.CardLifetime, idle, Notify) { Theme = _options.Theme };
 
         _hotkeys = new Hotkeys(_messages);
-        var shortcuts = new ShortcutService(_hotkeys, _brain.Settings, new() { [CardMode.Lookup] = LookupHotkey, [CardMode.Write] = WriteHotkey },
-            mode => _ = _card!.OpenAsync(mode));
+        var shortcuts = new ShortcutService(
+            _hotkeys,
+            _brain.Settings,
+            new() { [Shortcut.Lookup] = LookupHotkey, [Shortcut.Write] = WriteHotkey, [Shortcut.Clipboard] = ClipboardHotkey },
+            kind =>
+            {
+                if (kind == Shortcut.Clipboard)
+                {
+                    _panel.Toggle();
+                }
+                else
+                {
+                    _ = _card.OpenAsync(kind == Shortcut.Write ? CardMode.Write : CardMode.Lookup);
+                }
+            });
 
         _main = new MainWindowService(_brain, idle, shortcuts, _clipboard)
         {
@@ -79,8 +96,9 @@ public partial class App : Application
             DeleteData = DeleteDataAndQuit,
         };
         _card.SettingsOpener = section => _main.Show("settings", section);
+        _panel.SettingsOpener = section => _main.Show("settings", section);
 
-        _tray = new TrayService(_messages, _clipboard, startup, shortcuts, () => _main.Show(), _card.ShowSample, Quit);
+        _tray = new TrayService(_messages, _clipboard, startup, shortcuts, () => _main.Show(), () => _panel.Toggle(fromTray: true), _card.ShowSample, Quit);
         var taken = shortcuts.All.Where(s => !s.Registered).Select(s => s.Keys.ToString()).ToList();
         if (taken.Count > 0)
         {
@@ -93,6 +111,10 @@ public partial class App : Application
         if (_options.Page is { } page)
         {
             _main.Show(page);
+        }
+        else if (_options.Panel)
+        {
+            _panel.Toggle(fromTray: true);
         }
 
         if (_options.Measure)
@@ -146,6 +168,7 @@ public partial class App : Application
     private void Close()
     {
         _main?.Dispose();
+        _panel?.Dispose();
         _card?.Dispose();
         _hotkeys?.Dispose();
         _clipboard?.Dispose();

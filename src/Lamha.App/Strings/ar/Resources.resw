@@ -484,6 +484,31 @@
   <data name="Clipboard_Copied" xml:space="preserve"><value>نُسخ ✓</value><comment>d.copied</comment></data>
   <data name="Clipboard_AppLamha" xml:space="preserve"><value>لمحة</value><comment>d.appLamha</comment></data>
   <data name="Clipboard_AppUnknown" xml:space="preserve"><value>برنامج غير معروف</value><comment>d.appUnknown</comment></data>
+  <data name="Clipboard_Plain" xml:space="preserve"><value>الصق كنص عادي</value><comment>d.aPlain</comment></data>
+  <data name="Panel_WindowTitle" xml:space="preserve"><value>الحافظة — لمحة</value><comment>d.panelTitle</comment></data>
+  <data name="Panel_Hint" xml:space="preserve"><value>اختر نصًا لتلصقه</value><comment>d.panelHint</comment></data>
+  <data name="Panel_ToolsTitle" xml:space="preserve"><value>أدوات النص</value><comment>d.toolsTitle</comment></data>
+  <data name="Panel_BackToList" xml:space="preserve"><value>رجوع إلى القائمة</value><comment>d.backToList reworded: without its arrow, which is the button's icon</comment></data>
+  <data name="Panel_Paste" xml:space="preserve"><value>لصق</value><comment>d.paste</comment></data>
+  <data name="Panel_KeyPaste" xml:space="preserve"><value>لصق</value><comment>d.kPaste</comment></data>
+  <data name="Panel_KeyPlain" xml:space="preserve"><value>نص عادي</value><comment>d.kPlain</comment></data>
+  <data name="Panel_KeyTools" xml:space="preserve"><value>أدوات</value><comment>d.kTools</comment></data>
+  <data name="Panel_KeyClose" xml:space="preserve"><value>إغلاق</value><comment>d.kClose</comment></data>
+  <data name="Panel_KeyRun" xml:space="preserve"><value>تشغيل</value><comment>d.kRun</comment></data>
+  <data name="Panel_KeyShortcut" xml:space="preserve"><value>اختصار</value><comment>d.kShortcut</comment></data>
+  <data name="Panel_KeyBack" xml:space="preserve"><value>رجوع</value><comment>d.kBack</comment></data>
+  <data name="Panel_KeyToolsBack" xml:space="preserve"><value>الأدوات</value><comment>d.kToolsBack</comment></data>
+  <data name="Panel_HintTranslate" xml:space="preserve"><value>إلى {0}</value><comment>d.hTranslate: {0} is the translation language</comment></data>
+  <data name="Panel_HintEnglish" xml:space="preserve"><value>بإنجليزية طبيعية</value><comment>d.hEnglish</comment></data>
+  <data name="Panel_HintProofread" xml:space="preserve"><value>صحّح الأخطاء واشرحها</value><comment>d.hProofread</comment></data>
+  <data name="Panel_HintSummary" xml:space="preserve"><value>النقاط الرئيسية</value><comment>d.hSummary</comment></data>
+  <data name="Panel_HintLookup" xml:space="preserve"><value>في القاموس</value><comment>d.hLookup</comment></data>
+  <data name="Panel_HintReview" xml:space="preserve"><value>في بطاقات المراجعة</value><comment>d.hReview</comment></data>
+  <data name="Panel_HintPlain" xml:space="preserve"><value>بدون تنسيق</value><comment>d.hPlain</comment></data>
+  <data name="Tray_Clipboard" xml:space="preserve"><value>الحافظة</value><comment>d.trayClipboard</comment></data>
+  <data name="Note_Copied" xml:space="preserve"><value>تم النسخ</value><comment>d.copiedTitle</comment></data>
+  <data name="Note_PasteYourself" xml:space="preserve"><value>الصق يدويًا بـ Ctrl+V</value><comment>d.pasteYourself</comment></data>
+  <data name="Settings_CbIntro" xml:space="preserve"><value>سجل لما تنسخه في أي برنامج، تفتحه بـ {0} لتبحث فيه وتلصق. يبقى على جهازك فقط.</value><comment>d.sIntroA and d.sIntroB reworded in their markup only: joined around the shortcut {0}, the one in use</comment></data>
   <data name="Proto_Tooltip" xml:space="preserve"><value>لمحة 3 (نموذج أولي)</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>اعرض البطاقة (نص للتجربة)</value></data>
   <data name="Settings_Languages" xml:space="preserve"><value>اللغات</value><comment>o.languages</comment></data>

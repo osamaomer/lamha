@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using Lamha.App.Services;
-using Lamha.App.ViewModels.Card;
 using Lamha.App.ViewModels.Main;
 using Lamha.App.Views;
 using Lamha.Core.Layout;
@@ -59,7 +58,7 @@ public sealed partial class MainWindow : Window, IPageHost
         ViewModel = viewModel;
         _brain = brain;
         _shortcuts = shortcuts;
-        _lookupKeys = shortcuts.Keys(CardMode.Lookup).ToString();
+        _lookupKeys = shortcuts.Keys(Shortcut.Lookup).ToString();
         _clipboard = clipboard;
         InitializeComponent();
         Animations.Refresh(brain.Settings.Current); // the setting may have changed since the last window

@@ -163,6 +163,9 @@ public sealed record LamhaSettings
     /// <summary>The writing tools' keys, or "" for the app's own.</summary>
     public string WriteKeys { get; init; } = "";
 
+    /// <summary>The clipboard panel's keys, or "" for the app's own.</summary>
+    public string ClipboardKeys { get; init; } = "";
+
     /// <summary>
     /// New in Lamha 3: the currency a selected price is shown in (an ISO 4217 code, "SAR"); "" follows Windows' region
     /// (Settings → Languages).
