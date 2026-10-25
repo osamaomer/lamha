@@ -1,0 +1,112 @@
+# Lamha 3's beta: builds, tests and packs the installers as CI does, then publishes them as a GitHub pre-release
+# (v3.0.0-beta.N), x64 and ARM64 in one release. Started by hand (Actions → Beta → Run workflow, choosing the branch to
+# release); nothing starts it by itself. GitHub lists a hand-started workflow only once this file is on the default
+# branch (main). Lamha 2's updater reads only the latest full release, so its users never see a
+# pre-release. Until the updater comes (phase 5), each beta is installed from its release page.
+name: Beta
+
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: "What's new in this beta (shown on the release page)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  VERSION: 3.0.0-beta.${{ github.run_number }}
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet build Lamha.slnx -c Release
+      - run: dotnet test --solution Lamha.slnx -c Release --no-build
+
+  pack:
+    needs: test
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        rid: [win-x64, win-arm64]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+
+      - name: The offline dictionary file (shipped next to Lamha.exe as dict/lamha-dict.db)
+        run: dotnet run --project tools/DictionaryBuilder -c Release -- legacy/dict artifacts/dict/lamha-dict.db
+
+      # The beta's number in Lamha itself too (Report a problem, the log), not only in the installer.
+      - name: Publish (NativeAOT)
+        run: dotnet publish src/Lamha.App -c Release -r ${{ matrix.rid }} -o artifacts/publish/${{ matrix.rid }} -p:VersionSuffix=beta.${{ github.run_number }}
+
+      - name: Memory budgets (x64 only; informational until the runner's numbers are known, as in CI)
+        if: matrix.rid == 'win-x64'
+        continue-on-error: true
+        shell: pwsh
+        run: ./tools/Measure/measure.ps1 -Exe artifacts/publish/win-x64/Lamha.exe -Budget
+
+      - name: Pack the installer
+        shell: pwsh
+        run: >
+          dotnet vpk pack --packId Lamha --packVersion $env:VERSION --packTitle Lamha
+          --packAuthors "Artwork Lab" --packDir artifacts/publish/${{ matrix.rid }} --mainExe Lamha.exe
+          --icon src/Lamha.App/Assets/Lamha.ico --channel beta-${{ matrix.rid }} --exclude '.*\.pdb$'
+          --outputDir artifacts/releases/${{ matrix.rid }}
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: beta-${{ matrix.rid }}
+          path: artifacts/releases/${{ matrix.rid }}
+          retention-days: 7
+
+  release:
+    needs: pack
+    runs-on: windows-latest
+    # Only this job writes to the repository: it creates the tag and the pre-release.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: beta-*
+          path: artifacts/releases
+
+      # x64 creates the pre-release; ARM64 joins it (--merge), so one release has both installers.
+      - name: Publish the pre-release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          $tag = "v$env:VERSION"
+          foreach ($rid in "win-x64", "win-arm64") {
+            dotnet vpk upload github --outputDir "artifacts/releases/beta-$rid" --channel "beta-$rid" `
+              --repoUrl "https://github.com/${{ github.repository }}" --token $env:GH_TOKEN `
+              --publish --pre --merge --releaseName "Lamha $env:VERSION" --tag $tag --targetCommitish ${{ github.sha }}
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          $notes = if ($env:NOTES) { $env:NOTES } else { "A beta of Lamha 3. Install Lamha-beta-win-x64-Setup.exe (or win-arm64 on ARM PCs); it runs next to Lamha 2 with Ctrl+Alt+L / W." }
+          gh release edit $tag --repo ${{ github.repository }} --notes $notes

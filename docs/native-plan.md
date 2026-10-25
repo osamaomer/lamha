@@ -460,7 +460,9 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
 - **Found by running the published build:** C#/WinRT needs `AllowUnsafeBlocks` to pass a .NET list to WinUI under NativeAOT; without it the card failed only when published. Its AOT warnings are now errors, so the build catches it.
 - **Seen** in both languages and themes: a word, a phrase, a sentence, a price, the writing tools not set up, the hint. **Measured** (NativeAOT): tray 0 / 49 MB, card open 39 / 81 MB, card closed 1 / 81 MB, within budget. 344 tests.
 
-**Left before the first beta:** the release itself (Velopack's beta channel, a GitHub pre-release from CI). Listen waits for speech (phase 5); the error state and a pinned, followed card are still to be seen on screen.
+**The beta release** (`.github/workflows/beta.yml`): started by hand (Actions → Beta → Run workflow, on the branch to release), it builds, tests, publishes and packs as CI does, then publishes **v3.0.0-beta.N** as a GitHub pre-release with the x64 and ARM64 installers (Velopack's `beta-win-x64` / `beta-win-arm64` channels) and the notes typed when starting it. Lamha shows the same number. GitHub offers "Run workflow" only once the file is on `main`.
+
+**Left before the first beta:** the user starts the first run. Listen waits for speech (phase 5); the error state and a pinned, followed card are still to be seen on screen.
 
 ## Moving users from Lamha 2
 

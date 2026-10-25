@@ -62,6 +62,7 @@ dotnet publish src/Lamha.App -c Release -r win-x64 -o artifacts/publish/win-x64 
 ./tools/Measure/measure.ps1 -Budget                       # memory of the published build
 dotnet run --project tools/DictionaryBuilder -- legacy/dict artifacts/dict/lamha-dict.db   # the dictionary file (the app ships it; build it once before running the app)
 dotnet tool restore; dotnet vpk pack ...                  # the installer: see .github/workflows/ci.yml
+# the beta: Actions → Beta → Run workflow (.github/workflows/beta.yml, a GitHub pre-release; started only by hand)
 ```
 
 Before every commit: the whole build (0 warnings) and `dotnet test --solution Lamha.slnx`; for `legacy/` changes, `npm test` inside it.
