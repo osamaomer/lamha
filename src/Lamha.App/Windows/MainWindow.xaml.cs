@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Lamha.App.Services;
+using Lamha.App.ViewModels.Card;
 using Lamha.App.ViewModels.Main;
 using Lamha.App.Views;
 using Lamha.Core.Layout;
@@ -39,7 +40,7 @@ public sealed partial class MainWindow : Window, IPageHost
 
     private readonly Brain _brain;
     private readonly string _lookupKeys;
-    private readonly string _writeKeys;
+    private readonly ShortcutService _shortcuts;
     private TranslatePage? _translate;
     private WritePage? _write;
     private HistoryPage? _history;
@@ -51,15 +52,14 @@ public sealed partial class MainWindow : Window, IPageHost
 
     /// <param name="viewModel">The pages, the one that's open, and the toast.</param>
     /// <param name="brain">Lamha's brain, for the pages.</param>
-    /// <param name="lookupKeys">The quick-lookup shortcut ("Ctrl+Alt+L"), for the Translate page's line under its box.</param>
-    /// <param name="writeKeys">The writing tools' shortcut ("Ctrl+Alt+W"), for Settings → Writing tools.</param>
+    /// <param name="shortcuts">The shortcuts: the quick lookup's keys under the Translate page's box, and Settings' changes.</param>
     /// <param name="clipboard">Clipboard history's switch and pause, for the Clipboard page.</param>
-    public MainWindow(MainViewModel viewModel, Brain brain, string lookupKeys, string writeKeys, ClipboardService clipboard)
+    public MainWindow(MainViewModel viewModel, Brain brain, ShortcutService shortcuts, ClipboardService clipboard)
     {
         ViewModel = viewModel;
         _brain = brain;
-        _lookupKeys = lookupKeys;
-        _writeKeys = writeKeys;
+        _shortcuts = shortcuts;
+        _lookupKeys = shortcuts.Keys(CardMode.Lookup).ToString();
         _clipboard = clipboard;
         InitializeComponent();
         Animations.Refresh(brain.Settings.Current); // the setting may have changed since the last window
@@ -344,7 +344,7 @@ public sealed partial class MainWindow : Window, IPageHost
         switch (ViewModel.Page.Id)
         {
             case "settings":
-                _settings ??= new SettingsPage(new SettingsViewModel(_brain, this, _writeKeys, _clipboard, Startup));
+                _settings ??= new SettingsPage(new SettingsViewModel(_brain, this, _shortcuts, _clipboard, Startup));
                 _settings.ViewModel.Refresh();
                 _settings.ViewModel.Attach();
                 PageHost.Content = _settings;

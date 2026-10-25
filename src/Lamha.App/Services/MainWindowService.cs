@@ -11,10 +11,9 @@ namespace Lamha.App.Services;
 /// </summary>
 /// <param name="brain">Lamha's brain, for the pages.</param>
 /// <param name="idle">Told when the window opens and closes.</param>
-/// <param name="lookupKeys">The quick-lookup shortcut ("Ctrl+Alt+L"), which the Translate page shows.</param>
-/// <param name="writeKeys">The writing tools' shortcut ("Ctrl+Alt+W"), which Settings → Writing tools shows.</param>
+/// <param name="shortcuts">The shortcuts: their keys as the Translate page and Writing tools name them, and Settings' changes.</param>
 /// <param name="clipboard">Clipboard history's switch and pause, for the Clipboard page.</param>
-public sealed partial class MainWindowService(Brain brain, IdleMemory idle, string lookupKeys, string writeKeys, ClipboardService clipboard) : IDisposable
+public sealed partial class MainWindowService(Brain brain, IdleMemory idle, ShortcutService shortcuts, ClipboardService clipboard) : IDisposable
 {
     private MainWindow? _window;
     private string? _sample;
@@ -50,7 +49,7 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, stri
             }
 
             var started = Environment.TickCount64;
-            var window = _window = new MainWindow(new MainViewModel(), brain, lookupKeys, writeKeys, clipboard);
+            var window = _window = new MainWindow(new MainViewModel(), brain, shortcuts, clipboard);
             window.UseTheme(Theme ?? brain.Settings.Current.Theme);
             window.Startup = Startup;
             window.Go(page, section);

@@ -3,6 +3,7 @@ using Lamha.App.ViewModels.Main;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Lamha.Windows.Input;
 
 namespace Lamha.App.Views;
 
@@ -81,6 +82,44 @@ public sealed partial class SettingsPage : UserControl
         {
             command.Execute(null);
         }
+    }
+
+    /// <summary>
+    /// Keyboard shortcuts: while a shortcut waits for its new keys, the keys pressed go to it, not to the control with
+    /// the focus.
+    /// </summary>
+    private void OnPreviewKeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (!ViewModel.IsKeys || ViewModel.Shortcuts.Capturing is null)
+        {
+            return;
+        }
+
+        static bool Down(global::Windows.System.VirtualKey key) =>
+            Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(global::Windows.UI.Core.CoreVirtualKeyStates.Down);
+        var modifiers = HotkeyModifiers.None;
+        if (Down(global::Windows.System.VirtualKey.Control))
+        {
+            modifiers |= HotkeyModifiers.Control;
+        }
+
+        if (Down(global::Windows.System.VirtualKey.Menu))
+        {
+            modifiers |= HotkeyModifiers.Alt;
+        }
+
+        if (Down(global::Windows.System.VirtualKey.Shift))
+        {
+            modifiers |= HotkeyModifiers.Shift;
+        }
+
+        if (Down(global::Windows.System.VirtualKey.LeftWindows) || Down(global::Windows.System.VirtualKey.RightWindows))
+        {
+            modifiers |= HotkeyModifiers.Win;
+        }
+
+        // WinUI's virtual keys are Windows' own numbers.
+        e.Handled = ViewModel.Shortcuts.Press(modifiers, (Lamha.Windows.Input.VirtualKey)(ushort)e.Key);
     }
 
     /// <summary>Alt+←: back to the home, as the mouse's back button does in Windows' Settings.</summary>
@@ -250,6 +289,8 @@ public sealed class SettingsStrings
     public string MyDataLine { get; } = "‎%LOCALAPPDATA%\\Lamha Data‎ · " + Localization.Get("Settings_MyDataHint");
 
     public string OpenFolder { get; } = Localization.Get("Settings_OpenFolder");
+
+    public string KeyClose { get; } = Localization.Get("Settings_KeyClose");
 
     public string Login { get; } = Localization.Get("Tray_StartWithWindows");
 

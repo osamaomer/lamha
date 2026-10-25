@@ -40,7 +40,7 @@ public sealed record RecentItem(string Word, string Meaning, FlowDirection WordF
     public string Spoken => $"{Word}: {Meaning}";
 }
 
-/// <summary>A part of the quick-lookup shortcut's line: a key ("Ctrl") or the "+" between keys.</summary>
+/// <summary>A part of a shortcut as it's drawn (the quick lookup's line, Settings → Keyboard shortcuts): a key ("Ctrl") or the "+" between keys.</summary>
 public sealed record KeyPart(string Text, bool IsKey);
 
 /// <summary>

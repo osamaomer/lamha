@@ -155,6 +155,15 @@ public sealed record LamhaSettings
     public bool WindowMica { get; init; } = true;
 
     /// <summary>
+    /// New in Lamha 3 (Settings → Keyboard shortcuts; Lamha 2's were fixed): the quick lookup's keys ("Ctrl+Alt+L"),
+    /// or "" for the app's own.
+    /// </summary>
+    public string LookupKeys { get; init; } = "";
+
+    /// <summary>The writing tools' keys, or "" for the app's own.</summary>
+    public string WriteKeys { get; init; } = "";
+
+    /// <summary>
     /// New in Lamha 3: the currency a selected price is shown in (an ISO 4217 code, "SAR"); "" follows Windows' region
     /// (Settings → Languages).
     /// </summary>

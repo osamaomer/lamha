@@ -4,7 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:Lamha.App.Controls"
     xmlns:main="using:Lamha.App.ViewModels.Main"
-    KeyboardAcceleratorPlacementMode="Hidden">
+    KeyboardAcceleratorPlacementMode="Hidden"
+    PreviewKeyDown="OnPreviewKeyDown">
   <!-- The main window's Settings page, as signed off in phase 1 (docs/design/settings.html): a home of categories in
        two columns, each opening its own page of settings cards 4 px apart, with the breadcrumb back. Each category's
        page is made when it opens and let go when it's left (x:Load), so the home holds only its tiles. -->
@@ -27,6 +28,20 @@
         <controls:StatusText Text="{x:Bind Status, Mode=OneWay}" Kind="{x:Bind StatusKind, Mode=OneWay}" />
       </StackPanel>
     </DataTemplate>
+    <!-- Keys as the design draws them: key caps (12 px, the chip's fill, a line under) joined by "+" -->
+    <DataTemplate x:Key="KeyPartTemplate" x:DataType="main:KeyPart">
+      <Grid>
+        <Border Padding="7,2" CornerRadius="6" Background="{ThemeResource LamhaChipBrush}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="1,1,1,2"
+                Visibility="{x:Bind IsKey}">
+          <TextBlock FontSize="12" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind Text}" />
+        </Border>
+        <TextBlock Margin="2,0" VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Text}"
+                   Visibility="{x:Bind controls:Show.IfNot(IsKey)}" />
+      </Grid>
+    </DataTemplate>
+    <ItemsPanelTemplate x:Key="KeysPanel">
+      <StackPanel Orientation="Horizontal" Spacing="2" FlowDirection="LeftToRight" />
+    </ItemsPanelTemplate>
   </UserControl.Resources>
 
   <UserControl.KeyboardAccelerators>
@@ -438,6 +453,51 @@
           </StackPanel>
         </Button>
       </controls:SettingsCard>
+    </StackPanel>
+
+    <!-- ===== Keyboard shortcuts: each one's keys and Change; Esc closes the card ===== -->
+    <StackPanel x:Name="KeysSection" x:Load="{x:Bind ViewModel.IsKeys, Mode=OneWay}" Spacing="4">
+      <ItemsRepeater ItemsSource="{x:Bind ViewModel.Shortcuts.Rows}">
+        <ItemsRepeater.Layout>
+          <StackLayout Spacing="4" />
+        </ItemsRepeater.Layout>
+        <ItemsRepeater.ItemTemplate>
+          <DataTemplate x:DataType="main:ShortcutRow">
+            <Border Style="{StaticResource LamhaSettingsPanelStyle}" MinHeight="48">
+              <StackPanel Spacing="6" VerticalAlignment="Center">
+                <Grid ColumnSpacing="16">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="32" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Label}" />
+                  <ItemsControl Grid.Column="1" VerticalAlignment="Center" IsTabStop="False" ItemsSource="{x:Bind Keys, Mode=OneWay}"
+                                ItemTemplate="{StaticResource KeyPartTemplate}" ItemsPanel="{StaticResource KeysPanel}" />
+                  <ToggleButton Grid.Column="2" Style="{StaticResource LamhaIconToggleStyle}" Width="32" Height="32" BorderThickness="0"
+                                IsChecked="{x:Bind IsCapturing, Mode=OneWay}" Command="{x:Bind Change}" CommandParameter="{x:Bind}"
+                                ToolTipService.ToolTip="{x:Bind ChangeLabel}" AutomationProperties.Name="{x:Bind ChangeName, Mode=OneWay}">
+                    <controls:LineIcon Glyph="Write" Width="16" Height="16" />
+                  </ToggleButton>
+                </Grid>
+                <controls:StatusText Text="{x:Bind Status, Mode=OneWay}" Kind="{x:Bind StatusKind, Mode=OneWay}" />
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+      </ItemsRepeater>
+      <Border Style="{StaticResource LamhaSettingsPanelStyle}" MinHeight="48">
+        <Grid ColumnSpacing="16" VerticalAlignment="Center">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="32" />
+          </Grid.ColumnDefinitions>
+          <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.KeyClose}" />
+          <ItemsControl Grid.Column="1" VerticalAlignment="Center" IsTabStop="False" ItemsSource="{x:Bind ViewModel.Shortcuts.CloseKeys}"
+                        ItemTemplate="{StaticResource KeyPartTemplate}" ItemsPanel="{StaticResource KeysPanel}" />
+        </Grid>
+      </Border>
     </StackPanel>
 
     <!-- ===== Lamha: the version, Start with Windows, the releases, the dictionary's sources (updates come with phase 5) ===== -->

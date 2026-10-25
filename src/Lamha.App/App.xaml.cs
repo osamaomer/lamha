@@ -67,7 +67,11 @@ public partial class App : Application
             Theme = _options.Theme,
         };
 
-        _main = new MainWindowService(_brain, idle, LookupHotkey.ToString(), WriteHotkey.ToString(), _clipboard)
+        _hotkeys = new Hotkeys(_messages);
+        var shortcuts = new ShortcutService(_hotkeys, _brain.Settings, new() { [CardMode.Lookup] = LookupHotkey, [CardMode.Write] = WriteHotkey },
+            mode => _ = _card!.OpenAsync(mode));
+
+        _main = new MainWindowService(_brain, idle, shortcuts, _clipboard)
         {
             Theme = _options.Theme,
             Sample = _options.Page is null ? null : _options.Sample,
@@ -75,15 +79,8 @@ public partial class App : Application
         };
         _card.SettingsOpener = section => _main.Show("settings", section);
 
-        _hotkeys = new Hotkeys(_messages);
-        ShortcutInfo[] shortcuts =
-        [
-            Register(LookupHotkey, "Tray_ShortcutLookup", CardMode.Lookup),
-            Register(WriteHotkey, "Tray_ShortcutWrite", CardMode.Write),
-        ];
-
         _tray = new TrayService(_messages, _clipboard, startup, shortcuts, () => _main.Show(), _card.ShowSample, Quit);
-        var taken = shortcuts.Where(s => !s.Registered).Select(s => s.Keys.ToString()).ToList();
+        var taken = shortcuts.All.Where(s => !s.Registered).Select(s => s.Keys.ToString()).ToList();
         if (taken.Count > 0)
         {
             Notify(Localization.Get("Note_HotkeyTaken"), Localization.Format("Note_HotkeyTakenBody", string.Join(Localization.Get("Note_And"), taken)));
@@ -107,13 +104,6 @@ public partial class App : Application
         }
 
         idle.Schedule(); // start-up's own memory, once the tray is ready
-    }
-
-    private ShortcutInfo Register(Hotkey keys, string label, CardMode mode)
-    {
-        var registered = _hotkeys!.Register(keys, () => _ = _card!.OpenAsync(mode));
-        AppLog.Info($"hotkey {keys}: {(registered ? "registered" : "taken by another program")}");
-        return new ShortcutInfo(keys, label, registered);
     }
 
     private void Notify(string title, string body) => _tray?.Notify(title, body);

@@ -1,11 +1,7 @@
 using System.Globalization;
-using Lamha.Windows.Input;
 using Lamha.Windows.Shell;
 
 namespace Lamha.App.Services;
-
-/// <summary>A shortcut as the tray lists it: its keys, what it does, and whether Lamha got it.</summary>
-public sealed record ShortcutInfo(Hotkey Keys, string LabelKey, bool Registered);
 
 /// <summary>
 /// The tray icon, its tooltip and its menu: Lamha 2's trayMenu() / trayTooltip() in main.js, with what exists so far.
@@ -17,7 +13,7 @@ public sealed partial class TrayService : IDisposable
     private readonly TrayIcon _icon;
     private readonly ClipboardService _clipboard;
     private readonly StartWithWindows _startup;
-    private readonly IReadOnlyList<ShortcutInfo> _shortcuts;
+    private readonly ShortcutService _shortcuts;
     private readonly Action _sample;
     private readonly Action _quit;
 
@@ -25,7 +21,7 @@ public sealed partial class TrayService : IDisposable
         MessageWindow window,
         ClipboardService clipboard,
         StartWithWindows startup,
-        IReadOnlyList<ShortcutInfo> shortcuts,
+        ShortcutService shortcuts,
         Action open,
         Action sample,
         Action quit)
@@ -66,8 +62,8 @@ public sealed partial class TrayService : IDisposable
             TrayMenuItem.Separator,
         };
 
-        // The shortcuts, for information; one another program took is marked.
-        foreach (var s in _shortcuts)
+        // The shortcuts, for information (as they are now: Settings may have changed them); one another program took is marked.
+        foreach (var s in _shortcuts.All)
         {
             var text = $"{s.Keys} — {Localization.Get(s.LabelKey)}{(s.Registered ? "" : Localization.Get("Tray_Unavailable"))}";
             items.Add(new TrayMenuItem(text) { Enabled = false });

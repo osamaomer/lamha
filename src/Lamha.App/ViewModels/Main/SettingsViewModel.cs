@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lamha.App.Controls;
 using Lamha.App.Services;
+using Lamha.App.ViewModels.Card;
 using Lamha.Core;
 using Lamha.Core.Ai;
 using Lamha.Core.Money;
@@ -83,29 +84,32 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly Brain _brain;
     private readonly IPageHost _host;
     private readonly StartWithWindows? _startup;
+    private readonly ShortcutService _shortcutService;
     private bool _loading;
     private bool _attached;
     private int _trVersion;
 
     /// <param name="brain">Lamha's brain: the settings, the keys and the AI, the review list for Delete all cards.</param>
     /// <param name="host">The main window.</param>
-    /// <param name="writeKeys">The writing tools' shortcut ("Ctrl+Alt+W"), for Writing tools' first line.</param>
+    /// <param name="shortcuts">The shortcuts: Keyboard shortcuts changes them, Writing tools' first line names one.</param>
     /// <param name="clipboard">Clipboard history's switch, for Settings → Clipboard.</param>
     /// <param name="startup">Start with Windows, for Settings → Lamha (none in tests' windows).</param>
-    public SettingsViewModel(Brain brain, IPageHost host, string writeKeys, ClipboardService clipboard, StartWithWindows? startup = null)
+    public SettingsViewModel(Brain brain, IPageHost host, ShortcutService shortcuts, ClipboardService clipboard, StartWithWindows? startup = null)
     {
         _brain = brain;
         _host = host;
         _startup = startup;
+        _shortcutService = shortcuts;
         Writing = new WritingSetupViewModel(brain, () => _ = LoadTranslatorAsync());
-        AiIntro = Localization.Format("Settings_AiIntro", writeKeys);
+        Shortcuts = new ShortcutsSetupViewModel(shortcuts);
         Clipboard = new ClipboardSetupViewModel(brain, clipboard, host);
         Privacy = new PrivacySetupViewModel(brain, host);
         Tiles =
         [
             Tile("languages", Glyph.Translate, "Settings_Languages", "Settings_UiLang", "Settings_TargetLang", "Settings_Reverse"),
             Tile("card", Glyph.Card, "Settings_Card", "Settings_Context", "Settings_Explain", "Settings_Wiki"),
-            Tile("keys", Glyph.Keyboard, "Settings_Keys", "Settings_HkLookup", "Settings_HkWrite", "Settings_HkClip"),
+            // The design's summary names the clipboard panel's shortcut: back in it with the panel.
+            Tile("keys", Glyph.Keyboard, "Settings_Keys", "Settings_HkLookup", "Settings_HkWrite", "Settings_KeyClose"),
             Tile("writing", Glyph.Sparkle, "Settings_WritingTools", "Settings_AiProvider", "Settings_Model"),
             Tile("translation", Glyph.Globe, "Settings_Translation", "Settings_TrAuto", "Settings_TrProvider", "Settings_Model"),
             Tile("review", Glyph.Review, "Settings_Review", "Settings_CardsAuto", "Settings_NewPerDay", "Settings_Goal"),
@@ -140,7 +144,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     /// <summary>The category open ("languages", "card"…), or "" for the home.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsHome), nameof(SectionTitle), nameof(IsLanguages), nameof(IsCard), nameof(IsWriting), nameof(IsTranslation), nameof(IsClipboard), nameof(IsPrivacy), nameof(IsAbout),
+    [NotifyPropertyChangedFor(nameof(IsHome), nameof(SectionTitle), nameof(IsLanguages), nameof(IsCard), nameof(IsWriting), nameof(IsTranslation), nameof(IsClipboard), nameof(IsPrivacy), nameof(IsAbout), nameof(IsKeys),
         nameof(IsReview), nameof(IsOffline), nameof(IsAppearance))]
     public partial string Section { get; private set; } = "";
 
@@ -211,8 +215,15 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     // ----- Writing tools -----
 
-    /// <summary>"Select any text in any program and press Ctrl+Alt+W to proofread it…".</summary>
-    public string AiIntro { get; }
+    /// <summary>"Select any text in any program and press Ctrl+Alt+W to proofread it…", with the keys as they are now.</summary>
+    [ObservableProperty]
+    public partial string AiIntro { get; private set; } = "";
+
+    // ----- Keyboard shortcuts -----
+
+    public bool IsKeys => Section == "keys";
+
+    public ShortcutsSetupViewModel Shortcuts { get; }
 
     public WritingSetupViewModel Writing { get; }
 
@@ -445,7 +456,12 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         if (value == "writing")
         {
+            AiIntro = Localization.Format("Settings_AiIntro", _shortcutService.Keys(CardMode.Write).ToString());
             Writing.Load(_brain.Settings.Current);
+        }
+        else if (value == "keys")
+        {
+            Shortcuts.Load();
         }
         else if (value == "translation")
         {
