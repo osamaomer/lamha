@@ -486,7 +486,6 @@
   <data name="Clipboard_AppUnknown" xml:space="preserve"><value>برنامج غير معروف</value><comment>d.appUnknown</comment></data>
   <data name="Proto_Tooltip" xml:space="preserve"><value>لمحة 3 (نموذج أولي)</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>اعرض البطاقة (نص للتجربة)</value></data>
-  <data name="Proto_ClipboardHistory" xml:space="preserve"><value>سجل الحافظة</value><comment>d.historyLabel</comment></data>
   <data name="Settings_Languages" xml:space="preserve"><value>اللغات</value><comment>o.languages</comment></data>
   <data name="Settings_Card" xml:space="preserve"><value>بطاقة البحث</value><comment>o.cardSection</comment></data>
   <data name="Settings_Keys" xml:space="preserve"><value>اختصارات لوحة المفاتيح</value><comment>o.keys</comment></data>
@@ -658,4 +657,45 @@
   <data name="Settings_Err_ollama_offline" xml:space="preserve"><value>Ollama لا يعمل على هذا العنوان. شغّله من قائمة ابدأ (أو ثبّته من ollama.com).</value><comment>oerr.ollama_offline</comment></data>
   <data name="Settings_ConnectFailed" xml:space="preserve"><value>تعذّر الاتصال: </value><comment>o.connectFailed</comment></data>
   <data name="Settings_CustomWorks" xml:space="preserve"><value>✓ يعمل ({0} ث) — أدوات الكتابة جاهزة.</value><comment>o.ollamaWorks reworded 2026-10-25, a draft to approve: another server&apos;s Test, without &quot;free, on your PC&quot;</comment></data>
+  <data name="Settings_CbEnableHint" xml:space="preserve"><value>متوقف افتراضيًا. لا يُرسل أي نص إلا عندما تضغط إحدى أدوات لمحة عليه.</value><comment>d.sEnableHint</comment></data>
+  <data name="Settings_CbMaxHint" xml:space="preserve"><value>تُحذف الأقدم عند تجاوزه. المثبّتة لا تُحسب.</value><comment>d.sMaxHint</comment></data>
+  <data name="Settings_CbExpiry" xml:space="preserve"><value>الحذف التلقائي لغير المثبّت بعد</value><comment>d.sExpiry</comment></data>
+  <data name="Settings_CbExpiryHint" xml:space="preserve"><value>منذ آخر نسخ أو استخدام</value><comment>d.sExpiryHint</comment></data>
+  <data name="Settings_Day1" xml:space="preserve"><value>يوم</value><comment>d.sDay</comment></data>
+  <data name="Settings_Days7" xml:space="preserve"><value>٧ أيام</value><comment>d.s7</comment></data>
+  <data name="Settings_Days30" xml:space="preserve"><value>٣٠ يومًا</value><comment>d.s30</comment></data>
+  <data name="Settings_Days90" xml:space="preserve"><value>٩٠ يومًا</value><comment>d.s90</comment></data>
+  <data name="Settings_Never" xml:space="preserve"><value>أبدًا</value><comment>d.sNever</comment></data>
+  <data name="Settings_CbCards" xml:space="preserve"><value>تجاهل أرقام البطاقات البنكية</value><comment>d.sCards</comment></data>
+  <data name="Settings_CbCardsHint" xml:space="preserve"><value>لا يُحفظ رقم بطاقة (١٣–١٩ رقمًا) منسوخ وحده.</value><comment>d.sCardsHint</comment></data>
+  <data name="Settings_CbAppsHint" xml:space="preserve"><value>لا يُسجَّل شيء تنسخه من هذه البرامج. مديرو كلمات المرور مستثنون من البداية.</value><comment>d.sAppsHint</comment></data>
+  <data name="Settings_CbAppName" xml:space="preserve"><value>اسم البرنامج (exe)</value><comment>d.sAppName</comment></data>
+  <data name="Settings_CbAdd" xml:space="preserve"><value>إضافة</value><comment>d.sAdd</comment></data>
+  <data name="Settings_CbNoApps" xml:space="preserve"><value>لا توجد برامج مستثناة.</value><comment>d.sNoApps</comment></data>
+  <data name="Settings_CbBadApp" xml:space="preserve"><value>اكتب اسم البرنامج كما يظهر في مدير المهام، مثل notepad.exe</value><comment>d.sBadApp</comment></data>
+  <data name="Settings_CbFromHistory" xml:space="preserve"><value>من سجلك:</value><comment>d.sFromHistory</comment></data>
+  <data name="Settings_CbClear" xml:space="preserve"><value>مسح السجل</value><comment>d.sClear</comment></data>
+  <data name="Settings_CbClearHint" xml:space="preserve"><value>لا يمكن التراجع عن المسح</value><comment>d.sClearHint</comment></data>
+  <data name="Settings_CbClearAll" xml:space="preserve"><value>مسح الكل</value><comment>d.sClearAll</comment></data>
+  <data name="Settings_CbClearUnpinned" xml:space="preserve"><value>مسح غير المثبّت</value><comment>d.clearUnpinned</comment></data>
+  <data name="Settings_CbClearUnpinnedQ" xml:space="preserve"><value>مسح غير المثبّت؟</value><comment>d.clearUnpinnedQ</comment></data>
+  <data name="Settings_CbClearUnpinnedText" xml:space="preserve"><value>تبقى العناصر المثبّتة 📌 فقط.</value><comment>d.sClearUnpinnedText</comment></data>
+  <data name="Settings_CbClearAllQ" xml:space="preserve"><value>مسح كل السجل؟</value><comment>d.sClearAllQ</comment></data>
+  <data name="Settings_CbClearAllText" xml:space="preserve"><value>يُحذف كل ما في الحافظة، بما في ذلك العناصر المثبّتة.</value><comment>d.sClearAllText</comment></data>
+  <data name="Settings_CbOffQ" xml:space="preserve"><value>إيقاف سجل الحافظة</value><comment>d.sOffQ</comment></data>
+  <data name="Settings_CbOffQText" xml:space="preserve"><value>هل تريد حذف السجل الحالي أيضًا؟</value><comment>d.sOffQText</comment></data>
+  <data name="Settings_CbKeepIt" xml:space="preserve"><value>الإبقاء عليه</value><comment>d.sKeepIt</comment></data>
+  <data name="Settings_CbKeepThem" xml:space="preserve"><value>الإبقاء عليها</value><comment>d.keepThem</comment></data>
+  <data name="Settings_CbDeleteAppQ" xml:space="preserve"><value>حذف ما نُسخ من {0}؟</value><comment>d.sDeleteAppQ</comment></data>
+  <data name="Settings_CbEncrypted" xml:space="preserve"><value>🔒 السجل مشفّر على هذا الجهاز</value><comment>d.sEncrypted</comment></data>
+  <data name="Common_ClearShort" xml:space="preserve"><value>مسح</value><comment>d.clear</comment></data>
+  <data name="Settings_CbAppItemsOne" xml:space="preserve"><value>في السجل عنصر واحد من هذا البرنامج.</value><comment>d.sDeleteAppQText, ported by hand: one item</comment></data>
+  <data name="Settings_CbAppItemsTwo" xml:space="preserve"><value>في السجل عنصران من هذا البرنامج.</value><comment>d.sDeleteAppQText, ported by hand: two items</comment></data>
+  <data name="Settings_CbAppItemsFew" xml:space="preserve"><value>في السجل {0} عناصر من هذا البرنامج.</value><comment>d.sDeleteAppQText, ported by hand: 3 to 10 items</comment></data>
+  <data name="Settings_CbAppItemsMany" xml:space="preserve"><value>في السجل {0} عنصرًا من هذا البرنامج.</value><comment>d.sDeleteAppQText, ported by hand: 11 items or more</comment></data>
+  <data name="Settings_CbItemsOne" xml:space="preserve"><value>عنصر واحد</value><comment>d.sItemCount, ported by hand: one item</comment></data>
+  <data name="Settings_CbItemsTwo" xml:space="preserve"><value>عنصران</value><comment>d.sItemCount, ported by hand: two items</comment></data>
+  <data name="Settings_CbItemsFew" xml:space="preserve"><value>{0} عناصر</value><comment>d.sItemCount, ported by hand: 3 to 10 items</comment></data>
+  <data name="Settings_CbItemsMany" xml:space="preserve"><value>{0} عنصرًا</value><comment>d.sItemCount, ported by hand: 11 items or more</comment></data>
+  <data name="Settings_CbRemoveApp" xml:space="preserve"><value>إزالة {0}</value><comment>d.sRemoveApp, ported by hand</comment></data>
 </root>

@@ -282,6 +282,91 @@
       <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" Text="{x:Bind S.AiPrivacy}" />
     </StackPanel>
 
+    <!-- ===== Clipboard ===== -->
+    <StackPanel x:Name="ClipboardSection" x:Load="{x:Bind ViewModel.IsClipboard, Mode=OneWay}" Spacing="4">
+      <controls:SettingsCard Header="{x:Bind S.CbEnable}" Description="{x:Bind S.CbEnableHint}">
+        <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.Clipboard.IsOn, Mode=TwoWay}" />
+      </controls:SettingsCard>
+      <controls:SettingsCard Header="{x:Bind S.CbMax}" Description="{x:Bind S.CbMaxHint}">
+        <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.Clipboard.LimitChoices}" SelectedIndex="{x:Bind ViewModel.Clipboard.LimitIndex, Mode=TwoWay}" />
+      </controls:SettingsCard>
+      <controls:SettingsCard Header="{x:Bind S.CbExpiry}" Description="{x:Bind S.CbExpiryHint}">
+        <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.Clipboard.ExpiryChoices}" SelectedIndex="{x:Bind ViewModel.Clipboard.ExpiryIndex, Mode=TwoWay}" />
+      </controls:SettingsCard>
+      <controls:SettingsCard Header="{x:Bind S.CbCards}" Description="{x:Bind S.CbCardsHint}">
+        <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.Clipboard.SkipCards, Mode=TwoWay}" />
+      </controls:SettingsCard>
+
+      <!-- Excluded programs: the list (each with Remove), a name to add, and the programs seen in the history -->
+      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
+        <StackPanel Spacing="12">
+          <StackPanel Spacing="2">
+            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.CbApps}" AutomationProperties.HeadingLevel="Level2" />
+            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CbAppsHint}" />
+          </StackPanel>
+          <ItemsRepeater ItemsSource="{x:Bind ViewModel.Clipboard.Excluded, Mode=OneWay}">
+            <ItemsRepeater.ItemTemplate>
+              <DataTemplate x:DataType="main:ExcludedApp">
+                <Grid MinHeight="40" ColumnSpacing="12" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="{x:Bind controls:Show.LineAbove(IsFirst)}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Exe}" />
+                  <Button Grid.Column="1" Style="{StaticResource LamhaIconButtonStyle}" Width="32" Height="32" Command="{x:Bind Remove}"
+                          ToolTipService.ToolTip="{x:Bind RemoveName}" AutomationProperties.Name="{x:Bind RemoveName}">
+                    <controls:LineIcon Glyph="Trash" Width="16" Height="16" />
+                  </Button>
+                </Grid>
+              </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+          </ItemsRepeater>
+          <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind S.CbNoApps}"
+                     Visibility="{x:Bind ViewModel.Clipboard.HasNoApps, Mode=OneWay}" />
+          <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox Style="{StaticResource LamhaFieldStyle}" FlowDirection="LeftToRight" PlaceholderText="program.exe" AutomationProperties.Name="{x:Bind S.CbAppName}"
+                     Text="{x:Bind ViewModel.Clipboard.AppInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Tag="{x:Bind ViewModel.Clipboard.AddTypedCommand}" KeyDown="OnEnterCommits" />
+            <Button Grid.Column="1" Style="{StaticResource LamhaQuietButtonStyle}" MinHeight="36" Content="{x:Bind S.CbAdd}" Command="{x:Bind ViewModel.Clipboard.AddTypedCommand}" />
+          </Grid>
+          <controls:StatusText Text="{x:Bind ViewModel.Clipboard.AppError, Mode=OneWay}" Kind="Bad" />
+          <StackPanel Spacing="6" Visibility="{x:Bind ViewModel.Clipboard.HasSeen, Mode=OneWay}">
+            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CbFromHistory}" />
+            <ItemsControl ItemsSource="{x:Bind ViewModel.Clipboard.Seen, Mode=OneWay}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="main:SeenApp">
+                  <Button Style="{StaticResource LamhaChipButtonStyle}" FontSize="{StaticResource LamhaFontSizeSecondary}" Content="{x:Bind Label}" Command="{x:Bind Add}"
+                          ToolTipService.ToolTip="{x:Bind Tooltip}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <controls:SettingsCard Header="{x:Bind S.CbClear}" Description="{x:Bind S.CbClearHint}">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Clipboard.ClearUnpinnedCommand}" AutomationProperties.Name="{x:Bind S.CbClearUnpinned}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <controls:LineIcon Glyph="Trash" Width="14" Height="14" VerticalAlignment="Center" />
+              <TextBlock VerticalAlignment="Center" Text="{x:Bind S.CbClearUnpinned}" />
+            </StackPanel>
+          </Button>
+          <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Clipboard.ClearAllCommand}" AutomationProperties.Name="{x:Bind S.CbClearAll}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <controls:LineIcon Glyph="Trash" Width="14" Height="14" VerticalAlignment="Center" />
+              <TextBlock VerticalAlignment="Center" Text="{x:Bind S.CbClearAll}" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </controls:SettingsCard>
+      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" Text="{x:Bind S.CbEncrypted}" />
+    </StackPanel>
+
     <!-- ===== The lookup card ===== -->
     <StackPanel x:Name="CardSection" x:Load="{x:Bind ViewModel.IsCard, Mode=OneWay}" Spacing="4">
       <controls:SettingsCard Header="{x:Bind S.Context}" Description="{x:Bind S.ContextHint}">

@@ -9,18 +9,24 @@
     <ResourceDictionary Source="ms-appx:///Themes/Tokens.xaml" />
   </ResourceDictionary.MergedDictionaries>
 
-  <!-- The switch: Lamha 2's green when on (LamhaSwitchOnBrush, 3:1 on both themes' surfaces); high contrast keeps
+  <!-- The switch: Lamha 2's green when on (LamhaSwitchOnBrush, 3:1 on both themes' surfaces) with a white knob, as designed; high contrast keeps
        Windows' own. -->
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Light">
       <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#2E9E4F" />
       <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#2E9E4F" />
       <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#2E9E4F" />
+      <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#FFFFFF" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
       <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#2E9E4F" />
       <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#2E9E4F" />
       <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#2E9E4F" />
+      <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#FFFFFF" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="HighContrast" />
   </ResourceDictionary.ThemeDictionaries>
@@ -104,6 +110,13 @@
     <Setter Property="Padding" Value="8" />
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
     <Setter Property="FontWeight" Value="Normal" />
+  </Style>
+
+  <!-- "Delete" in a question (Lamha 2's dialog.js danger choice): the one red in both themes, white text at 4.8:1 -->
+  <Style x:Key="LamhaDialogDangerButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+    <Setter Property="Background" Value="{ThemeResource LamhaDangerSolidBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaDangerSolidTextBrush}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
   </Style>
 
   <!-- Deletes something: never looks like a harmless action (Lamha 2's btn.danger) -->

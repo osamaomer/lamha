@@ -487,7 +487,6 @@
   <data name="Clipboard_AppUnknown" xml:space="preserve"><value>Unknown program</value><comment>d.appUnknown</comment></data>
   <data name="Proto_Tooltip" xml:space="preserve"><value>Lamha 3 (prototype)</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>Show the card (sample text)</value></data>
-  <data name="Proto_ClipboardHistory" xml:space="preserve"><value>Clipboard history</value><comment>d.historyLabel</comment></data>
   <data name="Settings_Languages" xml:space="preserve"><value>Languages</value><comment>o.languages</comment></data>
   <data name="Settings_Card" xml:space="preserve"><value>The lookup card</value><comment>o.cardSection</comment></data>
   <data name="Settings_Keys" xml:space="preserve"><value>Keyboard shortcuts</value><comment>o.keys</comment></data>
@@ -659,4 +658,45 @@
   <data name="Settings_Err_ollama_offline" xml:space="preserve"><value>Ollama isn&apos;t running at this address. Start it from the Start menu (or install it from ollama.com).</value><comment>oerr.ollama_offline</comment></data>
   <data name="Settings_ConnectFailed" xml:space="preserve"><value>Couldn&apos;t connect: </value><comment>o.connectFailed</comment></data>
   <data name="Settings_CustomWorks" xml:space="preserve"><value>✓ Works ({0} s) — the writing tools are ready.</value><comment>o.ollamaWorks reworded 2026-10-25, a draft to approve: another server&apos;s Test, without &quot;free, on your PC&quot;</comment></data>
+  <data name="Settings_CbEnableHint" xml:space="preserve"><value>Off by default. No text is sent anywhere unless you press one of Lamha&apos;s tools on it.</value><comment>d.sEnableHint</comment></data>
+  <data name="Settings_CbMaxHint" xml:space="preserve"><value>The oldest go when there are more. Pinned items don&apos;t count.</value><comment>d.sMaxHint</comment></data>
+  <data name="Settings_CbExpiry" xml:space="preserve"><value>Delete unpinned items after</value><comment>d.sExpiry</comment></data>
+  <data name="Settings_CbExpiryHint" xml:space="preserve"><value>Since they were last copied or used</value><comment>d.sExpiryHint</comment></data>
+  <data name="Settings_Day1" xml:space="preserve"><value>1 day</value><comment>d.sDay</comment></data>
+  <data name="Settings_Days7" xml:space="preserve"><value>7 days</value><comment>d.s7</comment></data>
+  <data name="Settings_Days30" xml:space="preserve"><value>30 days</value><comment>d.s30</comment></data>
+  <data name="Settings_Days90" xml:space="preserve"><value>90 days</value><comment>d.s90</comment></data>
+  <data name="Settings_Never" xml:space="preserve"><value>Never</value><comment>d.sNever</comment></data>
+  <data name="Settings_CbCards" xml:space="preserve"><value>Skip bank card numbers</value><comment>d.sCards</comment></data>
+  <data name="Settings_CbCardsHint" xml:space="preserve"><value>A card number (13–19 digits) copied on its own is never saved.</value><comment>d.sCardsHint</comment></data>
+  <data name="Settings_CbAppsHint" xml:space="preserve"><value>Nothing you copy from these programs is recorded. Password managers are excluded from the start.</value><comment>d.sAppsHint</comment></data>
+  <data name="Settings_CbAppName" xml:space="preserve"><value>Program name (exe)</value><comment>d.sAppName</comment></data>
+  <data name="Settings_CbAdd" xml:space="preserve"><value>Add</value><comment>d.sAdd</comment></data>
+  <data name="Settings_CbNoApps" xml:space="preserve"><value>No excluded programs.</value><comment>d.sNoApps</comment></data>
+  <data name="Settings_CbBadApp" xml:space="preserve"><value>Type the program&apos;s name as Task Manager shows it, like notepad.exe</value><comment>d.sBadApp</comment></data>
+  <data name="Settings_CbFromHistory" xml:space="preserve"><value>From your history:</value><comment>d.sFromHistory</comment></data>
+  <data name="Settings_CbClear" xml:space="preserve"><value>Clear the history</value><comment>d.sClear</comment></data>
+  <data name="Settings_CbClearHint" xml:space="preserve"><value>This can&apos;t be undone</value><comment>d.sClearHint</comment></data>
+  <data name="Settings_CbClearAll" xml:space="preserve"><value>Clear all</value><comment>d.sClearAll</comment></data>
+  <data name="Settings_CbClearUnpinned" xml:space="preserve"><value>Clear unpinned</value><comment>d.clearUnpinned</comment></data>
+  <data name="Settings_CbClearUnpinnedQ" xml:space="preserve"><value>Clear unpinned items?</value><comment>d.clearUnpinnedQ</comment></data>
+  <data name="Settings_CbClearUnpinnedText" xml:space="preserve"><value>Only pinned 📌 items stay.</value><comment>d.sClearUnpinnedText</comment></data>
+  <data name="Settings_CbClearAllQ" xml:space="preserve"><value>Clear the whole history?</value><comment>d.sClearAllQ</comment></data>
+  <data name="Settings_CbClearAllText" xml:space="preserve"><value>Everything in the clipboard history is deleted, pinned items too.</value><comment>d.sClearAllText</comment></data>
+  <data name="Settings_CbOffQ" xml:space="preserve"><value>Turn off clipboard history</value><comment>d.sOffQ</comment></data>
+  <data name="Settings_CbOffQText" xml:space="preserve"><value>Do you also want to delete the current history?</value><comment>d.sOffQText</comment></data>
+  <data name="Settings_CbKeepIt" xml:space="preserve"><value>Keep it</value><comment>d.sKeepIt</comment></data>
+  <data name="Settings_CbKeepThem" xml:space="preserve"><value>Keep them</value><comment>d.keepThem</comment></data>
+  <data name="Settings_CbDeleteAppQ" xml:space="preserve"><value>Delete what was copied from {0}?</value><comment>d.sDeleteAppQ</comment></data>
+  <data name="Settings_CbEncrypted" xml:space="preserve"><value>🔒 The history is encrypted on this PC</value><comment>d.sEncrypted</comment></data>
+  <data name="Common_ClearShort" xml:space="preserve"><value>Clear</value><comment>d.clear</comment></data>
+  <data name="Settings_CbAppItemsOne" xml:space="preserve"><value>The history has 1 item from this program.</value><comment>d.sDeleteAppQText, ported by hand: one item</comment></data>
+  <data name="Settings_CbAppItemsTwo" xml:space="preserve"><value>The history has 2 items from this program.</value><comment>d.sDeleteAppQText, ported by hand: two items</comment></data>
+  <data name="Settings_CbAppItemsFew" xml:space="preserve"><value>The history has {0} items from this program.</value><comment>d.sDeleteAppQText, ported by hand: 3 to 10 items</comment></data>
+  <data name="Settings_CbAppItemsMany" xml:space="preserve"><value>The history has {0} items from this program.</value><comment>d.sDeleteAppQText, ported by hand: 11 items or more</comment></data>
+  <data name="Settings_CbItemsOne" xml:space="preserve"><value>1 item</value><comment>d.sItemCount, ported by hand: one item</comment></data>
+  <data name="Settings_CbItemsTwo" xml:space="preserve"><value>2 items</value><comment>d.sItemCount, ported by hand: two items</comment></data>
+  <data name="Settings_CbItemsFew" xml:space="preserve"><value>{0} items</value><comment>d.sItemCount, ported by hand: 3 to 10 items</comment></data>
+  <data name="Settings_CbItemsMany" xml:space="preserve"><value>{0} items</value><comment>d.sItemCount, ported by hand: 11 items or more</comment></data>
+  <data name="Settings_CbRemoveApp" xml:space="preserve"><value>Remove {0}</value><comment>d.sRemoveApp, ported by hand</comment></data>
 </root>

@@ -180,6 +180,44 @@ public sealed class SettingsStrings
 
     public string ServerModels { get; } = Localization.Get("Settings_ServerModels");
 
+    public string CbEnable { get; } = Localization.Get("Settings_CbEnable");
+
+    public string CbEnableHint { get; } = Localization.Get("Settings_CbEnableHint");
+
+    public string CbMax { get; } = Localization.Get("Settings_CbMax");
+
+    public string CbMaxHint { get; } = Localization.Get("Settings_CbMaxHint");
+
+    public string CbExpiry { get; } = Localization.Get("Settings_CbExpiry");
+
+    public string CbExpiryHint { get; } = Localization.Get("Settings_CbExpiryHint");
+
+    public string CbCards { get; } = Localization.Get("Settings_CbCards");
+
+    public string CbCardsHint { get; } = Localization.Get("Settings_CbCardsHint");
+
+    public string CbApps { get; } = Localization.Get("Settings_CbApps");
+
+    public string CbAppsHint { get; } = Localization.Get("Settings_CbAppsHint");
+
+    public string CbNoApps { get; } = Localization.Get("Settings_CbNoApps");
+
+    public string CbAppName { get; } = Localization.Get("Settings_CbAppName");
+
+    public string CbAdd { get; } = Localization.Get("Settings_CbAdd");
+
+    public string CbFromHistory { get; } = Localization.Get("Settings_CbFromHistory");
+
+    public string CbClear { get; } = Localization.Get("Settings_CbClear");
+
+    public string CbClearHint { get; } = Localization.Get("Settings_CbClearHint");
+
+    public string CbClearUnpinned { get; } = Localization.Get("Settings_CbClearUnpinned");
+
+    public string CbClearAll { get; } = Localization.Get("Settings_CbClearAll");
+
+    public string CbEncrypted { get; } = Localization.Get("Settings_CbEncrypted");
+
     public string Context { get; } = Localization.Get("Settings_Context");
 
     public string ContextHint { get; } = Localization.Get("Settings_ContextHint");

@@ -241,7 +241,7 @@ public sealed partial class MainWindow : Window, IPageHost
 
     public void OpenSettings(string section) => Go("settings", section);
 
-    public async Task<bool> AskAsync(string question, string confirm)
+    public async Task<Answer> AskAsync(string question, string confirm, string text = "", string? other = null)
     {
         var dialog = new ContentDialog
         {
@@ -249,11 +249,20 @@ public sealed partial class MainWindow : Window, IPageHost
             RequestedTheme = Root.ActualTheme,
             FlowDirection = Localization.FlowDirection,
             Title = question,
+            Content = text.Length > 0 ? new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, TextReadingOrder = TextReadingOrder.UseFlowDirection } : null,
             PrimaryButtonText = confirm,
+            PrimaryButtonStyle = (Style)Application.Current.Resources["LamhaDialogDangerButtonStyle"],
+            SecondaryButtonText = other ?? "",
             CloseButtonText = Localization.Get("Common_Cancel"),
-            DefaultButton = ContentDialogButton.Close,
+            // Nothing in Windows' accent: Cancel is still what Esc does, and the red choice stands out.
+            DefaultButton = ContentDialogButton.None,
         };
-        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+        return await dialog.ShowAsync() switch
+        {
+            ContentDialogResult.Primary => Answer.Confirm,
+            ContentDialogResult.Secondary => Answer.Other,
+            _ => Answer.Cancel,
+        };
     }
 
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
@@ -316,7 +325,7 @@ public sealed partial class MainWindow : Window, IPageHost
         switch (ViewModel.Page.Id)
         {
             case "settings":
-                _settings ??= new SettingsPage(new SettingsViewModel(_brain, this, _writeKeys));
+                _settings ??= new SettingsPage(new SettingsViewModel(_brain, this, _writeKeys, _clipboard));
                 _settings.ViewModel.Refresh();
                 _settings.ViewModel.Attach();
                 PageHost.Content = _settings;

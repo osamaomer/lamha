@@ -54,7 +54,7 @@ public sealed partial class ClipboardService : IDisposable
     /// <summary>The pause started or ended.</summary>
     public event Action? PauseChanged;
 
-    /// <summary>Clipboard history on or off (the tray's switch until Settings has it, phase 4).</summary>
+    /// <summary>Clipboard history on or off (Settings → Clipboard, and the Clipboard page's Turn on).</summary>
     public void SetOn(bool on) => _settings.Update(s => s with { ClipboardEnabled = on });
 
     /// <summary>The tray's pause: <paramref name="length"/>, or null for "until I resume".</summary>

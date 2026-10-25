@@ -10,8 +10,7 @@ public sealed record ShortcutInfo(Hotkey Keys, string LabelKey, bool Registered)
 /// <summary>
 /// The tray icon, its tooltip and its menu: Lamha 2's trayMenu() / trayTooltip() in main.js, with what exists so far.
 /// Clicking the icon opens the main window; the menu's Open, Review, Write and Settings come with the tray's design
-/// (phase 4), updates with phase 5. Until Settings → Clipboard exists, clipboard history has its switch
-/// here (Proto_ items, removed with phase 4).
+/// (phase 4), updates with phase 5. Clipboard history is turned on in Settings → Clipboard; the tray pauses it.
 /// </summary>
 public sealed partial class TrayService : IDisposable
 {
@@ -75,7 +74,6 @@ public sealed partial class TrayService : IDisposable
         }
 
         items.Add(TrayMenuItem.Separator);
-        items.Add(new TrayMenuItem(Localization.Get("Proto_ClipboardHistory"), () => _clipboard.SetOn(!_clipboard.IsOn)) { Checked = _clipboard.IsOn });
         items.AddRange(PauseItems());
         items.Add(TrayMenuItem.Separator);
         items.Add(new TrayMenuItem(Localization.Get("Tray_StartWithWindows"), ToggleStartup) { Checked = _startup.IsOn });

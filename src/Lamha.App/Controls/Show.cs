@@ -21,6 +21,9 @@ public static class Show
 
     public static Visibility IfAny(int count) => count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
+    /// <summary>A line between the rows of a list, none above its first (Settings' lists).</summary>
+    public static Thickness LineAbove(bool first) => first ? new Thickness(0) : new Thickness(0, 1, 0, 0);
+
     /// <summary>A bar's filled part and the rest, as star widths of a grid (Review's progress, from 0 to 1).</summary>
     public static GridLength Filled(double part) => new(Math.Clamp(part, 0, 1), GridUnitType.Star);
 

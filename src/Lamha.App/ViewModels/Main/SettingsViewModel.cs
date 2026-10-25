@@ -88,12 +88,14 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// <param name="brain">Lamha's brain: the settings, the keys and the AI, the review list for Delete all cards.</param>
     /// <param name="host">The main window.</param>
     /// <param name="writeKeys">The writing tools' shortcut ("Ctrl+Alt+W"), for Writing tools' first line.</param>
-    public SettingsViewModel(Brain brain, IPageHost host, string writeKeys)
+    /// <param name="clipboard">Clipboard history's switch, for Settings → Clipboard.</param>
+    public SettingsViewModel(Brain brain, IPageHost host, string writeKeys, ClipboardService clipboard)
     {
         _brain = brain;
         _host = host;
         Writing = new WritingSetupViewModel(brain, () => _ = LoadTranslatorAsync());
         AiIntro = Localization.Format("Settings_AiIntro", writeKeys);
+        Clipboard = new ClipboardSetupViewModel(brain, clipboard, host);
         Tiles =
         [
             Tile("languages", Glyph.Translate, "Settings_Languages", "Settings_UiLang", "Settings_TargetLang", "Settings_Reverse"),
@@ -132,7 +134,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     /// <summary>The category open ("languages", "card"…), or "" for the home.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsHome), nameof(SectionTitle), nameof(IsLanguages), nameof(IsCard), nameof(IsWriting), nameof(IsTranslation),
+    [NotifyPropertyChangedFor(nameof(IsHome), nameof(SectionTitle), nameof(IsLanguages), nameof(IsCard), nameof(IsWriting), nameof(IsTranslation), nameof(IsClipboard),
         nameof(IsReview), nameof(IsOffline), nameof(IsAppearance))]
     public partial string Section { get; private set; } = "";
 
@@ -148,6 +150,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     public bool IsWriting => Section == "writing";
 
     public bool IsTranslation => Section == "translation";
+
+    public bool IsClipboard => Section == "clipboard";
+
+    public ClipboardSetupViewModel Clipboard { get; }
 
     public bool IsReview => Section == "review";
 
@@ -331,7 +337,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task DeleteCardsAsync()
     {
-        if (!await _host.AskAsync(Localization.Get("Settings_DeleteCardsQ"), Localization.Get("Common_Delete")).ConfigureAwait(true))
+        if (await _host.AskAsync(Localization.Get("Settings_DeleteCardsQ"), Localization.Get("Common_Delete")).ConfigureAwait(true) != Answer.Confirm)
         {
             return;
         }
@@ -408,6 +414,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         else if (value == "translation")
         {
             _ = LoadTranslatorAsync();
+        }
+        else if (value == "clipboard")
+        {
+            Clipboard.Load(_brain.Settings.Current);
         }
     }
 
@@ -515,6 +525,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         if (IsTranslation)
         {
             _ = LoadTranslatorAsync();
+        }
+        else if (IsClipboard)
+        {
+            Clipboard.Load(s);
         }
     }
 

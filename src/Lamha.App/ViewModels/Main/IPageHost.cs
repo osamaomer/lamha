@@ -1,5 +1,13 @@
 namespace Lamha.App.ViewModels.Main;
 
+/// <summary>What was chosen in a question: its first choice, the other one, or nothing (Cancel, Esc).</summary>
+public enum Answer
+{
+    Cancel,
+    Confirm,
+    Other,
+}
+
 /// <summary>What a page of the main window asks of the window.</summary>
 public interface IPageHost
 {
@@ -30,8 +38,9 @@ public interface IPageHost
     void OpenSettings(string section);
 
     /// <summary>
-    /// Lamha 2's question before deleting something (shared/dialog.js): <paramref name="question"/>, with
-    /// <paramref name="confirm"/> ("Delete") and Cancel, Cancel the default. True when confirmed.
+    /// Lamha 2's question before deleting something (shared/dialog.js <c>ask()</c>): <paramref name="question"/> and the
+    /// line under it, <paramref name="confirm"/> ("Delete"), another choice if given ("Keep it"), and Cancel, the
+    /// default (Esc too).
     /// </summary>
-    Task<bool> AskAsync(string question, string confirm);
+    Task<Answer> AskAsync(string question, string confirm, string text = "", string? other = null);
 }
