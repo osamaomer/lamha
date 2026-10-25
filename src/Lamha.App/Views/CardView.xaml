@@ -90,7 +90,7 @@
                    TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
                    Text="{x:Bind ViewModel.BarTitle, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(ViewModel.BarTitle), Mode=OneWay, FallbackValue=Collapsed}" />
         <!-- العربية ⇄ English: the word translated, or explained in its own language -->
-        <Border Margin="6,0,0,0" Padding="2" CornerRadius="{StaticResource LamhaRadiusPill}" Background="{ThemeResource LamhaChipBrush}"
+        <Border Margin="6,0,0,0" Padding="2" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}"
                 Visibility="{x:Bind ViewModel.HasDictSwitch, Mode=OneWay, FallbackValue=Collapsed}" ToolTipService.ToolTip="{x:Bind DictSwitchName}">
           <StackPanel Orientation="Horizontal" AutomationProperties.Name="{x:Bind DictSwitchName}">
             <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind ViewModel.DictTranslatedLabel, Mode=OneWay}"
@@ -101,7 +101,7 @@
                           Command="{x:Bind ViewModel.SetDictCommand}" CommandParameter="true" />
           </StackPanel>
         </Border>
-        <Border Margin="4,0,0,0" Padding="4" CornerRadius="{StaticResource LamhaRadiusPill}" Background="{ThemeResource LamhaOkSoftBrush}"
+        <Border Margin="4,0,0,0" Padding="4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaOkSoftBrush}"
                 VerticalAlignment="Center" Visibility="{x:Bind controls:Show.IfText(ViewModel.BadgeTooltip), Mode=OneWay, FallbackValue=Collapsed}"
                 ToolTipService.ToolTip="{x:Bind ViewModel.BadgeTooltip, Mode=OneWay}"
                 AutomationProperties.Name="{x:Bind ViewModel.BadgeTooltip, Mode=OneWay}">
@@ -519,7 +519,7 @@
                         <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FlowDirection="LeftToRight" TextAlignment="{x:Bind controls:Show.LatinAlignment}">
                           <Run Text="{x:Bind Original}" Foreground="{ThemeResource LamhaDangerBrush}" TextDecorations="Strikethrough" /><Run Text=" → " /><Run Text="{x:Bind Fix}" Foreground="{ThemeResource LamhaOkBrush}" FontWeight="SemiBold" />
                         </TextBlock>
-                        <Border Margin="0,4,0,0" Padding="8,1" HorizontalAlignment="Left" CornerRadius="{StaticResource LamhaRadiusPill}"
+                        <Border Margin="0,4,0,0" Padding="8,1" HorizontalAlignment="Left" controls:Pill.IsPill="True"
                                 Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind HasCategory, FallbackValue=Collapsed}">
                           <TextBlock Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind Category}" />
                         </Border>
@@ -617,7 +617,7 @@
 
     <!-- "Copied", "Added to review": a moment at the foot of the card -->
     <Border Grid.Row="1" Grid.RowSpan="2" Margin="0,0,0,12" Padding="12,6" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-            CornerRadius="{StaticResource LamhaRadiusPill}" Background="{ThemeResource LamhaToastBackgroundBrush}"
+            controls:Pill.IsPill="True" Background="{ThemeResource LamhaToastBackgroundBrush}"
             Visibility="{x:Bind controls:Show.IfText(ViewModel.Toast), Mode=OneWay, FallbackValue=Collapsed}" IsHitTestVisible="False">
       <TextBlock FontSize="{StaticResource LamhaFontSizeSecondary}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaToastTextBrush}" Text="{x:Bind ViewModel.Toast, Mode=OneWay}" />
     </Border>

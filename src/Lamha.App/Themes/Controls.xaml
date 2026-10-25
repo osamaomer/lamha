@@ -119,14 +119,14 @@
     <Setter Property="Width" Value="34" />
     <Setter Property="Height" Value="34" />
     <Setter Property="MinHeight" Value="34" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusPill}" />
+    <Setter Property="controls:Pill.IsPill" Value="True" />
   </Style>
 
   <!-- A chip that does something once (a meaning or synonym to look up, "+3"): the chip's look on a button -->
   <Style x:Key="LamhaChipButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
     <Setter Property="Background" Value="{ThemeResource LamhaChipBrush}" />
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusPill}" />
+    <Setter Property="controls:Pill.IsPill" Value="True" />
     <Setter Property="Padding" Value="10,3" />
     <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
@@ -232,7 +232,7 @@
   <Style x:Key="LamhaRoundToggleStyle" TargetType="ToggleButton" BasedOn="{StaticResource LamhaIconToggleStyle}">
     <Setter Property="Width" Value="34" />
     <Setter Property="Height" Value="34" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusPill}" />
+    <Setter Property="controls:Pill.IsPill" Value="True" />
   </Style>
 
   <!-- A segment of a two-way switch in a pill (the card's العربية ⇄ English): the chosen one raised on the surface -->
@@ -241,7 +241,7 @@
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusPill}" />
+    <Setter Property="controls:Pill.IsPill" Value="True" />
     <Setter Property="Padding" Value="10,2" />
     <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
     <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
@@ -314,7 +314,7 @@
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
     <Setter Property="BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusPill}" />
+    <Setter Property="controls:Pill.IsPill" Value="True" />
     <Setter Property="Padding" Value="10,2" />
     <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
     <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />

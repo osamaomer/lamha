@@ -236,12 +236,12 @@
   </Style>
 
   <!-- Corners: Lamha 2's r-sm (buttons, small boxes), r-md (inputs, answer and meaning boxes), r-lg (cards and
-       panels inside a window), and the pill (chips, switches). The card's own window keeps Windows' 8 px corners,
-       edge and shadow, which Acrylic needs (phase 1's card design). -->
+       panels inside a window). The pill (chips, switches) is controls:Pill.IsPill, not a radius: WinUI turns Lamha 2's
+       999 px into an ellipse. The card's own window keeps Windows' 8 px corners, edge and shadow, which Acrylic needs
+       (phase 1's card design). -->
   <CornerRadius x:Key="LamhaRadiusSmall">8</CornerRadius>
   <CornerRadius x:Key="LamhaRadiusMedium">10</CornerRadius>
   <CornerRadius x:Key="LamhaRadiusLarge">14</CornerRadius>
-  <CornerRadius x:Key="LamhaRadiusPill">999</CornerRadius>
 
   <!-- Spacing: a 4 px grid, named by how many steps of 4 -->
   <x:Double x:Key="LamhaSpace1">4</x:Double>
