@@ -73,6 +73,15 @@ public static class Localization
     /// <summary>"25 October", "٢٥ أكتوبر".</summary>
     public static string DayAndMonth(DateOnly day) => Digits(day.ToString("d MMMM", IsArabic ? ArabicNumbers : EnglishNumbers));
 
+    /// <summary>"25 October 2025", "٢٥ أكتوبر ٢٠٢٥".</summary>
+    public static string FullDate(DateOnly day) => Digits(day.ToString("d MMMM yyyy", IsArabic ? ArabicNumbers : EnglishNumbers));
+
+    /// <summary>"Saturday", "السبت".</summary>
+    public static string Weekday(DateOnly day) => day.ToString("dddd", IsArabic ? ArabicNumbers : EnglishNumbers);
+
+    /// <summary>"10:24 AM", "١٠:٢٤ ص" (the main window's design).</summary>
+    public static string Time(DateTime time) => Digits(time.ToString("h:mm tt", IsArabic ? ArabicNumbers : EnglishNumbers));
+
     /// <summary>A language's name in the interface language ("الإنجليزية", "French"): Lamha 2's <c>langName()</c>.</summary>
     public static string LanguageName(string code)
     {

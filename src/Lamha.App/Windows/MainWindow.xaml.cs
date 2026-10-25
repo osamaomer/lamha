@@ -40,6 +40,7 @@ public sealed partial class MainWindow : Window, IPageHost
     private readonly Brain _brain;
     private readonly string _lookupKeys;
     private TranslatePage? _translate;
+    private HistoryPage? _history;
     private bool _choosing;
 
     /// <param name="viewModel">The pages, the one that's open, and the toast.</param>
@@ -174,6 +175,16 @@ public sealed partial class MainWindow : Window, IPageHost
 
     public void Toast(string text, string? action = null, Action? run = null) => ViewModel.ShowToast(text, action, run);
 
+    public void Translate(string text)
+    {
+        Go("translate");
+        if (_translate is { } translate)
+        {
+            translate.ViewModel.Navigate(text);
+            translate.FocusBox();
+        }
+    }
+
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
 
     /// <summary>One page is open across both lists: choosing in one clears the other.</summary>
@@ -207,6 +218,11 @@ public sealed partial class MainWindow : Window, IPageHost
                 _translate ??= new TranslatePage(new TranslateViewModel(_brain, this, _lookupKeys));
                 _translate.ViewModel.Refresh();
                 PageHost.Content = _translate;
+                break;
+            case "history":
+                _history ??= new HistoryPage(new HistoryViewModel(_brain, this));
+                _history.ViewModel.Refresh();
+                PageHost.Content = _history;
                 break;
             default:
                 PageHost.Content = null;

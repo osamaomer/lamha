@@ -16,4 +16,7 @@ public interface IPageHost
     /// (Lamha 2's <c>flash()</c>).
     /// </summary>
     void Toast(string text, string? action = null, Action? run = null);
+
+    /// <summary>The Translate page, with <paramref name="text"/> in its box and looked up (a word in the history).</summary>
+    void Translate(string text);
 }

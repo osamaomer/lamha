@@ -92,7 +92,7 @@ public sealed class BackupService(
 
         var cards = await review.Locked(() => deck.Batch(() => Merge(data["cards"] as JsonObject, data["cardsRemoved"] as JsonObject))).ConfigureAwait(false);
 
-        // History: both lists, newest first, the last 100 words.
+        // History: both lists, newest first, the last HistoryService.Keep words (Lamha 2's 100).
         var added = 0;
         if (data["history"] is JsonArray list)
         {

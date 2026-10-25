@@ -48,6 +48,12 @@
   <data name="Translate_Recent" xml:space="preserve"><value>Recent lookups</value><comment>p.recent</comment></data>
   <data name="Translate_Again" xml:space="preserve"><value>Translate again</value><comment>p.translateAgain</comment></data>
   <data name="Translate_HistoryCleared" xml:space="preserve"><value>History cleared</value><comment>p.histCleared</comment></data>
+  <data name="History_Search" xml:space="preserve"><value>Search your history…</value><comment>new in Lamha 3, approved with the main window's design 2026-10-25</comment></data>
+  <data name="History_Today" xml:space="preserve"><value>Today</value><comment>td.label</comment></data>
+  <data name="History_Yesterday" xml:space="preserve"><value>Yesterday</value><comment>d.yesterday</comment></data>
+  <data name="History_NoResults" xml:space="preserve"><value>No results</value><comment>d.noResults</comment></data>
+  <data name="History_Empty" xml:space="preserve"><value>No words yet</value><comment>rv.emptyTitle</comment></data>
+  <data name="History_EmptyHint" xml:space="preserve"><value>Every word you look up appears here, by day.</value><comment>new in Lamha 3, approved with the History page 2026-10-25</comment></data>
   <data name="Today_Label" xml:space="preserve"><value>Today</value><comment>td.label</comment></data>
   <data name="Today_Ring" xml:space="preserve"><value>{0} of {1}</value><comment>td.ring</comment></data>
   <data name="Today_Progress" xml:space="preserve"><value>{0} of {1} today</value><comment>td.progress</comment></data>

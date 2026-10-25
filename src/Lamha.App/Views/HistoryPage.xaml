@@ -1,0 +1,116 @@
+<UserControl
+    x:Class="Lamha.App.Views.HistoryPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Lamha.App.Controls"
+    xmlns:main="using:Lamha.App.ViewModels.Main">
+  <!-- The main window's History page, as signed off in phase 1 (docs/design/main-window.html): the search and Clear,
+       then every word by day in one panel. Text 20 px from the panel's edges, the bookmark 12 px from its end; rows
+       44 px, their hover 4 px in so it stays inside the panel's corners. -->
+
+  <StackPanel Spacing="16">
+    <!-- ===== Search your history…, and Clear ===== -->
+    <Grid ColumnSpacing="8" Visibility="{x:Bind ViewModel.HasHistory, Mode=OneWay}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <Grid>
+        <!-- The field: its 1 px edge, and Lamha's 2 px accent ring around it while it has the focus (the Translate box's) -->
+        <Border Height="36" CornerRadius="{StaticResource LamhaRadiusMedium}" BorderThickness="1" BorderBrush="{ThemeResource LamhaFieldLineBrush}"
+                Background="{ThemeResource LamhaSurfaceBrush}">
+          <Grid>
+            <TextBox x:Name="SearchBox" MinHeight="34" Padding="36,7,12,0" BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"
+                     FontFamily="{StaticResource LamhaFontFamily}" FontSize="{StaticResource LamhaFontSizeBody}" IsSpellCheckEnabled="False"
+                     TextReadingOrder="DetectFromContent" TextAlignment="{x:Bind controls:Show.BoxAlignment(ViewModel.HasQuery), Mode=OneWay}"
+                     PlaceholderText="{x:Bind Placeholder}" AutomationProperties.Name="{x:Bind Placeholder}"
+                     Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     KeyDown="OnSearchKeyDown" GotFocus="OnSearchFocus" LostFocus="OnSearchFocus">
+              <!-- Windows' own edge, fill and focus line give way to the field's -->
+              <TextBox.Resources>
+                <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
+                <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+                <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+                <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
+                <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
+                <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+                <SolidColorBrush x:Key="TextControlElevationBorderBrush" Color="Transparent" />
+                <SolidColorBrush x:Key="TextControlElevationBorderFocusedBrush" Color="Transparent" />
+              </TextBox.Resources>
+            </TextBox>
+            <controls:LineIcon Glyph="Search" Width="16" Height="16" Margin="12,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
+                               Foreground="{ThemeResource LamhaTextFaintBrush}" IsHitTestVisible="False" />
+          </Grid>
+        </Border>
+        <Border x:Name="FieldRing" Margin="-2" CornerRadius="12" BorderThickness="2" BorderBrush="{ThemeResource LamhaAccentBrush}"
+                IsHitTestVisible="False" Visibility="Collapsed" />
+      </Grid>
+      <Button Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.ClearHistoryCommand}"
+              Content="{x:Bind ClearLabel}" />
+    </Grid>
+
+    <!-- ===== The words, by day ===== -->
+    <Border Padding="0,0,0,4" Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.HasDays, Mode=OneWay}">
+      <ItemsRepeater ItemsSource="{x:Bind ViewModel.Days, Mode=OneWay}">
+        <ItemsRepeater.ItemTemplate>
+          <DataTemplate x:DataType="main:HistoryDayItem">
+            <StackPanel>
+              <TextBlock Margin="{x:Bind NameMargin}" Style="{StaticResource LamhaSectionHeadingTextStyle}" Text="{x:Bind Name}"
+                         AutomationProperties.HeadingLevel="Level2" />
+              <ItemsRepeater ItemsSource="{x:Bind Rows}">
+                <ItemsRepeater.ItemTemplate>
+                  <DataTemplate x:DataType="main:HistoryRow">
+                    <StackPanel>
+                      <!-- A line between words, across the panel; none under the day's name -->
+                      <Border Height="1" Background="{ThemeResource LamhaLineBrush}" Visibility="{x:Bind controls:Show.IfNot(IsFirst)}" />
+                      <Grid Margin="4,0">
+                        <!-- The whole row looks the word up again; its text lies over it, and lets the clicks through -->
+                        <Button Style="{StaticResource LamhaRowButtonStyle}" VerticalAlignment="Stretch" Command="{x:Bind Open}"
+                                ToolTipService.ToolTip="{x:Bind Tooltip}" AutomationProperties.Name="{x:Bind Spoken}" />
+                        <!-- 44 px with or without the bookmark; the times in a column of their own width, so the meanings line up -->
+                        <Grid MinHeight="44" Padding="16,8,8,8" ColumnSpacing="12">
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.1*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="64" />
+                            <ColumnDefinition Width="28" />
+                          </Grid.ColumnDefinitions>
+                          <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                     TextWrapping="NoWrap" FlowDirection="{x:Bind WordFlow}" TextAlignment="{x:Bind controls:Show.InterfaceAligned(WordFlow)}"
+                                     Text="{x:Bind Word}" IsHitTestVisible="False" />
+                          <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}" Foreground="{ThemeResource LamhaTextMutedBrush}"
+                                     TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" FlowDirection="{x:Bind MeaningFlow}" TextAlignment="{x:Bind MeaningAlignment}"
+                                     Text="{x:Bind Meaning}" IsHitTestVisible="False" />
+                          <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Foreground="{ThemeResource LamhaTextFaintBrush}"
+                                     TextWrapping="NoWrap" TextAlignment="Right" Text="{x:Bind Time}" IsHitTestVisible="False" />
+                          <!-- The review bookmark, as on the card: in the accent colour while the word is in review -->
+                          <ToggleButton Grid.Column="3" Style="{StaticResource LamhaIconToggleStyle}" Visibility="{x:Bind CanReview}"
+                                        IsChecked="{x:Bind InReview, Mode=OneWay}" Command="{x:Bind Review}" CommandParameter="{x:Bind}"
+                                        ToolTipService.ToolTip="{x:Bind ReviewTooltip, Mode=OneWay}" AutomationProperties.Name="{x:Bind ReviewTooltip, Mode=OneWay}">
+                            <controls:LineIcon Glyph="Bookmark" Width="16" Height="16" Filled="{x:Bind InReview, Mode=OneWay}" />
+                          </ToggleButton>
+                        </Grid>
+                      </Grid>
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+              </ItemsRepeater>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+      </ItemsRepeater>
+    </Border>
+
+    <!-- ===== Nothing looked up yet; nothing that matches ===== -->
+    <Border Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}">
+      <StackPanel Padding="8,8,8,4" Spacing="4">
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind EmptyTitle}" />
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind EmptyHint}" />
+      </StackPanel>
+    </Border>
+    <Border Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsNoMatch, Mode=OneWay}">
+      <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind NoResults}"
+                 AutomationProperties.LiveSetting="Polite" />
+    </Border>
+  </StackPanel>
+</UserControl>

@@ -58,8 +58,23 @@ public sealed partial class TranslatePage : UserControl
 
     public string ClearLabel { get; } = Localization.Get("Common_Clear");
 
-    /// <summary>The caret in the box, ready to type.</summary>
-    public void FocusBox() => QueryBox.Focus(FocusState.Programmatic);
+    /// <summary>The caret in the box, ready to type; once the page is shown, when it has only just been put in the window.</summary>
+    public void FocusBox()
+    {
+        if (IsLoaded)
+        {
+            QueryBox.Focus(FocusState.Programmatic);
+            return;
+        }
+
+        void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= OnLoaded;
+            QueryBox.Focus(FocusState.Programmatic);
+        }
+
+        Loaded += OnLoaded;
+    }
 
     /// <summary>Enter looks up at once; Shift+Enter starts a new line (Lamha 2's box).</summary>
     private void OnQueryKeyDown(object sender, KeyRoutedEventArgs e)

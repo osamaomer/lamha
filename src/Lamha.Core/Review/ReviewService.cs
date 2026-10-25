@@ -47,6 +47,9 @@ public sealed class ReviewService(IDeckStore deck, IStateStore state, IHistorySt
     /// <summary>A removal older than this has reached every copy long ago (Lamha 2's <c>REMOVED_KEEP_MS</c>).</summary>
     public const long RemovedKeep = 180 * Scheduler.Day;
 
+    /// <summary>The history words made into cards the first time: Lamha 2's whole history, 100 (Lamha 3 keeps more).</summary>
+    private const int ImportedFromHistory = 100;
+
     private const string StatsKey = "deck.stats";
     private const string ImportedKey = "deck.imported";
     private readonly SemaphoreSlim _gate = new(1, 1);
@@ -61,6 +64,10 @@ public sealed class ReviewService(IDeckStore deck, IStateStore state, IHistorySt
 
     /// <summary>Waits for changes on their way (a lookup's automatic card) before answering.</summary>
     public Task<bool> HasAsync(string word) => Locked(() => deck.Get(Card.KeyOf(word)) is not null);
+
+    /// <summary>Which of <paramref name="words"/> are in the deck, by their keys: the History page's bookmarks, in one go.</summary>
+    public Task<HashSet<string>> InReviewAsync(IEnumerable<string> words) => Locked(() =>
+        words.Select(Card.KeyOf).Where(k => k.Length > 0 && deck.Get(k) is not null).ToHashSet());
 
     /// <summary>Settings → delete all cards: the words and the progress, each noted as removed; the history isn't turned into cards again.</summary>
     public Task ClearAsync() => Locked(() =>
@@ -225,7 +232,7 @@ public sealed class ReviewService(IDeckStore deck, IStateStore state, IHistorySt
 
         if (settings.Current.CardsAuto)
         {
-            foreach (var h in history.Recent(HistoryService.Keep).Reverse().Where(h => h.Language == "en"))
+            foreach (var h in history.Recent(ImportedFromHistory).Reverse().Where(h => h.Language == "en"))
             {
                 Put(new CardDraft(h.Word, h.Meaning));
             }

@@ -47,6 +47,12 @@
   <data name="Translate_Recent" xml:space="preserve"><value>آخر عمليات البحث</value><comment>p.recent</comment></data>
   <data name="Translate_Again" xml:space="preserve"><value>ترجم مجددًا</value><comment>p.translateAgain</comment></data>
   <data name="Translate_HistoryCleared" xml:space="preserve"><value>مُسح السجل</value><comment>p.histCleared</comment></data>
+  <data name="History_Search" xml:space="preserve"><value>ابحث في السجل…</value><comment>new in Lamha 3, approved with the main window's design 2026-10-25</comment></data>
+  <data name="History_Today" xml:space="preserve"><value>اليوم</value><comment>td.label</comment></data>
+  <data name="History_Yesterday" xml:space="preserve"><value>أمس</value><comment>d.yesterday</comment></data>
+  <data name="History_NoResults" xml:space="preserve"><value>لا نتائج</value><comment>d.noResults</comment></data>
+  <data name="History_Empty" xml:space="preserve"><value>لا توجد كلمات بعد</value><comment>rv.emptyTitle</comment></data>
+  <data name="History_EmptyHint" xml:space="preserve"><value>تظهر هنا كل كلمة تبحث عنها، مرتّبة حسب اليوم.</value><comment>new in Lamha 3, approved with the History page 2026-10-25</comment></data>
   <data name="Today_Label" xml:space="preserve"><value>اليوم</value><comment>td.label</comment></data>
   <data name="Today_Ring" xml:space="preserve"><value>{0} من {1}</value><comment>td.ring</comment></data>
   <data name="Today_Progress" xml:space="preserve"><value>{0} من {1} اليوم</value><comment>td.progress</comment></data>
