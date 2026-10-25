@@ -3,7 +3,7 @@ using System.Globalization;
 namespace Lamha.App.Services;
 
 /// <summary>
-/// A small log file, %LOCALAPPDATA%\Lamha\logs\lamha.log, kept under 1 MB (the previous one is kept as lamha.1.log).
+/// A small log file, %LOCALAPPDATA%\Lamha Data\logs\lamha.log (for every profile), kept under 1 MB (the previous one is kept as lamha.1.log).
 /// Same rule as Lamha 2: what happened, error type names and lengths; never the user's text, keys or clipboard.
 /// Phase 2 replaces it with Microsoft.Extensions.Logging writing the same file.
 /// </summary>
@@ -12,8 +12,7 @@ public static class AppLog
     private const long MaxBytes = 1024 * 1024;
 
     private static readonly Lock Gate = new();
-    private static readonly string Folder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Lamha", "logs");
+    private static readonly string Folder = Path.Combine(DataFolder.Default, "logs");
 
     public static string FilePath { get; } = Path.Combine(Folder, "lamha.log");
 

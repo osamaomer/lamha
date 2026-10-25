@@ -142,6 +142,12 @@ public sealed record LamhaSettings
     /// <summary>Lamha's colours follow Windows' accent colour (<c>accentWindows</c>). Off unless turned on.</summary>
     public bool AccentWindows { get; init; }
 
+    /// <summary>
+    /// New in Lamha 3: the card and the clipboard panel on a solid background instead of Acrylic (Settings →
+    /// Appearance → the card's background). Off: translucent.
+    /// </summary>
+    public bool CardSolid { get; init; }
+
     /// <summary>The interface language in use: "ar" or "en", given the system's language (e.g. "ar-SA").</summary>
     public string InterfaceLanguage(string systemLanguage) => UiLang switch
     {

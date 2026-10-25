@@ -1,0 +1,3263 @@
+{
+ "about": "Lamha 2's interface strings [Arabic, English], made by tools/Strings/lamha2-strings.mjs dump. Don't edit by hand.",
+ "strings": {
+  "CATEGORIES.agreement.label": [
+   "توافق الفاعل والفعل",
+   "Subject–verb agreement"
+  ],
+  "CATEGORIES.agreement.tip": [
+   "مع he / she / it أو اسم مفرد يأخذ الفعل في المضارع s: She works, The team is. ومع الجمع بدون s: They work, The results are.",
+   "With he / she / it or a singular noun, the present-tense verb takes s: She works, The team is. With plurals it doesn't: They work, The results are."
+  ],
+  "CATEGORIES.articles.label": [
+   "أدوات التعريف والتنكير (a / an / the)",
+   "Articles (a / an / the)"
+  ],
+  "CATEGORIES.articles.tip": [
+   "استخدم a/an مع الاسم المفرد المعدود عند ذكره أول مرة، و the لشيء معروف أو ذُكر من قبل. لا تضع the قبل الأسماء العامة: Life is short وليس The life is short.",
+   "Use a/an with a singular countable noun the first time you mention it, and the for something known or already mentioned. Don't put the before general nouns: Life is short, not The life is short."
+  ],
+  "CATEGORIES.other.label": [
+   "أخرى",
+   "Other"
+  ],
+  "CATEGORIES.other.tip": [
+   "",
+   ""
+  ],
+  "CATEGORIES.plurals.label": [
+   "المفرد والجمع",
+   "Singular and plural nouns"
+  ],
+  "CATEGORIES.plurals.tip": [
+   "بعد الأعداد وكلمات مثل many / several / one of the يأتي الجمع: three days, one of the best places. وبعض الكلمات لا تُجمع: information, advice, equipment.",
+   "Use the plural after numbers and words like many / several / one of the: three days, one of the best places. Some nouns have no plural: information, advice, equipment."
+  ],
+  "CATEGORIES.prepositions.label": [
+   "حروف الجر (in / on / at …)",
+   "Prepositions (in / on / at …)"
+  ],
+  "CATEGORIES.prepositions.tip": [
+   "حروف الجر لا تُترجم حرفيًا من العربية: in للشهور والسنوات والمدن، on للأيام والتواريخ، at للساعات والأماكن المحددة. وبعض الأفعال لا تأخذ حرف جر: discuss the plan وليس discuss about the plan.",
+   "Prepositions often don't translate word for word: in for months, years and cities; on for days and dates; at for times and exact places. Some verbs take no preposition: discuss the plan, not discuss about the plan."
+  ],
+  "CATEGORIES.punctuation.label": [
+   "علامات الترقيم والأحرف الكبيرة",
+   "Punctuation and capitals"
+  ],
+  "CATEGORIES.punctuation.tip": [
+   "ابدأ الجملة وأسماء الأعلام والأيام والشهور و I بحرف كبير. وضع مسافة بعد الفاصلة والنقطة، لا قبلهما.",
+   "Start sentences, names, days, months and I with a capital letter. Put a space after commas and full stops, not before them."
+  ],
+  "CATEGORIES.sentence_structure.label": [
+   "بناء الجملة",
+   "Sentence structure"
+  ],
+  "CATEGORIES.sentence_structure.tip": [
+   "الجمل الإنجليزية أقصر من العربية. لا تربط جملتين كاملتين بفاصلة فقط؛ استخدم نقطة أو and / but / so / because.",
+   "English sentences are shorter than Arabic ones. Don't join two full sentences with just a comma; use a full stop or and / but / so / because."
+  ],
+  "CATEGORIES.spelling.label": [
+   "الإملاء",
+   "Spelling"
+  ],
+  "CATEGORIES.spelling.tip": [
+   "انتبه للكلمات المتشابهة في النطق: their / there / they're، و your / you're، و its / it's.",
+   "Watch words that sound alike: their / there / they're, your / you're, its / it's."
+  ],
+  "CATEGORIES.verb_tense.label": [
+   "أزمنة الأفعال",
+   "Verb tenses"
+  ],
+  "CATEGORIES.verb_tense.tip": [
+   "الماضي البسيط لحدث انتهى في وقت محدد (I finished yesterday)، والمضارع التام لحدث له أثر الآن أو بلا وقت محدد (I have finished). ولا تستخدم المضارع المستمر مع أفعال الحالة: I know وليس I am knowing.",
+   "Use the past simple for something finished at a known time (I finished yesterday), and the present perfect for something with an effect now or no set time (I have finished). Don't use the continuous with state verbs: I know, not I am knowing."
+  ],
+  "CATEGORIES.word_choice.label": [
+   "اختيار الكلمات",
+   "Word choice"
+  ],
+  "CATEGORIES.word_choice.tip": [
+   "الترجمة الحرفية من العربية تُنتج كلمات صحيحة لكنها غير طبيعية. تعلّم التراكيب الشائعة كاملة: make a decision وليس do a decision، و take a photo وليس make a photo.",
+   "Literal translations give words that are correct but unnatural. Learn common combinations as a whole: make a decision, not do a decision; take a photo, not make a photo."
+  ],
+  "CATEGORIES.word_order.label": [
+   "ترتيب الكلمات",
+   "Word order"
+  ],
+  "CATEGORIES.word_order.tip": [
+   "الصفة قبل الاسم (a big house)، والسؤال غير المباشر بترتيب الجملة الخبرية: Can you tell me where the station is وليس where is the station.",
+   "Adjectives come before the noun (a big house), and indirect questions use statement order: Can you tell me where the station is, not where is the station."
+  ],
+  "ERRORS.ai_bad_key.hint": [
+   "تحقق من المفتاح في الإعدادات أو أنشئ مفتاحًا جديدًا.",
+   "Check the key in Settings, or create a new one."
+  ],
+  "ERRORS.ai_bad_key.title": [
+   "مفتاح Claude غير صالح",
+   "The Claude key isn't valid"
+  ],
+  "ERRORS.ai_busy.hint": [
+   "أعد المحاولة بعد لحظات.",
+   "Try again in a moment."
+  ],
+  "ERRORS.ai_busy.title": [
+   "خدمة الذكاء الاصطناعي مشغولة الآن",
+   "The AI service is busy right now"
+  ],
+  "ERRORS.ai_forbidden.hint": [
+   "تحقق من صلاحيات المفتاح في موقع الخدمة (Anthropic أو Google AI Studio).",
+   "Check the key's permissions on the service's website (Anthropic or Google AI Studio)."
+  ],
+  "ERRORS.ai_forbidden.title": [
+   "المفتاح لا يملك صلاحية الاستخدام",
+   "The key isn't allowed to do this"
+  ],
+  "ERRORS.ai_model.hint": [
+   "اختر نموذجًا آخر من الإعدادات.",
+   "Choose another model in Settings."
+  ],
+  "ERRORS.ai_model.title": [
+   "النموذج المختار غير متاح لحسابك",
+   "The chosen model isn't available to your account"
+  ],
+  "ERRORS.ai_no_credit.hint": [
+   "أضف رصيدًا من console.anthropic.com ثم أعد المحاولة.",
+   "Add credit at console.anthropic.com, then try again."
+  ],
+  "ERRORS.ai_no_credit.title": [
+   "نفد رصيد حساب Claude API",
+   "The Claude API account is out of credit"
+  ],
+  "ERRORS.ai_no_key.hint": [
+   "اختر من الإعدادات Ollama (مجاني على جهازك) أو Gemini (مجاني بمفتاح) أو Claude (بمفتاح API).",
+   "In Settings, choose Ollama (free, on your PC), Gemini (free, with a key) or Claude (with an API key)."
+  ],
+  "ERRORS.ai_no_key.title": [
+   "فعّل أدوات الكتابة",
+   "Turn on the writing tools"
+  ],
+  "ERRORS.ai_rate_limited.hint": [
+   "انتظر قليلًا ثم أعد المحاولة.",
+   "Wait a little and try again."
+  ],
+  "ERRORS.ai_rate_limited.title": [
+   "طلبات كثيرة في وقت قصير",
+   "Too many requests in a short time"
+  ],
+  "ERRORS.ai_refused.hint": [
+   "لم يتمكن الذكاء الاصطناعي من العمل على هذا النص.",
+   "The AI couldn't work on this text."
+  ],
+  "ERRORS.ai_refused.title": [
+   "تعذّرت معالجة هذا النص",
+   "This text couldn't be processed"
+  ],
+  "ERRORS.ai_timeout.hint": [
+   "أعد المحاولة، أو استخدم نصًّا أقصر.",
+   "Try again, or use a shorter text."
+  ],
+  "ERRORS.ai_timeout.title": [
+   "استغرق الرد وقتًا طويلًا",
+   "The reply took too long"
+  ],
+  "ERRORS.ai_too_long.hint": [
+   "استخدم جزءًا أقصر من النص.",
+   "Use a shorter part of the text."
+  ],
+  "ERRORS.ai_too_long.title": [
+   "النص طويل جدًا",
+   "The text is too long"
+  ],
+  "ERRORS.gemini_bad_key.hint": [
+   "تحقق من المفتاح في الإعدادات أو أنشئ مفتاحًا جديدًا من aistudio.google.com.",
+   "Check the key in Settings, or create a new one at aistudio.google.com."
+  ],
+  "ERRORS.gemini_bad_key.title": [
+   "مفتاح Gemini غير صالح",
+   "The Gemini key isn't valid"
+  ],
+  "ERRORS.gemini_busy.hint": [
+   "خوادم Google مشغولة (يحدث كثيرًا مع النماذج الجديدة في الخطة المجانية). أعد المحاولة بعد دقيقة، أو استخدم Ollama.",
+   "Google's servers are busy (common with new models on the free tier). Try again in a minute, or use Ollama."
+  ],
+  "ERRORS.gemini_busy.title": [
+   "نماذج Gemini مزدحمة الآن",
+   "Gemini's models are busy right now"
+  ],
+  "ERRORS.gemini_no_key.hint": [
+   "أنشئ مفتاحًا مجانيًا من aistudio.google.com وأضفه في الإعدادات.",
+   "Create a free key at aistudio.google.com and add it in Settings."
+  ],
+  "ERRORS.gemini_no_key.title": [
+   "أضف مفتاح Gemini",
+   "Add a Gemini key"
+  ],
+  "ERRORS.gemini_quota.hint": [
+   "للخطة المجانية حد للطلبات في الدقيقة وفي اليوم. انتظر قليلًا، أو جرّب نموذج Flash-Lite، أو استخدم Ollama.",
+   "The free tier has per-minute and daily limits. Wait a little, try the Flash-Lite model, or use Ollama."
+  ],
+  "ERRORS.gemini_quota.title": [
+   "انتهى الحد المجاني من Gemini مؤقتًا",
+   "Gemini's free limit is used up for now"
+  ],
+  "ERRORS.gemini_region.hint": [
+   "خدمة Gemini API لا تعمل من موقعك الحالي. استخدم Ollama أو Claude.",
+   "The Gemini API doesn't work from your location. Use Ollama or Claude."
+  ],
+  "ERRORS.gemini_region.title": [
+   "Gemini غير متاح في بلدك",
+   "Gemini isn't available in your country"
+  ],
+  "ERRORS.network.hint": [
+   "تحقق من اتصالك ثم حاول مجددًا.",
+   "Check your connection and try again."
+  ],
+  "ERRORS.network.title": [
+   "لا يوجد اتصال بالإنترنت",
+   "No internet connection"
+  ],
+  "ERRORS.ollama_model.hint": [
+   "حمّله أولًا (ollama pull …) أو اختر نموذجًا آخر من الإعدادات.",
+   "Download it first (ollama pull …) or choose another model in Settings."
+  ],
+  "ERRORS.ollama_model.title": [
+   "النموذج غير موجود في Ollama",
+   "The model isn't in Ollama"
+  ],
+  "ERRORS.ollama_no_model.hint": [
+   "اختر نموذجًا من الإعدادات لتفعيل أدوات الكتابة.",
+   "Choose a model in Settings to turn on the writing tools."
+  ],
+  "ERRORS.ollama_no_model.title": [
+   "اختر نموذج Ollama",
+   "Choose an Ollama model"
+  ],
+  "ERRORS.ollama_offline.hint": [
+   "شغّل تطبيق Ollama من قائمة ابدأ ثم أعد المحاولة.",
+   "Start Ollama from the Start menu, then try again."
+  ],
+  "ERRORS.ollama_offline.title": [
+   "Ollama لا يعمل",
+   "Ollama isn't running"
+  ],
+  "ERRORS.ollama_origin.hint": [
+   "أضف متغيّر البيئة OLLAMA_ORIGINS كما في خطوات الإعدادات، ثم أعد تشغيل Ollama.",
+   "Add the OLLAMA_ORIGINS environment variable as in the Settings steps, then restart Ollama."
+  ],
+  "ERRORS.ollama_origin.title": [
+   "Ollama يرفض اتصال الإضافة",
+   "Ollama refuses the extension's connection"
+  ],
+  "ERRORS.other.hint": [
+   "أعد المحاولة.",
+   "Try again."
+  ],
+  "ERRORS.other.title": [
+   "حدث خطأ",
+   "Something went wrong"
+  ],
+  "c.addReview": [
+   "أضف إلى المراجعة",
+   "Add to review"
+  ],
+  "c.addedReview": [
+   "أُضيفت إلى المراجعة",
+   "Added to review"
+  ],
+  "c.aiBadgeTitle": [
+   "ترجمها الذكاء الاصطناعي ({p})",
+   "Translated by AI ({p})"
+  ],
+  "c.aiGuess": [
+   "تخمين من الذكاء الاصطناعي · ليست في القاموس",
+   "AI guess · not in the dictionary"
+  ],
+  "c.bestSense": [
+   "المعنى الأقرب لسياق الجملة",
+   "The meaning closest to this sentence"
+  ],
+  "c.betterTr": [
+   "ترجمة أدق",
+   "Better translation"
+  ],
+  "c.betterTrTitle": [
+   "ترجمة النص مجددًا بـ {p}: أدق في التعابير والعامية، وأبطأ",
+   "Translate again with {p}: better with idioms and slang, but slower"
+  ],
+  "c.cambridge": [
+   "قاموس كامبريدج",
+   "Cambridge Dictionary"
+  ],
+  "c.cardLabel": [
+   "لمحة — ترجمة",
+   "Lamha — translation"
+  ],
+  "c.closeEsc": [
+   "إغلاق (Esc)",
+   "Close (Esc)"
+  ],
+  "c.composeGo": [
+   "اكتب",
+   "Write"
+  ],
+  "c.composeLabel": [
+   "ماذا تريد أن تكتب؟",
+   "What do you want to write?"
+  ],
+  "c.composePlaceholder": [
+   "ماذا تريد أن تكتب؟ صِف فكرتك بالعربية أو الإنجليزية — مثلًا: بريد لمديري أطلب إجازة يوم الأحد",
+   "What do you want to write? Describe it in English or Arabic — e.g. an email to my manager asking for Sunday off"
+  ],
+  "c.composeTitle": [
+   "كتابة جديدة · {p}",
+   "Write new · {p}"
+  ],
+  "c.copiedToast": [
+   "تم النسخ",
+   "Copied"
+  ],
+  "c.copyTr": [
+   "نسخ الترجمة",
+   "Copy the translation"
+  ],
+  "c.corrections": [
+   "التصحيحات ({n})",
+   "Corrections ({n})"
+  ],
+  "c.definition": [
+   "التعريف",
+   "Definition"
+  ],
+  "c.dictEn": [
+   "إنجليزي",
+   "English"
+  ],
+  "c.dictSwitch": [
+   "معنى الكلمة: مترجمًا، أو مشروحًا بلغتها",
+   "Word meaning: translated, or explained in its own language"
+  ],
+  "c.didYouMean": [
+   "هل تقصد: ",
+   "Did you mean: "
+  ],
+  "c.didYouMeanEnd": [
+   "؟",
+   "?"
+  ],
+  "c.editRequest": [
+   "تعديل الطلب",
+   "Edit the request"
+  ],
+  "c.errBusy": [
+   "خدمة الترجمة مشغولة مؤقتًا",
+   "The translation service is busy"
+  ],
+  "c.errCheckConn": [
+   "تحقق من اتصالك ثم حاول مجددًا.",
+   "Check your connection and try again."
+  ],
+  "c.errFailed": [
+   "تعذّرت الترجمة",
+   "Couldn't translate"
+  ],
+  "c.errLocalOnly": [
+   "أنت في وضع «القاموس المحلي فقط». غيّر مصدر القاموس من الإعدادات للبحث عبر الإنترنت.",
+   "You're in “Offline only” mode. Change the dictionary source in Settings to search online."
+  ],
+  "c.errNotFound": [
+   "الكلمة غير موجودة في القاموس المحلي",
+   "The word isn't in the offline dictionary"
+  ],
+  "c.errOffline": [
+   "لا يوجد اتصال بالإنترنت",
+   "No internet connection"
+  ],
+  "c.errOfflineMode": [
+   "ترجمة الجمل تحتاج إلى الإنترنت",
+   "Translating sentences needs the internet"
+  ],
+  "c.errService": [
+   "حدث خطأ أثناء الاتصال بخدمة الترجمة.",
+   "Something went wrong reaching the translation service."
+  ],
+  "c.errTooMany": [
+   "أُرسلت طلبات كثيرة في وقت قصير. انتظر دقيقة ثم أعد المحاولة.",
+   "Too many requests in a short time. Wait a minute and try again."
+  ],
+  "c.examples": [
+   "أمثلة",
+   "Examples"
+  ],
+  "c.formOf": [
+   " ← صيغة من ",
+   " → a form of "
+  ],
+  "c.formOfPlain": [
+   "صيغة من ",
+   "A form of "
+  ],
+  "c.google": [
+   "ترجمة Google",
+   "Google Translate"
+  ],
+  "c.inArabic": [
+   "بالعربية",
+   "In Arabic"
+  ],
+  "c.inContext": [
+   "في هذا السياق",
+   "In this context"
+  ],
+  "c.inContextName": [
+   "في هذا السياق: اسم يبقى كما هو",
+   "In this context: a name, kept as is"
+  ],
+  "c.inEnglish": [
+   "بالإنجليزية",
+   "In English"
+  ],
+  "c.inReview": [
+   "في قائمة المراجعة — اضغط للإزالة",
+   "In your review list — click to remove"
+  ],
+  "c.insert": [
+   "إدراج",
+   "Insert"
+  ],
+  "c.inserted": [
+   "تم الإدراج",
+   "Inserted"
+  ],
+  "c.kind": [
+   "النوع:",
+   "Type:"
+  ],
+  "c.kindEmail": [
+   "بريد إلكتروني",
+   "Email"
+  ],
+  "c.kindMessage": [
+   "رسالة",
+   "Message"
+  ],
+  "c.listenOrig": [
+   "استمع للنص الأصلي",
+   "Listen to the original"
+  ],
+  "c.listenPron": [
+   "استمع للنطق",
+   "Listen to the pronunciation"
+  ],
+  "c.listenTr": [
+   "استمع للترجمة",
+   "Listen to the translation"
+  ],
+  "c.localBadgeTitle": [
+   "قاموس محلي: النتيجة من القاموس المدمج، ويعمل دون إنترنت",
+   "Offline dictionary: from the built-in dictionary, works without internet"
+  ],
+  "c.lookUpX": [
+   "ابحث عن {w}",
+   "Look up {w}"
+  ],
+  "c.lookupBtn": [
+   "بحث",
+   "Look up"
+  ],
+  "c.lookupWord": [
+   "ابحث عن الكلمة",
+   "Look up the word"
+  ],
+  "c.moreMeanings": [
+   "معانٍ أخرى ({n})",
+   "Other meanings ({n})"
+  ],
+  "c.noArDirect": [
+   "لا يوجد معنى عربي مباشر في القاموس المحلي — راجع التعريف أدناه.",
+   "No direct Arabic meaning in the offline dictionary — see the definition below."
+  ],
+  "c.noArSense": [
+   "لا يوجد معنى عربي لهذا الاستخدام في القاموس المحلي. المعنى المقصود هنا:",
+   "The offline dictionary has no Arabic meaning for this use. The meaning here:"
+  ],
+  "c.noDef": [
+   "لا يوجد تعريف لهذه الكلمة باللغة {lang} — جرّب الترجمة.",
+   "No {lang} definition for this word — try the translation."
+  ],
+  "c.noExplainAI": [
+   "لا يوجد شرح لهذه الكلمة باللغة {lang} هنا. لشرح الكلمات بلغتها اختر مزوّد ذكاء اصطناعي في الإعدادات.",
+   "No {lang} explanation for this word here. To explain words in their own language, choose an AI provider in Settings."
+  ],
+  "c.nothingToSummarize": [
+   "لا يوجد نص لتلخيصه",
+   "No text to summarize"
+  ],
+  "c.original": [
+   "الأصل",
+   "Original"
+  ],
+  "c.otherMeanings": [
+   "معانٍ أخرى",
+   "Other meanings"
+  ],
+  "c.pageBar": [
+   "ترجمة الصفحة",
+   "Page translation"
+  ],
+  "c.pageDone": [
+   "تُرجمت الصفحة",
+   "Page translated"
+  ],
+  "c.pagePartial": [
+   "تعذّرت ترجمة بعض الأجزاء",
+   "Some parts couldn't be translated"
+  ],
+  "c.pill": [
+   "لمحة",
+   "Lamha"
+  ],
+  "c.plural": [
+   "الجمع: {p}",
+   "Plural: {p}"
+  ],
+  "c.readWiki": [
+   "اقرأ المزيد في ويكيبيديا",
+   "Read more on Wikipedia"
+  ],
+  "c.readWikiHere": [
+   "اقرأ المقالة في لمحة",
+   "Read the article in Lamha"
+  ],
+  "c.removedReview": [
+   "أُزيلت من المراجعة",
+   "Removed from review"
+  ],
+  "c.replace": [
+   "استبدال",
+   "Replace"
+  ],
+  "c.replaceFailed": [
+   "تعذّر الاستبدال — نُسخ النص، الصقه بنفسك",
+   "Couldn't replace — the text was copied, paste it yourself"
+  ],
+  "c.replaced": [
+   "تم الاستبدال",
+   "Replaced"
+  ],
+  "c.replyPlaceholder": [
+   "ماذا تريد أن تقول؟ اكتب فكرتك بالعربية أو الإنجليزية (اختياري)",
+   "What do you want to say? Write your idea in English or Arabic (optional)"
+  ],
+  "c.root": [
+   "الجذر: {r}",
+   "Root: {r}"
+  ],
+  "c.selectFirst": [
+   "حدّد نصًّا أولًا",
+   "Select some text first"
+  ],
+  "c.showAll": [
+   "اضغط لعرض النص كاملًا",
+   "Click to show the whole text"
+  ],
+  "c.showMore": [
+   "عرض المزيد",
+   "Show more"
+  ],
+  "c.stopTranslation": [
+   "إيقاف الترجمة",
+   "Stop translating"
+  ],
+  "c.tone": [
+   "النبرة:",
+   "Tone:"
+  ],
+  "c.toneAuto": [
+   "تلقائي",
+   "Automatic"
+  ],
+  "c.toneLong": [
+   "مفصّل",
+   "Longer"
+  ],
+  "c.toneShort": [
+   "مختصر",
+   "Short"
+  ],
+  "c.toolKey": [
+   "اضغط {n} لتشغيلها",
+   "Press {n} to run it"
+  ],
+  "c.translateBtn": [
+   "ترجمة",
+   "Translate"
+  ],
+  "c.translateText": [
+   "ترجم النص",
+   "Translate the text"
+  ],
+  "c.wikiOffline": [
+   "من النسخة المنزّلة · {date}",
+   "Downloaded copy · {date}"
+  ],
+  "c.wikiOfflineShort": [
+   "من النسخة المنزّلة",
+   "Downloaded copy"
+  ],
+  "c.wikiOfflineTitle": [
+   "من ويكيبيديا التي نزّلتها على هذا الجهاز، دون إنترنت",
+   "From the Wikipedia you downloaded to this PC, no internet needed"
+  ],
+  "c.wikipedia": [
+   "ويكيبيديا",
+   "Wikipedia"
+  ],
+  "c.writeBtn": [
+   "كتابة",
+   "Write"
+  ],
+  "c.writeLabel": [
+   "لمحة — أدوات الكتابة",
+   "Lamha — writing tools"
+  ],
+  "c.writeNewHere": [
+   "اكتب نصًّا جديدًا في هذا المربع",
+   "Write something new in this box"
+  ],
+  "c.writeReply": [
+   "اكتب الرد",
+   "Write the reply"
+  ],
+  "c.writeTip": [
+   "نقرتان على مربع فارغ تفتحان الكتابة مع لمحة. يمكنك إيقاف ذلك من الإعدادات.",
+   "Double-click an empty box to write with Lamha. You can turn this off in Settings."
+  ],
+  "c.writeTitle": [
+   "أدوات الكتابة · {p}",
+   "Writing tools · {p}"
+  ],
+  "common.back": [
+   "رجوع",
+   "Back"
+  ],
+  "common.clear": [
+   "مسح",
+   "Clear"
+  ],
+  "common.close": [
+   "إغلاق",
+   "Close"
+  ],
+  "common.copied": [
+   "نُسخ ✓",
+   "Copied ✓"
+  ],
+  "common.copy": [
+   "نسخ",
+   "Copy"
+  ],
+  "common.copyFailed": [
+   "تعذّر النسخ",
+   "Couldn't copy"
+  ],
+  "common.lamha": [
+   "لمحة",
+   "Lamha"
+  ],
+  "common.listen": [
+   "استمع",
+   "Listen"
+  ],
+  "common.remove": [
+   "إزالة",
+   "Remove"
+  ],
+  "common.retry": [
+   "إعادة المحاولة",
+   "Try again"
+  ],
+  "common.saved": [
+   "تم الحفظ ✓",
+   "Saved ✓"
+  ],
+  "common.settings": [
+   "الإعدادات",
+   "Settings"
+  ],
+  "common.translating": [
+   "جارٍ الترجمة…",
+   "Translating…"
+  ],
+  "common.undo": [
+   "تراجع",
+   "Undo"
+  ],
+  "common.working": [
+   "جارٍ العمل…",
+   "Working…"
+  ],
+  "d.aEnglish": [
+   "اكتبه بالإنجليزية",
+   "Write it in English"
+  ],
+  "d.aLookup": [
+   "ابحث",
+   "Look up"
+  ],
+  "d.aPlain": [
+   "الصق كنص عادي",
+   "Paste as plain text"
+  ],
+  "d.aProofread": [
+   "دقّق لغويًا",
+   "Proofread"
+  ],
+  "d.aReview": [
+   "أضف للمراجعة",
+   "Add to review"
+  ],
+  "d.aSummary": [
+   "لخّص",
+   "Summarize"
+  ],
+  "d.aTranslate": [
+   "ترجم",
+   "Translate"
+  ],
+  "d.accent": [
+   "لون التمييز من Windows",
+   "Accent colour from Windows"
+  ],
+  "d.accentHint": [
+   "تأخذ الأزرار والروابط لون التمييز الذي اخترته في Windows، معدّلًا ليبقى مقروءًا",
+   "Buttons and links take the accent colour you chose in Windows, adjusted to stay readable"
+  ],
+  "d.addedReview": [
+   "أُضيفت «{w}» إلى المراجعة 🔖",
+   "Added “{w}” to review 🔖"
+  ],
+  "d.all": [
+   "الكل",
+   "All"
+  ],
+  "d.appLamha": [
+   "لمحة",
+   "Lamha"
+  ],
+  "d.appUnknown": [
+   "برنامج غير معروف",
+   "Unknown program"
+  ],
+  "d.backArrow": [
+   "→ رجوع",
+   "← Back"
+  ],
+  "d.backToList": [
+   "→ رجوع إلى القائمة",
+   "← Back to the list"
+  ],
+  "d.cached": [
+   "نتيجة محفوظة من قبل — «إعادة» تطلب نتيجة جديدة",
+   "Saved result — “Redo” asks for a new one"
+  ],
+  "d.cancel": [
+   "إلغاء",
+   "Cancel"
+  ],
+  "d.clear": [
+   "مسح",
+   "Clear"
+  ],
+  "d.clearFailed": [
+   "تعذّر المسح",
+   "Couldn't clear"
+  ],
+  "d.clearUnpinned": [
+   "مسح غير المثبّت",
+   "Clear unpinned"
+  ],
+  "d.clearUnpinnedN": [
+   "مسح غير المثبّت ({n})",
+   "Clear unpinned ({n})"
+  ],
+  "d.clearUnpinnedQ": [
+   "مسح غير المثبّت؟",
+   "Clear unpinned items?"
+  ],
+  "d.clearUnpinnedTitle": [
+   "يحذف كل ما في السجل عدا العناصر المثبّتة 📌",
+   "Deletes everything in the history except pinned 📌 items"
+  ],
+  "d.copied": [
+   "نُسخ ✓",
+   "Copied ✓"
+  ],
+  "d.copiedTitle": [
+   "تم النسخ",
+   "Copied"
+  ],
+  "d.copyFailed": [
+   "تعذّر النسخ",
+   "Couldn't copy"
+  ],
+  "d.delete": [
+   "حذف",
+   "Delete"
+  ],
+  "d.deleteKey": [
+   "حذف (Delete)",
+   "Delete (Delete)"
+  ],
+  "d.deleted": [
+   "حُذف العنصر",
+   "Item deleted"
+  ],
+  "d.empty": [
+   "لا يوجد شيء في الحافظة بعد — انسخ أي نص وسيظهر هنا",
+   "Nothing here yet — copy any text and it shows up here"
+  ],
+  "d.enable": [
+   "تفعيل سجل الحافظة",
+   "Turn on clipboard history"
+  ],
+  "d.errNoTranslation": [
+   "لا توجد ترجمة لهذا النص",
+   "No translation for this text"
+  ],
+  "d.errNoTranslationHint": [
+   "جرّب البحث عنه بدل ذلك.",
+   "Try looking it up instead."
+  ],
+  "d.errTranslate": [
+   "حدث خطأ أثناء الاتصال بخدمة الترجمة. تحقق من اتصالك ثم حاول مجددًا.",
+   "Something went wrong reaching the translation service. Check your connection and try again."
+  ],
+  "d.failed": [
+   "تعذّر ذلك",
+   "That didn't work"
+  ],
+  "d.filter": [
+   "تصفية",
+   "Filter"
+  ],
+  "d.firstCopied": [
+   "أول نسخ",
+   "First copied"
+  ],
+  "d.fullText": [
+   "النص كاملًا",
+   "Full text"
+  ],
+  "d.fxConnected": [
+   "Firefox متصل الآن.",
+   "Firefox is connected now."
+  ],
+  "d.fxIntro": [
+   "إضافة لمحة في Firefox تستطيع أن تستخدم ما نزّلته هنا: ويكيبيديا دون إنترنت في بطاقتها، وفتح المقالات في قارئ لمحة. تتصل من إعداداتها: لمحة لـ Windows ← اتصال.",
+   "The Lamha extension in Firefox can use what you downloaded here: Wikipedia without internet on its card, and articles opening in Lamha's reader. Connect from its Settings: Lamha for Windows → Connect."
+  ],
+  "d.fxLink": [
+   "السماح لإضافة Firefox بالاتصال بالتطبيق",
+   "Let the Firefox extension use this app"
+  ],
+  "d.fxLinkHint": [
+   "لإضافة لمحة وحدها، وبعد موافقتك في Firefox. لا يمر شيء عبر الإنترنت.",
+   "Only the Lamha extension, after you allow it in Firefox. Nothing goes over the internet."
+  ],
+  "d.fxTitle": [
+   "Firefox",
+   "Firefox"
+  ],
+  "d.fxWaiting": [
+   "جاهز، وFirefox غير متصل الآن.",
+   "Ready; Firefox isn't connected right now."
+  ],
+  "d.gpu": [
+   "الرسم بمعالج الرسوميات",
+   "Draw with the graphics card"
+  ],
+  "d.gpuHint": [
+   "حركة أسلس، لكن لمحة تستهلك ذاكرة أكثر (نحو ٢٥ ميغابايت). مُطفأ في الأصل",
+   "Smoother animations, but Lamha uses more memory (about 25 MB). Off unless you turn it on"
+  ],
+  "d.gpuPending": [
+   "يُطبَّق التغيير عند تشغيل لمحة من جديد",
+   "The change applies when Lamha starts again"
+  ],
+  "d.hEnglish": [
+   "بإنجليزية طبيعية",
+   "In natural English"
+  ],
+  "d.hLookup": [
+   "في القاموس",
+   "In the dictionary"
+  ],
+  "d.hPlain": [
+   "بدون تنسيق",
+   "Without formatting"
+  ],
+  "d.hProofread": [
+   "صحّح الأخطاء واشرحها",
+   "Fix the mistakes, with reasons"
+  ],
+  "d.hReview": [
+   "في بطاقات المراجعة",
+   "In your review cards"
+  ],
+  "d.hSummary": [
+   "النقاط الرئيسية",
+   "The key points"
+  ],
+  "d.hTranslate": [
+   "إلى {lang}",
+   "Into {lang}"
+  ],
+  "d.historyLabel": [
+   "سجل الحافظة",
+   "Clipboard history"
+  ],
+  "d.hkClipboard": [
+   "الحافظة: الصق من السجل",
+   "Clipboard: paste from history"
+  ],
+  "d.hkLookup": [
+   "بحث وترجمة في أي برنامج",
+   "Look up and translate in any program"
+  ],
+  "d.hkWrite": [
+   "أدوات الكتابة في أي برنامج",
+   "Writing tools in any program"
+  ],
+  "d.hotkeyTaken": [
+   "اختصار مستخدم",
+   "Shortcut in use"
+  ],
+  "d.ignoreApp": [
+   "تجاهل هذا البرنامج",
+   "Ignore this program"
+  ],
+  "d.ignoreAppTitle": [
+   "لا تسجّل ما يُنسخ من هذا البرنامج بعد الآن",
+   "Stop recording what's copied from this program"
+  ],
+  "d.ignoredDone": [
+   "أُضيف {app} إلى البرامج المستثناة",
+   "{app} added to the excluded programs"
+  ],
+  "d.ignoredQ": [
+   "لن يُسجَّل ما تنسخه من {app}",
+   "What you copy from {app} won't be recorded"
+  ],
+  "d.ignoredQText": [
+   "هل تريد حذف ما في السجل منه أيضًا ({n})؟",
+   "Also delete what's already in the history from it ({n})?"
+  ],
+  "d.kBack": [
+   "رجوع",
+   "back"
+  ],
+  "d.kClose": [
+   "إغلاق",
+   "close"
+  ],
+  "d.kPaste": [
+   "لصق",
+   "paste"
+  ],
+  "d.kPlain": [
+   "نص عادي",
+   "plain text"
+  ],
+  "d.kRun": [
+   "تشغيل",
+   "run"
+  ],
+  "d.kShortcut": [
+   "اختصار",
+   "shortcut"
+  ],
+  "d.kTools": [
+   "أدوات",
+   "tools"
+  ],
+  "d.kToolsBack": [
+   "الأدوات",
+   "tools"
+  ],
+  "d.keepThem": [
+   "الإبقاء عليها",
+   "Keep them"
+  ],
+  "d.label": [
+   "تسمية",
+   "Label"
+  ],
+  "d.labelInput": [
+   "تسمية العنصر",
+   "Item label"
+  ],
+  "d.labelPlaceholder": [
+   "اسم قصير يسهل البحث عنه",
+   "A short name that's easy to search for"
+  ],
+  "d.labelSaved": [
+   "حُفظت التسمية",
+   "Label saved"
+  ],
+  "d.lastCopied": [
+   "آخر نسخ",
+   "Last copied"
+  ],
+  "d.mica": [
+   "إظهار خلفية سطح المكتب خلف النافذة",
+   "Show the wallpaper behind the window"
+  ],
+  "d.micaHint": [
+   "لمسة من خلفية سطح المكتب خلف نافذة لمحة والإعدادات، كما في تطبيقات Windows 11 نفسها. تبقى البطاقات بلونها فيبقى النص واضحًا",
+   "A touch of your desktop wallpaper behind Lamha's window and Settings, as in Windows 11's own apps. The cards keep their colour, so text stays clear"
+  ],
+  "d.newResult": [
+   "نتيجة جديدة",
+   "A new result"
+  ],
+  "d.noPinned": [
+   "لا توجد عناصر مثبّتة بعد — ثبّت ما تحتاجه كثيرًا بـ Ctrl+P",
+   "Nothing pinned yet — pin what you use often with Ctrl+P"
+  ],
+  "d.noResults": [
+   "لا نتائج",
+   "No results"
+  ],
+  "d.notePrefix": [
+   "لمحة — ",
+   "Lamha — "
+  ],
+  "d.nothingUnpinned": [
+   "لا توجد عناصر غير مثبّتة",
+   "No unpinned items"
+  ],
+  "d.now": [
+   "الآن",
+   "Just now"
+  ],
+  "d.optInText": [
+   "يحفظ لمحة ما تنسخه على جهازك فقط، مشفّرًا، لتجده وتلصقه لاحقًا. لا يُرسل أي شيء إلا عند ضغطك على أداة.",
+   "Lamha keeps what you copy on this PC only, encrypted, so you can find and paste it later. Nothing is sent anywhere unless you press a tool."
+  ],
+  "d.optInTitle": [
+   "سجل الحافظة",
+   "Clipboard history"
+  ],
+  "d.panelHint": [
+   "اختر نصًا لتلصقه",
+   "Pick something to paste"
+  ],
+  "d.panelLabel": [
+   "الحافظة",
+   "Clipboard"
+  ],
+  "d.panelTitle": [
+   "الحافظة — لمحة",
+   "Clipboard — Lamha"
+  ],
+  "d.paste": [
+   "لصق",
+   "Paste"
+  ],
+  "d.pasteYourself": [
+   "الصق يدويًا بـ Ctrl+V",
+   "Paste it yourself with Ctrl+V"
+  ],
+  "d.pause": [
+   "إيقاف الحافظة مؤقتًا",
+   "Pause clipboard history"
+  ],
+  "d.pause15": [
+   "١٥ دقيقة",
+   "15 minutes"
+  ],
+  "d.pause60": [
+   "ساعة",
+   "1 hour"
+  ],
+  "d.pauseUntil": [
+   "حتى الاستئناف",
+   "Until I resume"
+  ],
+  "d.pausedText": [
+   "لا يُسجَّل ما تنسخه الآن.",
+   "What you copy isn't being recorded."
+  ],
+  "d.pausedTitle": [
+   "الحافظة متوقفة مؤقتًا",
+   "Clipboard history is paused"
+  ],
+  "d.pin": [
+   "تثبيت",
+   "Pin"
+  ],
+  "d.pinFailed": [
+   "تعذّر التثبيت",
+   "Couldn't pin"
+  ],
+  "d.pinKey": [
+   "تثبيت (Ctrl+P)",
+   "Pin (Ctrl+P)"
+  ],
+  "d.pinLimit": [
+   "وصلت إلى الحد الأقصى للعناصر المثبتة (٣٠٠)",
+   "You've reached the maximum of 300 pinned items"
+  ],
+  "d.pinned": [
+   "مثبّت",
+   "Pinned"
+  ],
+  "d.pinnedFilter": [
+   "المثبتة",
+   "Pinned"
+  ],
+  "d.pinnedToast": [
+   "تم التثبيت 📌",
+   "Pinned 📌"
+  ],
+  "d.program": [
+   "البرنامج",
+   "Program"
+  ],
+  "d.rBack": [
+   "رجوع",
+   "Back"
+  ],
+  "d.rBigger": [
+   "تكبير النص",
+   "Larger text"
+  ],
+  "d.rBroken": [
+   "تعذّرت قراءة هذه المقالة من الملف.",
+   "This article couldn't be read from the file."
+  ],
+  "d.rContents": [
+   "المحتويات",
+   "Contents"
+  ],
+  "d.rCredit": [
+   "من ويكيبيديا، برخصة CC BY-SA 4.0 · نسخة {date} المنزّلة من Kiwix",
+   "From Wikipedia, CC BY-SA 4.0 · the {date} copy, downloaded from Kiwix"
+  ],
+  "d.rForward": [
+   "تقدّم",
+   "Forward"
+  ],
+  "d.rHome": [
+   "البداية",
+   "Start"
+  ],
+  "d.rHomeHint": [
+   "ابحث عن مقالة في الأعلى، أو ابدأ بمقالة عشوائية. حدّد أي كلمة في مقالة لتراها في بطاقة لمحة.",
+   "Search for an article above, or start with a random one. Select any word in an article to look it up with Lamha."
+  ],
+  "d.rMainPage": [
+   "الصفحة الرئيسية",
+   "Main page"
+  ],
+  "d.rManage": [
+   "إدارة الملفات في الإعدادات",
+   "Manage the files in Settings"
+  ],
+  "d.rMini": [
+   "هذه نسخة مختصرة: المقدمة فقط.",
+   "This copy has introductions only."
+  ],
+  "d.rNoFiles": [
+   "لم تنزّل ويكيبيديا بعد",
+   "You haven't downloaded Wikipedia yet"
+  ],
+  "d.rNoFilesHint": [
+   "نزّلها مرة واحدة من الإعدادات، ثم اقرأها هنا دون إنترنت.",
+   "Download it once in Settings, then read it here without internet."
+  ],
+  "d.rNoResults": [
+   "لا توجد مقالة تبدأ بـ«{q}» في النسخة المنزّلة.",
+   "No article starting with “{q}” in your downloaded copy."
+  ],
+  "d.rNotHere": [
+   "هذه المقالة ليست في النسخة المنزّلة.",
+   "This article isn't in your downloaded copy."
+  ],
+  "d.rOnline": [
+   "افتح المقالة في ويكيبيديا على الإنترنت",
+   "Open this article on Wikipedia online"
+  ],
+  "d.rOpenOnline": [
+   "افتحها على الإنترنت",
+   "Open it online"
+  ],
+  "d.rRandom": [
+   "مقالة عشوائية",
+   "Random article"
+  ],
+  "d.rReadFull": [
+   "اقرأ المقالة كاملة على الإنترنت",
+   "Read the whole article online"
+  ],
+  "d.rSearch": [
+   "ابحث في ويكيبيديا المنزّلة",
+   "Search your downloaded Wikipedia"
+  ],
+  "d.rSmaller": [
+   "تصغير النص",
+   "Smaller text"
+  ],
+  "d.rTitle": [
+   "ويكيبيديا — لمحة",
+   "Wikipedia — Lamha"
+  ],
+  "d.rToSettings": [
+   "نزّلها من الإعدادات",
+   "Download it in Settings"
+  ],
+  "d.rTrayItem": [
+   "ويكيبيديا",
+   "Wikipedia"
+  ],
+  "d.redo": [
+   "إعادة",
+   "Redo"
+  ],
+  "d.removedReview": [
+   "أُزيلت «{w}» من المراجعة",
+   "Removed “{w}” from review"
+  ],
+  "d.replaceFailed": [
+   "تعذّر الاستبدال",
+   "Couldn't replace"
+  ],
+  "d.replaceFailedBody": [
+   "نُسخ النص — الصقه بنفسك (Ctrl+V).",
+   "The text was copied — paste it yourself (Ctrl+V)."
+  ],
+  "d.resume": [
+   "استئناف الحافظة (متوقفة)",
+   "Resume clipboard history (paused)"
+  ],
+  "d.resumeAt": [
+   "استئناف الحافظة (متوقفة حتى {time})",
+   "Resume clipboard history (paused until {time})"
+  ],
+  "d.resumeBtn": [
+   "استئناف",
+   "Resume"
+  ],
+  "d.reviewTime": [
+   "وقت المراجعة",
+   "Time to review"
+  ],
+  "d.s30": [
+   "٣٠ يومًا",
+   "30 days"
+  ],
+  "d.s7": [
+   "٧ أيام",
+   "7 days"
+  ],
+  "d.s90": [
+   "٩٠ يومًا",
+   "90 days"
+  ],
+  "d.sAdd": [
+   "إضافة",
+   "Add"
+  ],
+  "d.sAppName": [
+   "اسم البرنامج (exe)",
+   "Program name (exe)"
+  ],
+  "d.sApps": [
+   "البرامج المستثناة",
+   "Excluded programs"
+  ],
+  "d.sAppsHint": [
+   "لا يُسجَّل شيء تنسخه من هذه البرامج. مديرو كلمات المرور مستثنون من البداية.",
+   "Nothing you copy from these programs is recorded. Password managers are excluded from the start."
+  ],
+  "d.sBadApp": [
+   "اكتب اسم البرنامج كما يظهر في مدير المهام، مثل notepad.exe",
+   "Type the program's name as Task Manager shows it, like notepad.exe"
+  ],
+  "d.sCards": [
+   "تجاهل أرقام البطاقات البنكية",
+   "Skip bank card numbers"
+  ],
+  "d.sCardsHint": [
+   "لا يُحفظ رقم بطاقة (١٣–١٩ رقمًا) منسوخ وحده.",
+   "A card number (13–19 digits) copied on its own is never saved."
+  ],
+  "d.sClear": [
+   "مسح السجل",
+   "Clear the history"
+  ],
+  "d.sClearAll": [
+   "مسح الكل",
+   "Clear all"
+  ],
+  "d.sClearAllQ": [
+   "مسح كل السجل؟",
+   "Clear the whole history?"
+  ],
+  "d.sClearAllText": [
+   "يُحذف كل ما في الحافظة، بما في ذلك العناصر المثبّتة.",
+   "Everything in the clipboard history is deleted, pinned items too."
+  ],
+  "d.sClearHint": [
+   "لا يمكن التراجع عن المسح",
+   "This can't be undone"
+  ],
+  "d.sClearUnpinnedText": [
+   "تبقى العناصر المثبّتة 📌 فقط.",
+   "Only pinned 📌 items stay."
+  ],
+  "d.sDay": [
+   "يوم",
+   "1 day"
+  ],
+  "d.sDeleteAppQ": [
+   "حذف ما نُسخ من {app}؟",
+   "Delete what was copied from {app}?"
+  ],
+  "d.sEnableHint": [
+   "متوقف افتراضيًا. لا يُرسل أي نص إلا عندما تضغط إحدى أدوات لمحة عليه.",
+   "Off by default. No text is sent anywhere unless you press one of Lamha's tools on it."
+  ],
+  "d.sEncrypted": [
+   "🔒 السجل مشفّر على هذا الجهاز",
+   "🔒 The history is encrypted on this PC"
+  ],
+  "d.sExpiry": [
+   "الحذف التلقائي لغير المثبّت بعد",
+   "Delete unpinned items after"
+  ],
+  "d.sExpiryHint": [
+   "منذ آخر نسخ أو استخدام",
+   "Since they were last copied or used"
+  ],
+  "d.sFromHistory": [
+   "من سجلك:",
+   "From your history:"
+  ],
+  "d.sIntroA": [
+   "سجل لما تنسخه في أي برنامج، تفتحه بـ ",
+   "A history of what you copy in any program. Open it with "
+  ],
+  "d.sIntroB": [
+   " لتبحث فيه وتلصق. يبقى على جهازك فقط.",
+   " to search and paste. It stays on your PC."
+  ],
+  "d.sKeepIt": [
+   "الإبقاء عليه",
+   "Keep it"
+  ],
+  "d.sMax": [
+   "عدد العناصر المحفوظة",
+   "Items to keep"
+  ],
+  "d.sMaxHint": [
+   "تُحذف الأقدم عند تجاوزه. المثبّتة لا تُحسب.",
+   "The oldest go when there are more. Pinned items don't count."
+  ],
+  "d.sNever": [
+   "أبدًا",
+   "Never"
+  ],
+  "d.sNoApps": [
+   "لا توجد برامج مستثناة.",
+   "No excluded programs."
+  ],
+  "d.sNotEncrypted": [
+   "⚠️ التشفير غير متاح على هذا الجهاز — يُحفظ السجل دون تشفير.",
+   "⚠️ Encryption isn't available on this PC — the history is stored unencrypted."
+  ],
+  "d.sOffQ": [
+   "إيقاف سجل الحافظة",
+   "Turn off clipboard history"
+  ],
+  "d.sOffQText": [
+   "هل تريد حذف السجل الحالي أيضًا؟",
+   "Do you also want to delete the current history?"
+  ],
+  "d.sTitle": [
+   "الحافظة",
+   "Clipboard"
+  ],
+  "d.save": [
+   "حفظ",
+   "Save"
+  ],
+  "d.search": [
+   "ابحث في الحافظة…",
+   "Search the clipboard…"
+  ],
+  "d.searchLabel": [
+   "ابحث في الحافظة",
+   "Search the clipboard"
+  ],
+  "d.settingsLink": [
+   "إعدادات الحافظة والخصوصية",
+   "Clipboard & privacy settings"
+  ],
+  "d.settingsTitle": [
+   "إعدادات لمحة",
+   "Lamha settings"
+  ],
+  "d.settingsWriting": [
+   "الإعدادات ← أدوات الكتابة",
+   "Settings → Writing tools"
+  ],
+  "d.showMore": [
+   "عرض المزيد",
+   "Show more"
+  ],
+  "d.summaryLang": [
+   "لغة الملخص",
+   "Summary language"
+  ],
+  "d.summaryLangColon": [
+   "لغة الملخص:",
+   "Summary language:"
+  ],
+  "d.tab": [
+   "الحافظة",
+   "Clipboard"
+  ],
+  "d.timesCopied": [
+   "مرات النسخ",
+   "Times copied"
+  ],
+  "d.tipPaused": [
+   "الحافظة متوقفة مؤقتًا",
+   "Clipboard history paused"
+  ],
+  "d.tipReview": [
+   "{n} للمراجعة",
+   "{n} to review"
+  ],
+  "d.toolsLabel": [
+   "أدوات لمحة",
+   "Lamha's tools"
+  ],
+  "d.toolsTitle": [
+   "أدوات النص",
+   "Text tools"
+  ],
+  "d.trayClipboard": [
+   "الحافظة",
+   "Clipboard"
+  ],
+  "d.trayLogin": [
+   "التشغيل مع Windows",
+   "Start with Windows"
+  ],
+  "d.trayMotion": [
+   "الحركة",
+   "Animations"
+  ],
+  "d.trayOpen": [
+   "فتح لمحة",
+   "Open Lamha"
+  ],
+  "d.trayQuit": [
+   "خروج",
+   "Quit"
+  ],
+  "d.traySettings": [
+   "الإعدادات",
+   "Settings"
+  ],
+  "d.trayWrite": [
+   "كتابة ✨",
+   "Write ✨"
+  ],
+  "d.unavailable": [
+   " (غير متاح)",
+   " (unavailable)"
+  ],
+  "d.undo": [
+   "تراجع",
+   "Undo"
+  ],
+  "d.unpin": [
+   "إلغاء التثبيت",
+   "Unpin"
+  ],
+  "d.unpinKey": [
+   "إلغاء التثبيت (Ctrl+P)",
+   "Unpin (Ctrl+P)"
+  ],
+  "d.unpinned": [
+   "أُلغي التثبيت",
+   "Unpinned"
+  ],
+  "d.upAllReleases": [
+   "كل الإصدارات على GitHub",
+   "All releases on GitHub"
+  ],
+  "d.upAuto": [
+   "التحديثات التلقائية",
+   "Automatic updates"
+  ],
+  "d.upAutoHint": [
+   "يتحقق لمحة من وجود إصدار جديد عند التشغيل وكل ٦ ساعات، وينزّله في الخلفية، ويثبّته عند إعادة التشغيل.",
+   "Lamha checks for a new version at startup and every 6 hours, downloads it in the background, and installs it when it restarts."
+  ],
+  "d.upCheck": [
+   "التحقق من التحديثات",
+   "Check for updates"
+  ],
+  "d.upCheckNow": [
+   "التحقق الآن",
+   "Check now"
+  ],
+  "d.upCheckRow": [
+   "التحقق من وجود تحديث",
+   "Check for an update"
+  ],
+  "d.upChecking": [
+   "جارٍ التحقق من التحديثات…",
+   "Checking for updates…"
+  ],
+  "d.upDevBody": [
+   "التحديث التلقائي يعمل في النسخة المثبّتة فقط.",
+   "Automatic updates work in the installed version only."
+  ],
+  "d.upDownload": [
+   "تنزيل الإصدار {v}",
+   "Download version {v}"
+  ],
+  "d.upDownloadBtn": [
+   "تنزيل",
+   "Download"
+  ],
+  "d.upDownloading": [
+   "يُنزَّل الإصدار {v}…",
+   "Downloading version {v}…"
+  ],
+  "d.upFailedBody": [
+   "تحقق من اتصالك بالإنترنت ثم حاول مجددًا.",
+   "Check your internet connection and try again."
+  ],
+  "d.upFailedTitle": [
+   "تعذّر التحقق من التحديثات",
+   "Couldn't check for updates"
+  ],
+  "d.upLatestBody": [
+   "الإصدار {v} هو الأحدث.",
+   "Version {v} is the latest."
+  ],
+  "d.upLatestTitle": [
+   "لديك أحدث إصدار",
+   "You're up to date"
+  ],
+  "d.upNewBody": [
+   "الإصدار {v} متاح. نسخة Portable لا تُحدّث نفسها — اضغط لتنزيله.",
+   "Version {v} is available. The Portable version can't update itself — click to download it."
+  ],
+  "d.upNewIn": [
+   "ما الجديد في الإصدار {v}",
+   "What's new in version {v}"
+  ],
+  "d.upNewTitle": [
+   "إصدار جديد من لمحة",
+   "New version of Lamha"
+  ],
+  "d.upReadyBody": [
+   "الإصدار {v} — أعد تشغيل لمحة لتثبيته، أو سيُثبَّت عند الخروج. اضغط هنا لإعادة التشغيل الآن.",
+   "Version {v} — restart Lamha to install it, or it installs when you quit. Click here to restart now."
+  ],
+  "d.upReadyTitle": [
+   "تحديث جديد جاهز",
+   "Update ready"
+  ],
+  "d.upRestart": [
+   "أعد التشغيل لتثبيت الإصدار {v}",
+   "Restart to install version {v}"
+  ],
+  "d.upRestartNow": [
+   "أعد التشغيل الآن",
+   "Restart now"
+  ],
+  "d.upSAvailable": [
+   "الإصدار {v} متاح — نسخة Portable تُحدَّث بتنزيل الإصدار الجديد",
+   "Version {v} is available — the Portable version updates by downloading the new one"
+  ],
+  "d.upSChecking": [
+   "جارٍ التحقق…",
+   "Checking…"
+  ],
+  "d.upSDownloading": [
+   "يُنزَّل الإصدار {v}…",
+   "Downloading version {v}…"
+  ],
+  "d.upSError": [
+   "تعذّر التحقق من التحديثات. تحقق من اتصالك.",
+   "Couldn't check for updates. Check your connection."
+  ],
+  "d.upSLatest": [
+   "لديك أحدث إصدار ✓",
+   "You're up to date ✓"
+  ],
+  "d.upSReady": [
+   "الإصدار {v} جاهز — أعد التشغيل لتثبيته",
+   "Version {v} is ready — restart to install it"
+  ],
+  "d.upTitle": [
+   "التحديثات",
+   "Updates"
+  ],
+  "d.wAdd": [
+   "أضف ملفًا عندك",
+   "Add a file you have"
+  ],
+  "d.wAddBtn": [
+   "اختيار ملف…",
+   "Choose a file…"
+  ],
+  "d.wAddHint": [
+   "ملف ‎.zim‎ من ويكيبيديا، من Kiwix مثلًا. يُستخدم من مكانه ولا يُنسخ.",
+   "A Wikipedia .zim file, from Kiwix for example. It's used where it is, not copied."
+  ],
+  "d.wAdded": [
+   "أُضيف: {name}",
+   "Added: {name}"
+  ],
+  "d.wAll": [
+   "كل المقالات",
+   "All articles"
+  ],
+  "d.wBigQ": [
+   "تنزيل {size}؟",
+   "Download {size}?"
+  ],
+  "d.wBigQText": [
+   "ملف كبير قد يستغرق تنزيله ساعات، ويحتاج هذه المساحة على الجهاز. يمكنك إيقافه ومتابعته متى شئت.",
+   "A big file: it can take hours to download, and needs this much space on the PC. You can pause and resume it any time."
+  ],
+  "d.wCatalogOffline": [
+   "تعذّر جلب القائمة من Kiwix. تحقّق من الاتصال بالإنترنت.",
+   "Couldn't get the list from Kiwix. Check your internet connection."
+  ],
+  "d.wChange": [
+   "تغيير…",
+   "Change…"
+  ],
+  "d.wChecking": [
+   "يتحقّق من سلامة الملف… {p}",
+   "Checking the file… {p}"
+  ],
+  "d.wCredits": [
+   "مقالات ويكيبيديا برخصة CC BY-SA 4.0، وملفاتها من Kiwix ‏(openZIM).",
+   "Wikipedia articles are CC BY-SA 4.0; the files come from Kiwix (openZIM)."
+  ],
+  "d.wDefault": [
+   "المكان الافتراضي",
+   "Default"
+  ],
+  "d.wErr_checksum": [
+   "وصل الملف تالفًا فحُذف. نزّله من جديد.",
+   "The file arrived damaged and was deleted. Download it again."
+  ],
+  "d.wErr_failed": [
+   "تعذّر ذلك. أعد المحاولة.",
+   "That didn't work. Try again."
+  ],
+  "d.wErr_folder": [
+   "لا يمكن الحفظ في هذا المجلد. اختر مجلدًا آخر.",
+   "Files can't be saved in this folder. Choose another one."
+  ],
+  "d.wErr_no_space": [
+   "لا توجد مساحة كافية في مكان الحفظ. غيّره أو أفرغ بعض المساحة.",
+   "There isn't enough free space where files are saved. Change the folder or free some space."
+  ],
+  "d.wErr_not_wikipedia": [
+   "هذا الملف ليس من ويكيبيديا.",
+   "This file isn't Wikipedia."
+  ],
+  "d.wErr_not_zim": [
+   "هذا ليس ملف ‎.zim‎ صالحًا.",
+   "This isn't a valid .zim file."
+  ],
+  "d.wErr_offline": [
+   "انقطع الاتصال. يتابع التنزيل من حيث توقف عند المتابعة.",
+   "The connection dropped. Resume carries on from where it stopped."
+  ],
+  "d.wErr_too_old": [
+   "صيغة هذا الملف قديمة. نزّل نسخة أحدث.",
+   "This file's format is too old. Download a newer copy."
+  ],
+  "d.wFirst": [
+   "استخدم النسخة المنزّلة أولًا",
+   "Use the downloaded copy first"
+  ],
+  "d.wFirstHint": [
+   "أسرع، ولا يُسأل الإنترنت حتى مع الاتصال. دون هذا الخيار تُستخدم النسخة المنزّلة عند انقطاع الاتصال فقط.",
+   "Faster, and nothing goes online even when you're connected. Without it, the downloaded copy is used only when there's no connection."
+  ],
+  "d.wFolder": [
+   "مكان الحفظ",
+   "Save downloads to"
+  ],
+  "d.wForgetQ": [
+   "إزالة «{name}» من لمحة؟",
+   "Remove “{name}” from Lamha?"
+  ],
+  "d.wForgetQText": [
+   "يبقى الملف في مكانه، لكن لمحة لن تستخدمه.",
+   "The file stays where it is, but Lamha won't use it."
+  ],
+  "d.wGB": [
+   "{n} غيغابايت",
+   "{n} GB"
+  ],
+  "d.wGet": [
+   "تنزيل",
+   "Download"
+  ],
+  "d.wHave": [
+   "على هذا الجهاز",
+   "On this PC"
+  ],
+  "d.wHaveIt": [
+   "عندك",
+   "Downloaded"
+  ],
+  "d.wImported": [
+   "ملف أضفته",
+   "A file you added"
+  ],
+  "d.wInProgress": [
+   "قيد التنزيل",
+   "Downloading"
+  ],
+  "d.wIntro": [
+   "نزّل ويكيبيديا على هذا الجهاز لتظهر مقدمات مقالاتها في بطاقة البحث دون إنترنت. الملفات من Kiwix، وأنت تختار ما تنزّله.",
+   "Download Wikipedia to this PC, and the lookup card shows its articles' introductions without internet. The files come from Kiwix, and you choose what to download."
+  ],
+  "d.wLang": [
+   "اللغة",
+   "Language"
+  ],
+  "d.wLeftHours": [
+   "بقي {h} س {m} د",
+   "{h} h {m} min left"
+  ],
+  "d.wLoading": [
+   "جارٍ جلب القائمة من Kiwix…",
+   "Getting the list from Kiwix…"
+  ],
+  "d.wMB": [
+   "{n} ميغابايت",
+   "{n} MB"
+  ],
+  "d.wMaxi": [
+   "كاملة بالصور",
+   "Full, with pictures"
+  ],
+  "d.wMaxiHint": [
+   "المقالات كاملة بصورها",
+   "Whole articles with their pictures"
+  ],
+  "d.wMini": [
+   "مختصرة",
+   "Mini"
+  ],
+  "d.wMiniHint": [
+   "المقدمات فقط",
+   "Introductions only"
+  ],
+  "d.wMissing": [
+   "الملف ليس في مكانه",
+   "The file isn't where it was"
+  ],
+  "d.wNewer": [
+   "نسخة أحدث",
+   "Newer copy"
+  ],
+  "d.wNoFiles": [
+   "لا توجد ملفات ويكيبيديا بهذه اللغة.",
+   "There are no Wikipedia files in this language."
+  ],
+  "d.wNone": [
+   "لم تنزّل شيئًا بعد. «أهم المقالات · مختصرة» بداية جيدة: صغيرة وتكفي البطاقة.",
+   "Nothing downloaded yet. “Top articles · Mini” is a good start: small, and all the card needs."
+  ],
+  "d.wNopic": [
+   "كاملة دون صور",
+   "Full, no pictures"
+  ],
+  "d.wNopicHint": [
+   "المقالات كاملة",
+   "Whole articles"
+  ],
+  "d.wNotFinished": [
+   "لم يكتمل",
+   "Not finished"
+  ],
+  "d.wOpen": [
+   "فتح",
+   "Open"
+  ],
+  "d.wPause": [
+   "إيقاف مؤقت",
+   "Pause"
+  ],
+  "d.wPaused": [
+   "متوقف مؤقتًا",
+   "Paused"
+  ],
+  "d.wProgress": [
+   "{got} من {size}",
+   "{got} of {size}"
+  ],
+  "d.wQueued": [
+   "في الانتظار…",
+   "Waiting…"
+  ],
+  "d.wRead": [
+   "قراءة",
+   "Read"
+  ],
+  "d.wRemoveQ": [
+   "حذف «{name}»؟",
+   "Delete “{name}”?"
+  ],
+  "d.wRemoveQText": [
+   "يُحذف الملف ({size}) من هذا الجهاز.",
+   "The file ({size}) is deleted from this PC."
+  ],
+  "d.wResume": [
+   "متابعة",
+   "Resume"
+  ],
+  "d.wRetry": [
+   "إعادة المحاولة",
+   "Try again"
+  ],
+  "d.wSpeed": [
+   "{n}/ث",
+   "{n}/s"
+  ],
+  "d.wStart": [
+   "للبداية",
+   "Start here"
+  ],
+  "d.wTitle": [
+   "ويكيبيديا بدون إنترنت",
+   "Offline Wikipedia"
+  ],
+  "d.wTop": [
+   "أهم المقالات",
+   "Top articles"
+  ],
+  "d.wTopics": [
+   "مواضيع ({n})",
+   "Topics ({n})"
+  ],
+  "d.welcome1": [
+   "ابحث في أي برنامج:",
+   "Look up in any program:"
+  ],
+  "d.welcome1b": [
+   "حدّد كلمة أو جملة واضغط",
+   "select a word or sentence and press"
+  ],
+  "d.welcome2": [
+   "صحّح ما تكتبه وحسّنه:",
+   "Fix and improve your writing:"
+  ],
+  "d.welcome2b": [
+   "حدّد النص واضغط",
+   "select the text and press"
+  ],
+  "d.welcome3": [
+   "لمحة بجانب الساعة:",
+   "Lamha lives by the clock:"
+  ],
+  "d.welcome3b": [
+   "اضغط أيقونتها في شريط المهام للترجمة السريعة ومراجعة كلماتك.",
+   "click its icon on the taskbar for quick translation and your word review."
+  ],
+  "d.yesterday": [
+   "أمس",
+   "Yesterday"
+  ],
+  "lang.ar": [
+   "العربية",
+   "Arabic"
+  ],
+  "lang.de": [
+   "الألمانية",
+   "German"
+  ],
+  "lang.en": [
+   "الإنجليزية",
+   "English"
+  ],
+  "lang.es": [
+   "الإسبانية",
+   "Spanish"
+  ],
+  "lang.fa": [
+   "الفارسية",
+   "Persian"
+  ],
+  "lang.fr": [
+   "الفرنسية",
+   "French"
+  ],
+  "lang.tr": [
+   "التركية",
+   "Turkish"
+  ],
+  "lang.ur": [
+   "الأردية",
+   "Urdu"
+  ],
+  "menu.lookup": [
+   "لمحة: ترجمة «%s»",
+   "Lamha: translate “%s”"
+  ],
+  "menu.page": [
+   "لمحة: ترجمة الصفحة",
+   "Lamha: translate this page"
+  ],
+  "menu.summary": [
+   "لمحة: تلخيص الصفحة ✨",
+   "Lamha: summarize this page ✨"
+  ],
+  "menu.write": [
+   "لمحة: أدوات الكتابة ✨",
+   "Lamha: writing tools ✨"
+  ],
+  "motion.auto": [
+   "تلقائية",
+   "Automatic"
+  ],
+  "motion.full": [
+   "كاملة",
+   "Full"
+  ],
+  "motion.off": [
+   "متوقفة",
+   "Off"
+  ],
+  "motion.subtle": [
+   "خفيفة",
+   "Subtle"
+  ],
+  "ms.lookups": [
+   "🎉 هذه الكلمة رقم {n} تبحث عنها مع لمحة!",
+   "🎉 That's word number {n} you've looked up with Lamha!"
+  ],
+  "o.aiInInputs": [
+   "الزر داخل حقول الكتابة",
+   "The button inside text fields"
+  ],
+  "o.aiInInputsHint": [
+   "إظهار زر «كتابة» عند تحديد نص داخل مربعات النص والمحررات (البريد، الرسائل…)",
+   "Show the “Write” button when selecting text in text boxes and editors (email, messages…)"
+  ],
+  "o.aiIntro": [
+   "حدّد أي نص — أو اكتب في أي مربع نص — واضغط <span class=\"mini-pill\">✨ كتابة</span> لتدقيقه لغويًا مع شرح الأخطاء بالعربية، أو تحسين أسلوبه، أو جعله رسميًا أو ودّيًا أو أقصر، أو كتابة فكرتك العربية بإنجليزية طبيعية، أو تلخيصه، أو شرحه، أو كتابة ردٍّ عليه.",
+   "Select any text — or type in any text box — and click <span class=\"mini-pill\">✨ Write</span> to proofread it with explanations of each mistake, improve it, make it formal, friendly or shorter, turn your Arabic idea into natural English, summarize or explain it, or write a reply."
+  ],
+  "o.aiIntroApp": [
+   "حدّد أي نص في أي برنامج واضغط <span class=\"combo\"><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd></span> لتدقيقه لغويًا مع شرح الأخطاء بالعربية، أو تحسين أسلوبه، أو جعله رسميًا أو ودّيًا أو أقصر، أو كتابة فكرتك العربية بإنجليزية طبيعية، أو تلخيصه، أو شرحه، أو كتابة ردٍّ عليه.",
+   "Select any text in any program and press <span class=\"combo\"><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd></span> to proofread it with explanations of each mistake, improve it, make it formal, friendly or shorter, turn your Arabic idea into natural English, summarize or explain it, or write a reply."
+  ],
+  "o.aiPrivacy": [
+   "تُحفظ هذه الإعدادات والمفتاح على هذا الجهاز فقط ولا تُزامَن. مع Ollama لا يغادر النص جهازك. مع Gemini أو Claude لا يُرسَل أي نص إلى Google أو Anthropic إلا عندما تضغط إحدى أدوات الكتابة، ويُرسَل حينها النص المحدد (أو نص الصفحة عند طلب تلخيصها).",
+   "These settings and the key stay on this device and are never synced. With Ollama your text never leaves your PC. With Gemini or Claude, nothing is sent to Google or Anthropic until you press a writing tool; then the selected text is sent (or the page's text when you ask for a summary)."
+  ],
+  "o.aiProvider": [
+   "مصدر الذكاء الاصطناعي",
+   "AI provider"
+  ],
+  "o.altTip": [
+   "نصيحة: في وضع «الزر العائم» يمكنك التحديد مع الضغط على <kbd>Alt</kbd> لفتح الترجمة مباشرة.",
+   "Tip: in “Floating button” mode, hold <kbd>Alt</kbd> while selecting to open the translation directly."
+  ],
+  "o.app": [
+   "لمحة لـ Windows",
+   "Lamha for Windows"
+  ],
+  "o.appChecking": [
+   "جارٍ الاتصال بالتطبيق…",
+   "Reaching the app…"
+  ],
+  "o.appConnect": [
+   "اتصال",
+   "Connect"
+  ],
+  "o.appDeck": [
+   "بطاقات المراجعة مشتركة معه، آخر مرة {when}",
+   "Review cards shared with it, last {when}"
+  ],
+  "o.appDisconnect": [
+   "قطع الاتصال",
+   "Disconnect"
+  ],
+  "o.appHow": [
+   "يطلب Firefox إذنك مرة واحدة. في التطبيق: الإعدادات ← Firefox لإيقاف الاتصال من جهته.",
+   "Firefox asks for your permission once. In the app, Settings → Firefox turns the link off from its side."
+  ],
+  "o.appIntro": [
+   "إن كان تطبيق لمحة لـ Windows على هذا الجهاز، يمكن للإضافة أن تستخدم ما نزّلته فيه: ويكيبيديا دون إنترنت في بطاقة البحث، وقراءة المقالات كاملة في قارئ التطبيق.",
+   "If Lamha for Windows is on this PC, the extension can use what you downloaded there: Wikipedia without internet on the lookup card, and whole articles in the app's reader."
+  ],
+  "o.appLink": [
+   "الاتصال بالتطبيق",
+   "Link to the app"
+  ],
+  "o.appNoApp": [
+   "التطبيق مثبّت لكنه لم يُجب. شغّله ثم أعد المحاولة.",
+   "The app is installed but didn't answer. Open it, then try again."
+  ],
+  "o.appNotInstalled": [
+   "لم يُعثر على التطبيق. ثبّت أحدث إصدار من لمحة لـ Windows وشغّله مرة، وتأكد أن «Firefox» مفعّل في إعداداته.",
+   "The app wasn't found. Install the latest Lamha for Windows, open it once, and check that Firefox is on in its Settings."
+  ],
+  "o.appOff": [
+   "غير متصل.",
+   "Not connected."
+  ],
+  "o.appOn": [
+   "متصل بلمحة {v}",
+   "Connected to Lamha {v}"
+  ],
+  "o.appRetry": [
+   "إعادة المحاولة",
+   "Try again"
+  ],
+  "o.appWiki": [
+   "ويكيبيديا: {langs}",
+   "Wikipedia: {langs}"
+  ],
+  "o.appearance": [
+   "المظهر",
+   "Appearance"
+  ],
+  "o.autoSpeak": [
+   "النطق التلقائي",
+   "Speak automatically"
+  ],
+  "o.autoSpeakHint": [
+   "نطق الكلمة تلقائيًا عند البحث عنها",
+   "Pronounce the word when you look it up"
+  ],
+  "o.backup": [
+   "نسخة من بياناتي",
+   "A copy of my data"
+  ],
+  "o.backupBad": [
+   "هذا الملف ليس نسخة من بيانات لمحة.",
+   "This file isn't a copy of Lamha's data."
+  ],
+  "o.backupFailed": [
+   "تعذّر ذلك. أعد المحاولة.",
+   "That didn't work. Try again."
+  ],
+  "o.backupHint": [
+   "بطاقات المراجعة وتقدّمك فيها، وسجل الكلمات، وسجل أخطائي، في ملف تحتفظ به. الاسترجاع يضيف ما في الملف إلى ما هنا، على هذا الجهاز أو غيره، دون أن يحذف شيئًا.",
+   "Your review cards and progress, your word history and your mistake journal, in a file you keep. Restoring adds what's in the file to what's here, on this device or another, without deleting anything."
+  ],
+  "o.backupRestore": [
+   "استرجاع",
+   "Restore"
+  ],
+  "o.backupSave": [
+   "حفظ نسخة",
+   "Save a copy"
+  ],
+  "o.backupSaved": [
+   "النسخة جاهزة: احتفظ بالملف في مكان آمن.",
+   "The copy is ready: keep the file somewhere safe."
+  ],
+  "o.cancel": [
+   "إلغاء",
+   "Cancel"
+  ],
+  "o.cardSection": [
+   "بطاقة البحث",
+   "The lookup card"
+  ],
+  "o.cardsAuto": [
+   "إضافة الكلمات تلقائيًا",
+   "Add words automatically"
+  ],
+  "o.cardsAutoHint": [
+   "شغّله لتُضاف كل كلمة إنجليزية تبحث عنها إلى المراجعة. وإلا فأنت تختار: أضف الكلمة بزر 🔖 في بطاقة البحث.",
+   "Turn it on to add every English word you look up to review. Otherwise you choose: add a word with the 🔖 button on the lookup card."
+  ],
+  "o.checkingKey": [
+   "جارٍ التحقق من المفتاح…",
+   "Checking the key…"
+  ],
+  "o.claudeBest": [
+   "Claude — الأدق",
+   "Claude — most accurate"
+  ],
+  "o.claudeHint": [
+   "عبر الإنترنت بمفتاح Claude API، مدفوع حسب الاستخدام",
+   "Over the internet with a Claude API key, paid per use"
+  ],
+  "o.claudeKey": [
+   "مفتاح Claude API",
+   "Claude API key"
+  ],
+  "o.claudeModelsHint": [
+   "Opus أدق، و Sonnet و Haiku أسرع وأرخص",
+   "Opus is most accurate; Sonnet and Haiku are faster and cheaper"
+  ],
+  "o.claudeTip": [
+   "تحتاج إلى <b>مفتاح Claude API</b> من <a href=\"https://console.anthropic.com/settings/keys\" target=\"_blank\" rel=\"noopener noreferrer\">console.anthropic.com</a>. هذا حساب منفصل عن اشتراك Claude.ai (Pro/Max)، ويُحتسب حسب الاستخدام — تدقيق رسالة عادية يكلّف نحو سنت إلى سنتين مع Opus، وأقل بكثير مع Haiku.",
+   "You need a <b>Claude API key</b> from <a href=\"https://console.anthropic.com/settings/keys\" target=\"_blank\" rel=\"noopener noreferrer\">console.anthropic.com</a>. It's separate from a Claude.ai subscription (Pro/Max) and billed per use — proofreading a typical message costs about 1–2 cents with Opus, and much less with Haiku."
+  ],
+  "o.clear": [
+   "مسح",
+   "Clear"
+  ],
+  "o.clearHistory": [
+   "مسح السجل",
+   "Clear history"
+  ],
+  "o.clearJournal": [
+   "مسح السجل",
+   "Clear the journal"
+  ],
+  "o.confirmClearHistory": [
+   "مسح سجل الكلمات التي بحثت عنها؟ بطاقات المراجعة تبقى كما هي.",
+   "Clear the history of words you looked up? Your review cards stay."
+  ],
+  "o.confirmClearJournal": [
+   "مسح سجل أخطائك كله؟ ستبدأ الإحصاءات من جديد.",
+   "Clear your whole mistake journal? The statistics start again from zero."
+  ],
+  "o.confirmDeleteCards": [
+   "حذف كل بطاقات المراجعة وتقدّمك في حفظها؟",
+   "Delete all review cards and your progress?"
+  ],
+  "o.connectFailed": [
+   "تعذّر الاتصال: ",
+   "Couldn't connect: "
+  ],
+  "o.context": [
+   "فهم الكلمة من سياق الجملة",
+   "Understand words from their sentence"
+  ],
+  "o.contextHint": [
+   "تُرسَل الجملة المحيطة بالكلمة (وليس الصفحة) لاختيار المعنى المناسب. أوقفه لإرسال الكلمة فقط.",
+   "The sentence around the word (not the page) is sent to pick the right meaning. Turn it off to send only the word."
+  ],
+  "o.credits": [
+   "مصادر القاموس المحلي",
+   "Offline dictionary sources"
+  ],
+  "o.creditsLicense": [
+   "بيانات القاموس (مجلد dict) مُتاحة بموجب CC BY-SA 4.0. التفاصيل في dict/LICENSES.md.",
+   "The dictionary data (the dict folder) is available under CC BY-SA 4.0. Details in dict/LICENSES.md."
+  ],
+  "o.customize": [
+   "تخصيص الاختصارات",
+   "Customise shortcuts"
+  ],
+  "o.dailyGoal": [
+   "هدف اليوم",
+   "Daily goal"
+  ],
+  "o.dailyGoalHint": [
+   "كلمات تبحث عنها وبطاقات تراجعها كل يوم، في الحلقة على شاشة لمحة الرئيسية",
+   "Words you look up plus cards you review each day: the ring on Lamha's main screen"
+  ],
+  "o.delete": [
+   "حذف",
+   "Delete"
+  ],
+  "o.deleteCards": [
+   "حذف كل البطاقات",
+   "Delete all cards"
+  ],
+  "o.deleteCardsHint": [
+   "يحذف الكلمات وتقدّمك في حفظها",
+   "Deletes the words and your progress"
+  ],
+  "o.dictCounts": [
+   "القاموس المحلي: {entries} كلمة إنجليزية، منها {withArabic} بمعانٍ عربية، و{arabicIndex} كلمة عربية — يعمل دون إنترنت.",
+   "Offline dictionary: {entries} English words, {withArabic} of them with Arabic meanings, and {arabicIndex} Arabic words — works without internet."
+  ],
+  "o.dictInfo": [
+   "القاموس المحلي مدمج في لمحة ويعمل دون إنترنت.",
+   "The offline dictionary is built in and works without internet."
+  ],
+  "o.dictSource": [
+   "مصدر القاموس",
+   "Dictionary source"
+  ],
+  "o.dictionary": [
+   "القاموس",
+   "Dictionary"
+  ],
+  "o.examplesOf": [
+   "أمثلة من كتابتك — {cat}",
+   "Examples from your writing — {cat}"
+  ],
+  "o.explainAlways": [
+   "دائمًا: هذه لغة الترجمة",
+   "Always: this is your translation language"
+  ],
+  "o.explainLangs": [
+   "شرح الكلمات بلغتها",
+   "Explain words in their own language"
+  ],
+  "o.explainLangsHint": [
+   "تُشرح كلمات هذه اللغات بلغتها بدل ترجمتها، والترجمة تحت الشرح. زر اللغتين في البطاقة يغيّر ذلك أيضًا.",
+   "Words in these languages are explained in their own language instead of translated, with the translation under it. The card’s language switch changes this too."
+  ],
+  "o.floating": [
+   "زر عائم",
+   "Floating button"
+  ],
+  "o.floatingHint": [
+   "يظهر زر عند تحديد النص (مستحسن)",
+   "A button appears when you select text (recommended)"
+  ],
+  "o.gemFlash": [
+   "Gemini 3.8 Flash — الأدق",
+   "Gemini 3.8 Flash — most accurate"
+  ],
+  "o.gemLite": [
+   "Gemini 3.5 Flash-Lite — الأسرع",
+   "Gemini 3.5 Flash-Lite — fastest"
+  ],
+  "o.geminiBusySaved": [
+   "✓ المفتاح صحيح وحُفظ — لكن نماذج Gemini مزدحمة الآن، فجرّب أدوات الكتابة بعد قليل.",
+   "✓ The key works and is saved — but Gemini's models are busy right now, so try the writing tools in a little while."
+  ],
+  "o.geminiFree": [
+   "Gemini — مجاني",
+   "Gemini — free"
+  ],
+  "o.geminiHint": [
+   "من Google عبر الإنترنت، بحدّ يومي مجاني. يعمل على أي جهاز",
+   "From Google over the internet, with a free daily limit. Works on any PC"
+  ],
+  "o.geminiKey": [
+   "مفتاح Gemini API",
+   "Gemini API key"
+  ],
+  "o.geminiModelsHint": [
+   "Flash أدق، و Flash-Lite أسرع ويسمح بطلبات أكثر",
+   "Flash is more accurate; Flash-Lite is faster and allows more requests"
+  ],
+  "o.geminiTip": [
+   "أنشئ مفتاحًا مجانيًا من <a href=\"https://aistudio.google.com/apikey\" target=\"_blank\" rel=\"noopener noreferrer\">aistudio.google.com/apikey</a> بحساب Google — دون بطاقة دفع. للخطة المجانية حد للطلبات في الدقيقة وفي اليوم، تجده في AI Studio.",
+   "Create a free key at <a href=\"https://aistudio.google.com/apikey\" target=\"_blank\" rel=\"noopener noreferrer\">aistudio.google.com/apikey</a> with a Google account — no payment card needed. The free tier has per-minute and daily limits, shown in AI Studio."
+  ],
+  "o.geminiWarn": [
+   "⚠️ في الخطة المجانية قد تستخدم Google النصوص المرسلة لتحسين منتجاتها. مناسب للتدرّب، لا للرسائل الخاصة أو مستندات العمل.",
+   "⚠️ On the free tier Google may use what you send to improve its products. Fine for practice, not for private messages or work documents."
+  ],
+  "o.haiku": [
+   "Claude Haiku 4.5 — الأسرع والأرخص",
+   "Claude Haiku 4.5 — fastest and cheapest"
+  ],
+  "o.heroText": [
+   "ابحث عن معاني الكلمات الإنجليزية وترجم أي نص إلى العربية بلمسة واحدة.",
+   "Look up English words and translate any text in one click."
+  ],
+  "o.histEmpty": [
+   "السجل فارغ",
+   "History is empty"
+  ],
+  "o.inInputs": [
+   "العمل داخل حقول الكتابة",
+   "Work inside text fields"
+  ],
+  "o.inInputsHint": [
+   "إظهار الزر عند التحديد داخل مربعات النص والمحررات",
+   "Show the button when selecting inside text boxes and editors"
+  ],
+  "o.instant": [
+   "فوري",
+   "Instant"
+  ],
+  "o.instantHint": [
+   "تظهر الترجمة مباشرة عند التحديد",
+   "The translation appears as soon as you select"
+  ],
+  "o.jEmpty": [
+   "يُسجَّل هنا ما يجده «التدقيق اللغوي» في كتابتك، لتعرف نقاط ضعفك وتتحسّن. لم تدقّق أي نص بعد.",
+   "What Proofread finds in your writing is recorded here, so you can see your weak points and improve. You haven't proofread anything yet."
+  ],
+  "o.jTop": [
+   " أكثر أخطائك: {cat}.",
+   " Most frequent: {cat}."
+  ],
+  "o.journal": [
+   "سجل أخطائي",
+   "My mistake journal"
+  ],
+  "o.journalIntro": [
+   "يُسجَّل هنا ما يجده «التدقيق اللغوي» في كتابتك، لتعرف نقاط ضعفك وتتحسّن.",
+   "What Proofread finds in your writing is recorded here, so you can see your weak points and improve."
+  ],
+  "o.keyClipboard": [
+   "سجل الحافظة",
+   "Clipboard history"
+  ],
+  "o.keyClose": [
+   "إغلاق البطاقة",
+   "Close the card"
+  ],
+  "o.keyLookup": [
+   "بحث / ترجمة النص المحدد",
+   "Look up / translate the selection"
+  ],
+  "o.keyPage": [
+   "ترجمة الصفحة كاملة",
+   "Translate the whole page"
+  ],
+  "o.keySaved": [
+   "✓ المفتاح محفوظ.",
+   "✓ Key saved."
+  ],
+  "o.keySavedPlaceholder": [
+   "•••••••• (محفوظ) — الصق مفتاحًا جديدًا لتغييره",
+   "•••••••• (saved) — paste a new key to change it"
+  ],
+  "o.keyWrite": [
+   "أدوات الكتابة (للنص المحدد أو لمربع النص كله)",
+   "Writing tools (for the selection or the whole text box)"
+  ],
+  "o.keys": [
+   "اختصارات لوحة المفاتيح",
+   "Keyboard shortcuts"
+  ],
+  "o.languages": [
+   "اللغات",
+   "Languages"
+  ],
+  "o.localFirst": [
+   "المحلي أولًا",
+   "Offline first"
+  ],
+  "o.localFirstHint": [
+   "القاموس المدمج للكلمات، والإنترنت فقط لما ليس فيه (مستحسن)",
+   "The built-in dictionary for words, the internet only for what it lacks (recommended)"
+  ],
+  "o.localOnly": [
+   "المحلي فقط",
+   "Offline only"
+  ],
+  "o.localOnlyHint": [
+   "بدون أي اتصال بالإنترنت للكلمات. الجمل تُترجم فقط إن كان المترجم Ollama على جهازك.",
+   "No internet at all for words. Sentences are translated only when the translator is Ollama on your PC."
+  ],
+  "o.model": [
+   "النموذج",
+   "Model"
+  ],
+  "o.motion": [
+   "الحركة",
+   "Animations"
+  ],
+  "o.motionAutoIs": [
+   "تلقائية الآن: {level}",
+   "Automatic is using: {level}"
+  ],
+  "o.motionHint": [
+   "حركات الانتقال في النوافذ وبطاقة الترجمة. «تلقائية» تختار «خفيفة» على الأجهزة الأبطأ، وتوقفها إن طلب النظام تقليل الحركة.",
+   "Transitions in Lamha's windows and card. Automatic uses Subtle on slower computers and turns them off when your system asks for less motion."
+  ],
+  "o.motionNote_full": [
+   "كل الحركات، مع لمسات مرحة",
+   "Everything, plus playful touches"
+  ],
+  "o.motionNote_off": [
+   "بلا حركة: كل شيء يظهر فورًا",
+   "No motion: everything appears at once"
+  ],
+  "o.motionNote_subtle": [
+   "انتقالات قصيرة وهادئة",
+   "Short, calm transitions"
+  ],
+  "o.motionPlay": [
+   "شاهد",
+   "Preview"
+  ],
+  "o.newPerDay": [
+   "كلمات جديدة في اليوم",
+   "New words per day"
+  ],
+  "o.newPerDayHint": [
+   "عدد الكلمات الجديدة التي تظهر للمراجعة كل يوم",
+   "How many new words come up for review each day"
+  ],
+  "o.noGoal": [
+   "بلا هدف",
+   "No goal"
+  ],
+  "o.noKey": [
+   "لم يُضف مفتاح بعد.",
+   "No key added yet."
+  ],
+  "o.noSites": [
+   "لا توجد مواقع مستثناة.",
+   "No excluded websites."
+  ],
+  "o.offline": [
+   "دون إنترنت",
+   "Without internet"
+  ],
+  "o.ollama1": [
+   "ثبّت Ollama من <a href=\"https://ollama.com/download\" target=\"_blank\" rel=\"noopener noreferrer\">ollama.com/download</a>.",
+   "Install Ollama from <a href=\"https://ollama.com/download\" target=\"_blank\" rel=\"noopener noreferrer\">ollama.com/download</a>."
+  ],
+  "o.ollama2": [
+   "اسمح لإضافات Firefox بالاتصال به: أغلق Ollama من أيقونته بجوار الساعة، ثم نفّذ في PowerShell:<code dir=\"ltr\">setx OLLAMA_ORIGINS \"moz-extension://*\"</code>ثم افتح Ollama من قائمة ابدأ.",
+   "Let Firefox extensions connect to it: quit Ollama from its icon next to the clock, then run in PowerShell:<code dir=\"ltr\">setx OLLAMA_ORIGINS \"moz-extension://*\"</code>then start Ollama from the Start menu."
+  ],
+  "o.ollama3": [
+   "حمّل نموذجًا، مثلًا <b>qwen3.5:4b</b> (سريع، 3.4 GB — مناسب لبطاقة رسوميات 6 GB):<code dir=\"ltr\">ollama pull qwen3.5:4b</code>أو <b>qwen3.5:9b</b> لجودة أعلى لكنه أبطأ على هذه البطاقة.",
+   "Download a model, for example <b>qwen3.5:4b</b> (fast, 3.4 GB — fits a 6 GB graphics card):<code dir=\"ltr\">ollama pull qwen3.5:4b</code>or <b>qwen3.5:9b</b> for higher quality, though slower on that card."
+  ],
+  "o.ollamaConnecting": [
+   "جارٍ الاتصال بـ Ollama…",
+   "Connecting to Ollama…"
+  ],
+  "o.ollamaFree": [
+   "Ollama — مجاني",
+   "Ollama — free"
+  ],
+  "o.ollamaHint": [
+   "نموذج يعمل على جهازك: دون تكلفة، ودون إنترنت، ولا يغادر نصّك جهازك",
+   "A model on your computer: no cost, no internet, and your text never leaves your PC"
+  ],
+  "o.ollamaModelsHint": [
+   "النماذج المحمّلة في Ollama على هذا الجهاز",
+   "The models downloaded in Ollama on this PC"
+  ],
+  "o.ollamaNoModels": [
+   "Ollama يعمل لكن لا توجد نماذج بعد — نفّذ الأمر في الخطوة 3 ثم اضغط «تحديث القائمة».",
+   "Ollama is running but has no models yet — run the command in step 3, then click “Refresh list”."
+  ],
+  "o.ollamaPlainHttp": [
+   " ⚠️ هذا العنوان على جهاز آخر عبر http، فيمرّ نصك على الشبكة دون تشفير.",
+   " ⚠️ This address is another computer over http, so your text crosses the network unencrypted."
+  ],
+  "o.ollamaTesting": [
+   "جارٍ اختبار {model}… (أول تشغيل قد يستغرق دقيقة لتحميل النموذج في الذاكرة)",
+   "Testing {model}… (the first run can take a minute to load the model into memory)"
+  ],
+  "o.ollamaUrl": [
+   "عنوان Ollama",
+   "Ollama address"
+  ],
+  "o.ollamaUrlHint": [
+   "اتركه فارغًا إن كان Ollama على هذا الجهاز",
+   "Leave it empty if Ollama runs on this PC"
+  ],
+  "o.ollamaWorks": [
+   "✓ يعمل ({secs} ث) — أدوات الكتابة جاهزة مجانًا على جهازك.",
+   "✓ Works ({secs} s) — the writing tools are ready, free, on your PC."
+  ],
+  "o.onlineFirst": [
+   "الإنترنت أولًا",
+   "Online first"
+  ],
+  "o.onlineFirstHint": [
+   "نتائج Google، والقاموس المحلي عند انقطاع الاتصال",
+   "Google's results, with the offline dictionary when you're offline"
+  ],
+  "o.opus": [
+   "Claude Opus 5 — الأدق",
+   "Claude Opus 5 — most accurate"
+  ],
+  "o.packBad": [
+   "وصل الملف تالفًا. حاول مرة أخرى.",
+   "The file arrived damaged. Try again."
+  ],
+  "o.packFailed": [
+   "تعذّر التنزيل. تحقّق من الاتصال وحاول مرة أخرى.",
+   "Couldn't download it. Check your connection and try again."
+  ],
+  "o.packGet": [
+   "تنزيل",
+   "Download"
+  ],
+  "o.packGetting": [
+   "{p}٪",
+   "{p}%"
+  ],
+  "o.packInfo": [
+   "{words} كلمة · {mb} ميغابايت",
+   "{words} words · {mb} MB"
+  ],
+  "o.packs": [
+   "قواميس للتنزيل",
+   "Dictionaries to download"
+  ],
+  "o.packsHint": [
+   "لكل لغة قاموس بلغتها (فرنسي–فرنسي…) يُنزَّل مرة واحدة ويُحفظ على هذا الجهاز، فتُشرح كلماتها دون إنترنت ودون ذكاء اصطناعي. من ويكاموس (رخصة CC BY-SA).",
+   "A dictionary in each language (French–French…), downloaded once and kept on this device, so its words are explained with no internet and no AI. From Wiktionary (CC BY-SA licence)."
+  ],
+  "o.permText": [
+   "يحتاج لمحة إلى إذن الوصول إلى المواقع ليعمل على الصفحات التي تزورها.",
+   "Lamha needs permission to access websites to work on the pages you visit."
+  ],
+  "o.pickModel": [
+   "— اختر نموذجًا —",
+   "— choose a model —"
+  ],
+  "o.pickModelFirst": [
+   "اختر نموذجًا أولًا.",
+   "Choose a model first."
+  ],
+  "o.privacy": [
+   "الخصوصية والسجل",
+   "Privacy & history"
+  ],
+  "o.privacyMore": [
+   "ما الذي يُرسَل وإلى أين؟",
+   "What is sent, and where?"
+  ],
+  "o.privacyText": [
+   "يُرسَل إلى خدمة Google للترجمة: النص الذي تختاره، والجملة المحيطة به (إن كان «فهم السياق» مفعّلًا)، ونص الصفحة عندما تطلب ترجمتها. تُرسَل الكلمة إلى ويكيبيديا للنبذة. في وضع «القاموس المحلي» تُبحث الكلمات دون إرسال. عند استخدام أدوات الكتابة يُرسَل النص إلى المزوّد الذي اخترته: Claude أو Gemini بمفتاحك، أما Ollama فيبقى النص على جهازك. لا تُجمع أي بيانات أخرى.",
+   "Sent to Google's translation service: the text you select, the sentence around it (if “Understand words from their sentence” is on), and the page's text when you ask to translate it. The word is sent to Wikipedia for the summary. In offline-dictionary mode, words are looked up without sending anything. With the writing tools, the text goes to the provider you chose: Claude or Gemini with your key, while with Ollama it stays on your computer. No other data is collected."
+  ],
+  "o.recentMistakes": [
+   "آخر الأخطاء",
+   "Recent mistakes"
+  ],
+  "o.refreshList": [
+   "تحديث القائمة",
+   "Refresh list"
+  ],
+  "o.report": [
+   "الإبلاغ عن مشكلة",
+   "Report a problem"
+  ],
+  "o.reportCopied": [
+   "نُسخ التقرير. الصقه في رسالتك.",
+   "The report was copied. Paste it into your message."
+  ],
+  "o.reportCopy": [
+   "نسخ",
+   "Copy"
+  ],
+  "o.reportHint": [
+   "تقرير بإعداداتك وآخر الأخطاء، ليعرف المطوّر ما حدث. لا يحتوي على نصوصك ولا كلماتك ولا مفاتيحك. اقرأه أولًا: لا يُرسَل شيء إلا إن أرسلته أنت.",
+   "A report of your settings and the latest errors, so the developer can see what happened. It holds none of your text, words or keys. Read it first: nothing is sent unless you send it."
+  ],
+  "o.reportIssue": [
+   "ماذا حدث؟\n\n\nماذا كنت تتوقع؟\n\n",
+   "What happened?\n\n\nWhat did you expect?\n\n"
+  ],
+  "o.reportOpened": [
+   "فُتحت صفحة البلاغ والتقرير فيها. اكتب ما حدث ثم أرسله.",
+   "The report page opened with the report in it. Describe what happened, then submit it."
+  ],
+  "o.reportSend": [
+   "إبلاغ على GitHub",
+   "Report on GitHub"
+  ],
+  "o.reportShow": [
+   "عرض التقرير",
+   "Show the report"
+  ],
+  "o.reverse": [
+   "ترجمة النص العربي إلى الإنجليزية",
+   "Translate Arabic text into English"
+  ],
+  "o.reverseHint": [
+   "عند تحديد نص عربي تُعرض ترجمته الإنجليزية",
+   "When you select Arabic text, show its English translation"
+  ],
+  "o.review": [
+   "مراجعة الكلمات",
+   "Word review"
+  ],
+  "o.reviewIntro": [
+   "الكلمات التي تضيفها بزر 🔖 في بطاقة البحث تصير بطاقات مراجعة مع الجملة التي وجدتها فيها. راجعها من تبويب «مراجعة» في نافذة لمحة، وستعود كل كلمة في الوقت المناسب قبل أن تنساها.",
+   "Words you add with the 🔖 button on the lookup card become review cards, with the sentence you found them in. Review them in the “Review” tab of Lamha's window; each word comes back just before you'd forget it."
+  ],
+  "o.rule": [
+   "القاعدة: ",
+   "The rule: "
+  ],
+  "o.saveHistory": [
+   "حفظ سجل الكلمات",
+   "Keep a history of words"
+  ],
+  "o.saveHistoryHint": [
+   "يُحفظ محليًا على جهازك فقط. إن أوقفته، لا تُضاف الكلمات التي تبحث عنها إلى المراجعة تلقائيًا أيضًا.",
+   "Stored locally on your device only. If this is off, the words you look up aren't added to review automatically either."
+  ],
+  "o.saveMistakes": [
+   "تسجيل أخطائي",
+   "Record my mistakes"
+  ],
+  "o.saveMistakesHint": [
+   "يُحفظ على جهازك فقط. تُرسَل أكثر ٣ أنواع تكرارًا مع طلب التدقيق ليشرحها الذكاء الاصطناعي بوضوح أكبر.",
+   "Kept on your device only. Your 3 most frequent mistake types are sent with proofreading requests, so the AI explains them more clearly."
+  ],
+  "o.saveVerify": [
+   "حفظ وتحقق",
+   "Save & verify"
+  ],
+  "o.sections": [
+   "أقسام الإعدادات",
+   "Settings sections"
+  ],
+  "o.sites": [
+   "المواقع المستثناة",
+   "Excluded websites"
+  ],
+  "o.sitesIntro": [
+   "لن يظهر لمحة على هذه المواقع. يمكنك إضافة موقع من نافذة الإضافة في شريط الأدوات.",
+   "Lamha won't appear on these sites. Add a site from the extension's toolbar popup."
+  ],
+  "o.sonnet": [
+   "Claude Sonnet 5 — متوازن",
+   "Claude Sonnet 5 — balanced"
+  ],
+  "o.startOver": [
+   "البدء من جديد",
+   "Start over"
+  ],
+  "o.step1": [
+   "<b>حدّد كلمة أو جملة</b> في أي صفحة، سيظهر زر صغير <span class=\"mini-pill\">بحث</span> فوقها.",
+   "<b>Select a word or sentence</b> on any page, and a small <span class=\"mini-pill\">Look up</span> button appears above it."
+  ],
+  "o.step2": [
+   "<b>اضغط الزر</b> لتظهر لك الترجمة والمعاني والتعريف والنطق — مثل ميزة «البحث» في iOS و macOS.",
+   "<b>Click the button</b> to see the translation, meanings, definition and pronunciation — like “Look Up” on iOS and macOS."
+  ],
+  "o.step3": [
+   "<b>لترجمة صفحة كاملة</b> اضغط أيقونة لمحة في شريط الأدوات أو <span class=\"combo\"><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd></span>.",
+   "<b>To translate a whole page</b>, click the Lamha icon in the toolbar or press <span class=\"combo\"><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd></span>."
+  ],
+  "o.targetLang": [
+   "لغة الترجمة",
+   "Translation language"
+  ],
+  "o.targetLangHint": [
+   "اللغة التي تُترجم إليها النصوص",
+   "The language text is translated into"
+  ],
+  "o.test": [
+   "اختبار",
+   "Test"
+  ],
+  "o.theme": [
+   "السمة",
+   "Theme"
+  ],
+  "o.themeAuto": [
+   "تلقائي (حسب النظام)",
+   "Automatic (system)"
+  ],
+  "o.themeDark": [
+   "داكن",
+   "Dark"
+  ],
+  "o.themeHint": [
+   "مظهر لمحة: البطاقة والنافذة والإعدادات",
+   "The look of Lamha: the card, its window and these settings"
+  ],
+  "o.themeLight": [
+   "فاتح",
+   "Light"
+  ],
+  "o.title": [
+   "إعدادات لمحة",
+   "Lamha settings"
+  ],
+  "o.trAi": [
+   "الذكاء الاصطناعي",
+   "AI"
+  ],
+  "o.trAiHint": [
+   "ترجمة أكثر طبيعية للجمل، وأبطأ. Google عند تعذّره",
+   "More natural sentences, but slower. Google when it fails"
+  ],
+  "o.trAuto": [
+   "تلقائي",
+   "Automatic"
+  ],
+  "o.trAutoHint": [
+   "Google، والذكاء الاصطناعي حين لا يتوفر الإنترنت أو يتعذّر Google (مستحسن)",
+   "Google, and AI when there's no internet or Google can't answer (recommended)"
+  ],
+  "o.trGoogle": [
+   "Google فقط",
+   "Google only"
+  ],
+  "o.trGoogleHint": [
+   "سريع ومجاني، ولا يعمل دون إنترنت",
+   "Fast and free; doesn't work offline"
+  ],
+  "o.trIntro": [
+   "من يترجم الجمل والفقرات: Google سريع ويحتاج إلى الإنترنت، والذكاء الاصطناعي أدق في التعابير والعامية وأبطأ، ومع Ollama يعمل دون إنترنت.",
+   "Who translates sentences and paragraphs: Google is fast and needs the internet; AI is better with idioms and slang but slower, and with Ollama it works offline."
+  ],
+  "o.trModelHintClaude": [
+   "Haiku سريع ورخيص ويكفي للترجمة",
+   "Haiku is quick, cheap and enough for translation"
+  ],
+  "o.trModelHintGemini": [
+   "Flash-Lite سريع ويسمح بطلبات أكثر في الخطة المجانية، و Flash أدق لكنه ينفد سريعًا",
+   "Flash-Lite is quick and allows more free requests; Flash is more accurate but runs out quickly"
+  ],
+  "o.trModelHintOllama": [
+   "النماذج الأكبر تترجم أفضل وأبطأ",
+   "Bigger models translate better, and slower"
+  ],
+  "o.trNotReady": [
+   "{p} غير مُعدّ بعد: أضف مفتاحه أو اختر نموذجه في «أدوات الكتابة» أدناه. حتى ذلك الحين يترجم Google.",
+   "{p} isn't set up yet: add its key or choose its model under “Writing tools” below. Until then, Google translates."
+  ],
+  "o.trOllamaSame": [
+   "مثل أدوات الكتابة ({m})",
+   "Same as the writing tools ({m})"
+  ],
+  "o.trPages": [
+   "ترجمة الصفحات بالذكاء الاصطناعي أيضًا",
+   "Translate pages with AI too"
+  ],
+  "o.trPagesHint": [
+   "الصفحة الكاملة نص كثير: مع Gemini المجاني قد ينفد الحد اليومي سريعًا، ومع Ollama تكون أبطأ بكثير.",
+   "A whole page is a lot of text: free Gemini may run out of its daily limit quickly, and Ollama is much slower."
+  ],
+  "o.trProvider": [
+   "مَن يترجم",
+   "Translated by"
+  ],
+  "o.trProviderHint": [
+   "يمكن أن يختلف عن أدوات الكتابة، مثلًا Gemini للكتابة و Ollama للترجمة",
+   "Can differ from the writing tools, e.g. Gemini for writing and Ollama for translation"
+  ],
+  "o.trSameAsWriting": [
+   "مثل أدوات الكتابة",
+   "Same as the writing tools"
+  ],
+  "o.trService": [
+   "خدمة الترجمة",
+   "Translation service"
+  ],
+  "o.trUses": [
+   "تُترجم الجمل بـ {p}",
+   "Sentences are translated with {p}"
+  ],
+  "o.translateDefs": [
+   "ترجمة التعريفات",
+   "Translate definitions"
+  ],
+  "o.translateDefsHint": [
+   "عرض التعريفات الإنجليزية مترجمة إلى العربية",
+   "Show English definitions translated into your translation language"
+  ],
+  "o.translation": [
+   "الترجمة",
+   "Translation"
+  ],
+  "o.trigger": [
+   "طريقة الظهور",
+   "How it appears"
+  ],
+  "o.tryIt": [
+   "جرّبه الآن — حدّد هذه الكلمة:",
+   "Try it now — select this word:"
+  ],
+  "o.uiLang": [
+   "لغة الواجهة",
+   "Interface language"
+  ],
+  "o.uiLangAuto": [
+   "تلقائي (حسب النظام)",
+   "Automatic (system)"
+  ],
+  "o.uiLangHint": [
+   "لغة القوائم والأزرار والشروح في لمحة",
+   "The language of Lamha's menus, buttons and explanations"
+  ],
+  "o.version": [
+   "لمحة · الإصدار <span id=\"ver\"></span>",
+   "Lamha · version <span id=\"ver\"></span>"
+  ],
+  "o.welcome": [
+   "أهلًا بك 👋 إليك طريقة الاستخدام",
+   "Welcome 👋 Here's how it works"
+  ],
+  "o.wiki": [
+   "نبذة من ويكيبيديا",
+   "Wikipedia summary"
+  ],
+  "o.wikiHint": [
+   "عرض ملخص المقالة للمصطلحات والأسماء (بالعربية إن وُجدت)",
+   "Show the article summary for terms and names (in Arabic when available)"
+  ],
+  "o.withAlt": [
+   "مع مفتاح Alt",
+   "With the Alt key"
+  ],
+  "o.withAltHint": [
+   "حدّد النص مع الضغط على Alt",
+   "Select text while holding Alt"
+  ],
+  "o.writeOnDblClick": [
+   "زر الكتابة بنقرتين على مربع فارغ",
+   "Write button on a double-click in an empty box"
+  ],
+  "o.writeOnDblClickHint": [
+   "انقر نقرتين على مربع نص فارغ ليظهر زر «كتابة»، فتصف ما تريد ويكتبه الذكاء الاصطناعي في المربع",
+   "Double-click an empty text box to get the “Write” button: describe what you want and the AI writes it into the box"
+  ],
+  "o.writingTools": [
+   "أدوات الكتابة",
+   "Writing tools"
+  ],
+  "oerr.ai_bad_key": [
+   "المفتاح غير صالح. تأكد من نسخه كاملًا.",
+   "The key isn't valid. Make sure you copied all of it."
+  ],
+  "oerr.ai_busy": [
+   "خدمة الذكاء الاصطناعي مشغولة الآن، أعد المحاولة بعد لحظات.",
+   "The AI service is busy right now — try again in a moment."
+  ],
+  "oerr.ai_forbidden": [
+   "المفتاح لا يملك صلاحية استخدام الـ API.",
+   "The key isn't allowed to use the API."
+  ],
+  "oerr.ai_model": [
+   "النموذج المختار غير متاح لهذا الحساب. جرّب نموذجًا آخر.",
+   "The chosen model isn't available to this account. Try another model."
+  ],
+  "oerr.ai_no_credit": [
+   "المفتاح صحيح لكن رصيد الحساب نفد. أضف رصيدًا من console.anthropic.com.",
+   "The key works, but the account is out of credit. Add credit at console.anthropic.com."
+  ],
+  "oerr.ai_rate_limited": [
+   "طلبات كثيرة، انتظر دقيقة ثم أعد المحاولة.",
+   "Too many requests — wait a minute and try again."
+  ],
+  "oerr.ai_timeout": [
+   "انتهت مهلة الاتصال، أعد المحاولة.",
+   "The connection timed out — try again."
+  ],
+  "oerr.network": [
+   "تعذّر الاتصال بالإنترنت.",
+   "Couldn't reach the internet."
+  ],
+  "oerr.ollama_model": [
+   "النموذج غير موجود. حمّله بالأمر ollama pull ثم اضغط «تحديث القائمة».",
+   "The model isn't there. Download it with ollama pull, then click “Refresh list”."
+  ],
+  "oerr.ollama_offline": [
+   "Ollama لا يعمل على هذا العنوان. شغّله من قائمة ابدأ (أو ثبّته من ollama.com).",
+   "Ollama isn't running at this address. Start it from the Start menu (or install it from ollama.com)."
+  ],
+  "oerr.ollama_origin": [
+   "Ollama يرفض اتصال لمحة: نفّذ أمر OLLAMA_ORIGINS في الخطوة 2 ثم أعد تشغيل Ollama.",
+   "Ollama refuses Lamha's connection: run the OLLAMA_ORIGINS command in step 2, then restart Ollama."
+  ],
+  "p.busy": [
+   "خدمة الترجمة مشغولة مؤقتًا. انتظر دقيقة ثم حاول مجددًا.",
+   "The translation service is busy. Wait a minute and try again."
+  ],
+  "p.draftPlaceholder": [
+   "اكتب رسالتك هنا بالإنجليزية — أو بالعربية لتحويلها إلى إنجليزية طبيعية…",
+   "Write your message here in English — or in Arabic to turn it into natural English…"
+  ],
+  "p.enableLamha": [
+   "تفعيل لمحة",
+   "Enable Lamha"
+  ],
+  "p.failed": [
+   "تعذّرت الترجمة. تحقق من الاتصال.",
+   "Couldn't translate. Check your connection."
+  ],
+  "p.grant": [
+   "منح الإذن",
+   "Grant permission"
+  ],
+  "p.histCleared": [
+   "مُسح السجل",
+   "History cleared"
+  ],
+  "p.modes": [
+   "الوضع",
+   "Mode"
+  ],
+  "p.onOff": [
+   "تشغيل / إيقاف",
+   "On / off"
+  ],
+  "p.permText": [
+   "ليتمكن لمحة من العمل على الصفحات التي تزورها.",
+   "So Lamha can work on the pages you visit."
+  ],
+  "p.permTitle": [
+   "مطلوب إذن الوصول للمواقع",
+   "Site access permission needed"
+  ],
+  "p.qPlaceholder": [
+   "اكتب كلمة أو جملة للترجمة…",
+   "Type a word or sentence to translate…"
+  ],
+  "p.quickLookup": [
+   "بحث سريع",
+   "Quick lookup"
+  ],
+  "p.recent": [
+   "آخر عمليات البحث",
+   "Recent lookups"
+  ],
+  "p.reloadNote": [
+   "أعد تحميل الصفحة لتفعيل لمحة عليها.",
+   "Reload the page to use Lamha on it."
+  ],
+  "p.siteToggle": [
+   "تفعيل على هذا الموقع",
+   "Enable on this site"
+  ],
+  "p.specialPage": [
+   "لا يمكن للإضافات العمل على صفحات Firefox الخاصة.",
+   "Extensions can't work on Firefox's own pages."
+  ],
+  "p.stopPage": [
+   "إيقاف ترجمة الصفحة",
+   "Stop translating the page"
+  ],
+  "p.subtitle": [
+   "ترجمة وبحث فوري",
+   "Instant lookup & translation"
+  ],
+  "p.tabReview": [
+   "مراجعة",
+   "Review"
+  ],
+  "p.tabTranslate": [
+   "ترجمة",
+   "Translate"
+  ],
+  "p.tabWrite": [
+   "كتابة",
+   "Write"
+  ],
+  "p.translateAgain": [
+   "ترجم مجددًا",
+   "Translate again"
+  ],
+  "p.translatePage": [
+   "ترجمة هذه الصفحة",
+   "Translate this page"
+  ],
+  "p.writeTools": [
+   "أدوات الكتابة",
+   "Writing tools"
+  ],
+  "rv.again": [
+   "نسيت",
+   "Forgot"
+  ],
+  "rv.doneTitle": [
+   "أحسنت! لا توجد كلمات للمراجعة الآن 🎉",
+   "Well done! Nothing to review right now 🎉"
+  ],
+  "rv.due": [
+   "للمراجعة {n}",
+   "{n} due"
+  ],
+  "rv.emptyText": [
+   "اضغط 🔖 في بطاقة البحث لتضيف الكلمة هنا، أو شغّل «إضافة الكلمات تلقائيًا» في الإعدادات ← مراجعة الكلمات.",
+   "Press 🔖 on the lookup card to add a word here, or turn on “Add words automatically” in Settings → Word review."
+  ],
+  "rv.emptyTitle": [
+   "لا توجد كلمات بعد",
+   "No words yet"
+  ],
+  "rv.fresh": [
+   "جديدة {n}",
+   "{n} new"
+  ],
+  "rv.good": [
+   "عرفتها",
+   "Knew it"
+  ],
+  "rv.hard": [
+   "صعبة",
+   "Hard"
+  ],
+  "rv.key": [
+   "مفتاح {k}",
+   "Key {k}"
+  ],
+  "rv.newWord": [
+   "كلمة جديدة",
+   "New word"
+  ],
+  "rv.next": [
+   "المراجعة القادمة بعد {span}.",
+   "Next review in {span}."
+  ],
+  "rv.progress": [
+   "التقدّم في المراجعة",
+   "Review progress"
+  ],
+  "rv.remove": [
+   "إزالة من المراجعة",
+   "Remove from review"
+  ],
+  "rv.removed": [
+   "أُزيلت الكلمة",
+   "Word removed"
+  ],
+  "rv.show": [
+   "أظهر المعنى ",
+   "Show meaning "
+  ],
+  "span.min": [
+   "{n} د",
+   "{n} min"
+  ],
+  "td.goalDone": [
+   "🎯 حققت هدف اليوم: {n}!",
+   "🎯 Today's goal reached: {n}!"
+  ],
+  "td.label": [
+   "اليوم",
+   "Today"
+  ],
+  "td.left": [
+   "بقي {n} لهدف اليوم: ابحث عن كلمات أو راجع بطاقاتك",
+   "{n} to go: look up words or review your cards"
+  ],
+  "td.lookUp": [
+   "اعرض معناها",
+   "See its meaning"
+  ],
+  "td.met": [
+   "حققت هدف اليوم. أحسنت!",
+   "Today's goal is done. Well done!"
+  ],
+  "td.progress": [
+   "{done} من {goal} اليوم",
+   "{done} of {goal} today"
+  ],
+  "td.ring": [
+   "{done} من {goal}",
+   "{done} of {goal}"
+  ],
+  "td.streakTitle": [
+   "أيام متتالية من التعلّم",
+   "Days in a row of practice"
+  ],
+  "td.wordDeck": [
+   "كلمة اليوم · من كلماتك",
+   "Word of the day · one of yours"
+  ],
+  "td.wordDeckTitle": [
+   "كلمة بحثت عنها من قبل وحان وقت مراجعتها",
+   "A word you looked up before, due for review"
+  ],
+  "td.wordNew": [
+   "كلمة اليوم",
+   "Word of the day"
+  ],
+  "tool.concise": [
+   "أقصر",
+   "Shorter"
+  ],
+  "tool.expand": [
+   "أطول",
+   "Longer"
+  ],
+  "tool.explain": [
+   "اشرح بالعربية",
+   "Explain"
+  ],
+  "tool.formal": [
+   "رسمي",
+   "Formal"
+  ],
+  "tool.friendly": [
+   "ودّي",
+   "Friendly"
+  ],
+  "tool.improve": [
+   "تحسين الأسلوب",
+   "Improve"
+  ],
+  "tool.improveShort": [
+   "تحسين",
+   "Improve"
+  ],
+  "tool.proofread": [
+   "تدقيق لغوي",
+   "Proofread"
+  ],
+  "tool.reply": [
+   "اكتب ردًّا",
+   "Write a reply"
+  ],
+  "tool.summarize": [
+   "تلخيص",
+   "Summarize"
+  ],
+  "tool.toEnglish": [
+   "اكتبه بالإنجليزية",
+   "Write it in English"
+  ],
+  "tool.toEnglishShort": [
+   "بالإنجليزية",
+   "In English"
+  ],
+  "write.again": [
+   "محاولة أخرى",
+   "Try again"
+  ],
+  "write.learnRule": [
+   " ({n}) — اعرف القاعدة ←",
+   " ({n}) — learn the rule →"
+  ],
+  "write.noErrors": [
+   "لا توجد أخطاء — نصّك سليم",
+   "No mistakes — your text is fine"
+  ],
+  "write.noErrorsCheck": [
+   "✓ لا توجد أخطاء — نصّك سليم",
+   "✓ No mistakes — your text is fine"
+  ],
+  "write.topMistake": [
+   "أكثر أخطائك: ",
+   "Your most frequent mistake: "
+  ],
+  "write.useIt": [
+   "استبدال",
+   "Replace"
+  ],
+  "write.useItTitle": [
+   "ضع النتيجة في مربع الكتابة لتكمل عليها",
+   "Put the result in the compose box to keep working on it"
+  ]
+ },
+ "functions": {
+  "d.clearUnpinnedQText": [
+   "v => `سيُحذف ${items[0](v.n)} من السجل. تبقى العناصر المثبّتة 📌.`",
+   "v => `${items[1](v.n)} will be deleted from the history. Pinned 📌 items stay.`"
+  ],
+  "d.clearedN": [
+   "v => `حُذف ${items[0](v.n)} — بقيت العناصر المثبّتة`",
+   "v => `Deleted ${items[1](v.n)} — pinned items kept`"
+  ],
+  "d.dayAgo": [
+   "v => \"قبل \" + (v.n === 1 ? \"يوم\" : v.n === 2 ? \"يومين\" : arCount(v.n, \"\", \"\", \"أيام\", \"يومًا\"))",
+   "v => `${enCount(v.n, \"day\", \"days\")} ago`"
+  ],
+  "d.hotkeyTakenBody": [
+   "v => `برنامج آخر يستخدم ${v.keys.join(\" و \")} — لن يعمل من لمحة.`",
+   "v => `Another program uses ${v.keys.join(\" and \")} — it won't work in Lamha.`"
+  ],
+  "d.hourAgo": [
+   "v => \"قبل \" + (v.n === 1 ? \"ساعة\" : v.n === 2 ? \"ساعتين\" : arCount(v.n, \"\", \"\", \"ساعات\", \"ساعة\"))",
+   "v => `${enCount(v.n, \"hour\", \"hours\")} ago`"
+  ],
+  "d.minAgo": [
+   "v => \"قبل \" + (v.n === 1 ? \"دقيقة\" : v.n === 2 ? \"دقيقتين\" : arCount(v.n, \"\", \"\", \"دقائق\", \"دقيقة\"))",
+   "v => `${enCount(v.n, \"minute\", \"minutes\")} ago`"
+  ],
+  "d.reviewWaiting": [
+   "v => `${num(v.n)} ${v.n === 1 ? \"كلمة تنتظر\" : \"كلمات تنتظر\"} المراجعة.`",
+   "v => `${enCount(v.n, \"word is\", \"words are\")} waiting for review.`"
+  ],
+  "d.sDeleteAppQText": [
+   "v => `في السجل ${items[0](v.n)} من هذا البرنامج.`",
+   "v => `The history has ${enCount(v.n, \"item\", \"items\")} from this program.`"
+  ],
+  "d.sItemCount": [
+   "v => items[0](v.n)",
+   "v => items[1](v.n)"
+  ],
+  "d.sRemoveApp": [
+   "v => \"إزالة \" + v.app",
+   "v => \"Remove \" + v.app"
+  ],
+  "d.trayReview": [
+   "v => (v.n ? `مراجعة الكلمات (${num(v.n)})` : \"مراجعة الكلمات\")",
+   "v => (v.n ? `Word review (${num(v.n)})` : \"Word review\")"
+  ],
+  "d.upCurrent": [
+   "v => `الإصدار الحالي: ${v.v}` + (v.portable ? \" (Portable)\" : \"\")",
+   "v => `Current version: ${v.v}` + (v.portable ? \" (Portable)\" : \"\")"
+  ],
+  "d.wArticles": [
+   "v => `${num(v.n)} مقالة`",
+   "v => enCount(v.n, \"article\", \"articles\")"
+  ],
+  "d.wLeftMin": [
+   "v => \"بقي \" + (v.n <= 1 ? \"أقل من دقيقة\" : arCount(v.n, \"دقيقة\", \"دقيقتان\", \"دقائق\", \"دقيقة\"))",
+   "v => (v.n <= 1 ? \"under a minute left\" : `${num(v.n)} min left`)"
+  ],
+  "o.backupDone": [
+   "v => `أُضيفت ${arCount(v.cards, \"بطاقة واحدة\", \"بطاقتان\", \"بطاقات\", \"بطاقة\")} و${arCount(v.history, \"كلمة واحدة\", \"كلمتان\", \"كلمات\", \"كلمة\")} إلى السجل.`",
+   "v => `Added ${enCount(v.cards, \"card\", \"cards\")} and ${enCount(v.history, \"word\", \"words\")} to the history.`"
+  ],
+  "o.histCount": [
+   "v => arCount(v.n, \"كلمة واحدة محفوظة\", \"كلمتان محفوظتان\", \"كلمات محفوظة\", \"كلمة محفوظة\")",
+   "v => `${enCount(v.n, \"word\", \"words\")} saved`"
+  ],
+  "o.jSummary": [
+   "v => `دقّقت ${arCount(v.checks, \"نصًّا واحدًا\", \"نصّين\", \"نصوص\", \"نصًّا\")} ووُجد فيها ${arCount(v.total, \"خطأ واحد\", \"خطآن\", \"أخطاء\", \"خطأً\")}.${v.top} اضغط نوعًا لترى قاعدته وأمثلة من كتابتك.`",
+   "v => `You proofread ${enCount(v.checks, \"text\", \"texts\")} and ${enCount(v.total, \"mistake was\", \"mistakes were\")} found.${v.top} Click a type to see its rule and examples from your writing.`"
+  ],
+  "o.ollamaOk": [
+   "v => `✓ Ollama متصل — ${arCount(v.n, \"نموذج واحد\", \"نموذجان\", \"نماذج\", \"نموذجًا\")}. اضغط «اختبار» للتأكد من أن لمحة تستطيع استخدامه.`",
+   "v => `✓ Ollama connected — ${enCount(v.n, \"model\", \"models\")}. Click “Test” to make sure Lamha can use it.`"
+  ],
+  "o.rvSummary": [
+   "v => `في قائمة مراجعتك ${arCount(v.total, \"كلمة واحدة\", \"كلمتان\", \"كلمات\", \"كلمة\")}، حفظتَ منها ${num(v.learned)}. ينتظرك اليوم ${num(v.due)} للمراجعة و${num(v.fresh)} جديدة — افتح تبويب «مراجعة» في نافذة لمحة.`",
+   "v => `Your review list has ${enCount(v.total, \"word\", \"words\")}, ${num(v.learned)} learned. Today: ${num(v.due)} to review and ${num(v.fresh)} new — open the “Review” tab in Lamha's window.`"
+  ],
+  "rv.session": [
+   "v => `راجعت ${arCount(v.n, \"كلمة واحدة\", \"كلمتين\", \"كلمات\", \"كلمة\")} · عرفت ${num(v.good)} · صعبة ${num(v.hard)} · نسيت ${num(v.again)}`",
+   "v => `Reviewed ${enCount(v.n, \"word\", \"words\")} · knew ${num(v.good)} · hard ${num(v.hard)} · forgot ${num(v.again)}`"
+  ],
+  "rv.streak": [
+   "v => (v.n === 2 ? \"🔥 يومان متتاليان من المراجعة\" : v.n <= 10 ? `🔥 ${num(v.n)} أيام متتالية من المراجعة` : `🔥 ${num(v.n)} يومًا متتاليًا من المراجعة`)",
+   "v => `🔥 ${num(v.n)}-day review streak`"
+  ],
+  "rv.totals": [
+   "v => `${arCount(v.total, \"كلمة واحدة\", \"كلمتان\", \"كلمات\", \"كلمة\")} · ${num(v.learned)} محفوظة`",
+   "v => `${enCount(v.total, \"word\", \"words\")} · ${num(v.learned)} learned`"
+  ],
+  "span.days": [
+   "v => arCount(v.n, \"يوم\", v.after ? \"يومين\" : \"يومان\", \"أيام\", \"يومًا\")",
+   "v => enCount(v.n, \"day\", \"days\")"
+  ],
+  "span.hours": [
+   "v => arCount(v.n, \"ساعة\", v.after ? \"ساعتين\" : \"ساعتان\", \"ساعات\", \"ساعة\")",
+   "v => enCount(v.n, \"hour\", \"hours\")"
+  ],
+  "span.months": [
+   "v => arCount(v.n, \"شهر\", v.after ? \"شهرين\" : \"شهران\", \"أشهر\", \"شهرًا\")",
+   "v => enCount(v.n, \"month\", \"months\")"
+  ],
+  "span.years": [
+   "v => arCount(v.n, \"سنة\", v.after ? \"سنتين\" : \"سنتان\", \"سنوات\", \"سنة\")",
+   "v => enCount(v.n, \"year\", \"years\")"
+  ],
+  "td.streak": [
+   "v => (v.n === 2 ? \"🔥 يومان\" : v.n <= 10 ? `🔥 ${num(v.n)} أيام` : `🔥 ${num(v.n)} يومًا`)",
+   "v => `🔥 ${num(v.n)} days`"
+  ]
+ }
+}

@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 namespace Lamha.Data.Database;
 
 /// <summary>
-/// The user's database: <c>%LOCALAPPDATA%\Lamha\lamha.db</c> in the app, or a private in-memory one in tests. One
+/// The user's database: <c>%LOCALAPPDATA%\Lamha Data\lamha.db</c> in the app, or a private in-memory one in tests. One
 /// connection serves every store, one statement at a time: a statement here takes well under a millisecond, and a
 /// single connection keeps transactions simple and SQLite's page cache small.
 /// </summary>

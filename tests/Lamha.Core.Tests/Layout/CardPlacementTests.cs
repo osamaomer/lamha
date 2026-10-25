@@ -31,6 +31,25 @@ public class CardPlacementTests
     }
 
     [Fact]
+    public void ACardUnderTheMouseGrowsDownAndOneAboveItGrowsUp()
+    {
+        var below = new PixelRect(720, 116, W, 200);
+        Assert.Equal(new PixelRect(720, 116, W, 540), CardPlacement.Resize(below, 540, WorkArea, above: false));
+        var above = new PixelRect(720, 784, W, 200);
+        Assert.Equal(new PixelRect(720, 444, W, 540), CardPlacement.Resize(above, 540, WorkArea, above: true));
+        Assert.Equal(new PixelRect(720, 884, W, 100), CardPlacement.Resize(above, 100, WorkArea, above: true));
+    }
+
+    [Fact]
+    public void AGrowingCardStaysInsideTheWorkArea()
+    {
+        var nearBottom = new PixelRect(720, 900, W, 100);
+        Assert.Equal(new PixelRect(720, 500, W, 540), CardPlacement.Resize(nearBottom, 540, WorkArea, above: false));
+        var nearTop = new PixelRect(720, 10, W, 100);
+        Assert.Equal(new PixelRect(720, 0, W, 540), CardPlacement.Resize(nearTop, 540, WorkArea, above: true));
+    }
+
+    [Fact]
     public void AboveTheMouseNearTheBottom()
     {
         var low = CardPlacement.Place(new PixelPoint(960, 1000), WorkArea, W, H);

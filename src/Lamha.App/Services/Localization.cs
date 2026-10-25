@@ -6,23 +6,34 @@ using Microsoft.Windows.Globalization;
 namespace Lamha.App.Services;
 
 /// <summary>
-/// The interface language and its strings (Strings/ar and Strings/en). "Automatic", as in Lamha 2: Arabic on an
-/// Arabic system, English otherwise. The setting to choose comes with Settings (phase 4).
+/// The interface language and its strings (Strings/ar and Strings/en): the setting (Settings → Languages), or
+/// "automatic" as in Lamha 2, Arabic on an Arabic system and English otherwise (Core's <c>Localization</c>).
 /// </summary>
 public static class Localization
 {
+    /// <summary>Languages written right to left: Lamha 2's <c>textDir</c> in shared/i18n.js.</summary>
+    private static readonly HashSet<string> RightToLeft = ["ar", "fa", "ur", "he", "iw", "ps", "yi", "ku", "sd"];
+
+    private static readonly CultureInfo ArabicNumbers = CultureInfo.GetCultureInfo("ar-EG");
+    private static readonly CultureInfo EnglishNumbers = CultureInfo.GetCultureInfo("en-US");
+
     private static ResourceLoader? s_loader;
 
     public static bool IsArabic { get; private set; }
 
+    /// <summary>"ar" or "en".</summary>
+    public static string Language => IsArabic ? "ar" : "en";
+
     /// <summary>Right to left in Arabic, for every window's root.</summary>
     public static FlowDirection FlowDirection => IsArabic ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
 
-    /// <summary>Picks the language; call it before any window or string loads.</summary>
-    public static void Apply()
+    /// <summary>Sets the language ("ar" or "en"); call it before any window or string loads.</summary>
+    public static void Apply(string language)
     {
-        IsArabic = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar";
-        ApplicationLanguages.PrimaryLanguageOverride = IsArabic ? "ar" : "en";
+        IsArabic = language == "ar";
+        ApplicationLanguages.PrimaryLanguageOverride = Language;
+        // Language names (CultureInfo.DisplayName) follow the interface language, as Intl.DisplayNames did in Lamha 2.
+        CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(Language);
     }
 
     /// <summary>The string <paramref name="key"/> in the interface language.</summary>
@@ -33,6 +44,49 @@ public static class Localization
         return string.IsNullOrEmpty(value) ? key : value;
     }
 
+    /// <summary>The string with its {0}, {1}… filled in; numbers as the interface writes them (<see cref="Number"/>).</summary>
     public static string Format(string key, params object[] args) =>
-        string.Format(CultureInfo.CurrentCulture, Get(key), args);
+        string.Format(CultureInfo.CurrentCulture, Get(key), [.. args.Select(a => a is int or long ? Number(Convert.ToInt64(a, CultureInfo.InvariantCulture)) : a)]);
+
+    /// <summary>A number as Lamha 2 wrote it: Arabic-Indic digits in Arabic ("١٢٬٣٤٥"), "12,345" in English.</summary>
+    public static string Number(long n)
+    {
+        if (!IsArabic)
+        {
+            return n.ToString("#,0", EnglishNumbers);
+        }
+
+        var text = n.ToString("#,0", ArabicNumbers);
+        return string.Create(text.Length, text, (span, s) =>
+        {
+            for (var i = 0; i < s.Length; i++)
+            {
+                span[i] = s[i] is >= '0' and <= '9' ? (char)('٠' + (s[i] - '0')) : s[i];
+            }
+        });
+    }
+
+    /// <summary>A language's name in the interface language ("الإنجليزية", "French"): Lamha 2's <c>langName()</c>.</summary>
+    public static string LanguageName(string code)
+    {
+        if (code is "ar" or "en")
+        {
+            return Get("Lang_" + code);
+        }
+
+        try
+        {
+            return CultureInfo.GetCultureInfo(code).DisplayName;
+        }
+        catch (CultureNotFoundException)
+        {
+            return code;
+        }
+    }
+
+    /// <summary>Whether text in this language ("ar", "fa", "ur-PK"…) is written right to left.</summary>
+    public static bool IsRightToLeft(string? code) => RightToLeft.Contains((code ?? "").Split('-')[0].ToLowerInvariant());
+
+    /// <summary>The direction to lay out text in this language.</summary>
+    public static FlowDirection FlowOf(string? code) => IsRightToLeft(code) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
 }

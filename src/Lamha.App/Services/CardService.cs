@@ -1,9 +1,7 @@
-using Lamha.App.ViewModels;
+using Lamha.App.ViewModels.Card;
 using Lamha.App.Windows;
 using Lamha.Core.Dictionary;
-using Lamha.Core.Layout;
 using Lamha.Core.Text;
-using Lamha.Core.Translation;
 using Lamha.Windows.Selection;
 using Lamha.Windows.Shell;
 
@@ -11,8 +9,8 @@ namespace Lamha.App.Services;
 
 /// <summary>
 /// Opens the card on what's selected in the program in front, and carries out what the card asks (Replace / Insert,
-/// Copy, Close). Lamha 2's onHotkey / showCard / card-replace in main.js. <c>notify</c> shows a notification (title,
-/// body) when Replace couldn't paste.
+/// Copy, links, Close). Lamha 2's onHotkey / showCard / card-replace in main.js. <c>notify</c> shows a notification
+/// (title, body) when Replace couldn't paste.
 /// </summary>
 public sealed class CardService(
     SelectionService selection,
@@ -26,14 +24,19 @@ public sealed class CardService(
     /// <summary>Clicking elsewhere this soon after the card opened doesn't close it (the shortcut's own key-up).</summary>
     private const long DeactivateGraceMs = 400;
 
+    /// <summary>The hint ("Select some text first") goes after this long (Lamha 2's 1600 ms).</summary>
+    private static readonly TimeSpan HintTime = TimeSpan.FromMilliseconds(1600);
+
     /// <summary>The longest the shortcut waits for the sentence around a word (Lamha 2's 700 ms).</summary>
     private static readonly TimeSpan SentenceTimeout = TimeSpan.FromMilliseconds(700);
 
     private CardWindow? _window;
+    private bool _windowSolid;
     private SelectionCapture? _source;
     private long _shownAt;
     private bool _busy;
     private bool _visible;
+    private int _shown;
 
     /// <summary>
     /// A shortcut: read the selection first (the user's program must still be in front), and for a word the sentence
@@ -72,8 +75,16 @@ public sealed class CardService(
         }
     }
 
+    /// <summary><c>--sample</c>: the sample card's text, or "write:" and the text for the writing tools.</summary>
+    public string? Sample { get; init; }
+
     /// <summary>The card with sample text and nowhere to paste (the tray's test item, and tools/Measure).</summary>
-    public void ShowSample() => Show(new SelectionCapture(0, Localization.Get("Proto_SampleText"), IsTerminal: false), CardMode.Lookup, null);
+    public void ShowSample()
+    {
+        var sample = Sample ?? Localization.Get("Card_SampleText");
+        var write = sample.StartsWith("write:", StringComparison.Ordinal);
+        Show(new SelectionCapture(0, write ? sample["write:".Length..] : sample, IsTerminal: false), write ? CardMode.Write : CardMode.Lookup, null);
+    }
 
     public void Hide()
     {
@@ -97,13 +108,7 @@ public sealed class CardService(
         }
     }
 
-    async Task<string> ICardHost.LookupAsync(string text, WordContext? context, CancellationToken cancel)
-    {
-        var started = Environment.TickCount64;
-        var result = await brain.Lookup.LookupAsync(text, new LookupOptions { Context = context }, cancel).ConfigureAwait(true);
-        AppLog.Info($"lookup answered in {Environment.TickCount64 - started} ms ({result.From}, {text.Length} characters{(brain.HasDictionary ? "" : ", no dictionary file")})");
-        return result.Translation;
-    }
+    public bool CanOpenSettings => false; // Settings come with the main window, next in phase 4
 
     async Task ICardHost.ReplaceAsync(string text)
     {
@@ -119,7 +124,15 @@ public sealed class CardService(
 
     void ICardHost.Copy(string text) => selection.Copy(text);
 
+    void ICardHost.OpenLink(Uri uri) => _ = global::Windows.System.Launcher.LaunchUriAsync(uri);
+
+    void ICardHost.OpenSettings(string section)
+    {
+    }
+
     void ICardHost.Close() => Hide();
+
+    void ICardHost.Announce(string text) => _window?.Announce(text);
 
     public void Dispose()
     {
@@ -132,13 +145,19 @@ public sealed class CardService(
     {
         var started = Environment.TickCount64;
         _source = capture;
+
+        // The card's background is chosen when its window is made (Acrylic or solid): a change makes a new one.
+        var solid = brain.Settings.Current.CardSolid;
+        if (_window is not null && solid != _windowSolid)
+        {
+            Dispose();
+        }
+
         var created = _window is null;
-        var window = _window ??= Create();
+        var window = _window ??= Create(solid);
         window.ViewModel.Load(capture, mode, context);
 
         var cursor = Screens.Cursor;
-        var workArea = Screens.WorkAreaAt(cursor);
-        var (width, height) = CardPlacement.Size(CardWindow.CardWidth, CardWindow.CardHeight, Screens.ScaleAt(cursor), workArea);
         _shownAt = Environment.TickCount64;
         if (!_visible)
         {
@@ -146,16 +165,36 @@ public sealed class CardService(
             idle.WindowOpened();
         }
 
-        window.ShowAt(CardPlacement.Place(cursor, workArea, width, height).Window);
+        window.ShowAt(cursor, Screens.WorkAreaAt(cursor), Screens.ScaleAt(cursor));
         AppLog.Info($"card shown in {Environment.TickCount64 - started} ms ({(created ? "new window" : "kept window")}, {mode}, {capture.Text.Length} characters)");
+        if (window.ViewModel.IsHint)
+        {
+            _ = HideHintAsync(++_shown);
+        }
+        else
+        {
+            ++_shown;
+        }
     }
 
-    private CardWindow Create()
+    /// <summary>The hint goes by itself, unless something else opened the card meanwhile.</summary>
+    private async Task HideHintAsync(int shown)
     {
-        var window = new CardWindow(new CardViewModel(this));
+        await Task.Delay(HintTime).ConfigureAwait(true);
+        if (shown == _shown && _window?.ViewModel.IsHint == true)
+        {
+            Hide();
+        }
+    }
+
+    private CardWindow Create(bool solid)
+    {
+        _windowSolid = solid;
+        var window = new CardWindow(new CardViewModel(brain, this), solid);
         window.Deactivated += () =>
         {
-            if (Environment.TickCount64 - _shownAt > DeactivateGraceMs)
+            // A pinned card stays while the user works elsewhere.
+            if (Environment.TickCount64 - _shownAt > DeactivateGraceMs && !window.ViewModel.IsPinned && !window.ViewModel.IsHint)
             {
                 Hide();
             }

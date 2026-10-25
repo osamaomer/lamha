@@ -426,6 +426,36 @@ Built on the `native/phase-3` branch (2026-10-24), on top of phase 2:
 - **Where the user's data lives:** in its own folder, `%LOCALAPPDATA%\Lamha Data` (decision 0006). `%LOCALAPPDATA%\Lamha` is Velopack's install folder, and uninstalling Lamha deletes it; the data folder is never touched by an uninstall or a reinstall, and "delete my data" becomes a choice in Settings. `lamha.db` and the log move there. **To build before the first beta release** (phase 4's pre-release), along with CLAUDE.md's log path.
 - **Reading the selection without the clipboard:** yes, in 3.0. The sentence reader already finds the selection through UI Automation, so it reads the selection first and falls back to Ctrl+C.
 
+### Phase 4 progress
+
+On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
+
+**Answered at the start of phase 4** (2026-10-25)
+- **Order:** the foundations, then **the card**, then the **first GitHub pre-release** (the beta channel, so it's used daily), then the main window, Settings, the clipboard panel, first run, and the tray and notifications, with a new beta after each.
+- **Wording for phase 2's new errors** (title · the line under it), approved as drafted in Lamha 2's style:
+  - `openai_no_key`: أضف مفتاح OpenAI · أنشئ مفتاحًا من platform.openai.com وأضفه في الإعدادات. / Add an OpenAI key · Create a key at platform.openai.com and add it in Settings.
+  - `custom_no_server`: أكمل إعداد الخادم · أضف عنوان الخادم واختر نموذجًا من الإعدادات. / Finish setting up the server · Add the server's address and choose a model in Settings.
+  - `custom_insecure`: لا يمكن استخدام عنوان الخادم · استخدم عنوانًا يبدأ بـ https:// (يعمل http:// على هذا الجهاز وشبكتك المحلية فقط). / The server's address can't be used · Use an address that starts with https:// (http:// works only on this PC and your local network).
+  - `custom_offline`: الخادم لا يستجيب · تأكد أن الخادم يعمل وأن عنوانه صحيح في الإعدادات، ثم أعد المحاولة. / The server isn't answering · Make sure the server is running and its address in Settings is right, then try again.
+  - `google_error`: Lamha 2's general error, حدث خطأ · أعد المحاولة. / Something went wrong · Try again.
+- **Lamha 2's errors that name Claude** (`ai_bad_key`, `ai_no_credit`, `ai_forbidden`) name the provider in use, and its site for credit (Claude: console.anthropic.com, OpenAI: platform.openai.com, another server: "the service's website"); `ai_no_key` lists the five providers.
+- **The writing tools' system prompt** ("an app… in any program"): kept.
+
+**Foundations**
+- **Lamha 2's strings:** `tools/Strings/lamha2-strings.mjs` reads Lamha 2's four string files into `tools/Strings/lamha2-strings.json` (722 strings; 92 more are functions, mostly Arabic counting, ported by hand), finds a string, and writes the `.resw` lines for a key. `ResourcesTests` checks that both languages have the same strings and placeholders, and that every string whose comment names a Lamha 2 key keeps its wording (an approved rewording says "reworded" in its comment).
+- **The interface language** comes from the setting (Settings → Languages; "automatic" follows Windows, as in Lamha 2), read at start.
+- **The data folder** is `%LOCALAPPDATA%\Lamha Data` (decision 0006), with the log in its `logs` folder for every profile. A `lamha.db` left in the install folder by phase 3's builds moves there once.
+
+**The card** (built from the signed-off design, replacing the prototype; `ViewModels/Card`, `Views/CardView`, `Windows/CardWindow`, `Controls/`):
+- **The answer,** Lamha 2's `render(d)` part by part: the headword, its sound and what it's a form of; the review bookmark; "did you mean"; the hero (the meaning in the sentence with the sentence's translation around it, the AI's guess, the explained view's definition, roots and plural), right to left in both languages as in Lamha 2; other meanings by part of speech (Google's chips with "+n", the offline dictionary's senses with their hints, "Other meanings (n)"); definitions numbered, the one that fits the sentence tinted, their Arabic filled in after the card shows; examples; the Wikipedia summary; milestones; Google Translate, Cambridge, Better translation and Writing tools at the foot. Narrator reads the answer when it arrives.
+- **The bar:** Lamha's mark, the languages or العربية ⇄ English for a word, where the answer came from (book or sparkle), Back and Forward as a pair once a word has been followed (Alt+← / Alt+→ too), Pin (a pinned card stays, and moves by its bar), Close. Settings shows once the main window exists.
+- **The writing tools:** the tools for the text (1–9), the proofread's struck-through corrections with their kind and why, the other tools' text, Replace / Insert / Copy / Try again, the summary in the other language, Reply's and Write new's request (kind, tone, Ctrl+Enter).
+- **Errors** in Lamha 2's words with the provider named (`Services/ErrorText.cs`); "Select some text first" as Lamha 2's hint by the mouse, without taking the focus.
+- **The window:** Acrylic with the tokens' tint, always drawn active (`CardBackdrop`), or solid (a new setting, `cardSolid`, for Appearance); its height follows the card up to 540 px, then the body scrolls (`CardPlacement.Resize`: a card under the mouse grows down, one above it grows up).
+- **Seen** on screenshots in both languages (a word from the offline dictionary, a phrase, the writing tools not set up yet); **measured** (NativeAOT, x64): tray 0 / 49 MB, card open 35 / 77 MB, card closed 1 / 77 MB, within budget. `--sample=text` (or `write:text`) and `--lang=ar|en` set the sample card for screenshots.
+
+**Left on the card before the first beta:** prices in your currency (Core: finding a price, the day's rate kept for offline), the shimmer and the motion levels, and a look at the dark and light themes, pinned and followed words, the sentence and an error. Listen waits for speech (phase 5).
+
 ## Moving users from Lamha 2
 
 - **First run of 3.0** finds `%APPDATA%\Lamha` and imports settings, history, the deck (with `mod` and `cardsRemoved`), the mistake journal and clipboard history.
@@ -466,12 +496,10 @@ Held back from 3.0 so the first release has no web view. Ideas for doing it bett
 
 ## Questions by phase
 
-Phase 0's four and the two it raised, phase 2's four, phase 1's four and phase 3's two are answered (see each section). The beta stays in CI artifacts until phase 4, which brings the first GitHub pre-release. The rest:
+Phase 0's four and the two it raised, phase 2's four, phase 1's four, phase 3's two and phase 4's are answered (see each section). The first GitHub pre-release comes right after phase 4's card. The rest:
 
 | Phase | Question | Recommendation |
 |---|---|---|
-| 4 | Wording for phase 2's new error codes | Claude drafts in Lamha 2's style; you reword |
-| 4 | The writing tools' system prompt ("an app… in any program") | Keep |
 | 6 | Code signing? | Yours, once everything else is done (the beta ships unsigned until then) |
 | 6 | Warn users with downloaded Wikipedias? | Yes, in the bridge update |
 | 6 | Remove 2.x automatically? | Yes, keep its data for 30 days |

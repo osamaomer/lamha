@@ -8,13 +8,11 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
 
   <data name="Common_Lamha" xml:space="preserve"><value>لمحة</value><comment>common.lamha</comment></data>
-  <data name="Card_Copy.Content" xml:space="preserve"><value>نسخ</value><comment>common.copy</comment></data>
   <data name="Card_Close.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>إغلاق (Esc)</value><comment>c.closeEsc</comment></data>
   <data name="Card_Close.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>إغلاق (Esc)</value><comment>c.closeEsc</comment></data>
   <data name="Card_SelectFirst" xml:space="preserve"><value>حدّد نصًّا أولًا</value><comment>c.selectFirst</comment></data>
   <data name="Card_Replace" xml:space="preserve"><value>استبدال</value><comment>c.replace</comment></data>
   <data name="Card_Insert" xml:space="preserve"><value>إدراج</value><comment>c.insert</comment></data>
-  <data name="Card_WriteNewHere" xml:space="preserve"><value>اكتب نصًّا جديدًا في هذا المربع</value><comment>c.writeNewHere</comment></data>
   <data name="Tray_ShortcutLookup" xml:space="preserve"><value>بحث وترجمة في أي برنامج</value><comment>d.hkLookup</comment></data>
   <data name="Tray_ShortcutWrite" xml:space="preserve"><value>أدوات الكتابة في أي برنامج</value><comment>d.hkWrite</comment></data>
   <data name="Tray_Unavailable" xml:space="preserve"><value> (غير متاح)</value><comment>d.unavailable</comment></data>
@@ -33,16 +31,182 @@
   <data name="Note_ReplaceFailedBody" xml:space="preserve"><value>نُسخ النص — الصقه بنفسك (Ctrl+V).</value><comment>d.replaceFailedBody</comment></data>
   <data name="Tray_Quit" xml:space="preserve"><value>خروج</value><comment>d.trayQuit</comment></data>
 
+  <!-- The card (phase 4) -->
+  <data name="Common_Settings" xml:space="preserve"><value>الإعدادات</value><comment>common.settings</comment></data>
+  <data name="Common_Retry" xml:space="preserve"><value>إعادة المحاولة</value><comment>common.retry</comment></data>
+  <data name="Common_Copy" xml:space="preserve"><value>نسخ</value><comment>common.copy</comment></data>
+  <data name="Lang_ar" xml:space="preserve"><value>العربية</value><comment>lang.ar</comment></data>
+  <data name="Lang_en" xml:space="preserve"><value>الإنجليزية</value><comment>lang.en</comment></data>
+  <data name="Card_Back.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>رجوع</value><comment>common.back</comment></data>
+  <data name="Card_Back.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>رجوع</value><comment>common.back</comment></data>
+  <data name="Card_Forward.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>للأمام</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
+  <data name="Card_Forward.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>للأمام</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
+  <data name="Card_Settings.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>الإعدادات</value><comment>common.settings</comment></data>
+  <data name="Card_Settings.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>الإعدادات</value><comment>common.settings</comment></data>
+  <data name="Card_Pin" xml:space="preserve"><value>تثبيت البطاقة</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
+  <data name="Card_Pinned" xml:space="preserve"><value>مثبّتة: اضغط لإلغاء التثبيت</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
+  <data name="Card_DictSwitch" xml:space="preserve"><value>معنى الكلمة: مترجمًا، أو مشروحًا بلغتها</value><comment>c.dictSwitch</comment></data>
+  <data name="Card_DictEn" xml:space="preserve"><value>إنجليزي</value><comment>c.dictEn</comment></data>
+  <data name="Card_LocalBadgeTitle" xml:space="preserve"><value>قاموس محلي: النتيجة من القاموس المدمج، ويعمل دون إنترنت</value><comment>c.localBadgeTitle</comment></data>
+  <data name="Card_AiBadgeTitle" xml:space="preserve"><value>ترجمها الذكاء الاصطناعي ({0})</value><comment>c.aiBadgeTitle</comment></data>
+  <data name="Card_SampleText" xml:space="preserve"><value>a piece of cake</value><comment>the tray's sample card and tools/Measure: English in both languages</comment></data>
+  <data name="Card_FormOf" xml:space="preserve"><value> ← صيغة من </value><comment>c.formOf</comment></data>
+  <data name="Card_FormOfPlain" xml:space="preserve"><value>صيغة من </value><comment>c.formOfPlain</comment></data>
+  <data name="Card_InContext" xml:space="preserve"><value>في هذا السياق</value><comment>c.inContext</comment></data>
+  <data name="Card_InContextName" xml:space="preserve"><value>في هذا السياق: اسم يبقى كما هو</value><comment>c.inContextName</comment></data>
+  <data name="Card_AiGuess" xml:space="preserve"><value>تخمين من الذكاء الاصطناعي · ليست في القاموس</value><comment>c.aiGuess</comment></data>
+  <data name="Card_NoArSense" xml:space="preserve"><value>لا يوجد معنى عربي لهذا الاستخدام في القاموس المحلي. المعنى المقصود هنا:</value><comment>c.noArSense</comment></data>
+  <data name="Card_NoArDirect" xml:space="preserve"><value>لا يوجد معنى عربي مباشر في القاموس المحلي — راجع التعريف أدناه.</value><comment>c.noArDirect</comment></data>
+  <data name="Card_NoDef" xml:space="preserve"><value>لا يوجد تعريف لهذه الكلمة باللغة {0} — جرّب الترجمة.</value><comment>c.noDef</comment></data>
+  <data name="Card_NoExplainAI" xml:space="preserve"><value>لا يوجد شرح لهذه الكلمة باللغة {0} هنا. لشرح الكلمات بلغتها اختر مزوّد ذكاء اصطناعي في الإعدادات.</value><comment>c.noExplainAI</comment></data>
+  <data name="Card_Root" xml:space="preserve"><value>الجذر: {0}</value><comment>c.root</comment></data>
+  <data name="Card_Plural" xml:space="preserve"><value>الجمع: {0}</value><comment>c.plural</comment></data>
+  <data name="Card_LookUpX" xml:space="preserve"><value>ابحث عن {0}</value><comment>c.lookUpX</comment></data>
+  <data name="Card_Milestone" xml:space="preserve"><value>🎉 هذه الكلمة رقم {0} تبحث عنها مع لمحة!</value><comment>ms.lookups</comment></data>
+  <data name="Card_GoalDone" xml:space="preserve"><value>🎯 حققت هدف اليوم: {0}!</value><comment>td.goalDone</comment></data>
+  <data name="Card_InReview" xml:space="preserve"><value>في قائمة المراجعة — اضغط للإزالة</value><comment>c.inReview</comment></data>
+  <data name="Card_AddReview" xml:space="preserve"><value>أضف إلى المراجعة</value><comment>c.addReview</comment></data>
+  <data name="Card_AddedReview" xml:space="preserve"><value>أُضيفت إلى المراجعة</value><comment>c.addedReview</comment></data>
+  <data name="Card_RemovedReview" xml:space="preserve"><value>أُزيلت من المراجعة</value><comment>c.removedReview</comment></data>
+  <data name="Card_BestSense" xml:space="preserve"><value>المعنى الأقرب لسياق الجملة</value><comment>c.bestSense</comment></data>
+  <data name="Card_ShowMore" xml:space="preserve"><value>عرض المزيد</value><comment>c.showMore</comment></data>
+  <data name="Card_ShowAll" xml:space="preserve"><value>اضغط لعرض النص كاملًا</value><comment>c.showAll</comment></data>
+  <data name="Card_MoreMeanings" xml:space="preserve"><value>معانٍ أخرى ({0})</value><comment>c.moreMeanings</comment></data>
+  <data name="Card_DidYouMean" xml:space="preserve"><value>هل تقصد: </value><comment>c.didYouMean</comment></data>
+  <data name="Card_DidYouMeanEnd" xml:space="preserve"><value>؟</value><comment>c.didYouMeanEnd</comment></data>
+  <data name="Card_OtherMeanings" xml:space="preserve"><value>معانٍ أخرى</value><comment>c.otherMeanings</comment></data>
+  <data name="Card_Definition" xml:space="preserve"><value>التعريف</value><comment>c.definition</comment></data>
+  <data name="Card_Examples" xml:space="preserve"><value>أمثلة</value><comment>c.examples</comment></data>
+  <data name="Card_Wikipedia" xml:space="preserve"><value>ويكيبيديا</value><comment>c.wikipedia</comment></data>
+  <data name="Card_ReadWiki" xml:space="preserve"><value>اقرأ المزيد في ويكيبيديا</value><comment>c.readWiki</comment></data>
+  <data name="Card_Google" xml:space="preserve"><value>ترجمة Google</value><comment>c.google</comment></data>
+  <data name="Card_Cambridge" xml:space="preserve"><value>قاموس كامبريدج</value><comment>c.cambridge</comment></data>
+  <data name="Card_BetterTr" xml:space="preserve"><value>ترجمة أدق</value><comment>c.betterTr</comment></data>
+  <data name="Card_BetterTrTitle" xml:space="preserve"><value>ترجمة النص مجددًا بـ {0}: أدق في التعابير والعامية، وأبطأ</value><comment>c.betterTrTitle</comment></data>
+  <data name="Card_Copied" xml:space="preserve"><value>تم النسخ</value><comment>c.copiedToast</comment></data>
+  <data name="Card_CopyTr.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>نسخ</value><comment>common.copy</comment></data>
+  <data name="Card_CopyTr.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>نسخ الترجمة</value><comment>c.copyTr</comment></data>
+  <data name="Card_ErrNotFound" xml:space="preserve"><value>الكلمة غير موجودة في القاموس المحلي</value><comment>c.errNotFound</comment></data>
+  <data name="Card_ErrLocalOnly" xml:space="preserve"><value>أنت في وضع «القاموس المحلي فقط». غيّر مصدر القاموس من الإعدادات للبحث عبر الإنترنت.</value><comment>c.errLocalOnly</comment></data>
+  <data name="Card_ErrOfflineMode" xml:space="preserve"><value>ترجمة الجمل تحتاج إلى الإنترنت</value><comment>c.errOfflineMode</comment></data>
+  <data name="Card_ErrBusy" xml:space="preserve"><value>خدمة الترجمة مشغولة مؤقتًا</value><comment>c.errBusy</comment></data>
+  <data name="Card_ErrTooMany" xml:space="preserve"><value>أُرسلت طلبات كثيرة في وقت قصير. انتظر دقيقة ثم أعد المحاولة.</value><comment>c.errTooMany</comment></data>
+  <data name="Card_ErrFailed" xml:space="preserve"><value>تعذّرت الترجمة</value><comment>c.errFailed</comment></data>
+  <data name="Card_ErrService" xml:space="preserve"><value>حدث خطأ أثناء الاتصال بخدمة الترجمة.</value><comment>c.errService</comment></data>
+  <data name="Card_ErrOffline" xml:space="preserve"><value>لا يوجد اتصال بالإنترنت</value><comment>c.errOffline</comment></data>
+  <data name="Card_ErrCheckConn" xml:space="preserve"><value>تحقق من اتصالك ثم حاول مجددًا.</value><comment>c.errCheckConn</comment></data>
+  <data name="Card_WritingTools" xml:space="preserve"><value>أدوات الكتابة</value><comment>p.writeTools</comment></data>
+  <data name="Card_WriteTitle" xml:space="preserve"><value>أدوات الكتابة · {0}</value><comment>c.writeTitle</comment></data>
+  <data name="Card_ComposeTitle" xml:space="preserve"><value>كتابة جديدة · {0}</value><comment>c.composeTitle</comment></data>
+  <data name="Card_ToolKey" xml:space="preserve"><value>اضغط {0} لتشغيلها</value><comment>c.toolKey</comment></data>
+  <data name="Tool_Proofread" xml:space="preserve"><value>تدقيق لغوي</value><comment>tool.proofread</comment></data>
+  <data name="Tool_Improve" xml:space="preserve"><value>تحسين الأسلوب</value><comment>tool.improve</comment></data>
+  <data name="Tool_Formal" xml:space="preserve"><value>رسمي</value><comment>tool.formal</comment></data>
+  <data name="Tool_Friendly" xml:space="preserve"><value>ودّي</value><comment>tool.friendly</comment></data>
+  <data name="Tool_Concise" xml:space="preserve"><value>أقصر</value><comment>tool.concise</comment></data>
+  <data name="Tool_Expand" xml:space="preserve"><value>أطول</value><comment>tool.expand</comment></data>
+  <data name="Tool_ToEnglish" xml:space="preserve"><value>اكتبه بالإنجليزية</value><comment>tool.toEnglish</comment></data>
+  <data name="Tool_Summarize" xml:space="preserve"><value>تلخيص</value><comment>tool.summarize</comment></data>
+  <data name="Tool_Explain" xml:space="preserve"><value>اشرح بالعربية</value><comment>tool.explain</comment></data>
+  <data name="Tool_Reply" xml:space="preserve"><value>اكتب ردًّا</value><comment>tool.reply</comment></data>
+  <data name="Card_KindMessage" xml:space="preserve"><value>رسالة</value><comment>c.kindMessage</comment></data>
+  <data name="Card_KindEmail" xml:space="preserve"><value>بريد إلكتروني</value><comment>c.kindEmail</comment></data>
+  <data name="Card_Kind" xml:space="preserve"><value>النوع:</value><comment>c.kind</comment></data>
+  <data name="Card_Tone" xml:space="preserve"><value>النبرة:</value><comment>c.tone</comment></data>
+  <data name="Card_ToneAuto" xml:space="preserve"><value>تلقائي</value><comment>c.toneAuto</comment></data>
+  <data name="Card_ToneShort" xml:space="preserve"><value>مختصر</value><comment>c.toneShort</comment></data>
+  <data name="Card_ToneLong" xml:space="preserve"><value>مفصّل</value><comment>c.toneLong</comment></data>
+  <data name="Card_InArabic" xml:space="preserve"><value>بالعربية</value><comment>c.inArabic</comment></data>
+  <data name="Card_InEnglish" xml:space="preserve"><value>بالإنجليزية</value><comment>c.inEnglish</comment></data>
+  <data name="Card_EditRequest" xml:space="preserve"><value>تعديل الطلب</value><comment>c.editRequest</comment></data>
+  <data name="Card_NoMistakes" xml:space="preserve"><value>لا توجد أخطاء — نصّك سليم</value><comment>write.noErrors</comment></data>
+  <data name="Card_Corrections" xml:space="preserve"><value>التصحيحات ({0})</value><comment>c.corrections</comment></data>
+  <data name="Card_ComposePlaceholder" xml:space="preserve"><value>ماذا تريد أن تكتب؟ صِف فكرتك بالعربية أو الإنجليزية — مثلًا: بريد لمديري أطلب إجازة يوم الأحد</value><comment>c.composePlaceholder</comment></data>
+  <data name="Card_ComposeLabel" xml:space="preserve"><value>ماذا تريد أن تكتب؟</value><comment>c.composeLabel</comment></data>
+  <data name="Card_ReplyPlaceholder" xml:space="preserve"><value>ماذا تريد أن تقول؟ اكتب فكرتك بالعربية أو الإنجليزية (اختياري)</value><comment>c.replyPlaceholder</comment></data>
+  <data name="Card_ComposeGo" xml:space="preserve"><value>اكتب</value><comment>c.composeGo</comment></data>
+  <data name="Card_WriteReply" xml:space="preserve"><value>اكتب الرد</value><comment>c.writeReply</comment></data>
+  <data name="Card_Again.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>محاولة أخرى</value><comment>write.again</comment></data>
+  <data name="Card_Again.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>محاولة أخرى</value><comment>write.again</comment></data>
+  <data name="Category_articles" xml:space="preserve"><value>أدوات التعريف والتنكير (a / an / the)</value><comment>CATEGORIES.articles.label</comment></data>
+  <data name="Category_prepositions" xml:space="preserve"><value>حروف الجر (in / on / at …)</value><comment>CATEGORIES.prepositions.label</comment></data>
+  <data name="Category_verb_tense" xml:space="preserve"><value>أزمنة الأفعال</value><comment>CATEGORIES.verb_tense.label</comment></data>
+  <data name="Category_agreement" xml:space="preserve"><value>توافق الفاعل والفعل</value><comment>CATEGORIES.agreement.label</comment></data>
+  <data name="Category_plurals" xml:space="preserve"><value>المفرد والجمع</value><comment>CATEGORIES.plurals.label</comment></data>
+  <data name="Category_word_choice" xml:space="preserve"><value>اختيار الكلمات</value><comment>CATEGORIES.word_choice.label</comment></data>
+  <data name="Category_spelling" xml:space="preserve"><value>الإملاء</value><comment>CATEGORIES.spelling.label</comment></data>
+  <data name="Category_punctuation" xml:space="preserve"><value>علامات الترقيم والأحرف الكبيرة</value><comment>CATEGORIES.punctuation.label</comment></data>
+  <data name="Category_word_order" xml:space="preserve"><value>ترتيب الكلمات</value><comment>CATEGORIES.word_order.label</comment></data>
+  <data name="Category_sentence_structure" xml:space="preserve"><value>بناء الجملة</value><comment>CATEGORIES.sentence_structure.label</comment></data>
+  <data name="Pos_n" xml:space="preserve"><value>اسم</value><comment>local-dict.js POS_AR / POS_EN: n</comment></data>
+  <data name="Pos_v" xml:space="preserve"><value>فعل</value><comment>local-dict.js POS_AR / POS_EN: v</comment></data>
+  <data name="Pos_a" xml:space="preserve"><value>صفة</value><comment>local-dict.js POS_AR / POS_EN: a</comment></data>
+  <data name="Pos_r" xml:space="preserve"><value>ظرف</value><comment>local-dict.js POS_AR / POS_EN: r</comment></data>
+  <data name="Pos_p" xml:space="preserve"><value>حرف جر</value><comment>local-dict.js POS_AR / POS_EN: p</comment></data>
+  <data name="Pos_o" xml:space="preserve"><value>ضمير</value><comment>local-dict.js POS_AR / POS_EN: o</comment></data>
+  <data name="Pos_c" xml:space="preserve"><value>حرف عطف</value><comment>local-dict.js POS_AR / POS_EN: c</comment></data>
+  <data name="Pos_i" xml:space="preserve"><value>تعجّب</value><comment>local-dict.js POS_AR / POS_EN: i</comment></data>
+  <data name="Pos_d" xml:space="preserve"><value>أداة</value><comment>local-dict.js POS_AR / POS_EN: d</comment></data>
+  <data name="Pos_u" xml:space="preserve"><value>عدد</value><comment>local-dict.js POS_AR / POS_EN: u</comment></data>
+  <data name="Pos_h" xml:space="preserve"><value>عبارة</value><comment>local-dict.js POS_AR / POS_EN: h</comment></data>
+  <data name="Pos_m" xml:space="preserve"><value>اسم علم</value><comment>local-dict.js POS_AR / POS_EN: m</comment></data>
+  <data name="Pos_t" xml:space="preserve"><value>أداة</value><comment>local-dict.js POS_AR / POS_EN: t</comment></data>
+  <data name="Pos_e" xml:space="preserve"><value>بالإنجليزية</value><comment>local-dict.js POS_AR / POS_EN: e</comment></data>
+  <data name="Error_ai_model_Title" xml:space="preserve"><value>النموذج المختار غير متاح لحسابك</value><comment>ERRORS.ai_model.title</comment></data>
+  <data name="Error_ai_model_Hint" xml:space="preserve"><value>اختر نموذجًا آخر من الإعدادات.</value><comment>ERRORS.ai_model.hint</comment></data>
+  <data name="Error_ai_rate_limited_Title" xml:space="preserve"><value>طلبات كثيرة في وقت قصير</value><comment>ERRORS.ai_rate_limited.title</comment></data>
+  <data name="Error_ai_rate_limited_Hint" xml:space="preserve"><value>انتظر قليلًا ثم أعد المحاولة.</value><comment>ERRORS.ai_rate_limited.hint</comment></data>
+  <data name="Error_ai_busy_Title" xml:space="preserve"><value>خدمة الذكاء الاصطناعي مشغولة الآن</value><comment>ERRORS.ai_busy.title</comment></data>
+  <data name="Error_ai_busy_Hint" xml:space="preserve"><value>أعد المحاولة بعد لحظات.</value><comment>ERRORS.ai_busy.hint</comment></data>
+  <data name="Error_ai_timeout_Title" xml:space="preserve"><value>استغرق الرد وقتًا طويلًا</value><comment>ERRORS.ai_timeout.title</comment></data>
+  <data name="Error_ai_timeout_Hint" xml:space="preserve"><value>أعد المحاولة، أو استخدم نصًّا أقصر.</value><comment>ERRORS.ai_timeout.hint</comment></data>
+  <data name="Error_ai_too_long_Title" xml:space="preserve"><value>النص طويل جدًا</value><comment>ERRORS.ai_too_long.title</comment></data>
+  <data name="Error_ai_too_long_Hint" xml:space="preserve"><value>استخدم جزءًا أقصر من النص.</value><comment>ERRORS.ai_too_long.hint</comment></data>
+  <data name="Error_ai_refused_Title" xml:space="preserve"><value>تعذّرت معالجة هذا النص</value><comment>ERRORS.ai_refused.title</comment></data>
+  <data name="Error_ai_refused_Hint" xml:space="preserve"><value>لم يتمكن الذكاء الاصطناعي من العمل على هذا النص.</value><comment>ERRORS.ai_refused.hint</comment></data>
+  <data name="Error_ollama_no_model_Title" xml:space="preserve"><value>اختر نموذج Ollama</value><comment>ERRORS.ollama_no_model.title</comment></data>
+  <data name="Error_ollama_no_model_Hint" xml:space="preserve"><value>اختر نموذجًا من الإعدادات لتفعيل أدوات الكتابة.</value><comment>ERRORS.ollama_no_model.hint</comment></data>
+  <data name="Error_ollama_offline_Title" xml:space="preserve"><value>Ollama لا يعمل</value><comment>ERRORS.ollama_offline.title</comment></data>
+  <data name="Error_ollama_offline_Hint" xml:space="preserve"><value>شغّل تطبيق Ollama من قائمة ابدأ ثم أعد المحاولة.</value><comment>ERRORS.ollama_offline.hint</comment></data>
+  <data name="Error_ollama_origin_Title" xml:space="preserve"><value>Ollama يرفض اتصال الإضافة</value><comment>ERRORS.ollama_origin.title</comment></data>
+  <data name="Error_ollama_origin_Hint" xml:space="preserve"><value>أضف متغيّر البيئة OLLAMA_ORIGINS كما في خطوات الإعدادات، ثم أعد تشغيل Ollama.</value><comment>ERRORS.ollama_origin.hint</comment></data>
+  <data name="Error_ollama_model_Title" xml:space="preserve"><value>النموذج غير موجود في Ollama</value><comment>ERRORS.ollama_model.title</comment></data>
+  <data name="Error_ollama_model_Hint" xml:space="preserve"><value>حمّله أولًا (ollama pull …) أو اختر نموذجًا آخر من الإعدادات.</value><comment>ERRORS.ollama_model.hint</comment></data>
+  <data name="Error_gemini_no_key_Title" xml:space="preserve"><value>أضف مفتاح Gemini</value><comment>ERRORS.gemini_no_key.title</comment></data>
+  <data name="Error_gemini_no_key_Hint" xml:space="preserve"><value>أنشئ مفتاحًا مجانيًا من aistudio.google.com وأضفه في الإعدادات.</value><comment>ERRORS.gemini_no_key.hint</comment></data>
+  <data name="Error_gemini_bad_key_Title" xml:space="preserve"><value>مفتاح Gemini غير صالح</value><comment>ERRORS.gemini_bad_key.title</comment></data>
+  <data name="Error_gemini_bad_key_Hint" xml:space="preserve"><value>تحقق من المفتاح في الإعدادات أو أنشئ مفتاحًا جديدًا من aistudio.google.com.</value><comment>ERRORS.gemini_bad_key.hint</comment></data>
+  <data name="Error_gemini_quota_Title" xml:space="preserve"><value>انتهى الحد المجاني من Gemini مؤقتًا</value><comment>ERRORS.gemini_quota.title</comment></data>
+  <data name="Error_gemini_quota_Hint" xml:space="preserve"><value>للخطة المجانية حد للطلبات في الدقيقة وفي اليوم. انتظر قليلًا، أو جرّب نموذج Flash-Lite، أو استخدم Ollama.</value><comment>ERRORS.gemini_quota.hint</comment></data>
+  <data name="Error_gemini_busy_Title" xml:space="preserve"><value>نماذج Gemini مزدحمة الآن</value><comment>ERRORS.gemini_busy.title</comment></data>
+  <data name="Error_gemini_busy_Hint" xml:space="preserve"><value>خوادم Google مشغولة (يحدث كثيرًا مع النماذج الجديدة في الخطة المجانية). أعد المحاولة بعد دقيقة، أو استخدم Ollama.</value><comment>ERRORS.gemini_busy.hint</comment></data>
+  <data name="Error_gemini_region_Title" xml:space="preserve"><value>Gemini غير متاح في بلدك</value><comment>ERRORS.gemini_region.title</comment></data>
+  <data name="Error_gemini_region_Hint" xml:space="preserve"><value>خدمة Gemini API لا تعمل من موقعك الحالي. استخدم Ollama أو Claude.</value><comment>ERRORS.gemini_region.hint</comment></data>
+  <data name="Error_ai_no_key_Title" xml:space="preserve"><value>فعّل أدوات الكتابة</value><comment>ERRORS.ai_no_key.title</comment></data>
+  <data name="Error_ai_no_key_Hint" xml:space="preserve"><value>اختر من الإعدادات Ollama (مجاني على جهازك) أو Gemini (مجاني بمفتاح) أو Claude أو OpenAI (بمفتاح API) أو خادمًا آخر.</value><comment>ERRORS.ai_no_key.hint reworded 2026-10-25 (approved at the start of phase 4): the five providers</comment></data>
+  <data name="Error_ai_bad_key_Title" xml:space="preserve"><value>مفتاح {0} غير صالح</value><comment>ERRORS.ai_bad_key.title reworded 2026-10-25 (approved at the start of phase 4): the provider in use</comment></data>
+  <data name="Error_ai_bad_key_Hint" xml:space="preserve"><value>تحقق من المفتاح في الإعدادات أو أنشئ مفتاحًا جديدًا.</value><comment>ERRORS.ai_bad_key.hint</comment></data>
+  <data name="Error_ai_no_credit_Title" xml:space="preserve"><value>نفد رصيد حساب {0} API</value><comment>ERRORS.ai_no_credit.title reworded 2026-10-25 (approved at the start of phase 4): the provider in use</comment></data>
+  <data name="Error_ai_no_credit_Hint" xml:space="preserve"><value>أضف رصيدًا من {0} ثم أعد المحاولة.</value><comment>ERRORS.ai_no_credit.hint reworded 2026-10-25 (approved at the start of phase 4): the provider's site</comment></data>
+  <data name="Error_ai_forbidden_Title" xml:space="preserve"><value>المفتاح لا يملك صلاحية الاستخدام</value><comment>ERRORS.ai_forbidden.title</comment></data>
+  <data name="Error_ai_forbidden_Hint" xml:space="preserve"><value>تحقق من صلاحيات المفتاح في موقع الخدمة ({0}).</value><comment>ERRORS.ai_forbidden.hint reworded 2026-10-25 (approved at the start of phase 4): the provider in use</comment></data>
+  <data name="Error_ServiceSite" xml:space="preserve"><value>موقع الخدمة</value><comment>another server's credit site (Error_ai_no_credit_Hint), approved 2026-10-25</comment></data>
+  <data name="Error_ai_error_Title" xml:space="preserve"><value>تعذّر الاتصال بـ {0}</value><comment>lamha-ai.js errorInfo(): an ai_error's title</comment></data>
+  <data name="Error_other_Title" xml:space="preserve"><value>حدث خطأ</value><comment>ERRORS.other.title</comment></data>
+  <data name="Error_other_Hint" xml:space="preserve"><value>أعد المحاولة.</value><comment>ERRORS.other.hint</comment></data>
+  <data name="Error_openai_no_key_Title" xml:space="preserve"><value>أضف مفتاح OpenAI</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_openai_no_key_Hint" xml:space="preserve"><value>أنشئ مفتاحًا من platform.openai.com وأضفه في الإعدادات.</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_no_server_Title" xml:space="preserve"><value>أكمل إعداد الخادم</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_no_server_Hint" xml:space="preserve"><value>أضف عنوان الخادم واختر نموذجًا من الإعدادات.</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_insecure_Title" xml:space="preserve"><value>لا يمكن استخدام عنوان الخادم</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_insecure_Hint" xml:space="preserve"><value>استخدم عنوانًا يبدأ بـ https:// (يعمل http:// على هذا الجهاز وشبكتك المحلية فقط).</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_offline_Title" xml:space="preserve"><value>الخادم لا يستجيب</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Error_custom_offline_Hint" xml:space="preserve"><value>تأكد أن الخادم يعمل وأن عنوانه صحيح في الإعدادات، ثم أعد المحاولة.</value><comment>new in Lamha 3, approved at the start of phase 4 (2026-10-25)</comment></data>
+  <data name="Ai_Custom" xml:space="preserve"><value>خادم آخر</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
+
+
   <data name="Proto_Tooltip" xml:space="preserve"><value>لمحة 3 (نموذج أولي)</value></data>
-  <data name="Proto_Word" xml:space="preserve"><value>كلمة أو عبارة قصيرة</value></data>
-  <data name="Proto_Sentence" xml:space="preserve"><value>جملة</value></data>
   <data name="Proto_Sample" xml:space="preserve"><value>اعرض البطاقة (نص للتجربة)</value></data>
-  <data name="Proto_SampleText" xml:space="preserve"><value>a piece of cake</value></data>
-  <data name="Proto_Write" xml:space="preserve"><value>تأتي أدوات الكتابة مع البطاقة الحقيقية: عدّل النص ثم «استبدال»</value></data>
-  <data name="Proto_Result" xml:space="preserve"><value>يعيد «استبدال» هذا النص (يمكنك تعديله):</value></data>
-  <data name="Proto_Looking" xml:space="preserve"><value>جارٍ البحث…</value></data>
-  <data name="Proto_LookingInSentence" xml:space="preserve"><value>جارٍ البحث، مع الجملة التي حول الكلمة…</value></data>
-  <data name="Proto_LookupFailed" xml:space="preserve"><value>تعذّر البحث ({0}). ستقول البطاقة الحقيقية السبب بالكلمات.</value></data>
   <data name="Proto_ClipboardHistory" xml:space="preserve"><value>سجل الحافظة</value><comment>d.historyLabel</comment></data>
   <data name="Proto_Accent" xml:space="preserve"><value>لون التمييز من Windows</value><comment>d.accent</comment></data>
 </root>

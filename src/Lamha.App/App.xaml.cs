@@ -1,5 +1,5 @@
 using Lamha.App.Services;
-using Lamha.App.ViewModels;
+using Lamha.App.ViewModels.Card;
 using Lamha.Windows.Input;
 using Lamha.Windows.Selection;
 using Lamha.Windows.Shell;
@@ -24,7 +24,7 @@ public partial class App : Application
     private readonly AppInstance _instance;
     private MessageWindow? _messages;
     private Hotkeys? _hotkeys;
-    private Brain? _brain;
+    private readonly Brain _brain;
     private AccentService? _accent;
     private SentenceReader? _sentences;
     private ClipboardService? _clipboard;
@@ -35,7 +35,9 @@ public partial class App : Application
     {
         _options = options;
         _instance = instance;
-        Localization.Apply();
+        // The settings decide the interface language, so they open before anything shows.
+        _brain = new Brain(DataFolder.For(options.Profile), options.Profile is null ? "Lamha/" : "Lamha-profile/");
+        Localization.Apply(options.Language ?? _brain.Localization.Language);
         InitializeComponent();
         // The tray keeps Lamha running with no window open; only Quit ends it.
         DispatcherShutdownMode = DispatcherShutdownMode.OnExplicitShutdown;
@@ -48,9 +50,6 @@ public partial class App : Application
         var queue = DispatcherQueue.GetForCurrentThread();
         var idle = new IdleMemory(queue);
         _messages = new MessageWindow();
-        _brain = new Brain(
-            _options.Profile ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Lamha"),
-            _options.Profile is null ? "Lamha/" : "Lamha-profile/");
         _accent = new AccentService(_brain.Settings, queue); // kept: it listens to Windows for as long as Lamha runs
         _clipboard = new ClipboardService(_messages, _brain, queue);
         _sentences = new SentenceReader();
@@ -61,7 +60,10 @@ public partial class App : Application
             startup.Refresh(); // a new install folder (an update keeps it, a reinstall may not)
         }
 
-        _card = new CardService(new SelectionService(_messages), _sentences, _clipboard, _brain, _options.CardLifetime, idle, Notify);
+        _card = new CardService(new SelectionService(_messages), _sentences, _clipboard, _brain, _options.CardLifetime, idle, Notify)
+        {
+            Sample = _options.Sample,
+        };
 
         _hotkeys = new Hotkeys(_messages);
         ShortcutInfo[] shortcuts =
@@ -111,7 +113,7 @@ public partial class App : Application
         _sentences?.Dispose();
         _tray?.Dispose();
         _messages?.Dispose();
-        _brain?.Dispose();
+        _brain.Dispose();
         Exit();
     }
 }

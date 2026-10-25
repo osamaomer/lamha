@@ -48,6 +48,17 @@ public static class CardPlacement
             Math.Min((int)Math.Round(height * z, MidpointRounding.AwayFromZero), workArea.Height));
     }
 
+    /// <summary>
+    /// The card's window at a new <paramref name="height"/> (its answer arrived, or a section opened): new in Lamha 3,
+    /// whose window follows the card's height. A card under the mouse keeps its top edge and grows down, one above it
+    /// keeps its bottom edge and grows up, so the edge next to the selection stays put; either way inside the work area.
+    /// </summary>
+    public static PixelRect Resize(PixelRect window, int height, PixelRect workArea, bool above)
+    {
+        var y = above ? window.Bottom - height : window.Y;
+        return window with { Y = Clamp(y, workArea.Y, workArea.Bottom - height), Height = height };
+    }
+
     /// <summary>The clipboard panel under the mouse, or above it when there's no room below, inside the work area.</summary>
     public static PixelRect PlacePanel(PixelPoint cursor, PixelRect workArea, int width, int height)
     {

@@ -42,4 +42,14 @@ public static unsafe class Screens
         var preference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
         PInvoke.DwmSetWindowAttribute((HWND)hwnd, DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE, &preference, sizeof(DWM_WINDOW_CORNER_PREFERENCE));
     }
+
+    /// <summary>
+    /// Moves a window without a title bar with the mouse, from a press on what serves as its title bar (a pinned card's
+    /// bar): Windows' own move, as if the press were on a title bar. Call it while the left button is down.
+    /// </summary>
+    public static void StartMove(nint hwnd)
+    {
+        PInvoke.ReleaseCapture();
+        PInvoke.SendMessage((HWND)hwnd, PInvoke.WM_NCLBUTTONDOWN, PInvoke.HTCAPTION, 0);
+    }
 }

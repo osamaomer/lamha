@@ -41,7 +41,7 @@ try {
     $wait = $samples[$stage] - ((Get-Date) - $started).TotalSeconds
     if ($wait -gt 0) { Start-Sleep -Milliseconds ([int]($wait * 1000)) }
     $p.Refresh()
-    if ($p.HasExited) { throw "Lamha exited early (code $($p.ExitCode)): see %LOCALAPPDATA%\Lamha\logs\lamha.log" }
+    if ($p.HasExited) { throw "Lamha exited early (code $($p.ExitCode)): see %LOCALAPPDATA%\Lamha Data\logs\lamha.log" }
     $m = Read-Memory $p.Id
     $rows += [pscustomobject]@{
       Stage = $stage

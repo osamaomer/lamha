@@ -27,7 +27,7 @@ public sealed class Brain : IDisposable
 {
     private readonly Lazy<Lookups> _lookups;
 
-    /// <param name="dataFolder">Where lamha.db lives: %LOCALAPPDATA%\Lamha, or a <c>--profile</c> folder.</param>
+    /// <param name="dataFolder">Where lamha.db lives: %LOCALAPPDATA%\Lamha Data, or a <c>--profile</c> folder.</param>
     /// <param name="keyPrefix">Credential Manager names start with it ("Lamha/"; another for a <c>--profile</c>).</param>
     public Brain(string dataFolder, string keyPrefix)
     {
@@ -69,6 +69,17 @@ public sealed class Brain : IDisposable
 
     public DiagnosticsReport Diagnostics => _lookups.Value.Diagnostics;
 
+    /// <summary>The AI: whether the writing tools and the translator are set up, and which.</summary>
+    public AiService Ai => _lookups.Value.Ai;
+
+    /// <summary>Translation on its own: the offline dictionary's definitions, translated after the card shows them.</summary>
+    public TranslationService Translation => _lookups.Value.Translation;
+
+    public WikipediaService Wikipedia => _lookups.Value.Wikipedia;
+
+    /// <summary>Windows' network state (online, metered…).</summary>
+    public INetworkStatus Network => _lookups.Value.Network;
+
     /// <summary>Whether the offline dictionary file shipped with Lamha could be opened (after the first lookup).</summary>
     public bool HasDictionary => _lookups.IsValueCreated && _lookups.Value.DictionaryFile is not null;
 
@@ -96,7 +107,7 @@ public sealed class Brain : IDisposable
             var deck = new SqliteDeckStore(db);
             var mistakes = new SqliteMistakeStore(db);
             var activity = new SqliteActivityStore(db);
-            var network = new NetworkStatus();
+            var network = Network = new NetworkStatus();
 
             // Lamha's own timeouts apply per request (Core's Http); HttpClient's own would cut a slow AI answer short.
             _client = new HttpClient(new SocketsHttpHandler { PooledConnectionIdleTimeout = TimeSpan.FromMinutes(1) })
@@ -109,20 +120,28 @@ public sealed class Brain : IDisposable
             DictionaryFile = OpenDictionary();
             var dictionary = DictionaryFile is null ? null : new LocalDictionary(DictionaryFile);
             var errorLog = new ErrorLog(new SqliteErrorLogStore(db), clock);
-            var ai = new AiService(settings, brain.Secrets, http);
+            var ai = Ai = new AiService(settings, brain.Secrets, http);
             var packs = new NoLanguagePacks(); // phase 5
-            var translation = new TranslationService(settings, ai, new GoogleTranslate(http), new AiTranslator(ai), network);
+            var translation = Translation = new TranslationService(settings, ai, new GoogleTranslate(http), new AiTranslator(ai), network);
             var today = new TodayService(activity, brain.State, deck, history, settings, clock, dictionary);
             Review = new ReviewService(deck, brain.State, history, settings, today, clock);
             Writing = new WritingService(ai, settings, mistakes, brain.Localization, clock, errorLog);
             Lookup = new LookupService(
                 settings, brain.Localization, translation, new WordExplainer(ai, packs), packs, new HistoryService(history, clock),
-                Review, today, new WikipediaService(http, network, Version), network, clock, dictionary, errorLog);
+                Review, today, Wikipedia = new WikipediaService(http, network, Version), network, clock, dictionary, errorLog);
             Diagnostics = new DiagnosticsReport(
                 settings, brain.Localization, brain.Secrets, deck, history, mistakes, packs, errorLog, new HostInfo(settings), Version);
         }
 
         public DictionaryFile? DictionaryFile { get; }
+
+        public AiService Ai { get; }
+
+        public TranslationService Translation { get; }
+
+        public WikipediaService Wikipedia { get; }
+
+        public INetworkStatus Network { get; }
 
         public LookupService Lookup { get; }
 
