@@ -40,9 +40,12 @@
       </Grid>
 
       <!-- Quick lookup Ctrl+Alt+L -->
-      <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
+      <StackPanel x:Name="QuickLine" Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
         <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind QuickLookup}" />
         <controls:KeyCaps Keys="{x:Bind ViewModel.Keys}" />
+        <!-- The first time: Windows' teaching tip at this line, Lamha's main gesture -->
+        <TeachingTip x:Name="LookupTip" Target="{x:Bind QuickLine}" PreferredPlacement="BottomLeft" Title="{x:Bind LookupTipTitle}"
+                     Subtitle="{x:Bind ViewModel.LookupTipText}" Closed="OnLookupTipClosed" />
       </StackPanel>
     </StackPanel>
 

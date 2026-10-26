@@ -39,9 +39,28 @@ public sealed partial class TranslatePage : UserControl
                 QueryBox.Select(QueryBox.Text.Length, 0);
             }
         };
+        if (viewModel.ShowsLookupTip)
+        {
+            Loaded += OnLoadedOpenTip;
+        }
     }
 
     public TranslateViewModel ViewModel { get; }
+
+    public string LookupTipTitle { get; } = Localization.Get("Translate_TipTitle");
+
+    /// <summary>The first time the page shows: the hint, once laid out (it points at the line); seen once it's shown.</summary>
+    private void OnLoadedOpenTip(object sender, RoutedEventArgs e)
+    {
+        Loaded -= OnLoadedOpenTip;
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            LookupTip.IsOpen = true;
+            ViewModel.LookupTipSeen();
+        });
+    }
+
+    private void OnLookupTipClosed(TeachingTip sender, TeachingTipClosedEventArgs args) => FocusBox();
 
     // Its own words (x:Bind reads them once).
     public string Placeholder { get; } = Localization.Get("Translate_Placeholder");

@@ -106,6 +106,25 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
     /// <summary>Ctrl, +, Alt, +, L.</summary>
     public List<KeyPart> Keys { get; }
 
+    // ----- the first-time hint -----
+
+    /// <summary>Where it's remembered that the hint was shown.</summary>
+    private const string LookupTipKey = "tip.lookup";
+
+    /// <summary>
+    /// Windows' teaching tip at the quick lookup's line, once (docs/design/system.md §6): Lamha's main gesture, which
+    /// the main window otherwise only names in passing.
+    /// </summary>
+    public bool ShowsLookupTip => _brain.State.Get(LookupTipKey) is null;
+
+    /// <summary>"Select a word in any program and press Ctrl+Alt+L."</summary>
+    /// <remarks>The keys are isolated left to right (U+2066 … U+2069), so Arabic's full stop ends the sentence.</remarks>
+    public string LookupTipText =>
+        Localization.Format("Translate_TipText", "⁦" + string.Join("+", Keys.Where(k => k.IsKey).Select(k => k.Text)) + "⁩");
+
+    /// <summary>The hint was shown (closed, or its window left): never again.</summary>
+    public void LookupTipSeen() => _brain.State.Set(LookupTipKey, "1");
+
     // ----- under the box -----
 
     [ObservableProperty]

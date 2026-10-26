@@ -239,6 +239,39 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
    - **Done 2026-10-26.** 465 tests. To the user: try the search's suggestions (the screenshots can't show its popup), and Back with the mouse's back button.
    - **Noticed, not this step's:** `LookupTests.AWordLookedUpAgainGoesBackToTheTopOfTheHistory` fails now and then when the whole solution's tests run together (it passes alone): a race in the test, worth a look.
 4. **Components:** WinUI's own where they fit (`InfoBar`, `InfoBadge`, `SelectorBar`, `TeachingTip`, `ContentDialog`); Settings in Windows' pattern; the answer, Write and the card as in *Features from the study*.
+
+   **Built 2026-10-26:**
+   - **Controls on WinUI's own styles:** the accent, standard, subtle and hyperlink buttons; icon buttons 32 × 32; chips as Windows' (toggle) buttons in a pill; Windows' radio buttons. Lamha's painted template stays only where the colour is the meaning (Review's answers, Delete).
+   - **Fields** are Windows' text box with its accent line (Translate, Write, History, Clipboard); Lamha 2's accent ring is gone. The search fields have 🔍 at their end.
+   - **New components:** the content card, `KeyCaps` (Translate, Settings, first run), the card foot's links, `EmptyState` (History as drawn, Review), the toast in Acrylic.
+   - **Messages:** Lamha 2's amber banners and the lookup's and Write's errors are `InfoBar`s.
+   - **Translate** (T1–T6): the box on the page; Listen and Copy right after the meaning; the part of speech a caption; a meaning's English line at the interface's side.
+   - **Write** (W1–W4): Set up in place (an `InfoBar` opening Settings' own setup in a dialog); Proofread with Ctrl+Enter, Rewrite ▾; the journal's settings as setting cards.
+   - **Settings:**
+     - the home is one column of cards;
+     - every setting card has its icon (15 new names: system.md §5);
+     - `SettingsCard.Detail` turns the hand-made panels into cards;
+     - What is sent is Windows' `Expander`;
+     - Windows' breadcrumb colours.
+   - **The card** (C2): its source is a plain icon with its tooltip, not a green pill. C1 came with the answer.
+   - **Not done, on purpose:**
+     - `SelectorBar`: its items are 40 high, too tall for the card's bar, so the card's العربية ⇄ English and Clipboard's All / Pinned keep Lamha's segmented switch;
+     - the dialog was already Windows' `ContentDialog`.
+   - **The first-time hint:** Windows' `TeachingTip` at Translate's shortcut, the first time the page shows (remembered as `tip.lookup`).
+   - **Clipboard's Pause** is Windows' drop-down button, as Rewrite ▾ is.
+   - **The user's answers:** see *Questions* (step 4).
+   - **Measured** (NativeAOT, no warnings), against step 3's last commit built and measured the same way on this PC the same day: step 3 then step 4, in commit MB:
+
+     | Stage | Step 3 | Step 4 |
+     |---|---|---|
+     | Tray | 57 | 57 |
+     | Card open | 89 | 88 |
+     | Card closed | 87 | 87 |
+     | Main window open | 99 | 99 |
+     | Main window closed | 98 | 96 |
+
+     Step 4 adds nothing. The tray's 57 is over 0008's 55 for both, the PC as in 0020.
+   - **Done 2026-10-26.** 460 tests (the five checks of Lamha 2's banner and toast colours went with them).
 5. **Motion and feedback:** the catalogue above, through `Animations.cs`, at each level.
 6. **The new features:** the mini translator, the jump list, paste and translate, side by side.
 7. **Every window revisited** against the system: the main window's pages, Settings, the card, the clipboard panel, first run. Each in both languages and themes, high contrast and 150 % text; screenshots for you; memory measured against the budgets (0008, 0013, 0015).
@@ -251,6 +284,12 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
 Released as **Lamha 3.1**, after betas. The website follows, with the new screenshots.
 
 ## Questions
+
+**Step 4, answered 2026-10-26 ("go by your recommendation"):**
+- **Review's empty line:** ☆ in place of 🔖 ("Press ☆ on the lookup card…"), as the bookmark is the star.
+- **The meaning's tinted box** stays: the card's character from phase 1, with Listen and Copy right after the meaning inside it.
+- **A first-time hint:** yes. Windows' `TeachingTip` at Translate's shortcut, once: "Look up from any program / Select a word in any program and press Ctrl+Alt+L." (Claude's draft, in both languages; yours to reword).
+- **Settings' new icons:** kept as chosen (system.md §5).
 
 **Answered 2026-10-26:**
 - **Icons:** Windows' Segoe Fluent Icons everywhere.

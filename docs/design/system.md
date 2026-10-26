@@ -172,6 +172,27 @@ The 33 names, mapped (seen side by side with Lamha 2's in `system.html`):
 | List | E8FD | BulletedList |
 | Text | E8D2 | Font |
 | Chevron | E76C | ChevronRight (turns in Arabic): a breadcrumb's step, a card that opens a page |
+| Journal | E7BE | Education: the mistake journal (system.html's) |
+
+Added in step 4, for setting cards the names above didn't cover (each setting card has its icon, as in Windows' Settings):
+
+| Name | Glyph | Windows' name: for |
+|---|---|---|
+| Swap | E8AB | Switch: Arabic text translated to English |
+| Currency | E8EF | Calculator: prices in your currency |
+| Timer | E916 | Stopwatch: how long copies are kept |
+| PaymentCard | E8C7 | PaymentCard: bank card numbers skipped |
+| Apps | E71D | AllApps: programs left out |
+| SaveCopy | EA35 | SaveCopy: a copy of my data |
+| Bug | EBE8 | Bug: report a problem |
+| Update | E895 | Sync: automatic updates |
+| Power | E7E8 | PowerButton: start with Windows |
+| Calendar | E787 | Calendar: new words per day |
+| Goal | F272 | Target: the day's goal |
+| Download | E896 | Download: dictionaries to download |
+| Motion | E945 | LightningBolt: animations (system.html's) |
+| Brush | E771 | Personalize: the accent colour from Windows |
+| Picture | E8B9 | Picture: the wallpaper behind the window |
 
 **The pane's coloured icons** are Lamha's own (drafts in `system.html`), in Windows Settings' style: 20 × 20, one main colour each, soft shading, the same in both themes with an edge that keeps them clear on dark.
 
@@ -193,7 +214,7 @@ The default is WinUI's own control and style. Lamha's styles only set tokens.
 | **Search box** | `AutoSuggestBox`, 32 high, 🔍 at its end |
 | **Dropdown** | `ComboBox`, 32 high, radius 4 |
 | **Switch** | `ToggleSwitch`, on in the accent; its "On / Off" at the start |
-| **Setting card** | **68** high at least, padding 16, icon 20, 20 to the text, name (Body) over description (Caption, secondary); its control at the end, then a 12 chevron when it opens a page. **Wraps** when narrow: the control moves under the text |
+| **Setting card** | **68** high at least, padding 16, icon 20, 20 to the text, name (Body) over description (Caption, secondary); its control at the end, then a 12 chevron when it opens a page. **Wraps** below 476 (WinUI's threshold): the control moves under the text. What belongs under the text (a status, a list, a preview) is its `Detail`, 12 below, where the text starts (`Controls/SettingsCard.cs`) |
 | **Expander** | 48 high at least; a setting with options under it |
 | **Group** | a heading (Body strong), 11 from its baseline to the first card; cards 4 apart; 28 before the next heading |
 | **Content card** | radius 8, padding 24, `CardBackgroundFillColorDefault` and its edge |
@@ -204,8 +225,8 @@ The default is WinUI's own control and style. Lamha's styles only set tokens.
 | **Menu** | `MenuFlyout`: 16 icons, shortcuts at the end |
 | **Teaching tip** | `TeachingTip` for a first-time hint, pointing at its control |
 | **Progress** | `ProgressRing` (16 inline, 32 for a page), `ProgressBar`; skeletons for an answer that loads |
-| **Key cap** | Caption, padding 4,1, radius 4, the control fill and its edge |
-| **Empty state** | a 40 icon in the tertiary colour, one line (Body), one button |
+| **Key cap** | Caption, padding 4,1, radius 4, the control fill and its edge (`Controls/KeyCaps.cs`) |
+| **Empty state** | a 40 icon in the tertiary colour, one line (Body), one button (`Controls/EmptyState.cs`) |
 
 **Targets:** nothing pressable smaller than 24; rows and the pane 36 or more.
 

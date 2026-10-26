@@ -49,20 +49,20 @@
       </Border>
 
       <!-- Pause clipboard history ▸ 15 minutes / 1 hour / Until I resume (the tray's) -->
-      <Button Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LamhaQuietButtonStyle}" IsEnabled="{x:Bind ViewModel.CanPause, Mode=OneWay}"
+      <DropDownButton Grid.Column="2" VerticalAlignment="Center" IsEnabled="{x:Bind ViewModel.CanPause, Mode=OneWay}"
               AutomationProperties.Name="{x:Bind PauseLabel}">
-        <StackPanel Orientation="Horizontal" Spacing="6">
+        <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
           <controls:FluentIcon Glyph="Pause" />
           <TextBlock Text="{x:Bind PauseLabel}" />
         </StackPanel>
-        <Button.Flyout>
+        <DropDownButton.Flyout>
           <MenuFlyout Placement="BottomEdgeAlignedRight">
             <MenuFlyoutItem Text="{x:Bind Pause15}" Command="{x:Bind ViewModel.PauseCommand}" CommandParameter="15" />
             <MenuFlyoutItem Text="{x:Bind Pause60}" Command="{x:Bind ViewModel.PauseCommand}" CommandParameter="60" />
             <MenuFlyoutItem Text="{x:Bind PauseUntil}" Command="{x:Bind ViewModel.PauseCommand}" CommandParameter="0" />
           </MenuFlyout>
-        </Button.Flyout>
-      </Button>
+        </DropDownButton.Flyout>
+      </DropDownButton>
     </Grid>
 
     <!-- ===== Paused: Windows' InfoBar, and Resume ===== -->

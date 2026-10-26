@@ -421,7 +421,7 @@
   <data name="Review_StreakFew" xml:space="preserve"><value>🔥 {0} أيام متتالية من المراجعة</value><comment>rv.streak, ported by hand: 3 to 10 days</comment></data>
   <data name="Review_StreakMany" xml:space="preserve"><value>🔥 {0} يومًا متتاليًا من المراجعة</value><comment>rv.streak, ported by hand: 11 days or more</comment></data>
   <data name="Review_EmptyTitle" xml:space="preserve"><value>لا توجد كلمات بعد</value><comment>rv.emptyTitle</comment></data>
-  <data name="Review_EmptyText" xml:space="preserve"><value>اضغط 🔖 في بطاقة البحث لتضيف الكلمة هنا، أو شغّل «إضافة الكلمات تلقائيًا» في الإعدادات ← مراجعة الكلمات.</value><comment>rv.emptyText</comment></data>
+  <data name="Review_EmptyText" xml:space="preserve"><value>اضغط ☆ في بطاقة البحث لتضيف الكلمة هنا، أو شغّل «إضافة الكلمات تلقائيًا» في الإعدادات ← مراجعة الكلمات.</value><comment>rv.emptyText, reworded 2026-10-26 (the user's call): ☆ for 🔖, the bookmark being the star now (decision 0020)</comment></data>
   <data name="Span_Min" xml:space="preserve"><value>{0} د</value><comment>span.min</comment></data>
   <data name="Span_HourOne" xml:space="preserve"><value>ساعة</value><comment>span.hours, ported by hand: 1</comment></data>
   <data name="Span_HourTwo" xml:space="preserve"><value>ساعتان</value><comment>span.hours, ported by hand: 2</comment></data>
@@ -877,4 +877,6 @@
   <data name="Write_SetupText" xml:space="preserve"><value>يتوفر Gemini مجانًا باستخدام مفتاح API من Google.</value><comment>new in Lamha 3, approved with the design system 2026-10-26, the user's Arabic: after Write_SetupTitle</comment></data>
   <data name="Write_SetUp" xml:space="preserve"><value>إعداد</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the InfoBar's button, opening the writing tools' setup</comment></data>
   <data name="Write_Rewrite" xml:space="preserve"><value>إعادة الصياغة</value><comment>new in Lamha 3, approved with the design system 2026-10-26, the user's Arabic: the menu of Improve, Formal, Friendly, Shorter, Longer</comment></data>
+  <data name="Translate_TipTitle" xml:space="preserve"><value>ابحث من أي برنامج</value><comment>new in Lamha 3 (design system step 4), Claude's draft, the user's go-ahead 2026-10-26: the first-time hint at Translate's shortcut</comment></data>
+  <data name="Translate_TipText" xml:space="preserve"><value>حدّد كلمة في أي برنامج واضغط {0}.</value><comment>new in Lamha 3 (design system step 4), Claude's draft, the user's go-ahead 2026-10-26: under Translate_TipTitle; {0} the keys (Ctrl+Alt+L)</comment></data>
 </root>
