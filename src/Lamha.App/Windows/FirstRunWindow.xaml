@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:Lamha.App.Controls"
+    xmlns:firstRun="using:Lamha.App.ViewModels.FirstRun"
     xmlns:main="using:Lamha.App.ViewModels.Main"
     xmlns:views="using:Lamha.App.Views">
   <!-- Phase 1's first-run window (docs/design/first-run.html): 640 × 540, Mica, its own title bar, and one step at a
@@ -19,6 +20,26 @@
           <TextBlock Margin="2,0" VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Text}"
                      Visibility="{x:Bind controls:Show.IfNot(IsKey)}" />
         </Grid>
+      </DataTemplate>
+      <!-- A row of the Lamha 2 step, as the design draws it: the icon on the accent's tint, what moves, and how many -->
+      <DataTemplate x:Key="MoveItemTemplate" x:DataType="firstRun:MoveItem">
+        <StackPanel>
+          <Border Height="1" Background="{ThemeResource LamhaLineBrush}" Visibility="{x:Bind controls:Show.IfNot(IsFirst)}" />
+          <Grid Padding="0,10" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="28" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Border Width="28" Height="28" CornerRadius="8" Background="{ThemeResource LamhaAccentSoftBrush}">
+              <controls:LineIcon Glyph="{x:Bind Glyph}" Width="16" Height="16" StrokeWidth="2" Foreground="{ThemeResource LamhaAccentBrush}" />
+            </Border>
+            <TextBlock Grid.Column="1" VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}"
+                       Text="{x:Bind Label}" />
+            <TextBlock Grid.Column="2" VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="12.5"
+                       Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Count}" />
+          </Grid>
+        </StackPanel>
       </DataTemplate>
       <ItemsPanelTemplate x:Key="KeysPanel">
         <StackPanel Orientation="Horizontal" Spacing="2" FlowDirection="LeftToRight" />
@@ -127,6 +148,44 @@
                   </RadioButton>
                 </Grid>
               </Grid>
+            </StackPanel>
+
+            <!-- ===== Lamha 2's data, only when it's found: what moves, counted; then what moved, and what Lamha 3 doesn't have ===== -->
+            <StackPanel x:Name="Lamha2Step" Visibility="{x:Bind ViewModel.IsLamha2, Mode=OneWay}" Spacing="12">
+              <TextBlock Style="{StaticResource StepTitleStyle}" Text="{x:Bind ViewModel.Lamha2Title, Mode=OneWay}" AutomationProperties.HeadingLevel="Level1"
+                         AutomationProperties.LiveSetting="Polite" />
+              <TextBlock Style="{StaticResource LeadStyle}" Text="{x:Bind ViewModel.Lamha2Text}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.Moved), Mode=OneWay}" />
+              <Border Style="{StaticResource BoxStyle}">
+                <ItemsControl IsTabStop="False" ItemsSource="{x:Bind ViewModel.Lamha2Items}" ItemTemplate="{StaticResource MoveItemTemplate}" />
+              </Border>
+              <!-- A key or clipboard history Windows couldn't read here (the folder came from another account) -->
+              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
+                      Visibility="{x:Bind ViewModel.KeysLost, Mode=OneWay}">
+                <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="13"
+                           Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind ViewModel.KeysLostText}" />
+              </Border>
+              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
+                      Visibility="{x:Bind ViewModel.ClipsLost, Mode=OneWay}">
+                <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="13"
+                           Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind ViewModel.ClipsLostText}" />
+              </Border>
+              <!-- What Lamha 2 had and Lamha 3 doesn't, of what this user used, so nothing seems to vanish -->
+              <StackPanel Spacing="4" Visibility="{x:Bind ViewModel.HasDropped, Mode=OneWay}">
+                <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="13" FontWeight="SemiBold" Text="{x:Bind ViewModel.NotInLamha3}" />
+                <ItemsControl IsTabStop="False" ItemsSource="{x:Bind ViewModel.Dropped, Mode=OneWay}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                      <TextBlock Margin="0,2" TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="13"
+                                 Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+              <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="13"
+                         Foreground="{ThemeResource LamhaDangerBrush}" Text="{x:Bind ViewModel.MoveFailedText}" Visibility="{x:Bind ViewModel.MoveFailed, Mode=OneWay}"
+                         AutomationProperties.LiveSetting="Assertive" />
+              <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="12.5"
+                         Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind ViewModel.FolderStays}" />
             </StackPanel>
 
             <!-- ===== 2. Try it: select a word in the sentence and press the shortcut; the real card opens ===== -->
@@ -243,7 +302,8 @@
           </Grid>
         </ScrollViewer>
 
-        <!-- The buttons: Customise shortcuts at the start on Try it; Back, Later and Next (or Start) at the end -->
+        <!-- The buttons: Customise shortcuts (Try it) or Start fresh (Lamha 2's data) at the start; Back, Later and Next
+             (or Move my data, or Start) at the end -->
         <Grid Grid.Row="2" Padding="28,16,28,20" ColumnSpacing="8">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -253,13 +313,18 @@
           <Button Style="{StaticResource LamhaQuietButtonStyle}" Margin="-8,0,0,0" Padding="8,6" Background="Transparent" FontWeight="Normal"
                   Foreground="{ThemeResource LamhaTextMutedBrush}" Content="{x:Bind ViewModel.CustomizeLabel}" Command="{x:Bind ViewModel.CustomizeCommand}"
                   Visibility="{x:Bind ViewModel.IsTry, Mode=OneWay}" />
+          <Button Style="{StaticResource LamhaQuietButtonStyle}" Margin="-8,0,0,0" Padding="8,6" Background="Transparent" FontWeight="Normal"
+                  Foreground="{ThemeResource LamhaTextMutedBrush}" Content="{x:Bind ViewModel.FreshLabel}" Command="{x:Bind ViewModel.FreshCommand}"
+                  Visibility="{x:Bind ViewModel.CanMove, Mode=OneWay}" />
           <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
             <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ViewModel.BackLabel}" Command="{x:Bind ViewModel.BackCommand}"
                     Visibility="{x:Bind controls:Show.IfNot(ViewModel.IsLanguage), Mode=OneWay}" />
             <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ViewModel.LaterLabel}" Command="{x:Bind ViewModel.LaterCommand}"
                     Visibility="{x:Bind ViewModel.IsWriting, Mode=OneWay}" />
+            <Button x:Name="MoveButton" Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind ViewModel.MoveLabel}" Command="{x:Bind ViewModel.MoveCommand}"
+                    Visibility="{x:Bind ViewModel.CanMove, Mode=OneWay}" />
             <Button x:Name="NextButton" Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind ViewModel.NextLabel}" Command="{x:Bind ViewModel.NextCommand}"
-                    Visibility="{x:Bind controls:Show.IfNot(ViewModel.IsReady), Mode=OneWay}" />
+                    Visibility="{x:Bind ViewModel.ShowsNext, Mode=OneWay}" />
             <Button x:Name="StartButton" Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind ViewModel.StartLabel}" Command="{x:Bind ViewModel.StartCommand}"
                     Visibility="{x:Bind ViewModel.IsReady, Mode=OneWay}" />
           </StackPanel>

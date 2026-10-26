@@ -845,4 +845,26 @@ What did you expect?
   <data name="Note_ByTheClockBody" xml:space="preserve"><value>If you don&apos;t see its icon, click ^ on the taskbar. Select any text in any program and press {0}.</value><comment>new in Lamha 3, approved with the tray and notifications design 2026-10-25; {0} is the lookup shortcut (Alt+Shift+L in the design)</comment></data>
   <data name="FirstRun_Arabic" xml:space="preserve"><value>العربية</value><comment>step 1's choice: each language in its own name, the same in both languages</comment></data>
   <data name="FirstRun_English" xml:space="preserve"><value>English</value><comment>step 1's choice: each language in its own name, the same in both languages</comment></data>
+  <data name="FirstRun_StepLamha2" xml:space="preserve"><value>Lamha 2&apos;s data</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Lamha2Title" xml:space="preserve"><value>We found your data from Lamha 2</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Lamha2Text" xml:space="preserve"><value>All of it moves to Lamha 3 as it is:</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Lamha2Cards" xml:space="preserve"><value>Your review cards and progress</value><comment>a piece of Lamha 2's o.backupHint, as the first-run design has it</comment></data>
+  <data name="FirstRun_Lamha2History" xml:space="preserve"><value>Your word history</value><comment>a piece of Lamha 2's o.backupHint, as the first-run design has it</comment></data>
+  <data name="FirstRun_Lamha2Journal" xml:space="preserve"><value>Your mistake journal</value><comment>a piece of Lamha 2's o.backupHint, as the first-run design has it</comment></data>
+  <data name="FirstRun_Lamha2Settings" xml:space="preserve"><value>Your settings and AI keys</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Lamha2Clipboard" xml:space="preserve"><value>Clipboard history</value><comment>d.historyLabel</comment></data>
+  <data name="FirstRun_MistakesOne" xml:space="preserve"><value>1 mistake</value><comment>o.jSummary, ported by hand: 1 mistake, on its own</comment></data>
+  <data name="FirstRun_MistakesTwo" xml:space="preserve"><value>2 mistakes</value><comment>o.jSummary, ported by hand: 2 mistakes, on its own</comment></data>
+  <data name="FirstRun_MistakesFew" xml:space="preserve"><value>{0} mistakes</value><comment>o.jSummary, ported by hand: 3 to 10 mistakes, on its own</comment></data>
+  <data name="FirstRun_MistakesMany" xml:space="preserve"><value>{0} mistakes</value><comment>o.jSummary, ported by hand: 0, or 11 mistakes or more, on its own</comment></data>
+  <data name="FirstRun_Move" xml:space="preserve"><value>Move my data</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_Fresh" xml:space="preserve"><value>Start fresh</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_FolderStays" xml:space="preserve"><value>Lamha 2&apos;s folder stays as it is, so nothing is lost.</value><comment>new in Lamha 3, approved with the first-run design 2026-10-25</comment></data>
+  <data name="FirstRun_MovedTitle" xml:space="preserve"><value>Your data is in Lamha 3</value><comment>new in Lamha 3 (phase 6), drafted: waiting for the user&apos;s wording</comment></data>
+  <data name="FirstRun_NotInLamha3" xml:space="preserve"><value>Not in Lamha 3:</value><comment>new in Lamha 3 (phase 6), drafted: waiting for the user&apos;s wording</comment></data>
+  <data name="FirstRun_DroppedFirefox" xml:space="preserve"><value>Lamha in Firefox: page translation, the per-site switches and the link to the app.</value><comment>new in Lamha 3 (phase 6), drafted: waiting for the user&apos;s wording</comment></data>
+  <data name="FirstRun_DroppedWikipedia" xml:space="preserve"><value>Offline Wikipedia, for now: the files you downloaded stay on this PC for when it returns.</value><comment>new in Lamha 3 (phase 6), drafted: waiting for the user&apos;s wording</comment></data>
+  <data name="FirstRun_KeysLost" xml:space="preserve"><value>Your AI keys couldn&apos;t be read on this PC: enter them again in Writing tools.</value><comment>new in Lamha 3 (phase 6), drafted: waiting for the user&apos;s wording</comment></data>
+  <data name="FirstRun_ClipsLost" xml:space="preserve"><value>Clipboard history couldn&apos;t be read on this PC.</value><comment>new in Lamha 3 (phase 6), drafted: waiting for the user&apos;s wording</comment></data>
+  <data name="FirstRun_MoveFailed" xml:space="preserve"><value>Couldn&apos;t move your data. Nothing in Lamha 2&apos;s folder changed: try again, or start fresh.</value><comment>new in Lamha 3 (phase 6), drafted: waiting for the user&apos;s wording</comment></data>
 </root>

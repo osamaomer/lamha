@@ -139,6 +139,7 @@ public partial class App : Application
             Theme = _options.Theme,
             Startup = _options.Profile is null ? startup : null,
             SettingsOpener = section => _main.Show("settings", section),
+            Lamha2Path = _options.Lamha2,
             LanguageChanged = () =>
             {
                 _tray?.Refresh();
@@ -149,7 +150,7 @@ public partial class App : Application
 
         _tray = new TrayService(_messages, _brain.Settings, _clipboard, startup, shortcuts, _updates, new TrayActions(OpenMain, OpenPage, () => _panel.Toggle(fromTray: true), Quit));
         _tray.EnabledChanged += () => NotifyTaken(shortcuts);
-        _reminders = new ReviewReminderService(_brain, _notes, () => shortcuts.IsOn && !_main.IsInUse, queue) { OpenReview = () => OpenPage("review") };
+        _reminders = new ReviewReminderService(_brain, _notes, () => shortcuts.IsOn && !_main.IsInUse && _firstRun?.IsOpen != true, queue) { OpenReview = () => OpenPage("review") };
         _reminders.Changed += _tray.SetWaiting;
         _notes.Register();
         NotifyTaken(shortcuts);

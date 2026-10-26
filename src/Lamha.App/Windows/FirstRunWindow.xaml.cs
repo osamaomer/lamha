@@ -145,17 +145,25 @@ public sealed partial class FirstRunWindow : Window
             Scroller.ChangeView(null, 0, null, disableAnimation: true);
             DispatcherQueue.TryEnqueue(FocusStep);
         }
+        else if (e.PropertyName == nameof(FirstRunViewModel.Moved))
+        {
+            DispatcherQueue.TryEnqueue(FocusStep); // Move my data gave way to Next
+        }
     }
 
     /// <summary>
-    /// The focus on each step: the chosen language, Next (Enter goes on), or Start; on Try it nowhere in particular,
-    /// so the mouse can select a word.
+    /// The focus on each step: the chosen language, Move my data, Next (Enter goes on), or Start; on Try it nowhere in
+    /// particular, so the mouse can select a word.
     /// </summary>
     private void FocusStep()
     {
         if (ViewModel.IsLanguage)
         {
             (ViewModel.IsArabic ? ArabicChoice : EnglishChoice).Focus(FocusState.Programmatic);
+        }
+        else if (ViewModel.CanMove)
+        {
+            MoveButton.Focus(FocusState.Programmatic);
         }
         else if (ViewModel.IsReady)
         {

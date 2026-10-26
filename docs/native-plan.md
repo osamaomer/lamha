@@ -2,7 +2,7 @@
 
 The plan for rebuilding Lamha as a native Windows 11 app (WinUI 3 + Windows App SDK) and dropping the Firefox extension and the Linux plan. Written 2026-10-24.
 
-**Where it stands:** phases 0 and 1 are done ([phase 0](#phase-0-results), [phase 1](#phase-1-progress)). Phase 2 (the brain) is built but for the parity tool ([progress](#phase-2-progress)), and phase 3 (Windows integration) is built ([progress](#phase-3-progress)). Phase 4 (the UI) is under way: the card is done and out as the first beta; the main window, Settings and the clipboard panel are built ([progress](#phase-4-progress)). Phase 5 has started with the updates ([progress](#phase-5-progress)): the next beta is the first that updates itself.
+**Where it stands:** phases 0 and 1 are done ([phase 0](#phase-0-results), [phase 1](#phase-1-progress)). Phase 2 (the brain) is built but for the parity tool ([progress](#phase-2-progress)), and phase 3 (Windows integration) is built ([progress](#phase-3-progress)). Phase 4 (the UI) is under way: the card is done and out as the first beta; the main window, Settings and the clipboard panel are built ([progress](#phase-4-progress)). Phase 5 is built: the updates, speech and the language packs ([progress](#phase-5-progress)); the next beta is the first that updates itself. Phase 6 (moving users over) has started with the importer ([progress](#phase-6-progress)).
 
 **Branches:** the phases were built on `native/phase-0` … `native/phase-4`, one line of work in the order 0, 2, 3, 1, 4. On 2026-10-25 it was merged into `main` (decision 0003: `main` is Lamha 3) and those branches were deleted; the progress sections below still name the branch each phase was built on. New work goes on short `lamha3/<what>` branches, merged into `main`.
 
@@ -43,7 +43,7 @@ Why C# rather than C++/WinRT: it's the language WinUI 3 is mainly documented and
 - No Node, Chromium or PowerShell running in the background, which antivirus programs trust more.
 
 **Questions**
-- **Tell 2.x users with downloaded Wikipedias before they update?** Recommendation: yes. The bridge update says offline Wikipedia pauses in 3.0, and those users can choose to stay on 2.x until it's back. *(phase 6)*
+- **Tell 2.x users with downloaded Wikipedias before they update?** Recommendation: yes. The bridge update says offline Wikipedia pauses in 3.0, and those users can choose to stay on 2.x until it's back. **Answered 2026-10-26: as recommended.** *(phase 6)*
 
 ## Architecture
 
@@ -534,7 +534,7 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
   2. **Try it:** the sample sentence, selectable; the lookup shortcut, while this window is in front, opens **the real card** on the word selected there, with the sentence around it (so "settle" shows "in this context: تسوية" and the sentence translated), and "That's it" replaces the instruction. With nothing selected, the card's own hint. The writing and clipboard shortcuts named under it, all three as they are now; Customise shortcuts opens Settings → Keyboard shortcuts, and the keys are read again when the window comes back to the front.
   3. **Writing tools:** Settings' own five providers (now one control, `Views/WritingSetupView`, in both places), so a key is checked and saved, and Ollama is found, as in Settings; the step scrolls. **Later** puts back the provider saved when the step opened (no AI until the user chooses).
   4. **Ready:** Start with Windows (on) and clipboard history (as it is: off on a new install); **Start** applies both and closes the window. With `--profile`, Start with Windows isn't written (the real Run key is left alone).
-  - **Not built yet: Lamha 2's data** (step 2 of the design). It needs the importer, which is phase 6; the step joins then, between the language and Try it.
+  - **Lamha 2's data** (step 2 of the design) came with the importer in [phase 6](#phase-6-progress), between the language and Try it.
   - **Differences from the design:** the card on Try it is the real one, opening by the mouse, so the sample box holds only the sentence (the design drew the card inside it); Windows draws a greyed maximise button beside minimise and close, as it does for every window that can't be maximised.
   - **Found while building it:** Settings → Writing tools' intro ("Select any text in any program and press Ctrl+Alt+W…") never showed: bound once, it was read before the page set it. Fixed.
   - `--first-run` shows it at start even when done (`--first-run=try`, `writing` or `ready` at that step), for screenshots; it never shows with `--measure`, `--page`, `--panel` or `--sample`.
@@ -589,6 +589,24 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
   - **Seen** (Debug, a test profile, the packs from a local server that sends them slowly): the list in both languages and themes, French downloading (32%), installed, Remove; "maisons" on Translate with the French definition under Google's translation; a failed download's line in Arabic. **Measured** (NativeAOT): the budget stages unchanged (tray 2 / 51, card open 42 / 87 and closed 3 / 85, main window 27 / 95 and after it 5 / 94); a French word looked up with the French pack installed: no difference in commit. 422 tests (11 new: Lamha 2's three pack tests on real files, the failed update, the progress, a half-done download, the language's own lowercasing and plurals, the real Turkish pack; Data's builder, file and folder).
   - **For you:** run Actions → Language packs once (from `main`, after this is merged): it publishes `packs-v2`, which the app downloads from. Until then, Download says it couldn't download.
 
+### Phase 6 progress
+
+- **The importer** (2026-10-26, on `lamha3/importer`; Data's `Import/Lamha2Folder` and `ElectronSafeStorage`, Core's `Import/Lamha2Import`, Windows' `Dpapi.UnprotectForUser`, first run's Lamha 2 step): [decision 0018](decisions/0018-importing-lamha-2.md).
+  - **First run's step 2,** as the design has it, only when `%APPDATA%\Lamha` has Lamha 2's storage files: what moves, counted (review cards, word history, mistake journal, settings and AI keys, clipboard history; a part with nothing in it isn't listed), **Move my data**, **Start fresh**, Back, and "Lamha 2's folder stays as it is". The step's row at the top shows it only when it's there.
+  - **What moves:** the settings (each only when it's of its kind), the API keys (Claude's and Gemini's, unless Lamha 3 already has one), the deck with its progress, removals and streak, the history, the mistake journal, the days' practice, the lookup count, Write's draft, and clipboard history with its pins, labels and saved translations. The deck and the rest go through the backup's merge, so moving twice adds nothing. **Not moved:** the interface language (step 1), `enabled` (the user's call), `windowMica` (Lamha 3 is designed on Mica).
+  - **After the move** the step says "Your data is in Lamha 3", the same list, and, when this user had them, what Lamha 3 doesn't have: Lamha in Firefox, and offline Wikipedia (its files stay). A key Windows can't read (the folder came from another account) is said, and the writing tools step asks for it. The writing tools step is skipped when the moved settings set them up; Ready's clipboard switch shows the moved setting. Lamha 2's theme, animations and accent apply at once.
+  - **The review reminder** waits while first run is open (Lamha 2's rule: not while Lamha's window is in use); moving a deck with words due had sent "Time to review" over the window.
+  - **Decryption without Electron:** Lamha 2's `Local State` key (DPAPI, no entropy) and AES-GCM for each `v10` value, in .NET. Tried first outside Lamha on this PC's own Lamha 2 folder (lengths only), then in Lamha: the key read, nothing reported unreadable.
+  - **`--lamha2=folder`:** Lamha 2's data read from a copy instead; `--first-run=lamha2` opens at the step.
+  - **Seen** (Debug and NativeAOT, test profiles, copies of this PC's Lamha 2 folder: 79 cards, settings, an encrypted Gemini key, Firefox settings and two downloaded Wikipedias; one copy with the key damaged, one with 1,248 history words, 32 mistakes and 183 copies added): the step in both languages and themes before and after the move, every row, the counts' Arabic plurals, the warning and the "Not in Lamha 3" list, Next to Try it. **Measured** (NativeAOT): reading the folder 22 ms; the budget stages unchanged (tray 1 / 51, card open 42 / 88 and closed 2 / 86, main window 26 / 95 and after it 5 / 93). 434 tests (12 new: the move on the real stores, settings, clipboard, keys kept and lost, odd values; the folder as Electron leaves it, from another account, damaged files; DPAPI without entropy).
+  - **New wording, drafted** (yours to reword): "Your data is in Lamha 3" / "انتقلت بياناتك إلى لمحة 3", "Not in Lamha 3:" / "ليست في لمحة 3:", the Firefox and Wikipedia lines, the unreadable keys and clipboard lines, and the failed move's line.
+  - **For you to try:** first run on a copy of your Lamha 2 folder (`--profile=` an empty folder `--lamha2=` the copy `--first-run`), and the move with your real key: that copies it into Credential Manager under the test profile's name.
+- **Not started:** the beta on your PCs, the bridge update (2.x tells users about 3.0 and runs its setup; then 2.x is removed and its folder after 30 days, Wikipedia files kept), the release, removing `legacy/`, the README and site.
+
+**Ideas**
+- **Lamha 2's language packs:** the importer knows which languages a user had; the summary could offer to download them again (0017's format), instead of waiting for Settings.
+- **Move my data later, from Settings → A copy of my data,** for someone who chose Start fresh or installed Lamha 2 afterwards.
+
 ## Moving users from Lamha 2
 
 - **First run of 3.0** finds `%APPDATA%\Lamha` and imports settings, history, the deck (with `mod` and `cardsRemoved`), the mistake journal and clipboard history.
@@ -598,8 +616,8 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
 - **The Firefox extension:** a last version on addons.mozilla.org saying it's ended and pointing to the Windows app, then unlisted. Publishing that is your call when the time comes.
 
 **Questions**
-- **Remove 2.x automatically, or leave it for the user?** Recommendation: remove it after a successful import, but keep its data folder for 30 days so nothing is lost if something went wrong. *(phase 6)*
-- **Settings that no longer exist** (per-site switches, the Firefox link): drop them silently? Recommendation: yes, and list them in the import summary so nothing seems to vanish. *(phase 6)*
+- **Remove 2.x automatically, or leave it for the user?** Recommendation: remove it after a successful import, but keep its data folder for 30 days so nothing is lost if something went wrong. **Answered 2026-10-26: as recommended.** *(phase 6)*
+- **Settings that no longer exist** (per-site switches, the Firefox link): drop them silently? Recommendation: yes, and list them in the import summary so nothing seems to vanish. **Answered 2026-10-26: as recommended.** *(phase 6)*
 - **Lamha 2's `enabled`** (its window's switch, which did nothing in its Windows app): leave it out of the import? In Lamha 3 it turns the shortcuts off (the tray's Enable Lamha), so a Lamha 2 user who switched off the Firefox extension would start with Lamha off. **Answered 2026-10-26: left out.** *(phase 6)*
 
 ## Risks
@@ -630,11 +648,11 @@ Held back from 3.0 so the first release has no web view. Ideas for doing it bett
 
 ## Questions by phase
 
-Phase 0's four and the two it raised, phase 2's four, phase 1's four, phase 3's two and phase 4's are answered (see each section). The first GitHub pre-release comes right after phase 4's card. The rest:
+Phase 0's four and the two it raised, phase 2's four, phase 1's four, phase 3's two and phase 4's are answered (see each section). The first GitHub pre-release comes right after phase 4's card. Phase 6's were answered on 2026-10-26: as recommended (code signing stays the user's call, once everything else is done):
 
-| Phase | Question | Recommendation |
+| Phase | Question | Answer |
 |---|---|---|
-| 6 | Code signing? | Yours, once everything else is done (the beta ships unsigned until then) |
+| 6 | Code signing? | The user's, once everything else is done (the beta ships unsigned until then) |
 | 6 | Warn users with downloaded Wikipedias? | Yes, in the bridge update |
 | 6 | Remove 2.x automatically? | Yes, keep its data for 30 days |
 | 6 | Drop settings that no longer exist? | Yes, listed in the import summary |
@@ -642,7 +660,6 @@ Phase 0's four and the two it raised, phase 2's four, phase 1's four, phase 3's 
 
 ## What's needed from you
 
-- **Answers to the questions above** by the phase each one names. Phase 4's come next.
 - **Trying the prototype** on your desktop (phase 0's one unverified step).
 - **Sign-off on the screen designs** (phase 1) and on any copy changes.
 - **Testing the betas on your PCs**, especially Arabic input and the programs you use Lamha in.

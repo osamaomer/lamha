@@ -28,7 +28,7 @@ public sealed class BackupService(
     string appVersion)
 {
     /// <summary>Lamha 2 kept days as JavaScript's <c>toDateString()</c>: "Sat Oct 24 2026".</summary>
-    private const string DayFormat = "ddd MMM dd yyyy";
+    internal const string DayFormat = "ddd MMM dd yyyy";
 
     private static readonly JsonSerializerOptions Readable = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
@@ -90,6 +90,17 @@ public sealed class BackupService(
             throw new LamhaException(ErrorCodes.NotBackup);
         }
 
+        return await RestoreAsync(data).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Data in a saved copy's shape merged with what's here: a copy, or Lamha 2's own storage.local (its keys are the
+    /// same: <c>cards</c>, <c>cardsRemoved</c>, <c>history</c>, <c>mistakes</c>, <c>activity</c>, <c>lookupCount</c>),
+    /// moved over by the importer.
+    /// </summary>
+    public async Task<RestoreResult> RestoreAsync(JsonObject data)
+    {
+        ArgumentNullException.ThrowIfNull(data);
         var cards = await review.Locked(() => deck.Batch(() => Merge(data["cards"] as JsonObject, data["cardsRemoved"] as JsonObject))).ConfigureAwait(false);
         review.OnChanged();
 

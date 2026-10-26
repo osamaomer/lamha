@@ -168,6 +168,52 @@ public sealed class ClipboardHistory(IClipStore store, IDataProtector protector,
     }
 
     /// <summary>
+    /// Copies from elsewhere (Lamha 2's clipboard history, moved over by the importer), kept with their times, label and
+    /// pin. A text already here keeps the copy that's here; pins stop at <see cref="MaxPinned"/>, and the history is
+    /// trimmed to the setting afterwards. Returns how many were added and kept.
+    /// </summary>
+    public int Import(IEnumerable<Clip> clips)
+    {
+        ArgumentNullException.ThrowIfNull(clips);
+        var added = 0;
+        lock (_gate)
+        {
+            var pinned = store.CountPinned();
+            foreach (var clip in clips)
+            {
+                var key = TextKey(clip.Text);
+                if (clip.Text.Trim().Length == 0 || store.FindByKey(key) is not null)
+                {
+                    continue;
+                }
+
+                var pin = clip.Pinned && pinned < MaxPinned;
+                pinned += pin ? 1 : 0;
+                Save(
+                    clip with
+                    {
+                        Id = IsId(clip.Id) && store.Get(clip.Id) is null ? clip.Id : NewId(),
+                        Label = clip.Label.Length > LabelMax ? clip.Label[..LabelMax] : clip.Label,
+                        SourceApp = clip.SourceApp.Length > 0 ? clip.SourceApp : "unknown",
+                        Lang = SearchText.DetectLanguage(clip.Text),
+                        Pinned = pin,
+                    },
+                    key);
+                added++;
+            }
+
+            added = Math.Max(0, added - Trim());
+        }
+
+        if (added > 0)
+        {
+            OnChanged();
+        }
+
+        return added;
+    }
+
+    /// <summary>
     /// A page of the list: pinned copies always first, then the most recent, or for a query the best match first
     /// (every word must match; the whole query, word starts and the label rank higher). <paramref name="targetLang"/>
     /// picks the translation shown under English copies.
@@ -463,6 +509,10 @@ public sealed class ClipboardHistory(IClipStore store, IDataProtector protector,
         _lastMs = now;
         return "c_" + Base36(now, 9) + Base36(_sameMs, 3) + Base36(RandomNumberGenerator.GetInt32(36 * 36 * 36), 3);
     }
+
+    /// <summary>An id as <see cref="NewId"/> makes them (Lamha 2's too): "c_" and 15 small letters or digits.</summary>
+    private static bool IsId(string id) =>
+        id.Length == 17 && id.StartsWith("c_", StringComparison.Ordinal) && !id.AsSpan(2).ContainsAnyExcept("0123456789abcdefghijklmnopqrstuvwxyz");
 
     private static string Base36(long value, int width)
     {

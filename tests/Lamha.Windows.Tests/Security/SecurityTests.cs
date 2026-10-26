@@ -59,4 +59,12 @@ public sealed class SecurityTests : IDisposable
         damaged[^1] ^= 0xFF;
         Assert.Null(dpapi.Unprotect(damaged));
     }
+
+    [Fact]
+    public void LamhasOwnDataIsNotReadAsAnotherProgramsData()
+    {
+        // Electron's key is sealed without entropy; Lamha's clipboard key with its own, so one isn't taken for the other.
+        Assert.Null(Dpapi.UnprotectForUser(new Dpapi().Protect([1, 2, 3])));
+        Assert.Null(Dpapi.UnprotectForUser([1, 2, 3, 4]));
+    }
 }

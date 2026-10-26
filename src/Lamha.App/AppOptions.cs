@@ -31,8 +31,8 @@ public enum CardLifetime
 /// </param>
 /// <param name="Panel"><c>--panel</c>: the clipboard panel at start (with nothing to paste into), for screenshots.</param>
 /// <param name="FirstRun">
-/// <c>--first-run</c>: first run at start even when it's done (<c>--first-run=try</c>, <c>writing</c> or <c>ready</c> at
-/// that step), for screenshots. Without it, first run shows only at the first start, and never with <c>--measure</c>,
+/// <c>--first-run</c>: first run at start even when it's done (<c>--first-run=lamha2</c>, <c>try</c>, <c>writing</c> or
+/// <c>ready</c> at that step), for screenshots. Without it, first run shows only at the first start, and never with <c>--measure</c>,
 /// <c>--page</c>, <c>--panel</c> or <c>--sample</c>.
 /// </param>
 /// <param name="Updates">
@@ -43,7 +43,11 @@ public enum CardLifetime
 /// <c>--packs=address</c>: the language packs downloaded from there instead of their GitHub release, to try packs made
 /// on this PC before they're published.
 /// </param>
-public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null, string? Updates = null, string? Packs = null)
+/// <param name="Lamha2">
+/// <c>--lamha2=folder</c>: first run's Lamha 2 step reads Lamha 2's data from that folder instead of %APPDATA%\Lamha,
+/// to try the move on a copy (with <c>--first-run=lamha2</c> and a <c>--profile</c>).
+/// </param>
+public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null, string? Updates = null, string? Packs = null, string? Lamha2 = null)
 {
     public static AppOptions FromArgs(IReadOnlyList<string> args)
     {
@@ -57,8 +61,9 @@ public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string?
         var firstRun = args.Contains("--first-run", StringComparer.OrdinalIgnoreCase) ? "" : Value(args, "--first-run=");
         var updates = Value(args, "--updates=");
         var packs = Value(args, "--packs=");
+        var lamha2 = Value(args, "--lamha2=");
         return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language, theme, string.IsNullOrWhiteSpace(page) ? null : page, args.Contains("--panel", StringComparer.OrdinalIgnoreCase), firstRun, string.IsNullOrWhiteSpace(updates) ? null : updates,
-            string.IsNullOrWhiteSpace(packs) ? null : packs.TrimEnd('/') + "/");
+            string.IsNullOrWhiteSpace(packs) ? null : packs.TrimEnd('/') + "/", string.IsNullOrWhiteSpace(lamha2) ? null : Path.GetFullPath(lamha2));
     }
 
     /// <summary>What Lamha starts with again after an update: the profile and the releases' folder, not a screenshot's page or sample.</summary>

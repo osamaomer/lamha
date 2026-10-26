@@ -1,6 +1,9 @@
 using Lamha.App.ViewModels.FirstRun;
 using Lamha.App.Windows;
 using Lamha.Core.Dictionary;
+using Lamha.Core.Import;
+using Lamha.Data.Import;
+using Lamha.Windows.Security;
 using Lamha.Windows.Shell;
 using Windows.Graphics;
 
@@ -9,7 +12,7 @@ namespace Lamha.App.Services;
 /// <summary>
 /// First run: the window at the first start (phase 1's design), and what its steps change. Lamha 2's
 /// <c>installed.flag</c> in main.js marks it done, in the data folder, so Delete my data brings it back and a backup
-/// doesn't carry it. Lamha 2's data step comes with the importer (phase 6).
+/// doesn't carry it. Lamha 2's data, when its folder is found, is read once and offered after the language.
 /// </summary>
 /// <param name="brain">Lamha's brain: the settings, the writing tools' setup.</param>
 /// <param name="shortcuts">The shortcuts, named on Try it and Ready.</param>
@@ -23,6 +26,9 @@ public sealed partial class FirstRunService(Brain brain, ShortcutService shortcu
     private const string FlagName = "installed.flag";
 
     private FirstRunWindow? _window;
+    private bool _lamha2Read;
+    private Lamha2Data? _lamha2;
+    private Lamha2Summary? _moved;
 
     /// <summary><c>--theme</c>: the window's theme for this run instead of the setting.</summary>
     public string? Theme { get; init; }
@@ -35,6 +41,9 @@ public sealed partial class FirstRunService(Brain brain, ShortcutService shortcu
 
     /// <summary>The interface language changed (step 1): the tray's words, and the card made afresh in it.</summary>
     public Action? LanguageChanged { get; init; }
+
+    /// <summary><c>--lamha2</c>: Lamha 2's data read from that folder instead of %APPDATA%\Lamha (a copy, to try the move).</summary>
+    public string? Lamha2Path { get; init; }
 
     public bool IsOpen => _window is not null;
 
@@ -71,8 +80,15 @@ public sealed partial class FirstRunService(Brain brain, ShortcutService shortcu
                 return;
             }
 
+            if (!_lamha2Read)
+            {
+                _lamha2Read = true;
+                _lamha2 = ReadLamha2();
+            }
+
             var settings = brain.Settings.Current;
-            var window = _window = new FirstRunWindow(new FirstRunViewModel(brain, shortcuts, this, step, startWithWindows: true), settings.WindowMica);
+            var model = new FirstRunViewModel(brain, shortcuts, this, step, startWithWindows: true, _lamha2, _moved);
+            var window = _window = new FirstRunWindow(model, settings.WindowMica);
             window.UseTheme(Theme ?? settings.Theme);
             window.Closed += (_, _) =>
             {
@@ -149,6 +165,14 @@ public sealed partial class FirstRunService(Brain brain, ShortcutService shortcu
 
     void IFirstRunHost.OpenShortcuts() => SettingsOpener?.Invoke("keys");
 
+    void IFirstRunHost.Moved(Lamha2Summary summary)
+    {
+        _moved = summary;
+        var settings = brain.Settings.Current;
+        _window?.UseTheme(Theme ?? settings.Theme);
+        Animations.Refresh(settings);
+    }
+
     void IFirstRunHost.Finish(bool startWithWindows, bool clipboardOn)
     {
         if (Startup is { } startup && startup.IsOn != startWithWindows)
@@ -171,6 +195,22 @@ public sealed partial class FirstRunService(Brain brain, ShortcutService shortcu
         MarkDone(brain.DataFolder);
         AppLog.Info("first run done");
         notify(Localization.Get("Note_ByTheClock"), Localization.Format("Note_ByTheClockBody", shortcuts.Keys(Shortcut.Lookup).ToString()));
+    }
+
+    /// <summary>Lamha 2's data, or null when it has none here (or it can't be read: first run goes on without the step).</summary>
+    private Lamha2Data? ReadLamha2()
+    {
+        try
+        {
+            var data = new Lamha2Folder(Lamha2Path ?? Lamha2Folder.DefaultPath, Dpapi.UnprotectForUser).Read();
+            AppLog.Info(data is null ? "first run: no Lamha 2 data" : $"first run: Lamha 2's data found{(data.KeysLost || data.ClipsLost ? " (some of it unreadable here)" : "")}");
+            return data;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            AppLog.Error("first run: reading Lamha 2's data", ex);
+            return null;
+        }
     }
 
     private static void MarkDone(string dataFolder)

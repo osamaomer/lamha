@@ -84,6 +84,26 @@ public sealed class ReviewService(IDeckStore deck, IStateStore state, IHistorySt
         return true;
     });
 
+    /// <summary>
+    /// Lamha 2's deck counters, moved over with its deck by the importer, so the review streak goes on; and whether
+    /// Lamha 2 had already made its history into cards (<c>cardsImported</c>), so that isn't done twice. Counters
+    /// already here are kept.
+    /// </summary>
+    public Task MoveFromLamha2Async(DeckStats stats, bool historyImported) => Locked(() =>
+    {
+        if (Stats() == new DeckStats())
+        {
+            SaveStats(stats);
+        }
+
+        if (historyImported)
+        {
+            state.Set(ImportedKey, "true");
+        }
+
+        return true;
+    });
+
     /// <summary>The cards to review now (Lamha 2's <c>reviewQueue</c>).</summary>
     public Task<ReviewQueue> QueueAsync() => Locked(() =>
     {

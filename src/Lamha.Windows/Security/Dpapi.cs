@@ -46,6 +46,23 @@ public sealed unsafe class Dpapi : IDataProtector
         }
     }
 
+    /// <summary>
+    /// Data this Windows user's programs encrypted without entropy, or null: Electron's own key in Lamha 2's
+    /// <c>Local State</c>, which its safeStorage encrypted the API keys and clipboard history with.
+    /// </summary>
+    public static byte[]? UnprotectForUser(byte[] data)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+        fixed (byte* p = data)
+        {
+            var input = new CRYPT_INTEGER_BLOB { cbData = (uint)data.Length, pbData = p };
+            CRYPT_INTEGER_BLOB output;
+            return PInvoke.CryptUnprotectData(&input, null, null, null, null, PInvoke.CRYPTPROTECT_UI_FORBIDDEN, &output)
+                ? Take(output)
+                : null;
+        }
+    }
+
     /// <summary>Copies the output and frees Windows' buffer (cleared first: it held the plain text, or a key).</summary>
     private static byte[] Take(CRYPT_INTEGER_BLOB blob)
     {

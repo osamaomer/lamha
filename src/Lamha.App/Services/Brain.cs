@@ -5,6 +5,7 @@ using Lamha.Core.Clipboard;
 using Lamha.Core.Diagnostics;
 using Lamha.Core.Money;
 using Lamha.Core.Dictionary;
+using Lamha.Core.Import;
 using Lamha.Core.Net;
 using Lamha.Core.Review;
 using Lamha.Core.Settings;
@@ -108,6 +109,10 @@ public sealed partial class Brain : IDisposable
 
     /// <summary>Prices in the user's currency, with the day's rates kept for offline.</summary>
     public CurrencyService Money => _lookups.Value.Money;
+
+    /// <summary>First run's Lamha 2 step: its settings, keys, deck, history, journal and clipboard history moved here.</summary>
+    public Task<Lamha2Summary> MoveFromLamha2Async(Lamha2Data data) =>
+        new Lamha2Import(Settings, Secrets, State, Backup, Review, ClipboardHistory).MoveAsync(data);
 
     /// <summary>Whether the offline dictionary file shipped with Lamha could be opened (after the first lookup).</summary>
     public bool HasDictionary => _lookups.IsValueCreated && _lookups.Value.DictionaryFile is not null;
