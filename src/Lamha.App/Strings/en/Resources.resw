@@ -873,4 +873,9 @@ What did you expect?
   <data name="FirstRun_RemoveLamha2Admin" xml:space="preserve"><value>Windows will ask for permission: Lamha 2 was installed for all users.</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording; after the hint</comment></data>
   <data name="Search_Placeholder" xml:space="preserve"><value>Search settings, words and copies</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the title bar's search</comment></data>
   <data name="Search_Translate" xml:space="preserve"><value>Translate “{0}”</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the search's last suggestion</comment></data>
+  <data name="Common_Close" xml:space="preserve"><value>Close</value><comment>common.close</comment></data>
+  <data name="Write_SetupTitle" xml:space="preserve"><value>The writing tools need an AI provider.</value><comment>new in Lamha 3, approved with the design system 2026-10-26: Write's InfoBar when no provider is set up</comment></data>
+  <data name="Write_SetupText" xml:space="preserve"><value>Gemini is free with an API key from Google.</value><comment>new in Lamha 3, approved with the design system 2026-10-26: after Write_SetupTitle</comment></data>
+  <data name="Write_SetUp" xml:space="preserve"><value>Set up</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the InfoBar's button, opening the writing tools' setup</comment></data>
+  <data name="Write_Rewrite" xml:space="preserve"><value>Rewrite</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the menu of Improve, Formal, Friendly, Shorter, Longer</comment></data>
 </root>

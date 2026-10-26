@@ -872,4 +872,9 @@
   <data name="FirstRun_RemoveLamha2Admin" xml:space="preserve"><value>سيطلب منك Windows الإذن، لأن لمحة 2 مثبّتة لكل المستخدمين.</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording; after the hint</comment></data>
   <data name="Search_Placeholder" xml:space="preserve"><value>ابحث في الإعدادات والكلمات والمنسوخات</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the title bar's search</comment></data>
   <data name="Search_Translate" xml:space="preserve"><value>ترجم «{0}»</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the search's last suggestion</comment></data>
+  <data name="Common_Close" xml:space="preserve"><value>إغلاق</value><comment>common.close</comment></data>
+  <data name="Write_SetupTitle" xml:space="preserve"><value>تتطلب أدوات الكتابة مزوّدًا لخدمات الذكاء الاصطناعي.</value><comment>new in Lamha 3, approved with the design system 2026-10-26, the user's Arabic: Write's InfoBar when no provider is set up</comment></data>
+  <data name="Write_SetupText" xml:space="preserve"><value>يتوفر Gemini مجانًا باستخدام مفتاح API من Google.</value><comment>new in Lamha 3, approved with the design system 2026-10-26, the user's Arabic: after Write_SetupTitle</comment></data>
+  <data name="Write_SetUp" xml:space="preserve"><value>إعداد</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the InfoBar's button, opening the writing tools' setup</comment></data>
+  <data name="Write_Rewrite" xml:space="preserve"><value>إعادة الصياغة</value><comment>new in Lamha 3, approved with the design system 2026-10-26, the user's Arabic: the menu of Improve, Formal, Friendly, Shorter, Longer</comment></data>
 </root>

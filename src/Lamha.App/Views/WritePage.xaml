@@ -5,73 +5,63 @@
     xmlns:controls="using:Lamha.App.Controls"
     xmlns:card="using:Lamha.App.ViewModels.Card"
     xmlns:main="using:Lamha.App.ViewModels.Main">
-  <!-- The main window's Write page, as signed off in phase 1 (docs/design/main-window.html): Lamha 2's Write tab (the
+  <!-- The main window's Write page (docs/design/system.md; phase 1's design before it): Lamha 2's Write tab (the
        draft, its tools, Ctrl+Enter, the result, the corrections, your most frequent mistake) and the mistake journal
-       under it, moved from Lamha 2's Settings. Panels are 20 px in, 16 px apart, on the 4 px grid. -->
+       under it, moved from Lamha 2's Settings. As the study found (W1–W4): the setup in place, Proofread first and
+       Rewrite ▾ for the rest, the journal's settings as Windows' setting cards. -->
 
-  <StackPanel Spacing="16">
-    <!-- ===== The draft, its tools, and what they give back ===== -->
-    <Border Style="{StaticResource LamhaContentCardStyle}">
+  <StackPanel Spacing="{StaticResource LamhaSpace4}">
+    <!-- ===== No AI provider yet: set one up right here, the draft stays ===== -->
+    <InfoBar x:Name="SetupBar" x:Load="{x:Bind ViewModel.NeedsSetup, Mode=OneWay}" IsOpen="True" IsClosable="False" Severity="Informational"
+             Title="{x:Bind SetupTitle}" Message="{x:Bind SetupText}">
+      <InfoBar.ActionButton>
+        <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind SetUpLabel}" Click="OnSetUp" />
+      </InfoBar.ActionButton>
+    </InfoBar>
+
+    <!-- ===== The draft, on the page as a large Windows field; Proofread (Ctrl+Enter) and Rewrite ▾ under it ===== -->
+    <StackPanel Spacing="{StaticResource LamhaSpace3}">
+      <TextBox x:Name="DraftBox" Style="{StaticResource LamhaDraftFieldStyle}"
+               TextAlignment="{x:Bind controls:Show.BoxAlignment(ViewModel.HasDraft), Mode=OneWay}"
+               PlaceholderText="{x:Bind Placeholder}" AutomationProperties.Name="{x:Bind Placeholder}"
+               Text="{x:Bind ViewModel.Draft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyboardAcceleratorPlacementMode="Hidden">
+        <TextBox.KeyboardAccelerators>
+          <KeyboardAccelerator Key="Enter" Modifiers="Control" Invoked="OnRunKey" />
+        </TextBox.KeyboardAccelerators>
+      </TextBox>
+      <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}" AutomationProperties.Name="{x:Bind ToolsName}">
+        <Button Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind ViewModel.MainTool.Pick, Mode=OneWay}" IsEnabled="{x:Bind ViewModel.MainTool.IsEnabled, Mode=OneWay}"
+                ToolTipService.ToolTip="{x:Bind RunKeys}" AutomationProperties.Name="{x:Bind ViewModel.MainTool.Label, Mode=OneWay}" AutomationProperties.AcceleratorKey="{x:Bind RunKeys}">
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
+            <TextBlock Text="{x:Bind ViewModel.MainTool.Label, Mode=OneWay}" />
+            <TextBlock VerticalAlignment="Center" FlowDirection="LeftToRight" FontSize="{StaticResource LamhaFontSizeCaption}" Opacity="0.8" Text="{x:Bind RunKeys}" />
+          </StackPanel>
+        </Button>
+        <DropDownButton x:Name="RewriteButton" IsEnabled="{x:Bind ViewModel.MainTool.IsEnabled, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.HasRewrite, Mode=OneWay}" AutomationProperties.Name="{x:Bind RewriteLabel}">
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
+            <controls:FluentIcon Glyph="Write" />
+            <TextBlock Text="{x:Bind RewriteLabel}" />
+          </StackPanel>
+          <DropDownButton.Flyout>
+            <MenuFlyout x:Name="RewriteMenu" Placement="BottomEdgeAlignedLeft" Opening="OnRewriteOpening" />
+          </DropDownButton.Flyout>
+        </DropDownButton>
+      </StackPanel>
+    </StackPanel>
+
+    <!-- ===== What the tools give back: working, the result, no mistakes ===== -->
+    <Border Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.HasOutput, Mode=OneWay, FallbackValue=Collapsed}">
       <StackPanel>
-        <Grid>
-          <!-- The field: its 1 px edge, and Lamha's 2 px accent ring around it while it has the focus (the Translate box's) -->
-          <Border CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1" BorderBrush="{ThemeResource LamhaFieldLineBrush}"
-                  Background="{ThemeResource LamhaSurfaceBrush}">
-            <TextBox x:Name="DraftBox" MinHeight="118" MaxHeight="320" Padding="16,12" BorderThickness="0" Background="Transparent"
-                     FontFamily="{StaticResource LamhaFontFamily}" FontSize="{StaticResource LamhaFontSizeBody}"
-                     AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     TextReadingOrder="DetectFromContent" TextAlignment="{x:Bind controls:Show.BoxAlignment(ViewModel.HasDraft), Mode=OneWay}"
-                     PlaceholderText="{x:Bind Placeholder}" AutomationProperties.Name="{x:Bind Placeholder}"
-                     Text="{x:Bind ViewModel.Draft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     GotFocus="OnDraftFocus" LostFocus="OnDraftFocus" KeyboardAcceleratorPlacementMode="Hidden">
-              <TextBox.KeyboardAccelerators>
-                <KeyboardAccelerator Key="Enter" Modifiers="Control" Invoked="OnRunKey" />
-              </TextBox.KeyboardAccelerators>
-              <!-- Windows' own edge, fill and focus line give way to the field's -->
-              <TextBox.Resources>
-                <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlElevationBorderBrush" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlElevationBorderFocusedBrush" Color="Transparent" />
-              </TextBox.Resources>
-            </TextBox>
-          </Border>
-          <Border x:Name="FieldRing" Margin="-2" CornerRadius="12" BorderThickness="2" BorderBrush="{ThemeResource LamhaAccentBrush}"
-                  IsHitTestVisible="False" Visibility="Collapsed" />
-        </Grid>
-
-        <!-- The tools: the editing ones for English, "In English" for Arabic; Ctrl+Enter after the last -->
-        <ItemsControl Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.Tools, Mode=OneWay}" IsTabStop="False" AutomationProperties.Name="{x:Bind ToolsName}">
-          <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-              <controls:WrapPanel HorizontalSpacing="6" VerticalSpacing="6" />
-            </ItemsPanelTemplate>
-          </ItemsControl.ItemsPanel>
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="main:DraftTool">
-              <StackPanel Orientation="Horizontal" Spacing="10">
-                <ToggleButton Style="{StaticResource LamhaChipStyle}" IsChecked="{x:Bind IsOn, Mode=TwoWay}" IsEnabled="{x:Bind IsEnabled, Mode=OneWay}"
-                              Command="{x:Bind Pick}" Content="{x:Bind Label}" />
-                <TextBlock VerticalAlignment="Center" FlowDirection="LeftToRight" FontSize="{StaticResource LamhaFontSizeCaption}"
-                           Foreground="{ThemeResource LamhaTextFaintBrush}" Text="{x:Bind Hint}" Visibility="{x:Bind controls:Show.IfText(Hint)}" />
-              </StackPanel>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
         <!-- Working -->
-        <StackPanel Margin="0,16,0,0" Spacing="8" Visibility="{x:Bind ViewModel.IsWorking, Mode=OneWay, FallbackValue=Collapsed}">
+        <StackPanel Spacing="{StaticResource LamhaSpace2}" Visibility="{x:Bind ViewModel.IsWorking, Mode=OneWay, FallbackValue=Collapsed}">
           <controls:Skeleton Height="14" Margin="0,0,24,0" CornerRadius="{StaticResource LamhaRadiusControl}" />
           <controls:Skeleton Height="14" Margin="0,0,80,0" CornerRadius="{StaticResource LamhaRadiusControl}" />
           <controls:Skeleton Height="14" Margin="0,0,160,0" CornerRadius="{StaticResource LamhaRadiusControl}" />
         </StackPanel>
 
         <!-- A result: Replace (into the draft), Copy, Try again -->
-        <StackPanel Margin="0,16,0,0" Visibility="{x:Bind ViewModel.IsResult, Mode=OneWay, FallbackValue=Collapsed}">
+        <StackPanel Visibility="{x:Bind ViewModel.IsResult, Mode=OneWay, FallbackValue=Collapsed}">
           <Border Style="{StaticResource LamhaTintedBoxStyle}">
             <controls:DiffText FlowDirection="{x:Bind ViewModel.ResultFlow, Mode=OneWay}" TextStyle="{StaticResource LamhaReadingTextStyle}"
                                Parts="{x:Bind ViewModel.Diff, Mode=OneWay}" Fallback="{x:Bind ViewModel.Result, Mode=OneWay}" />
@@ -125,26 +115,21 @@
         </StackPanel>
 
         <!-- No mistakes -->
-        <StackPanel Margin="0,16,0,0" Orientation="Horizontal" Spacing="8" Visibility="{x:Bind ViewModel.IsNoMistakes, Mode=OneWay, FallbackValue=Collapsed}">
+        <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind ViewModel.IsNoMistakes, Mode=OneWay, FallbackValue=Collapsed}">
           <controls:FluentIcon Glyph="Check" Foreground="{ThemeResource LamhaOkBrush}" />
           <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind NoMistakes}" />
         </StackPanel>
-
-        <!-- An error, or the writing tools not set up yet: what to do, one button -->
-        <StackPanel Margin="0,16,0,0" Padding="8,8,8,0" Spacing="4" Visibility="{x:Bind ViewModel.IsError, Mode=OneWay, FallbackValue=Collapsed}">
-          <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind ViewModel.Error.Title, Mode=OneWay}" />
-          <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind ViewModel.Error.Hint, Mode=OneWay}" />
-          <Button Margin="0,8,0,0" HorizontalAlignment="Center" Style="{StaticResource LamhaButtonStyle}"
-                  Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.RunErrorActionCommand}"
-                  AutomationProperties.Name="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}">
-            <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:FluentIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Error), Mode=OneWay}" />
-              <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}" />
-            </StackPanel>
-          </Button>
-        </StackPanel>
       </StackPanel>
     </Border>
+
+    <!-- ===== An error (the key, the quota, the network…): Windows' InfoBar, one button ===== -->
+    <InfoBar x:Name="ErrorBar" x:Load="{x:Bind ViewModel.IsError, Mode=OneWay}" IsOpen="True" IsClosable="False" Severity="Error"
+             Title="{x:Bind ViewModel.Error.Title, Mode=OneWay}" Message="{x:Bind ViewModel.Error.Hint, Mode=OneWay}">
+      <InfoBar.ActionButton>
+        <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}"
+                Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.RunErrorActionCommand}" />
+      </InfoBar.ActionButton>
+    </InfoBar>
 
     <!-- ===== Your most frequent mistake: Verb tenses (7) — learn the rule → ===== -->
     <StackPanel Orientation="Horizontal" Visibility="{x:Bind ViewModel.HasWeak, Mode=OneWay, FallbackValue=Collapsed}">
@@ -152,122 +137,102 @@
         <Run Text="{x:Bind TopMistake}" /><Run Text="{x:Bind ViewModel.WeakName, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaTextBrush}" />
       </TextBlock>
       <HyperlinkButton VerticalAlignment="Center" Style="{StaticResource LamhaLinkButtonStyle}" Command="{x:Bind ViewModel.LearnRuleCommand}">
-        <TextBlock Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind ViewModel.WeakLink, Mode=OneWay}" />
+        <TextBlock Text="{x:Bind ViewModel.WeakLink, Mode=OneWay}" />
       </HyperlinkButton>
     </StackPanel>
 
-    <!-- ===== My mistake journal ===== -->
-    <Border x:Name="JournalBox" Style="{StaticResource LamhaContentCardStyle}">
-      <StackPanel>
-        <TextBlock Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind JournalTitle}" AutomationProperties.HeadingLevel="Level2" />
-        <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind ViewModel.Journal.Summary, Mode=OneWay}" />
+    <!-- ===== My mistake journal: a group (its heading 28 below what's above), the journal in a content card, its two
+         settings as Windows' setting cards (the study's W4) ===== -->
+    <StackPanel x:Name="JournalBox" Margin="0,12,0,0" Spacing="{StaticResource LamhaCardGap}">
+      <TextBlock Style="{StaticResource LamhaGroupHeadingTextStyle}" Text="{x:Bind JournalTitle}" AutomationProperties.HeadingLevel="Level2" />
+      <Border Style="{StaticResource LamhaContentCardStyle}">
+        <StackPanel>
+          <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind ViewModel.Journal.Summary, Mode=OneWay}" />
 
-        <!-- A bar per kind, most frequent first; a click shows its rule and examples -->
-        <ItemsControl x:Name="BarList" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.Journal.Bars, Mode=OneWay}" IsTabStop="False"
-                      Visibility="{x:Bind ViewModel.Journal.HasBars, Mode=OneWay, FallbackValue=Collapsed}">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="main:JournalBar">
-              <!-- The row reaches 10 px past the panel's text, so its name lines up with the lines around it -->
-              <Button Margin="-10,0,-10,4" Style="{StaticResource LamhaRowButtonStyle}" Command="{x:Bind Pick}" AutomationProperties.Name="{x:Bind Spoken}">
-                <Grid>
-                  <Border Margin="-9,-7" CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1" BorderBrush="{ThemeResource LamhaAccentBrush}"
-                          Background="{ThemeResource LamhaHoverBrush}" Visibility="{x:Bind IsOn, Mode=OneWay}" />
-                  <Grid ColumnSpacing="10">
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="{x:Bind LabelWidth, Mode=OneWay}" />
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="36" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Foreground="{ThemeResource LamhaTextBrush}"
-                               TextWrapping="NoWrap" Text="{x:Bind Label}" />
-                    <!-- Lamha 2's meter: 8 px, round, the brand's gradient against the line colour -->
-                    <Grid Grid.Column="1" Height="8" VerticalAlignment="Center" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaLineBrush}">
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="{x:Bind Fill}" />
-                        <ColumnDefinition Width="{x:Bind Rest}" />
-                      </Grid.ColumnDefinitions>
-                      <Border CornerRadius="{StaticResource LamhaRadiusControl}">
-                        <Border.Background>
-                          <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                            <GradientStop Offset="0" Color="#6366F1" />
-                            <GradientStop Offset="1" Color="#06B6D4" />
-                          </LinearGradientBrush>
-                        </Border.Background>
-                      </Border>
-                    </Grid>
-                    <TextBlock Grid.Column="2" VerticalAlignment="Center" TextAlignment="Right" Style="{StaticResource LamhaSecondaryTextStyle}"
-                               FontWeight="Bold" Text="{x:Bind Count}" />
-                  </Grid>
-                </Grid>
-              </Button>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
-        <!-- The chosen kind's rule -->
-        <Border Margin="0,4,0,0" Style="{StaticResource LamhaTintedBoxStyle}" Visibility="{x:Bind controls:Show.IfText(ViewModel.Journal.Tip), Mode=OneWay, FallbackValue=Collapsed}">
-          <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Foreground="{ThemeResource LamhaTextBrush}" LineHeight="22">
-            <Run Text="{x:Bind RuleLabel}" FontWeight="Bold" Foreground="{ThemeResource LamhaAccentBrush}" /><Run Text="{x:Bind ViewModel.Journal.Tip, Mode=OneWay}" />
-          </TextBlock>
-        </Border>
-
-        <!-- Recent mistakes, or the chosen kind's examples -->
-        <StackPanel Visibility="{x:Bind ViewModel.Journal.HasRecent, Mode=OneWay, FallbackValue=Collapsed}">
-          <Grid Style="{StaticResource LamhaSectionRowStyle}">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TextBlock Style="{StaticResource LamhaSectionHeadingTextStyle}" Text="{x:Bind ViewModel.Journal.RecentTitle, Mode=OneWay}" AutomationProperties.HeadingLevel="Level3" />
-            <Border Grid.Column="1" Height="1" VerticalAlignment="Center" Background="{ThemeResource LamhaLineBrush}" />
-          </Grid>
-          <ItemsControl ItemsSource="{x:Bind ViewModel.Journal.Recent, Mode=OneWay}" IsTabStop="False">
+          <!-- A bar per kind, most frequent first; a click shows its rule and examples -->
+          <ItemsControl x:Name="BarList" Margin="0,12,0,0" ItemsSource="{x:Bind ViewModel.Journal.Bars, Mode=OneWay}" IsTabStop="False"
+                        Visibility="{x:Bind ViewModel.Journal.HasBars, Mode=OneWay, FallbackValue=Collapsed}">
             <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="main:JournalEntryItem">
-                <StackPanel Padding="{x:Bind Space}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="{x:Bind Edge}">
-                  <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Foreground="{ThemeResource LamhaTextBrush}" FlowDirection="LeftToRight"
-                             TextAlignment="{x:Bind controls:Show.LatinAlignment}">
-                    <Run Text="{x:Bind Original}" Foreground="{ThemeResource LamhaDangerBrush}" TextDecorations="Strikethrough" /><Run Text=" → " /><Run Text="{x:Bind Fix}" Foreground="{ThemeResource LamhaOkBrush}" FontWeight="SemiBold" />
-                  </TextBlock>
-                  <TextBlock Margin="0,2,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}"
-                             Visibility="{x:Bind HasWhy}" />
-                </StackPanel>
+              <DataTemplate x:DataType="main:JournalBar">
+                <!-- The row reaches 10 px past the panel's text, so its name lines up with the lines around it -->
+                <Button Margin="-10,0,-10,4" Padding="9,7" MinHeight="0" Style="{StaticResource LamhaRowButtonStyle}" Command="{x:Bind Pick}" AutomationProperties.Name="{x:Bind Spoken}">
+                  <Grid>
+                    <Border Margin="-9,-7" CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1" BorderBrush="{ThemeResource LamhaAccentBrush}"
+                            Background="{ThemeResource LamhaHoverBrush}" Visibility="{x:Bind IsOn, Mode=OneWay}" />
+                    <Grid ColumnSpacing="10">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{x:Bind LabelWidth, Mode=OneWay}" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="36" />
+                      </Grid.ColumnDefinitions>
+                      <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Foreground="{ThemeResource LamhaTextBrush}"
+                                 TextWrapping="NoWrap" Text="{x:Bind Label}" />
+                      <!-- Lamha 2's meter: 8 px, round, the brand's gradient against the line colour -->
+                      <Grid Grid.Column="1" Height="8" VerticalAlignment="Center" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaLineBrush}">
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="{x:Bind Fill}" />
+                          <ColumnDefinition Width="{x:Bind Rest}" />
+                        </Grid.ColumnDefinitions>
+                        <Border CornerRadius="{StaticResource LamhaRadiusControl}">
+                          <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                              <GradientStop Offset="0" Color="#6366F1" />
+                              <GradientStop Offset="1" Color="#06B6D4" />
+                            </LinearGradientBrush>
+                          </Border.Background>
+                        </Border>
+                      </Grid>
+                      <TextBlock Grid.Column="2" VerticalAlignment="Center" TextAlignment="Right" Style="{StaticResource LamhaSecondaryTextStyle}"
+                                 FontWeight="Bold" Text="{x:Bind Count}" />
+                    </Grid>
+                  </Grid>
+                </Button>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-        </StackPanel>
 
-        <!-- Record my mistakes, and Clear the journal (Lamha 2's, under its journal) -->
-        <Grid Margin="0,16,0,0" Padding="0,12,0,0" ColumnSpacing="16" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,1,0,0">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center">
-            <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Text="{x:Bind SaveLabel}" />
-            <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind SaveHint}" />
+          <!-- The chosen kind's rule -->
+          <Border Margin="0,4,0,0" Style="{StaticResource LamhaTintedBoxStyle}" Visibility="{x:Bind controls:Show.IfText(ViewModel.Journal.Tip), Mode=OneWay, FallbackValue=Collapsed}">
+            <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Foreground="{ThemeResource LamhaTextBrush}" LineHeight="22">
+              <Run Text="{x:Bind RuleLabel}" FontWeight="Bold" Foreground="{ThemeResource LamhaAccentBrush}" /><Run Text="{x:Bind ViewModel.Journal.Tip, Mode=OneWay}" />
+            </TextBlock>
+          </Border>
+
+          <!-- Recent mistakes, or the chosen kind's examples -->
+          <StackPanel Visibility="{x:Bind ViewModel.Journal.HasRecent, Mode=OneWay, FallbackValue=Collapsed}">
+            <Grid Style="{StaticResource LamhaSectionRowStyle}">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <TextBlock Style="{StaticResource LamhaSectionHeadingTextStyle}" Text="{x:Bind ViewModel.Journal.RecentTitle, Mode=OneWay}" AutomationProperties.HeadingLevel="Level3" />
+              <Border Grid.Column="1" Height="1" VerticalAlignment="Center" Background="{ThemeResource LamhaLineBrush}" />
+            </Grid>
+            <ItemsControl ItemsSource="{x:Bind ViewModel.Journal.Recent, Mode=OneWay}" IsTabStop="False">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="main:JournalEntryItem">
+                  <StackPanel Padding="{x:Bind Space}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="{x:Bind Edge}">
+                    <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Foreground="{ThemeResource LamhaTextBrush}" FlowDirection="LeftToRight"
+                               TextAlignment="{x:Bind controls:Show.LatinAlignment}">
+                      <Run Text="{x:Bind Original}" Foreground="{ThemeResource LamhaDangerBrush}" TextDecorations="Strikethrough" /><Run Text=" → " /><Run Text="{x:Bind Fix}" Foreground="{ThemeResource LamhaOkBrush}" FontWeight="SemiBold" />
+                    </TextBlock>
+                    <TextBlock Margin="0,2,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}"
+                               Visibility="{x:Bind HasWhy}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
           </StackPanel>
-          <!-- Windows keeps a 12 px column after the switch for its words; without words, the switch ends at the edge -->
-          <ToggleSwitch Grid.Column="1" MinWidth="0" Margin="0,0,-12,0" VerticalAlignment="Center" OnContent="" OffContent="" IsOn="{x:Bind ViewModel.Journal.SaveMistakes, Mode=TwoWay}"
-                        AutomationProperties.Name="{x:Bind SaveLabel}" />
-        </Grid>
-        <Grid Margin="0,12,0,0" Padding="0,12,0,0" ColumnSpacing="16" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,1,0,0">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center">
-            <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Text="{x:Bind ClearTitle}" />
-            <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind StartOver}" />
-          </StackPanel>
-          <Button Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Journal.ClearCommand}" AutomationProperties.Name="{x:Bind ClearTitle}">
-            <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:FluentIcon Glyph="Trash" />
-              <TextBlock Text="{x:Bind ClearLabel}" />
-            </StackPanel>
-          </Button>
-        </Grid>
-      </StackPanel>
-    </Border>
+        </StackPanel>
+      </Border>
+      <!-- Record my mistakes, and Clear the journal (Lamha 2's, under its journal) -->
+      <controls:SettingsCard Icon="Journal" Header="{x:Bind SaveLabel}" Description="{x:Bind SaveHint}">
+        <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.Journal.SaveMistakes, Mode=TwoWay}" />
+      </controls:SettingsCard>
+      <controls:SettingsCard Icon="Trash" Header="{x:Bind ClearTitle}" Description="{x:Bind StartOver}">
+        <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Journal.ClearCommand}" AutomationProperties.Name="{x:Bind ClearTitle}"
+                Content="{x:Bind ClearLabel}" />
+      </controls:SettingsCard>
+    </StackPanel>
   </StackPanel>
 </UserControl>

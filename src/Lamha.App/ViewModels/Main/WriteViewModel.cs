@@ -19,9 +19,6 @@ public sealed partial class DraftTool(WritingTool tool, string label, IRelayComm
 
     public IRelayCommand Pick { get; } = pick;
 
-    /// <summary>"Ctrl+Enter" after the last tool (it wraps with it), "" for the others.</summary>
-    public string Hint { get; init; } = "";
-
     [ObservableProperty]
     public partial bool IsOn { get; set; }
 
@@ -77,8 +74,28 @@ public sealed partial class WriteViewModel : ObservableObject
 
     public bool HasDraft => Draft.Trim().Length > 0;
 
+    /// <summary>
+    /// The tools for the draft's language: the first is the main button (Proofread, or "In English" for Arabic: what
+    /// Ctrl+Enter runs), the rest are under Rewrite ▾ (the study's W2, the user's answer).
+    /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MainTool), nameof(RewriteTools), nameof(HasRewrite))]
     public partial List<DraftTool> Tools { get; private set; } = [];
+
+    public DraftTool MainTool => Tools[0];
+
+    public List<DraftTool> RewriteTools => [.. Tools.Skip(1)];
+
+    public bool HasRewrite => Tools.Count > 1;
+
+    /// <summary>
+    /// No AI provider is set up yet: an InfoBar offers the setup right on the page (the study's W1), and the tools wait.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool NeedsSetup { get; private set; }
+
+    /// <summary>A setup of the writing tools for the dialog Write opens (Settings → Writing tools' own).</summary>
+    public WritingSetupViewModel NewSetup() => new(_brain, () => { });
 
     /// <summary>The draft's text was put there by Lamha (a result, a text from Translate), not typed.</summary>
     public event Action? DraftReplaced;
@@ -86,8 +103,11 @@ public sealed partial class WriteViewModel : ObservableObject
     // ----- under the tools -----
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsWorking), nameof(IsResult), nameof(IsProofread), nameof(IsNoMistakes), nameof(IsError))]
+    [NotifyPropertyChangedFor(nameof(IsWorking), nameof(IsResult), nameof(IsProofread), nameof(IsNoMistakes), nameof(IsError), nameof(HasOutput))]
     public partial WritingView View { get; private set; }
+
+    /// <summary>Something under the tools for the card that holds it: working, a result, or no mistakes.</summary>
+    public bool HasOutput => IsWorking || IsResult || IsNoMistakes;
 
     public bool IsWorking => View == WritingView.Working;
 
@@ -141,11 +161,12 @@ public sealed partial class WriteViewModel : ObservableObject
     public void Refresh()
     {
         _notReady = NotReady();
-        if (_notReady is not null)
+        NeedsSetup = _notReady is not null;
+        if (NeedsSetup)
         {
             // Lamha 2's showSetup(): how to set one up as soon as the page opens, a first step rather than an error.
             Cancel();
-            ShowError(_notReady);
+            View = WritingView.None;
         }
         else if (View == WritingView.Error && Error?.Action != ErrorAction.Retry)
         {
@@ -271,10 +292,7 @@ public sealed partial class WriteViewModel : ObservableObject
     private List<DraftTool> MakeTools(bool arabic)
     {
         WritingTool[] tools = arabic ? [WritingTool.ToEnglish] : EnglishTools;
-        return [.. tools.Select((t, i) => new DraftTool(t, Label(t), new RelayCommand(() => _ = RunAsync(t, fresh: false)))
-        {
-            Hint = i == tools.Length - 1 ? "Ctrl+Enter" : "",
-        })];
+        return [.. tools.Select(t => new DraftTool(t, Label(t), new RelayCommand(() => _ = RunAsync(t, fresh: false))))];
     }
 
     /// <summary>The short names Lamha 2's Write tab used ("Improve", "In English"), the card's for the rest.</summary>
@@ -319,8 +337,7 @@ public sealed partial class WriteViewModel : ObservableObject
         _tool = tool;
         if (_notReady is not null)
         {
-            ShowError(_notReady);
-            return;
+            return; // the InfoBar above the draft says what to do
         }
 
         Cancel();

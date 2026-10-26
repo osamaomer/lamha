@@ -44,6 +44,7 @@ public enum Glyph
     List,
     Text,
     Chevron,
+    Journal,
 }
 
 /// <summary>The design system's icon sizes (docs/design/system.md, Icons).</summary>
@@ -117,6 +118,7 @@ public sealed partial class FluentIcon : UserControl
         [Glyph.List] = '', // BulletedList
         [Glyph.Text] = '', // Font
         [Glyph.Chevron] = '', // ChevronRight: a breadcrumb's step, a setting card that opens a page
+        [Glyph.Journal] = '', // Education: the mistake journal
     };
 
     /// <summary>The filled glyph, where the icon shows a state: a word in review, a pinned copy.</summary>

@@ -410,6 +410,15 @@
     <Setter Property="IsHitTestVisible" Value="False" />
   </Style>
 
+  <!-- The draft (Write): the large field, taller, in Body, with no clear button -->
+  <Style x:Key="LamhaDraftFieldStyle" TargetType="TextBox" BasedOn="{StaticResource LamhaLargeFieldStyle}">
+    <Setter Property="MinHeight" Value="120" />
+    <Setter Property="MaxHeight" Value="320" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+  </Style>
+
   <!-- The × at the top end of a large field: 24, a 12 icon, centred on the first line -->
   <Style x:Key="LamhaFieldClearButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaIconButtonStyle}">
     <Setter Property="Width" Value="24" />
@@ -463,7 +472,12 @@
     <Setter Property="MinHeight" Value="0" />
   </Style>
 
-  <!-- ===== Settings (phase 1's Settings design) ===== -->
+  <!-- ===== Settings (Windows' Settings, docs/design/system.md §6) ===== -->
+
+  <!-- A group's heading over its cards (Body strong): in a stack of cards 4 apart, 8 above its first card -->
+  <Style x:Key="LamhaGroupHeadingTextStyle" TargetType="TextBlock" BasedOn="{StaticResource LamhaSectionHeadingTextStyle}">
+    <Setter Property="Margin" Value="0,0,0,4" />
+  </Style>
 
   <!-- A setting card (Windows' Settings): Windows' card fill and edge, rounded 4, 68 high at least (a short one sets
        48); the text 16 from the edge, the edge included; the icon 20, 20 before the text; the name in Body over its hint

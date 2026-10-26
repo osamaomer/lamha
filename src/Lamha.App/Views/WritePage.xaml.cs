@@ -76,6 +76,17 @@ public sealed partial class WritePage : UserControl
 
     public string ClearLabel { get; } = Localization.Get("Common_Clear");
 
+    public string SetupTitle { get; } = Localization.Get("Write_SetupTitle");
+
+    public string SetupText { get; } = Localization.Get("Write_SetupText");
+
+    public string SetUpLabel { get; } = Localization.Get("Write_SetUp");
+
+    public string RewriteLabel { get; } = Localization.Get("Write_Rewrite");
+
+    /// <summary>The main tool's shortcut, on the button and in its tooltip (the study's W3).</summary>
+    public string RunKeys { get; } = "Ctrl+Enter";
+
     /// <summary>The caret in the draft, ready to write; once the page is shown, when it has only just been put in the window.</summary>
     public void FocusDraft()
     {
@@ -101,9 +112,35 @@ public sealed partial class WritePage : UserControl
         ViewModel.RunDefault();
     }
 
-    /// <summary>The field's accent ring while the draft has the focus.</summary>
-    private void OnDraftFocus(object sender, RoutedEventArgs e) =>
-        FieldRing.Visibility = DraftBox.FocusState == FocusState.Unfocused ? Visibility.Collapsed : Visibility.Visible;
+    /// <summary>Rewrite ▾: the draft's other tools, as they are now (they change with its language).</summary>
+    private void OnRewriteOpening(object? sender, object e)
+    {
+        RewriteMenu.Items.Clear();
+        foreach (var tool in ViewModel.RewriteTools)
+        {
+            RewriteMenu.Items.Add(new MenuFlyoutItem { Text = tool.Label, Command = tool.Pick, IsEnabled = tool.IsEnabled });
+        }
+    }
+
+    /// <summary>
+    /// Set up: Settings → Writing tools' own setup in a dialog, so the draft stays where it is (the study's W1); the
+    /// tools wake up when it closes with a provider ready.
+    /// </summary>
+    private async void OnSetUp(object sender, RoutedEventArgs e)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            RequestedTheme = ActualTheme,
+            FlowDirection = Localization.FlowDirection,
+            Title = Localization.Get("Settings_WritingTools"),
+            Content = new ScrollViewer { Content = new WritingSetupView { Setup = ViewModel.NewSetup() } },
+            CloseButtonText = Localization.Get("Common_Close"),
+            DefaultButton = ContentDialogButton.Close,
+        };
+        await dialog.ShowAsync();
+        ViewModel.Refresh();
+    }
 
     private void OnJournalChanged(object? sender, PropertyChangedEventArgs e)
     {
