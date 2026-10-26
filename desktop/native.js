@@ -160,6 +160,18 @@ function processNameOf(hwnd) {
   }
 }
 
+/** "arm64" or "x64": the PC's own processor, for Lamha 3's setup (updater.js). Lamha 2 is an x64 app, which an ARM
+ *  PC runs emulated, so process.arch says x64 there. IsWow64Process2 is looked up only here: older Windows 10 lacks it. */
+function nativeArch() {
+  try {
+    const GetCurrentProcess = kernel32.func("intptr_t __stdcall GetCurrentProcess()");
+    const IsWow64Process2 = kernel32.func("bool __stdcall IsWow64Process2(intptr_t hProcess, _Out_ uint16_t *pProcessMachine, _Out_ uint16_t *pNativeMachine)");
+    const processMachine = [0], nativeMachine = [0];
+    if (IsWow64Process2(GetCurrentProcess(), processMachine, nativeMachine)) return nativeMachine[0] === 0xaa64 /* IMAGE_FILE_MACHINE_ARM64 */ ? "arm64" : "x64";
+  } catch (_) { /* not in this Windows */ }
+  return "x64";
+}
+
 function globalCopy(bytes) {
   const h = GlobalAlloc(0x0002 /* GMEM_MOVEABLE */, bytes.length);
   const p = GlobalLock(h);
@@ -187,7 +199,7 @@ function writeClipboardRaw(text, dwords = {}, hwnd = 0) {
 
 module.exports = {
   VK, sleep, isDown, releaseModifiers, ctrlChord, tap, isTerminal, className, forceForeground, hwndOf,
-  hasClipboardFormat, clipboardDword, processNameOf, writeClipboardRaw,
+  hasClipboardFormat, clipboardDword, processNameOf, writeClipboardRaw, nativeArch,
   clipboardSeq: () => GetClipboardSequenceNumber(),
   clipboardOwner: () => GetClipboardOwner(),
   addClipboardListener: hwnd => AddClipboardFormatListener(hwnd),

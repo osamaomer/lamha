@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!-- Lamha desktop: Lamha 3 is here (updater.js, the bridge). main.js injects shared/ui.css, theme.js, i18n.js,
+     i18n-desktop.js and lamha3.js into it; the page talks to the main process through lamhaUpdates (preload.js). -->
+<html lang="ar" dir="rtl" class="l3-page">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self' data:; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>لمحة 3</title>
+  <style>
+    html.l3-page, .l3-page body { height: 100%; }
+    .l3-page body { display: flex; flex-direction: column; }
+    .l3 { flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 28px 28px 24px; }
+    .l3-head { display: flex; align-items: center; gap: 14px; }
+    .l3-head img { width: 48px; height: 48px; flex: none; }
+    .l3-head h1 { margin: 0; font-size: 22px; line-height: 1.3; }
+    .l3 p { margin: 0; }
+    .l3-box { background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .l3-box h2 { margin: 0; font-size: 13px; font-weight: 700; color: var(--faint); }
+    .l3-box ul { margin: 0; padding-inline-start: 18px; display: flex; flex-direction: column; gap: 6px; }
+    .l3-small { font-size: 12.5px; color: var(--muted); }
+    .l3-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+    .l3-status { min-height: 1.5em; font-size: 12.5px; color: var(--muted); }
+    .l3-status.bad { color: var(--danger); }
+    .l3-bar { height: 4px; border-radius: 2px; background: var(--accent-soft); overflow: hidden; }
+    .l3-bar > span { display: block; height: 100%; width: 0; background: var(--btn); transition: width .2s; }
+    .l3-buttons { display: flex; gap: 10px; }
+    .l3-buttons .btn { min-width: 120px; }
+  </style>
+</head>
+<body>
+  <main class="l3">
+    <header class="l3-head">
+      <img src="../../assets/icon-256.png" alt="">
+      <h1 data-i18n="d.l3NoteTitle">وصلت لمحة 3</h1>
+    </header>
+    <p data-i18n="d.l3Intro"></p>
+    <p data-i18n="d.l3Moves"></p>
+    <section class="l3-box">
+      <h2 data-i18n="d.l3NotIn"></h2>
+      <ul>
+        <li data-i18n="d.l3Firefox"></li>
+        <li id="l3Wiki" data-i18n="d.l3Wikipedia" hidden></li>
+      </ul>
+    </section>
+    <p class="l3-small" data-i18n="d.l3Replaces"></p>
+    <footer class="l3-foot">
+      <div class="l3-bar" id="l3Bar" hidden><span></span></div>
+      <div class="l3-status" id="l3Status" role="status"></div>
+      <div class="l3-buttons">
+        <button class="btn" type="button" id="l3Install" data-i18n="d.l3Install"></button>
+        <button class="btn ghost" type="button" id="l3Later" data-i18n="d.l3Later"></button>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

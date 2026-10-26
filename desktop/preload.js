@@ -53,9 +53,14 @@ if (info.role === "page") {
     for (const f of updateListeners) { try { f(); } catch (err) { console.error(err); } }
   });
   contextBridge.exposeInMainWorld("lamhaUpdates", {
-    state: () => call("update.state"), // { status, version, current, packaged, portable, releases, checkedAt }
+    state: () => call("update.state"), // { status, version, current, packaged, portable, releases, checkedAt, lamha3, progress, wikipedia }
     check: () => call("update.check"),
     restart: () => call("update.restart"), // install the downloaded update (or open the download page: Portable)
+    // Lamha 3 (the bridge): its window, its setup, and "Later"
+    openLamha3: () => call("update.lamha3Open"),
+    closeLamha3: () => call("update.lamha3Close"),
+    installLamha3: () => call("update.lamha3Install"),
+    lamha3Later: () => call("update.lamha3Later"),
     onChanged: f => { updateListeners.push(f); }
   });
 }

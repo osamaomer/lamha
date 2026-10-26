@@ -140,13 +140,14 @@ CI (`.github/workflows/checks.yml`) runs `npm test` and the lint on every push. 
 
 ## Where we left off
 
-_Last updated: 2026-10-04. Latest release: **2.0.1** (tagged 2026-10-04). The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
+_Last updated: 2026-10-26. Latest release: **2.0.1** (tagged 2026-10-04); **2.1.0, the bridge to Lamha 3, is built and not released**. The history of each session (what was built, why, what was found) is in [docs/history.md](docs/history.md); undecided plans are in [docs/ideas.md](docs/ideas.md)._
 
 **At the end of a session:** update the open items below (add new ones, delete finished ones), and add a short dated entry to docs/history.md for substantial work, in the same commit. Keep this file small (under ~25 KB): details belong in history.md.
 
 ### Open items
 
 **Next work**
+- **2.1.0, the bridge to Lamha 3** (2026-10-26, docs/history.md → *The bridge to Lamha 3*; Lamha 3's decision 0019 on `main`): `desktop/updater.js` finds Lamha 3 on GitHub, the window is `desktop/renderer/lamha3/`. Its wording is Claude's draft (`d.l3*`, 2.1.0's changelog note): the user rewords it. Before release: `npm run smoke` on the user's desktop, and the whole path tried with `LAMHA_BRIDGE_TAG=v3.0.0-beta.N` (it installs that beta). Released before 3.0; 3.0's release must also carry 2.1.0's `latest.yml`, setup and blockmap (0019). No 2.x release after 3.0.
 - **The design audit (2026-10-04)**: report at https://claude.ai/artifact/Mkpy2A8QooHXQ2q2PBefjm; all done but F20 (docs/history.md → *The design audit's fixes*; the user said to go with the recommendations for F5 and the copy).
   - F20, the offline dictionary's odd meanings (كتاب → bookmaker), is a data job in `tools/build_dict.py`.
   - Narrator itself was not run (the accessibility tree was checked instead: `LAMHA_SHOTS_AUDIT=1` writes `a11y-*.txt`).

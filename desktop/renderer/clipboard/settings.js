@@ -176,6 +176,7 @@
     const upPanel = h("section", { class: "panel", id: "updatesPanel" },
       h("h2", null, L("d.upTitle")),
       h("p", { class: "muted", id: "upVersion" }),
+      h("p", { class: "muted", id: "upWindows10", hidden: true }, L("d.l3SWindows10")), // Lamha 3 found, but this PC has Windows 10
       h("label", { class: "opt" },
         h("div", null, h("b", null, L("d.upAuto")), h("small", null, L("d.upAutoHint"))),
         sw("updatesAuto", L("d.upAuto"))),
@@ -193,8 +194,14 @@
       available: st => L("d.upSAvailable", { v: st.version }),
       latest: () => L("d.upSLatest"),
       error: () => L("d.upSError"),
-      dev: () => L("d.upDevBody")
+      dev: () => L("d.upDevBody"),
+      // Lamha 3 (the bridge): its window does the rest
+      lamha3: st => L("d.l3SFound", { v: st.version }),
+      "lamha3-downloading": st => L("d.l3Downloading", { p: Math.floor(st.progress * 100) }),
+      "lamha3-starting": () => L("d.l3Starting"),
+      "lamha3-error": st => L(st.error === "damaged" ? "d.l3Damaged" : "d.l3Failed")
     };
+    const LAMHA3 = ["lamha3", "lamha3-downloading", "lamha3-starting", "lamha3-error"];
     let releases = "", newsFor = "";
     /** What's new in the installed version (shared/changelog.js, shipped with the app: it works offline). Earlier
      *  versions are on GitHub (the link under it). A version missing from the changelog (a build from source) shows the newest. */
@@ -216,15 +223,18 @@
       releases = st.releases;
       renderNews(st.current);
       $("upVersion").textContent = L("d.upCurrent", { v: st.current, portable: st.portable });
+      $("upWindows10").hidden = !(st.lamha3 && st.lamha3.windows11 === false);
       upStatus.textContent = STATUS[st.status] ? STATUS[st.status](st) : "";
-      upBtn.textContent = st.status === "ready" ? L("d.upRestartNow") : st.status === "available" ? L("d.upDownloadBtn") : L("d.upCheckNow");
-      upBtn.disabled = ["checking", "downloading"].includes(st.status);
+      upBtn.textContent = LAMHA3.includes(st.status) ? L("d.l3SeeBtn") : st.status === "ready" ? L("d.upRestartNow") : st.status === "available" ? L("d.upDownloadBtn") : L("d.upCheckNow");
+      upBtn.disabled = ["checking", "downloading", "lamha3-starting"].includes(st.status);
       const { updatesAuto } = await local.get({ updatesAuto: true });
       $("updatesAuto").checked = updatesAuto !== false;
     };
     upBtn.addEventListener("click", async () => {
       const st = await lamhaUpdates.state();
-      if (["ready", "available"].includes(st.status)) lamhaUpdates.restart(); else { await lamhaUpdates.check(); renderUpdates(); }
+      if (LAMHA3.includes(st.status)) lamhaUpdates.openLamha3();
+      else if (["ready", "available"].includes(st.status)) lamhaUpdates.restart();
+      else { await lamhaUpdates.check(); renderUpdates(); }
     });
     $("updatesAuto").addEventListener("change", e => local.set({ updatesAuto: e.target.checked }));
     $("upReleases").addEventListener("click", () => browser.tabs.create({ url: releases }));

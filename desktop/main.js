@@ -295,9 +295,19 @@ ipcMain.handle("lamha:call", async (e, method, args) => {
     case "openUrl": openUrl(args[0]); return true;
     case "commands": // Settings → Shortcuts shows the app's own, in the browser's shape (options.js)
       return Object.entries(HOTKEYS).map(([shortcut, kind]) => ({ name: { lookup: "lookup-selection", write: "writing-tools", clipboard: "clipboard-panel" }[kind], shortcut }));
-    case "update.state": return { ...updater.state, current: app.getVersion(), packaged: app.isPackaged, portable: !!process.env.PORTABLE_EXECUTABLE_DIR, releases: updater.releasesUrl };
+    case "update.state": return {
+      ...updater.state, current: app.getVersion(), packaged: app.isPackaged, portable: !!process.env.PORTABLE_EXECUTABLE_DIR, releases: updater.releasesUrl,
+      wikipedia: !!(wikiLibrary && wikiLibrary.langs().length) // the Lamha 3 window says the downloaded ones stay
+    };
     case "update.check": await updater.check(true); return { ...updater.state };
     case "update.restart": updater.restart(); return true;
+    case "update.lamha3Open": openLamha3(); return true;
+    case "update.lamha3Close": if (lamha3Win && !lamha3Win.isDestroyed()) lamha3Win.close(); return true;
+    case "update.lamha3Install": await updater.installLamha3(); return { ...updater.state };
+    case "update.lamha3Later":
+      await updater.lamha3Later();
+      if (lamha3Win && !lamha3Win.isDestroyed()) lamha3Win.close();
+      return true;
     case "firefox.status": return { available: !!bridge, connected: !!(bridge && bridge.connected), lastSeen: bridge ? bridge.lastSeen : 0 };
     case "app.gpu": return GPU; // what this run draws with (Settings compares it with the setting)
     case "app.mica": return MICA_SUPPORTED; // Settings shows the wallpaper switch only on Windows 11
@@ -945,6 +955,11 @@ function notify(title, body, onClick) {
 
 /* ---------------- updates (GitHub Releases, see updater.js) ---------------- */
 
+// Trying the bridge on a release that isn't the latest (a Lamha 3 beta): LAMHA_BRIDGE_TAG=v3.0.0-beta.2. Only a tag of
+// this repository's releases, so nothing else can be offered as Lamha 3.
+const BRIDGE_TAG = /^v3\.[0-9A-Za-z.-]+$/.test(process.env.LAMHA_BRIDGE_TAG || "") ? process.env.LAMHA_BRIDGE_TAG : "";
+let lamha3Win = null, lamha3Setup = "";
+
 const updater = require("./updater").createUpdater({
   version: app.getVersion(),
   packaged: app.isPackaged,
@@ -961,12 +976,62 @@ const updater = require("./updater").createUpdater({
     updateTray();
     for (const w of BrowserWindow.getAllWindows()) if (!w.isDestroyed()) w.webContents.send("lamha:update-changed");
   },
-  openUrl
+  openUrl,
+  fetch: (url, init) => netFetch(url, { ...init, headers: { "User-Agent": "Lamha/" + app.getVersion() } }),
+  tempDir: app.getPath("temp"),
+  machine: { arch: native ? native.nativeArch() : "x64", windowsBuild: Number(os.release().split(".")[2]) || 0 },
+  prefs: { get: () => stores.local.get({ lamha3NotifiedAt: 0, lamha3Later: 0 }), set: patch => stores.local.set(patch) },
+  openLamha3: () => openLamha3(),
+  runSetup: file => { lamha3Setup = file; quitting = true; app.quit(); }, // started once Lamha 2 has saved and quit (app "quit")
+  lamha3Release: BRIDGE_TAG ? `https://api.github.com/repos/osamaomer/lamha/releases/tags/${BRIDGE_TAG}` : ""
 });
+
+/** Lamha 3 is here (renderer/lamha3/): what changes, and its setup. One window, brought forward when asked again. */
+function openLamha3() {
+  if (lamha3Win && !lamha3Win.isDestroyed()) {
+    if (lamha3Win.isMinimized()) lamha3Win.restore();
+    if (!SMOKE) { lamha3Win.show(); lamha3Win.focus(); }
+    return lamha3Win;
+  }
+  lamha3Win = new BrowserWindow({
+    width: 520, height: 540, resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
+    title: T("d.l3Title"), icon: ICON, show: false, autoHideMenuBar: true,
+    backgroundColor: nativeTheme.shouldUseDarkColors ? "#1c1c1e" : "#f5f5f7", webPreferences: webPrefs()
+  });
+  prepare(lamha3Win);
+  const wc = lamha3Win.webContents;
+  wc.on("did-finish-load", async () => { // again after a reload (the interface language changed)
+    try {
+      await wc.insertCSS(fs.readFileSync(path.join(EXT_DIR, "shared", "ui.css"), "utf8"));
+      const scripts = [
+        ...["theme.js", "i18n.js"].map(f => path.join(EXT_DIR, "shared", f)),
+        path.join(__dirname, "renderer", "i18n-desktop.js"), path.join(__dirname, "renderer", "lamha3", "lamha3.js")
+      ];
+      for (const f of scripts) await wc.executeJavaScript(fs.readFileSync(f, "utf8") + "\n;true");
+      lamha3Win.setTitle(T("d.l3Title"));
+    } catch (err) { console.error("Lamha 3 window failed:", err && err.message); }
+  });
+  lamha3Win.loadFile(path.join(__dirname, "renderer", "lamha3", "lamha3.html"));
+  lamha3Win.once("ready-to-show", () => { if (!SMOKE) lamha3Win.show(); });
+  lamha3Win.on("closed", () => { lamha3Win = null; });
+  return lamha3Win;
+}
+
+/** Lamha 3's setup, after Lamha 2 has saved everything and let go of its shortcuts: it installs Lamha 3 and starts
+ *  it, and Lamha 3 moves the data from %APPDATA%\Lamha. Downloaded by Lamha itself, so Windows doesn't ask about it. */
+function startLamha3Setup() {
+  if (!lamha3Setup) return;
+  try {
+    require("node:child_process").spawn(lamha3Setup, [], { detached: true, stdio: "ignore" }).unref();
+  } catch (err) { console.error("Lamha 3's setup didn't start:", err && err.code); }
+}
 
 /** Tray item: check, or install / download what was found. */
 function updateMenu() {
   const st = updater.state;
+  if (st.status === "lamha3" || st.status === "lamha3-error") return { label: T("d.l3Tray"), click: () => openLamha3() };
+  if (st.status === "lamha3-downloading") return { label: T("d.l3TrayDownloading", { p: Math.floor(st.progress * 100) }), click: () => openLamha3() };
+  if (st.status === "lamha3-starting") return { label: T("d.l3Starting"), enabled: false };
   if (st.status === "ready") return { label: T("d.upRestart", { v: st.version }), click: () => updater.restart() };
   if (st.status === "available") return { label: T("d.upDownload", { v: st.version }), click: () => updater.restart() };
   if (st.status === "downloading") return { label: T("d.upDownloading", { v: st.version }), enabled: false };
@@ -1149,7 +1214,7 @@ if (!gotLock) {
         app, mainWin, openOptions, getOptionsWin: () => optionsWin, stores, send: msg => messageHandler(msg, {}),
         desktop: { onHotkey, uiaContext, getCardWin: () => cardWin, cardReady: () => cardReady, selection, native, clipboardMonitor, getClipStore: () => clipStore, updater,
           openPanel, hidePanel, getPanelWin: () => panelWin, panelReady: () => panelReady,
-          pauseClipboard, resumeClipboard, runClipExpiry, trayTooltip, updateMotionHint, getWikiLibrary: () => wikiLibrary, openReader, getReaderWin: () => readerWin, getBridge: () => bridge }
+          pauseClipboard, resumeClipboard, runClipExpiry, trayTooltip, updateMotionHint, getWikiLibrary: () => wikiLibrary, openReader, getReaderWin: () => readerWin, getBridge: () => bridge, openLamha3 }
       });
     }
   }).catch(err => {
@@ -1158,6 +1223,7 @@ if (!gotLock) {
   });
   app.on("window-all-closed", () => { /* stay in the tray */ });
   app.on("will-quit", () => globalShortcut.unregisterAll());
+  app.on("quit", startLamha3Setup); // after before-quit's saving: Lamha 3 reads these files
   app.on("before-quit", () => {
     quitting = true;
     if (stores) { stores.local.flush(); stores.sync.flush(); }

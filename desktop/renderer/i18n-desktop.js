@@ -85,6 +85,30 @@
     "d.upSLatest": ["لديك أحدث إصدار ✓", "You're up to date ✓"],
     "d.upSError": ["تعذّر التحقق من التحديثات. تحقق من اتصالك.", "Couldn't check for updates. Check your connection."],
 
+    /* ---- Lamha 3 (the bridge: updater.js, renderer/lamha3/): drafts, the user rewords them. The Firefox, Wikipedia
+       and "Not in Lamha 3" lines are Lamha 3's own (its first run's FirstRun_Dropped*), so both say the same ---- */
+    "d.l3NoteTitle": ["وصلت لمحة 3", "Lamha 3 is here"],
+    "d.l3NoteBody": ["لمحة جديدة مبنية لويندوز 11. اضغط هنا لترى ما الجديد وتثبّتها.", "A new Lamha, built for Windows 11. Click here to see what's new and install it."],
+    "d.l3Title": ["لمحة 3", "Lamha 3"],
+    "d.l3Intro": ["أُعيد بناء لمحة لويندوز 11: أسرع، وأخف على جهازك، وبتصميم جديد.", "Lamha has been rebuilt for Windows 11: faster, lighter on your PC, and with a new look."],
+    "d.l3Moves": ["تنتقل بياناتك معك كما هي: بطاقات المراجعة وتقدّمك فيها، وسجل الكلمات، وسجل أخطائي، والإعدادات ومفاتيح الذكاء الاصطناعي، وسجل الحافظة.", "Your data comes with you as it is: your review cards and progress, word history, mistake journal, settings and AI keys, and clipboard history."],
+    "d.l3NotIn": ["ليست في لمحة 3:", "Not in Lamha 3:"],
+    "d.l3Firefox": ["لمحة في Firefox: ترجمة الصفحات، وإعدادات كل موقع، والربط بالتطبيق.", "Lamha in Firefox: page translation, the per-site switches and the link to the app."],
+    "d.l3Wikipedia": ["ويكيبيديا دون إنترنت، مؤقتًا: تبقى الملفات التي نزّلتها على جهازك حتى تعود.", "Offline Wikipedia, for now: the files you downloaded stay on this PC for when it returns."],
+    "d.l3Replaces": ["تحل لمحة 3 محل لمحة 2: تُزال لمحة 2 بعد انتقال بياناتك، ويبقى مجلدها ٣٠ يومًا حتى لا يضيع شيء.", "Lamha 3 replaces Lamha 2: Lamha 2 is removed once your data has moved, and its folder is kept for 30 days so nothing is lost."],
+    "d.l3Install": ["تثبيت لمحة 3", "Install Lamha 3"],
+    "d.l3Later": ["لاحقًا", "Later"],
+    "d.l3Size": [v => `حجم التنزيل: ${num(v.mb)} ميغابايت`, v => `Download: ${num(v.mb)} MB`],
+    "d.l3Downloading": [v => `تُنزَّل لمحة 3… ${num(v.p)}%`, v => `Downloading Lamha 3… ${num(v.p)}%`],
+    "d.l3Starting": ["يبدأ تثبيت لمحة 3، وتُغلق لمحة 2…", "Lamha 3's setup is starting, and Lamha 2 is closing…"],
+    "d.l3Failed": ["تعذّر تنزيل لمحة 3. تحقق من اتصالك ثم حاول مجددًا.", "Couldn't download Lamha 3. Check your connection and try again."],
+    "d.l3Damaged": ["وصل الملف تالفًا. حاول مجددًا.", "The file arrived damaged. Try again."],
+    "d.l3Tray": ["تثبيت لمحة 3…", "Install Lamha 3…"],
+    "d.l3TrayDownloading": [v => `تُنزَّل لمحة 3… ${num(v.p)}%`, v => `Downloading Lamha 3… ${num(v.p)}%`],
+    "d.l3SFound": [v => `لمحة 3 (الإصدار ${v.v}) متاحة`, v => `Lamha 3 (version ${v.v}) is available`],
+    "d.l3SWindows10": ["لمحة 3 لويندوز 11 فقط. تبقى لمحة 2 تعمل على هذا الجهاز وتصلها تحديثاتها.", "Lamha 3 is for Windows 11 only. Lamha 2 keeps working on this PC, with its updates."],
+    "d.l3SeeBtn": ["ما الجديد؟", "See what's new"],
+
     /* ---- clipboard list (clip-list.js) ---- */
     "d.now": ["الآن", "Just now"],
     "d.minAgo": [v => "قبل " + (v.n === 1 ? "دقيقة" : v.n === 2 ? "دقيقتين" : arCount(v.n, "", "", "دقائق", "دقيقة")), v => `${enCount(v.n, "minute", "minutes")} ago`],

@@ -338,7 +338,26 @@ module.exports = async function shots({ app, mainWin, openOptions, getOptionsWin
           await wait(500);
           await save(ow, "settings-updates-" + status);
         }
-        Object.assign(desktop.updater.state, { status: "idle", version: null, error: null });
+        // Lamha 3 (the bridge): Settings' row, Windows 10's line, then its window found, downloading and failed
+        const lamha3 = { version: "3.0.0", size: 51505712, page: "https://github.com/osamaomer/lamha/releases/tag/v3.0.0", windows11: true };
+        for (const [name, st] of [["lamha3", { status: "lamha3", version: "3.0.0", lamha3 }], ["windows10", { status: "latest", lamha3: { ...lamha3, windows11: false } }]]) {
+          Object.assign(desktop.updater.state, st);
+          ow.webContents.send("lamha:update-changed");
+          await wait(500);
+          await save(ow, "settings-updates-" + name);
+        }
+        const lw = desktop.openLamha3();
+        await loaded(lw);
+        lw.setPosition(600, 40);
+        for (const [name, status, extra] of [["found", "lamha3", {}], ["downloading", "lamha3-downloading", { progress: 0.45 }], ["error", "lamha3-error", { error: "network" }]]) {
+          Object.assign(desktop.updater.state, { status, lamha3, progress: 0, error: null, ...extra });
+          lw.webContents.send("lamha:update-changed");
+          await wait(900);
+          await js(lw, `document.getElementById("l3Wiki").hidden = false; true`); // as for someone with a downloaded Wikipedia
+          await save(lw, "lamha3-" + name);
+        }
+        lw.destroy();
+        Object.assign(desktop.updater.state, { status: "idle", version: null, error: null, lamha3: null, progress: 0 });
         ow.webContents.send("lamha:update-changed");
       }
       await stores.local.set({ accentWindows: true }); // Windows' accent colour, as this PC has it
