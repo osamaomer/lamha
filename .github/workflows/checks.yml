@@ -4,7 +4,8 @@ name: Checks
 
 on:
   push:
-    branches: [main]
+    # Lamha 2 lives on release/2.x (and its lamha2/* branches); main is Lamha 3, with its own CI.
+    branches: [release/2.x, "lamha2/**"]
   pull_request:
 
 permissions:
