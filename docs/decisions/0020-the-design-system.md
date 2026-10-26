@@ -45,4 +45,7 @@
 
 - **This replaces phase 1's choices** of Lamha 2's line icons (over Segoe Fluent Icons), Lamha 2's radii (8 / 10 / 14), its green switch, and its motion timings (180 / 110 / 200 ms). `TokensTests` stops holding the changed tokens to Lamha 2's values; Lamha 2's colours stay where they're kept.
 - **The work follows [the plan](../design/system-plan.md)'s steps 2 to 8** and is released as 3.1, after betas.
-- **Memory is measured** after the frame changes to NavigationView and a Frame (budgets 0008, 0013, 0015).
+- **Memory:** measured with step 3's window (NativeAOT, `measure.ps1`, against `main` built and measured the same way on the same PC the same day).
+  - Windows' NavigationView keeps about 3 MB of commit after the main window closes, and its TitleBar about 1 MB: 99 / 97 MB open and closed, against `main`'s 95 / 94.
+  - **The user's call (2026-10-26):** keep Windows' controls and raise 0013's "back in the tray after the main window" to **100 MB** commit, rather than a hand-built pane in Windows' look.
+  - The tray measured 57 MB for `main` and this branch alike that day, above 0008's 55: that's the PC, not the design system. It stays to be looked into.

@@ -221,6 +221,19 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
    - **The screens:** the typed font sizes and corners became tokens (the fields' accent rings excepted: they go with step 4's fields).
    - **Tests:** the button and the switch follow the new rules (446 pass).
 3. **The frame:** `NavigationView`, `TitleBar` with Back and ☰, the three widths, the pages in a `Frame` with transitions, the window remembered.
+
+   **Built 2026-10-26:**
+   - **The window:**
+     - Windows' `TitleBar` with Back (and ☰ when narrow), Lamha's mark and name 16 apart;
+     - Windows' `NavigationView`, open at 300 or hidden behind ☰ below 720 px, two widths as Settings;
+     - the coloured page icons (`Controls/PaneIcon`, drawn as XAML);
+     - the review count as Windows' badge with Lamha's digits;
+     - the pill in Lamha's accent, repainted with Windows' accent.
+   - **Back** goes through the pages and Settings' categories as they were opened, with Alt+← and the mouse's back button too.
+   - **Transitions:** pages rise in, a category slides in from the text's end, and Back slides the other way (`Animations.Page`; the pages stay the cached views they were, so no `Frame`).
+   - **Measured against Settings:** rows from 18 with names at 63; the title's baseline at 85.
+   - **Memory:** see 0020 (99 / 97 MB; 0013's budget after the window raised to 100 MB, the user's call).
+   - **Still to do in this step:** the search box in the title bar, and the window remembering its size, position and pane.
 4. **Components:** WinUI's own where they fit (`InfoBar`, `InfoBadge`, `SelectorBar`, `TeachingTip`, `ContentDialog`); Settings in Windows' pattern; the answer, Write and the card as in *Features from the study*.
 5. **Motion and feedback:** the catalogue above, through `Animations.cs`, at each level.
 6. **The new features:** the mini translator, the jump list, paste and translate, side by side.
