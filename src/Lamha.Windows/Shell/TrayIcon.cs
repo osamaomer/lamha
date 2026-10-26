@@ -1,4 +1,5 @@
 using global::Windows.Win32;
+using global::Windows.Win32.Graphics.Gdi;
 using global::Windows.Win32.UI.Shell;
 using global::Windows.Win32.UI.WindowsAndMessaging;
 
@@ -17,11 +18,18 @@ public sealed record TrayMenuItem(string? Text, Action? Run = null)
 
     /// <summary>A submenu's items; the item itself then does nothing.</summary>
     public IReadOnlyList<TrayMenuItem>? Items { get; init; }
+
+    /// <summary>Shown in bold: what a click on the icon does.</summary>
+    public bool Default { get; init; }
+
+    /// <summary>One of a choice: with <see cref="Checked"/>, the menu's dot instead of a check mark.</summary>
+    public bool Radio { get; init; }
 }
 
 /// <summary>
 /// Lamha's icon in the notification area, with its menu. Plain Win32 (Shell_NotifyIcon), so it costs no window and
-/// works with NativeAOT. Added again when Explorer restarts.
+/// works with NativeAOT. Added again when Explorer restarts. The icon can carry a dot and be faded
+/// (<see cref="TrayIconArt"/>), drawn at the tray's size.
 /// </summary>
 public sealed unsafe class TrayIcon : IDisposable
 {
@@ -33,6 +41,9 @@ public sealed unsafe class TrayIcon : IDisposable
 
     private readonly MessageWindow _window;
     private readonly HICON _icon;
+    private readonly int _size;
+    private HICON _marked; // the icon with its marks, while it has any
+    private (bool Dot, bool Faded) _marks;
     private string _tooltip;
     private Func<IReadOnlyList<TrayMenuItem>> _menu = () => [];
     private List<TrayMenuItem> _shown = [];
@@ -45,11 +56,12 @@ public sealed unsafe class TrayIcon : IDisposable
     {
         _window = window;
         _tooltip = tooltip;
+        // The tray's own size (16 px at 100%), so the marks are drawn on the pixels Windows shows.
+        _size = PInvoke.GetSystemMetricsForDpi(SYSTEM_METRICS_INDEX.SM_CXSMICON, PInvoke.GetDpiForSystem());
         fixed (char* path = iconPath)
         {
             _icon = (HICON)(nint)PInvoke.LoadImage(
-                default, path, GDI_IMAGE_TYPE.IMAGE_ICON, 0, 0,
-                IMAGE_FLAGS.LR_LOADFROMFILE | IMAGE_FLAGS.LR_DEFAULTSIZE).Value;
+                default, path, GDI_IMAGE_TYPE.IMAGE_ICON, _size, _size, IMAGE_FLAGS.LR_LOADFROMFILE).Value;
         }
 
         _window.TrayMessage += OnTrayMessage;
@@ -75,10 +87,29 @@ public sealed unsafe class TrayIcon : IDisposable
         PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_MODIFY, &data);
     }
 
+    /// <summary>The icon with a dot (words waiting for review) and faded (Lamha turned off), or as it is.</summary>
+    public void SetMarks(bool dot, bool faded)
+    {
+        if (_marks == (dot, faded) || _icon.IsNull)
+        {
+            return;
+        }
+
+        _marks = (dot, faded);
+        var old = _marked;
+        _marked = dot || faded ? Draw(dot, faded) : default;
+        var data = Data(NOTIFY_ICON_DATA_FLAGS.NIF_ICON);
+        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_MODIFY, &data);
+        if (!old.IsNull)
+        {
+            PInvoke.DestroyIcon(old);
+        }
+    }
+
     public void SetTooltip(string tooltip)
     {
         _tooltip = tooltip;
-        var data = Data(NOTIFY_ICON_DATA_FLAGS.NIF_TIP | NOTIFY_ICON_DATA_FLAGS.NIF_SHOWTIP);
+        var data = Data(NOTIFY_ICON_DATA_FLAGS.NIF_TIP);
         PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_MODIFY, &data);
     }
 
@@ -98,11 +129,16 @@ public sealed unsafe class TrayIcon : IDisposable
         {
             PInvoke.DestroyIcon(_icon);
         }
+
+        if (!_marked.IsNull)
+        {
+            PInvoke.DestroyIcon(_marked);
+        }
     }
 
     private void Add()
     {
-        var data = Data(NOTIFY_ICON_DATA_FLAGS.NIF_MESSAGE | NOTIFY_ICON_DATA_FLAGS.NIF_ICON | NOTIFY_ICON_DATA_FLAGS.NIF_TIP | NOTIFY_ICON_DATA_FLAGS.NIF_SHOWTIP);
+        var data = Data(NOTIFY_ICON_DATA_FLAGS.NIF_MESSAGE | NOTIFY_ICON_DATA_FLAGS.NIF_ICON);
         _added = PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_ADD, &data);
         data.Anonymous.uVersion = PInvoke.NOTIFYICON_VERSION_4;
         PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_SETVERSION, &data);
@@ -115,13 +151,67 @@ public sealed unsafe class TrayIcon : IDisposable
             cbSize = (uint)sizeof(NOTIFYICONDATAW),
             hWnd = _window.Handle,
             uID = IconId,
-            uFlags = flags,
+            // With NOTIFYICON_VERSION_4, any change sent without NIF_SHOWTIP hides the tooltip: it goes with every one.
+            uFlags = flags == 0 ? 0 : flags | NOTIFY_ICON_DATA_FLAGS.NIF_TIP | NOTIFY_ICON_DATA_FLAGS.NIF_SHOWTIP,
             uCallbackMessage = MessageWindow.TrayCallback,
-            hIcon = _icon,
+            hIcon = _marked.IsNull ? _icon : _marked,
         };
         var tip = _tooltip.AsSpan(0, Math.Min(_tooltip.Length, 127));
         tip.CopyTo(new Span<char>(&data.szTip, 128));
         return data;
+    }
+
+    /// <summary>A copy of the icon with its marks: its pixels read, marked, and made into a new icon.</summary>
+    private HICON Draw(bool dot, bool faded)
+    {
+        ICONINFO info;
+        if (!PInvoke.GetIconInfo(_icon, &info))
+        {
+            return default;
+        }
+
+        var header = new BITMAPINFO();
+        header.bmiHeader.biSize = (uint)sizeof(BITMAPINFOHEADER);
+        header.bmiHeader.biWidth = _size;
+        header.bmiHeader.biHeight = -_size; // top row first
+        header.bmiHeader.biPlanes = 1;
+        header.bmiHeader.biBitCount = 32;
+        var pixels = new byte[_size * _size * 4];
+        var screen = PInvoke.GetDC(default);
+        try
+        {
+            fixed (byte* p = pixels)
+            {
+                _ = PInvoke.GetDIBits(screen, info.hbmColor, 0, (uint)_size, p, &header, DIB_USAGE.DIB_RGB_COLORS);
+            }
+
+            if (dot)
+            {
+                TrayIconArt.Dot(pixels, _size);
+            }
+
+            // After the dot, so it fades too (the design's filter is on the whole icon).
+            if (faded)
+            {
+                TrayIconArt.Fade(pixels);
+            }
+
+            void* bits;
+            var colour = PInvoke.CreateDIBSection(screen, &header, DIB_USAGE.DIB_RGB_COLORS, &bits, default, 0);
+            pixels.CopyTo(new Span<byte>(bits, pixels.Length));
+            var mask = PInvoke.CreateBitmap(_size, _size, 1, 1, null); // nothing masked: the alpha decides
+            var made = new ICONINFO { fIcon = true, hbmColor = colour, hbmMask = mask };
+            var icon = PInvoke.CreateIconIndirect(&made);
+            PInvoke.DeleteObject(colour);
+            PInvoke.DeleteObject(mask);
+            return icon;
+        }
+        finally
+        {
+            _ = PInvoke.ReleaseDC(default, screen);
+            PInvoke.DeleteObject(info.hbmColor);
+            PInvoke.DeleteObject(info.hbmMask);
+        }
     }
 
     private void OnTrayMessage(uint message, int x, int y)
@@ -160,8 +250,9 @@ public sealed unsafe class TrayIcon : IDisposable
     private HMENU Build(IReadOnlyList<TrayMenuItem> items)
     {
         var menu = PInvoke.CreatePopupMenu();
-        foreach (var item in items)
+        for (var place = 0; place < items.Count; place++)
         {
+            var item = items[place];
             if (item.Text is null)
             {
                 PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, (char*)null);
@@ -169,7 +260,7 @@ public sealed unsafe class TrayIcon : IDisposable
             }
 
             var flags = MENU_ITEM_FLAGS.MF_STRING
-                | (item.Checked ? MENU_ITEM_FLAGS.MF_CHECKED : 0)
+                | (item.Checked && !item.Radio ? MENU_ITEM_FLAGS.MF_CHECKED : 0)
                 | (item.Enabled ? 0 : MENU_ITEM_FLAGS.MF_GRAYED);
             nuint id;
             if (item.Items is { } children)
@@ -186,6 +277,17 @@ public sealed unsafe class TrayIcon : IDisposable
             fixed (char* text = item.Text)
             {
                 PInvoke.AppendMenu(menu, flags, id, text);
+            }
+
+            if (item.Radio && item.Checked)
+            {
+                // The choice made gets the menu's dot, and the radio item's look.
+                PInvoke.CheckMenuRadioItem(menu, (uint)place, (uint)place, (uint)place, (uint)MENU_ITEM_FLAGS.MF_BYPOSITION);
+            }
+
+            if (item.Default)
+            {
+                PInvoke.SetMenuDefaultItem(menu, (uint)place, 1); // by position
             }
         }
 

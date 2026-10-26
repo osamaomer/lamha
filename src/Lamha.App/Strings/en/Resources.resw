@@ -31,6 +31,17 @@
   <data name="Note_ReplaceFailed" xml:space="preserve"><value>Couldn't replace</value><comment>d.replaceFailed</comment></data>
   <data name="Note_ReplaceFailedBody" xml:space="preserve"><value>The text was copied — paste it yourself (Ctrl+V).</value><comment>d.replaceFailedBody</comment></data>
   <data name="Tray_Quit" xml:space="preserve"><value>Quit</value><comment>d.trayQuit</comment></data>
+  <data name="Tray_Open" xml:space="preserve"><value>Open Lamha</value><comment>d.trayOpen</comment></data>
+  <data name="Tray_Review" xml:space="preserve"><value>Word review</value><comment>d.trayReview, ported by hand: no words waiting</comment></data>
+  <data name="Tray_ReviewCount" xml:space="preserve"><value>Word review ({0})</value><comment>d.trayReview, ported by hand: {0} words waiting</comment></data>
+  <data name="Tray_Write" xml:space="preserve"><value>Write ✨</value><comment>d.trayWrite</comment></data>
+  <data name="Tray_Enable" xml:space="preserve"><value>Enable Lamha</value><comment>p.enableLamha</comment></data>
+  <data name="Tray_Motion" xml:space="preserve"><value>Animations</value><comment>d.trayMotion</comment></data>
+  <data name="Tray_Settings" xml:space="preserve"><value>Settings</value><comment>d.traySettings</comment></data>
+  <data name="Tray_TipReview" xml:space="preserve"><value>{0} to review</value><comment>d.tipReview</comment></data>
+  <data name="Note_ReviewTime" xml:space="preserve"><value>Time to review</value><comment>d.reviewTime</comment></data>
+  <data name="Note_ReviewWaitingOne" xml:space="preserve"><value>{0} word is waiting for review.</value><comment>d.reviewWaiting, ported by hand: 1 word</comment></data>
+  <data name="Note_ReviewWaitingMany" xml:space="preserve"><value>{0} words are waiting for review.</value><comment>d.reviewWaiting, ported by hand: 2 words or more</comment></data>
 
   <!-- The card (phase 4) -->
   <data name="Common_Settings" xml:space="preserve"><value>Settings</value><comment>common.settings</comment></data>
@@ -510,8 +521,6 @@
   <data name="Note_Copied" xml:space="preserve"><value>Copied</value><comment>d.copiedTitle</comment></data>
   <data name="Note_PasteYourself" xml:space="preserve"><value>Paste it yourself with Ctrl+V</value><comment>d.pasteYourself</comment></data>
   <data name="Settings_CbIntro" xml:space="preserve"><value>A history of what you copy in any program. Open it with {0} to search and paste. It stays on your PC.</value><comment>d.sIntroA and d.sIntroB reworded in their markup only: joined around the shortcut {0}, the one in use</comment></data>
-  <data name="Proto_Tooltip" xml:space="preserve"><value>Lamha 3 (prototype)</value></data>
-  <data name="Proto_Sample" xml:space="preserve"><value>Show the card (sample text)</value></data>
   <data name="Settings_Languages" xml:space="preserve"><value>Languages</value><comment>o.languages</comment></data>
   <data name="Settings_Card" xml:space="preserve"><value>The lookup card</value><comment>o.cardSection</comment></data>
   <data name="Settings_Keys" xml:space="preserve"><value>Keyboard shortcuts</value><comment>o.keys</comment></data>

@@ -18,3 +18,4 @@ changes gets a new record that replaces the old one (the old one says so at the 
 | [0011](0011-clipboard-history-encrypted-in-sqlite.md) | Clipboard history in SQLite, each copy encrypted for the Windows user | Accepted, 2026-10-24 (built in phase 3) |
 | [0012](0012-sentence-through-ui-automation-in-process.md) | The sentence around a word: UI Automation in Lamha's process, on its own thread | Accepted, 2026-10-24 (built in phase 3) |
 | [0013](0013-main-window-memory.md) | The main window's memory: closed after use, .NET's spare memory given back, 95 MB after it for now | Accepted, 2026-10-25 (provisional until its pages are built) |
+| [0014](0014-notifications-windows-toasts-and-lamha-links.md) | Notifications: Windows' own toasts, their clicks as Lamha's links | Accepted, 2026-10-26 (built in phase 4) |

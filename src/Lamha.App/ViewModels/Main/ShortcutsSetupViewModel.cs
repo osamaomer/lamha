@@ -70,7 +70,7 @@ public sealed partial class ShortcutsSetupViewModel : ObservableObject
         {
             var info = _shortcuts.All.First(s => s.Kind == row.Kind);
             row.Keys = KeyPart.Of(info.Keys);
-            row.Status = info.Registered ? "" : Localization.Format("Note_HotkeyTakenBody", info.Keys.ToString());
+            row.Status = info.Taken ? Localization.Format("Note_HotkeyTakenBody", info.Keys.ToString()) : "";
             row.StatusKind = StatusKind.Bad;
         }
     }

@@ -47,6 +47,12 @@ public enum AiProviderKind
 /// </summary>
 public sealed record LamhaSettings
 {
+    /// <summary>
+    /// The tray's Enable Lamha (Lamha 2's <c>enabled</c>, its window's switch). Off, Lamha lets go of its shortcuts and
+    /// sends no review reminders (the user's call, 2026-10-26); clipboard history keeps its own switch.
+    /// </summary>
+    public bool Enabled { get; init; } = true;
+
     /// <summary>The translation language (<c>targetLang</c>).</summary>
     public string TargetLang { get; init; } = "ar";
 

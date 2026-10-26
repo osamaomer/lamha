@@ -39,6 +39,7 @@ public sealed partial class Brain : IDisposable
         Secrets = new CredentialStore(keyPrefix);
         Localization = new CoreLocalization(Settings);
         ClipboardHistory = new ClipboardHistory(new SqliteClipStore(Database), new Dpapi(), State, Settings, TimeProvider.System);
+        Reminder = new ReviewReminder(new SqliteDeckStore(Database), State, Settings, TimeProvider.System);
         _lookups = new Lazy<Lookups>(() => new Lookups(this));
     }
 
@@ -60,6 +61,12 @@ public sealed partial class Brain : IDisposable
     public CoreLocalization Localization { get; }
 
     public ClipboardHistory ClipboardHistory { get; }
+
+    /// <summary>The tray's count of words waiting for review, and when to remind: read from the deck, without a lookup's parts.</summary>
+    public ReviewReminder Reminder { get; }
+
+    /// <summary>The review deck changed (once a lookup has built it), on the thread that changed it.</summary>
+    public event Action? ReviewChanged;
 
     /// <summary>The lookup: dictionary, Google, the AI, Wikipedia (built at first use).</summary>
     public LookupService Lookup => _lookups.Value.Lookup;
@@ -141,6 +148,7 @@ public sealed partial class Brain : IDisposable
             var translation = Translation = new TranslationService(settings, ai, new GoogleTranslate(http), new AiTranslator(ai), network);
             var today = Today = new TodayService(activity, brain.State, deck, history, settings, clock, dictionary);
             Review = new ReviewService(deck, brain.State, history, settings, today, clock);
+            Review.Changed += () => brain.ReviewChanged?.Invoke();
             Writing = new WritingService(ai, settings, mistakes, brain.Localization, clock, errorLog);
             Lookup = new LookupService(
                 settings, brain.Localization, translation, new WordExplainer(ai, packs), packs, History = new HistoryService(history, clock),

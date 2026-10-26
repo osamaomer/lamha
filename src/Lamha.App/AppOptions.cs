@@ -18,7 +18,7 @@ public enum CardLifetime
 /// own names, and the startup entry left alone; for measuring and trying things without touching the real data.
 /// </param>
 /// <param name="Sample">
-/// <c>--sample=text</c>: the sample card's text (the tray's item, <c>--measure</c>); <c>--sample=write:text</c> opens
+/// <c>--sample=text</c>: the sample card, shown at start (and by <c>--measure</c>); <c>--sample=write:text</c> opens
 /// the writing tools on it, <c>--sample=write:</c> Write new, <c>--sample=error:code</c> the error a lookup would show
 /// for that code (<c>network</c>, <c>rate_limited</c>…). For screenshots of the card's states. With <c>--page=translate</c>,
 /// the text looked up in the main window's box instead.

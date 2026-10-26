@@ -85,7 +85,7 @@ public sealed partial class CardService(
     /// <summary><c>--theme</c>: the card's theme for this run instead of the setting.</summary>
     public string? Theme { get; init; }
 
-    /// <summary>The card with sample text and nowhere to paste (the tray's test item, and tools/Measure).</summary>
+    /// <summary>The card with sample text and nowhere to paste (<c>--sample</c> at start, and tools/Measure).</summary>
     public void ShowSample()
     {
         var sample = Sample ?? Localization.Get("Card_SampleText");

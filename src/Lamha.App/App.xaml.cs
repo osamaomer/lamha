@@ -7,6 +7,8 @@ using Lamha.Windows.Shell;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
+using WinRT;
+using ILaunchActivatedEventArgs = Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs;
 
 namespace Lamha.App;
 
@@ -22,6 +24,12 @@ public partial class App : Application
     private static readonly Hotkey WriteHotkey = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, VirtualKey.W);
     private static readonly Hotkey ClipboardHotkey = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, VirtualKey.V);
 
+    /// <summary>Who Lamha's notifications are from, in Windows (Lamha 2's was com.artworklab.lamha).</summary>
+    private const string NotificationAppId = "ArtworkLab.Lamha";
+
+    /// <summary>The scheme of Lamha's own links, which a notification's clicks open (lamha:review).</summary>
+    private const string LinkScheme = "lamha";
+
     private readonly AppOptions _options;
     private readonly AppInstance _instance;
     private MessageWindow? _messages;
@@ -31,6 +39,8 @@ public partial class App : Application
     private SentenceReader? _sentences;
     private ClipboardService? _clipboard;
     private TrayService? _tray;
+    private NotificationService? _notes;
+    private ReviewReminderService? _reminders;
     private CardService? _card;
     private ClipPanelService? _panel;
     private MainWindowService? _main;
@@ -60,6 +70,7 @@ public partial class App : Application
         _messages = new MessageWindow();
         _accent = new AccentService(_brain.Settings, queue); // kept: it listens to Windows for as long as Lamha runs
         _clipboard = new ClipboardService(_messages, _brain, queue);
+        _notes = new NotificationService(Notifications(_options.Profile), (title, body) => _tray?.Notify(title, body));
         _sentences = new SentenceReader();
 
         var startup = new StartWithWindows($"\"{Environment.ProcessPath}\"");
@@ -118,21 +129,33 @@ public partial class App : Application
             SettingsOpener = section => _main.Show("settings", section),
             LanguageChanged = () =>
             {
-                _tray?.RefreshTooltip();
+                _tray?.Refresh();
                 _card.Dispose(); // made again in the new language at the next lookup
                 _panel.Dispose();
             },
         };
 
-        _tray = new TrayService(_messages, _clipboard, startup, shortcuts, OpenMain, () => _panel.Toggle(fromTray: true), _card.ShowSample, Quit);
-        var taken = shortcuts.All.Where(s => !s.Registered).Select(s => s.Keys.ToString()).ToList();
-        if (taken.Count > 0)
-        {
-            Notify(Localization.Get("Note_HotkeyTaken"), Localization.Format("Note_HotkeyTakenBody", string.Join(Localization.Get("Note_And"), taken)));
-        }
+        _tray = new TrayService(_messages, _brain.Settings, _clipboard, startup, shortcuts, new TrayActions(OpenMain, OpenPage, () => _panel.Toggle(fromTray: true), Quit));
+        _tray.EnabledChanged += () => NotifyTaken(shortcuts);
+        _reminders = new ReviewReminderService(_brain, _notes, () => shortcuts.IsOn && !_main.IsInUse, queue) { OpenReview = () => OpenPage("review") };
+        _reminders.Changed += _tray.SetWaiting;
+        _notes.Register();
+        NotifyTaken(shortcuts);
+        var fromNotification = _notes.Open(Environment.CommandLine); // a click on a notification that started Lamha
+        queue.TryEnqueue(DispatcherQueuePriority.Low, _reminders.Recount); // the count, and a reminder if one is due (Lamha 2's, at start)
 
-        // A second start of Lamha lands here (on a background thread): it opens the main window.
-        _instance.Activated += (_, _) => queue.TryEnqueue(OpenMain);
+        // A second start of Lamha lands here (on a background thread): a notification's link, or the main window.
+        _instance.Activated += (_, e) =>
+        {
+            var arguments = Arguments(e);
+            queue.TryEnqueue(() =>
+            {
+                if (_notes?.Open(arguments) != true)
+                {
+                    OpenMain();
+                }
+            });
+        };
 
         if (_options.Page is { } page)
         {
@@ -142,11 +165,15 @@ public partial class App : Application
         {
             _panel.Toggle(fromTray: true);
         }
+        else if (_options.Sample is not null && !_options.Measure)
+        {
+            _card.ShowSample();
+        }
         else if (_options.FirstRun is { } step)
         {
             _firstRun.Show(Enum.TryParse<FirstRunStep>(step, ignoreCase: true, out var at) ? at : FirstRunStep.Language);
         }
-        else if (!_options.Measure && _options.Sample is null && FirstRunService.IsDue(_brain.DataFolder, _hadDatabase))
+        else if (!_options.Measure && _options.Sample is null && !fromNotification && FirstRunService.IsDue(_brain.DataFolder, _hadDatabase))
         {
             _firstRun.Show();
         }
@@ -163,7 +190,58 @@ public partial class App : Application
         idle.Schedule(); // start-up's own memory, once the tray is ready
     }
 
-    private void Notify(string title, string body) => _tray?.Notify(title, body);
+    /// <summary>
+    /// Lamha's name, icon and links for its notifications. With <c>--profile</c>, names of their own (and the profile in
+    /// the links' command), so trying something never takes over the installed Lamha's.
+    /// </summary>
+    internal static NotificationRegistration Notifications(string? profile)
+    {
+        var command = $"\"{Environment.ProcessPath}\"{(profile is null ? "" : $" --profile=\"{profile}\"")} \"%1\"";
+        return profile is null
+            ? new NotificationRegistration(NotificationAppId, LinkScheme, command)
+            : new NotificationRegistration(NotificationAppId + ".Profile", LinkScheme + "-profile", command);
+    }
+
+    /// <summary>A second start's command line (where a notification's link is), or "".</summary>
+    private static string Arguments(AppActivationArguments e)
+    {
+        if (e.Kind != ExtendedActivationKind.Launch || e.Data is null)
+        {
+            return "";
+        }
+
+        try
+        {
+            return e.Data.As<ILaunchActivatedEventArgs>().Arguments ?? "";
+        }
+        catch (InvalidCastException)
+        {
+            return "";
+        }
+    }
+
+    private void Notify(string title, string body) => _notes?.Show(title, body);
+
+    /// <summary>Shortcut in use: the keys another program holds, at start and when Lamha is enabled again (Lamha 2's).</summary>
+    private void NotifyTaken(ShortcutService shortcuts)
+    {
+        var taken = shortcuts.All.Where(s => s.Taken).Select(s => s.Keys.ToString()).ToList();
+        if (taken.Count > 0)
+        {
+            Notify(Localization.Get("Note_HotkeyTaken"), Localization.Format("Note_HotkeyTakenBody", string.Join(Localization.Get("Note_And"), taken)));
+        }
+    }
+
+    /// <summary>The tray's Word review, Write and Settings, and a review notification: the main window on that page.</summary>
+    private void OpenPage(string page)
+    {
+        if (page == "review")
+        {
+            _reminders?.Dismiss();
+        }
+
+        _main?.Show(page);
+    }
 
     /// <summary>The tray icon and a second start: the main window, or first run while it's open.</summary>
     private void OpenMain()
@@ -218,6 +296,7 @@ public partial class App : Application
         _clipboard?.Dispose();
         _accent?.Dispose();
         _sentences?.Dispose();
+        _reminders?.Dispose();
         _tray?.Dispose();
         _messages?.Dispose();
         _brain.Dispose();

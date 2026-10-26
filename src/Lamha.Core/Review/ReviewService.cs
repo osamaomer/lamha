@@ -54,13 +54,19 @@ public sealed class ReviewService(IDeckStore deck, IStateStore state, IHistorySt
     private const string ImportedKey = "deck.imported";
     private readonly SemaphoreSlim _gate = new(1, 1);
 
+    /// <summary>
+    /// The deck changed: a word added or removed, an answer, the deck cleared or restored (the tray's count reads it
+    /// again). Raised on whichever thread made the change.
+    /// </summary>
+    public event Action? Changed;
+
     /// <summary>Adds the word if it's new; a word already there keeps its progress and gets what it was missing.</summary>
-    public Task<bool> AddAsync(CardDraft draft) => Locked(() => Put(draft));
+    public Task<bool> AddAsync(CardDraft draft) => Changing(() => Put(draft));
 
     /// <summary>The card's bookmark: adds the word if it's missing, else removes it. Returns whether it's in the deck now.</summary>
-    public Task<bool> ToggleAsync(CardDraft draft) => Locked(() => deck.Get(Card.KeyOf(draft.Word)) is null ? Put(draft) : !Drop(Card.KeyOf(draft.Word)));
+    public Task<bool> ToggleAsync(CardDraft draft) => Changing(() => deck.Get(Card.KeyOf(draft.Word)) is null ? Put(draft) : !Drop(Card.KeyOf(draft.Word)));
 
-    public Task<bool> RemoveAsync(string key) => Locked(() => Drop(key));
+    public Task<bool> RemoveAsync(string key) => Changing(() => Drop(key));
 
     /// <summary>Waits for changes on their way (a lookup's automatic card) before answering.</summary>
     public Task<bool> HasAsync(string word) => Locked(() => deck.Get(Card.KeyOf(word)) is not null);
@@ -70,7 +76,7 @@ public sealed class ReviewService(IDeckStore deck, IStateStore state, IHistorySt
         words.Select(Card.KeyOf).Where(k => k.Length > 0 && deck.Get(k) is not null).ToHashSet());
 
     /// <summary>Settings → delete all cards: the words and the progress, each noted as removed; the history isn't turned into cards again.</summary>
-    public Task ClearAsync() => Locked(() =>
+    public Task ClearAsync() => Changing(() =>
     {
         deck.Clear(Days.NowMs(time));
         state.Set(StatsKey, null);
@@ -85,9 +91,7 @@ public sealed class ReviewService(IDeckStore deck, IStateStore state, IHistorySt
         var now = Days.NowMs(time);
         var stats = Stats();
         var todayDate = Days.Today(time);
-        var seen = stats.Day == todayDate ? stats.NewSeen : 0;
-        var perDay = settings.Current.CardsNewPerDay > 0 ? settings.Current.CardsNewPerDay : 10;
-        var newLeft = Math.Max(0, perDay - seen);
+        var newLeft = NewLeft(stats, settings.Current, todayDate);
 
         var counts = deck.Counts(now);
         var due = deck.Due(now, 100);
@@ -137,10 +141,26 @@ public sealed class ReviewService(IDeckStore deck, IStateStore state, IHistorySt
             });
             return true;
         }).ConfigureAwait(false);
+        Changed?.Invoke();
         return today.CountActivity();
     }
 
-    public DeckStats Stats() => state.Get(StatsKey) is { } json ? JsonSerializer.Deserialize(json, DeckJson.Default.DeckStats) ?? new() : new();
+    public DeckStats Stats() => ReadStats(state);
+
+    /// <summary>The deck's day and streak as kept in <paramref name="state"/>.</summary>
+    internal static DeckStats ReadStats(IStateStore state) =>
+        state.Get(StatsKey) is { } json ? JsonSerializer.Deserialize(json, DeckJson.Default.DeckStats) ?? new() : new();
+
+    /// <summary>New words still to show today: the day's limit (<c>cardsNewPerDay</c>, 10 when unset) less those seen.</summary>
+    internal static int NewLeft(DeckStats stats, LamhaSettings settings, DateOnly today)
+    {
+        var seen = stats.Day == today ? stats.NewSeen : 0;
+        var perDay = settings.CardsNewPerDay > 0 ? settings.CardsNewPerDay : 10;
+        return Math.Max(0, perDay - seen);
+    }
+
+    /// <summary>Tells <see cref="Changed"/> after a change made elsewhere (a restored backup).</summary>
+    internal void OnChanged() => Changed?.Invoke();
 
     /// <summary>Runs <paramref name="work"/> with the deck to itself.</summary>
     internal async Task<T> Locked<T>(Func<T> work)
@@ -154,6 +174,14 @@ public sealed class ReviewService(IDeckStore deck, IStateStore state, IHistorySt
         {
             _gate.Release();
         }
+    }
+
+    /// <summary>Runs a change with the deck to itself, then tells <see cref="Changed"/>.</summary>
+    private async Task<bool> Changing(Func<bool> work)
+    {
+        var result = await Locked(work).ConfigureAwait(false);
+        Changed?.Invoke();
+        return result;
     }
 
     /// <summary>Lamha 2's <c>putCard</c>: true when the word was added.</summary>

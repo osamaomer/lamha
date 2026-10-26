@@ -15,7 +15,10 @@ public static class Program
     public static int Main(string[] args)
     {
         // Install, update and uninstall hooks; exits by itself when Velopack started the process for one of them.
-        VelopackApp.Build().Run();
+        // Uninstalling takes Lamha's notification name and links out of the registry (the user's data folder stays).
+        VelopackApp.Build()
+            .OnBeforeUninstallFastCallback(_ => App.Notifications(profile: null).Unregister())
+            .Run();
 
         WinRT.ComWrappersSupport.InitializeComWrappers();
         var instance = AppInstance.FindOrRegisterForKey(InstanceKey);

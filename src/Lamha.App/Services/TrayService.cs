@@ -1,58 +1,84 @@
 using System.Globalization;
+using Lamha.Core.Settings;
 using Lamha.Windows.Shell;
 
 namespace Lamha.App.Services;
 
+/// <summary>What the tray's items open: the main window (on a page), the clipboard panel, and Quit.</summary>
+/// <param name="Open">The main window as it was (a click on the icon too), or first run while it's open.</param>
+/// <param name="Page">The main window on a page ("review", "write", "settings").</param>
+/// <param name="Clipboard">The clipboard panel, with nothing to paste into (a paste only copies).</param>
+/// <param name="Quit">Lamha ends.</param>
+public sealed record TrayActions(Action Open, Action<string> Page, Action Clipboard, Action Quit);
+
 /// <summary>
-/// The tray icon, its tooltip and its menu: Lamha 2's trayMenu() / trayTooltip() in main.js, with what exists so far.
-/// Clicking the icon opens the main window; Clipboard opens the clipboard panel (nothing to paste into from here: a paste
-/// only copies). The menu's Open, Review, Write and Settings come with the tray's design (phase 4), updates with
-/// phase 5. Clipboard history is turned on in Settings → Clipboard; the tray pauses it.
+/// The tray icon, its tooltip and its menu: Lamha 2's trayMenu() / trayTooltip() in main.js, as the tray design
+/// (2026-10-25) has them, with Enable Lamha moved in from Lamha 2's window. The icon has a dot while words wait for
+/// review, and is faded while Lamha is turned off. Check for updates comes with the updates (phase 5).
 /// </summary>
 public sealed partial class TrayService : IDisposable
 {
+    private static readonly string[] MotionLevels = ["auto", "full", "subtle", "off"];
+
     private readonly TrayIcon _icon;
+    private readonly SettingsService _settings;
     private readonly ClipboardService _clipboard;
     private readonly StartWithWindows _startup;
     private readonly ShortcutService _shortcuts;
-    private readonly Action _panel;
-    private readonly Action _sample;
-    private readonly Action _quit;
+    private readonly TrayActions _actions;
+    private int _waiting;
 
     public TrayService(
         MessageWindow window,
+        SettingsService settings,
         ClipboardService clipboard,
         StartWithWindows startup,
         ShortcutService shortcuts,
-        Action open,
-        Action panel,
-        Action sample,
-        Action quit)
+        TrayActions actions)
     {
+        _settings = settings;
         _clipboard = clipboard;
         _startup = startup;
         _shortcuts = shortcuts;
-        _panel = panel;
-        _sample = sample;
-        _quit = quit;
+        _actions = actions;
         _icon = new TrayIcon(window, Path.Combine(AppContext.BaseDirectory, "Assets", "Lamha.ico"), Tooltip());
         _icon.SetMenu(Menu);
-        _icon.Invoked += open;
-        _clipboard.PauseChanged += () => _icon.SetTooltip(Tooltip());
+        _icon.Invoked += actions.Open;
+        _clipboard.PauseChanged += Refresh;
+        Refresh();
     }
 
-    /// <summary>The tooltip again, in the interface language (first run's language step changes it while Lamha runs).</summary>
-    public void RefreshTooltip() => _icon.SetTooltip(Tooltip());
+    /// <summary>Enable Lamha was switched: the shortcuts are taken or let go, and the icon fades or comes back.</summary>
+    public event Action? EnabledChanged;
 
-    /// <summary>A notification from the tray icon.</summary>
+    /// <summary>Words waiting for review: the dot, the tooltip and Word review's count.</summary>
+    public void SetWaiting(int waiting)
+    {
+        _waiting = waiting;
+        Refresh();
+    }
+
+    /// <summary>The tooltip and the icon again (also in a new interface language: first run's language step).</summary>
+    public void Refresh()
+    {
+        _icon.SetTooltip(Tooltip());
+        _icon.SetMarks(dot: _waiting > 0, faded: !_shortcuts.IsOn);
+    }
+
+    /// <summary>The tray icon's own notification, for when Windows' can't be used.</summary>
     public void Notify(string title, string body) => _icon.Notify(title, body);
 
     public void Dispose() => _icon.Dispose(); // before exiting, or a dead icon stays until the mouse passes over it
 
-    /// <summary>"Lamha 3 (prototype) — Clipboard history paused".</summary>
+    /// <summary>"Lamha — 12 to review — Clipboard history paused" (Lamha 2's).</summary>
     private string Tooltip()
     {
-        var parts = new List<string> { Localization.Get("Proto_Tooltip") };
+        var parts = new List<string> { Localization.Get("Common_Lamha") };
+        if (_waiting > 0)
+        {
+            parts.Add(Localization.Format("Tray_TipReview", _waiting));
+        }
+
         if (_clipboard.PausedUntil is not null)
         {
             parts.Add(Localization.Get("Tray_TipPaused"));
@@ -65,24 +91,29 @@ public sealed partial class TrayService : IDisposable
     {
         var items = new List<TrayMenuItem>
         {
-            new(Localization.Get("Tray_Clipboard"), _panel),
-            new(Localization.Get("Proto_Sample"), _sample),
+            new(Localization.Get("Tray_Open"), _actions.Open) { Default = true },
+            new(Localization.Get("Tray_Clipboard"), _actions.Clipboard),
+            new(_waiting > 0 ? Localization.Format("Tray_ReviewCount", _waiting) : Localization.Get("Tray_Review"), () => _actions.Page("review")),
+            new(Localization.Get("Tray_Write"), () => _actions.Page("write")),
             TrayMenuItem.Separator,
+            new(Localization.Get("Tray_Enable"), ToggleEnabled) { Checked = _shortcuts.IsOn },
         };
+        items.AddRange(PauseItems());
+        items.Add(MotionItem());
+        items.Add(new TrayMenuItem(Localization.Get("Tray_Settings"), () => _actions.Page("settings")));
+        items.Add(TrayMenuItem.Separator);
 
         // The shortcuts, for information (as they are now: Settings may have changed them); one another program took is marked.
         foreach (var s in _shortcuts.All)
         {
-            var text = $"{s.Keys} — {Localization.Get(s.LabelKey)}{(s.Registered ? "" : Localization.Get("Tray_Unavailable"))}";
+            var text = $"{s.Keys} — {Localization.Get(s.LabelKey)}{(s.Taken ? Localization.Get("Tray_Unavailable") : "")}";
             items.Add(new TrayMenuItem(text) { Enabled = false });
         }
 
         items.Add(TrayMenuItem.Separator);
-        items.AddRange(PauseItems());
-        items.Add(TrayMenuItem.Separator);
         items.Add(new TrayMenuItem(Localization.Get("Tray_StartWithWindows"), ToggleStartup) { Checked = _startup.IsOn });
         items.Add(TrayMenuItem.Separator);
-        items.Add(new TrayMenuItem(Localization.Get("Tray_Quit"), _quit));
+        items.Add(new TrayMenuItem(Localization.Get("Tray_Quit"), _actions.Quit));
         return items;
     }
 
@@ -111,6 +142,29 @@ public sealed partial class TrayService : IDisposable
                 new(Localization.Get("Tray_PauseUntil"), () => _clipboard.Pause(null)),
             ],
         };
+    }
+
+    /// <summary>Animations ▸ Automatic / Full / Subtle / Off: Settings → Appearance's choice (Lamha 2's motionMenu()).</summary>
+    private TrayMenuItem MotionItem()
+    {
+        var current = _settings.Current.Motion;
+        return new TrayMenuItem(Localization.Get("Tray_Motion"))
+        {
+            Items = [.. MotionLevels.Select(level => new TrayMenuItem(
+                Localization.Get("Settings_Motion" + char.ToUpperInvariant(level[0]) + level[1..]),
+                () => _settings.Update(s => s with { Motion = level }))
+            {
+                Radio = true,
+                Checked = current == level,
+            })],
+        };
+    }
+
+    private void ToggleEnabled()
+    {
+        _shortcuts.SetOn(!_shortcuts.IsOn);
+        Refresh();
+        EnabledChanged?.Invoke();
     }
 
     private void ToggleStartup()

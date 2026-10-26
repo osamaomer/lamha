@@ -36,6 +36,9 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
 
     public bool IsOpen => _window is not null;
 
+    /// <summary>Open and in front (Lamha 2's <c>isVisible() &amp;&amp; isFocused()</c>): no review reminder then.</summary>
+    public bool IsInUse => _window is { } window && ForegroundWindow.Current == window.Handle;
+
     /// <summary>
     /// The window, on the page <paramref name="page"/> ("translate", "settings"…); for Settings, at the category
     /// <paramref name="section"/> ("writing"…) when one is given (an error's Settings button).
