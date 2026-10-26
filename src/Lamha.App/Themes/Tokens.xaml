@@ -19,10 +19,6 @@
       <SolidColorBrush x:Key="LamhaLineBrush" Color="#14000000" />
       <SolidColorBrush x:Key="LamhaFieldLineBrush" Color="#6B000000" />
       <SolidColorBrush x:Key="LamhaHoverBrush" Color="#0D000000" />
-      <!-- The main window's side pane on Mica: a page under the mouse, the page that's open (its text in high contrast) -->
-      <SolidColorBrush x:Key="LamhaNavHoverBrush" Color="#0A000000" />
-      <SolidColorBrush x:Key="LamhaNavSelectedBrush" Color="#0F000000" />
-      <SolidColorBrush x:Key="LamhaNavSelectedTextBrush" Color="#1D1D1F" />
       <!-- The edge of buttons and chips: none here, the text colour in high contrast (their fills disappear there) -->
       <SolidColorBrush x:Key="LamhaControlEdgeBrush" Color="#00000000" />
       <!-- Chips and quiet buttons, and the shapes that stand in for an answer while it loads -->
@@ -81,9 +77,6 @@
       <SolidColorBrush x:Key="LamhaLineBrush" Color="#1AFFFFFF" />
       <SolidColorBrush x:Key="LamhaFieldLineBrush" Color="#66FFFFFF" />
       <SolidColorBrush x:Key="LamhaHoverBrush" Color="#12FFFFFF" />
-      <SolidColorBrush x:Key="LamhaNavHoverBrush" Color="#0DFFFFFF" />
-      <SolidColorBrush x:Key="LamhaNavSelectedBrush" Color="#12FFFFFF" />
-      <SolidColorBrush x:Key="LamhaNavSelectedTextBrush" Color="#F5F5F7" />
       <SolidColorBrush x:Key="LamhaControlEdgeBrush" Color="#00000000" />
       <SolidColorBrush x:Key="LamhaChipBrush" Color="#12FFFFFF" />
       <SolidColorBrush x:Key="LamhaSkeletonBrush" Color="#14FFFFFF" />
@@ -132,9 +125,6 @@
       <SolidColorBrush x:Key="LamhaLineBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
       <SolidColorBrush x:Key="LamhaFieldLineBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
       <SolidColorBrush x:Key="LamhaHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
-      <SolidColorBrush x:Key="LamhaNavHoverBrush" Color="{ThemeResource SystemColorHighlightColor}" />
-      <SolidColorBrush x:Key="LamhaNavSelectedBrush" Color="{ThemeResource SystemColorHighlightColor}" />
-      <SolidColorBrush x:Key="LamhaNavSelectedTextBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
       <SolidColorBrush x:Key="LamhaControlEdgeBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
       <SolidColorBrush x:Key="LamhaChipBrush" Color="{ThemeResource SystemColorWindowColor}" />
       <SolidColorBrush x:Key="LamhaSkeletonBrush" Color="{ThemeResource SystemColorGrayTextColor}" />

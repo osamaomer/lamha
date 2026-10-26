@@ -59,6 +59,9 @@ public sealed partial class MainWindow : Window, IPageHost
     /// <summary>The page is changing because of Back: it isn't added to where Back goes, and it slides in from the start.</summary>
     private bool _goingBack;
 
+    /// <summary>Where the window is when neither maximised nor minimised: saved when it closes.</summary>
+    private WindowPlace? _normal;
+
     /// <param name="viewModel">The pages, the one that's open, and the toast.</param>
     /// <param name="brain">Lamha's brain, for the pages.</param>
     /// <param name="shortcuts">The shortcuts: the quick lookup's keys under the Translate page's box, and Settings' changes.</param>
@@ -126,6 +129,7 @@ public sealed partial class MainWindow : Window, IPageHost
         };
         Closed += (_, _) =>
         {
+            SavePlace();
             _translate?.ViewModel.Unload();
             _write?.ViewModel.Unload();
             if (ReferenceEquals(PageHost.Content, _clipboardPage))
@@ -211,15 +215,36 @@ public sealed partial class MainWindow : Window, IPageHost
         Nav.SelectedItem = _items[page.Id];
     }
 
-    /// <summary>Opens at the design's size, in the middle of the screen the mouse is on.</summary>
+    /// <summary>
+    /// Opens where it was when it last closed (maximised again if it was), as Windows' own apps do; the first time, or
+    /// when that screen is gone, at the design's size in the middle of the screen the mouse is on.
+    /// </summary>
     public void ShowCentred(PixelRect workArea, double scale)
     {
-        var width = Math.Min(Scaled(StartWidth, scale), workArea.Width);
-        var height = Math.Min(Scaled(StartHeight, scale), workArea.Height);
         var presenter = AppWindow.Presenter.As<OverlappedPresenter>(); // not `is`: false under NativeAOT (see CardWindow)
         presenter.PreferredMinimumWidth = Scaled(MinWidth, scale);
         presenter.PreferredMinimumHeight = Scaled(MinHeight, scale);
-        AppWindow.MoveAndResize(new RectInt32(workArea.X + ((workArea.Width - width) / 2), workArea.Y + ((workArea.Height - height) / 2), width, height));
+        var was = WindowPlace.Parse(_brain.State.Get(WindowPlace.Key)) is { } saved
+            ? saved.On(Screens.WorkAreaAt(new PixelPoint(saved.X + (saved.Width / 2), saved.Y)))
+            : null;
+        if (was is not null)
+        {
+            AppWindow.MoveAndResize(new RectInt32(was.X, was.Y, was.Width, was.Height));
+        }
+        else
+        {
+            var width = Math.Min(Scaled(StartWidth, scale), workArea.Width);
+            var height = Math.Min(Scaled(StartHeight, scale), workArea.Height);
+            AppWindow.MoveAndResize(new RectInt32(workArea.X + ((workArea.Width - width) / 2), workArea.Y + ((workArea.Height - height) / 2), width, height));
+        }
+
+        _normal = new WindowPlace(AppWindow.Position.X, AppWindow.Position.Y, AppWindow.Size.Width, AppWindow.Size.Height, false);
+        if (was?.Maximized == true)
+        {
+            presenter.Maximize();
+        }
+
+        AppWindow.Changed += OnPlaceChanged;
         AppWindow.Show(activateWindow: true);
         Activate();
         // Started again from the Start menu, Lamha (already running) isn't the program in front, and Windows would
@@ -358,6 +383,25 @@ public sealed partial class MainWindow : Window, IPageHost
     }
 
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
+
+    /// <summary>Moved or resized while neither maximised nor minimised: that's where it opens next time.</summary>
+    private void OnPlaceChanged(AppWindow sender, AppWindowChangedEventArgs args)
+    {
+        if ((args.DidPositionChange || args.DidSizeChange) && sender.Presenter.As<OverlappedPresenter>().State == OverlappedPresenterState.Restored)
+        {
+            _normal = new WindowPlace(sender.Position.X, sender.Position.Y, sender.Size.Width, sender.Size.Height, false);
+        }
+    }
+
+    /// <summary>Closing: where it was (its normal place, and whether it was maximised), for next time.</summary>
+    private void SavePlace()
+    {
+        if (_normal is { } normal)
+        {
+            var maximized = AppWindow.Presenter.As<OverlappedPresenter>().State == OverlappedPresenterState.Maximized;
+            _brain.State.Set(WindowPlace.Key, (normal with { Maximized = maximized }).ToString());
+        }
+    }
 
     /// <summary>
     /// A row of the pane: the page's coloured icon and its name (and Review's count), as Windows' Settings draws its

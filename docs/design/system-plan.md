@@ -233,7 +233,11 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
    - **Transitions:** pages rise in, a category slides in from the text's end, and Back slides the other way (`Animations.Page`; the pages stay the cached views they were, so no `Frame`).
    - **Measured against Settings:** rows from 18 with names at 63; the title's baseline at 85.
    - **Memory:** see 0020 (99 / 97 MB; 0013's budget after the window raised to 100 MB, the user's call).
-   - **Still to do in this step:** the search box in the title bar, and the window remembering its size, position and pane.
+   - **The search** in the title bar (`QuickSearch` in Core): settings (each category and the settings it names), words looked up, clipboard copies when clipboard history is on, and "Translate …" last. It's 512 wide in the middle, and a 🔍 button when narrow. `--sample=search:text` shows it for screenshots.
+   - **Lamha's accent for all of Windows' controls** through the `SystemAccentColor` family (Tokens.xaml); taken away for Windows' own accent, and the open window applies a change at once.
+   - **The window opens where it was** (`WindowPlace` in Core): its normal place and whether it was maximised, if the place can still be grabbed on a screen.
+   - **Done 2026-10-26.** 465 tests. To the user: try the search's suggestions (the screenshots can't show its popup), and Back with the mouse's back button.
+   - **Noticed, not this step's:** `LookupTests.AWordLookedUpAgainGoesBackToTheTopOfTheHistory` fails now and then when the whole solution's tests run together (it passes alone): a race in the test, worth a look.
 4. **Components:** WinUI's own where they fit (`InfoBar`, `InfoBadge`, `SelectorBar`, `TeachingTip`, `ContentDialog`); Settings in Windows' pattern; the answer, Write and the card as in *Features from the study*.
 5. **Motion and feedback:** the catalogue above, through `Animations.cs`, at each level.
 6. **The new features:** the mini translator, the jump list, paste and translate, side by side.
