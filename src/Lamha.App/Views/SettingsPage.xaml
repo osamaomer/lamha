@@ -482,9 +482,45 @@
       <controls:SettingsCard Header="{x:Bind S.Theme}" Description="{x:Bind S.ThemeHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.ThemeChoices}" SelectedIndex="{x:Bind ViewModel.ThemeIndex, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.Motion}" Description="{x:Bind S.MotionHint}">
-        <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.MotionChoices}" SelectedIndex="{x:Bind ViewModel.MotionIndex, Mode=TwoWay}" />
-      </controls:SettingsCard>
+      <!-- Animations, with Lamha 2's preview under it: a small card that comes in as the chosen level makes it, what the
+           level does, and Preview -->
+      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
+        <StackPanel Spacing="10">
+          <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Spacing="2">
+              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Motion}" />
+              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.MotionHint}" />
+            </StackPanel>
+            <ComboBox Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.MotionChoices}"
+                      SelectedIndex="{x:Bind ViewModel.MotionIndex, Mode=TwoWay}" AutomationProperties.Name="{x:Bind S.Motion}" AutomationProperties.HelpText="{x:Bind S.MotionHint}" />
+          </Grid>
+          <Grid Padding="12" MinHeight="76" ColumnSpacing="12" CornerRadius="{StaticResource LamhaRadiusLarge}" Background="{ThemeResource LamhaPageBrush}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <!-- Lamha 2's .md-card: the English word on the left in both languages, its meaning on the reading side -->
+            <Border x:Name="MotionDemoCard" Padding="12,10" CornerRadius="{StaticResource LamhaRadiusMedium}" VerticalAlignment="Center"
+                    Background="{ThemeResource LamhaSurfaceBrush}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="1"
+                    AutomationProperties.AccessibilityView="Raw">
+              <StackPanel Spacing="2">
+                <TextBlock FlowDirection="LeftToRight" TextAlignment="Left" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource LamhaTextBrush}"
+                           Text="{x:Bind S.MotionDemoWord}" />
+                <TextBlock x:Name="MotionDemoMeaning" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind S.MotionDemoMeaning}" />
+              </StackPanel>
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="8">
+              <TextBlock MaxWidth="150" TextWrapping="Wrap" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}"
+                         Text="{x:Bind ViewModel.MotionNote, Mode=OneWay}" />
+              <Button HorizontalAlignment="Left" Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.MotionPreview}" Command="{x:Bind ViewModel.PreviewMotionCommand}" />
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </Border>
       <controls:SettingsCard Header="{x:Bind S.CardBg}" Description="{x:Bind S.CardBgHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.CardBgChoices}" SelectedIndex="{x:Bind ViewModel.CardBgIndex, Mode=TwoWay}" />
       </controls:SettingsCard>

@@ -594,6 +594,13 @@
   <data name="Settings_MotionFull" xml:space="preserve"><value>Full</value><comment>motion.full</comment></data>
   <data name="Settings_MotionSubtle" xml:space="preserve"><value>Subtle</value><comment>motion.subtle</comment></data>
   <data name="Settings_MotionOff" xml:space="preserve"><value>Off</value><comment>motion.off</comment></data>
+  <data name="Settings_MotionPreview" xml:space="preserve"><value>Preview</value><comment>o.motionPlay</comment></data>
+  <data name="Settings_MotionNoteFull" xml:space="preserve"><value>Everything, plus playful touches</value><comment>o.motionNote_full</comment></data>
+  <data name="Settings_MotionNoteSubtle" xml:space="preserve"><value>Short, calm transitions</value><comment>o.motionNote_subtle</comment></data>
+  <data name="Settings_MotionNoteOff" xml:space="preserve"><value>No motion: everything appears at once</value><comment>o.motionNote_off</comment></data>
+  <data name="Settings_MotionAutoIs" xml:space="preserve"><value>Automatic is using: {0}</value><comment>o.motionAutoIs, ported by hand: {0} is the level's name</comment></data>
+  <data name="Settings_MotionDemoWord" xml:space="preserve"><value>glance</value><comment>the Animations preview's word (Lamha 2's options.html), the same in both languages</comment></data>
+  <data name="Settings_MotionDemoMeaning" xml:space="preserve"><value>لمحة</value><comment>the Animations preview's meaning (Lamha 2's options.html), the same in both languages</comment></data>
   <data name="Settings_Accent" xml:space="preserve"><value>Accent colour from Windows</value><comment>d.accent</comment></data>
   <data name="Settings_AccentHint" xml:space="preserve"><value>Buttons and links take the accent colour you chose in Windows, adjusted to stay readable</value><comment>d.accentHint</comment></data>
   <data name="Settings_Mica" xml:space="preserve"><value>Show the wallpaper behind the window</value><comment>d.mica</comment></data>

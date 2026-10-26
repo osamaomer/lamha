@@ -83,7 +83,7 @@
           </ScrollViewer>
 
           <!-- "Copied", "History cleared · Undo": a moment at the foot of the page (Lamha 2's flash) -->
-          <Border Margin="0,0,0,16" Padding="14,6" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+          <Border x:Name="ToastBox" Margin="0,0,0,16" Padding="14,6" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                   controls:Pill.IsPill="True" Background="{ThemeResource LamhaToastBackgroundBrush}"
                   Visibility="{x:Bind controls:Show.IfText(ViewModel.Toast), Mode=OneWay, FallbackValue=Collapsed}">
             <StackPanel Orientation="Horizontal" Spacing="12">
@@ -95,6 +95,9 @@
               </HyperlinkButton>
             </StackPanel>
           </Border>
+
+          <!-- The day's goal reached: Lamha 2's burst of letters from the toast, over the page (left to right: the code places it) -->
+          <Canvas x:Name="BurstLayer" FlowDirection="LeftToRight" IsHitTestVisible="False" />
         </Grid>
       </Border>
     </Grid>

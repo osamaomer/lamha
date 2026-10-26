@@ -53,6 +53,9 @@ public interface IPageHost : IClipHost
     /// <summary>Windows' Open dialog for a JSON file: the path chosen, or null.</summary>
     Task<string?> PickOpenFileAsync();
 
+    /// <summary>The day's goal reached: <see cref="IClipHost.Toast"/>, with Lamha 2's burst of letters from it.</summary>
+    void Celebrate(string text);
+
     /// <summary>Opens <paramref name="folder"/> in File Explorer.</summary>
     void OpenFolder(string folder);
 

@@ -1,5 +1,7 @@
+using System.Numerics;
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Main;
+using Lamha.Core.Appearance;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -23,6 +25,7 @@ public sealed partial class SettingsPage : UserControl
                 DispatcherQueue.TryEnqueue(KeepFocus);
             }
         };
+        ViewModel.MotionPreview += PlayMotionPreview;
     }
 
     public SettingsViewModel ViewModel { get; }
@@ -31,6 +34,31 @@ public sealed partial class SettingsPage : UserControl
     public string Title { get; } = Localization.Get("Common_Settings");
 
     public SettingsStrings S { get; } = new();
+
+    /// <summary>
+    /// Animations' preview, Lamha 2's <c>demo()</c> with its numbers: at full the card springs in from its top start
+    /// corner (its own top left, which Arabic's mirroring puts at the right) and its meaning rises in after it; at
+    /// subtle it slides down into place; at off it's simply there.
+    /// </summary>
+    private void PlayMotionPreview()
+    {
+        if (MotionDemoCard is not { } card)
+        {
+            return;
+        }
+
+        var level = Animations.Level;
+        if (level == MotionLevel.Full)
+        {
+            Animations.Enter(card, level, 280, from: 0, rise: -6, scale: 0.86f, (0.2f, 0.9f, 0.3f, 1.25f), origin: Vector2.Zero);
+            Animations.Enter(MotionDemoMeaning, level, 260, from: 0, rise: 6, scale: 0.95f, Motion.EnterEasing, TimeSpan.FromMilliseconds(120));
+        }
+        else
+        {
+            Animations.ShowNow(MotionDemoMeaning);
+            Animations.Enter(card, level, 180, from: 0, rise: -3, scale: 1, Motion.EnterEasing);
+        }
+    }
 
     /// <summary>
     /// The tile clicked, or the breadcrumb, goes when the page changes, and the focus would fall to the side pane's
@@ -319,6 +347,12 @@ public sealed class SettingsStrings
     public string Motion { get; } = Localization.Get("Settings_Motion");
 
     public string MotionHint { get; } = Localization.Get("Settings_MotionHint");
+
+    public string MotionPreview { get; } = Localization.Get("Settings_MotionPreview");
+
+    public string MotionDemoWord { get; } = Localization.Get("Settings_MotionDemoWord");
+
+    public string MotionDemoMeaning { get; } = Localization.Get("Settings_MotionDemoMeaning");
 
     public string CardBg { get; } = Localization.Get("Settings_CardBg");
 

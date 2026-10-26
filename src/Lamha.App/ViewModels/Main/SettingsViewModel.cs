@@ -321,6 +321,16 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     public partial int MotionIndex { get; set; }
 
+    /// <summary>
+    /// Under Animations' preview, what the level does: "Everything, plus playful touches", after "Automatic is using:
+    /// Full —" when it's automatic (Lamha 2's <c>initMotionSetting()</c> note).
+    /// </summary>
+    [ObservableProperty]
+    public partial string MotionNote { get; private set; } = "";
+
+    /// <summary>The preview plays: the level was changed, or Preview pressed (Lamha 2's <c>demo()</c>).</summary>
+    public event Action? MotionPreview;
+
     public List<string> CardBgChoices { get; }
 
     [ObservableProperty]
@@ -502,7 +512,33 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     partial void OnThemeIndexChanged(int value) => Save(s => s with { Theme = Pick(Themes, value, s.Theme) });
 
-    partial void OnMotionIndexChanged(int value) => Save(s => s with { Motion = Pick(Motions, value, s.Motion) });
+    partial void OnMotionIndexChanged(int value)
+    {
+        Save(s => s with { Motion = Pick(Motions, value, s.Motion) });
+        if (!_loading)
+        {
+            Animations.Refresh(_brain.Settings.Current); // at once, so the preview shows the new level
+            ShowMotionNote();
+            MotionPreview?.Invoke();
+        }
+    }
+
+    [RelayCommand]
+    private void PreviewMotion() => MotionPreview?.Invoke();
+
+    private void ShowMotionNote()
+    {
+        var level = Animations.Level switch
+        {
+            Core.Appearance.MotionLevel.Full => "Full",
+            Core.Appearance.MotionLevel.Subtle => "Subtle",
+            _ => "Off",
+        };
+        var note = Localization.Get("Settings_MotionNote" + level);
+        MotionNote = Pick(Motions, MotionIndex, "auto") == "auto"
+            ? Localization.Format("Settings_MotionAutoIs", Localization.Get("Settings_Motion" + level)) + " — " + note
+            : note;
+    }
 
     partial void OnCardBgIndexChanged(int value) => Save(s => s with { CardSolid = value == 1 });
 
@@ -577,6 +613,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             DictOnline = s.DictSource == DictSource.Online;
             ThemeIndex = Index(Themes, s.Theme);
             MotionIndex = Index(Motions, s.Motion);
+            ShowMotionNote();
             CardBgIndex = s.CardSolid ? 1 : 0;
             AccentWindows = s.AccentWindows;
             WindowMica = s.WindowMica;

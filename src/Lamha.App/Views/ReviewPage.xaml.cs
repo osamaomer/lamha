@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Numerics;
+using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Main;
 using Lamha.Core.Appearance;
@@ -21,7 +22,8 @@ namespace Lamha.App.Views;
 /// <summary>
 /// The main window's Review page: the counts, the progress and the flashcard (ViewModels/Main/ReviewViewModel), and
 /// Lamha 2's motion for it (popup.js <c>flyOff</c> and <c>renderReview</c>, with their numbers): the answered card
-/// leaves the way it was answered, the next one rises in, the meaning fades in, and "Well done" pops in.
+/// leaves the way it was answered, the next one rises in, the meaning fades in, and "Well done" pops in with its burst
+/// of letters (<see cref="Burst"/>).
 /// </summary>
 public sealed partial class ReviewPage : UserControl
 {
@@ -118,7 +120,7 @@ public sealed partial class ReviewPage : UserControl
         if (e.PropertyName == nameof(ReviewViewModel.IsShown) && ViewModel.IsShown)
         {
             // The back fades in (Lamha 2's .rv-back), once it's laid out.
-            DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () => Animate(BackBox, Animations.Level, RevealMilliseconds, from: 0, rise: 0, scale: 1, Motion.EnterEasing));
+            DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () => Animations.Enter(BackBox, Animations.Level, RevealMilliseconds, from: 0, rise: 0, scale: 1, Motion.EnterEasing));
         }
     }
 
@@ -232,76 +234,22 @@ public sealed partial class ReviewPage : UserControl
             // The part that isn't coming in is reset, so it's there the next time it shows without motion.
             if (ViewModel.IsCard)
             {
-                Animate(CardBox, level, EnterMilliseconds, from: 0, rise: 14, scale: 0.98f, Motion.EnterEasing, level == MotionLevel.Full ? EnterDelay : TimeSpan.Zero);
-                ShowNow(DoneBox);
+                Animations.Enter(CardBox, level, EnterMilliseconds, from: 0, rise: 14, scale: 0.98f, Motion.EnterEasing, level == MotionLevel.Full ? EnterDelay : TimeSpan.Zero);
+                Animations.ShowNow(DoneBox);
             }
             else if (ViewModel.IsDone)
             {
-                Animate(DoneBox, level, DoneMilliseconds, from: 0, rise: 0, scale: 0.94f, (0.2f, 0.9f, 0.3f, 1.25f));
-                ShowNow(CardBox);
+                Animations.Enter(DoneBox, level, DoneMilliseconds, from: 0, rise: 0, scale: 0.94f, (0.2f, 0.9f, 0.3f, 1.25f));
+                Burst.From(DoneTitleText, Flying, count: 18); // Lamha 2's 18, from "Well done"
+                Animations.ShowNow(CardBox);
             }
             else
             {
-                ShowNow(CardBox);
-                ShowNow(DoneBox);
+                Animations.ShowNow(CardBox);
+                Animations.ShowNow(DoneBox);
             }
         });
     }
-
-    /// <summary>
-    /// <paramref name="element"/> comes in: from <paramref name="from"/> opacity, <paramref name="rise"/> px lower and at
-    /// <paramref name="scale"/>, to where it is (Lamha 2's <c>LamhaMotion.play</c>: a quarter faster at subtle, none at off).
-    /// </summary>
-    private static void Animate(UIElement element, MotionLevel level, int milliseconds, float from, float rise, float scale,
-        (float X1, float Y1, float X2, float Y2) easing, TimeSpan delay = default)
-    {
-        var visual = ElementCompositionPreview.GetElementVisual(element);
-        var duration = Motion.Time(level, milliseconds);
-        if (duration == TimeSpan.Zero || element is not FrameworkElement { ActualWidth: > 0 } framed)
-        {
-            ShowNow(element);
-            return;
-        }
-
-        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
-        var c = visual.Compositor;
-        visual.CenterPoint = new Vector3((float)framed.ActualWidth / 2, (float)framed.ActualHeight / 2, 0);
-        var ease = c.CreateCubicBezierEasingFunction(new Vector2(easing.X1, easing.Y1), new Vector2(easing.X2, easing.Y2));
-
-        var fade = c.CreateScalarKeyFrameAnimation();
-        fade.InsertKeyFrame(0, from);
-        fade.InsertKeyFrame(1, 1, ease);
-        Time(fade, duration, delay);
-        visual.StartAnimation("Opacity", fade);
-
-        if (rise != 0)
-        {
-            var move = c.CreateVector3KeyFrameAnimation();
-            move.InsertKeyFrame(0, new Vector3(0, rise, 0));
-            move.InsertKeyFrame(1, Vector3.Zero, ease);
-            Time(move, duration, delay);
-            visual.StartAnimation("Translation", move);
-        }
-
-        if (scale != 1)
-        {
-            var grow = c.CreateVector3KeyFrameAnimation();
-            grow.InsertKeyFrame(0, new Vector3(scale, scale, 1));
-            grow.InsertKeyFrame(1, Vector3.One, ease);
-            Time(grow, duration, delay);
-            visual.StartAnimation("Scale", grow);
-        }
-    }
-
-    /// <summary>The duration and the wait before it; while it waits, the first frame (Lamha 2's <c>fill: backwards</c>).</summary>
-    private static void Time(KeyFrameAnimation animation, TimeSpan duration, TimeSpan delay)
-    {
-        animation.Duration = duration;
-        animation.DelayTime = delay;
-        animation.DelayBehavior = AnimationDelayBehavior.SetInitialValueBeforeDelay;
-    }
-
-    private static void ShowNow(UIElement element) => ElementCompositionPreview.GetElementVisual(element).Opacity = 1;
 
     private static bool IsDown(VirtualKey key) => InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(CoreVirtualKeyStates.Down);
 }

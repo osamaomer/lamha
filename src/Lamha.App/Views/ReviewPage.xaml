@@ -73,7 +73,7 @@
 
         <!-- Show meaning, at the foot of the card -->
         <Button x:Name="ShowButton" Grid.Row="2" MaxWidth="420" Margin="0,12,0,0" HorizontalAlignment="Stretch" Style="{StaticResource LamhaButtonStyle}"
-                Command="{x:Bind ViewModel.RevealCommand}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.IsShown), Mode=OneWay}">
+                Command="{x:Bind ViewModel.RevealCommand}" AutomationProperties.Name="{x:Bind ShowLabel}" AutomationProperties.AcceleratorKey="Space" Visibility="{x:Bind controls:Show.IfNot(ViewModel.IsShown), Mode=OneWay}">
           <StackPanel Orientation="Horizontal" Spacing="8">
             <TextBlock VerticalAlignment="Center" Text="{x:Bind ShowLabel}" />
             <Border Padding="5,1" VerticalAlignment="Center" CornerRadius="5" Background="#2EFFFFFF">
@@ -98,21 +98,21 @@
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Button x:Name="AgainButton" Style="{StaticResource LamhaGradeButtonStyle}" Background="{ThemeResource LamhaDangerSoftBrush}" Foreground="{ThemeResource LamhaDangerBrush}"
-                    Command="{x:Bind ViewModel.GradeAgainCommand}" ToolTipService.ToolTip="{x:Bind KeyOne}" AutomationProperties.AcceleratorKey="1">
+                    Command="{x:Bind ViewModel.GradeAgainCommand}" AutomationProperties.Name="{x:Bind AgainLabel}" ToolTipService.ToolTip="{x:Bind KeyOne}" AutomationProperties.AcceleratorKey="1">
               <StackPanel>
                 <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Text="{x:Bind AgainLabel}" />
                 <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource LamhaFontSizeLabel}" Opacity="0.8" Text="{x:Bind ViewModel.AgainIn, Mode=OneWay}" />
               </StackPanel>
             </Button>
             <Button Grid.Column="1" Style="{StaticResource LamhaGradeButtonStyle}" Background="{ThemeResource LamhaChipBrush}" Foreground="{ThemeResource LamhaTextBrush}"
-                    Command="{x:Bind ViewModel.GradeHardCommand}" ToolTipService.ToolTip="{x:Bind KeyTwo}" AutomationProperties.AcceleratorKey="2">
+                    Command="{x:Bind ViewModel.GradeHardCommand}" AutomationProperties.Name="{x:Bind HardLabel}" ToolTipService.ToolTip="{x:Bind KeyTwo}" AutomationProperties.AcceleratorKey="2">
               <StackPanel>
                 <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Text="{x:Bind HardLabel}" />
                 <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource LamhaFontSizeLabel}" Opacity="0.8" Text="{x:Bind ViewModel.HardIn, Mode=OneWay}" />
               </StackPanel>
             </Button>
             <Button x:Name="GoodButton" Grid.Column="2" Style="{StaticResource LamhaGradeButtonStyle}" Background="{ThemeResource LamhaOkSoftBrush}" Foreground="{ThemeResource LamhaOkBrush}"
-                    Command="{x:Bind ViewModel.GradeGoodCommand}" ToolTipService.ToolTip="{x:Bind KeyThree}" AutomationProperties.AcceleratorKey="3">
+                    Command="{x:Bind ViewModel.GradeGoodCommand}" AutomationProperties.Name="{x:Bind GoodLabel}" ToolTipService.ToolTip="{x:Bind KeyThree}" AutomationProperties.AcceleratorKey="3">
               <StackPanel>
                 <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Text="{x:Bind GoodLabel}" />
                 <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource LamhaFontSizeLabel}" Opacity="0.8" Text="{x:Bind ViewModel.GoodIn, Mode=OneWay}" />
@@ -129,7 +129,7 @@
     <!-- ===== Nothing to review now: what this sitting did, the next review, the streak ===== -->
     <Border x:Name="DoneBox" Margin="0,16,0,0" Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsDone, Mode=OneWay}">
       <StackPanel Padding="8,8,8,4" Spacing="4" AutomationProperties.LiveSetting="Polite">
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="16" Text="{x:Bind DoneTitle}" />
+        <TextBlock x:Name="DoneTitleText" HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="16" Text="{x:Bind DoneTitle}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" FontWeight="SemiBold"
                    Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.Session, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(ViewModel.Session), Mode=OneWay}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}"
@@ -150,8 +150,8 @@
     </Border>
   </StackPanel>
 
-  <!-- The answered card, flying off over the page while the next one comes in; left to right whatever the language,
-       as the code chooses the direction -->
+  <!-- The answered card, flying off over the page while the next one comes in, and "Well done"'s burst of letters;
+       left to right whatever the language, as the code chooses the direction -->
   <Canvas x:Name="Flying" FlowDirection="LeftToRight" IsHitTestVisible="False" />
   </Grid>
 </UserControl>

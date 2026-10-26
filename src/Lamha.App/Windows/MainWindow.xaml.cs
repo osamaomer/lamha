@@ -229,6 +229,13 @@ public sealed partial class MainWindow : Window, IPageHost
 
     public void Toast(string text, string? action = null, Action? run = null) => ViewModel.ShowToast(text, action, run);
 
+    public void Celebrate(string text)
+    {
+        ViewModel.ShowToast(text);
+        // Once the toast is laid out, so the letters start from its middle.
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => Controls.Burst.From(ToastBox, BurstLayer));
+    }
+
     public void Translate(string text)
     {
         Go("translate");

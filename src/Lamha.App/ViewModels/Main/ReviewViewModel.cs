@@ -245,7 +245,7 @@ public sealed partial class ReviewViewModel : ObservableObject
 
         if (goal > 0)
         {
-            _host.Toast(Localization.Format("Card_GoalDone", goal));
+            _host.Celebrate(Localization.Format("Card_GoalDone", goal)); // Lamha 2's flash and burst
         }
     }
 
