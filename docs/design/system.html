@@ -630,8 +630,8 @@ button.scard:active { transform: scale(0.995); }
       theme: "Theme", themeHint: "The look of Lamha: the card, its window and these settings", motion: "Animations", motionHintShort: "Transitions in Lamha's windows and card",
       cardBg: "The card's background", cardBgHint: "Translucent shows a little of what's behind the card; solid is clearer over busy pages",
       ibInfoT: "The writing tools need an AI provider.", ibInfo: "Gemini is free with an API key from Google.", setUp: "Set up",
-      ibOkT: "Saved.", ibOk: "Gemini is ready for the writing tools.", ibWarnT: "No internet.", ibWarn: "Words come from the built-in dictionary.",
-      ibErrT: "That key doesn't work.", ibErr: "Copy it again from Google AI Studio.", retry: "Try again", showToast: "Show the toast",
+      ibOkT: "Saved.", ibOk: "Gemini is ready to use with the writing tools.", ibWarnT: "No internet connection.", ibWarn: "Words come from the built-in dictionary.",
+      ibErrT: "That API key isn't valid.", ibErr: "Please copy it again from Google AI Studio.", retry: "Try again", showToast: "Show the toast",
       deleteHistory: "Clear history", emptyHistory: "Words you look up appear here.", translateSomething: "Translate a word", openCard: "Look up “reluctant”",
       showMeaning: "Show meaning", tasks: "Tasks", pasteChip: "Translate what you copied:", forgot: "Forgot", hard: "Hard", knewIt: "Knew it",
       today: "Today", yesterday: "Yesterday", undo: "Undo", deleted: "Deleted", pinned: "Pinned", delete: "Delete", pin: "Pin",
@@ -646,7 +646,7 @@ button.scard:active { transform: scale(0.995); }
     ar: {
       lamha: "لمحة", translate: "ترجمة", write: "كتابة", review: "مراجعة", history: "السجل", clipboard: "الحافظة", settings: "الإعدادات",
       search: "ابحث في الإعدادات والكلمات والمنسوخات", quick: "بحث سريع", definition: "التعريف", adjective: "صفة",
-      listen: "استمع", copy: "نسخ", save: "حفظ", copied: "تم النسخ", addReview: "أضف إلى المراجعة", proofread: "تدقيق لغوي", rewrite: "إعادة صياغة",
+      listen: "استمع", copy: "نسخ", save: "حفظ", copied: "تم النسخ", addReview: "أضف إلى المراجعة", proofread: "تدقيق لغوي", rewrite: "إعادة الصياغة",
       improve: "تحسين الأسلوب", formal: "رسمي", friendly: "ودّي", shorter: "أقصر", longer: "أطول", cancel: "إلغاء", google: "ترجمة Google", cambridge: "قاموس كامبريدج",
       writePh: "اكتب رسالتك هنا بالإنجليزية — أو بالعربية لتحويلها إلى إنجليزية طبيعية…", translatePh: "اكتب كلمة أو جملة للترجمة…",
       historySearch: "ابحث في السجل…", journal: "سجل أخطائي", recordMistakes: "تسجيل أخطائي",
@@ -657,9 +657,9 @@ button.scard:active { transform: scale(0.995); }
       theme: "السمة", themeHint: "مظهر لمحة: البطاقة والنافذة والإعدادات", motion: "الحركة", motionHintShort: "حركات الانتقال في النوافذ وبطاقة الترجمة",
       cardBg: "خلفية البطاقة", cardBgHint: "الشفافة تُظهر ما خلف البطاقة قليلًا، والثابتة أوضح فوق الصفحات المزدحمة",
       ibInfoT: "تتطلب أدوات الكتابة مزوّدًا لخدمات الذكاء الاصطناعي.", ibInfo: "يتوفر Gemini مجانًا باستخدام مفتاح API من Google.", setUp: "إعداد",
-      ibOkT: "تم الحفظ.", ibOk: "Gemini جاهز لأدوات الكتابة.", ibWarnT: "لا يوجد إنترنت.", ibWarn: "الكلمات من القاموس المدمج.",
-      ibErrT: "هذا المفتاح لا يعمل.", ibErr: "انسخه مرة أخرى من Google AI Studio.", retry: "حاول مجددًا", showToast: "أظهر الإشعار",
-      deleteHistory: "مسح السجل", emptyHistory: "تظهر هنا الكلمات التي تبحث عنها.", translateSomething: "ترجم كلمة", openCard: "ابحث عن «reluctant»",
+      ibOkT: "تم الحفظ.", ibOk: "أصبح Gemini جاهزًا للاستخدام مع أدوات الكتابة.", ibWarnT: "لا يوجد اتصال بالإنترنت.", ibWarn: "يتم جلب الكلمات من القاموس المدمج.",
+      ibErrT: "مفتاح API غير صالح.", ibErr: "يُرجى نسخه مجددًا من Google AI Studio.", retry: "حاول مجددًا", showToast: "أظهر الإشعار",
+      deleteHistory: "مسح السجل", emptyHistory: "ستظهر هنا الكلمات التي تبحث عنها.", translateSomething: "ترجم كلمة", openCard: "ابحث عن «reluctant»",
       showMeaning: "أظهر المعنى", tasks: "المهام", pasteChip: "ترجم ما نسخته:", forgot: "نسيت", hard: "صعبة", knewIt: "عرفتها",
       today: "اليوم", yesterday: "أمس", undo: "تراجع", deleted: "تم الحذف", pinned: "المثبتة", delete: "حذف", pin: "تثبيت",
       dlgTitle: "مسح السجل؟", dlgBody: "لا يمكن التراجع عن المسح", clear: "مسح", aiProvider: "مصدر الذكاء الاصطناعي",
@@ -674,7 +674,7 @@ button.scard:active { transform: scale(0.995); }
   // Words not in Lamha's string files yet: drafts, shown underlined.
   const DRAFT = new Set(["search", "rewrite", "ibInfoT", "ibInfo", "setUp", "ibOkT", "ibOk", "ibWarnT", "ibWarn", "ibErrT", "ibErr", "emptyHistory", "translateSomething", "pasteChip", "dlgTitle", "sgWords", "sgTranslate"]);
   // The user's own wording (no longer a draft in that language).
-  const APPROVED = { ar: new Set(["ibInfoT", "ibInfo"]), en: new Set() };
+  const APPROVED = { ar: new Set(["ibInfoT", "ibInfo", "ibOkT", "ibOk", "ibWarnT", "ibWarn", "ibErrT", "ibErr", "emptyHistory", "translateSomething", "rewrite"]), en: new Set() };
   let lang = "en";
   const t = k => S[lang][k] ?? S.en[k] ?? k;
   const isDraft = k => DRAFT.has(k) && !APPROVED[lang].has(k);
