@@ -138,6 +138,7 @@ public partial class App : Application
             Updates = _updates,
             DeleteData = DeleteDataAndQuit,
         };
+        _accent.Repainted += (_, _) => _main.AccentChanged();
         _card.SettingsOpener = section => _main.Show("settings", section);
         _panel.SettingsOpener = section => _main.Show("settings", section);
 

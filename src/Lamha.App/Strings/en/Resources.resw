@@ -871,4 +871,6 @@ What did you expect?
   <data name="FirstRun_RemoveLamha2HintMoved" xml:space="preserve"><value>Lamha 3 replaces it and uses the same shortcuts. Its folder is kept for 30 days, so nothing is lost.</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording</comment></data>
   <data name="FirstRun_RemoveLamha2HintFresh" xml:space="preserve"><value>Lamha 3 uses the same shortcuts, so the two can&apos;t run together. Lamha 2&apos;s data stays where it is.</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording</comment></data>
   <data name="FirstRun_RemoveLamha2Admin" xml:space="preserve"><value>Windows will ask for permission: Lamha 2 was installed for all users.</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording; after the hint</comment></data>
+  <data name="Search_Placeholder" xml:space="preserve"><value>Search settings, words and copies</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the title bar's search</comment></data>
+  <data name="Search_Translate" xml:space="preserve"><value>Translate “{0}”</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the search's last suggestion</comment></data>
 </root>

@@ -28,6 +28,26 @@ public static class Show
 
     public static Visibility IfSet(object? value) => value is null ? Visibility.Collapsed : Visibility.Visible;
 
+    /// <summary>A search suggestion's icon: a setting's gear, a word's history, a copy's clipboard, Translate's own.</summary>
+    public static Glyph QuickGlyph(Lamha.Core.Search.QuickKind kind) => kind switch
+    {
+        Lamha.Core.Search.QuickKind.Setting => Glyph.Settings,
+        Lamha.Core.Search.QuickKind.Word => Glyph.History,
+        Lamha.Core.Search.QuickKind.Copy => Glyph.Clipboard,
+        _ => Glyph.Translate,
+    };
+
+    /// <summary>A search suggestion's line: "Translate “…”" for the text itself.</summary>
+    public static string QuickText(Lamha.Core.Search.QuickKind kind, string text) =>
+        kind == Lamha.Core.Search.QuickKind.Translate ? Localization.Format("Search_Translate", text) : text;
+
+    /// <summary>The line under it: a copy says where it is.</summary>
+    public static string QuickDetail(Lamha.Core.Search.QuickKind kind, string detail) =>
+        kind == Lamha.Core.Search.QuickKind.Copy ? Localization.Get("Main_Clipboard") : detail;
+
+    /// <summary>Whether the suggestion has a line under it (x:Bind can't nest the two calls).</summary>
+    public static Visibility IfQuickDetail(Lamha.Core.Search.QuickKind kind, string detail) => IfText(QuickDetail(kind, detail));
+
     public static Visibility IfAny(int count) => count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
     /// <summary>A line between the rows of a list, none above its first (Settings' lists).</summary>

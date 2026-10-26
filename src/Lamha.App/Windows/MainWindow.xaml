@@ -2,7 +2,8 @@
     x:Class="Lamha.App.Windows.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:Lamha.App.Controls">
+    xmlns:controls="using:Lamha.App.Controls"
+    xmlns:search="using:Lamha.Core.Search">
   <!-- The main window, as Windows' Settings (docs/design/system.md, The window; decision 0020): Mica, Windows' title bar
        with Back (and ☰ when narrow), Windows' navigation pane with Lamha's coloured icons, and the page on Windows' content
        layer, which NavigationView draws. Two widths only, as Settings: the pane open, or hidden behind ☰. -->
@@ -21,6 +22,10 @@
     <!-- Windows' title bar: Back, ☰ when the pane is hidden, Lamha's mark and name; Windows' buttons at its end -->
     <TitleBar x:Name="AppTitleBar" IsBackButtonVisible="True" IsBackButtonEnabled="False"
               IsPaneToggleButtonVisible="False" BackRequested="OnBackRequested" PaneToggleRequested="OnPaneToggleRequested">
+      <!-- The search fills the middle up to its 512, centred, as Settings' (the title bar sizes it to its content otherwise) -->
+      <TitleBar.Resources>
+        <HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment>
+      </TitleBar.Resources>
       <!-- The mark and the name as one header, 16 apart as Windows' icon and title, whatever the title bar's state -->
       <TitleBar.LeftHeader>
         <StackPanel Margin="{StaticResource LamhaTitleBarMarkMargin}" Orientation="Horizontal" Spacing="{StaticResource LamhaSpace4}" VerticalAlignment="Center">
@@ -28,6 +33,35 @@
           <TextBlock VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind Lamha}" />
         </StackPanel>
       </TitleBar.LeftHeader>
+      <!-- The search, as Settings' "Find a setting": settings, words, copies, and "Translate …" (Core's QuickSearch).
+           Narrow, it's a 🔍 button that opens the box. -->
+      <AutoSuggestBox x:Name="Search" MaxWidth="{StaticResource LamhaSearchMaxWidth}" HorizontalAlignment="Stretch" VerticalAlignment="Center" QueryIcon="Find"
+                      PlaceholderText="{x:Bind SearchPlaceholder}" AutomationProperties.Name="{x:Bind SearchPlaceholder}"
+                      TextChanged="OnSearchChanged" SuggestionChosen="OnSearchChosen" QuerySubmitted="OnSearchSubmitted" LostFocus="OnSearchLostFocus">
+        <AutoSuggestBox.ItemTemplate>
+          <DataTemplate x:DataType="search:QuickHit">
+            <Grid ColumnSpacing="{StaticResource LamhaSpace3}" Padding="0,4">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <controls:FluentIcon Glyph="{x:Bind controls:Show.QuickGlyph(Kind)}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+              <StackPanel Grid.Column="1">
+                <TextBlock Text="{x:Bind controls:Show.QuickText(Kind, Text)}" TextTrimming="CharacterEllipsis" TextReadingOrder="DetectFromContent" />
+                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis"
+                           TextReadingOrder="DetectFromContent" Text="{x:Bind controls:Show.QuickDetail(Kind, Detail)}"
+                           Visibility="{x:Bind controls:Show.IfQuickDetail(Kind, Detail)}" />
+              </StackPanel>
+            </Grid>
+          </DataTemplate>
+        </AutoSuggestBox.ItemTemplate>
+      </AutoSuggestBox>
+      <TitleBar.RightHeader>
+        <Button x:Name="SearchButton" Style="{StaticResource LamhaTitleBarButtonStyle}" Visibility="Collapsed" Click="OnSearchButton"
+                ToolTipService.ToolTip="{x:Bind SearchPlaceholder}" AutomationProperties.Name="{x:Bind SearchPlaceholder}">
+          <controls:FluentIcon Glyph="Search" />
+        </Button>
+      </TitleBar.RightHeader>
     </TitleBar>
 
     <!-- Windows' navigation: open at 300, hidden behind ☰ below LamhaPaneHideWidth; Back and ☰ live in the title bar -->

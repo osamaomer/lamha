@@ -200,25 +200,22 @@ public partial class TokensTests
         }
     }
 
-    /// <summary>The switch when on is the accent fill with the button's text colour as its knob, as Windows' (decision 0020).</summary>
+    /// <summary>
+    /// Windows' controls take Lamha's accent through the SystemAccentColor family (decision 0020): their fill (the switch,
+    /// the pane's pill, Windows' accent buttons) is Lamha's button in each theme, Dark1 in light and Light2 in dark, as
+    /// Windows' AccentFillColorDefault reads them; their accent text (Dark2 in light, Light3 in dark) reads at 4.5:1 on the
+    /// theme's surface.
+    /// </summary>
     [Fact]
-    public void TheSwitchIsTheAccentFill()
+    public void WindowsControlsTakeLamhasAccent()
     {
-        var controls = XDocument.Load(Path.Combine(RealDictionary.RepositoryRoot, "src", "Lamha.App", "Themes", "Controls.xaml")).Root!
-            .Elements().Single(e => e.Name.LocalName == "ResourceDictionary.ThemeDictionaries")
-            .Elements().ToDictionary(d => d.Attribute(X + "Key")!.Value);
-        foreach (var theme in new[] { "Light", "Dark" })
-        {
-            List<XElement> Keyed(string prefix) => controls[theme].Elements().Where(e => e.Attribute(X + "Key")!.Value.StartsWith(prefix, StringComparison.Ordinal)).ToList();
-            var fills = Keyed("ToggleSwitchFillOn");
-            var knobs = Keyed("ToggleSwitchKnobFillOn");
-            Assert.Equal(3, fills.Count);
-            Assert.Equal(3, knobs.Count);
-            Assert.All(fills, f => Assert.Equal(Brush(theme, "LamhaButtonBrush"), Colour(f.Attribute("Color")!.Value)));
-            Assert.All(knobs, k => Assert.Equal(Brush(theme, "LamhaButtonTextBrush"), Colour(k.Attribute("Color")!.Value)));
-        }
-
-        Assert.Empty(controls["HighContrast"].Elements()); // Windows' own colours
+        var family = XDocument.Load(Path.Combine(RealDictionary.RepositoryRoot, "src", "Lamha.App", "Themes", "Tokens.xaml")).Root!
+            .Elements().Where(e => e.Name.LocalName == "Color")
+            .ToDictionary(e => e.Attribute(X + "Key")!.Value, e => Colour(e.Value).Rgb);
+        Assert.Equal(Brush("Light", "LamhaButtonBrush").Rgb, family["SystemAccentColorDark1"]);
+        Assert.Equal(Brush("Dark", "LamhaButtonBrush").Rgb, family["SystemAccentColorLight2"]);
+        Assert.True(Rgb.Contrast(family["SystemAccentColorDark2"], Brush("Light", "LamhaSurfaceBrush").Rgb) >= 4.5, "light: accent text on the surface");
+        Assert.True(Rgb.Contrast(family["SystemAccentColorLight3"], Brush("Dark", "LamhaSurfaceBrush").Rgb) >= 4.5, "dark: accent text on the surface");
     }
 
     [GeneratedRegex(@"(?:StaticResource|ThemeResource)\s+(Lamha\w+)|ResourceKey=""(Lamha\w+)""")]

@@ -12,7 +12,8 @@ namespace Lamha.App.Services;
 /// Lamha's accent brushes (Themes/Tokens.xaml: LamhaAccentBrush, LamhaAccentSoftBrush, LamhaButtonBrush), in Lamha's own
 /// colours or, with Settings → Appearance → "Accent colour from Windows" on, in the colour picked in Windows, made
 /// readable for each theme (<see cref="AccentPalette"/>). It follows a new pick in Windows at once, as Lamha 2 did on
-/// accent-color-changed. The brushes are changed in place, so whatever shows them updates.
+/// accent-color-changed. The brushes are changed in place, so whatever shows them updates. Windows' own controls follow
+/// the same choice through the SystemAccentColor family (decision 0020).
 /// </summary>
 public sealed partial class AccentService : IDisposable
 {
@@ -24,9 +25,18 @@ public sealed partial class AccentService : IDisposable
         new ThemeAccent(new Rgb(0x4F, 0x46, 0xE5), 0.09, new Rgb(0x4F, 0x46, 0xE5)),
         new ThemeAccent(new Rgb(0x9A, 0xA1, 0xFF), 0.12, new Rgb(0x9A, 0xA1, 0xFF)));
 
+    /// <summary>Windows' accent colours (its controls' accent fills and text), which Tokens.xaml sets to Lamha's indigo.</summary>
+    private static readonly string[] AccentFamily =
+    [
+        "SystemAccentColor", "SystemAccentColorLight1", "SystemAccentColorLight2", "SystemAccentColorLight3",
+        "SystemAccentColorDark1", "SystemAccentColorDark2", "SystemAccentColorDark3",
+    ];
+
     private readonly SettingsService _settings;
     private readonly DispatcherQueue _queue;
     private readonly UISettings _windows = new();
+    private readonly Dictionary<string, object> _lamhaFamily = [];
+    private ResourceDictionary? _family;
     private bool _painted;
 
     public AccentService(SettingsService settings, DispatcherQueue queue)
@@ -67,10 +77,55 @@ public sealed partial class AccentService : IDisposable
             return;
         }
 
+        var repaint = _painted;
         _painted = true;
         Current = palette;
         Paint("Light", palette.Light);
         Paint("Dark", palette.Dark);
+        UseFamily(own: !_settings.Current.AccentWindows);
+        if (repaint)
+        {
+            Repainted?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>
+    /// The accent changed while Lamha runs: Windows' controls take a new accent only when their theme is applied again,
+    /// so open windows do that (Lamha's own brushes changed in place already).
+    /// </summary>
+    public event EventHandler? Repainted;
+
+    /// <summary>
+    /// Windows' controls in Lamha's accent (Tokens.xaml's SystemAccentColor family), or, for Windows' own accent, the
+    /// family taken out so Windows' colours show through.
+    /// </summary>
+    private void UseFamily(bool own)
+    {
+        if (_family is null)
+        {
+            _family = WithMerged(Application.Current.Resources).FirstOrDefault(d => d.ContainsKey(AccentFamily[0]));
+            if (_family is null)
+            {
+                return;
+            }
+
+            foreach (var key in AccentFamily)
+            {
+                _lamhaFamily[key] = _family[key];
+            }
+        }
+
+        foreach (var key in AccentFamily)
+        {
+            if (own)
+            {
+                _family[key] = _lamhaFamily[key];
+            }
+            else
+            {
+                _family.Remove(key);
+            }
+        }
     }
 
     /// <summary>Paints the theme's brushes wherever they're defined (Tokens.xaml is merged into the app's resources).</summary>
@@ -83,12 +138,6 @@ public sealed partial class AccentService : IDisposable
                 Set(brushes, "LamhaAccentBrush", accent.Accent, 1);
                 Set(brushes, "LamhaAccentSoftBrush", accent.Accent, accent.SoftAlpha);
                 Set(brushes, "LamhaButtonBrush", accent.Button, 1);
-                // The switch when on is the button's colour, as Windows' is its accent (Themes/Controls.xaml).
-                Set(brushes, "ToggleSwitchFillOn", accent.Button, 1);
-                Set(brushes, "ToggleSwitchFillOnPointerOver", accent.Button, 1);
-                Set(brushes, "ToggleSwitchFillOnPressed", accent.Button, 1);
-                // The pane's selection pill is the accent, as Windows' is its own (Themes/Controls.xaml).
-                Set(brushes, "NavigationViewSelectionIndicatorForeground", accent.Accent, 1);
             }
         }
     }

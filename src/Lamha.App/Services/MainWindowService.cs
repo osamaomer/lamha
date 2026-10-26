@@ -39,6 +39,9 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
 
     public bool IsOpen => _window is not null;
 
+    /// <summary>The accent changed (AccentService): the open window's Windows controls take it.</summary>
+    public void AccentChanged() => _window?.DispatcherQueue.TryEnqueue(() => _window?.RefreshAccent(Theme ?? brain.Settings.Current.Theme));
+
     /// <summary>Open and in front (Lamha 2's <c>isVisible() &amp;&amp; isFocused()</c>): no review reminder then.</summary>
     public bool IsInUse => _window is { } window && ForegroundWindow.Current == window.Handle;
 

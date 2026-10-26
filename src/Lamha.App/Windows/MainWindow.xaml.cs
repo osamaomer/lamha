@@ -4,6 +4,7 @@ using Lamha.App.Services;
 using Lamha.App.ViewModels.Main;
 using Lamha.App.Views;
 using Lamha.Core.Layout;
+using Lamha.Core.Search;
 using Lamha.Windows.Shell;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
@@ -154,6 +155,8 @@ public sealed partial class MainWindow : Window, IPageHost
 
     public string Lamha { get; } = Localization.Get("Common_Lamha");
 
+    public string SearchPlaceholder { get; } = Localization.Get("Search_Placeholder");
+
     /// <summary>Settings → Appearance → Theme: "light", "dark", or "auto" (Windows'); the title bar's buttons follow.</summary>
     public void UseTheme(string theme)
     {
@@ -169,6 +172,16 @@ public sealed partial class MainWindow : Window, IPageHost
             "dark" => TitleBarTheme.Dark,
             _ => TitleBarTheme.UseDefaultAppMode,
         };
+    }
+
+    /// <summary>
+    /// The accent changed: Windows' controls read their accent again only when their theme is applied, so the theme is
+    /// applied once the other way and back (both before the next frame, so nothing flickers).
+    /// </summary>
+    public void RefreshAccent(string theme)
+    {
+        Root.RequestedTheme = Root.ActualTheme == ElementTheme.Dark ? ElementTheme.Light : ElementTheme.Dark;
+        UseTheme(theme);
     }
 
     /// <summary>Settings → Appearance → the wallpaper behind the window: Mica, or Lamha's page colour.</summary>
@@ -226,9 +239,35 @@ public sealed partial class MainWindow : Window, IPageHost
         ForegroundWindow.ForceForeground(Handle);
     }
 
-    /// <summary><c>--sample=text</c> with <c>--page=translate</c>: the text in the box, looked up, for screenshots.</summary>
+    /// <summary>
+    /// <c>--sample=text</c> with <c>--page=translate</c>: the text in the box, looked up, for screenshots;
+    /// <c>--sample=search:text</c> with any page: the text in the title bar's search, its suggestions open.
+    /// </summary>
     public void TypeSample(string text)
     {
+        if (text.StartsWith("search:", StringComparison.Ordinal))
+        {
+            void Type()
+            {
+                Search.Visibility = Visibility.Visible;
+                Search.Text = text["search:".Length..];
+                Search.ItemsSource = Suggestions(Search.Text);
+                Search.Focus(FocusState.Programmatic);
+                Search.IsSuggestionListOpen = true;
+            }
+
+            if (Root.IsLoaded)
+            {
+                Type();
+            }
+            else
+            {
+                Root.Loaded += (_, _) => DispatcherQueue.TryEnqueue(Type);
+            }
+
+            return;
+        }
+
         if (PageHost.Content is TranslatePage translate)
         {
             translate.ViewModel.Navigate(text);
@@ -381,9 +420,82 @@ public sealed partial class MainWindow : Window, IPageHost
         }
     }
 
-    /// <summary>Narrow, the pane hides and ☰ appears in the title bar (Windows' Settings).</summary>
-    private void OnDisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args) =>
-        AppTitleBar.IsPaneToggleButtonVisible = args.DisplayMode == NavigationViewDisplayMode.Minimal;
+    /// <summary>Narrow, the pane hides and ☰ appears in the title bar, and the search becomes a 🔍 button (Windows' Settings).</summary>
+    private void OnDisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)
+    {
+        var narrow = args.DisplayMode == NavigationViewDisplayMode.Minimal;
+        AppTitleBar.IsPaneToggleButtonVisible = narrow;
+        SearchButton.Visibility = narrow ? Visibility.Visible : Visibility.Collapsed;
+        Search.Visibility = narrow && Search.FocusState == FocusState.Unfocused ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    /// <summary>Narrow: the 🔍 button opens the box, ready to type.</summary>
+    private void OnSearchButton(object sender, RoutedEventArgs e)
+    {
+        Search.Visibility = Visibility.Visible;
+        SearchButton.Visibility = Visibility.Collapsed;
+        Search.Focus(FocusState.Programmatic);
+    }
+
+    /// <summary>Narrow, an empty box left goes back to its 🔍 button.</summary>
+    private void OnSearchLostFocus(object sender, RoutedEventArgs e)
+    {
+        if (Nav.DisplayMode == NavigationViewDisplayMode.Minimal && Search.Text.Length == 0)
+        {
+            Search.Visibility = Visibility.Collapsed;
+            SearchButton.Visibility = Visibility.Visible;
+        }
+    }
+
+    /// <summary>The suggestions as the user types: settings, words looked up, copies (when clipboard history is on), and "Translate …".</summary>
+    private void OnSearchChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
+        {
+            return;
+        }
+
+        sender.ItemsSource = Suggestions(sender.Text);
+    }
+
+    /// <summary>The search's suggestions for <paramref name="query"/>: copies only when clipboard history is on.</summary>
+    private List<QuickHit> Suggestions(string query)
+    {
+        var copies = _clipboard.IsOn && query.Trim().Length > 0
+            ? _brain.ClipboardHistory.List(query.Trim(), limit: QuickSearch.PerKind).Items.Select(c => (c.Id, c.Text))
+            : [];
+        return [.. QuickSearch.Find(query, SettingsCategories.Entries(), _brain.History.Recent(), copies)];
+    }
+
+    private void OnSearchChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        // Keep what was typed in the box while ↑ ↓ move through the suggestions (Settings' search does the same).
+    }
+
+    /// <summary>A suggestion chosen (or Enter): its setting, its word's answer, the Clipboard page, or the text translated.</summary>
+    private void OnSearchSubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        var hit = args.ChosenSuggestion as QuickHit ?? new QuickHit(QuickKind.Translate, args.QueryText.Trim(), "", args.QueryText.Trim());
+        if (hit.Target.Length == 0)
+        {
+            return;
+        }
+
+        sender.Text = "";
+        sender.ItemsSource = null;
+        switch (hit.Kind)
+        {
+            case QuickKind.Setting:
+                Go("settings", hit.Target);
+                break;
+            case QuickKind.Copy:
+                Go("clipboard");
+                break;
+            default:
+                Translate(hit.Target);
+                break;
+        }
+    }
 
     private void OnPaneToggleRequested(TitleBar sender, object args) => Nav.IsPaneOpen = !Nav.IsPaneOpen;
 

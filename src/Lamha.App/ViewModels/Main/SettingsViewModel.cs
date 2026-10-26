@@ -108,21 +108,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         Clipboard = new ClipboardSetupViewModel(brain, clipboard, host);
         Privacy = new PrivacySetupViewModel(brain, host);
         Offline = new OfflineSetupViewModel(brain);
-        Tiles =
-        [
-            Tile("languages", Glyph.Translate, "Settings_Languages", "Settings_UiLang", "Settings_TargetLang", "Settings_Reverse"),
-            Tile("card", Glyph.Card, "Settings_Card", "Settings_Context", "Settings_Explain", "Settings_Wiki"),
-            // The design's summary names the clipboard panel's shortcut: back in it with the panel.
-            Tile("keys", Glyph.Keyboard, "Settings_Keys", "Settings_HkLookup", "Settings_HkWrite", "Settings_KeyClose"),
-            Tile("writing", Glyph.Sparkle, "Settings_WritingTools", "Settings_AiProvider", "Settings_Model"),
-            Tile("translation", Glyph.Globe, "Settings_Translation", "Settings_TrAuto", "Settings_TrProvider", "Settings_Model"),
-            Tile("review", Glyph.Review, "Settings_Review", "Settings_CardsAuto", "Settings_NewPerDay", "Settings_Goal"),
-            Tile("offline", Glyph.Book, "Settings_Offline", "Settings_LocalFirst", "Settings_Packs"),
-            Tile("clipboard", Glyph.Clipboard, "Settings_Clipboard", "Settings_CbEnable", "Settings_CbMax", "Settings_CbApps"),
-            Tile("appearance", Glyph.Palette, "Settings_Appearance", "Settings_Theme", "Settings_Motion", "Settings_CardBg"),
-            Tile("privacy", Glyph.Shield, "Settings_Privacy", "Settings_SaveHistory", "Settings_Backup", "Settings_Report"),
-            Tile("about", Glyph.Info, "Common_Lamha", "Settings_UpAuto", "Tray_StartWithWindows", "Settings_Credits"),
-        ];
+        Tiles = [.. SettingsCategories.All.Select(Tile)];
 
         var settings = brain.Settings.Current;
         ExplainChips = [.. ExplainLanguages.Select(code => new ExplainChip(code, OnExplainChanged))];
@@ -853,8 +839,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
     }
 
-    private SettingsTile Tile(string id, Glyph glyph, string title, params string[] summary) =>
-        new(id, glyph, Localization.Get(title), string.Join(" · ", summary.Select(Localization.Get)), new RelayCommand(() => Section = id));
+    private SettingsTile Tile(SettingsCategory category) =>
+        new(category.Id, category.Glyph, Localization.Get(category.Title), SettingsCategories.Summary(category), new RelayCommand(() => Section = category.Id));
 
     /// <summary>A setting's place in its choices; the first (its default's place in Lamha 2's lists) for one that isn't there.</summary>
     private static int Index<T>(IReadOnlyList<T> choices, T value)
