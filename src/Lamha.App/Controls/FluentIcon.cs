@@ -45,6 +45,23 @@ public enum Glyph
     Text,
     Chevron,
     Journal,
+
+    // Settings' cards (step 4: each setting card has its icon, as in Windows' Settings)
+    Swap,
+    Currency,
+    Timer,
+    PaymentCard,
+    Apps,
+    SaveCopy,
+    Bug,
+    Update,
+    Power,
+    Calendar,
+    Goal,
+    Download,
+    Motion,
+    Brush,
+    Picture,
 }
 
 /// <summary>The design system's icon sizes (docs/design/system.md, Icons).</summary>
@@ -119,6 +136,21 @@ public sealed partial class FluentIcon : UserControl
         [Glyph.Text] = '', // Font
         [Glyph.Chevron] = '', // ChevronRight: a breadcrumb's step, a setting card that opens a page
         [Glyph.Journal] = '', // Education: the mistake journal
+        [Glyph.Swap] = '', // Switch: Arabic text translated to English
+        [Glyph.Currency] = '', // Calculator: prices in your currency
+        [Glyph.Timer] = '', // Stopwatch: how long copies are kept
+        [Glyph.PaymentCard] = '', // PaymentCard: bank card numbers skipped
+        [Glyph.Apps] = '', // AllApps: programs left out
+        [Glyph.SaveCopy] = '', // SaveCopy: a copy of my data
+        [Glyph.Bug] = '', // Bug: report a problem
+        [Glyph.Update] = '', // Sync: automatic updates
+        [Glyph.Power] = '', // PowerButton: start with Windows
+        [Glyph.Calendar] = '', // Calendar: new words per day
+        [Glyph.Goal] = '', // Target: the day's goal
+        [Glyph.Download] = '', // Download: dictionaries to download
+        [Glyph.Motion] = '', // LightningBolt: animations (system.html's)
+        [Glyph.Brush] = '', // Personalize: the accent colour from Windows
+        [Glyph.Picture] = '', // Picture: the wallpaper behind the window
     };
 
     /// <summary>The filled glyph, where the icon shows a state: a word in review, a pinned copy.</summary>

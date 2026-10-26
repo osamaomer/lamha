@@ -513,6 +513,7 @@
             <Grid.RowDefinitions>
               <RowDefinition Height="Auto" />
               <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <controls:FluentIcon x:Name="IconBox" Margin="0,0,20,0" VerticalAlignment="Center" Size="Large" Glyph="{TemplateBinding Icon}" />
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -521,6 +522,7 @@
                          TextReadingOrder="UseFlowDirection" Text="{TemplateBinding Description}" />
             </StackPanel>
             <ContentPresenter x:Name="Control" Grid.Column="2" VerticalAlignment="Center" Content="{TemplateBinding Content}" />
+            <ContentPresenter x:Name="DetailBox" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,12,0,0" Content="{TemplateBinding Detail}" />
           </Grid>
         </ControlTemplate>
       </Setter.Value>
@@ -538,7 +540,7 @@
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
   </Style>
 
-  <!-- The breadcrumb's "Settings": the page title's size, muted until the mouse is over it -->
+  <!-- The breadcrumb's "Settings": the page title's size in the tertiary colour, the secondary under the pointer (Windows' Settings) -->
   <Style x:Key="LamhaCrumbButtonStyle" TargetType="HyperlinkButton">
     <Setter Property="Padding" Value="0" />
     <Setter Property="BorderThickness" Value="0" />
@@ -546,7 +548,7 @@
     <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeTitle}" />
     <Setter Property="FontWeight" Value="SemiBold" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorTertiaryBrush}" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="UseSystemFocusVisuals" Value="True" />
     <Setter Property="Template">
@@ -560,12 +562,12 @@
                 <VisualState x:Name="Normal" />
                 <VisualState x:Name="PointerOver">
                   <VisualState.Setters>
-                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaTextBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
                   </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="Pressed">
                   <VisualState.Setters>
-                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaTextBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
                     <Setter Target="Presenter.Opacity" Value="0.8" />
                   </VisualState.Setters>
                 </VisualState>
@@ -578,65 +580,23 @@
     </Setter>
   </Style>
 
-  <!-- A choice among a few, with its hint (Translation, Without internet): the design's 20 px ring, filled to a 5 px
-       ring in the button colour when chosen; 10 px above and below, so the lines between choices sit in the middle -->
-  <Style x:Key="LamhaRadioStyle" TargetType="RadioButton">
-    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Padding" Value="0,10" />
+  <!-- A choice among a few, with its hint (Translation, Without internet, the AI provider): Windows' radio button (its
+       20 ring, the accent when chosen), the first line beside the ring; 4 above and below, so the lines between choices
+       sit in the middle -->
+  <Style x:Key="LamhaRadioStyle" TargetType="RadioButton" BasedOn="{StaticResource DefaultRadioButtonStyle}">
+    <Setter Property="Padding" Value="12,6,0,0" />
+    <Setter Property="Margin" Value="0,4" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-    <Setter Property="UseSystemFocusVisuals" Value="True" />
-    <Setter Property="FocusVisualMargin" Value="-4,2" />
-    <Setter Property="Template">
-      <Setter.Value>
-        <ControlTemplate TargetType="RadioButton">
-          <Grid x:Name="Root" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" ColumnSpacing="12">
-            <VisualStateManager.VisualStateGroups>
-              <VisualStateGroup x:Name="CommonStates">
-                <VisualState x:Name="Normal" />
-                <VisualState x:Name="PointerOver">
-                  <VisualState.Setters>
-                    <Setter Target="Ring.Stroke" Value="{ThemeResource LamhaTextMutedBrush}" />
-                  </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="Pressed">
-                  <VisualState.Setters>
-                    <Setter Target="Ring.Stroke" Value="{ThemeResource LamhaTextMutedBrush}" />
-                  </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="Disabled">
-                  <VisualState.Setters>
-                    <Setter Target="Root.Opacity" Value="0.45" />
-                  </VisualState.Setters>
-                </VisualState>
-              </VisualStateGroup>
-              <VisualStateGroup x:Name="CheckStates">
-                <VisualState x:Name="Checked">
-                  <VisualState.Setters>
-                    <Setter Target="Ring.Stroke" Value="{ThemeResource LamhaButtonBrush}" />
-                    <Setter Target="Ring.StrokeThickness" Value="5" />
-                  </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="Unchecked" />
-                <VisualState x:Name="Indeterminate" />
-              </VisualStateGroup>
-            </VisualStateManager.VisualStateGroups>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="20" />
-              <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Ellipse x:Name="Ring" Width="20" Height="20" Margin="0,1,0,0" VerticalAlignment="Top" Fill="Transparent"
-                     Stroke="{ThemeResource LamhaFieldLineBrush}" StrokeThickness="1" />
-            <ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
-                              Foreground="{TemplateBinding Foreground}" AutomationProperties.AccessibilityView="Raw" />
-          </Grid>
-        </ControlTemplate>
-      </Setter.Value>
-    </Setter>
   </Style>
 
-  <!-- A dropdown at the end of a settings card: 36 px high (the text boxes' height), 200 px at least, the inputs' corners -->
+  <!-- A line between the choices in a card -->
+  <Style x:Key="LamhaDividerStyle" TargetType="Border">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Background" Value="{ThemeResource DividerStrokeColorDefaultBrush}" />
+  </Style>
+
+  <!-- A dropdown at the end of a setting card: Windows' 32 high, 200 wide at least, radius 4 -->
   <Style x:Key="LamhaComboStyle" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
     <Setter Property="MinWidth" Value="200" />
     <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
@@ -645,7 +605,7 @@
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
   </Style>
 
-  <!-- A text field and a key field in Settings: 36 px high (the dropdowns' and buttons' height), the inputs' corners -->
+  <!-- A text field and a key field in Settings: Windows' 32 high, radius 4 -->
   <Style x:Key="LamhaFieldStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
     <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
     <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />

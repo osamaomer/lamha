@@ -22,12 +22,17 @@ public sealed partial class SettingsCard : ContentControl
     public static readonly DependencyProperty IconProperty =
         DependencyProperty.Register(nameof(Icon), typeof(Glyph), typeof(SettingsCard), new PropertyMetadata(Glyph.None, (d, _) => ((SettingsCard)d).Update()));
 
+    public static readonly DependencyProperty DetailProperty =
+        DependencyProperty.Register(nameof(Detail), typeof(object), typeof(SettingsCard), new PropertyMetadata(null, (d, e) => ((SettingsCard)d).OnDetailChanged(e.OldValue)));
+
     /// <summary>WinUI's SettingsCardWrapThreshold: below this width the control goes under the text.</summary>
     private const double WrapWidth = 476;
 
     private TextBlock? _description;
     private FrameworkElement? _icon;
     private FrameworkElement? _control;
+    private FrameworkElement? _detail;
+    private long _detailToken;
 
     public SettingsCard()
     {
@@ -56,14 +61,50 @@ public sealed partial class SettingsCard : ContentControl
         set => SetValue(IconProperty, value);
     }
 
+    /// <summary>
+    /// What goes under the name and hint, where the text starts (a status line, a list, a preview); hidden with it when
+    /// it hides itself.
+    /// </summary>
+    public object? Detail
+    {
+        get => GetValue(DetailProperty);
+        set => SetValue(DetailProperty, value);
+    }
+
     protected override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
         _description = GetTemplateChild("Description") as TextBlock;
         _icon = GetTemplateChild("IconBox") as FrameworkElement;
         _control = GetTemplateChild("Control") as FrameworkElement;
+        _detail = GetTemplateChild("DetailBox") as FrameworkElement;
         Update();
+        ShowDetail();
         Wrap(ActualWidth);
+    }
+
+    private void OnDetailChanged(object? old)
+    {
+        if (old is UIElement before && _detailToken != 0)
+        {
+            before.UnregisterPropertyChangedCallback(VisibilityProperty, _detailToken);
+            _detailToken = 0;
+        }
+
+        if (Detail is UIElement after)
+        {
+            _detailToken = after.RegisterPropertyChangedCallback(VisibilityProperty, (_, _) => ShowDetail());
+        }
+
+        ShowDetail();
+    }
+
+    private void ShowDetail()
+    {
+        if (_detail is not null)
+        {
+            _detail.Visibility = Detail is UIElement { Visibility: Visibility.Visible } ? Visibility.Visible : Visibility.Collapsed;
+        }
     }
 
     protected override void OnContentChanged(object oldContent, object newContent)

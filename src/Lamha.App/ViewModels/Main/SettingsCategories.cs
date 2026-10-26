@@ -15,12 +15,12 @@ public static class SettingsCategories
 {
     public static readonly IReadOnlyList<SettingsCategory> All =
     [
-        new("languages", Glyph.Translate, "Settings_Languages", ["Settings_UiLang", "Settings_TargetLang", "Settings_Reverse"]),
+        new("languages", Glyph.Globe, "Settings_Languages", ["Settings_UiLang", "Settings_TargetLang", "Settings_Reverse"]),
         new("card", Glyph.Card, "Settings_Card", ["Settings_Context", "Settings_Explain", "Settings_Wiki"]),
         // The design's summary names the clipboard panel's shortcut: back in it with the panel.
         new("keys", Glyph.Keyboard, "Settings_Keys", ["Settings_HkLookup", "Settings_HkWrite", "Settings_KeyClose"]),
         new("writing", Glyph.Sparkle, "Settings_WritingTools", ["Settings_AiProvider", "Settings_Model"]),
-        new("translation", Glyph.Globe, "Settings_Translation", ["Settings_TrAuto", "Settings_TrProvider", "Settings_Model"]),
+        new("translation", Glyph.Translate, "Settings_Translation", ["Settings_TrAuto", "Settings_TrProvider", "Settings_Model"]),
         new("review", Glyph.Review, "Settings_Review", ["Settings_CardsAuto", "Settings_NewPerDay", "Settings_Goal"]),
         new("offline", Glyph.Book, "Settings_Offline", ["Settings_LocalFirst", "Settings_Packs"]),
         new("clipboard", Glyph.Clipboard, "Settings_Clipboard", ["Settings_CbEnable", "Settings_CbMax", "Settings_CbApps"]),

@@ -14,6 +14,14 @@ public sealed partial class ShortcutRow(Shortcut kind, string label, IRelayComma
 
     public string Label { get; } = label;
 
+    /// <summary>Its card's icon: the card for a lookup, Write, the clipboard.</summary>
+    public Glyph Glyph => Kind switch
+    {
+        Shortcut.Write => Glyph.Write,
+        Shortcut.Clipboard => Glyph.Clipboard,
+        _ => Glyph.Card,
+    };
+
     /// <summary>"Ctrl", "Alt", "L": shown as keys.</summary>
     [ObservableProperty]
     public partial List<KeyPart> Keys { get; set; } = [];

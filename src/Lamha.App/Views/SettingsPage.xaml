@@ -7,62 +7,45 @@
     xmlns:views="using:Lamha.App.Views"
     KeyboardAcceleratorPlacementMode="Hidden"
     PreviewKeyDown="OnPreviewKeyDown">
-  <!-- The main window's Settings page, as signed off in phase 1 (docs/design/settings.html): a home of categories in
-       two columns, each opening its own page of settings cards 4 px apart, with the breadcrumb back. Each category's
-       page is made when it opens and let go when it's left (x:Load), so the home holds only its tiles. -->
-  <UserControl.Resources>
-    <!-- Keys as the design draws them: key caps (12 px, the chip's fill, a line under) joined by "+" -->
-    <DataTemplate x:Key="KeyPartTemplate" x:DataType="main:KeyPart">
-      <Grid>
-        <Border Padding="7,2" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaChipBrush}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="1,1,1,2"
-                Visibility="{x:Bind IsKey}">
-          <TextBlock FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind Text}" />
-        </Border>
-        <TextBlock Margin="2,0" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Text}"
-                   Visibility="{x:Bind controls:Show.IfNot(IsKey)}" />
-      </Grid>
-    </DataTemplate>
-    <ItemsPanelTemplate x:Key="KeysPanel">
-      <StackPanel Orientation="Horizontal" Spacing="2" FlowDirection="LeftToRight" />
-    </ItemsPanelTemplate>
-  </UserControl.Resources>
+  <!-- The main window's Settings page, as Windows' Settings (docs/design/system.md): a home of the categories in one
+       column of cards, each opening its own page of setting cards 4 apart (each with its icon), with the breadcrumb back.
+       Each category's page is made when it opens and let go when it's left (x:Load), so the home holds only its cards. -->
 
   <UserControl.KeyboardAccelerators>
     <KeyboardAccelerator Key="Left" Modifiers="Menu" Invoked="OnBack" />
   </UserControl.KeyboardAccelerators>
 
   <StackPanel>
-    <!-- ===== The breadcrumb: "Settings", or "Settings › Languages" (the page's title, 24 px above what follows) ===== -->
+    <!-- ===== The breadcrumb: "Settings", or "Settings › Languages" (the parent a link in the tertiary colour) ===== -->
     <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,0,0,24" Style="{StaticResource LamhaPageTitleTextStyle}" Text="{x:Bind Title}" AutomationProperties.HeadingLevel="Level1"
                Visibility="{x:Bind ViewModel.IsHome, Mode=OneWay}" />
-    <StackPanel Margin="0,0,0,24" Orientation="Horizontal" Spacing="8" Visibility="{x:Bind controls:Show.IfNot(ViewModel.IsHome), Mode=OneWay}">
+    <StackPanel Margin="0,0,0,24" Orientation="Horizontal" Spacing="{StaticResource LamhaSpace3}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.IsHome), Mode=OneWay}">
       <HyperlinkButton x:Name="Crumb" Style="{StaticResource LamhaCrumbButtonStyle}" Command="{x:Bind ViewModel.GoHomeCommand}" Content="{x:Bind Title}" />
-      <controls:FluentIcon Glyph="Chevron" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
+      <controls:FluentIcon Glyph="Chevron" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
       <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaPageTitleTextStyle}" Text="{x:Bind ViewModel.SectionTitle, Mode=OneWay}" AutomationProperties.HeadingLevel="Level1" />
     </StackPanel>
 
-    <!-- ===== The home: the categories, two columns (one when narrow) ===== -->
+    <!-- ===== The home: the categories, one column of cards, each with its icon, what's in it, and the chevron ===== -->
     <ItemsRepeater x:Name="Home" x:Load="{x:Bind ViewModel.IsHome, Mode=OneWay}" ItemsSource="{x:Bind ViewModel.Tiles}">
       <ItemsRepeater.Layout>
-        <UniformGridLayout MinItemWidth="260" MinColumnSpacing="4" MinRowSpacing="4" MaximumRowsOrColumns="2" ItemsStretch="Fill" />
+        <StackLayout Spacing="{StaticResource LamhaCardGap}" />
       </ItemsRepeater.Layout>
       <ItemsRepeater.ItemTemplate>
         <DataTemplate x:DataType="main:SettingsTile">
           <Button Style="{StaticResource LamhaTileButtonStyle}" Command="{x:Bind Open}" AutomationProperties.Name="{x:Bind Spoken}">
-            <Grid ColumnSpacing="16">
+            <Grid>
               <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="32" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
-              <Border Width="32" Height="32" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaAccentSoftBrush}">
-                <controls:FluentIcon Glyph="{x:Bind Glyph}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}" />
-              </Border>
+              <controls:FluentIcon Margin="0,0,20,0" Glyph="{x:Bind Glyph}" Size="Large" VerticalAlignment="Center" />
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Title}" />
-                <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{x:Bind Summary}" />
+                <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" Text="{x:Bind Title}" />
+                <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{x:Bind Summary}" />
               </StackPanel>
-              <controls:FluentIcon Grid.Column="2" Glyph="Chevron" Size="Small" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
+              <controls:FluentIcon Grid.Column="2" Margin="16,0,0,0" Glyph="Chevron" Size="Small" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </Grid>
           </Button>
         </DataTemplate>
@@ -70,422 +53,343 @@
     </ItemsRepeater>
 
     <!-- ===== Languages ===== -->
-    <StackPanel x:Name="LanguagesSection" x:Load="{x:Bind ViewModel.IsLanguages, Mode=OneWay}" Spacing="4">
-      <controls:SettingsCard Header="{x:Bind S.UiLang}" Description="{x:Bind S.UiLangHint}">
+    <StackPanel x:Name="LanguagesSection" x:Load="{x:Bind ViewModel.IsLanguages, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
+      <controls:SettingsCard Icon="Globe" Header="{x:Bind S.UiLang}" Description="{x:Bind S.UiLangHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.UiLangChoices}" SelectedIndex="{x:Bind ViewModel.UiLangIndex, Mode=TwoWay}" />
+        <!-- "The change applies when Lamha starts again", while the language chosen isn't the one in use -->
+        <controls:SettingsCard.Detail>
+          <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.RestartPending}" AutomationProperties.LiveSetting="Polite"
+                     Visibility="{x:Bind ViewModel.IsRestartPending, Mode=OneWay}" />
+        </controls:SettingsCard.Detail>
       </controls:SettingsCard>
-      <!-- "The change applies when Lamha starts again", while the language chosen isn't the one in use -->
-      <TextBlock TextReadingOrder="UseFlowDirection" Margin="16,0,16,4" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.RestartPending}" AutomationProperties.LiveSetting="Polite"
-                 Visibility="{x:Bind ViewModel.IsRestartPending, Mode=OneWay}" />
-      <controls:SettingsCard Header="{x:Bind S.TargetLang}" Description="{x:Bind S.TargetLangHint}">
+      <controls:SettingsCard Icon="Translate" Header="{x:Bind S.TargetLang}" Description="{x:Bind S.TargetLangHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.TargetLangChoices}" SelectedIndex="{x:Bind ViewModel.TargetLangIndex, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.Reverse}" Description="{x:Bind S.ReverseHint}">
+      <controls:SettingsCard Icon="Swap" Header="{x:Bind S.Reverse}" Description="{x:Bind S.ReverseHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.ReverseForArabic, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.Currency}" Description="{x:Bind S.CurrencyHint}">
+      <controls:SettingsCard Icon="Currency" Header="{x:Bind S.Currency}" Description="{x:Bind S.CurrencyHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.CurrencyChoices}" SelectedIndex="{x:Bind ViewModel.CurrencyIndex, Mode=TwoWay}" />
       </controls:SettingsCard>
     </StackPanel>
 
     <!-- ===== Writing tools: the five providers, the chosen one's setup under it ===== -->
-    <StackPanel x:Name="WritingSection" x:Load="{x:Bind ViewModel.IsWriting, Mode=OneWay}" Spacing="4">
+    <StackPanel x:Name="WritingSection" x:Load="{x:Bind ViewModel.IsWriting, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
       <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,-8,0,16" MaxWidth="560" HorizontalAlignment="Left" Style="{StaticResource LamhaSecondaryTextStyle}"
                  Text="{x:Bind ViewModel.AiIntro, Mode=OneWay}" />
-      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,0,0,4" Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Text="{x:Bind S.AiProvider}"
-                 AutomationProperties.HeadingLevel="Level2" />
+      <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaGroupHeadingTextStyle}" Text="{x:Bind S.AiProvider}" AutomationProperties.HeadingLevel="Level2" />
       <views:WritingSetupView Setup="{x:Bind ViewModel.Writing}" />
-      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Text="{x:Bind S.AiPrivacy}" />
+      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.AiPrivacy}" />
     </StackPanel>
 
     <!-- ===== Clipboard ===== -->
-    <StackPanel x:Name="ClipboardSection" x:Load="{x:Bind ViewModel.IsClipboard, Mode=OneWay}" Spacing="4">
+    <StackPanel x:Name="ClipboardSection" x:Load="{x:Bind ViewModel.IsClipboard, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
       <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,-8,0,16" MaxWidth="560" HorizontalAlignment="Left" Style="{StaticResource LamhaSecondaryTextStyle}"
                  Text="{x:Bind ViewModel.ClipboardIntro, Mode=OneWay}" />
-      <controls:SettingsCard Header="{x:Bind S.CbEnable}" Description="{x:Bind S.CbEnableHint}">
+      <controls:SettingsCard Icon="Clipboard" Header="{x:Bind S.CbEnable}" Description="{x:Bind S.CbEnableHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.Clipboard.IsOn, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.CbMax}" Description="{x:Bind S.CbMaxHint}">
+      <controls:SettingsCard Icon="List" Header="{x:Bind S.CbMax}" Description="{x:Bind S.CbMaxHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.Clipboard.LimitChoices}" SelectedIndex="{x:Bind ViewModel.Clipboard.LimitIndex, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.CbExpiry}" Description="{x:Bind S.CbExpiryHint}">
+      <controls:SettingsCard Icon="Timer" Header="{x:Bind S.CbExpiry}" Description="{x:Bind S.CbExpiryHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.Clipboard.ExpiryChoices}" SelectedIndex="{x:Bind ViewModel.Clipboard.ExpiryIndex, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.CbCards}" Description="{x:Bind S.CbCardsHint}">
+      <controls:SettingsCard Icon="PaymentCard" Header="{x:Bind S.CbCards}" Description="{x:Bind S.CbCardsHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.Clipboard.SkipCards, Mode=TwoWay}" />
       </controls:SettingsCard>
 
       <!-- Excluded programs: the list (each with Remove), a name to add, and the programs seen in the history -->
-      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
-        <StackPanel Spacing="12">
-          <StackPanel Spacing="2">
-            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.CbApps}" AutomationProperties.HeadingLevel="Level2" />
-            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CbAppsHint}" />
-          </StackPanel>
-          <ItemsRepeater ItemsSource="{x:Bind ViewModel.Clipboard.Excluded, Mode=OneWay}">
-            <ItemsRepeater.ItemTemplate>
-              <DataTemplate x:DataType="main:ExcludedApp">
-                <Grid MinHeight="40" ColumnSpacing="12" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="{x:Bind controls:Show.LineAbove(IsFirst)}">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                  </Grid.ColumnDefinitions>
-                  <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Exe}" />
-                  <Button Grid.Column="1" Style="{StaticResource LamhaIconButtonStyle}" Width="32" Height="32" Command="{x:Bind Remove}"
-                          ToolTipService.ToolTip="{x:Bind RemoveName}" AutomationProperties.Name="{x:Bind RemoveName}">
-                    <controls:FluentIcon Glyph="Trash" />
-                  </Button>
-                </Grid>
-              </DataTemplate>
-            </ItemsRepeater.ItemTemplate>
-          </ItemsRepeater>
-          <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind S.CbNoApps}"
-                     Visibility="{x:Bind ViewModel.Clipboard.HasNoApps, Mode=OneWay}" />
-          <Grid ColumnSpacing="8">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <TextBox Style="{StaticResource LamhaFieldStyle}" FlowDirection="LeftToRight" PlaceholderText="program.exe" AutomationProperties.Name="{x:Bind S.CbAppName}"
-                     Text="{x:Bind ViewModel.Clipboard.AppInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Tag="{x:Bind ViewModel.Clipboard.AddTypedCommand}" KeyDown="OnEnterCommits" />
-            <Button Grid.Column="1" Style="{StaticResource LamhaQuietButtonStyle}" MinHeight="36" Content="{x:Bind S.CbAdd}" Command="{x:Bind ViewModel.Clipboard.AddTypedCommand}" />
-          </Grid>
-          <controls:StatusText Text="{x:Bind ViewModel.Clipboard.AppError, Mode=OneWay}" Kind="Bad" />
-          <StackPanel Spacing="6" Visibility="{x:Bind ViewModel.Clipboard.HasSeen, Mode=OneWay}">
-            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CbFromHistory}" />
-            <ItemsControl ItemsSource="{x:Bind ViewModel.Clipboard.Seen, Mode=OneWay}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="main:SeenApp">
-                  <Button Style="{StaticResource LamhaChipButtonStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind Label}" Command="{x:Bind Add}"
-                          ToolTipService.ToolTip="{x:Bind Tooltip}" />
+      <controls:SettingsCard Icon="Apps" Header="{x:Bind S.CbApps}" Description="{x:Bind S.CbAppsHint}">
+        <controls:SettingsCard.Detail>
+          <StackPanel Spacing="{StaticResource LamhaSpace3}">
+            <ItemsRepeater ItemsSource="{x:Bind ViewModel.Clipboard.Excluded, Mode=OneWay}">
+              <ItemsRepeater.ItemTemplate>
+                <DataTemplate x:DataType="main:ExcludedApp">
+                  <Grid MinHeight="40" ColumnSpacing="12" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="{x:Bind controls:Show.LineAbove(IsFirst)}">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Exe}" />
+                    <Button Grid.Column="1" Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind Remove}"
+                            ToolTipService.ToolTip="{x:Bind RemoveName}" AutomationProperties.Name="{x:Bind RemoveName}">
+                      <controls:FluentIcon Glyph="Trash" />
+                    </Button>
+                  </Grid>
                 </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
+              </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind S.CbNoApps}"
+                       Visibility="{x:Bind ViewModel.Clipboard.HasNoApps, Mode=OneWay}" />
+            <Grid ColumnSpacing="{StaticResource LamhaSpace2}">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <TextBox Style="{StaticResource LamhaFieldStyle}" FlowDirection="LeftToRight" PlaceholderText="program.exe" AutomationProperties.Name="{x:Bind S.CbAppName}"
+                       Text="{x:Bind ViewModel.Clipboard.AppInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                       Tag="{x:Bind ViewModel.Clipboard.AddTypedCommand}" KeyDown="OnEnterCommits" />
+              <Button Grid.Column="1" Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.CbAdd}" Command="{x:Bind ViewModel.Clipboard.AddTypedCommand}" />
+            </Grid>
+            <controls:StatusText Text="{x:Bind ViewModel.Clipboard.AppError, Mode=OneWay}" Kind="Bad" />
+            <StackPanel Spacing="{StaticResource LamhaSpace2}" Visibility="{x:Bind ViewModel.Clipboard.HasSeen, Mode=OneWay}">
+              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CbFromHistory}" />
+              <ItemsControl ItemsSource="{x:Bind ViewModel.Clipboard.Seen, Mode=OneWay}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="main:SeenApp">
+                    <Button Style="{StaticResource LamhaChipButtonStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind Label}" Command="{x:Bind Add}"
+                            ToolTipService.ToolTip="{x:Bind Tooltip}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
           </StackPanel>
-        </StackPanel>
-      </Border>
+        </controls:SettingsCard.Detail>
+      </controls:SettingsCard>
 
-      <controls:SettingsCard Header="{x:Bind S.CbClear}" Description="{x:Bind S.CbClearHint}">
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Clipboard.ClearUnpinnedCommand}" AutomationProperties.Name="{x:Bind S.CbClearUnpinned}">
-            <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:FluentIcon Glyph="Trash" VerticalAlignment="Center" />
-              <TextBlock VerticalAlignment="Center" Text="{x:Bind S.CbClearUnpinned}" />
-            </StackPanel>
-          </Button>
-          <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Clipboard.ClearAllCommand}" AutomationProperties.Name="{x:Bind S.CbClearAll}">
-            <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:FluentIcon Glyph="Trash" VerticalAlignment="Center" />
-              <TextBlock VerticalAlignment="Center" Text="{x:Bind S.CbClearAll}" />
-            </StackPanel>
-          </Button>
+      <controls:SettingsCard Icon="Trash" Header="{x:Bind S.CbClear}" Description="{x:Bind S.CbClearHint}">
+        <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
+          <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Clipboard.ClearUnpinnedCommand}" Content="{x:Bind S.CbClearUnpinned}" />
+          <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Clipboard.ClearAllCommand}" Content="{x:Bind S.CbClearAll}" />
         </StackPanel>
       </controls:SettingsCard>
-      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Text="{x:Bind S.CbEncrypted}" />
+      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CbEncrypted}" />
     </StackPanel>
 
     <!-- ===== Privacy & history ===== -->
-    <StackPanel x:Name="PrivacySection" x:Load="{x:Bind ViewModel.IsPrivacy, Mode=OneWay}" Spacing="4">
-      <controls:SettingsCard Header="{x:Bind S.SaveHistory}" Description="{x:Bind S.SaveHistoryHint}">
+    <StackPanel x:Name="PrivacySection" x:Load="{x:Bind ViewModel.IsPrivacy, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
+      <controls:SettingsCard Icon="History" Header="{x:Bind S.SaveHistory}" Description="{x:Bind S.SaveHistoryHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.Privacy.SaveHistory, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.ClearHistory}" Description="{x:Bind ViewModel.Privacy.HistoryCount, Mode=OneWay}">
-        <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Privacy.ClearHistoryCommand}" AutomationProperties.Name="{x:Bind S.ClearHistory}">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <controls:FluentIcon Glyph="Trash" VerticalAlignment="Center" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind S.Clear}" />
-          </StackPanel>
-        </Button>
+      <controls:SettingsCard Icon="Trash" Header="{x:Bind S.ClearHistory}" Description="{x:Bind ViewModel.Privacy.HistoryCount, Mode=OneWay}">
+        <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Privacy.ClearHistoryCommand}" Content="{x:Bind S.Clear}" AutomationProperties.Name="{x:Bind S.ClearHistory}" />
       </controls:SettingsCard>
 
       <!-- A copy of my data: Save a copy and Restore, and how it went under them -->
-      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
-        <StackPanel Spacing="8">
-          <Grid ColumnSpacing="16">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <StackPanel VerticalAlignment="Center" Spacing="2">
-              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Backup}" />
-              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.BackupHint}" />
-            </StackPanel>
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
-              <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.BackupSave}" Command="{x:Bind ViewModel.Privacy.SaveCopyCommand}" />
-              <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.BackupRestore}" Command="{x:Bind ViewModel.Privacy.RestoreCommand}" />
-            </StackPanel>
-          </Grid>
-          <controls:StatusText Text="{x:Bind ViewModel.Privacy.BackupStatus, Mode=OneWay}" Kind="{x:Bind ViewModel.Privacy.BackupStatusKind, Mode=OneWay}" />
+      <controls:SettingsCard Icon="SaveCopy" Header="{x:Bind S.Backup}" Description="{x:Bind S.BackupHint}">
+        <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
+          <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.BackupSave}" Command="{x:Bind ViewModel.Privacy.SaveCopyCommand}" />
+          <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.BackupRestore}" Command="{x:Bind ViewModel.Privacy.RestoreCommand}" />
         </StackPanel>
-      </Border>
+        <controls:SettingsCard.Detail>
+          <controls:StatusText Text="{x:Bind ViewModel.Privacy.BackupStatus, Mode=OneWay}" Kind="{x:Bind ViewModel.Privacy.BackupStatusKind, Mode=OneWay}" />
+        </controls:SettingsCard.Detail>
+      </controls:SettingsCard>
 
       <!-- Report a problem: Copy, Report on GitHub, and the report itself to read first -->
-      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
-        <StackPanel Spacing="8">
-          <Grid ColumnSpacing="16">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <StackPanel VerticalAlignment="Center" Spacing="2">
-              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Report}" />
-              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.ReportHint}" />
-            </StackPanel>
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
-              <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.Copy}" Command="{x:Bind ViewModel.Privacy.CopyReportCommand}" />
-              <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.ReportSend}" Command="{x:Bind ViewModel.Privacy.SendReportCommand}" />
-            </StackPanel>
-          </Grid>
-          <controls:StatusText Text="{x:Bind ViewModel.Privacy.ReportStatus, Mode=OneWay}" Kind="Ok" />
-          <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" Content="{x:Bind S.ReportShow}" Command="{x:Bind ViewModel.Privacy.ToggleReportCommand}" />
-          <Border Padding="12,8" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaChipBrush}" FlowDirection="LeftToRight"
-                  Visibility="{x:Bind ViewModel.Privacy.IsReportShown, Mode=OneWay}">
-            <TextBlock FontFamily="Consolas" FontSize="{StaticResource LamhaFontSizeCaption}" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource LamhaTextBrush}"
-                       Text="{x:Bind ViewModel.Privacy.Report, Mode=OneWay}" />
-          </Border>
+      <controls:SettingsCard Icon="Bug" Header="{x:Bind S.Report}" Description="{x:Bind S.ReportHint}">
+        <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
+          <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.Copy}" Command="{x:Bind ViewModel.Privacy.CopyReportCommand}" />
+          <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.ReportSend}" Command="{x:Bind ViewModel.Privacy.SendReportCommand}" />
         </StackPanel>
-      </Border>
+        <controls:SettingsCard.Detail>
+          <StackPanel Spacing="{StaticResource LamhaSpace2}">
+            <controls:StatusText Text="{x:Bind ViewModel.Privacy.ReportStatus, Mode=OneWay}" Kind="Ok" />
+            <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" Content="{x:Bind S.ReportShow}" Command="{x:Bind ViewModel.Privacy.ToggleReportCommand}" />
+            <Border Padding="12,8" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource ControlFillColorSecondaryBrush}" FlowDirection="LeftToRight"
+                    Visibility="{x:Bind ViewModel.Privacy.IsReportShown, Mode=OneWay}">
+              <TextBlock FontFamily="Consolas" FontSize="{StaticResource LamhaFontSizeCaption}" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                         Text="{x:Bind ViewModel.Privacy.Report, Mode=OneWay}" />
+            </Border>
+          </StackPanel>
+        </controls:SettingsCard.Detail>
+      </controls:SettingsCard>
 
       <!-- My data on this PC: where it is, and Open the folder -->
-      <controls:SettingsCard Header="{x:Bind S.MyData}" Description="{x:Bind S.MyDataLine}">
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.Privacy.OpenFolderCommand}" AutomationProperties.Name="{x:Bind S.OpenFolder}">
-            <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:FluentIcon Glyph="Folder" VerticalAlignment="Center" />
-              <TextBlock VerticalAlignment="Center" Text="{x:Bind S.OpenFolder}" />
-            </StackPanel>
-          </Button>
+      <controls:SettingsCard Icon="Folder" Header="{x:Bind S.MyData}" Description="{x:Bind S.MyDataLine}">
+        <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
+          <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.OpenFolder}" Command="{x:Bind ViewModel.Privacy.OpenFolderCommand}" />
           <Button Style="{StaticResource LamhaDangerButtonStyle}" Content="{x:Bind S.DeleteData}" Command="{x:Bind ViewModel.Privacy.DeleteDataCommand}" />
         </StackPanel>
       </controls:SettingsCard>
 
-      <!-- What is sent, and where? The answer opens under the row (the design's chevron) -->
-      <Border Style="{StaticResource LamhaSettingsPanelStyle}" MinHeight="48" Padding="0">
-        <StackPanel>
-          <!-- 14 px: the panel's 1 px edge and the button's own make the text 16 px in, as on every card -->
-          <Button Style="{StaticResource LamhaRowButtonStyle}" MinHeight="46" Padding="14,0" Command="{x:Bind ViewModel.Privacy.TogglePrivacyTextCommand}"
-                  AutomationProperties.Name="{x:Bind S.PrivacyMore}">
-            <Grid ColumnSpacing="16">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="32" />
-              </Grid.ColumnDefinitions>
-              <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.PrivacyMore}" />
-              <controls:FluentIcon Grid.Column="1" Glyph="Down" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
-            </Grid>
-          </Button>
-          <TextBlock Margin="15,0,15,12" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind S.PrivacyText}"
-                     Visibility="{x:Bind ViewModel.Privacy.IsPrivacyTextShown, Mode=OneWay}" />
-        </StackPanel>
-      </Border>
+      <!-- What is sent, and where? Windows' expander, the answer under it -->
+      <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="{x:Bind ViewModel.Privacy.IsPrivacyTextShown, Mode=TwoWay}" AutomationProperties.Name="{x:Bind S.PrivacyMore}">
+        <Expander.Header>
+          <StackPanel Orientation="Horizontal">
+            <controls:FluentIcon Margin="0,0,20,0" Glyph="Shield" Size="Large" VerticalAlignment="Center" />
+            <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.PrivacyMore}" />
+          </StackPanel>
+        </Expander.Header>
+        <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind S.PrivacyText}" />
+      </Expander>
     </StackPanel>
 
     <!-- ===== Keyboard shortcuts: each one's keys and Change; Esc closes the card ===== -->
-    <StackPanel x:Name="KeysSection" x:Load="{x:Bind ViewModel.IsKeys, Mode=OneWay}" Spacing="4">
+    <StackPanel x:Name="KeysSection" x:Load="{x:Bind ViewModel.IsKeys, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
       <ItemsRepeater ItemsSource="{x:Bind ViewModel.Shortcuts.Rows}">
         <ItemsRepeater.Layout>
-          <StackLayout Spacing="4" />
+          <StackLayout Spacing="{StaticResource LamhaCardGap}" />
         </ItemsRepeater.Layout>
         <ItemsRepeater.ItemTemplate>
           <DataTemplate x:DataType="main:ShortcutRow">
-            <Border Style="{StaticResource LamhaSettingsPanelStyle}" MinHeight="48">
-              <StackPanel Spacing="6" VerticalAlignment="Center">
-                <Grid ColumnSpacing="16">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="32" />
-                  </Grid.ColumnDefinitions>
-                  <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Label}" />
-                  <ItemsControl Grid.Column="1" VerticalAlignment="Center" IsTabStop="False" ItemsSource="{x:Bind Keys, Mode=OneWay}"
-                                ItemTemplate="{StaticResource KeyPartTemplate}" ItemsPanel="{StaticResource KeysPanel}" />
-                  <ToggleButton Grid.Column="2" Style="{StaticResource LamhaIconToggleStyle}" Width="32" Height="32" BorderThickness="0"
-                                IsChecked="{x:Bind IsCapturing, Mode=OneWay}" Command="{x:Bind Change}" CommandParameter="{x:Bind}"
-                                ToolTipService.ToolTip="{x:Bind ChangeLabel}" AutomationProperties.Name="{x:Bind ChangeName, Mode=OneWay}">
-                    <controls:FluentIcon Glyph="Write" />
-                  </ToggleButton>
-                </Grid>
-                <controls:StatusText Text="{x:Bind Status, Mode=OneWay}" Kind="{x:Bind StatusKind, Mode=OneWay}" />
+            <controls:SettingsCard Icon="{x:Bind Glyph}" Header="{x:Bind Label}" MinHeight="48">
+              <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace4}">
+                <controls:KeyCaps Keys="{x:Bind Keys, Mode=OneWay}" />
+                <ToggleButton Style="{StaticResource LamhaIconToggleStyle}" BorderThickness="0"
+                              IsChecked="{x:Bind IsCapturing, Mode=OneWay}" Command="{x:Bind Change}" CommandParameter="{x:Bind}"
+                              ToolTipService.ToolTip="{x:Bind ChangeLabel}" AutomationProperties.Name="{x:Bind ChangeName, Mode=OneWay}">
+                  <controls:FluentIcon Glyph="Write" />
+                </ToggleButton>
               </StackPanel>
-            </Border>
+              <controls:SettingsCard.Detail>
+                <controls:StatusText Text="{x:Bind Status, Mode=OneWay}" Kind="{x:Bind StatusKind, Mode=OneWay}" />
+              </controls:SettingsCard.Detail>
+            </controls:SettingsCard>
           </DataTemplate>
         </ItemsRepeater.ItemTemplate>
       </ItemsRepeater>
-      <Border Style="{StaticResource LamhaSettingsPanelStyle}" MinHeight="48">
-        <Grid ColumnSpacing="16" VerticalAlignment="Center">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="32" />
-          </Grid.ColumnDefinitions>
-          <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.KeyClose}" />
-          <ItemsControl Grid.Column="1" VerticalAlignment="Center" IsTabStop="False" ItemsSource="{x:Bind ViewModel.Shortcuts.CloseKeys}"
-                        ItemTemplate="{StaticResource KeyPartTemplate}" ItemsPanel="{StaticResource KeysPanel}" />
-        </Grid>
-      </Border>
+      <!-- Esc: its keys where the others' are, a Change's width after them -->
+      <controls:SettingsCard Icon="Close" Header="{x:Bind S.KeyClose}" MinHeight="48">
+        <controls:KeyCaps Margin="0,0,48,0" Keys="{x:Bind ViewModel.Shortcuts.CloseKeys}" />
+      </controls:SettingsCard>
     </StackPanel>
 
     <!-- ===== Lamha: the version and its update, Automatic updates, Start with Windows, the releases, the dictionary's sources ===== -->
-    <StackPanel x:Name="AboutSection" x:Load="{x:Bind ViewModel.IsAbout, Mode=OneWay}" Spacing="4">
-      <!-- The version, how the update stands under it in the design's colour, and Check now (or Restart now) -->
-      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
-        <Grid ColumnSpacing="16">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center" Spacing="2">
-            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind ViewModel.Version}" />
-            <controls:StatusText Text="{x:Bind ViewModel.UpStatus, Mode=OneWay}" Kind="{x:Bind ViewModel.UpStatusKind, Mode=OneWay}" />
-          </StackPanel>
-          <Button Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ViewModel.UpButton, Mode=OneWay}"
-                  Command="{x:Bind ViewModel.CheckUpdatesCommand}" Visibility="{x:Bind ViewModel.HasUpdates}" />
-        </Grid>
-      </Border>
-      <controls:SettingsCard Header="{x:Bind S.UpAuto}" Description="{x:Bind S.UpAutoHint}" Visibility="{x:Bind ViewModel.HasUpdates}">
+    <StackPanel x:Name="AboutSection" x:Load="{x:Bind ViewModel.IsAbout, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
+      <!-- The version, how the update stands under it in its colour, and Check now (or Restart now) -->
+      <controls:SettingsCard Icon="Info" Header="{x:Bind ViewModel.Version}">
+        <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ViewModel.UpButton, Mode=OneWay}"
+                Command="{x:Bind ViewModel.CheckUpdatesCommand}" Visibility="{x:Bind ViewModel.HasUpdates}" />
+        <controls:SettingsCard.Detail>
+          <controls:StatusText Margin="0,-10,0,0" Text="{x:Bind ViewModel.UpStatus, Mode=OneWay}" Kind="{x:Bind ViewModel.UpStatusKind, Mode=OneWay}" />
+        </controls:SettingsCard.Detail>
+      </controls:SettingsCard>
+      <controls:SettingsCard Icon="Update" Header="{x:Bind S.UpAuto}" Description="{x:Bind S.UpAutoHint}" Visibility="{x:Bind ViewModel.HasUpdates}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.UpdatesAuto, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.Login}" Description="{x:Bind S.LoginHint}" Visibility="{x:Bind ViewModel.CanStartWithWindows}">
+      <controls:SettingsCard Icon="Power" Header="{x:Bind S.Login}" Description="{x:Bind S.LoginHint}" Visibility="{x:Bind ViewModel.CanStartWithWindows}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.StartsWithWindows, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.UpAll}" MinHeight="48">
-        <Button Style="{StaticResource LamhaIconButtonStyle}" Width="32" Height="32" Command="{x:Bind ViewModel.OpenReleasesCommand}"
-                ToolTipService.ToolTip="{x:Bind S.UpAll}">
+      <controls:SettingsCard Icon="List" Header="{x:Bind S.UpAll}" MinHeight="48">
+        <Button Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind ViewModel.OpenReleasesCommand}" ToolTipService.ToolTip="{x:Bind S.UpAll}">
           <controls:FluentIcon Glyph="External" />
         </Button>
       </controls:SettingsCard>
-      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
-        <StackPanel Spacing="8">
-          <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Credits}" AutomationProperties.HeadingLevel="Level2" />
-          <TextBlock FlowDirection="LeftToRight" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" LineHeight="21" controls:Markup.Text="{x:Bind S.CreditsList}" />
-          <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CreditsLicense}" />
-        </StackPanel>
-      </Border>
+      <controls:SettingsCard Icon="Book" Header="{x:Bind S.Credits}">
+        <controls:SettingsCard.Detail>
+          <StackPanel Spacing="{StaticResource LamhaSpace2}">
+            <TextBlock FlowDirection="LeftToRight" Style="{StaticResource LamhaCaptionTextStyle}" LineHeight="21" controls:Markup.Text="{x:Bind S.CreditsList}" />
+            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CreditsLicense}" />
+          </StackPanel>
+        </controls:SettingsCard.Detail>
+      </controls:SettingsCard>
     </StackPanel>
 
     <!-- ===== The lookup card ===== -->
-    <StackPanel x:Name="CardSection" x:Load="{x:Bind ViewModel.IsCard, Mode=OneWay}" Spacing="4">
-      <controls:SettingsCard Header="{x:Bind S.Context}" Description="{x:Bind S.ContextHint}">
+    <StackPanel x:Name="CardSection" x:Load="{x:Bind ViewModel.IsCard, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
+      <controls:SettingsCard Icon="Sparkle" Header="{x:Bind S.Context}" Description="{x:Bind S.ContextHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.UseContext, Mode=TwoWay}" />
       </controls:SettingsCard>
       <!-- The languages explained in their own language: chips under the name and hint -->
-      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
-        <StackPanel Spacing="12">
-          <StackPanel Spacing="2">
-            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Explain}" />
-            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.ExplainHint}" />
-          </StackPanel>
+      <controls:SettingsCard Icon="Book" Header="{x:Bind S.Explain}" Description="{x:Bind S.ExplainHint}">
+        <controls:SettingsCard.Detail>
           <ItemsControl ItemsSource="{x:Bind ViewModel.ExplainChips}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False"
                         AutomationProperties.Name="{x:Bind S.Explain}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="main:ExplainChip">
-                <ToggleButton Style="{StaticResource LamhaChipStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Padding="12,3"
+                <ToggleButton Style="{StaticResource LamhaChipStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
                               IsChecked="{x:Bind IsOn, Mode=TwoWay}" IsEnabled="{x:Bind CanChange, Mode=OneWay}" Content="{x:Bind Label}"
                               ToolTipService.ToolTip="{x:Bind Tooltip, Mode=OneWay}" />
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-        </StackPanel>
-      </Border>
-      <controls:SettingsCard Header="{x:Bind S.TranslateDefs}" Description="{x:Bind S.TranslateDefsHint}">
+        </controls:SettingsCard.Detail>
+      </controls:SettingsCard>
+      <controls:SettingsCard Icon="Translate" Header="{x:Bind S.TranslateDefs}" Description="{x:Bind S.TranslateDefsHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.TranslateDefinitions, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.Wiki}" Description="{x:Bind S.WikiHint}">
+      <controls:SettingsCard Icon="Globe" Header="{x:Bind S.Wiki}" Description="{x:Bind S.WikiHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.ShowWikipedia, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.AutoSpeak}" Description="{x:Bind S.AutoSpeakHint}">
+      <controls:SettingsCard Icon="Speak" Header="{x:Bind S.AutoSpeak}" Description="{x:Bind S.AutoSpeakHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.AutoSpeak, Mode=TwoWay}" />
       </controls:SettingsCard>
     </StackPanel>
 
     <!-- ===== Translation ===== -->
-    <StackPanel x:Name="TranslationSection" x:Load="{x:Bind ViewModel.IsTranslation, Mode=OneWay}" Spacing="4">
+    <StackPanel x:Name="TranslationSection" x:Load="{x:Bind ViewModel.IsTranslation, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
       <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,-8,0,16" MaxWidth="560" HorizontalAlignment="Left" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind S.TrIntro}" />
       <Border Style="{StaticResource LamhaSettingsPanelStyle}">
         <StackPanel>
           <RadioButton GroupName="TrService" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind ViewModel.TrAuto, Mode=TwoWay}"
                        AutomationProperties.Name="{x:Bind S.TrAuto}" AutomationProperties.HelpText="{x:Bind S.TrAutoHint}">
-            <StackPanel Spacing="1">
+            <StackPanel>
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.TrAuto}" />
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.TrAutoHint}" />
             </StackPanel>
           </RadioButton>
-          <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
+          <Border Style="{StaticResource LamhaDividerStyle}" />
           <RadioButton GroupName="TrService" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind ViewModel.TrGoogle, Mode=TwoWay}"
                        AutomationProperties.Name="{x:Bind S.TrGoogle}" AutomationProperties.HelpText="{x:Bind S.TrGoogleHint}">
-            <StackPanel Spacing="1">
+            <StackPanel>
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.TrGoogle}" />
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.TrGoogleHint}" />
             </StackPanel>
           </RadioButton>
-          <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
+          <Border Style="{StaticResource LamhaDividerStyle}" />
           <RadioButton GroupName="TrService" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind ViewModel.TrAi, Mode=TwoWay}"
                        AutomationProperties.Name="{x:Bind S.TrAi}" AutomationProperties.HelpText="{x:Bind S.TrAiHint}">
-            <StackPanel Spacing="1">
+            <StackPanel>
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.TrAi}" />
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.TrAiHint}" />
             </StackPanel>
           </RadioButton>
         </StackPanel>
       </Border>
-      <controls:SettingsCard Header="{x:Bind S.TrProvider}" Description="{x:Bind S.TrProviderHint}">
+      <controls:SettingsCard Icon="Sparkle" Header="{x:Bind S.TrProvider}" Description="{x:Bind S.TrProviderHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.TranslatorChoices}" SelectedIndex="{x:Bind ViewModel.TranslatorIndex, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.Model}" Description="{x:Bind ViewModel.TrModelHint, Mode=OneWay}" Visibility="{x:Bind ViewModel.UsesAi, Mode=OneWay}">
+      <controls:SettingsCard Icon="List" Header="{x:Bind S.Model}" Description="{x:Bind ViewModel.TrModelHint, Mode=OneWay}" Visibility="{x:Bind ViewModel.UsesAi, Mode=OneWay}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" MaxWidth="320" ItemsSource="{x:Bind ViewModel.TrModelChoices, Mode=OneWay}"
                   SelectedIndex="{x:Bind ViewModel.TrModelIndex, Mode=TwoWay}" />
+        <controls:SettingsCard.Detail>
+          <controls:StatusText Text="{x:Bind ViewModel.TrStatus, Mode=OneWay}" Kind="{x:Bind ViewModel.TrStatusKind, Mode=OneWay}" />
+        </controls:SettingsCard.Detail>
       </controls:SettingsCard>
-      <Border Margin="16,4,16,0" Visibility="{x:Bind ViewModel.UsesAi, Mode=OneWay}">
-        <controls:StatusText Text="{x:Bind ViewModel.TrStatus, Mode=OneWay}" Kind="{x:Bind ViewModel.TrStatusKind, Mode=OneWay}" />
-      </Border>
     </StackPanel>
 
     <!-- ===== Word review ===== -->
-    <StackPanel x:Name="ReviewSection" x:Load="{x:Bind ViewModel.IsReview, Mode=OneWay}" Spacing="4">
+    <StackPanel x:Name="ReviewSection" x:Load="{x:Bind ViewModel.IsReview, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
       <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,-8,0,16" MaxWidth="560" HorizontalAlignment="Left" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind S.ReviewIntro}" />
-      <controls:SettingsCard Header="{x:Bind S.CardsAuto}" Description="{x:Bind S.CardsAutoHint}">
+      <controls:SettingsCard Icon="Review" Header="{x:Bind S.CardsAuto}" Description="{x:Bind S.CardsAutoHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.CardsAuto, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.NewPerDay}" Description="{x:Bind S.NewPerDayHint}">
+      <controls:SettingsCard Icon="Calendar" Header="{x:Bind S.NewPerDay}" Description="{x:Bind S.NewPerDayHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.PerDayChoices}" SelectedIndex="{x:Bind ViewModel.PerDayIndex, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.Goal}" Description="{x:Bind S.GoalHint}">
+      <controls:SettingsCard Icon="Goal" Header="{x:Bind S.Goal}" Description="{x:Bind S.GoalHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.GoalChoices}" SelectedIndex="{x:Bind ViewModel.GoalIndex, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.DeleteCards}" Description="{x:Bind S.DeleteCardsHint}">
-        <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.DeleteCardsCommand}" AutomationProperties.Name="{x:Bind S.DeleteCards}">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <controls:FluentIcon Glyph="Trash" VerticalAlignment="Center" />
-            <TextBlock TextReadingOrder="UseFlowDirection" VerticalAlignment="Center" Text="{x:Bind S.Delete}" />
-          </StackPanel>
-        </Button>
+      <controls:SettingsCard Icon="Trash" Header="{x:Bind S.DeleteCards}" Description="{x:Bind S.DeleteCardsHint}">
+        <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.DeleteCardsCommand}" Content="{x:Bind S.Delete}" AutomationProperties.Name="{x:Bind S.DeleteCards}" />
       </controls:SettingsCard>
     </StackPanel>
 
     <!-- ===== Without internet ===== -->
-    <StackPanel x:Name="OfflineSection" x:Load="{x:Bind ViewModel.IsOffline, Mode=OneWay}" Spacing="4">
+    <StackPanel x:Name="OfflineSection" x:Load="{x:Bind ViewModel.IsOffline, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
       <Border Style="{StaticResource LamhaSettingsPanelStyle}">
         <StackPanel>
           <RadioButton GroupName="DictSource" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind ViewModel.DictLocal, Mode=TwoWay}"
                        AutomationProperties.Name="{x:Bind S.LocalFirst}" AutomationProperties.HelpText="{x:Bind S.LocalFirstHint}">
-            <StackPanel Spacing="1">
+            <StackPanel>
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.LocalFirst}" />
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.LocalFirstHint}" />
             </StackPanel>
           </RadioButton>
-          <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
+          <Border Style="{StaticResource LamhaDividerStyle}" />
           <RadioButton GroupName="DictSource" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind ViewModel.DictOffline, Mode=TwoWay}"
                        AutomationProperties.Name="{x:Bind S.LocalOnly}" AutomationProperties.HelpText="{x:Bind S.LocalOnlyHint}">
-            <StackPanel Spacing="1">
+            <StackPanel>
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.LocalOnly}" />
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.LocalOnlyHint}" />
             </StackPanel>
           </RadioButton>
-          <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
+          <Border Style="{StaticResource LamhaDividerStyle}" />
           <RadioButton GroupName="DictSource" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind ViewModel.DictOnline, Mode=TwoWay}"
                        AutomationProperties.Name="{x:Bind S.OnlineFirst}" AutomationProperties.HelpText="{x:Bind S.OnlineFirstHint}">
-            <StackPanel Spacing="1">
+            <StackPanel>
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.OnlineFirst}" />
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.OnlineFirstHint}" />
             </StackPanel>
@@ -495,21 +399,17 @@
 
       <!-- Dictionaries to download: each language with its size and Download (its progress while it comes) or Remove,
            and why the last try failed under its name (Lamha 2's renderPacks()) -->
-      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
-        <StackPanel Spacing="12">
-          <StackPanel Spacing="2">
-            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Packs}" AutomationProperties.HeadingLevel="Level2" />
-            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.PacksHint}" />
-          </StackPanel>
+      <controls:SettingsCard Icon="Download" Header="{x:Bind S.Packs}" Description="{x:Bind S.PacksHint}">
+        <controls:SettingsCard.Detail>
           <ItemsRepeater ItemsSource="{x:Bind ViewModel.Offline.Packs}">
             <ItemsRepeater.ItemTemplate>
               <DataTemplate x:DataType="main:PackRow">
-                <Grid MinHeight="48" Padding="0,8" ColumnSpacing="12" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="{x:Bind controls:Show.LineAbove(IsFirst)}">
+                <Grid MinHeight="48" Padding="0,8" ColumnSpacing="12" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="{x:Bind controls:Show.LineAbove(IsFirst)}">
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                   </Grid.ColumnDefinitions>
-                  <StackPanel VerticalAlignment="Center" Spacing="1">
+                  <StackPanel VerticalAlignment="Center">
                     <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Name}" />
                     <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Info, Mode=OneWay}" />
                     <controls:StatusText Text="{x:Bind Error, Mode=OneWay}" Kind="Bad" />
@@ -520,61 +420,50 @@
               </DataTemplate>
             </ItemsRepeater.ItemTemplate>
           </ItemsRepeater>
-        </StackPanel>
-      </Border>
+        </controls:SettingsCard.Detail>
+      </controls:SettingsCard>
     </StackPanel>
 
     <!-- ===== Appearance ===== -->
-    <StackPanel x:Name="AppearanceSection" x:Load="{x:Bind ViewModel.IsAppearance, Mode=OneWay}" Spacing="4">
-      <controls:SettingsCard Header="{x:Bind S.Theme}" Description="{x:Bind S.ThemeHint}">
+    <StackPanel x:Name="AppearanceSection" x:Load="{x:Bind ViewModel.IsAppearance, Mode=OneWay}" Spacing="{StaticResource LamhaCardGap}">
+      <controls:SettingsCard Icon="Palette" Header="{x:Bind S.Theme}" Description="{x:Bind S.ThemeHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.ThemeChoices}" SelectedIndex="{x:Bind ViewModel.ThemeIndex, Mode=TwoWay}" />
       </controls:SettingsCard>
       <!-- Animations, with Lamha 2's preview under it: a small card that comes in as the chosen level makes it, what the
            level does, and Preview -->
-      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
-        <StackPanel Spacing="10">
-          <Grid ColumnSpacing="16">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <StackPanel VerticalAlignment="Center" Spacing="2">
-              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Motion}" />
-              <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.MotionHint}" />
-            </StackPanel>
-            <ComboBox Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.MotionChoices}"
-                      SelectedIndex="{x:Bind ViewModel.MotionIndex, Mode=TwoWay}" AutomationProperties.Name="{x:Bind S.Motion}" AutomationProperties.HelpText="{x:Bind S.MotionHint}" />
-          </Grid>
-          <Grid Padding="12" MinHeight="76" ColumnSpacing="12" CornerRadius="{StaticResource LamhaRadiusOverlay}" Background="{ThemeResource LamhaPageBrush}">
+      <controls:SettingsCard Icon="Motion" Header="{x:Bind S.Motion}" Description="{x:Bind S.MotionHint}">
+        <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.MotionChoices}" SelectedIndex="{x:Bind ViewModel.MotionIndex, Mode=TwoWay}" />
+        <controls:SettingsCard.Detail>
+          <Grid Padding="12" MinHeight="76" ColumnSpacing="12" CornerRadius="{StaticResource LamhaRadiusOverlay}" Background="{ThemeResource LayerFillColorDefaultBrush}">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*" />
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <!-- Lamha 2's .md-card: the English word on the left in both languages, its meaning on the reading side -->
             <Border x:Name="MotionDemoCard" Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" VerticalAlignment="Center"
-                    Background="{ThemeResource LamhaSurfaceBrush}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="1"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
                     AutomationProperties.AccessibilityView="Raw">
-              <StackPanel Spacing="2">
+              <StackPanel>
                 <TextBlock FlowDirection="LeftToRight" TextAlignment="Left" FontSize="{StaticResource LamhaFontSizeBody}" FontWeight="Bold" Foreground="{ThemeResource LamhaTextBrush}"
                            Text="{x:Bind S.MotionDemoWord}" />
                 <TextBlock x:Name="MotionDemoMeaning" FontSize="{StaticResource LamhaFontSizeBodyLarge}" FontWeight="Bold" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind S.MotionDemoMeaning}" />
               </StackPanel>
             </Border>
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="8">
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="{StaticResource LamhaSpace2}">
               <TextBlock MaxWidth="150" TextWrapping="Wrap" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}"
                          Text="{x:Bind ViewModel.MotionNote, Mode=OneWay}" />
               <Button HorizontalAlignment="Left" Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.MotionPreview}" Command="{x:Bind ViewModel.PreviewMotionCommand}" />
             </StackPanel>
           </Grid>
-        </StackPanel>
-      </Border>
-      <controls:SettingsCard Header="{x:Bind S.CardBg}" Description="{x:Bind S.CardBgHint}">
+        </controls:SettingsCard.Detail>
+      </controls:SettingsCard>
+      <controls:SettingsCard Icon="Card" Header="{x:Bind S.CardBg}" Description="{x:Bind S.CardBgHint}">
         <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.CardBgChoices}" SelectedIndex="{x:Bind ViewModel.CardBgIndex, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.Accent}" Description="{x:Bind S.AccentHint}">
+      <controls:SettingsCard Icon="Brush" Header="{x:Bind S.Accent}" Description="{x:Bind S.AccentHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.AccentWindows, Mode=TwoWay}" />
       </controls:SettingsCard>
-      <controls:SettingsCard Header="{x:Bind S.Mica}" Description="{x:Bind S.MicaHint}">
+      <controls:SettingsCard Icon="Picture" Header="{x:Bind S.Mica}" Description="{x:Bind S.MicaHint}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.WindowMica, Mode=TwoWay}" />
       </controls:SettingsCard>
     </StackPanel>
