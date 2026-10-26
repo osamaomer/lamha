@@ -65,21 +65,12 @@
       </Button>
     </Grid>
 
-    <!-- ===== Paused: a banner, and Resume ===== -->
-    <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
-            Visibility="{x:Bind ViewModel.IsPaused, Mode=OneWay}">
-      <Grid ColumnSpacing="12">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-        <StackPanel VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite">
-          <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontWeight="Bold" Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind PausedTitle}" />
-          <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind PausedText}" />
-        </StackPanel>
-        <Button Grid.Column="1" Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind ResumeLabel}" Command="{x:Bind ViewModel.ResumeCommand}" />
-      </Grid>
-    </Border>
+    <!-- ===== Paused: Windows' InfoBar, and Resume ===== -->
+    <InfoBar IsOpen="{x:Bind ViewModel.IsPaused, Mode=OneWay}" IsClosable="False" Severity="Warning" Title="{x:Bind PausedTitle}" Message="{x:Bind PausedText}">
+      <InfoBar.ActionButton>
+        <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ResumeLabel}" Command="{x:Bind ViewModel.ResumeCommand}" />
+      </InfoBar.ActionButton>
+    </InfoBar>
 
     <!-- ===== The copies ===== -->
     <Border Padding="0,4" Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind controls:Show.IfAny(ViewModel.Rows.Count), Mode=OneWay}"

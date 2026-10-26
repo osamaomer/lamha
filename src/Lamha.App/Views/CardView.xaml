@@ -327,10 +327,9 @@
     </Border>
 
     <!-- "Copied", "Added to review": a moment at the foot of the card -->
-    <Border Grid.Row="1" Grid.RowSpan="2" Margin="0,0,0,12" Padding="12,6" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-            controls:Pill.IsPill="True" Background="{ThemeResource LamhaToastBackgroundBrush}"
+    <Border Grid.Row="1" Grid.RowSpan="2" Margin="0,0,0,12" Style="{StaticResource LamhaToastStyle}"
             Visibility="{x:Bind controls:Show.IfText(ViewModel.Toast), Mode=OneWay, FallbackValue=Collapsed}" IsHitTestVisible="False">
-      <TextBlock FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaToastTextBrush}" Text="{x:Bind ViewModel.Toast, Mode=OneWay}" />
+      <TextBlock Style="{StaticResource LamhaToastTextStyle}" Text="{x:Bind ViewModel.Toast, Mode=OneWay}" />
     </Border>
   </Grid>
 </UserControl>

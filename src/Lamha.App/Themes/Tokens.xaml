@@ -41,16 +41,9 @@
       <!-- One red in both themes for "delete" in a question (white text at 4.8:1) -->
       <SolidColorBrush x:Key="LamhaDangerSolidBrush" Color="#DC2626" />
       <SolidColorBrush x:Key="LamhaDangerSolidTextBrush" Color="#FFFFFF" />
-      <!-- A warning banner -->
-      <SolidColorBrush x:Key="LamhaWarnBackgroundBrush" Color="#FFF7E6" />
-      <SolidColorBrush x:Key="LamhaWarnTextBrush" Color="#8A5300" />
       <!-- What a search matched (Lamha 2's mark): amber behind the text -->
       <SolidColorBrush x:Key="LamhaMarkBrush" Color="#4DF59E0B" />
       <SolidColorBrush x:Key="LamhaMarkTextBrush" Color="#1D1D1F" />
-      <!-- Toasts stand out from what's behind them: dark on light, light on dark -->
-      <SolidColorBrush x:Key="LamhaToastBackgroundBrush" Color="#1C1C1E" />
-      <SolidColorBrush x:Key="LamhaToastTextBrush" Color="#FFFFFF" />
-      <SolidColorBrush x:Key="LamhaToastActionBrush" Color="#A5B4FC" />
       <!-- The Lamha mark, and milestones -->
       <LinearGradientBrush x:Key="LamhaBrandBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Offset="0" Color="#6366F1" />
@@ -93,13 +86,8 @@
       <SolidColorBrush x:Key="LamhaDangerSoftBrush" Color="#24FC8888" />
       <SolidColorBrush x:Key="LamhaDangerSolidBrush" Color="#DC2626" />
       <SolidColorBrush x:Key="LamhaDangerSolidTextBrush" Color="#FFFFFF" />
-      <SolidColorBrush x:Key="LamhaWarnBackgroundBrush" Color="#3A2C12" />
-      <SolidColorBrush x:Key="LamhaWarnTextBrush" Color="#F5C46B" />
       <SolidColorBrush x:Key="LamhaMarkBrush" Color="#52F59E0B" />
       <SolidColorBrush x:Key="LamhaMarkTextBrush" Color="#F5F5F7" />
-      <SolidColorBrush x:Key="LamhaToastBackgroundBrush" Color="#F5F2F2F7" />
-      <SolidColorBrush x:Key="LamhaToastTextBrush" Color="#1C1C1E" />
-      <SolidColorBrush x:Key="LamhaToastActionBrush" Color="#4F46E5" />
       <LinearGradientBrush x:Key="LamhaBrandBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Offset="0" Color="#6366F1" />
         <GradientStop Offset="1" Color="#06B6D4" />
@@ -141,13 +129,8 @@
       <SolidColorBrush x:Key="LamhaDangerSoftBrush" Color="{ThemeResource SystemColorWindowColor}" />
       <SolidColorBrush x:Key="LamhaDangerSolidBrush" Color="{ThemeResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="LamhaDangerSolidTextBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
-      <SolidColorBrush x:Key="LamhaWarnBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
-      <SolidColorBrush x:Key="LamhaWarnTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
       <SolidColorBrush x:Key="LamhaMarkBrush" Color="{ThemeResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="LamhaMarkTextBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
-      <SolidColorBrush x:Key="LamhaToastBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
-      <SolidColorBrush x:Key="LamhaToastTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
-      <SolidColorBrush x:Key="LamhaToastActionBrush" Color="{ThemeResource SystemColorHotlightColor}" />
       <SolidColorBrush x:Key="LamhaBrandBrush" Color="{ThemeResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="LamhaCelebrateBrush" Color="{ThemeResource SystemColorWindowColor}" />
       <StaticResource x:Key="LamhaCardTintColor" ResourceKey="SystemColorWindowColor" />

@@ -10,17 +10,6 @@
        time on Windows' content layer: the steps in a row at the top, the step, and its buttons at the foot -->
   <Grid x:Name="Root">
     <Grid.Resources>
-      <!-- Keys as the design draws them: key caps (12 px, the chip's fill, a line under) joined by "+" -->
-      <DataTemplate x:Key="KeyPartTemplate" x:DataType="main:KeyPart">
-        <Grid>
-          <Border Padding="7,2" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaSurfaceBrush}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="1,1,1,2"
-                  Visibility="{x:Bind IsKey}">
-            <TextBlock FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind Text}" />
-          </Border>
-          <TextBlock Margin="2,0" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Text}"
-                     Visibility="{x:Bind controls:Show.IfNot(IsKey)}" />
-        </Grid>
-      </DataTemplate>
       <!-- A row of the Lamha 2 step, as the design draws it: the icon on the accent's tint, what moves, and how many -->
       <DataTemplate x:Key="MoveItemTemplate" x:DataType="firstRun:MoveItem">
         <StackPanel>
@@ -41,9 +30,6 @@
           </Grid>
         </StackPanel>
       </DataTemplate>
-      <ItemsPanelTemplate x:Key="KeysPanel">
-        <StackPanel Orientation="Horizontal" Spacing="2" FlowDirection="LeftToRight" />
-      </ItemsPanelTemplate>
       <Style x:Key="StepTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource LamhaTextStyle}">
         <Setter Property="FontSize" Value="22" />
         <Setter Property="FontWeight" Value="Bold" />
@@ -155,16 +141,8 @@
                 <ItemsControl IsTabStop="False" ItemsSource="{x:Bind ViewModel.Lamha2Items}" ItemTemplate="{StaticResource MoveItemTemplate}" />
               </Border>
               <!-- A key or clipboard history Windows couldn't read here (the folder came from another account) -->
-              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
-                      Visibility="{x:Bind ViewModel.KeysLost, Mode=OneWay}">
-                <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
-                           Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind ViewModel.KeysLostText}" />
-              </Border>
-              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
-                      Visibility="{x:Bind ViewModel.ClipsLost, Mode=OneWay}">
-                <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
-                           Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind ViewModel.ClipsLostText}" />
-              </Border>
+              <InfoBar IsOpen="{x:Bind ViewModel.KeysLost, Mode=OneWay}" IsClosable="False" Severity="Warning" Message="{x:Bind ViewModel.KeysLostText}" />
+              <InfoBar IsOpen="{x:Bind ViewModel.ClipsLost, Mode=OneWay}" IsClosable="False" Severity="Warning" Message="{x:Bind ViewModel.ClipsLostText}" />
               <!-- What Lamha 2 had and Lamha 3 doesn't, of what this user used, so nothing seems to vanish -->
               <StackPanel Spacing="4" Visibility="{x:Bind ViewModel.HasDropped, Mode=OneWay}">
                 <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="SemiBold" Text="{x:Bind ViewModel.NotInLamha3}" />
@@ -190,8 +168,7 @@
               <StackPanel Orientation="Horizontal" Spacing="6" Visibility="{x:Bind controls:Show.IfNot(ViewModel.Tried), Mode=OneWay}">
                 <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}"
                            Text="{x:Bind ViewModel.TryText}" />
-                <ItemsControl VerticalAlignment="Center" IsTabStop="False" ItemsSource="{x:Bind ViewModel.LookupKeys, Mode=OneWay}"
-                              ItemTemplate="{StaticResource KeyPartTemplate}" ItemsPanel="{StaticResource KeysPanel}" />
+                <controls:KeyCaps Keys="{x:Bind ViewModel.LookupKeys, Mode=OneWay}" />
               </StackPanel>
               <!-- Once the card has opened on it: the design's green line -->
               <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaOkSoftBrush}"
@@ -215,8 +192,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}"
                                Text="{x:Bind ViewModel.HkWrite}" />
-                    <ItemsControl Grid.Column="1" VerticalAlignment="Center" IsTabStop="False" ItemsSource="{x:Bind ViewModel.WriteKeys, Mode=OneWay}"
-                                  ItemTemplate="{StaticResource KeyPartTemplate}" ItemsPanel="{StaticResource KeysPanel}" />
+                    <controls:KeyCaps Grid.Column="1" Keys="{x:Bind ViewModel.WriteKeys, Mode=OneWay}" />
                   </Grid>
                   <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
                   <Grid Padding="0,10" ColumnSpacing="12">
@@ -226,8 +202,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}"
                                Text="{x:Bind ViewModel.HkClip}" />
-                    <ItemsControl Grid.Column="1" VerticalAlignment="Center" IsTabStop="False" ItemsSource="{x:Bind ViewModel.ClipboardKeys, Mode=OneWay}"
-                                  ItemTemplate="{StaticResource KeyPartTemplate}" ItemsPanel="{StaticResource KeysPanel}" />
+                    <controls:KeyCaps Grid.Column="1" Keys="{x:Bind ViewModel.ClipboardKeys, Mode=OneWay}" />
                   </Grid>
                 </StackPanel>
               </Border>
@@ -256,8 +231,7 @@
                     <Paragraph>
                       <Run Text="{x:Bind ViewModel.ReadyText}" />
                       <InlineUIContainer>
-                        <ItemsControl Margin="0,0,0,-5" IsTabStop="False" ItemsSource="{x:Bind ViewModel.LookupKeys, Mode=OneWay}"
-                                      ItemTemplate="{StaticResource KeyPartTemplate}" ItemsPanel="{StaticResource KeysPanel}" />
+                        <controls:KeyCaps Margin="0,0,0,-5" Keys="{x:Bind ViewModel.LookupKeys, Mode=OneWay}" />
                       </InlineUIContainer>
                     </Paragraph>
                   </RichTextBlock>

@@ -429,6 +429,24 @@
     <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
   </Style>
 
+  <!-- The toast ("Copied", "Deleted · Undo"): Windows' Acrylic and its edge, rounded 8, Body in the main text colour;
+       its action a hyperlink button -->
+  <Style x:Key="LamhaToastStyle" TargetType="Border">
+    <Setter Property="Padding" Value="16,6" />
+    <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Bottom" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusOverlay}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{ThemeResource SurfaceStrokeColorFlyoutBrush}" />
+    <Setter Property="Background" Value="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
+  </Style>
+  <Style x:Key="LamhaToastTextStyle" TargetType="TextBlock" BasedOn="{StaticResource LamhaBodyTextStyle}">
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    <Setter Property="TextWrapping" Value="NoWrap" />
+  </Style>
+
   <!-- A key cap (Ctrl, Alt, L): Caption in the secondary colour on Windows' control fill and its edge, rounded 4 -->
   <Style x:Key="LamhaKeyCapStyle" TargetType="Border">
     <Setter Property="Padding" Value="4,1" />

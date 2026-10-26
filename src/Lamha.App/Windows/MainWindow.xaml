@@ -81,16 +81,12 @@
         </ScrollViewer>
 
         <!-- "Copied", "History cleared · Undo": a moment at the foot of the page (Lamha 2's flash) -->
-        <Border x:Name="ToastBox" Margin="{StaticResource LamhaToastMargin}" Padding="14,6" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                controls:Pill.IsPill="True" Background="{ThemeResource LamhaToastBackgroundBrush}"
+        <Border x:Name="ToastBox" Margin="{StaticResource LamhaToastMargin}" Style="{StaticResource LamhaToastStyle}"
                 Visibility="{x:Bind controls:Show.IfText(ViewModel.Toast), Mode=OneWay, FallbackValue=Collapsed}">
           <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace3}">
-            <TextBlock VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaToastTextBrush}"
-                       Text="{x:Bind ViewModel.Toast, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
-            <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" Command="{x:Bind ViewModel.RunToastActionCommand}"
-                             Visibility="{x:Bind controls:Show.IfText(ViewModel.ToastAction), Mode=OneWay, FallbackValue=Collapsed}">
-              <TextBlock FontWeight="Bold" Foreground="{ThemeResource LamhaToastActionBrush}" Text="{x:Bind ViewModel.ToastAction, Mode=OneWay}" />
-            </HyperlinkButton>
+            <TextBlock Style="{StaticResource LamhaToastTextStyle}" Text="{x:Bind ViewModel.Toast, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
+            <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" Command="{x:Bind ViewModel.RunToastActionCommand}" Content="{x:Bind ViewModel.ToastAction, Mode=OneWay}"
+                             Visibility="{x:Bind controls:Show.IfText(ViewModel.ToastAction), Mode=OneWay, FallbackValue=Collapsed}" />
           </StackPanel>
         </Border>
 

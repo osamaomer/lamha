@@ -98,9 +98,8 @@
       <StackPanel x:Name="GeminiSetup" x:Load="{x:Bind Setup.IsGemini, Mode=OneWay}" Style="{StaticResource LamhaProviderSetupStyle}">
         <ContentControl Content="{x:Bind Setup.Gemini}" ContentTemplate="{StaticResource KeyTemplate}" HorizontalContentAlignment="Stretch" IsTabStop="False" />
         <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" controls:Markup.Text="{x:Bind S.GeminiTip}" />
-        <Border Padding="12,8" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaWarnBackgroundBrush}">
-          <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind S.GeminiWarn}" />
-        </Border>
+        <InfoBar IsOpen="True" IsClosable="False" Severity="Warning" Message="{x:Bind S.GeminiWarn}" />
+
         <Grid ColumnSpacing="16">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />

@@ -38,11 +38,6 @@ public partial class TokensTests
         { "LamhaOkSoftBrush", "ui", "ok-soft" },
         { "LamhaDangerBrush", "ui", "danger" },
         { "LamhaDangerSoftBrush", "ui", "danger-soft" },
-        { "LamhaWarnBackgroundBrush", "ui", "warn-bg" },
-        { "LamhaWarnTextBrush", "ui", "warn-fg" },
-        { "LamhaToastBackgroundBrush", "ui", "toast-bg" },
-        { "LamhaToastTextBrush", "ui", "toast-fg" },
-        { "LamhaToastActionBrush", "ui", "toast-act" },
     };
 
     [Theory]
@@ -88,8 +83,6 @@ public partial class TokensTests
             ["LamhaChipBrush"] = Ground(theme, "LamhaChipBrush", surface),
             ["LamhaButtonBrush"] = Ground(theme, "LamhaButtonBrush", surface),
             ["LamhaDangerSolidBrush"] = Ground(theme, "LamhaDangerSolidBrush", surface),
-            ["LamhaWarnBackgroundBrush"] = Ground(theme, "LamhaWarnBackgroundBrush", surface),
-            ["LamhaToastBackgroundBrush"] = Ground(theme, "LamhaToastBackgroundBrush", surface),
         };
 
         void Need(string text, string ground, double min = 4.5)
@@ -119,9 +112,6 @@ public partial class TokensTests
         Need("LamhaTextMutedBrush", "LamhaChipBrush");
         Need("LamhaButtonTextBrush", "LamhaButtonBrush");
         Need("LamhaDangerSolidTextBrush", "LamhaDangerSolidBrush");
-        Need("LamhaWarnTextBrush", "LamhaWarnBackgroundBrush");
-        Need("LamhaToastTextBrush", "LamhaToastBackgroundBrush");
-        Need("LamhaToastActionBrush", "LamhaToastBackgroundBrush");
 
         // A field's edge, drawn over its own fill (the page colour), against the surface around it and the fill inside;
         // the switch's track when on (WCAG 1.4.11)

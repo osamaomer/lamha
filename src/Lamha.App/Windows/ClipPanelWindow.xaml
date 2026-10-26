@@ -85,21 +85,13 @@
         <TextBlock VerticalAlignment="Bottom" Margin="0,0,0,1" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Hint}" />
       </StackPanel>
 
-      <!-- Paused: a banner, and Resume -->
-      <Border Grid.Row="1" Margin="16,10,16,0" Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
-              Visibility="{x:Bind ViewModel.List.IsPaused, Mode=OneWay}">
-        <Grid ColumnSpacing="12">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite">
-            <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontWeight="Bold" Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind PausedTitle}" />
-            <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind PausedText}" />
-          </StackPanel>
-          <Button Grid.Column="1" Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind ResumeLabel}" Command="{x:Bind ViewModel.List.ResumeCommand}" />
-        </Grid>
-      </Border>
+      <!-- Paused: Windows' InfoBar, and Resume -->
+      <InfoBar Grid.Row="1" Margin="16,10,16,0" IsOpen="{x:Bind ViewModel.List.IsPaused, Mode=OneWay}" IsClosable="False" Severity="Warning"
+               Title="{x:Bind PausedTitle}" Message="{x:Bind PausedText}">
+        <InfoBar.ActionButton>
+          <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ResumeLabel}" Command="{x:Bind ViewModel.List.ResumeCommand}" />
+        </InfoBar.ActionButton>
+      </InfoBar>
 
       <!-- Search, All / Pinned -->
       <Grid Grid.Row="2" Padding="16,10" ColumnSpacing="8">
@@ -438,16 +430,12 @@
     </Grid>
 
     <!-- "Pinned", "Deleted · Undo": a moment above the foot (Lamha 2's lc-toast) -->
-    <Border Margin="0,0,0,44" Padding="14,6" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-            controls:Pill.IsPill="True" Background="{ThemeResource LamhaToastBackgroundBrush}"
+    <Border Margin="0,0,0,44" Style="{StaticResource LamhaToastStyle}"
             Visibility="{x:Bind controls:Show.IfText(ViewModel.Toast), Mode=OneWay, FallbackValue=Collapsed}">
-      <StackPanel Orientation="Horizontal" Spacing="12">
-        <TextBlock VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaToastTextBrush}"
-                   Text="{x:Bind ViewModel.Toast, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
-        <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" IsTabStop="False" Command="{x:Bind ViewModel.RunToastActionCommand}"
-                         Visibility="{x:Bind controls:Show.IfText(ViewModel.ToastAction), Mode=OneWay, FallbackValue=Collapsed}">
-          <TextBlock FontWeight="Bold" Foreground="{ThemeResource LamhaToastActionBrush}" Text="{x:Bind ViewModel.ToastAction, Mode=OneWay}" />
-        </HyperlinkButton>
+      <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace3}">
+        <TextBlock Style="{StaticResource LamhaToastTextStyle}" Text="{x:Bind ViewModel.Toast, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
+        <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" IsTabStop="False" Command="{x:Bind ViewModel.RunToastActionCommand}" Content="{x:Bind ViewModel.ToastAction, Mode=OneWay}"
+                         Visibility="{x:Bind controls:Show.IfText(ViewModel.ToastAction), Mode=OneWay, FallbackValue=Collapsed}" />
       </StackPanel>
     </Border>
   </Grid>
