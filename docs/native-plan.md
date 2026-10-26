@@ -562,7 +562,7 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
 **Questions**
 - **Remove 2.x automatically, or leave it for the user?** Recommendation: remove it after a successful import, but keep its data folder for 30 days so nothing is lost if something went wrong. *(phase 6)*
 - **Settings that no longer exist** (per-site switches, the Firefox link): drop them silently? Recommendation: yes, and list them in the import summary so nothing seems to vanish. *(phase 6)*
-- **Lamha 2's `enabled`** (its window's switch, which did nothing in its Windows app): leave it out of the import? In Lamha 3 it turns the shortcuts off (the tray's Enable Lamha), so a Lamha 2 user who switched off the Firefox extension would start with Lamha off. Recommendation: leave it out. *(phase 6)*
+- **Lamha 2's `enabled`** (its window's switch, which did nothing in its Windows app): leave it out of the import? In Lamha 3 it turns the shortcuts off (the tray's Enable Lamha), so a Lamha 2 user who switched off the Firefox extension would start with Lamha off. **Answered 2026-10-26: left out.** *(phase 6)*
 
 ## Risks
 
