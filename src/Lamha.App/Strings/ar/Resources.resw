@@ -776,6 +776,26 @@
   <data name="Settings_MyDataHint" xml:space="preserve"><value>لا يحذفها إلغاء تثبيت لمحة ولا إعادة تثبيته</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
   <data name="Settings_OpenFolder" xml:space="preserve"><value>فتح المجلد</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
   <data name="Settings_UpAll" xml:space="preserve"><value>كل الإصدارات على GitHub</value><comment>d.upAllReleases</comment></data>
+  <data name="Tray_UpCheck" xml:space="preserve"><value>التحقق من التحديثات</value><comment>d.upCheck</comment></data>
+  <data name="Tray_UpChecking" xml:space="preserve"><value>جارٍ التحقق من التحديثات…</value><comment>d.upChecking</comment></data>
+  <data name="Tray_UpDownloading" xml:space="preserve"><value>يُنزَّل الإصدار {0}…</value><comment>d.upDownloading</comment></data>
+  <data name="Tray_UpRestart" xml:space="preserve"><value>أعد التشغيل لتثبيت الإصدار {0}</value><comment>d.upRestart</comment></data>
+  <data name="Note_UpLatest" xml:space="preserve"><value>لديك أحدث إصدار</value><comment>d.upLatestTitle</comment></data>
+  <data name="Note_UpLatestBody" xml:space="preserve"><value>الإصدار {0} هو الأحدث.</value><comment>d.upLatestBody</comment></data>
+  <data name="Note_UpReady" xml:space="preserve"><value>تحديث جديد جاهز</value><comment>d.upReadyTitle</comment></data>
+  <data name="Note_UpReadyBody" xml:space="preserve"><value>الإصدار {0} — أعد تشغيل لمحة لتثبيته، أو سيُثبَّت عند الخروج. اضغط هنا لإعادة التشغيل الآن.</value><comment>d.upReadyBody</comment></data>
+  <data name="Note_UpFailed" xml:space="preserve"><value>تعذّر التحقق من التحديثات</value><comment>d.upFailedTitle</comment></data>
+  <data name="Note_UpFailedBody" xml:space="preserve"><value>تحقق من اتصالك بالإنترنت ثم حاول مجددًا.</value><comment>d.upFailedBody</comment></data>
+  <data name="Note_Updates" xml:space="preserve"><value>التحديثات</value><comment>d.upTitle</comment></data>
+  <data name="Note_UpDevBody" xml:space="preserve"><value>التحديث التلقائي يعمل في النسخة المثبّتة فقط.</value><comment>d.upDevBody</comment></data>
+  <data name="Note_UpRestartNow" xml:space="preserve"><value>أعد التشغيل الآن</value><comment>d.upRestartNow</comment></data>
+  <data name="Settings_UpAutoHint" xml:space="preserve"><value>يتحقق لمحة من وجود إصدار جديد عند التشغيل وكل ٦ ساعات، وينزّله في الخلفية، ويثبّته عند إعادة التشغيل.</value><comment>d.upAutoHint</comment></data>
+  <data name="Settings_UpCheckNow" xml:space="preserve"><value>التحقق الآن</value><comment>d.upCheckNow</comment></data>
+  <data name="Settings_UpChecking" xml:space="preserve"><value>جارٍ التحقق…</value><comment>d.upSChecking</comment></data>
+  <data name="Settings_UpDownloading" xml:space="preserve"><value>يُنزَّل الإصدار {0}…</value><comment>d.upSDownloading</comment></data>
+  <data name="Settings_UpReady" xml:space="preserve"><value>الإصدار {0} جاهز — أعد التشغيل لتثبيته</value><comment>d.upSReady</comment></data>
+  <data name="Settings_UpLatest" xml:space="preserve"><value>لديك أحدث إصدار ✓</value><comment>d.upSLatest</comment></data>
+  <data name="Settings_UpError" xml:space="preserve"><value>تعذّر التحقق من التحديثات. تحقق من اتصالك.</value><comment>d.upSError</comment></data>
   <data name="Settings_CreditsLicense" xml:space="preserve"><value>بيانات القاموس (مجلد dict) مُتاحة بموجب CC BY-SA 4.0. التفاصيل في dict/LICENSES.md.</value><comment>o.creditsLicense</comment></data>
   <data name="Settings_Version" xml:space="preserve"><value>لمحة · الإصدار {0}</value><comment>o.version reworded in its markup only: the version is {0}</comment></data>
   <data name="Settings_LoginHint" xml:space="preserve"><value>يبدأ لمحة في الخلفية عند تسجيل الدخول، فتعمل الاختصارات فورًا</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>

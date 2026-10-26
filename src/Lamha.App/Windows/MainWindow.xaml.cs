@@ -46,6 +46,7 @@ public sealed partial class MainWindow : Window, IPageHost
     private ReviewPage? _review;
     private ClipboardPage? _clipboardPage;
     private SettingsPage? _settings;
+    private string _section = "";
     private readonly ClipboardService _clipboard;
     private bool _choosing;
 
@@ -121,6 +122,9 @@ public sealed partial class MainWindow : Window, IPageHost
     /// <summary>Start with Windows, for Settings → Lamha; set before the window shows a page.</summary>
     public StartWithWindows? Startup { get; set; }
 
+    /// <summary>The updates, for Settings → Lamha; set before the window shows a page.</summary>
+    public UpdateService? Updates { get; set; }
+
     /// <summary>Settings → Delete my data: deletes everything and quits (the app's).</summary>
     public Action? DeleteData { get; set; }
 
@@ -172,7 +176,15 @@ public sealed partial class MainWindow : Window, IPageHost
 
         if (page.Id == "settings" && section.Length > 0)
         {
-            _settings?.ViewModel.Open(section);
+            if (PageHost.Content is SettingsPage settings)
+            {
+                settings.ViewModel.Open(section);
+            }
+            else
+            {
+                // A new window's list changes page only once it's loaded: Settings opens at the category then.
+                _section = section;
+            }
         }
     }
 
@@ -356,8 +368,10 @@ public sealed partial class MainWindow : Window, IPageHost
         switch (ViewModel.Page.Id)
         {
             case "settings":
-                _settings ??= new SettingsPage(new SettingsViewModel(_brain, this, _shortcuts, _clipboard, Startup));
+                _settings ??= new SettingsPage(new SettingsViewModel(_brain, this, _shortcuts, _clipboard, Startup, Updates));
                 _settings.ViewModel.Refresh();
+                _settings.ViewModel.Open(_section);
+                _section = "";
                 _settings.ViewModel.Attach();
                 PageHost.Content = _settings;
                 break;

@@ -178,6 +178,12 @@ public sealed record LamhaSettings
     /// </summary>
     public string Currency { get; init; } = "";
 
+    /// <summary>
+    /// Lamha checks for a new version at start and every 6 hours, and downloads it (Settings → Lamha; Lamha 2's
+    /// <c>updatesAuto</c>, in its storage.local).
+    /// </summary>
+    public bool UpdatesAuto { get; init; } = true;
+
     /// <summary>The interface language in use: "ar" or "en", given the system's language (e.g. "ar-SA").</summary>
     public string InterfaceLanguage(string systemLanguage) => UiLang switch
     {

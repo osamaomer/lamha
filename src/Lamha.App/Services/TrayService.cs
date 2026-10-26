@@ -1,5 +1,6 @@
 using System.Globalization;
 using Lamha.Core.Settings;
+using Lamha.Core.Updates;
 using Lamha.Windows.Shell;
 
 namespace Lamha.App.Services;
@@ -14,7 +15,7 @@ public sealed record TrayActions(Action Open, Action<string> Page, Action Clipbo
 /// <summary>
 /// The tray icon, its tooltip and its menu: Lamha 2's trayMenu() / trayTooltip() in main.js, as the tray design
 /// (2026-10-25) has them, with Enable Lamha moved in from Lamha 2's window. The icon has a dot while words wait for
-/// review, and is faded while Lamha is turned off. Check for updates comes with the updates (phase 5).
+/// review, and is faded while Lamha is turned off.
 /// </summary>
 public sealed partial class TrayService : IDisposable
 {
@@ -25,6 +26,7 @@ public sealed partial class TrayService : IDisposable
     private readonly ClipboardService _clipboard;
     private readonly StartWithWindows _startup;
     private readonly ShortcutService _shortcuts;
+    private readonly UpdateService _updates;
     private readonly TrayActions _actions;
     private int _waiting;
 
@@ -34,12 +36,14 @@ public sealed partial class TrayService : IDisposable
         ClipboardService clipboard,
         StartWithWindows startup,
         ShortcutService shortcuts,
+        UpdateService updates,
         TrayActions actions)
     {
         _settings = settings;
         _clipboard = clipboard;
         _startup = startup;
         _shortcuts = shortcuts;
+        _updates = updates;
         _actions = actions;
         _icon = new TrayIcon(window, Path.Combine(AppContext.BaseDirectory, "Assets", "Lamha.ico"), Tooltip());
         _icon.SetMenu(Menu);
@@ -101,6 +105,7 @@ public sealed partial class TrayService : IDisposable
         items.AddRange(PauseItems());
         items.Add(MotionItem());
         items.Add(new TrayMenuItem(Localization.Get("Tray_Settings"), () => _actions.Page("settings")));
+        items.Add(UpdateItem());
         items.Add(TrayMenuItem.Separator);
 
         // The shortcuts, for information (as they are now: Settings may have changed them); one another program took is marked.
@@ -157,6 +162,19 @@ public sealed partial class TrayService : IDisposable
                 Radio = true,
                 Checked = current == level,
             })],
+        };
+    }
+
+    /// <summary>Check for updates, or install what was found (Lamha 2's <c>updateMenu()</c>); greyed while it works.</summary>
+    private TrayMenuItem UpdateItem()
+    {
+        var state = _updates.State;
+        return state.Status switch
+        {
+            UpdateStatus.Ready => new TrayMenuItem(Localization.Format("Tray_UpRestart", UpdateService.Shown(state.Version ?? "")), _updates.Restart),
+            UpdateStatus.Downloading => new TrayMenuItem(Localization.Format("Tray_UpDownloading", UpdateService.Shown(state.Version ?? ""))) { Enabled = false },
+            UpdateStatus.Checking => new TrayMenuItem(Localization.Get("Tray_UpChecking")) { Enabled = false },
+            _ => new TrayMenuItem(Localization.Get("Tray_UpCheck"), _updates.Check),
         };
     }
 

@@ -777,6 +777,26 @@ What did you expect?
   <data name="Settings_MyDataHint" xml:space="preserve"><value>Uninstalling or reinstalling Lamha leaves it</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
   <data name="Settings_OpenFolder" xml:space="preserve"><value>Open the folder</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
   <data name="Settings_UpAll" xml:space="preserve"><value>All releases on GitHub</value><comment>d.upAllReleases</comment></data>
+  <data name="Tray_UpCheck" xml:space="preserve"><value>Check for updates</value><comment>d.upCheck</comment></data>
+  <data name="Tray_UpChecking" xml:space="preserve"><value>Checking for updates…</value><comment>d.upChecking</comment></data>
+  <data name="Tray_UpDownloading" xml:space="preserve"><value>Downloading version {0}…</value><comment>d.upDownloading</comment></data>
+  <data name="Tray_UpRestart" xml:space="preserve"><value>Restart to install version {0}</value><comment>d.upRestart</comment></data>
+  <data name="Note_UpLatest" xml:space="preserve"><value>You're up to date</value><comment>d.upLatestTitle</comment></data>
+  <data name="Note_UpLatestBody" xml:space="preserve"><value>Version {0} is the latest.</value><comment>d.upLatestBody</comment></data>
+  <data name="Note_UpReady" xml:space="preserve"><value>Update ready</value><comment>d.upReadyTitle</comment></data>
+  <data name="Note_UpReadyBody" xml:space="preserve"><value>Version {0} — restart Lamha to install it, or it installs when you quit. Click here to restart now.</value><comment>d.upReadyBody</comment></data>
+  <data name="Note_UpFailed" xml:space="preserve"><value>Couldn't check for updates</value><comment>d.upFailedTitle</comment></data>
+  <data name="Note_UpFailedBody" xml:space="preserve"><value>Check your internet connection and try again.</value><comment>d.upFailedBody</comment></data>
+  <data name="Note_Updates" xml:space="preserve"><value>Updates</value><comment>d.upTitle</comment></data>
+  <data name="Note_UpDevBody" xml:space="preserve"><value>Automatic updates work in the installed version only.</value><comment>d.upDevBody</comment></data>
+  <data name="Note_UpRestartNow" xml:space="preserve"><value>Restart now</value><comment>d.upRestartNow</comment></data>
+  <data name="Settings_UpAutoHint" xml:space="preserve"><value>Lamha checks for a new version at startup and every 6 hours, downloads it in the background, and installs it when it restarts.</value><comment>d.upAutoHint</comment></data>
+  <data name="Settings_UpCheckNow" xml:space="preserve"><value>Check now</value><comment>d.upCheckNow</comment></data>
+  <data name="Settings_UpChecking" xml:space="preserve"><value>Checking…</value><comment>d.upSChecking</comment></data>
+  <data name="Settings_UpDownloading" xml:space="preserve"><value>Downloading version {0}…</value><comment>d.upSDownloading</comment></data>
+  <data name="Settings_UpReady" xml:space="preserve"><value>Version {0} is ready — restart to install it</value><comment>d.upSReady</comment></data>
+  <data name="Settings_UpLatest" xml:space="preserve"><value>You're up to date ✓</value><comment>d.upSLatest</comment></data>
+  <data name="Settings_UpError" xml:space="preserve"><value>Couldn't check for updates. Check your connection.</value><comment>d.upSError</comment></data>
   <data name="Settings_CreditsLicense" xml:space="preserve"><value>The dictionary data (the dict folder) is available under CC BY-SA 4.0. Details in dict/LICENSES.md.</value><comment>o.creditsLicense</comment></data>
   <data name="Settings_Version" xml:space="preserve"><value>Lamha · version {0}</value><comment>o.version reworded in its markup only: the version is {0}</comment></data>
   <data name="Settings_LoginHint" xml:space="preserve"><value>Lamha starts in the background when you sign in, so the shortcuts work at once</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>

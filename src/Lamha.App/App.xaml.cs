@@ -41,6 +41,7 @@ public partial class App : Application
     private TrayService? _tray;
     private NotificationService? _notes;
     private ReviewReminderService? _reminders;
+    private UpdateService? _updates;
     private CardService? _card;
     private ClipPanelService? _panel;
     private MainWindowService? _main;
@@ -72,6 +73,15 @@ public partial class App : Application
         _clipboard = new ClipboardService(_messages, _brain, queue);
         _notes = new NotificationService(Notifications(_options.Profile), (title, body) => _tray?.Notify(title, body));
         _sentences = new SentenceReader();
+        _updates = new UpdateService(new VelopackUpdates(_options.Updates, _options.RestartArgs()), _brain.Settings, _notes, idle, queue, automatic: !_options.Measure)
+        {
+            Exit = () =>
+            {
+                // Restart now: Velopack's updater is already waiting for Lamha to exit.
+                Close();
+                Exit();
+            },
+        };
 
         var startup = new StartWithWindows($"\"{Environment.ProcessPath}\"");
         if (_options.Profile is null)
@@ -118,6 +128,7 @@ public partial class App : Application
             Theme = _options.Theme,
             Sample = _options.Page is null ? null : _options.Sample,
             Startup = startup,
+            Updates = _updates,
             DeleteData = DeleteDataAndQuit,
         };
         _card.SettingsOpener = section => _main.Show("settings", section);
@@ -135,7 +146,7 @@ public partial class App : Application
             },
         };
 
-        _tray = new TrayService(_messages, _brain.Settings, _clipboard, startup, shortcuts, new TrayActions(OpenMain, OpenPage, () => _panel.Toggle(fromTray: true), Quit));
+        _tray = new TrayService(_messages, _brain.Settings, _clipboard, startup, shortcuts, _updates, new TrayActions(OpenMain, OpenPage, () => _panel.Toggle(fromTray: true), Quit));
         _tray.EnabledChanged += () => NotifyTaken(shortcuts);
         _reminders = new ReviewReminderService(_brain, _notes, () => shortcuts.IsOn && !_main.IsInUse, queue) { OpenReview = () => OpenPage("review") };
         _reminders.Changed += _tray.SetWaiting;
@@ -159,7 +170,8 @@ public partial class App : Application
 
         if (_options.Page is { } page)
         {
-            _main.Show(page);
+            var at = page.IndexOf(':', StringComparison.Ordinal);
+            _main.Show(at < 0 ? page : page[..at], at < 0 ? "" : page[(at + 1)..]);
         }
         else if (_options.Panel)
         {
@@ -281,6 +293,7 @@ public partial class App : Application
     private void Quit()
     {
         AppLog.Info("quit");
+        _updates?.Quitting();
         Close();
         Exit();
     }
@@ -297,6 +310,7 @@ public partial class App : Application
         _accent?.Dispose();
         _sentences?.Dispose();
         _reminders?.Dispose();
+        _updates?.Dispose();
         _tray?.Dispose();
         _messages?.Dispose();
         _brain.Dispose();

@@ -1,3 +1,4 @@
+using Lamha.App.Services;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
@@ -16,7 +17,10 @@ public static class Program
     {
         // Install, update and uninstall hooks; exits by itself when Velopack started the process for one of them.
         // Uninstalling takes Lamha's notification name and links out of the registry (the user's data folder stays).
+        // Not Velopack's own install of a downloaded version at start: in a second start (the Start menu, a
+        // notification's click) it would close the Lamha already running without letting it save (tried 2026-10-26).
         VelopackApp.Build()
+            .SetAutoApplyOnStartup(false)
             .OnBeforeUninstallFastCallback(_ => App.Notifications(profile: null).Unregister())
             .Run();
 
@@ -31,6 +35,13 @@ public static class Program
         }
 
         var options = AppOptions.FromArgs(args);
+        // A version downloaded before Lamha last ended without installing it (Windows shut down): installed now, as the
+        // only Lamha running, and Lamha starts again with the same arguments.
+        if (new VelopackUpdates(options.Updates, args).InstallPending())
+        {
+            return 0;
+        }
+
         Application.Start(callback =>
         {
             SynchronizationContext.SetSynchronizationContext(new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread()));

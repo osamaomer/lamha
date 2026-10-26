@@ -262,6 +262,10 @@ public sealed class SettingsStrings
 
     public string LoginHint { get; } = Localization.Get("Settings_LoginHint");
 
+    public string UpAuto { get; } = Localization.Get("Settings_UpAuto");
+
+    public string UpAutoHint { get; } = Localization.Get("Settings_UpAutoHint");
+
     public string UpAll { get; } = Localization.Get("Settings_UpAll");
 
     public string Credits { get; } = Localization.Get("Settings_Credits");

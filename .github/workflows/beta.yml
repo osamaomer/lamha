@@ -2,7 +2,8 @@
 # (v3.0.0-beta.N), x64 and ARM64 in one release. Started by hand (Actions → Beta → Run workflow, choosing the branch to
 # release); nothing starts it by itself. GitHub lists a hand-started workflow only once this file is on the default
 # branch (main). Lamha 2's updater reads only the latest full release, so its users never see a
-# pre-release. Until the updater comes (phase 5), each beta is installed from its release page.
+# pre-release. A beta from beta.2 on updates itself to the next one (Velopack, from these releases); beta.1 has no
+# updater, so it is replaced by installing a newer beta from its release page.
 name: Beta
 
 on:
@@ -61,6 +62,18 @@ jobs:
         continue-on-error: true
         shell: pwsh
         run: ./tools/Measure/measure.ps1 -Exe artifacts/publish/win-x64/Lamha.exe -Budget
+
+      # The last beta in the folder the pack writes to, so the pack adds a delta from it: the update downloads only what
+      # changed. Without it (no earlier beta, GitHub didn't answer) the update downloads the whole package, so it
+      # doesn't stop the beta.
+      - name: The previous beta (for a delta update)
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          dotnet vpk download github --repoUrl "https://github.com/${{ github.repository }}" --token $env:GH_TOKEN --pre
+          --channel beta-${{ matrix.rid }} --outputDir artifacts/releases/${{ matrix.rid }}
 
       - name: Pack the installer
         shell: pwsh

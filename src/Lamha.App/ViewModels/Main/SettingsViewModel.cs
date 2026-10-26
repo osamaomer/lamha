@@ -6,6 +6,7 @@ using Lamha.Core;
 using Lamha.Core.Ai;
 using Lamha.Core.Money;
 using Lamha.Core.Settings;
+using Lamha.Core.Updates;
 using Lamha.Windows.Shell;
 using Localization = Lamha.App.Services.Localization;
 
@@ -83,6 +84,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly Brain _brain;
     private readonly IPageHost _host;
     private readonly StartWithWindows? _startup;
+    private readonly UpdateService? _updates;
     private readonly ShortcutService _shortcutService;
     private bool _loading;
     private bool _attached;
@@ -93,11 +95,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// <param name="shortcuts">The shortcuts: Keyboard shortcuts changes them, Writing tools' first line names one.</param>
     /// <param name="clipboard">Clipboard history's switch, for Settings → Clipboard.</param>
     /// <param name="startup">Start with Windows, for Settings → Lamha (none in tests' windows).</param>
-    public SettingsViewModel(Brain brain, IPageHost host, ShortcutService shortcuts, ClipboardService clipboard, StartWithWindows? startup = null)
+    /// <param name="updates">The updates, for Settings → Lamha (none in tests' windows).</param>
+    public SettingsViewModel(Brain brain, IPageHost host, ShortcutService shortcuts, ClipboardService clipboard, StartWithWindows? startup = null, UpdateService? updates = null)
     {
         _brain = brain;
         _host = host;
         _startup = startup;
+        _updates = updates;
         _shortcutService = shortcuts;
         Writing = new WritingSetupViewModel(brain, () => _ = LoadTranslatorAsync());
         Shortcuts = new ShortcutsSetupViewModel(shortcuts);
@@ -116,8 +120,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             Tile("clipboard", Glyph.Clipboard, "Settings_Clipboard", "Settings_CbEnable", "Settings_CbMax", "Settings_CbApps"),
             Tile("appearance", Glyph.Palette, "Settings_Appearance", "Settings_Theme", "Settings_Motion", "Settings_CardBg"),
             Tile("privacy", Glyph.Shield, "Settings_Privacy", "Settings_SaveHistory", "Settings_Backup", "Settings_Report"),
-            // The design's summary starts with Automatic updates: back in it with the updates (phase 5).
-            Tile("about", Glyph.Info, "Common_Lamha", "Tray_StartWithWindows", "Settings_UpAll", "Settings_Credits"),
+            Tile("about", Glyph.Info, "Common_Lamha", "Settings_UpAuto", "Tray_StartWithWindows", "Settings_Credits"),
         ];
 
         var settings = brain.Settings.Current;
@@ -173,7 +176,36 @@ public sealed partial class SettingsViewModel : ObservableObject
     public bool IsAbout => Section == "about";
 
     /// <summary>"Lamha · version 3.0.0-beta.2".</summary>
-    public string Version { get; } = Localization.Format("Settings_Version", "‎" + Brain.Version.Split('+')[0] + "‎"); // "3.0.0-beta.2", not "beta.2-3.0.0", in Arabic
+    public string Version { get; } = Localization.Format("Settings_Version", UpdateService.Shown(UpdateService.Current));
+
+    public bool HasUpdates => _updates is not null;
+
+    /// <summary>Lamha 2's line under Check for an update: checking, downloading, ready, up to date, couldn't (its <c>STATUS</c>).</summary>
+    public string UpStatus => _updates?.State is not { } state ? "" : state.Status switch
+    {
+        UpdateStatus.Checking => Localization.Get("Settings_UpChecking"),
+        UpdateStatus.Downloading => Localization.Format("Settings_UpDownloading", UpdateService.Shown(state.Version ?? "")),
+        UpdateStatus.Ready => Localization.Format("Settings_UpReady", UpdateService.Shown(state.Version ?? "")),
+        UpdateStatus.Latest => Localization.Get("Settings_UpLatest"),
+        UpdateStatus.Error => Localization.Get("Settings_UpError"),
+        UpdateStatus.Dev => Localization.Get("Note_UpDevBody"),
+        _ => "",
+    };
+
+    /// <summary>The design's state: green when up to date or ready, red when the check failed.</summary>
+    public StatusKind UpStatusKind => _updates?.State.Status switch
+    {
+        UpdateStatus.Latest or UpdateStatus.Ready => StatusKind.Ok,
+        UpdateStatus.Error => StatusKind.Bad,
+        _ => StatusKind.Neutral,
+    };
+
+    /// <summary>Check now, or Restart now once a version is ready (Lamha 2's).</summary>
+    public string UpButton => _updates?.State.Status == UpdateStatus.Ready ? Localization.Get("Note_UpRestartNow") : Localization.Get("Settings_UpCheckNow");
+
+    /// <summary>Automatic updates (Lamha 2's <c>updatesAuto</c>).</summary>
+    [ObservableProperty]
+    public partial bool UpdatesAuto { get; set; }
 
     /// <summary>Lamha starts at sign-in (Windows' Run key, and its Startup switch).</summary>
     [ObservableProperty]
@@ -365,6 +397,11 @@ public sealed partial class SettingsViewModel : ObservableObject
         {
             _attached = true;
             _brain.Settings.Changed += OnSettingsChanged;
+            if (_updates is not null)
+            {
+                _updates.Changed += OnUpdateChanged;
+                OnUpdateChanged(); // what happened while the page was away
+            }
         }
     }
 
@@ -372,6 +409,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         _attached = false;
         _brain.Settings.Changed -= OnSettingsChanged;
+        if (_updates is not null)
+        {
+            _updates.Changed -= OnUpdateChanged;
+        }
     }
 
     // ----- commands -----
@@ -457,6 +498,32 @@ public sealed partial class SettingsViewModel : ObservableObject
             AppLog.Info($"start with Windows: {(value ? "on" : "off")}");
         }
     }
+
+    /// <summary>Check now, or Restart now when a version is ready; greyed while a check or a download runs.</summary>
+    [RelayCommand(CanExecute = nameof(CanCheckUpdates))]
+    private void CheckUpdates()
+    {
+        if (_updates?.State.Status == UpdateStatus.Ready)
+        {
+            _updates.Restart();
+        }
+        else
+        {
+            _updates?.Check();
+        }
+    }
+
+    private bool CanCheckUpdates() => _updates?.State.Status is not (UpdateStatus.Checking or UpdateStatus.Downloading);
+
+    private void OnUpdateChanged()
+    {
+        OnPropertyChanged(nameof(UpStatus));
+        OnPropertyChanged(nameof(UpStatusKind));
+        OnPropertyChanged(nameof(UpButton));
+        CheckUpdatesCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnUpdatesAutoChanged(bool value) => Save(s => s with { UpdatesAuto = value });
 
     /// <summary>All releases on GitHub (Lamha 2's link under Updates).</summary>
     [RelayCommand]
@@ -617,6 +684,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             CardBgIndex = s.CardSolid ? 1 : 0;
             AccentWindows = s.AccentWindows;
             WindowMica = s.WindowMica;
+            UpdatesAuto = s.UpdatesAuto;
             CurrencyIndex = Prices.Named.ToList().IndexOf(s.Currency) + 1; // 0: automatic, also for a code Lamha has no name for
             LoadExplain(s);
         }

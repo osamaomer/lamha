@@ -326,9 +326,26 @@
       </Border>
     </StackPanel>
 
-    <!-- ===== Lamha: the version, Start with Windows, the releases, the dictionary's sources (updates come with phase 5) ===== -->
+    <!-- ===== Lamha: the version and its update, Automatic updates, Start with Windows, the releases, the dictionary's sources ===== -->
     <StackPanel x:Name="AboutSection" x:Load="{x:Bind ViewModel.IsAbout, Mode=OneWay}" Spacing="4">
-      <controls:SettingsCard Header="{x:Bind ViewModel.Version}" MinHeight="48" />
+      <!-- The version, how the update stands under it in the design's colour, and Check now (or Restart now) -->
+      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
+        <Grid ColumnSpacing="16">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel VerticalAlignment="Center" Spacing="2">
+            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind ViewModel.Version}" />
+            <controls:StatusText Text="{x:Bind ViewModel.UpStatus, Mode=OneWay}" Kind="{x:Bind ViewModel.UpStatusKind, Mode=OneWay}" />
+          </StackPanel>
+          <Button Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ViewModel.UpButton, Mode=OneWay}"
+                  Command="{x:Bind ViewModel.CheckUpdatesCommand}" Visibility="{x:Bind ViewModel.HasUpdates}" />
+        </Grid>
+      </Border>
+      <controls:SettingsCard Header="{x:Bind S.UpAuto}" Description="{x:Bind S.UpAutoHint}" Visibility="{x:Bind ViewModel.HasUpdates}">
+        <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.UpdatesAuto, Mode=TwoWay}" />
+      </controls:SettingsCard>
       <controls:SettingsCard Header="{x:Bind S.Login}" Description="{x:Bind S.LoginHint}" Visibility="{x:Bind ViewModel.CanStartWithWindows}">
         <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.StartsWithWindows, Mode=TwoWay}" />
       </controls:SettingsCard>
