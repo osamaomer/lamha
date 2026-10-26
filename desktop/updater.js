@@ -34,12 +34,14 @@ function newer(a, b) {
 }
 
 /** Lamha 3's setup in a GitHub release (the API's shape), for a PC of `arch` ("x64" or "arm64"): Velopack's
- *  Lamha-win-<arch>-Setup.exe, or Lamha-beta-win-<arch>-Setup.exe in a beta. An ARM PC takes the x64 one when the
- *  release has no other (Windows runs it emulated). null when the release isn't Lamha 3 or has no setup. */
+ *  Lamha-win-<arch>-Setup.exe, or Lamha-beta-win-<arch>-Setup.exe in a beta's release only (a beta-channel install
+ *  would follow the betas). An ARM PC takes the x64 one when the release has no other (Windows runs it emulated). null
+ *  when the release isn't Lamha 3 or has no setup. */
 function lamha3Setup(rel, arch) {
   const version = String((rel && rel.tag_name) || "").replace(/^v/, "");
   if (!(parseInt(version, 10) >= 3) || !Array.isArray(rel.assets)) return null;
-  const find = a => rel.assets.find(x => x && new RegExp(`^Lamha-(beta-)?win-${a}-Setup\\.exe$`).test(String(x.name)));
+  const prefix = version.includes("-") ? "Lamha-beta-" : "Lamha-";
+  const find = a => rel.assets.find(x => x && String(x.name) === `${prefix}win-${a}-Setup.exe`);
   const asset = find(arch === "arm64" ? "arm64" : "x64") || find("x64");
   if (!asset || !String(asset.browser_download_url).startsWith("https://github.com/") || !(asset.size > 0)) return null;
   const digest = /^sha256:([0-9a-f]{64})$/i.exec(String(asset.digest || ""));

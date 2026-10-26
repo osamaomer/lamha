@@ -190,6 +190,9 @@ test("Lamha 3: the setup for this PC's processor, a beta's names, nothing from a
   assert.match(lamha3Setup(x64Only, "arm64").url, /Lamha-win-x64-Setup\.exe$/, "an ARM PC runs the x64 one emulated");
   const beta = lamha3Release({ tag_name: "v3.0.0-beta.3", assets: [asset("Lamha-beta-win-x64-Setup.exe")] });
   assert.equal(lamha3Setup(beta, "x64").version, "3.0.0-beta.3");
+  const both = lamha3Release({ assets: [asset("Lamha-beta-win-x64-Setup.exe"), asset("Lamha-win-x64-Setup.exe")] });
+  assert.match(lamha3Setup(both, "x64").url, /\/Lamha-win-x64-Setup\.exe$/, "a release's own setup, never the beta channel's");
+  assert.equal(lamha3Setup(lamha3Release({ assets: [asset("Lamha-beta-win-x64-Setup.exe")] }), "x64"), null, "a beta-channel install would follow the betas");
   const s = lamha3Setup(rel, "x64");
   assert.equal(s.size, SETUP_BYTES.length);
   assert.equal("sha256:" + s.sha256, sha(SETUP_BYTES));
