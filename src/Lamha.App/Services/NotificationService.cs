@@ -26,6 +26,9 @@ public sealed record Note(string Title, string Body = "")
     public IReadOnlyList<NoteButton> Buttons { get; init; } = [];
 
     public string Tag { get; init; } = "";
+
+    /// <summary>Shown without Windows' sound (the next word after an answer).</summary>
+    public bool Silent { get; init; }
 }
 
 /// <summary>
@@ -163,6 +166,11 @@ public sealed partial class NotificationService
         }
 
         xml.Append("</binding></visual>");
+        if (note.Silent)
+        {
+            xml.Append("<audio silent=\"true\"/>");
+        }
+
         if (note.Buttons.Count > 0)
         {
             xml.Append("<actions>");

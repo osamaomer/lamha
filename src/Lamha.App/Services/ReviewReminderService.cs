@@ -9,7 +9,8 @@ namespace Lamha.App.Services;
 /// The words waiting for review, for the tray, and Lamha 2's reminder (main.js <c>setBadge()</c>, Core's
 /// <see cref="ReviewReminder"/>): counted again when the deck or the settings change (after Lamha 2's 300 ms) and every
 /// 30 minutes (its <c>lamha-badge</c> alarm), so words falling due are noticed. New in Lamha 3, the reminder asks about
-/// one word: Show meaning, then Forgot / Hard / Knew it, answered without opening Lamha (the tray design, 2026-10-25).
+/// one word: Show meaning, then Forgot / Hard / Knew it, answered without opening Lamha (the tray design, 2026-10-25),
+/// and then the next word, without a sound, until none is left.
 /// </summary>
 public sealed partial class ReviewReminderService : IDisposable
 {
@@ -58,14 +59,7 @@ public sealed partial class ReviewReminderService : IDisposable
     /// <summary>Counts the waiting words now, and reminds when it's time.</summary>
     public void Recount()
     {
-        var before = Waiting;
-        var remind = _brain.Reminder.Recount(_mayRemind());
-        if (Waiting != before)
-        {
-            Changed?.Invoke(Waiting);
-        }
-
-        if (remind && _brain.Reminder.First() is { } card)
+        if (Count(_mayRemind()) && _brain.Reminder.First() is { } card)
         {
             AppLog.Info($"review reminder: {Waiting} waiting");
             _notes.Show(Reminder(card, Waiting));
@@ -85,7 +79,10 @@ public sealed partial class ReviewReminderService : IDisposable
     }
 
     /// <summary>Time to review · 5 words are waiting for review. · the word and its sentence · Show meaning, Word review.</summary>
-    private static Note Reminder(Card card, int waiting) => new(
+    /// <param name="card">The word asked about.</param>
+    /// <param name="waiting">How many are waiting, this one among them.</param>
+    /// <param name="silent">Without Windows' sound: the next word after an answer.</param>
+    private static Note Reminder(Card card, int waiting, bool silent = false) => new(
         Localization.Get("Note_ReviewTime"),
         Localization.Format(waiting == 1 ? "Note_ReviewWaitingOne" : "Note_ReviewWaitingMany", waiting))
     {
@@ -98,9 +95,13 @@ public sealed partial class ReviewReminderService : IDisposable
             new(Localization.Get("Tray_Review"), "review"),
         ],
         Tag = Tag,
+        Silent = silent,
     };
 
-    /// <summary>After Show meaning: the word, its meaning (or, for an English–English card, its definition), and the three answers.</summary>
+    /// <summary>
+    /// After Show meaning: the word, its meaning (or, for an English–English card, its definition), and the three
+    /// answers; without a sound, as it answers a click.
+    /// </summary>
     private static Note Meaning(Card card)
     {
         var meaning = card.EnglishFirst && card.Definition.Length > 0 ? card.Definition : card.Meaning.Length > 0 ? card.Meaning : card.Definition;
@@ -116,6 +117,7 @@ public sealed partial class ReviewReminderService : IDisposable
                 new(Localization.Get("Review_Good"), "grade", Values(card.Key, "good")),
             ],
             Tag = Tag,
+            Silent = true,
         };
     }
 
@@ -132,10 +134,24 @@ public sealed partial class ReviewReminderService : IDisposable
 
     private static string Cut(string text, int max) => text.Length > max ? text[..max].TrimEnd() + "…" : text;
 
+    /// <summary>Counts the waiting words again, telling the tray when the number changed; true when it's time to remind.</summary>
+    private bool Count(bool mayRemind)
+    {
+        var before = Waiting;
+        var remind = _brain.Reminder.Recount(mayRemind);
+        if (Waiting != before)
+        {
+            Changed?.Invoke(Waiting);
+        }
+
+        return remind;
+    }
+
     private async void OnClicked(AppLink link)
     {
         try
         {
+            _brain.Reminder.Reminded(); // the user is reviewing: no reminder on top of it, nor from a Lamha the click started
             var key = link.Values.GetValueOrDefault("key", "");
             switch (link.Action)
             {
@@ -148,6 +164,17 @@ public sealed partial class ReviewReminderService : IDisposable
                 case "grade" when Grades(link.Values.GetValueOrDefault("grade")) is { } grade:
                     await _brain.Review.GradeAsync(key, grade).ConfigureAwait(true);
                     AppLog.Info($"review answered from a notification: {grade}");
+                    // The next word straight away, quietly (the user's call, 2026-10-26); none left, nothing more.
+                    Count(mayRemind: false);
+                    if (_brain.Reminder.First() is { } next)
+                    {
+                        _notes.Show(Reminder(next, Waiting, silent: true));
+                    }
+                    else
+                    {
+                        _notes.Remove(Tag); // the question answered doesn't stay in the notification centre
+                    }
+
                     break;
             }
         }

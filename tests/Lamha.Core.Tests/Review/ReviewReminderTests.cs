@@ -69,6 +69,23 @@ public class ReviewReminderTests
     }
 
     [Fact]
+    public void ANotificationUsedCountsAsAReminder()
+    {
+        using var lamha = Lamha();
+        PutDue(lamha, "bank");
+        var reminder = Reminder(lamha);
+        reminder.Reminded(); // a click on a notification started Lamha
+        Assert.False(reminder.Recount(mayRemind: true));
+
+        PutDue(lamha, "river");
+        lamha.Clock.Advance(TimeSpan.FromHours(3));
+        Assert.False(reminder.Recount(mayRemind: true)); // more words, but within 4 hours of it
+        PutDue(lamha, "stone");
+        lamha.Clock.Advance(TimeSpan.FromHours(1) + TimeSpan.FromMinutes(1));
+        Assert.True(reminder.Recount(mayRemind: true));
+    }
+
+    [Fact]
     public async Task TheFirstWordIsTheLongestWaitingDueOneElseTheNewestNew()
     {
         using var lamha = Lamha(newPerDay: 1);

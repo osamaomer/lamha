@@ -40,6 +40,12 @@ public sealed class ReviewReminder(IDeckStore deck, IStateStore state, SettingsS
         return false;
     }
 
+    /// <summary>
+    /// A review notification was used (a word shown or answered, Review opened from it): that counts as a reminder, so
+    /// none follows for 4 hours, not even from a Lamha the click has just started.
+    /// </summary>
+    public void Reminded() => _lastReminder = Days.NowMs(time);
+
     /// <summary>The word a reminder asks about: Review's first (the longest-waiting due word, else the newest new one).</summary>
     public Card? First()
     {
