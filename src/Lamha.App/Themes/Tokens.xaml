@@ -273,6 +273,20 @@
   <x:Double x:Key="LamhaGroupGap">28</x:Double>
   <x:Double x:Key="LamhaPagePadding">28</x:Double>
 
+  <!-- The main window, measured on Windows' Settings: the pane open at 300, hidden behind ☰ below 720 px; the page 28
+       from each side (its title's baseline 37 under the title bar), up to 1000 wide; the toast 16 above the foot; the
+       mark in the title bar beside its name -->
+  <x:Double x:Key="LamhaPaneWidth">300</x:Double>
+  <!-- A pane row starts 18 from the window's edge (WinUI's 4 plus this 14), its icon 11 into it and its name 45 in -->
+  <Thickness x:Key="LamhaNavItemMargin">14,0,0,0</Thickness>
+  <Thickness x:Key="LamhaNavRowMargin">-2,0,0,0</Thickness>
+  <x:Double x:Key="LamhaNavIconGap">14</x:Double>
+  <x:Double x:Key="LamhaPaneHideWidth">720</x:Double>
+  <x:Double x:Key="LamhaPageMaxWidth">1000</x:Double>
+  <Thickness x:Key="LamhaPageMargin">28,4,28,40</Thickness>
+  <Thickness x:Key="LamhaToastMargin">0,0,0,16</Thickness>
+  <Thickness x:Key="LamhaTitleBarMarkMargin">4,0,16,0</Thickness>
+
   <!-- Sizes: Windows' 32 for text boxes, dropdowns and the buttons next to them, and nothing that can be clicked is
        smaller than 24 px (WCAG 2.5.8) -->
   <x:Double x:Key="LamhaControlHeight">32</x:Double>

@@ -19,6 +19,8 @@
       <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#FFFFFF" />
       <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#FFFFFF" />
       <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#FFFFFF" />
+      <!-- The pane's selection pill: Lamha's accent (LamhaAccentBrush's colour; AccentService repaints it with it) -->
+      <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="#4F46E5" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
       <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#9AA1FF" />
@@ -27,6 +29,7 @@
       <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#0B0B12" />
       <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#0B0B12" />
       <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#0B0B12" />
+      <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="#9AA1FF" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="HighContrast" />
   </ResourceDictionary.ThemeDictionaries>
@@ -34,6 +37,25 @@
   <!-- Lamha's mark: its gradient, which follows the theme (Windows' highlight in high contrast) -->
   <Style TargetType="controls:BrandMark">
     <Setter Property="Background" Value="{ThemeResource LamhaBrandBrush}" />
+  </Style>
+
+  <!-- The count beside Review in the pane, as Windows' InfoBadge (16 high, its 11 px number, the accent fill), with
+       Lamha's own digits (Arabic ones in Arabic), which InfoBadge can't show -->
+  <Style x:Key="LamhaNavBadgeStyle" TargetType="Border">
+    <Setter Property="MinWidth" Value="16" />
+    <Setter Property="Height" Value="16" />
+    <Setter Property="Padding" Value="5,0" />
+    <Setter Property="Margin" Value="0,0,12,0" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Background" Value="{ThemeResource LamhaButtonBrush}" />
+  </Style>
+  <Style x:Key="LamhaNavBadgeTextStyle" TargetType="TextBlock">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontSize" Value="{StaticResource InfoBadgeValueFontSize}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
   </Style>
 
   <!-- Buttons: one template, coloured by the style. A hover tint over the fill, a little faded when pressed,

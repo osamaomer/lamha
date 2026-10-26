@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Main;
 using Lamha.App.Views;
@@ -9,6 +10,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
 using WinRT;
@@ -17,8 +19,9 @@ using ClipboardApi = Lamha.Windows.Clipboard.Clipboard;
 namespace Lamha.App.Windows;
 
 /// <summary>
-/// Lamha's main window (phase 1's design): one Windows 11 window, Mica behind, its own title bar, the pages on the
-/// start side, folding to icons when the window is narrow. Opened from the tray and by starting Lamha again; closing it
+/// Lamha's main window, as Windows' Settings (docs/design/system.md; decision 0020): Mica behind, Windows' title bar
+/// with Back, Windows' navigation pane (open, or hidden behind ☰ when narrow), and the page. Back goes through the
+/// pages and Settings' categories as they were opened. Opened from the tray and by starting Lamha again; closing it
 /// ends it (made again next time), so nothing of it stays in the tray. Each page is made the first time it's opened.
 /// </summary>
 public sealed partial class MainWindow : Window, IPageHost
@@ -31,15 +34,16 @@ public sealed partial class MainWindow : Window, IPageHost
     private const int MinWidth = 500;
     private const int MinHeight = 400;
 
-    /// <summary>Narrower than this, the pane shows only icons (Windows' navigation folds at about this width too).</summary>
-    private const double FoldWidth = 720;
-
-    private const double PaneWidth = 260;
-    private const double FoldedPaneWidth = 48;
-
     private readonly Brain _brain;
     private readonly string _lookupKeys;
     private readonly ShortcutService _shortcuts;
+    private readonly ClipboardService _clipboard;
+
+    /// <summary>The pane's rows, by page.</summary>
+    private readonly Dictionary<string, NavigationViewItem> _items = [];
+
+    /// <summary>Where Back goes: the pages and Settings' categories, as they were left.</summary>
+    private readonly Stack<(string Page, string Section)> _back = new();
     private TranslatePage? _translate;
     private WritePage? _write;
     private HistoryPage? _history;
@@ -47,8 +51,12 @@ public sealed partial class MainWindow : Window, IPageHost
     private ClipboardPage? _clipboardPage;
     private SettingsPage? _settings;
     private string _section = "";
-    private readonly ClipboardService _clipboard;
-    private bool _choosing;
+
+    /// <summary>What's showing: the page, and Settings' category ("" for its home).</summary>
+    private (string Page, string Section) _here = ("", "");
+
+    /// <summary>The page is changing because of Back: it isn't added to where Back goes, and it slides in from the start.</summary>
+    private bool _goingBack;
 
     /// <param name="viewModel">The pages, the one that's open, and the toast.</param>
     /// <param name="brain">Lamha's brain, for the pages.</param>
@@ -67,7 +75,8 @@ public sealed partial class MainWindow : Window, IPageHost
         Root.FlowDirection = Localization.FlowDirection;
         UseMica(brain.Settings.Current.WindowMica);
         ExtendsContentIntoTitleBar = true;
-        SetTitleBar(TitleBar);
+        SetTitleBar(AppTitleBar);
+        AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall; // Windows' buttons as tall as the title bar
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "Lamha.ico"));
         Handle = Win32Interop.GetWindowFromWindowId(AppWindow.Id);
         if (Localization.IsArabic)
@@ -75,12 +84,22 @@ public sealed partial class MainWindow : Window, IPageHost
             Screens.LayOutRightToLeft(Handle);
         }
 
-        PageList.SelectedItem = ViewModel.Page;
+        foreach (var page in ViewModel.Pages)
+        {
+            Nav.MenuItems.Add(Item(page));
+        }
+
+        foreach (var page in ViewModel.Footer)
+        {
+            Nav.FooterMenuItems.Add(Item(page));
+        }
+
+        Nav.SelectedItem = _items[ViewModel.Page.Id];
         ViewModel.PropertyChanged += OnViewModelChanged;
+        Root.PointerPressed += OnPointerPressed;
         ShowPage();
         // The first focus goes to the Translate page's box, ready to type (Write's draft, Review's card likewise); on
-        // other pages to the pane as if clicked:
-        // the arrow keys work in it, without the keyboard's focus rectangle on a window that was opened with the mouse.
+        // other pages to the pane's row, as if clicked.
         Root.Loaded += (_, _) =>
         {
             if (PageHost.Content is TranslatePage translate)
@@ -101,7 +120,7 @@ public sealed partial class MainWindow : Window, IPageHost
             }
             else
             {
-                (FooterList.SelectedItem is null ? PageList : FooterList).Focus(FocusState.Pointer);
+                _items[ViewModel.Page.Id].Focus(FocusState.Pointer);
             }
         };
         Closed += (_, _) =>
@@ -135,8 +154,6 @@ public sealed partial class MainWindow : Window, IPageHost
 
     public string Lamha { get; } = Localization.Get("Common_Lamha");
 
-    public string Settings { get; } = Localization.Get("Common_Settings");
-
     /// <summary>Settings → Appearance → Theme: "light", "dark", or "auto" (Windows'); the title bar's buttons follow.</summary>
     public void UseTheme(string theme)
     {
@@ -165,15 +182,6 @@ public sealed partial class MainWindow : Window, IPageHost
     public void Go(string id, string section = "")
     {
         var page = ViewModel.Find(id);
-        if (ViewModel.Footer.Contains(page))
-        {
-            FooterList.SelectedItem = page;
-        }
-        else
-        {
-            PageList.SelectedItem = page;
-        }
-
         if (page.Id == "settings" && section.Length > 0)
         {
             if (PageHost.Content is SettingsPage settings)
@@ -182,10 +190,12 @@ public sealed partial class MainWindow : Window, IPageHost
             }
             else
             {
-                // A new window's list changes page only once it's loaded: Settings opens at the category then.
+                // Settings opens at the category when the page is shown.
                 _section = section;
             }
         }
+
+        Nav.SelectedItem = _items[page.Id];
     }
 
     /// <summary>Opens at the design's size, in the middle of the screen the mouse is on.</summary>
@@ -311,6 +321,42 @@ public sealed partial class MainWindow : Window, IPageHost
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
 
     /// <summary>
+    /// A row of the pane: the page's coloured icon and its name (and Review's count), as Windows' Settings draws its
+    /// pages. The icon is in the row's content, not its Icon, which takes only Windows' icon types.
+    /// </summary>
+    private NavigationViewItem Item(NavItem page)
+    {
+        var badgeText = new TextBlock { Style = (Style)Application.Current.Resources["LamhaNavBadgeTextStyle"], Text = page.Badge };
+        var badge = new Border { Style = (Style)Application.Current.Resources["LamhaNavBadgeStyle"], Child = badgeText };
+        badge.Visibility = page.Badge.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        page.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(NavItem.Badge))
+            {
+                badgeText.Text = page.Badge;
+                badge.Visibility = page.Badge.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        };
+
+        var row = new Grid { ColumnSpacing = (double)Application.Current.Resources["LamhaNavIconGap"], Margin = (Thickness)Application.Current.Resources["LamhaNavRowMargin"] };
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        var icon = new PaneIcon { Page = page.Id, VerticalAlignment = VerticalAlignment.Center };
+        var name = new TextBlock { Text = page.Label, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
+        Grid.SetColumn(name, 1);
+        Grid.SetColumn(badge, 2);
+        row.Children.Add(icon);
+        row.Children.Add(name);
+        row.Children.Add(badge);
+
+        var item = new NavigationViewItem { Content = row, Tag = page.Id, Margin = (Thickness)Application.Current.Resources["LamhaNavItemMargin"] };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(item, page.Label);
+        _items[page.Id] = item;
+        return item;
+    }
+
+    /// <summary>
     /// The count on Review: when the window opens and each time another page opens (a word bookmarked on Translate or
     /// History, or added from the Clipboard page); the Review page keeps it up to date as words are answered.
     /// </summary>
@@ -327,29 +373,110 @@ public sealed partial class MainWindow : Window, IPageHost
         }
     }
 
-    /// <summary>One page is open across both lists: choosing in one clears the other.</summary>
-    private void OnPageChosen(object sender, SelectionChangedEventArgs e)
+    private void OnNavChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (_choosing || ((ListView)sender).SelectedItem is not NavItem page)
+        if (args.SelectedItem is NavigationViewItem { Tag: string id } && id != ViewModel.Page.Id)
+        {
+            ViewModel.Page = ViewModel.Find(id);
+        }
+    }
+
+    /// <summary>Narrow, the pane hides and ☰ appears in the title bar (Windows' Settings).</summary>
+    private void OnDisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args) =>
+        AppTitleBar.IsPaneToggleButtonVisible = args.DisplayMode == NavigationViewDisplayMode.Minimal;
+
+    private void OnPaneToggleRequested(TitleBar sender, object args) => Nav.IsPaneOpen = !Nav.IsPaneOpen;
+
+    private void OnBackRequested(TitleBar sender, object args) => GoBack();
+
+    private void OnBackKey(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        args.Handled = _back.Count > 0;
+        GoBack();
+    }
+
+    /// <summary>The mouse's back button goes back too, as in Windows' Settings.</summary>
+    private void OnPointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (e.GetCurrentPoint(Root).Properties.IsXButton1Pressed)
+        {
+            e.Handled = _back.Count > 0;
+            GoBack();
+        }
+    }
+
+    /// <summary>To the page (and Settings' category) before this one.</summary>
+    private void GoBack()
+    {
+        if (!_back.TryPop(out var to))
         {
             return;
         }
 
-        _choosing = true;
-        (ReferenceEquals(sender, PageList) ? FooterList : PageList).SelectedItem = null;
-        _choosing = false;
-        ViewModel.Page = page;
+        _goingBack = true;
+        try
+        {
+            if (to.Page == _here.Page && to.Page == "settings")
+            {
+                _settings?.ViewModel.Open(to.Section);
+            }
+            else
+            {
+                Go(to.Page, to.Section);
+            }
+        }
+        finally
+        {
+            _goingBack = false;
+            AppTitleBar.IsBackButtonEnabled = _back.Count > 0;
+        }
+    }
+
+    /// <summary>Somewhere new: where we were goes on Back's list (not when going back), and the title bar's Back follows.</summary>
+    private void Arrive((string Page, string Section) to)
+    {
+        if (to == _here)
+        {
+            return;
+        }
+
+        if (!_goingBack && _here.Page.Length > 0)
+        {
+            _back.Push(_here);
+        }
+
+        _here = to;
+        AppTitleBar.IsBackButtonEnabled = _back.Count > 0;
     }
 
     private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(MainViewModel.Page))
         {
+            if (!ReferenceEquals(Nav.SelectedItem, _items[ViewModel.Page.Id]))
+            {
+                Nav.SelectedItem = _items[ViewModel.Page.Id];
+            }
+
             ShowPage();
         }
     }
 
-    /// <summary>The open page in the content layer; the pages still to be built show only their title.</summary>
+    /// <summary>Settings opened a category or its home: Back can return, and the category slides in as Windows' Settings.</summary>
+    private void OnSettingsChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(SettingsViewModel.Section) || _settings is not { } settings || !ReferenceEquals(PageHost.Content, settings))
+        {
+            return;
+        }
+
+        var section = settings.ViewModel.Section;
+        var move = _goingBack || section.Length == 0 ? PageMove.Back : PageMove.DrillIn;
+        Arrive(("settings", section));
+        Animations.Page(PageHost, move);
+    }
+
+    /// <summary>The open page in the content layer.</summary>
     private void ShowPage()
     {
         _ = CountReviewAsync();
@@ -368,7 +495,13 @@ public sealed partial class MainWindow : Window, IPageHost
         switch (ViewModel.Page.Id)
         {
             case "settings":
-                _settings ??= new SettingsPage(new SettingsViewModel(_brain, this, _shortcuts, _clipboard, Startup, Updates));
+                if (_settings is null)
+                {
+                    _settings = new SettingsPage(new SettingsViewModel(_brain, this, _shortcuts, _clipboard, Startup, Updates));
+                    _settings.ViewModel.PropertyChanged += OnSettingsChanged;
+                }
+
+                // The category opens before the page shows, so it comes in with the page rather than sliding in after.
                 _settings.ViewModel.Refresh();
                 _settings.ViewModel.Open(_section);
                 _section = "";
@@ -414,11 +547,12 @@ public sealed partial class MainWindow : Window, IPageHost
                 PageHost.Content = null;
                 break;
         }
-    }
 
-    private void OnRootSizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        ViewModel.IsFolded = e.NewSize.Width < FoldWidth;
-        PaneColumn.Width = new GridLength(ViewModel.IsFolded ? FoldedPaneWidth : PaneWidth);
+        var first = _here.Page.Length == 0;
+        Arrive((ViewModel.Page.Id, ViewModel.Page.Id == "settings" ? _settings?.ViewModel.Section ?? "" : ""));
+        if (!first)
+        {
+            Animations.Page(PageFrame, _goingBack ? PageMove.Back : PageMove.Entrance);
+        }
     }
 }

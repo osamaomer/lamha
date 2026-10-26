@@ -87,6 +87,8 @@ public sealed partial class AccentService : IDisposable
                 Set(brushes, "ToggleSwitchFillOn", accent.Button, 1);
                 Set(brushes, "ToggleSwitchFillOnPointerOver", accent.Button, 1);
                 Set(brushes, "ToggleSwitchFillOnPressed", accent.Button, 1);
+                // The pane's selection pill is the accent, as Windows' is its own (Themes/Controls.xaml).
+                Set(brushes, "NavigationViewSelectionIndicatorForeground", accent.Accent, 1);
             }
         }
     }

@@ -8,6 +8,14 @@ using Windows.UI.ViewManagement;
 
 namespace Lamha.App.Services;
 
+/// <summary>How a page of the main window came: another page, a deeper one, or back.</summary>
+public enum PageMove
+{
+    Entrance,
+    DrillIn,
+    Back,
+}
+
 /// <summary>
 /// How much moves on screen now: the setting (Settings → Appearance → Animations), Windows' Animation effects, and what
 /// this PC can do (Core's <see cref="Motion"/>). Read again when a window opens, so a change applies to the next one.
@@ -70,6 +78,48 @@ public static class Animations
             Time(grow, duration, delay);
             visual.StartAnimation("Scale", grow);
         }
+    }
+
+    /// <summary>
+    /// A page of the main window comes in, as Windows' Settings does it (docs/design/system.md, Motion): a new page rises
+    /// 28 px (Entrance), a deeper one slides in from the text's end (Drill in), and going back slides in from its start;
+    /// Windows' 250 ms and its curve, a quarter faster at subtle, at once at off.
+    /// </summary>
+    public static void Page(UIElement element, PageMove move)
+    {
+        ArgumentNullException.ThrowIfNull(element);
+        var visual = ElementCompositionPreview.GetElementVisual(element);
+        var duration = Motion.Time(Level, Motion.ResizeMilliseconds);
+        if (duration == TimeSpan.Zero)
+        {
+            ShowNow(element);
+            return;
+        }
+
+        // The window's layout is mirrored in Arabic, its visuals' offsets are not: "the text's end" is left there.
+        var end = Localization.IsArabic ? -1f : 1f;
+        var from = move switch
+        {
+            PageMove.DrillIn => new Vector3(40 * end, 0, 0),
+            PageMove.Back => new Vector3(-40 * end, 0, 0),
+            _ => new Vector3(0, 28, 0),
+        };
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        var c = visual.Compositor;
+        var (x1, y1, x2, y2) = Motion.EnterEasing;
+        var ease = c.CreateCubicBezierEasingFunction(new Vector2(x1, y1), new Vector2(x2, y2));
+
+        var fade = c.CreateScalarKeyFrameAnimation();
+        fade.InsertKeyFrame(0, 0);
+        fade.InsertKeyFrame(1, 1, ease);
+        Time(fade, duration, TimeSpan.Zero);
+        visual.StartAnimation("Opacity", fade);
+
+        var slide = c.CreateVector3KeyFrameAnimation();
+        slide.InsertKeyFrame(0, from);
+        slide.InsertKeyFrame(1, Vector3.Zero, ease);
+        Time(slide, duration, TimeSpan.Zero);
+        visual.StartAnimation("Translation", slide);
     }
 
     /// <summary>Shown as it is, with no motion (what <see cref="Enter"/> hid is shown again).</summary>

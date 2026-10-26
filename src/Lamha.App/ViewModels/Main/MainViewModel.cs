@@ -1,22 +1,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Lamha.App.Controls;
 using Lamha.App.Services;
 
 namespace Lamha.App.ViewModels.Main;
 
-/// <summary>A page in the side pane: its name, its icon, and its name as a tooltip once the pane is folded.</summary>
-public sealed partial class NavItem(string id, string label, Glyph glyph) : ObservableObject
+/// <summary>A page in the side pane: its id (which names its coloured icon, Controls/PaneIcon) and its name.</summary>
+public sealed partial class NavItem(string id, string label) : ObservableObject
 {
     public string Id { get; } = id;
 
     public string Label { get; } = label;
-
-    public Glyph Glyph { get; } = glyph;
-
-    /// <summary>The name, shown when the pane is only icons; null otherwise.</summary>
-    [ObservableProperty]
-    public partial string? Tooltip { get; set; }
 
     /// <summary>A count beside the name (the words to review: "١٥"), or "" for none.</summary>
     [ObservableProperty]
@@ -43,13 +36,13 @@ public sealed partial class MainViewModel : ObservableObject
     {
         Pages =
         [
-            new("translate", Localization.Get("Main_Translate"), Glyph.Translate),
-            new("write", Localization.Get("Main_Write"), Glyph.Write),
-            new("review", Localization.Get("Main_Review"), Glyph.Review),
-            new("history", Localization.Get("Main_History"), Glyph.History),
-            new("clipboard", Localization.Get("Main_Clipboard"), Glyph.Clipboard),
+            new("translate", Localization.Get("Main_Translate")),
+            new("write", Localization.Get("Main_Write")),
+            new("review", Localization.Get("Main_Review")),
+            new("history", Localization.Get("Main_History")),
+            new("clipboard", Localization.Get("Main_Clipboard")),
         ];
-        Footer = [new("settings", Localization.Get("Common_Settings"), Glyph.Settings)];
+        Footer = [new("settings", Localization.Get("Common_Settings"))];
         Page = Pages[0];
     }
 
@@ -66,10 +59,6 @@ public sealed partial class MainViewModel : ObservableObject
 
     /// <summary>The window shows the page's title; Settings shows its own breadcrumb instead.</summary>
     public bool ShowsTitle => Page.Id != "settings";
-
-    /// <summary>The pane is only icons: the window is narrow.</summary>
-    [ObservableProperty]
-    public partial bool IsFolded { get; set; }
 
     /// <summary>"Copied", "History cleared": at the foot of the window for a moment.</summary>
     [ObservableProperty]
@@ -117,13 +106,5 @@ public sealed partial class MainViewModel : ObservableObject
         Toast = "";
         ToastAction = "";
         _toastRun = null;
-    }
-
-    partial void OnIsFoldedChanged(bool value)
-    {
-        foreach (var item in Pages.Concat(Footer))
-        {
-            item.Tooltip = value ? item.Label : null;
-        }
     }
 }
