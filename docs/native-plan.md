@@ -616,7 +616,19 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
   - **Seen** (Debug, a test profile, a stand-in uninstall entry for this user that was removed afterwards): Ready with the new row in both languages and themes, found as "2.0.1 (this user)", and not offered without the flag. **Measured** (NativeAOT, no warnings): tray 2 / 51, card open 41 / 87 and closed 2 / 85, main window 26 / 94 and after it 5 / 92, as before. 447 tests (13 new: the entry for this user and all users, a missing or foreign uninstaller, its quiet command and prompt, the start entry; the shortcuts kept, put back, left, and told apart from Lamha 2's even with the user's folder written short; the folder emptied around its Wikipedias, one elsewhere, none, and a folder that isn't Lamha 2's).
   - **Not tried:** a real Lamha 2 removed. This PC has none installed now; to try it, install 2.0.1 from its release ("only for me" and "all users" each), then start a build with `--remove-lamha2 --first-run --profile=<empty folder>`.
   - **New wording, drafted** (yours to reword): "Remove Lamha 2" and its three hint lines.
-- **Not started:** the beta on your PCs, the release (with 2.1.0's files in it, and Alt+Shift+L / W / V as 3.0's shortcuts), removing `legacy/`, the README and site.
+- **The release, prepared** (2026-10-26, on `lamha3/release`; nothing released): `.github/workflows/release.yml` (Actions → Release, by hand), described in 0019's consequences.
+  - Each version goes out in the normal channel and in the beta's, with 2.1.0's files, `Lamha-Setup.exe` for the website, and checks of what each reader finds. It stops if 2.1.0 isn't out.
+  - A released build takes Lamha 2's Alt+Shift+L / W / V and the normal channel (from a beta too); betas keep Ctrl+Alt and theirs.
+  - Lamha 2's bridge now takes a `Lamha-beta-` setup only from a beta's release (2.x, 264 tests).
+  - Lamha 2's checks run on `release/2.x` again (they only ran on `main`, which is Lamha 3 now).
+  - **Tried:** `vpk pack` in the beta channel and a local upload with its setup and Portable taken out of `assets.beta-win-x64.json` (only the update package and the feed went), the filter on a list of one, the YAML parsed, `-p:VersionSuffix=` giving 3.0.0. **Not tried:** the workflow itself, which publishes; electron-updater 2.0.1 reading a `latest.yml` from a release whose tag is v3.0.0 (as far as its GitHub provider goes, it doesn't compare the two).
+- **The order to release in:**
+  1. The betas on your PCs: beta.3 is the first to update itself from beta.2.
+  2. Your wording, and 2.x's `npm run smoke`.
+  3. Lamha 2.1.0: tag `v2.1.0` on `release/2.x`, which runs its release workflow.
+  4. Lamha 3.0.0: VersionSuffix stays as it is; Actions → Release.
+  5. The website and README, then removing `legacy/`.
+- **Not started:** the website and README for Lamha 3, removing `legacy/`.
 
 **Ideas**
 - **Lamha 2's language packs:** the importer knows which languages a user had; the summary could offer to download them again (0017's format), instead of waiting for Settings.

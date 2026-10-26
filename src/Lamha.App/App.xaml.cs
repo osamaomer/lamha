@@ -20,10 +20,15 @@ namespace Lamha.App;
 /// </summary>
 public partial class App : Application
 {
-    /// <summary>The beta's shortcuts, so it runs next to Lamha 2 (which owns Alt+Shift+L / W / V) until 3.0.</summary>
-    private static readonly Hotkey LookupHotkey = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, VirtualKey.L);
-    private static readonly Hotkey WriteHotkey = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, VirtualKey.W);
-    private static readonly Hotkey ClipboardHotkey = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, VirtualKey.V);
+    /// <summary>
+    /// The shortcuts: Lamha 2's Alt+Shift+L / W / V in the released Lamha 3, which replaces it; a beta (or a build from
+    /// source) takes Ctrl+Alt+L / W / V, so it runs next to Lamha 2. Keys left as they were are saved as "the default",
+    /// so a beta updated to 3.0 takes 3.0's.
+    /// </summary>
+    private static readonly HotkeyModifiers Modifiers = UpdateService.IsRelease ? HotkeyModifiers.Alt | HotkeyModifiers.Shift : HotkeyModifiers.Control | HotkeyModifiers.Alt;
+    private static readonly Hotkey LookupHotkey = new(Modifiers, VirtualKey.L);
+    private static readonly Hotkey WriteHotkey = new(Modifiers, VirtualKey.W);
+    private static readonly Hotkey ClipboardHotkey = new(Modifiers, VirtualKey.V);
 
     /// <summary>Who Lamha's notifications are from, in Windows (Lamha 2's was com.artworklab.lamha).</summary>
     private const string NotificationAppId = "ArtworkLab.Lamha";
@@ -137,7 +142,7 @@ public partial class App : Application
         _panel.SettingsOpener = section => _main.Show("settings", section);
 
         // Removing Lamha 2: the released Lamha 3 only (a beta runs next to it), or --remove-lamha2 to try it.
-        var removal = new Lamha2Removal(_brain.DataFolder, _options.Lamha2 ?? Lamha2Folder.DefaultPath, !UpdateService.Current.Contains('-', StringComparison.Ordinal) || _options.RemoveLamha2);
+        var removal = new Lamha2Removal(_brain.DataFolder, _options.Lamha2 ?? Lamha2Folder.DefaultPath, UpdateService.IsRelease || _options.RemoveLamha2);
         _ = Task.Run(removal.AtStart);
         _firstRun = new FirstRunService(_brain, shortcuts, _clipboard, idle, Notify)
         {

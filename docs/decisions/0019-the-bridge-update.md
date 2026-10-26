@@ -38,7 +38,11 @@
 
 ## Consequences
 
-- Lamha 3's release workflow (phase 6's release) must copy 2.1.0's `latest.yml`, setup and blockmap into each Latest release.
+- **Lamha 3's release workflow** (`.github/workflows/release.yml`, started by hand) does it for every release. It stops when 2.1.0 isn't released yet, and it copies 2.1.0's `latest.yml`, setup and blockmap into each Latest release.
+  - Each version is packed in the normal channel (`win-x64`, `win-arm64`) and in the beta's, so the betas update to it. The beta channel's copy is only its update package (its setup and Portable are taken out of `assets.<channel>.json`), and the bridge takes a `Lamha-beta-` setup only from a beta's release.
+  - A released Lamha follows the normal channel even after updating from a beta (`VelopackUpdates`, Velopack's `ExplicitChannel`).
+  - It takes Lamha 2's Alt+Shift+L / W / V, while a beta keeps Ctrl+Alt (`App.xaml.cs`; keys left as they were are saved as the default, so a beta updated to 3.0 takes 3.0's).
+  - It checks what each kind of user reads: `latest.yml` at GitHub's latest link (Lamha 2.0.x), the setups and feeds (2.1.0, Velopack), `Lamha-Setup.exe` (the website), and no beta setup on the page.
 - No 2.x release after 3.0: once 3.0 is the Latest release, electron-updater would see only 2.1.0 there.
 - The GitHub API is asked once per check (every 6 hours), well under its limit of 60 an hour for each address.
 - The Firefox extension's last version (saying it has ended) is a separate step, the user's to publish.

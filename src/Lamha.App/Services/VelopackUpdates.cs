@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Lamha.Core.Updates;
 using Velopack;
 using Velopack.Sources;
@@ -70,7 +71,16 @@ internal sealed class VelopackUpdates : Core.Updates.IUpdateSource
         }
     }
 
+    /// <summary>
+    /// A released version follows the normal channel (win-x64, win-arm64) even when it came as an update from a beta,
+    /// which was packed in beta-win-x64…: 3.0 is published in both, and a beta that took it moves over (decision 0019's
+    /// release). A beta stays in the channel it was packed with.
+    /// </summary>
+    private static UpdateOptions? Options() => UpdateService.IsRelease
+        ? new UpdateOptions { ExplicitChannel = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "win-arm64" : "win-x64" }
+        : null;
+
     private UpdateManager Manager() => _from is not null
-        ? new UpdateManager(_from)
-        : new UpdateManager(new GithubSource(Repository, accessToken: null, prerelease: Brain.Version.Contains('-', StringComparison.Ordinal)));
+        ? new UpdateManager(_from, Options())
+        : new UpdateManager(new GithubSource(Repository, accessToken: null, prerelease: !UpdateService.IsRelease), Options());
 }

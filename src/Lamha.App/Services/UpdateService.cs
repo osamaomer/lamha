@@ -69,6 +69,9 @@ public sealed partial class UpdateService : IDisposable
     /// <summary>This version, "3.0.0-beta.4" (without the commit).</summary>
     public static string Current { get; } = Brain.Version.Split('+')[0];
 
+    /// <summary>A released version ("3.0.0"), not a beta or a build from source ("3.0.0-beta.4", "3.0.0-alpha.0").</summary>
+    public static bool IsRelease { get; } = !Current.Contains('-', StringComparison.Ordinal);
+
     /// <summary>A version in a line of text, kept "3.0.0-beta.2" in Arabic (not "beta.2-3.0.0").</summary>
     public static string Shown(string version) => "‎" + version + "‎";
 

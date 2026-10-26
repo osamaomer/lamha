@@ -1,0 +1,200 @@
+# Lamha 3's release (3.0.0 and the ones after it): builds, tests and packs the installers as the beta does, then
+# publishes them as GitHub's Latest release, x64 and ARM64 in one. Started by hand (Actions → Release → Run workflow,
+# from main); nothing starts it by itself. The version is Directory.Build.props' VersionPrefix, without a suffix.
+#
+# Decision 0019 (the bridge) shapes it:
+# - Each version is packed twice: in the normal channel (win-x64, win-arm64), which a released Lamha follows, and in the
+#   beta's (beta-win-x64…), so the betas update to it. The beta channel's copy is only its update package: no second
+#   setup or Portable on the release page, and none for Lamha 2's bridge to pick.
+# - Lamha 2.1.0's latest.yml, setup and blockmap go into every Latest release: electron-updater reads latest.yml only
+#   from GitHub's Latest release, so a Lamha 2.0.x that never updated still finds the bridge. 2.1.0 must be released
+#   first (from release/2.x, by its own workflow).
+# - Lamha-Setup.exe, the x64 setup under the name the website's download button uses.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: "What's new (shown on the release page)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  BRIDGE: v2.1.0 # Lamha 2's last release, the bridge to Lamha 3
+
+jobs:
+  version:
+    runs-on: windows-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: The version, not released yet, and the bridge released
+        id: v
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.VersionPrefix | Where-Object { $_ } | Select-Object -First 1
+          if ($version -notmatch '^3\.\d+\.\d+$') { Write-Error "VersionPrefix '$version' isn't a Lamha 3 version"; exit 1 }
+          gh release view "v$version" --repo ${{ github.repository }} *> $null
+          if ($LASTEXITCODE -eq 0) { Write-Error "v$version is already released: raise VersionPrefix first"; exit 1 }
+          $bridge = gh release view $env:BRIDGE --repo ${{ github.repository }} --json assets --jq '.assets[].name'
+          foreach ($name in "latest.yml", "Lamha-Setup-$($env:BRIDGE.TrimStart('v')).exe") {
+            if ($bridge -notcontains $name) { Write-Error "$($env:BRIDGE) has no $($name): release Lamha 2.1.0 first"; exit 1 }
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          exit 0 # the "not released yet" check above ended with gh's error code on purpose
+
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet build Lamha.slnx -c Release -p:VersionSuffix=
+      - run: dotnet test --solution Lamha.slnx -c Release --no-build
+
+  pack:
+    needs: [version, test]
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        rid: [win-x64, win-arm64]
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+
+      - name: The offline dictionary file (shipped next to Lamha.exe as dict/lamha-dict.db)
+        run: dotnet run --project tools/DictionaryBuilder -c Release -- legacy/dict artifacts/dict/lamha-dict.db
+
+      # No suffix: a released version (Lamha 2's shortcuts, the normal channel, removing Lamha 2).
+      - name: Publish (NativeAOT)
+        run: dotnet publish src/Lamha.App -c Release -r ${{ matrix.rid }} -o artifacts/publish/${{ matrix.rid }} -p:VersionSuffix=
+
+      - name: Memory budgets (x64 only; informational until the runner's numbers are known, as in CI)
+        if: matrix.rid == 'win-x64'
+        continue-on-error: true
+        shell: pwsh
+        run: ./tools/Measure/measure.ps1 -Exe artifacts/publish/win-x64/Lamha.exe -Budget
+
+      # The last version in each channel, so each pack adds a delta from it. None yet (the first release), or GitHub
+      # didn't answer: the update downloads the whole package, so it doesn't stop the release.
+      - name: The previous versions (for delta updates)
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet vpk download github --repoUrl "https://github.com/${{ github.repository }}" --token $env:GH_TOKEN `
+            --channel ${{ matrix.rid }} --outputDir artifacts/releases/${{ matrix.rid }}
+          dotnet vpk download github --repoUrl "https://github.com/${{ github.repository }}" --token $env:GH_TOKEN --pre `
+            --channel beta-${{ matrix.rid }} --outputDir artifacts/releases/beta-${{ matrix.rid }}
+
+      - name: Pack, in the normal channel and the beta's
+        shell: pwsh
+        run: |
+          foreach ($channel in "${{ matrix.rid }}", "beta-${{ matrix.rid }}") {
+            dotnet vpk pack --packId Lamha --packVersion $env:VERSION --packTitle Lamha --packAuthors "Artwork Lab" `
+              --packDir artifacts/publish/${{ matrix.rid }} --mainExe Lamha.exe --icon src/Lamha.App/Assets/Lamha.ico `
+              --channel $channel --exclude '.*\.pdb$' --outputDir artifacts/releases/$channel
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          # The beta channel's copy: only what an update needs (the upload sends what assets.<channel>.json lists).
+          $dir = "artifacts/releases/beta-${{ matrix.rid }}"
+          $assets = "$dir/assets.beta-${{ matrix.rid }}.json"
+          $all = Get-Content $assets -Raw | ConvertFrom-Json
+          $all | Where-Object { $_.Type -in "Installer", "Portable" } | ForEach-Object { Remove-Item "$dir/$($_.RelativeFileName)" }
+          ConvertTo-Json -InputObject @($all | Where-Object { $_.Type -notin "Installer", "Portable" }) -Compress | Set-Content $assets
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-${{ matrix.rid }}
+          path: artifacts/releases
+          retention-days: 7
+
+  release:
+    needs: [version, pack]
+    runs-on: windows-latest
+    # Only this job writes to the repository: it creates the tag and the release.
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: release-*
+          path: artifacts/releases
+          merge-multiple: true
+
+      # x64's normal channel creates the release; the others join it (--merge), so one release has them all.
+      - name: Publish the release
+        shell: pwsh
+        run: |
+          $tag = "v$env:VERSION"
+          foreach ($channel in "win-x64", "win-arm64", "beta-win-x64", "beta-win-arm64") {
+            dotnet vpk upload github --outputDir "artifacts/releases/$channel" --channel $channel `
+              --repoUrl "https://github.com/${{ github.repository }}" --token $env:GH_TOKEN `
+              --publish --merge --releaseName "Lamha $env:VERSION" --tag $tag --targetCommitish ${{ github.sha }}
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Lamha 2's bridge, and the website's fixed name
+        shell: pwsh
+        run: |
+          $tag = "v$env:VERSION"
+          $bridge = $env:BRIDGE.TrimStart('v')
+          gh release download $env:BRIDGE --repo ${{ github.repository }} --dir bridge `
+            --pattern latest.yml --pattern "Lamha-Setup-$bridge.exe" --pattern "Lamha-Setup-$bridge.exe.blockmap"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item artifacts/releases/win-x64/Lamha-win-x64-Setup.exe bridge/Lamha-Setup.exe
+          gh release upload $tag (Get-ChildItem bridge).FullName --repo ${{ github.repository }} --clobber
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $notes = if ($env:NOTES) { $env:NOTES } else { "Lamha $env:VERSION. Install Lamha-win-x64-Setup.exe (or win-arm64 on ARM PCs). Lamha 2 offers it by itself and moves your data." }
+          gh release edit $tag --repo ${{ github.repository }} --latest --notes $notes
+        env:
+          NOTES: ${{ inputs.notes }}
+
+      # What each kind of user reads: Lamha 2.0.x (latest.yml), Lamha 2.1.0 (the API's setups), the website.
+      - name: Every reader finds it
+        shell: pwsh
+        run: |
+          # GitHub's latest/download link can take a moment to follow a new release (Lamha 2's release workflow waits too).
+          $url = "https://github.com/${{ github.repository }}/releases/latest/download/latest.yml"
+          for ($i = 1; $i -le 6; $i++) {
+            $yml = curl.exe -sfL $url | Out-String
+            if ($yml -match "version: $([regex]::Escape($env:BRIDGE.TrimStart('v')))") { break }
+            if ($i -eq 6) { Write-Error "$url isn't the bridge's latest.yml"; exit 1 }
+            Start-Sleep -Seconds 10
+          }
+          $names = gh release view "v$env:VERSION" --repo ${{ github.repository }} --json assets --jq '.assets[].name'
+          foreach ($name in "Lamha-win-x64-Setup.exe", "Lamha-win-arm64-Setup.exe", "Lamha-Setup.exe", "releases.win-x64.json", "releases.beta-win-x64.json") {
+            if ($names -notcontains $name) { Write-Error "the release has no $name"; exit 1 }
+          }
+          if ($names -match "^Lamha-beta-") { Write-Error "a beta setup is on the release page"; exit 1 }
+          "OK: v$env:VERSION is the Latest release, with the bridge's files"
+          exit 0
