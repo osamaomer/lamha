@@ -202,7 +202,11 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
 ## Steps
 
 0. **Done 2026-10-26:** the answers below, and **[the UX study](ux-study.md)**: Windows' Settings measured on the user's PC, WinUI's own sizes, and Lamha's card, Translate and Write compared, with their findings and the features chosen. Still to measure in step 1: Settings in light, its narrow breakpoint, and Lamha's other screens.
-1. **The system on paper:** `system.md` and `system.html` (foundations, icons beside Lamha 2's, components, the motion catalogue with live demos), for your sign-off as in phase 1.
+1. **The system on paper:** `system.md` and `system.html` (foundations, icons beside Lamha 2's, components, the motion catalogue with live demos), for your sign-off as in phase 1. **Drafted 2026-10-26** ([online](https://claude.ai/artifact/SfLssJ2QPaXQwjPCHEGfYw)):
+   - all 33 icons mapped to Segoe Fluent Icons, checked by drawing them on this PC; Fluent has no bookmark, so the star is offered;
+   - the six coloured pane icons, drafted;
+   - setting cards rounded 4 (the control radius), measured;
+   - the accent in dark the Windows way: a light indigo with dark text.
 2. **Foundations in code:** the type ramp, Windows' brushes, the radii, the spacing tokens; Fluent icons through the same `Glyph` names; the typed sizes and radii replaced.
 3. **The frame:** `NavigationView`, `TitleBar` with Back and ☰, the three widths, the pages in a `Frame` with transitions, the window remembered.
 4. **Components:** WinUI's own where they fit (`InfoBar`, `InfoBadge`, `SelectorBar`, `TeachingTip`, `ContentDialog`); Settings in Windows' pattern; the answer, Write and the card as in *Features from the study*.

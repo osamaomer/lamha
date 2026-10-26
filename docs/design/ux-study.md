@@ -23,10 +23,11 @@ Windows' Settings uses WinUI's standard sizes everywhere; the measured values ma
 | Selected page's pill | 3 × 16, rounded 2, in the accent | `NavigationViewSelectionIndicator*` |
 | Pane icon | 16 in WinUI; Settings' coloured icons fill about 20 | `NavigationViewItemOnLeftIconBoxHeight`, measured |
 | Pane icon → name | the name starts 63 from the window's edge | measured |
-| Pane width when open | the page starts 328 from the window's edge | measured |
+| Pane width when open | 300: the page starts 328 from the window's edge, and its side padding is 28 (the narrow window's) | measured |
+| Page side padding | 28 on both sides, at every width | measured (640 and 1100) |
 | Page title | Title, 28 semibold; a sub-page's title is a breadcrumb ("System › Display", the parent in the secondary text colour) | `TitleTextBlockFontSize`, measured |
 | Group heading | Body strong, 14 semibold; the next card starts 13 below its text | measured |
-| Setting card | 68 high, 4 apart (plus their 1 px edges), rounded 8; icon 20, the text 56 in from the card's edge | measured |
+| Setting card | 68 high, 4 apart (plus their 1 px edges), rounded 4 (the control radius); padding 16, icon 20, 20 from icon to text | measured |
 | Between two groups | 61 from one group's last card to the next group's first | measured |
 | Field, dropdown | 32 high; padding 10,5,6,6; a 2 px accent line under it when focused | `TextControlThemeMinHeight`, `TextControlThemePadding` |
 | Button | padding 11,5,11,6; 32 high | `ButtonPadding` |
@@ -34,7 +35,7 @@ Windows' Settings uses WinUI's standard sizes everywhere; the measured values ma
 | Expander | 48 high at least | `ExpanderMinHeight` |
 | InfoBar | 48 high at least, 16 padding | `InfoBarMinHeight` |
 | Dialog | 320 to 548 wide | `ContentDialogMin/MaxWidth` |
-| Corners | 4 for controls, 8 for cards and overlays | `ControlCornerRadius`, `OverlayCornerRadius` |
+| Corners | 4 for controls (setting cards included), 8 for overlays and content cards | `ControlCornerRadius`, `OverlayCornerRadius` |
 | Type | Caption 12, Body 14, Body strong 14 semibold, Body large 18, Subtitle 20, Title 28, Title large 40, Display 68 | `*TextBlockFontSize` |
 | Motion | 83 ms (faster), 167 ms (fast), 250 ms (normal); curve 0,0,0,1 | `Control*AnimationDuration`, `ControlFastOutSlowInKeySpline` |
 
@@ -53,7 +54,7 @@ Windows' Settings uses WinUI's standard sizes everywhere; the measured values ma
 | Pane width | 260 | about 320 (the page from 328) |
 | Pane icons | Lamha 2's line icons, 16, one colour | coloured, about 20 |
 | Narrow window | folds to icons | the pane hides, ☰ in the title bar |
-| Cards and panels | rounded 14, 16 apart, a panel inside a panel on Translate and Write | rounded 8, 4 apart, one level |
+| Cards and panels | rounded 14, 16 apart, a panel inside a panel on Translate and Write | setting cards rounded 4 and 4 apart; one level |
 | Field focus | a 2 px accent ring all round | a 2 px accent line under it |
 | Switch when on | Lamha 2's green | the accent |
 | Font sizes | 12 typed in the screens, 11 in the tokens | 8 named sizes |

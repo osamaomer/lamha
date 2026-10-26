@@ -1,0 +1,1015 @@
+<title>Lamha's Design System</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a specimen book for one Windows 11 app. The live window first (it is the system at work), then each
+   layer of the system in order: measurements, type, colour, icons, components, motion, new features, questions.
+   The mock's colours approximate Windows 11's own brushes; Lamha's accent is its indigo. */
+:root {
+  --ground: #eef0f5;            /* the page around the specimens */
+  --sheet: #ffffff;             /* specimen sheets */
+  --ink: #1b1b1f; --ink-2: #5d5d66; --ink-3: #7c7c86;
+  --rule: rgba(20, 20, 40, 0.10);
+  --draft: #e8590c;             /* new wording, waiting for approval */
+  /* Windows 11, light */
+  --mica: linear-gradient(140deg, #e9ecf6 0%, #f1edf3 50%, #ecf2f3 100%);
+  --layer: rgba(255, 255, 255, 0.55); --layer-edge: rgba(0, 0, 0, 0.06);
+  --card: rgba(255, 255, 255, 0.72); --card-edge: rgba(0, 0, 0, 0.07);
+  --subtle-1: rgba(0, 0, 0, 0.037); --subtle-2: rgba(0, 0, 0, 0.024);
+  --ctl: rgba(255, 255, 255, 0.72); --ctl-2: rgba(249, 249, 249, 0.6); --ctl-edge: rgba(0, 0, 0, 0.07); --ctl-edge-low: rgba(0, 0, 0, 0.16);
+  --t1: rgba(0, 0, 0, 0.9); --t2: rgba(0, 0, 0, 0.61); --t3: rgba(0, 0, 0, 0.45); --t4: rgba(0, 0, 0, 0.36);
+  --divider: rgba(0, 0, 0, 0.08);
+  --acrylic: rgba(252, 252, 252, 0.96); --shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --accent: #4f46e5; --accent-fill: #4f46e5; --on-accent: #ffffff; --accent-soft: rgba(79, 70, 229, 0.10);
+  --ok: #166534; --ok-soft: #dff6dd; --danger: #c42b1c; --danger-soft: #fde7e9; --warn: #9d5d00; --warn-soft: #fff4ce; --info-soft: rgba(79, 70, 229, 0.08);
+  --mark: rgba(245, 158, 11, 0.30);
+  --win-edge: rgba(0, 0, 0, 0.18); --win-shadow: 0 30px 70px -20px rgba(20, 20, 50, 0.35), 0 6px 18px rgba(0, 0, 0, 0.08);
+  --ui: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", "Noto Sans Arabic", Tahoma, system-ui, sans-serif;
+  --ui-display: "Segoe UI Variable Display", "Segoe UI Variable Text", "Segoe UI", "Noto Sans Arabic", Tahoma, system-ui, sans-serif;
+  --serif: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --icons: "Segoe Fluent Icons", "Segoe MDL2 Assets";
+  /* motion, set by the Animations switch */
+  --t-faster: 83ms; --t-fast: 167ms; --t-normal: 250ms; --t-slow: 333ms;
+  --ease-in: cubic-bezier(0, 0, 0, 1); --ease-out: cubic-bezier(1, 0, 1, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #15161b; --sheet: #1d1e24; --ink: #f2f2f5; --ink-2: #a9a9b3; --ink-3: #8b8b95; --rule: rgba(255, 255, 255, 0.09); --draft: #ff922b;
+    --mica: linear-gradient(140deg, #1c1e27 0%, #211c22 50%, #1a2024 100%);
+    --layer: rgba(58, 58, 58, 0.30); --layer-edge: rgba(0, 0, 0, 0.25);
+    --card: rgba(255, 255, 255, 0.051); --card-edge: rgba(0, 0, 0, 0.18);
+    --subtle-1: rgba(255, 255, 255, 0.061); --subtle-2: rgba(255, 255, 255, 0.042);
+    --ctl: rgba(255, 255, 255, 0.061); --ctl-2: rgba(255, 255, 255, 0.084); --ctl-edge: rgba(255, 255, 255, 0.07); --ctl-edge-low: rgba(255, 255, 255, 0.05);
+    --t1: #ffffff; --t2: rgba(255, 255, 255, 0.79); --t3: rgba(255, 255, 255, 0.55); --t4: rgba(255, 255, 255, 0.36);
+    --divider: rgba(255, 255, 255, 0.084);
+    --acrylic: rgba(44, 44, 44, 0.96); --shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+    --accent: #9aa1ff; --accent-fill: #9aa1ff; --on-accent: #0b0b12; --accent-soft: rgba(154, 161, 255, 0.14);
+    --ok: #6ccb5f; --ok-soft: #393d1b; --danger: #ff99a4; --danger-soft: #442726; --warn: #fce100; --warn-soft: #433519; --info-soft: rgba(154, 161, 255, 0.10);
+    --mark: rgba(245, 158, 11, 0.32);
+    --win-edge: rgba(255, 255, 255, 0.12); --win-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.8), 0 6px 18px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #15161b; --sheet: #1d1e24; --ink: #f2f2f5; --ink-2: #a9a9b3; --ink-3: #8b8b95; --rule: rgba(255, 255, 255, 0.09); --draft: #ff922b;
+  --mica: linear-gradient(140deg, #1c1e27 0%, #211c22 50%, #1a2024 100%);
+  --layer: rgba(58, 58, 58, 0.30); --layer-edge: rgba(0, 0, 0, 0.25);
+  --card: rgba(255, 255, 255, 0.051); --card-edge: rgba(0, 0, 0, 0.18);
+  --subtle-1: rgba(255, 255, 255, 0.061); --subtle-2: rgba(255, 255, 255, 0.042);
+  --ctl: rgba(255, 255, 255, 0.061); --ctl-2: rgba(255, 255, 255, 0.084); --ctl-edge: rgba(255, 255, 255, 0.07); --ctl-edge-low: rgba(255, 255, 255, 0.05);
+  --t1: #ffffff; --t2: rgba(255, 255, 255, 0.79); --t3: rgba(255, 255, 255, 0.55); --t4: rgba(255, 255, 255, 0.36);
+  --divider: rgba(255, 255, 255, 0.084);
+  --acrylic: rgba(44, 44, 44, 0.96); --shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --accent: #9aa1ff; --accent-fill: #9aa1ff; --on-accent: #0b0b12; --accent-soft: rgba(154, 161, 255, 0.14);
+  --ok: #6ccb5f; --ok-soft: #393d1b; --danger: #ff99a4; --danger-soft: #442726; --warn: #fce100; --warn-soft: #433519; --info-soft: rgba(154, 161, 255, 0.10);
+  --mark: rgba(245, 158, 11, 0.32);
+  --win-edge: rgba(255, 255, 255, 0.12); --win-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.8), 0 6px 18px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 14px/1.5 var(--ui); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 72px; }
+
+/* ---------- the book's own frame ---------- */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ground); }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--ground) 88%, transparent); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); }
+.bar .wrap { display: flex; align-items: center; gap: 12px 20px; flex-wrap: wrap; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 600 15px/1 var(--ui-display); margin-inline-end: auto; }
+.brand i { width: 20px; height: 20px; border-radius: 5px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; font: normal 12px/1 var(--icons); }
+.seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 6px; background: var(--subtle-1); border: 1px solid var(--rule); }
+.seg button { border: 0; background: none; color: var(--ink-2); font: 12px/1 var(--ui); padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--sheet); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+.seg-label { font-size: 12px; color: var(--ink-3); margin-inline-end: 6px; }
+.ctl-group { display: flex; align-items: center; }
+
+header.intro { padding-block: 44px 28px; display: grid; gap: 14px; }
+header.intro h1 { margin: 0; font: 600 40px/1.15 var(--ui-display); letter-spacing: -0.01em; text-wrap: balance; }
+header.intro p { margin: 0; max-width: 68ch; color: var(--ink-2); font-size: 15px; }
+.meta { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+.meta b { color: var(--ink-2); font-weight: 600; }
+.new { text-decoration: underline 2px var(--draft); text-underline-offset: 3px; }
+
+section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); margin-top: 48px; }
+.chapter > .head { display: grid; grid-template-columns: 56px 1fr; gap: 4px 16px; margin-bottom: 24px; }
+.chapter > .head .no { font: 600 13px/28px var(--ui); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.chapter > .head h2 { margin: 0; font: 600 28px/36px var(--ui-display); text-wrap: balance; }
+.chapter > .head p { grid-column: 2; margin: 0; color: var(--ink-2); max-width: 70ch; }
+@media (max-width: 640px) { .chapter > .head { grid-template-columns: 1fr; } .chapter > .head p { grid-column: 1; } }
+.sheet { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: 24px; min-width: 0; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 16px; }
+.caption { font-size: 12px; color: var(--ink-3); }
+h3 { margin: 0 0 12px; font: 600 14px/20px var(--ui); }
+table.spec { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.spec th, table.spec td { text-align: start; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.spec th { font-weight: 600; color: var(--ink-2); font-size: 12px; }
+table.spec td.n { font-variant-numeric: tabular-nums; font-weight: 600; }
+.scroll-x { overflow-x: auto; }
+
+/* ---------- the window mock (Windows 11) ---------- */
+.stage { display: grid; gap: 12px; }
+.stage-tools { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.win { position: relative; width: 100%; max-width: 1000px; height: 660px; margin-inline: auto; border-radius: 8px; overflow: hidden; background: var(--mica);
+  border: 1px solid var(--win-edge); box-shadow: var(--win-shadow); font: 14px/20px var(--ui); color: var(--t1); container-type: inline-size; container-name: win;
+  display: grid; grid-template-rows: 48px 1fr; transition: max-width var(--t-normal) var(--ease-in); }
+.win.forced-narrow { max-width: 560px; }
+.tb { position: relative; display: flex; align-items: center; height: 48px; padding-inline-start: 4px; }
+.tb .navbtn { width: 40px; height: 36px; border: 0; border-radius: 4px; background: transparent; color: var(--t1); display: grid; place-items: center; cursor: pointer; font: 16px/1 var(--icons); }
+.tb .navbtn:hover:not(:disabled) { background: var(--subtle-1); }
+.tb .navbtn:active:not(:disabled) { background: var(--subtle-2); color: var(--t2); }
+.tb .navbtn:disabled { color: var(--t4); cursor: default; }
+.tb .rtlflip { display: inline-block; }
+.win[dir="rtl"] .rtlflip { transform: scaleX(-1); }
+.tb .app { display: flex; align-items: center; gap: 12px; padding-inline: 8px 16px; font-size: 12px; white-space: nowrap; }
+.tb .app i { width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #6366f1, #06b6d4); color: #fff; display: grid; place-items: center; font: normal 10px/1 var(--icons); }
+.tb .search { position: absolute; left: 50%; transform: translateX(-50%); width: min(512px, 46%); }
+.tb .caps { margin-inline-start: auto; display: flex; }
+.tb .caps span { width: 46px; height: 32px; display: grid; place-items: center; font: 10px/1 var(--icons); color: var(--t1); align-self: flex-start; }
+.only-narrow { display: none !important; }
+.body { position: relative; display: grid; grid-template-columns: 300px 1fr; min-height: 0; }
+.pane { position: relative; display: flex; flex-direction: column; padding-block: 4px 8px; padding-inline: 14px 10px; min-height: 0; }
+.pane .rows { position: relative; display: grid; gap: 4px; }
+.pane .foot { margin-top: auto; }
+.navrow { position: relative; display: flex; align-items: center; gap: 14px; height: 36px; padding-inline-start: 11px; border-radius: 4px; cursor: pointer; color: var(--t1); border: 0; background: transparent; width: 100%; font: inherit; text-align: start; }
+.navrow:hover { background: var(--subtle-1); }
+.navrow:active { background: var(--subtle-2); }
+.navrow[aria-current="page"] { background: var(--subtle-1); }
+.navrow .ico { width: 20px; height: 20px; flex: none; }
+.navrow .badge { margin-inline-start: auto; margin-inline-end: 12px; min-width: 16px; height: 16px; padding: 0 5px; border-radius: 8px; background: var(--accent-fill); color: var(--on-accent); font: 600 11px/16px var(--ui); text-align: center; }
+.pill { position: absolute; inset-inline-start: 0; top: 0; width: 3px; height: 16px; border-radius: 2px; background: var(--accent); transition: transform var(--t-normal) var(--ease-in), opacity var(--t-faster); pointer-events: none; }
+.page { position: relative; min-height: 0; background: var(--layer); border-top: 1px solid var(--layer-edge); border-inline-start: 1px solid var(--layer-edge); border-start-start-radius: 8px; overflow: hidden; }
+.page .scroller { position: absolute; inset: 0; overflow-y: auto; padding: 10px 28px 40px; }
+.page .scroller > .view { max-width: 1000px; }
+.title { font: 600 28px/36px var(--ui-display); margin: 0 0 17px; display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px; }
+.title .parent { color: var(--t3); cursor: pointer; border: 0; background: none; font: inherit; padding: 0; }
+.title .parent:hover { color: var(--t2); }
+.title .sep { font: 16px/1 var(--icons); color: var(--t3); }
+.win[dir="rtl"] .title .sep { transform: scaleX(-1); }
+.group-h { font: 600 14px/20px var(--ui); margin: 28px 0 8px; }
+.group-h:first-child { margin-top: 0; }
+.view { animation: v-enter var(--t-normal) var(--ease-in) both; }
+.view.drill { animation-name: v-drill; }
+.view.drill-back { animation-name: v-drill-back; }
+@keyframes v-enter { from { opacity: 0; transform: translateY(28px); } }
+@keyframes v-drill { from { opacity: 0; transform: translateX(var(--drill-from, 40px)); } }
+@keyframes v-drill-back { from { opacity: 0; transform: translateX(var(--drill-back-from, -40px)); } }
+.win[dir="rtl"] .view { --drill-from: -40px; --drill-back-from: 40px; }
+/* Narrow, as Windows' Settings: no pane, ☰ and 🔍 join Back in the title bar; ☰ opens the pane over the page */
+@container win (max-width: 680px) {
+  .tb .search { display: none; }
+  .only-narrow { display: grid !important; }
+  .body { grid-template-columns: 1fr; }
+  .pane { position: absolute; inset-block: 0; inset-inline-start: 0; width: 300px; z-index: 4; background: var(--acrylic); box-shadow: var(--shadow); border-start-end-radius: 8px; border-end-end-radius: 8px;
+    transform: translateX(-104%); transition: transform var(--t-fast) var(--ease-in); }
+  .win[dir="rtl"] .pane { transform: translateX(104%); }
+  .win.pane-open .pane { transform: none; }
+  .page { border-start-start-radius: 0; border-inline-start: 0; }
+}
+
+/* ---------- Windows controls ---------- */
+.fi { font-family: var(--icons); font-style: normal; font-weight: normal; line-height: 1; display: inline-block; }
+.btn { height: 32px; padding: 5px 11px 6px; border-radius: 4px; border: 1px solid var(--ctl-edge); border-bottom-color: var(--ctl-edge-low); background: var(--ctl); color: var(--t1);
+  font: 14px/20px var(--ui); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap; transition: background var(--t-faster), transform var(--t-faster); }
+.btn:hover { background: var(--ctl-2); }
+.btn:active { color: var(--t2); transform: scale(0.98); }
+.btn.accent { background: var(--accent-fill); color: var(--on-accent); border-color: transparent; }
+.btn.accent:hover { filter: brightness(1.08); }
+.btn.accent:active { filter: brightness(0.94); color: var(--on-accent); }
+.btn.subtle { background: transparent; border-color: transparent; }
+.btn.subtle:hover { background: var(--subtle-1); }
+.btn.link { background: none; border-color: transparent; color: var(--accent); padding-inline: 4px; }
+.btn.link:hover { text-decoration: underline; }
+.btn.danger { background: #c42b1c; color: #fff; border-color: transparent; }
+.btn .fi { font-size: 16px; }
+.btn .chev { font-size: 12px; margin-inline-start: 2px; }
+.ib { width: 32px; height: 32px; border: 0; border-radius: 4px; background: transparent; color: var(--t1); display: inline-grid; place-items: center; cursor: pointer; position: relative; transition: background var(--t-faster), transform var(--t-faster); }
+.ib:hover { background: var(--subtle-1); }
+.ib:active { background: var(--subtle-2); transform: scale(0.96); }
+.ib .fi { font-size: 16px; transition: transform var(--t-fast) var(--ease-in), color var(--t-fast); }
+.ib.main .fi { color: var(--accent); }
+.ib.on .fi { color: var(--accent); }
+.ib .fi.pop { animation: pop var(--t-fast) var(--ease-in); }
+@keyframes pop { 40% { transform: scale(1.25); } }
+.ib .fi.done { animation: tick var(--t-fast) var(--ease-in); color: var(--ok); }
+@keyframes tick { from { transform: scale(0.4) rotate(-30deg); opacity: 0; } }
+:is(.btn, .ib, .navrow, .navbtn, .scard, .seg button, .chip):focus-visible { outline: 2px solid var(--t1); outline-offset: 1px; box-shadow: 0 0 0 3px var(--sheet); }
+.kbd { display: inline-block; font: 12px/16px var(--ui); padding: 1px 5px; border-radius: 4px; background: var(--ctl); border: 1px solid var(--ctl-edge); border-bottom-color: var(--ctl-edge-low); color: var(--t2); direction: ltr; }
+.keys { display: inline-flex; gap: 3px; align-items: center; direction: ltr; color: var(--t3); font-size: 12px; }
+.field { position: relative; border-radius: 4px; background: var(--ctl); border: 1px solid var(--ctl-edge); border-bottom-color: var(--ctl-edge-low); min-height: 32px; }
+.field::after { content: ""; position: absolute; inset-inline: -1px; bottom: -1px; height: 2px; border-radius: 0 0 4px 4px; background: var(--accent); transform: scaleX(0); transition: transform var(--t-fast) var(--ease-in); }
+.field:focus-within { background: var(--sheet); }
+.field:focus-within::after { transform: scaleX(1); }
+.field textarea, .field input { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--t1); font: 14px/20px var(--ui); padding: 5px 34px 6px 10px; display: block; }
+.win[dir="rtl"] .field textarea, .win[dir="rtl"] .field input { padding: 5px 10px 6px 34px; }
+.field textarea::placeholder, .field input::placeholder { color: var(--t3); }
+.field .x { position: absolute; top: 4px; inset-inline-end: 4px; width: 24px; height: 24px; border: 0; border-radius: 4px; background: transparent; color: var(--t2); font: 12px/1 var(--icons); cursor: pointer; }
+.field .x:hover { background: var(--subtle-1); }
+.field.search input { padding-inline-end: 36px; }
+.field.search .glass { position: absolute; inset-inline-end: 10px; top: 8px; font: 14px/1 var(--icons); color: var(--t2); pointer-events: none; }
+.combo { height: 32px; border-radius: 4px; background: var(--ctl); border: 1px solid var(--ctl-edge); border-bottom-color: var(--ctl-edge-low); color: var(--t1); font: 14px/20px var(--ui); padding: 5px 11px 6px; display: inline-flex; align-items: center; gap: 24px; min-width: 160px; justify-content: space-between; cursor: pointer; }
+.combo .fi { font-size: 12px; color: var(--t2); }
+.switch { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; border: 0; background: none; color: var(--t1); font: 14px/20px var(--ui); padding: 0; }
+.switch .track { width: 40px; height: 20px; border-radius: 10px; border: 1px solid var(--t2); position: relative; transition: background var(--t-faster), border-color var(--t-faster); }
+.switch .knob { position: absolute; top: 3px; inset-inline-start: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--t2); transition: inset-inline-start var(--t-fast) var(--ease-in), transform var(--t-faster), background var(--t-faster); }
+.switch:hover .knob { transform: scale(1.15); }
+.switch[aria-checked="true"] .track { background: var(--accent-fill); border-color: var(--accent-fill); }
+.switch[aria-checked="true"] .knob { inset-inline-start: 23px; background: var(--on-accent); }
+.scard { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; column-gap: 20px; row-gap: 12px; min-height: 68px; padding: 13px 16px; border-radius: 4px;
+  background: var(--card); border: 1px solid var(--card-edge); color: var(--t1); width: 100%; font: inherit; text-align: start; transition: background var(--t-faster), transform var(--t-faster); }
+button.scard { cursor: pointer; }
+button.scard:hover { background: var(--ctl-2); }
+button.scard:active { transform: scale(0.995); }
+.scard + .scard { margin-top: 4px; }
+.scard .sic { font: 20px/1 var(--icons); color: var(--t1); }
+.scard .nm { display: block; }
+.scard .ds { display: block; font-size: 12px; line-height: 16px; color: var(--t2); }
+.scard .end { display: flex; align-items: center; gap: 16px; }
+.scard .end .go { font: 12px/1 var(--icons); color: var(--t2); }
+.win[dir="rtl"] .scard .end .go { transform: scaleX(-1); }
+.scard.wrapped { grid-template-columns: 20px minmax(0, 1fr); }
+.scard.wrapped .end { grid-column: 2; }
+.ccard { background: var(--card); border: 1px solid var(--card-edge); border-radius: 8px; padding: 24px; }
+.infobar { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 12px; min-height: 48px; padding: 8px 8px 8px 16px; border-radius: 4px; border: 1px solid var(--card-edge); background: var(--info-soft); }
+.win[dir="rtl"] .infobar, [dir="rtl"] .infobar { padding: 8px 16px 8px 8px; }
+.infobar .bi { width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font: 10px/1 var(--icons); color: var(--sheet); background: var(--accent); }
+.infobar.ok { background: var(--ok-soft); } .infobar.ok .bi { background: var(--ok); }
+.infobar.warn { background: var(--warn-soft); } .infobar.warn .bi { background: var(--warn); }
+.infobar.err { background: var(--danger-soft); } .infobar.err .bi { background: var(--danger); }
+.infobar b { font-weight: 600; margin-inline-end: 6px; }
+.infobar.slide { animation: ib-in var(--t-fast) var(--ease-in); }
+@keyframes ib-in { from { opacity: 0; transform: translateY(-8px); } }
+.toast { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; align-items: center; gap: 12px; padding: 8px 16px; border-radius: 8px; background: var(--acrylic);
+  border: 1px solid var(--ctl-edge); box-shadow: var(--shadow); font: 14px/20px var(--ui); color: var(--t1); white-space: nowrap; animation: toast-in var(--t-fast) var(--ease-in); }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 16px); } }
+.toast.leaving { animation: toast-out var(--t-faster) var(--ease-out) forwards; }
+@keyframes toast-out { to { opacity: 0; transform: translate(-50%, 8px); } }
+.menu { position: absolute; z-index: 7; min-width: 200px; padding: 4px; border-radius: 8px; background: var(--acrylic); border: 1px solid var(--ctl-edge); box-shadow: var(--shadow); animation: menu-in var(--t-fast) var(--ease-in); }
+@keyframes menu-in { from { opacity: 0; transform: translateY(-6px); } }
+.menu button { display: flex; align-items: center; gap: 12px; width: 100%; height: 32px; padding: 0 11px; border: 0; border-radius: 4px; background: none; color: var(--t1); font: 14px/20px var(--ui); cursor: pointer; text-align: start; }
+.menu button:hover { background: var(--subtle-1); }
+.menu .fi { font-size: 16px; width: 16px; }
+.menu .hint { margin-inline-start: auto; color: var(--t3); font-size: 12px; direction: ltr; }
+.chip { height: 28px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--ctl-edge); background: var(--ctl); color: var(--t1); font: 14px/26px var(--ui); cursor: pointer; }
+.chip:hover { background: var(--ctl-2); }
+.row-list { display: grid; gap: 2px; }
+.lrow { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; min-height: 40px; max-height: 80px; padding: 6px 4px 6px 12px; border-radius: 4px; overflow: hidden; }
+.lrow:hover { background: var(--subtle-1); }
+.lrow .w { font-weight: 600; }
+.lrow .m { color: var(--t2); margin-inline-start: 10px; }
+.lrow .acts { display: flex; gap: 2px; opacity: 0.0; transition: opacity var(--t-faster); }
+.lrow:hover .acts, .lrow:focus-within .acts { opacity: 1; }
+.lrow.folding { animation: fold var(--t-normal) var(--ease-out) forwards; }
+@keyframes fold { to { opacity: 0; min-height: 0; max-height: 0; padding-block: 0; } }
+.lrow.unfolding { animation: unfold var(--t-normal) var(--ease-in); }
+@keyframes unfold { from { opacity: 0; min-height: 0; max-height: 0; padding-block: 0; } }
+.lrow.pinned .w::after { content: "\E842"; font: 12px/1 var(--icons); color: var(--accent); margin-inline-start: 8px; }
+
+/* ---------- the answer (Translate, the card) ---------- */
+.answer .hw { display: flex; align-items: flex-start; gap: 12px; }
+.answer .hw .word { font: 700 28px/36px var(--serif); letter-spacing: -0.01em; direction: ltr; }
+.answer .hw .ipa { font-size: 12px; line-height: 16px; color: var(--t2); direction: ltr; }
+.answer .hw .acts { margin-inline-start: auto; display: flex; gap: 2px; }
+.meaning { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; margin-top: 16px; }
+.meaning .ar { font: 700 20px/34px var(--ui); direction: rtl; }
+.meaning .acts { display: flex; gap: 2px; }
+.defs { margin-top: 24px; }
+.defs .pos { font-size: 12px; line-height: 16px; color: var(--t2); margin: 4px 0 8px; }
+.def { display: grid; grid-template-columns: 20px 1fr; gap: 2px 10px; padding-block: 6px; }
+.def .num { width: 20px; height: 20px; border-radius: 10px; background: var(--subtle-1); font: 600 11px/20px var(--ui); text-align: center; color: var(--t2); margin-top: 2px; }
+.def .gl-ar { font-size: 14px; line-height: 24px; direction: rtl; text-align: start; }
+.def .gl-en { grid-column: 2; font-size: 12px; line-height: 18px; color: var(--t2); direction: ltr; text-align: start; }
+.win[dir="rtl"] .def .gl-en, [dir="rtl"] .def .gl-en { text-align: right; }
+.def .syn { grid-column: 2; display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; direction: ltr; }
+.win[dir="rtl"] .def .syn { justify-content: flex-end; }
+.links { display: flex; gap: 4px 16px; flex-wrap: wrap; margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--divider); }
+.links .btn { height: auto; padding: 2px 4px; font-size: 12px; }
+
+/* ---------- suggestions under the title bar's search ---------- */
+.suggest { position: absolute; top: 44px; left: 50%; transform: translateX(-50%); width: min(512px, 92%); z-index: 8; padding: 4px; border-radius: 8px; background: var(--acrylic); border: 1px solid var(--ctl-edge); box-shadow: var(--shadow); animation: menu-in var(--t-fast) var(--ease-in); }
+.suggest .grp { font: 600 12px/16px var(--ui); color: var(--t3); padding: 8px 11px 4px; }
+.suggest button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 36px; padding: 4px 11px; border: 0; border-radius: 4px; background: none; color: var(--t1); font: 14px/20px var(--ui); text-align: start; cursor: pointer; }
+.suggest button:hover, .suggest button.hot { background: var(--subtle-1); }
+.suggest .fi { font-size: 16px; color: var(--t2); width: 16px; }
+.suggest small { color: var(--t3); font-size: 12px; margin-inline-start: auto; }
+
+/* ---------- the redline overlay ---------- */
+.win.redline [data-m] { outline: 1px dashed #f03e8c; outline-offset: -1px; }
+.navbtn, .ccard, .scard { position: relative; }
+.win.redline [data-m]::before { content: attr(data-m); position: absolute; z-index: 9; top: 0; inset-inline-end: 0; font: 600 10px/14px var(--ui); color: #fff; background: #f03e8c; padding: 0 4px; border-radius: 0 0 0 3px; pointer-events: none; white-space: nowrap; direction: ltr; }
+
+/* ---------- dialog ---------- */
+.scrim { position: absolute; inset: 0; z-index: 9; background: rgba(0, 0, 0, 0.3); display: grid; place-items: center; animation: fade var(--t-fast) var(--ease-in); }
+@keyframes fade { from { opacity: 0; } }
+.dialog { width: min(448px, calc(100% - 32px)); border-radius: 8px; background: var(--acrylic); border: 1px solid var(--ctl-edge); box-shadow: var(--shadow); overflow: hidden; animation: dlg var(--t-fast) var(--ease-in); }
+@keyframes dlg { from { opacity: 0; transform: scale(1.05); } }
+.dialog .content { padding: 24px; display: grid; gap: 12px; }
+.dialog h4 { margin: 0; font: 600 20px/28px var(--ui-display); }
+.dialog .foot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 24px; background: var(--subtle-2); border-top: 1px solid var(--divider); }
+.radio { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.radio i { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--t2); display: grid; place-items: center; }
+.radio[aria-checked="true"] i { border: 5px solid var(--accent-fill); }
+.radio small { color: var(--t2); font-size: 12px; margin-inline-start: 4px; }
+
+/* ---------- specimens ---------- */
+.ramp { display: grid; gap: 0; }
+.ramp .r { display: grid; grid-template-columns: 180px 90px minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.ramp .r:last-child { border-bottom: 0; }
+.ramp .k { font: 600 12px/16px var(--ui); color: var(--ink-2); }
+.ramp .s { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ramp .x { min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
+@media (max-width: 640px) { .ramp .r { grid-template-columns: 1fr; gap: 2px; } }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.sw { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--sheet); }
+.sw .chipc { height: 56px; border-bottom: 1px solid var(--rule); }
+.sw .lab { padding: 8px 10px; font-size: 12px; line-height: 16px; }
+.sw .lab b { display: block; font-weight: 600; color: var(--ink); }
+.sw .lab span { color: var(--ink-3); }
+.icons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.icell { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); }
+.icell .nm { grid-column: 1 / -1; font: 600 12px/16px var(--ui); }
+.icell .nm small { font-weight: 400; color: var(--ink-3); margin-inline-start: 4px; font-variant-numeric: tabular-nums; }
+.icell .v { display: grid; place-items: center; height: 44px; border-radius: 4px; background: var(--subtle-2); color: var(--ink); }
+.icell .v svg { width: 20px; height: 20px; }
+.icell .v .fi { font-size: 20px; }
+.icell .tag { font-size: 11px; color: var(--ink-3); text-align: center; }
+.icell.ask { border-color: var(--draft); }
+.paneicons { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.pi { display: grid; justify-items: center; gap: 10px; padding: 16px 8px; border-radius: 8px; background: var(--subtle-2); border: 1px solid var(--rule); }
+.pi svg.big { width: 64px; height: 64px; }
+.pi .sm { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.pi .sm svg { width: 20px; height: 20px; }
+.demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.demo { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: 20px; display: grid; gap: 14px; align-content: start; min-width: 0; position: relative; overflow: hidden; }
+.demo .stagebox { position: relative; min-height: 150px; border-radius: 8px; background: var(--mica); border: 1px solid var(--rule); padding: 16px; overflow: hidden; color: var(--t1); }
+.demo .stagebox.layer { background: var(--layer); }
+.demo p { margin: 0; color: var(--ink-2); font-size: 13px; }
+.demo .tm { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.mini-card { position: absolute; inset-inline-start: 50%; top: 22px; width: 240px; margin-inline-start: -120px; padding: 14px 16px; border-radius: 8px; background: var(--acrylic); border: 1px solid var(--ctl-edge); box-shadow: var(--shadow); }
+.mini-card.in { animation: card-in var(--t-fast) var(--ease-in); }
+@keyframes card-in { from { opacity: 0; transform: scale(0.96); } }
+.mini-card.out { animation: card-out var(--t-faster) var(--ease-out) forwards; }
+@keyframes card-out { to { opacity: 0; transform: scale(0.98); } }
+.flash { perspective: 800px; }
+.flash .card3d { position: relative; height: 120px; transform-style: preserve-3d; transition: transform var(--t-slow) var(--ease-in); }
+.flash.turned .card3d { transform: rotateY(180deg); }
+.flash .face { position: absolute; inset: 0; border-radius: 8px; background: var(--card); border: 1px solid var(--card-edge); display: grid; place-items: center; backface-visibility: hidden; font: 700 22px/1.2 var(--serif); }
+.flash .face.b { transform: rotateY(180deg); font: 700 20px/1.4 var(--ui); }
+.shake { animation: shake 360ms var(--ease-in); }
+@keyframes shake { 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+.motion-off *, .motion-off *::before, .motion-off *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { html:not(.motion-chosen) *, html:not(.motion-chosen) *::before { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+
+/* ---------- new features ---------- */
+.feature { display: grid; gap: 12px; align-content: start; }
+.compact { width: 340px; max-width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid var(--win-edge); box-shadow: var(--win-shadow); background: var(--mica); color: var(--t1); }
+.compact .ctb { height: 32px; display: flex; align-items: center; gap: 8px; padding-inline: 10px 0; font-size: 12px; }
+.compact .ctb .sp { margin-inline-start: auto; display: flex; }
+.compact .ctb .sp span { width: 40px; height: 32px; display: grid; place-items: center; font: 10px/1 var(--icons); }
+.compact .cb { padding: 4px 12px 12px; display: grid; gap: 10px; }
+.jump { width: 280px; max-width: 100%; border-radius: 8px; background: var(--acrylic); border: 1px solid var(--ctl-edge); box-shadow: var(--shadow); padding: 6px; color: var(--t1); }
+.jump .grp { font: 600 12px/16px var(--ui); color: var(--t3); padding: 8px 10px 4px; }
+.jump .it { display: flex; align-items: center; gap: 12px; height: 36px; padding: 0 10px; border-radius: 4px; }
+.jump .it:hover { background: var(--subtle-1); }
+.jump .it svg { width: 16px; height: 16px; }
+.jump hr { border: 0; border-top: 1px solid var(--divider); margin: 4px 0; }
+.sbs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 8px; overflow: hidden; border: 1px solid var(--card-edge); background: var(--card); }
+.sbs > div { padding: 12px 14px; font-size: 13px; line-height: 20px; min-width: 0; }
+.sbs > div + div { border-inline-start: 1px solid var(--divider); }
+.sbs .ar { direction: rtl; text-align: right; line-height: 24px; }
+.sbs .hl { background: var(--mark); border-radius: 3px; }
+.paste-chip { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; height: 32px; padding: 0 12px; border-radius: 16px; background: var(--accent-soft); color: var(--accent); font-size: 13px; border: 1px solid transparent; cursor: pointer; }
+.paste-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+/* ---------- questions ---------- */
+.qs { display: grid; gap: 12px; counter-reset: q; }
+.q { display: grid; grid-template-columns: 32px 1fr; gap: 4px 12px; padding: 16px 20px; border-radius: 8px; background: var(--sheet); border: 1px solid var(--rule); }
+.q::before { counter-increment: q; content: counter(q); width: 24px; height: 24px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font: 600 12px/24px var(--ui); text-align: center; }
+.q h4 { margin: 0; font: 600 14px/24px var(--ui); }
+.q p { grid-column: 2; margin: 0; color: var(--ink-2); font-size: 13px; }
+.q .rec { color: var(--ink); }
+</style>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="brand"><i aria-hidden="true">&#xF2B7;</i>Lamha's design system</div>
+    <div class="ctl-group"><span class="seg-label">Language</span><div class="seg" data-ctl="lang"><button data-v="en" aria-pressed="true">English</button><button data-v="ar" aria-pressed="false">العربية</button></div></div>
+    <div class="ctl-group"><span class="seg-label">Theme</span><div class="seg" data-ctl="theme"><button data-v="light" aria-pressed="false">Light</button><button data-v="dark" aria-pressed="false">Dark</button></div></div>
+    <div class="ctl-group"><span class="seg-label">Animations</span><div class="seg" data-ctl="motion"><button data-v="full" aria-pressed="true">Full</button><button data-v="subtle" aria-pressed="false">Subtle</button><button data-v="off" aria-pressed="false">Off</button></div></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="intro">
+    <h1>Lamha, built like Windows' Settings</h1>
+    <p>One system for every screen of Lamha 3: Windows 11's own measurements, controls, icons and motion, with Lamha's character kept in the answer, Review and the celebrations. Everything here is drawn at its real size. Words <span class="new">underlined in orange</span> are new wording, waiting for your approval.</p>
+    <div class="meta"><span><b>Status</b> Draft for sign-off</span><span><b>Date</b> 26 October 2026</span><span><b>Source</b> docs/design/system.md, measured in ux-study.md</span><span><b>Icons</b> Segoe Fluent Icons: open this page on Windows 11 to see them</span></div>
+  </header>
+
+  <!-- ====================== 1. The window ====================== -->
+  <section class="chapter" id="window" style="border-top: 0; margin-top: 0; padding-top: 8px;">
+    <div class="head"><span class="no">01</span><h2>The window</h2><p>Click through it. Back works, Settings opens a category with Windows' drill-in, the search in the title bar finds settings, your words and copies, and the narrow width hides the pane behind ☰ as Settings does. "Show measurements" draws every size on top.</p></div>
+    <div class="stage">
+      <div class="stage-tools">
+        <div class="ctl-group"><span class="seg-label">Width</span><div class="seg" data-ctl="width"><button data-v="wide" aria-pressed="true">Wide</button><button data-v="narrow" aria-pressed="false">Narrow</button></div></div>
+        <button class="switch" id="redline" role="switch" aria-checked="false"><span class="track"><span class="knob"></span></span><span>Show measurements</span></button>
+      </div>
+      <div class="win" id="win" dir="ltr">
+        <div class="tb" data-m="title bar 48">
+          <button class="navbtn" id="back" disabled data-m="40×36" aria-label="Back"><span class="rtlflip">&#xE72B;</span></button>
+          <button class="navbtn only-narrow" id="hamb" aria-label="Navigation">&#xE700;</button>
+          <div class="app"><i aria-hidden="true">&#xF2B7;</i><span data-s="lamha"></span></div>
+          <div class="search" data-m="search ≤512×32"><div class="field search"><input id="q" data-ph="search" autocomplete="off" aria-label="Search"><span class="glass">&#xE721;</span></div></div>
+          <button class="navbtn only-narrow" id="qbtn" aria-label="Search">&#xE721;</button>
+          <div class="caps" aria-hidden="true"><span>&#xE921;</span><span>&#xE922;</span><span>&#xE8BB;</span></div>
+        </div>
+        <div class="body">
+          <nav class="pane" data-m="pane 300">
+            <div class="rows" id="rows"><span class="pill" id="pill"></span></div>
+            <div class="foot rows" id="footrows"></div>
+          </nav>
+          <main class="page" data-m="page padding 28"><div class="scroller" id="scroller"></div></main>
+        </div>
+      </div>
+      <p class="caption" style="text-align: center;">1000 × 660, the window's real size at 100 %. Pane 300, rows 36, the title bar 48, the page 28 from each side: Windows' Settings, measured.</p>
+    </div>
+  </section>
+
+  <!-- ====================== 2. Measurements ====================== -->
+  <section class="chapter" id="measure">
+    <div class="head"><span class="no">02</span><h2>Measurements</h2><p>Every size a screen may use, with where it comes from. Where Windows has a number, Lamha takes it exactly; anything else sits on the 4 px grid. The names are the tokens the XAML will use.</p></div>
+    <div class="grid2">
+      <div class="sheet scroll-x"><h3>The frame</h3><table class="spec"><thead><tr><th>Part</th><th>Size</th><th>From</th></tr></thead><tbody>
+        <tr><td>Title bar</td><td class="n">48</td><td>WinUI TitleBarExpandedHeight</td></tr>
+        <tr><td>Back, ☰, 🔍</td><td class="n">40 × 36</td><td>NavigationBackButton</td></tr>
+        <tr><td>Search box</td><td class="n">≤ 512 × 32</td><td>Settings, measured</td></tr>
+        <tr><td>Pane, open</td><td class="n">300</td><td>Settings, measured</td></tr>
+        <tr><td>Pane row</td><td class="n">36, 4 apart</td><td>NavigationViewItem</td></tr>
+        <tr><td>Pane icon</td><td class="n">20</td><td>Settings, measured</td></tr>
+        <tr><td>Selected pill</td><td class="n">3 × 16, r 2</td><td>SelectionIndicator</td></tr>
+        <tr><td>Page padding</td><td class="n">28</td><td>Settings, measured</td></tr>
+        <tr><td>Page title</td><td class="n">28 / 36</td><td>TitleTextBlockStyle</td></tr>
+      </tbody></table></div>
+      <div class="sheet scroll-x"><h3>Settings and content</h3><table class="spec"><thead><tr><th>Part</th><th>Size</th><th>From</th></tr></thead><tbody>
+        <tr><td>Setting card</td><td class="n">≥ 68, r 4</td><td>Settings, measured</td></tr>
+        <tr><td>Its padding · icon · gap</td><td class="n">16 · 20 · 20</td><td>Settings, measured</td></tr>
+        <tr><td>Between cards</td><td class="n">4</td><td>Settings, measured</td></tr>
+        <tr><td>Before a group heading</td><td class="n">28</td><td>Settings, measured</td></tr>
+        <tr><td>Heading baseline → card</td><td class="n">11</td><td>Settings, measured</td></tr>
+        <tr><td>Content card</td><td class="n">r 8, padding 24</td><td>Settings' Home cards</td></tr>
+        <tr><td>Button, field, dropdown</td><td class="n">32, r 4</td><td>WinUI</td></tr>
+        <tr><td>Icon button</td><td class="n">32 × 32, icon 16</td><td>WinUI subtle button</td></tr>
+        <tr><td>List row · Expander · InfoBar</td><td class="n">40 · 48 · 48</td><td>WinUI</td></tr>
+      </tbody></table></div>
+      <div class="sheet scroll-x"><h3>Corners, space, icons</h3><table class="spec"><thead><tr><th>Token</th><th>Value</th><th>For</th></tr></thead><tbody>
+        <tr><td>ControlCornerRadius</td><td class="n">4</td><td>controls, setting cards, rows</td></tr>
+        <tr><td>OverlayCornerRadius</td><td class="n">8</td><td>content cards, flyouts, dialogs, the card</td></tr>
+        <tr><td>LamhaSpace1…10</td><td class="n">4 · 8 · 12 · 16 · 20 · 24 · 32 · 40</td><td>every other gap</td></tr>
+        <tr><td>Icon sizes</td><td class="n">12 · 16 · 20</td><td>chevrons · buttons and rows · cards and the pane</td></tr>
+        <tr><td>Smallest target</td><td class="n">24</td><td>WCAG 2.5.8; rows 36 and up</td></tr>
+      </tbody></table></div>
+      <div class="sheet scroll-x"><h3>Lamha today → the system</h3><table class="spec"><thead><tr><th></th><th>3.0</th><th>System</th></tr></thead><tbody>
+        <tr><td>Pane row</td><td class="n">32</td><td class="n">36</td></tr>
+        <tr><td>Pane width</td><td class="n">260</td><td class="n">300</td></tr>
+        <tr><td>Corners</td><td class="n">8 · 10 · 14</td><td class="n">4 · 8</td></tr>
+        <tr><td>Font sizes in screens</td><td class="n">12 typed</td><td class="n">8 named</td></tr>
+        <tr><td>Cards apart</td><td class="n">16</td><td class="n">4</td></tr>
+        <tr><td>Field focus</td><td>ring all round</td><td>accent line under</td></tr>
+        <tr><td>Switch on</td><td>green</td><td>the accent</td></tr>
+      </tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ====================== 3. Type ====================== -->
+  <section class="chapter" id="type">
+    <div class="head"><span class="no">03</span><h2>Type</h2><p>WinUI's ramp for the frame, Settings and controls, and three content styles of Lamha's own. Arabic gets taller lines from the style itself, never by hand.</p></div>
+    <div class="sheet"><div class="ramp" id="ramp"></div></div>
+  </section>
+
+  <!-- ====================== 4. Colour ====================== -->
+  <section class="chapter" id="colour">
+    <div class="head"><span class="no">04</span><h2>Colour</h2><p>The frame and controls take Windows' brushes, so light, dark and high contrast follow by themselves. Lamha's own colours carry meaning only: the accent means "you can press this". Switch the theme above to see both.</p></div>
+    <h3>Windows' brushes</h3>
+    <div class="swatches" id="sw-win"></div>
+    <h3 style="margin-top: 24px;">Lamha's meanings</h3>
+    <div class="swatches" id="sw-lamha"></div>
+  </section>
+
+  <!-- ====================== 5. Icons ====================== -->
+  <section class="chapter" id="icons">
+    <div class="head"><span class="no">05</span><h2>Icons</h2><p>Lamha's 33 icon names keep their names and change their drawing: Lamha 2's line icons on the left of each pair, Windows' Segoe Fluent Icons on the right. The pane gets coloured icons in Settings' style, drawn for Lamha.</p></div>
+    <h3>The pane's coloured icons (drafts)</h3>
+    <div class="paneicons" id="paneicons"></div>
+    <p class="caption" style="margin-top: 8px;">64 to judge the drawing, 20 as the pane shows them. They stay the same in both themes, as Windows Settings' do.</p>
+    <h3 style="margin-top: 28px;">Every icon, Lamha 2 → Windows</h3>
+    <div class="icons-grid" id="icongrid"></div>
+  </section>
+
+  <!-- ====================== 6. Components ====================== -->
+  <section class="chapter" id="components">
+    <div class="head"><span class="no">06</span><h2>Components</h2><p>WinUI's own controls, styled only by the tokens. Hover, press and use them: every state is drawn.</p></div>
+    <div class="demo-grid" id="comp" dir="ltr">
+      <div class="demo"><h3>Buttons</h3>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;"><button class="btn accent" data-s="proofread"></button><button class="btn" data-s="cancel"></button><button class="btn subtle"><span class="fi">&#xE8C8;</span><span data-s="copy"></span></button><button class="btn link" data-s="google"></button></div>
+        <p>One accent button per view, for the main action. Subtle buttons for tools; hyperlink buttons for going elsewhere.</p>
+        <div class="tm">32 high · padding 11,5,11,6 · radius 4 · press 98 %</div></div>
+      <div class="demo"><h3>Icon buttons and a split</h3>
+        <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;"><button class="ib main" title="Listen"><span class="fi">&#xE767;</span></button><button class="ib" title="Copy" data-copy><span class="fi">&#xE8C8;</span></button><button class="ib" title="Save" data-star><span class="fi">&#xE734;</span></button><button class="ib" title="Pin"><span class="fi">&#xE718;</span></button>
+          <span style="width: 12px;"></span><button class="btn" data-menu="rewrite"><span class="fi">&#xE70F;</span><span data-s="rewrite" class="new"></span><span class="fi chev">&#xE70D;</span></button></div>
+        <p>32 × 32 with a 16 icon. Copy turns into ✓; the star fills with a pop.</p>
+        <div class="tm">tooltip: name and shortcut</div></div>
+      <div class="demo"><h3>Field and search</h3>
+        <div class="field"><input data-ph="translatePh" aria-label="Translate"></div>
+        <div class="field search"><input data-ph="historySearch" aria-label="Search"><span class="glass">&#xE721;</span></div>
+        <p>Click into a field: Windows' 2 px accent line grows under it.</p>
+        <div class="tm">32 high · padding 10,5,6,6 · radius 4</div></div>
+      <div class="demo"><h3>Switch and dropdown</h3>
+        <button class="switch" role="switch" aria-checked="true" data-toggle><span class="track"><span class="knob"></span></span><span data-s="on"></span></button>
+        <div><span class="combo" tabindex="0"><span data-s="arabic"></span><span class="fi">&#xE70D;</span></span></div>
+        <p>On in the accent, as Windows'. The knob grows a little under the pointer.</p>
+        <div class="tm">40 × 20 · knob 12 · 167 ms</div></div>
+      <div class="demo" style="grid-column: 1 / -1;"><h3>Setting cards and a group</h3>
+        <div class="stagebox layer" style="padding: 20px 28px;">
+          <div class="group-h" data-s="appearance"></div>
+          <div class="scard"><span class="sic">&#xE790;</span><span><span class="nm" data-s="theme"></span><span class="ds" data-s="themeHint"></span></span><span class="end"><span class="combo"><span data-s="auto"></span><span class="fi">&#xE70D;</span></span></span></div>
+          <div class="scard"><span class="sic">&#xE945;</span><span><span class="nm" data-s="motion"></span><span class="ds" data-s="motionHintShort"></span></span><span class="end"><button class="switch" role="switch" aria-checked="true" data-toggle><span class="track"><span class="knob"></span></span></button></span></div>
+          <button class="scard"><span class="sic">&#xE737;</span><span><span class="nm" data-s="cardBg"></span><span class="ds" data-s="cardBgHint"></span></span><span class="end"><span class="go">&#xE76C;</span></span></button>
+          <div class="scard wrapped" style="max-width: 360px; margin-top: 12px;"><span class="sic">&#xE774;</span><span><span class="nm" data-s="targetLang"></span><span class="ds" data-s="targetHint"></span></span><span class="end"><span class="combo"><span data-s="arabic"></span><span class="fi">&#xE70D;</span></span></span></div>
+        </div>
+        <p>68 high at least, 4 apart, rounded 4. A heading in Body strong above each group. When the card is narrow (the last one), its control moves under its text, as in Windows' Settings.</p></div>
+      <div class="demo" style="grid-column: 1 / -1;"><h3>InfoBars</h3>
+        <div class="infobar"><span class="bi">&#xE946;</span><span><b data-s="ibInfoT" class="new"></b><span data-s="ibInfo" class="new"></span></span><button class="btn" data-s="setUp"></button></div>
+        <div class="infobar ok"><span class="bi">&#xE73E;</span><span><b data-s="ibOkT" class="new"></b><span data-s="ibOk" class="new"></span></span><span></span></div>
+        <div class="infobar warn"><span class="bi">&#xE7BA;</span><span><b data-s="ibWarnT" class="new"></b><span data-s="ibWarn" class="new"></span></span><span></span></div>
+        <div class="infobar err"><span class="bi">&#xE711;</span><span><b data-s="ibErrT" class="new"></b><span data-s="ibErr" class="new"></span></span><button class="btn" data-s="retry"></button></div>
+        <p>In place of Lamha's banners: information, success, warning, error, each at the top of what it's about.</p></div>
+      <div class="demo"><h3>Toast, badge, key caps</h3>
+        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;"><button class="btn" data-toast="copied"><span data-s="showToast"></span></button><span class="navrow" style="width: auto; padding-inline-end: 0; pointer-events: none;"><span data-s="review"></span><span class="badge">12</span></span></div>
+        <div class="keys"><span class="kbd">Ctrl</span>+<span class="kbd">Alt</span>+<span class="kbd">L</span></div>
+        <p>The toast rises from the foot in Acrylic; the count is WinUI's InfoBadge.</p></div>
+      <div class="demo"><h3>Dialog</h3>
+        <div><button class="btn" data-dialog="delete" data-s="deleteHistory"></button></div>
+        <p>Windows' dialog: 320 to 548 wide, the main action on the start side, Delete in red.</p></div>
+      <div class="demo"><h3>Empty state</h3>
+        <div style="display: grid; justify-items: center; gap: 8px; padding: 12px; text-align: center;"><span class="fi" style="font-size: 40px; color: var(--t3);">&#xE81C;</span><span data-s="emptyHistory" class="new"></span><button class="btn accent"><span data-s="translateSomething" class="new"></span></button></div>
+        <p>One pattern everywhere: a 40 icon, one line, one button.</p></div>
+    </div>
+  </section>
+
+  <!-- ====================== 7. Motion ====================== -->
+  <section class="chapter" id="motion">
+    <div class="head"><span class="no">07</span><h2>Motion and feedback</h2><p>Windows' timings: 83 ms for reactions, 167 for most things, 250 for pages and lists, 333 for celebrations. Arrivals settle softly; departures speed up. Try each one, then switch Animations above to Subtle or Off.</p></div>
+    <div class="demo-grid" id="motiondemos">
+      <div class="demo"><h3>Copy confirms itself</h3><div class="stagebox" style="display: grid; place-items: center;"><button class="ib" data-copy title="Copy" style="transform: scale(1.5);"><span class="fi">&#xE8C8;</span></button></div><p>The icon turns into ✓ for 1.5 s and the toast rises.</p><div class="tm">167 ms in · 1.5 s · 83 ms back</div></div>
+      <div class="demo"><h3>Delete, then Undo</h3><div class="stagebox layer"><div class="row-list" id="dl"></div></div><p>The row folds and the others close the gap; Undo brings it back the same way.</p><div class="tm">250 ms · ease out, then in</div></div>
+      <div class="demo"><h3>Pin moves to the top</h3><div class="stagebox layer"><div class="row-list" id="pl"></div></div><p>Pinning a copy lifts it to the top; the others make room.</p><div class="tm">250 ms · ease in</div></div>
+      <div class="demo"><h3>The card appears</h3><div class="stagebox" id="cardstage" style="min-height: 170px;"><button class="btn" id="cardbtn" data-s="openCard"></button></div><p>It grows from 96 % as it fades in, and leaves faster than it came.</p><div class="tm">167 ms in · 83 ms out</div></div>
+      <div class="demo"><h3>Review turns the card</h3><div class="stagebox"><div class="flash" id="flash"><div class="card3d"><div class="face">reluctant</div><div class="face b" dir="rtl">غير راغب</div></div></div><div style="display: flex; gap: 8px; margin-top: 12px; justify-content: center;"><button class="btn" id="turn" data-s="showMeaning"></button></div></div><p>Lamha's moment: the card turns over to its meaning.</p><div class="tm">333 ms</div></div>
+      <div class="demo"><h3>A mistake is pointed out</h3><div class="stagebox layer" style="display: grid; gap: 10px; align-content: start;"><div class="field" id="keyfield"><input value="AIzaSy-short" aria-label="API key"></div><div id="errslot"></div><div><button class="btn accent" id="savekey" data-s="save"></button></div></div><p>The field shakes once (Full only) and an InfoBar slides in under it.</p><div class="tm">167 ms</div></div>
+    </div>
+    <div class="sheet scroll-x" style="margin-top: 16px;"><h3>Everywhere else</h3><table class="spec"><thead><tr><th>Where</th><th>What moves</th><th>Time</th></tr></thead><tbody>
+      <tr><td>A page</td><td>rises 28 and fades in (Entrance)</td><td class="n">250</td></tr>
+      <tr><td>Into a Settings category</td><td>slides in from the text's end (Drill in); Back reverses it</td><td class="n">250</td></tr>
+      <tr><td>The pane's pill</td><td>glides to the new page</td><td class="n">250</td></tr>
+      <tr><td>The pane, narrow</td><td>slides over the page</td><td class="n">167</td></tr>
+      <tr><td>Hover · press</td><td>the fill fades · cards and buttons dip to 98 %</td><td class="n">83</td></tr>
+      <tr><td>Menus, the search's suggestions</td><td>drop 6 and fade in</td><td class="n">167</td></tr>
+      <tr><td>Save to Review</td><td>the star pops; the pane's count ticks up</td><td class="n">167</td></tr>
+      <tr><td>The answer</td><td>its height follows the content; skeleton shimmer; the waiting mark after 250</td><td class="n">250</td></tr>
+      <tr><td>Listen</td><td>the waves move while it speaks</td><td class="n">900</td></tr>
+      <tr><td>Review's goal</td><td>the ring fills, the letters burst, the streak's number rolls</td><td class="n">333</td></tr>
+      <tr><td>Lists (Full only)</td><td>the first 8 items come in one by one, 22 apart, rising 6</td><td class="n">200</td></tr>
+      <tr><td>The clipboard panel</td><td>rises from the taskbar's side</td><td class="n">167</td></tr>
+    </tbody></table><p class="caption" style="margin-top: 10px;">Subtle: the same, a third faster, without the pop, shake and burst. Off: nothing moves. Automatic follows Windows' Animation effects.</p></div>
+  </section>
+
+  <!-- ====================== 8. New features ====================== -->
+  <section class="chapter" id="features">
+    <div class="head"><span class="no">08</span><h2>New features</h2><p>The four you chose from the study, each a native Windows touch.</p></div>
+    <div class="demo-grid">
+      <div class="demo feature"><h3>Mini translator, always on top</h3>
+        <div class="compact" dir="ltr" id="mini"><div class="ctb"><i style="width: 14px; height: 14px; border-radius: 3px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; font: normal 9px/1 var(--icons);">&#xF2B7;</i><span data-s="lamha"></span><span class="sp"><span>&#xE718;</span><span>&#xE8BB;</span></span></div>
+          <div class="cb"><div class="field"><input value="reluctant" aria-label="Word"></div><div style="display: flex; align-items: baseline; gap: 10px;"><span style="font: 700 18px/1.3 var(--serif);">reluctant</span><span dir="rtl" style="font: 700 16px/1.6 var(--ui);">غير راغب، متردد</span></div></div></div>
+        <p>Windows' compact overlay, as Video's picture in picture: a small Lamha floating over an article or a film's subtitles.</p></div>
+      <div class="demo feature"><h3>Jump list</h3>
+        <div class="jump" id="jump"><div class="grp" data-s="tasks"></div></div>
+        <p>Right-click Lamha on the taskbar. It costs nothing in memory: Windows draws it.</p></div>
+      <div class="demo feature"><h3>Paste and translate</h3>
+        <div class="stagebox layer" style="display: grid; gap: 10px;"><div class="field"><textarea rows="2" data-ph="translatePh" aria-label="Translate"></textarea></div><div><button class="paste-chip"><span class="fi" style="font-size: 14px;">&#xE77F;</span><span><span data-s="pasteChip" class="new"></span> “The committee was reluctant to…”</span></button></div></div>
+        <p>When the clipboard holds text, the empty box offers it in one click.</p></div>
+      <div class="demo feature"><h3>Side by side</h3>
+        <div class="sbs"><div dir="ltr">The committee was <span class="hl">reluctant</span> to approve the plan without more data.</div><div class="ar">كانت اللجنة <span class="hl">مترددة</span> في الموافقة على الخطة دون بيانات إضافية.</div></div>
+        <p>A paragraph switches Translate to two columns. The word under the pointer lights up on both sides.</p></div>
+    </div>
+  </section>
+
+  <!-- ====================== 9. Questions ====================== -->
+  <section class="chapter" id="questions">
+    <div class="head"><span class="no">09</span><h2>For your sign-off</h2><p>Answers turn this draft into the system the code follows (step 2 of the plan).</p></div>
+    <div class="qs">
+      <div class="q"><h4>The bookmark becomes a star?</h4><p>Segoe Fluent Icons has no bookmark. Windows' own apps (Edge, Photos) save with the star. <span class="rec">Recommendation: the star, filled once the word is in Review.</span></p></div>
+      <div class="q"><h4>The pane's coloured icons</h4><p>Six drafts in Icons. Approve, or say which to redraw and how (colour, object, weight).</p></div>
+      <div class="q"><h4>The accent in dark</h4><p>Windows fills its main buttons in dark with a light shade of the accent and dark text; Lamha 3.0 uses a deeper indigo with white text. <span class="rec">Recommendation: Windows' way (drawn on this page in dark).</span></p></div>
+      <div class="q"><h4>The new wording</h4><p>Everything underlined in orange: the search's placeholder, Rewrite, the InfoBars, the empty state, the paste chip. Reword in either language.</p></div>
+      <div class="q"><h4>Sign off the system</h4><p>Measurements, type, colour, icons, components and motion as drawn. Then step 2 begins: the tokens and icons in code.</p></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const S = {
+    en: {
+      lamha: "Lamha", translate: "Translate", write: "Write", review: "Review", history: "History", clipboard: "Clipboard", settings: "Settings",
+      search: "Search settings, words and copies", quick: "Quick lookup", definition: "Definition", adjective: "adjective",
+      listen: "Listen", copy: "Copy", save: "Save", copied: "Copied", addReview: "Add to review", proofread: "Proofread", rewrite: "Rewrite",
+      improve: "Improve", formal: "Formal", friendly: "Friendly", shorter: "Shorter", longer: "Longer", cancel: "Cancel", google: "Google Translate", cambridge: "Cambridge Dictionary",
+      writePh: "Write your message here in English — or in Arabic to turn it into natural English…", translatePh: "Type a word or sentence to translate…",
+      historySearch: "Search your history…", journal: "My mistake journal", recordMistakes: "Record my mistakes",
+      recordHint: "Kept on your device only. Your 3 most frequent mistake types are sent with proofreading requests, so the AI explains them more clearly.",
+      on: "On", off: "Off", arabic: "Arabic", english: "English", auto: "Automatic (system)", languages: "Languages", card: "The lookup card", keys: "Keyboard shortcuts",
+      writingTools: "Writing tools", translation: "Translation", wordReview: "Word review", offline: "Without internet", appearance: "Appearance", privacy: "Privacy & history",
+      uiLang: "Interface language", uiLangHint: "The language of Lamha's menus, buttons and explanations", targetLang: "Translation language", targetHint: "The language text is translated into",
+      theme: "Theme", themeHint: "The look of Lamha: the card, its window and these settings", motion: "Animations", motionHintShort: "Transitions in Lamha's windows and card",
+      cardBg: "The card's background", cardBgHint: "Translucent shows a little of what's behind the card; solid is clearer over busy pages",
+      ibInfoT: "The writing tools need an AI provider.", ibInfo: "Gemini is free with a key from Google.", setUp: "Set up",
+      ibOkT: "Saved.", ibOk: "Gemini is ready for the writing tools.", ibWarnT: "No internet.", ibWarn: "Words come from the built-in dictionary.",
+      ibErrT: "That key doesn't work.", ibErr: "Copy it again from Google AI Studio.", retry: "Try again", showToast: "Show the toast",
+      deleteHistory: "Clear history", emptyHistory: "Words you look up appear here.", translateSomething: "Translate a word", openCard: "Look up “reluctant”",
+      showMeaning: "Show meaning", tasks: "Tasks", pasteChip: "Translate what you copied:", forgot: "Forgot", hard: "Hard", knewIt: "Knew it",
+      today: "Today", yesterday: "Yesterday", undo: "Undo", deleted: "Deleted", pinned: "Pinned", delete: "Delete", pin: "Pin",
+      dlgTitle: "Clear your history?", dlgBody: "This can't be undone", clear: "Clear", aiProvider: "AI provider",
+      summaries: {
+        languages: "Interface language · Translation language", card: "Understand words from their sentence", keys: "Look up and translate in any program",
+        writingTools: "AI provider · Model", translation: "Automatic · Translated by", wordReview: "Add words automatically · New words per day", offline: "Offline first · Dictionaries to download",
+        clipboard: "Turn on clipboard history · Items to keep", appearance: "Theme · Animations · The card's background", privacy: "Keep a history of words · A copy of my data", lamha: "Automatic updates · Start with Windows"
+      },
+      sgSettings: "Settings", sgWords: "Your words", sgCopies: "Clipboard", sgTranslate: "Translate “{0}”"
+    },
+    ar: {
+      lamha: "لمحة", translate: "ترجمة", write: "كتابة", review: "مراجعة", history: "السجل", clipboard: "الحافظة", settings: "الإعدادات",
+      search: "ابحث في الإعدادات والكلمات والمنسوخات", quick: "بحث سريع", definition: "التعريف", adjective: "صفة",
+      listen: "استمع", copy: "نسخ", save: "حفظ", copied: "تم النسخ", addReview: "أضف إلى المراجعة", proofread: "تدقيق لغوي", rewrite: "إعادة صياغة",
+      improve: "تحسين الأسلوب", formal: "رسمي", friendly: "ودّي", shorter: "أقصر", longer: "أطول", cancel: "إلغاء", google: "ترجمة Google", cambridge: "قاموس كامبريدج",
+      writePh: "اكتب رسالتك هنا بالإنجليزية — أو بالعربية لتحويلها إلى إنجليزية طبيعية…", translatePh: "اكتب كلمة أو جملة للترجمة…",
+      historySearch: "ابحث في السجل…", journal: "سجل أخطائي", recordMistakes: "تسجيل أخطائي",
+      recordHint: "يُحفظ على جهازك فقط. تُرسل أكثر ٣ أنواع تكرارًا مع طلب التدقيق ليشرحها الذكاء الاصطناعي بوضوح أكبر.",
+      on: "تشغيل", off: "إيقاف", arabic: "العربية", english: "الإنجليزية", auto: "تلقائي (حسب النظام)", languages: "اللغات", card: "بطاقة البحث", keys: "اختصارات لوحة المفاتيح",
+      writingTools: "أدوات الكتابة", translation: "الترجمة", wordReview: "مراجعة الكلمات", offline: "دون إنترنت", appearance: "المظهر", privacy: "الخصوصية والسجل",
+      uiLang: "لغة الواجهة", uiLangHint: "لغة القوائم والأزرار والشروح في لمحة", targetLang: "لغة الترجمة", targetHint: "اللغة التي تُترجم إليها النصوص",
+      theme: "السمة", themeHint: "مظهر لمحة: البطاقة والنافذة والإعدادات", motion: "الحركة", motionHintShort: "حركات الانتقال في النوافذ وبطاقة الترجمة",
+      cardBg: "خلفية البطاقة", cardBgHint: "الشفافة تُظهر ما خلف البطاقة قليلًا، والثابتة أوضح فوق الصفحات المزدحمة",
+      ibInfoT: "تحتاج أدوات الكتابة إلى مصدر ذكاء اصطناعي.", ibInfo: "Gemini مجاني بمفتاح من Google.", setUp: "إعداد",
+      ibOkT: "تم الحفظ.", ibOk: "Gemini جاهز لأدوات الكتابة.", ibWarnT: "لا يوجد إنترنت.", ibWarn: "الكلمات من القاموس المدمج.",
+      ibErrT: "هذا المفتاح لا يعمل.", ibErr: "انسخه مرة أخرى من Google AI Studio.", retry: "حاول مجددًا", showToast: "أظهر الإشعار",
+      deleteHistory: "مسح السجل", emptyHistory: "تظهر هنا الكلمات التي تبحث عنها.", translateSomething: "ترجم كلمة", openCard: "ابحث عن «reluctant»",
+      showMeaning: "أظهر المعنى", tasks: "المهام", pasteChip: "ترجم ما نسخته:", forgot: "نسيت", hard: "صعبة", knewIt: "عرفتها",
+      today: "اليوم", yesterday: "أمس", undo: "تراجع", deleted: "تم الحذف", pinned: "المثبتة", delete: "حذف", pin: "تثبيت",
+      dlgTitle: "مسح السجل؟", dlgBody: "لا يمكن التراجع عن المسح", clear: "مسح", aiProvider: "مصدر الذكاء الاصطناعي",
+      summaries: {
+        languages: "لغة الواجهة · لغة الترجمة", card: "فهم الكلمة من سياق الجملة", keys: "بحث وترجمة في أي برنامج",
+        writingTools: "مصدر الذكاء الاصطناعي · النموذج", translation: "تلقائي · مَن يترجم", wordReview: "إضافة الكلمات تلقائيًا · كلمات جديدة في اليوم", offline: "المحلي أولًا · قواميس للتنزيل",
+        clipboard: "تفعيل سجل الحافظة · عدد العناصر المحفوظة", appearance: "السمة · الحركة · خلفية البطاقة", privacy: "حفظ سجل الكلمات · نسخة من بياناتي", lamha: "التحديثات التلقائية · التشغيل مع Windows"
+      },
+      sgSettings: "الإعدادات", sgWords: "كلماتك", sgCopies: "الحافظة", sgTranslate: "ترجم «{0}»"
+    }
+  };
+  // Words not in Lamha's string files yet: drafts, shown underlined.
+  const DRAFT = new Set(["search", "rewrite", "ibInfoT", "ibInfo", "setUp", "ibOkT", "ibOk", "ibWarnT", "ibWarn", "ibErrT", "ibErr", "emptyHistory", "translateSomething", "pasteChip", "dlgTitle", "sgWords", "sgTranslate"]);
+  let lang = "en";
+  const t = k => S[lang][k] ?? S.en[k] ?? k;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const tx = k => DRAFT.has(k) ? `<span class="new">${esc(t(k))}</span>` : esc(t(k));
+
+  /* ---------- the pane's coloured icons (drafts), 20 × 20 ---------- */
+  let gid = 0;
+  function gear(cx, cy, ro, ri, n) {
+    let d = "";
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2, w = Math.PI / n * 0.55;
+      const pts = [[ri, a - w * 1.25], [ro, a - w * 0.7], [ro, a + w * 0.7], [ri, a + w * 1.25]];
+      pts.forEach(([r, ang], j) => { d += `${i === 0 && j === 0 ? "M" : "L"}${(cx + r * Math.cos(ang)).toFixed(2)} ${(cy + r * Math.sin(ang)).toFixed(2)} `; });
+    }
+    return d + "Z";
+  }
+  const COLOR = {
+    translate: () => { const a = `g${gid++}`, b = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ee0f2"/><stop offset="1" stop-color="#0891b2"/></linearGradient><linearGradient id="${b}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9ea6ff"/><stop offset="1" stop-color="#4f46e5"/></linearGradient></defs><path d="M8.2 2.2h8.3a1.6 1.6 0 0 1 1.6 1.6v5.9a1.6 1.6 0 0 1-1.6 1.6h-1.3v2.3l-2.7-2.3H8.2a1.6 1.6 0 0 1-1.6-1.6V3.8a1.6 1.6 0 0 1 1.6-1.6z" fill="url(#${a})"/><text x="12.35" y="9.4" font-size="6.6" font-weight="700" fill="#fff" text-anchor="middle" font-family="Segoe UI, Tahoma, sans-serif">ع</text><path d="M3.5 7.3h8.4a1.6 1.6 0 0 1 1.6 1.6v5.5a1.6 1.6 0 0 1-1.6 1.6H7.5l-2.8 2.3v-2.3H3.5a1.6 1.6 0 0 1-1.6-1.6V8.9a1.6 1.6 0 0 1 1.6-1.6z" fill="url(#${b})"/><text x="7.7" y="14.2" font-size="6.4" font-weight="700" fill="#fff" text-anchor="middle" font-family="Segoe UI, sans-serif">A</text></svg>`; },
+    write: () => { const a = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fcd34d"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><g transform="rotate(-45 10 10)"><rect x="4.2" y="7.9" width="9.6" height="4.2" fill="url(#${a})"/><path d="M4.2 7.9h9.6v1.4H4.2z" fill="#fde68a" opacity=".7"/><rect x="2.1" y="7.9" width="1.6" height="4.2" rx=".2" fill="#9ca3af"/><path d="M2.1 7.9h-.4a1.3 1.3 0 0 0-1.3 1.3v1.6a1.3 1.3 0 0 0 1.3 1.3h.4z" fill="#f472b6"/><path d="M13.8 7.9 18.4 10l-4.6 2.1z" fill="#fde3b5"/><path d="M16.9 9.3 18.4 10l-1.5.7z" fill="#374151"/></g><path d="M3 18.2h6" stroke="#9ca3af" stroke-width="1.1" stroke-linecap="round"/></svg>`; },
+    review: () => { const a = `g${gid++}`, b = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#0d9488"/></linearGradient><linearGradient id="${b}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a5b4fc"/><stop offset="1" stop-color="#4f46e5"/></linearGradient></defs><rect x="6.4" y="1.9" width="10.6" height="12.8" rx="2" fill="url(#${a})" transform="rotate(9 11.7 8.3)"/><rect x="2.8" y="5" width="10.6" height="13" rx="2" fill="url(#${b})"/><path d="m5.6 11.6 2 2 3.9-4.3" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`; },
+    history: () => { const a = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#0369a1"/></linearGradient></defs><circle cx="10.5" cy="10.5" r="7.6" fill="url(#${a})"/><circle cx="10.5" cy="10.5" r="7.6" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width=".8"/><path d="M10.5 6.3v4.4l2.9 1.8" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.6 4.6 2 8.1l3.4-.9" fill="none" stroke="#0369a1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`; },
+    clipboard: () => { const a = `g${gid++}`, b = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbbf24"/><stop offset="1" stop-color="#b45309"/></linearGradient><linearGradient id="${b}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f4f6"/><stop offset="1" stop-color="#9ca3af"/></linearGradient></defs><rect x="3.3" y="3" width="13.4" height="15.6" rx="2" fill="url(#${a})"/><rect x="5.3" y="5.6" width="9.4" height="11.2" rx="1" fill="#fff"/><path d="M7.3 9.2h5.4M7.3 11.7h5.4M7.3 14.2h3.2" stroke="#cbd5e1" stroke-width="1.1" stroke-linecap="round"/><rect x="6.9" y="1.6" width="6.2" height="3.6" rx="1.3" fill="url(#${b})" stroke="#6b7280" stroke-width=".5"/></svg>`; },
+    settings: () => { const a = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c3c8d2"/><stop offset="1" stop-color="#555c6b"/></linearGradient></defs><path fill-rule="evenodd" fill="url(#${a})" d="${gear(10, 10, 8.4, 6.4, 8)} M10 6.9a3.1 3.1 0 1 0 0 6.2a3.1 3.1 0 1 0 0-6.2z"/><circle cx="10" cy="10" r="3.1" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width=".7"/></svg>`; }
+  };
+
+  /* ---------- Lamha 2's line icons (LineIcon.cs) and Windows' glyphs ---------- */
+  const L2 = {
+    Speak: "M11 5 6 9H2v6h4l5 4V5z~M15.54 8.46a5 5 0 0 1 0 7.07~M19.07 4.93a10 10 0 0 1 0 14.14", SpeakSmall: "M11 5 6 9H2v6h4l5 4V5z~M15.54 8.46a5 5 0 0 1 0 7.07",
+    Copy: "M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z~M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1",
+    Close: "M18 6 6 18~M6 6l12 12", Settings: "M4 21v-7~M4 10V3~M12 21v-9~M12 8V3~M20 21v-5~M20 12V3~M1 14h6~M9 8h6~M17 16h6",
+    Back: "M15 18l-6-6 6-6", Forward: "M9 18l6-6-6-6", External: "M15 3h6v6~M10 14 21 3~M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",
+    Search: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z~M20 20l-3.5-3.5", Translate: "M5 8l6 6~M4 14l6-6 2-3~M2 5h12~M7 2h1~M22 22l-5-10-5 10~M14 18h6",
+    Check: "M20 6 9 17l-5-5", Retry: "M3 12a9 9 0 1 0 3-6.7L3 8~M3 3v5h5", Book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20~M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z",
+    Sparkle: "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z~M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z",
+    Bookmark: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
+    Pin: "M12 17v5~M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z",
+    Write: "M12 20h9~M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z", Review: "M2 6h14a2 2 0 0 1 2 2v12H4a2 2 0 0 1-2-2z~M6 2h14a2 2 0 0 1 2 2v12",
+    History: "M3 12a9 9 0 1 0 3-6.7L3 8~M3 3v5h5~M12 7v5l3 2", Clipboard: "M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z~M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2",
+    Trash: "M3 6h18~M8 6V4h8v2~M6 6l1 14h10l1-14", Pause: "M9 5v14~M15 5v14", Card: "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z~M6 9h8~M6 13h12",
+    Keyboard: "M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z~M6 10h.01~M10 10h.01~M14 10h.01~M18 10h.01~M7 14h10",
+    Globe: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z~M2 12h20~M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+    Palette: "M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z~M12 2v20~M12 7h7~M12 12h10~M12 17h7", Shield: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+    Info: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z~M12 16v-4~M12 8h.01", Folder: "M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+    Down: "M6 9l6 6 6-6", List: "M8 6h13~M8 12h13~M8 18h13~M3 6h.01~M3 12h.01~M3 18h.01", Text: "M4 7V4h16v3~M9 20h6~M12 4v16"
+  };
+  const FLUENT = [["Speak", "E767", "Volume"], ["SpeakSmall", "E767", "Volume, at 12"], ["Copy", "E8C8", "Copy"], ["Close", "E711", "Cancel"], ["Settings", "E713", "Settings"], ["Back", "E72B", "Back"], ["Forward", "E72A", "Forward"],
+    ["External", "E8A7", "OpenInNewWindow"], ["Search", "E721", "Search"], ["Translate", "F2B7", "LocaleLanguage"], ["Check", "E73E", "CheckMark"], ["Retry", "E72C", "Refresh"], ["Book", "E82D", "Dictionary"],
+    ["Sparkle", "F4A5", "Sparkle"], ["Bookmark", "E734", "FavoriteStar (a question)"], ["Pin", "E718", "Pin"], ["Write", "E70F", "Edit"], ["Review", "E7C4", "TaskView"], ["History", "E81C", "History"],
+    ["Clipboard", "E77F", "Paste"], ["Trash", "E74D", "Delete"], ["Pause", "E769", "Pause"], ["Card", "E737", "Frame"], ["Keyboard", "E765", "KeyboardClassic"], ["Globe", "E774", "Globe"],
+    ["Palette", "E790", "Color"], ["Shield", "EA18", "Shield"], ["Info", "E946", "Info"], ["Folder", "E8B7", "Folder"], ["Down", "E70D", "ChevronDown"], ["List", "E8FD", "BulletedList"], ["Text", "E8D2", "Font"]];
+  const line = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${(L2[n] || "").split("~").map(d => `<path d="${d}"/>`).join("")}</svg>`;
+  const glyph = (hex, extra = "") => `<span class="fi"${extra}>&#x${hex};</span>`;
+
+  /* ---------- the window: pages, Back, the pill, search ---------- */
+  const PAGES = ["translate", "write", "review", "history", "clipboard"];
+  const CATS = [["languages", "E774"], ["card", "E737"], ["keys", "E765"], ["writingTools", "F4A5"], ["translation", "F2B7"], ["wordReview", "E7C4"], ["offline", "E82D"], ["clipboard", "E77F"], ["appearance", "E790"], ["privacy", "EA18"], ["lamha", "E946"]];
+  const stack = [];
+  let here = { page: "translate" };
+  const win = $("#win"), scroller = $("#scroller");
+
+  function navRow(key) {
+    return `<button class="navrow" data-page="${key}" ${here.page === key ? 'aria-current="page"' : ""} data-m="row 36">${COLOR[key]().replace("<svg", '<svg class="ico"')}<span>${esc(t(key))}</span>${key === "review" ? '<span class="badge">12</span>' : ""}</button>`;
+  }
+  function drawPane() {
+    $("#rows").innerHTML = '<span class="pill" id="pill"></span>' + PAGES.map(navRow).join("");
+    $("#footrows").innerHTML = navRow("settings");
+    $$(".navrow[data-page]", win).forEach(b => b.addEventListener("click", () => go({ page: b.dataset.page }, "enter")));
+    placePill(false);
+  }
+  function placePill(animate) {
+    const pill = $("#pill"), cur = $(`.navrow[data-page="${here.page}"]`, win);
+    if (!pill || !cur) return;
+    const rows = $("#rows"), inFoot = !rows.contains(cur);
+    if (inFoot) { pill.style.opacity = "0"; cur.insertAdjacentHTML("afterbegin", '<span class="pill" style="top: 10px;"></span>'); return; }
+    if (!animate) pill.style.transition = "none";
+    pill.style.opacity = "1";
+    pill.style.transform = `translateY(${cur.offsetTop + 10}px)`;
+    if (!animate) { pill.offsetHeight; pill.style.transition = ""; }
+  }
+
+  function answerCard() {
+    return `<div class="ccard answer" data-m="content card r8 · 24">
+      <div class="hw"><div><div class="word">reluctant</div><div class="ipa">/rɪˈlʌktənt/</div></div>
+        <div class="acts"><button class="ib main" title="${esc(t("listen"))}" data-m="32"><span class="fi">&#xE767;</span></button><button class="ib" title="${esc(t("addReview"))}" data-star><span class="fi">&#xE734;</span></button></div></div>
+      <div class="meaning"><span class="ar">غير راغب</span><span class="acts"><button class="ib" title="${esc(t("listen"))}"><span class="fi">&#xE767;</span></button><button class="ib" title="${esc(t("copy"))}" data-copy><span class="fi">&#xE8C8;</span></button></span></div>
+      <div class="defs"><div class="group-h" style="margin: 0;">${esc(t("definition"))}</div><div class="pos">${esc(t("adjective"))}</div>
+        <div class="def"><span class="num">1</span><span class="gl-ar">غير راغب في التورط</span><span class="gl-en">disinclined to become involved</span><span class="syn"><button class="chip">unwilling</button><button class="chip">hesitant</button></span></div>
+        <div class="def"><span class="num">2</span><span class="gl-ar">عدم الرغبة في القيام بشيء يتعارض مع عادتك</span><span class="gl-en">unwillingness to do something contrary to your custom</span></div></div>
+      <div class="links"><button class="btn link"><span class="fi" style="font-size: 12px;">&#xE8A7;</span>${esc(t("google"))}</button><button class="btn link"><span class="fi" style="font-size: 12px;">&#xE8A7;</span>${esc(t("cambridge"))}</button></div></div>`;
+  }
+  const VIEWS = {
+    translate: () => `<div class="title">${esc(t("translate"))}</div>
+      <div class="field" data-m="field · accent line on focus"><textarea rows="3" aria-label="${esc(t("translate"))}">reluctant</textarea><button class="x" aria-label="Clear">&#xE711;</button></div>
+      <div style="display: flex; align-items: center; gap: 8px; margin: 8px 0 20px; color: var(--t3); font-size: 12px;"><span>${esc(t("quick"))}</span><span class="keys"><span class="kbd">Ctrl</span>+<span class="kbd">Alt</span>+<span class="kbd">L</span></span></div>
+      ${answerCard()}`,
+    write: () => `<div class="title">${esc(t("write"))}</div>
+      <div class="infobar" style="margin-bottom: 12px;"><span class="bi">&#xE946;</span><span><b>${tx("ibInfoT")}</b>${tx("ibInfo")}</span><button class="btn" data-dialog="setup">${tx("setUp")}</button></div>
+      <div class="field"><textarea rows="5" placeholder="${esc(t("writePh"))}" aria-label="${esc(t("write"))}"></textarea></div>
+      <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;"><button class="btn accent" title="Ctrl+Enter">${esc(t("proofread"))}<span class="keys" style="color: inherit; opacity: .8;">Ctrl+Enter</span></button><button class="btn" data-menu="rewrite"><span class="fi">&#xE70F;</span>${tx("rewrite")}<span class="fi chev">&#xE70D;</span></button></div>
+      <div class="group-h">${esc(t("journal"))}</div>
+      <div class="scard"><span class="sic">&#xE7BE;</span><span><span class="nm">${esc(t("recordMistakes"))}</span><span class="ds">${esc(t("recordHint"))}</span></span><span class="end"><button class="switch" role="switch" aria-checked="true" data-toggle><span class="track"><span class="knob"></span></span></button></span></div>`,
+    review: () => `<div class="title">${esc(t("review"))}</div>
+      <div class="ccard" style="display: grid; justify-items: center; gap: 16px; padding-block: 40px;"><div style="font: 700 28px/36px var(--serif);">reluctant</div><button class="btn accent">${esc(t("showMeaning"))}</button>
+      <div style="display: flex; gap: 8px;"><button class="btn">1 · ${esc(t("forgot"))}</button><button class="btn">2 · ${esc(t("hard"))}</button><button class="btn">3 · ${esc(t("knewIt"))}</button></div></div>`,
+    history: () => `<div class="title">${esc(t("history"))}</div>
+      <div class="field search" style="margin-bottom: 16px;"><input placeholder="${esc(t("historySearch"))}" aria-label="${esc(t("history"))}"><span class="glass">&#xE721;</span></div>
+      <div class="group-h">${esc(t("today"))}</div>${rows([["reluctant", "غير راغب"], ["ubiquitous", "منتشر في كل مكان"], ["meticulous", "دقيق جدًا"]])}
+      <div class="group-h">${esc(t("yesterday"))}</div>${rows([["candid", "صريح"], ["arduous", "شاق"]])}`,
+    clipboard: () => `<div class="title">${esc(t("clipboard"))}</div>
+      <div class="field search" style="margin-bottom: 16px;"><input placeholder="${esc(t("historySearch"))}" aria-label="${esc(t("clipboard"))}"><span class="glass">&#xE721;</span></div>
+      ${rows([["The committee was reluctant to approve…", ""], ["osamaomer6@gmail.com", ""], ["https://github.com/osamaomer/lamha", ""]], true)}`,
+    settings: () => `<div class="title">${esc(t("settings"))}</div>` + CATS.map(([k, g]) => `<button class="scard" data-cat="${k}" data-m="${k === "languages" ? "card 68 · r4 · 4 apart" : ""}"><span class="sic">&#x${g};</span><span><span class="nm">${esc(t(k))}</span><span class="ds">${esc(S[lang].summaries[k])}</span></span><span class="end"><span class="go">&#xE76C;</span></span></button>`).join(""),
+    languages: () => `<div class="title"><button class="parent" data-up>${esc(t("settings"))}</button><span class="sep">&#xE76C;</span><span>${esc(t("languages"))}</span></div>
+      <div class="scard"><span class="sic">&#xE774;</span><span><span class="nm">${esc(t("uiLang"))}</span><span class="ds">${esc(t("uiLangHint"))}</span></span><span class="end"><span class="combo"><span>${esc(lang === "ar" ? t("arabic") : t("english"))}</span><span class="fi">&#xE70D;</span></span></span></div>
+      <div class="scard"><span class="sic">&#xF2B7;</span><span><span class="nm">${esc(t("targetLang"))}</span><span class="ds">${esc(t("targetHint"))}</span></span><span class="end"><span class="combo"><span>${esc(t("arabic"))}</span><span class="fi">&#xE70D;</span></span></span></div>`
+  };
+  function rows(list, clip) {
+    return `<div class="row-list">${list.map(([w, m]) => `<div class="lrow"><span><span class="w" ${clip ? 'style="font-weight: 400;" dir="ltr"' : 'dir="ltr"'}>${esc(w)}</span>${m ? `<span class="m" dir="rtl">${esc(m)}</span>` : ""}</span><span class="acts">${clip ? `<button class="ib" title="${esc(t("pin"))}"><span class="fi">&#xE718;</span></button>` : ""}<button class="ib" title="${esc(t("copy"))}" data-copy><span class="fi">&#xE8C8;</span></button><button class="ib" title="${esc(t("delete"))}"><span class="fi">&#xE74D;</span></button></span></div>`).join("")}</div>`;
+  }
+  function render(kind) {
+    const key = here.cat || here.page;
+    scroller.innerHTML = `<div class="view ${kind === "drill" ? "drill" : kind === "back-drill" ? "drill-back" : ""}">${VIEWS[key]()}</div>`;
+    scroller.scrollTop = 0;
+    $$("[data-cat]", scroller).forEach(b => b.addEventListener("click", () => { if (b.dataset.cat === "languages") go({ page: "settings", cat: "languages" }, "drill"); }));
+    $$("[data-up]", scroller).forEach(b => b.addEventListener("click", back));
+    wire(scroller);
+    $("#back").disabled = stack.length === 0;
+  }
+  function go(to, kind) {
+    if (to.page === here.page && to.cat === here.cat) { win.classList.remove("pane-open"); return; }
+    stack.push({ ...here, kind });
+    here = to;
+    win.classList.remove("pane-open");
+    $$(".navrow", win).forEach(r => r.dataset.page === here.page ? r.setAttribute("aria-current", "page") : r.removeAttribute("aria-current"));
+    $$(".navrow .pill:not(#pill)", win).forEach(p => p.remove());
+    placePill(true);
+    render(kind);
+  }
+  function back() {
+    const prev = stack.pop();
+    if (!prev) return;
+    const kind = prev.kind === "drill" ? "back-drill" : "enter";
+    here = { page: prev.page, cat: prev.cat };
+    $$(".navrow", win).forEach(r => r.dataset.page === here.page ? r.setAttribute("aria-current", "page") : r.removeAttribute("aria-current"));
+    $$(".navrow .pill:not(#pill)", win).forEach(p => p.remove());
+    placePill(true);
+    render(kind);
+  }
+  $("#back").addEventListener("click", back);
+  $("#hamb").addEventListener("click", () => win.classList.toggle("pane-open"));
+  win.addEventListener("keydown", e => { if (e.altKey && e.key === "ArrowLeft") { e.preventDefault(); back(); } });
+
+  /* search: settings, words, copies, and always "Translate …" */
+  const q = $("#q");
+  const INDEX = () => [
+    ...CATS.map(([k, g]) => ({ g: "sgSettings", icon: g, label: t(k), hint: S[lang].summaries[k], to: k === "languages" ? { page: "settings", cat: "languages" } : { page: "settings" } })),
+    { g: "sgSettings", icon: "E790", label: t("theme"), hint: t("appearance"), to: { page: "settings" } },
+    { g: "sgSettings", icon: "E945", label: t("motion"), hint: t("appearance"), to: { page: "settings" } },
+    ...[["reluctant", "غير راغب"], ["ubiquitous", "منتشر في كل مكان"], ["meticulous", "دقيق جدًا"], ["candid", "صريح"]].map(([w, m]) => ({ g: "sgWords", icon: "E81C", label: w, hint: m, to: { page: "translate" } })),
+    ...["The committee was reluctant to approve…", "osamaomer6@gmail.com"].map(c => ({ g: "sgCopies", icon: "E77F", label: c, hint: "", to: { page: "clipboard" } }))
+  ];
+  function suggest() {
+    $$(".suggest", win).forEach(s => s.remove());
+    const v = q.value.trim().toLowerCase();
+    if (!v) return;
+    const hits = INDEX().filter(i => i.label.toLowerCase().includes(v) || (i.hint || "").toLowerCase().includes(v)).slice(0, 7);
+    const groups = {};
+    hits.forEach(h => (groups[h.g] ??= []).push(h));
+    let html = "";
+    for (const [g, items] of Object.entries(groups)) html += `<div class="grp">${tx(g)}</div>` + items.map((h, i) => `<button data-i="${INDEX().findIndex(x => x.label === h.label && x.g === h.g)}"><span class="fi">&#x${h.icon};</span><span>${esc(h.label)}</span><small>${esc(h.hint || "")}</small></button>`).join("");
+    html += `<div class="grp" style="border-top: 1px solid var(--divider); margin-top: 4px;"></div><button data-tr><span class="fi">&#xF2B7;</span><span>${S[lang].sgTranslate.replace("{0}", esc(q.value.trim()))}</span></button>`;
+    win.insertAdjacentHTML("beforeend", `<div class="suggest">${html}</div>`);
+    const box = $(".suggest", win);
+    box.querySelector("button")?.classList.add("hot");
+    $$("button[data-i]", box).forEach(b => b.addEventListener("mousedown", e => { e.preventDefault(); const it = INDEX()[+b.dataset.i]; q.value = ""; box.remove(); go(it.to, it.to.cat ? "drill" : "enter"); }));
+    $("button[data-tr]", box).addEventListener("mousedown", e => { e.preventDefault(); q.value = ""; box.remove(); go({ page: "translate" }, "enter"); });
+  }
+  q.addEventListener("input", suggest);
+  q.addEventListener("blur", () => setTimeout(() => $$(".suggest", win).forEach(s => s.remove()), 120));
+  $("#qbtn").addEventListener("click", () => { win.classList.remove("forced-narrow"); setSeg("width", "wide"); setTimeout(() => q.focus(), 300); });
+
+  /* ---------- shared behaviour: copy, star, toggles, menus, dialogs, toasts ---------- */
+  let toastTimer;
+  function toast(where, text, action) {
+    $$(".toast", where).forEach(x => x.remove());
+    where.insertAdjacentHTML("beforeend", `<div class="toast" role="status"><span>${esc(text)}</span>${action ? `<button class="btn link" style="height: auto; padding: 0;"><b>${esc(action.label)}</b></button>` : ""}</div>`);
+    const el = $(".toast", where);
+    if (action) el.querySelector("button").addEventListener("click", () => { action.run(); el.remove(); });
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.classList.add("leaving"); setTimeout(() => el.remove(), 120); }, 4000);
+  }
+  function hostOf(el) { return el.closest(".win") || el.closest(".stagebox") || el.closest(".demo") || document.body; }
+  function wire(root) {
+    $$("[data-copy]", root).forEach(b => b.addEventListener("click", () => {
+      const f = b.querySelector(".fi");
+      f.innerHTML = "&#xE73E;"; f.classList.remove("done"); void f.offsetWidth; f.classList.add("done");
+      toast(hostOf(b), t("copied"));
+      setTimeout(() => { f.innerHTML = "&#xE8C8;"; f.classList.remove("done"); }, 1500);
+    }));
+    $$("[data-star]", root).forEach(b => b.addEventListener("click", () => {
+      const f = b.querySelector(".fi"), on = !b.classList.contains("on");
+      b.classList.toggle("on", on); f.innerHTML = on ? "&#xE735;" : "&#xE734;";
+      f.classList.remove("pop"); void f.offsetWidth; if (on) f.classList.add("pop");
+      const badge = $(".navrow .badge", win); if (badge) badge.textContent = String(+badge.textContent + (on ? 1 : -1));
+    }));
+    $$("[data-toggle]", root).forEach(s => s.addEventListener("click", () => s.setAttribute("aria-checked", s.getAttribute("aria-checked") === "true" ? "false" : "true")));
+    $$("[data-menu]", root).forEach(b => b.addEventListener("click", e => {
+      e.stopPropagation();
+      $$(".menu").forEach(m => m.remove());
+      const host = b.closest(".win") || b.closest(".demo"), hr = host.getBoundingClientRect(), br = b.getBoundingClientRect();
+      const items = [["improve", "E8D2"], ["formal", "E7BE"], ["friendly", "E76E"], ["shorter", "E8E7"], ["longer", "E8E8"]];
+      host.insertAdjacentHTML("beforeend", `<div class="menu" style="top: ${br.bottom - hr.top + 4}px; ${host.getAttribute("dir") === "rtl" || getComputedStyle(host).direction === "rtl" ? `right: ${hr.right - br.right}px` : `left: ${br.left - hr.left}px`};">${items.map(([k, g]) => `<button><span class="fi">&#x${g};</span>${esc(t(k))}</button>`).join("")}</div>`);
+    }));
+    $$("[data-toast]", root).forEach(b => b.addEventListener("click", () => toast(hostOf(b), t("copied"))));
+    $$("[data-dialog]", root).forEach(b => b.addEventListener("click", () => dialog(b.dataset.dialog, b.closest(".win") || b.closest(".demo"))));
+  }
+  document.addEventListener("click", () => $$(".menu").forEach(m => m.remove()));
+  function dialog(kind, host) {
+    const isSetup = kind === "setup";
+    const body = isSetup
+      ? `<h4>${esc(t("writingTools"))}</h4><div style="display: grid; gap: 10px;">${[["Ollama", lang === "ar" ? "مجاني، على جهازك" : "free, on your PC"], ["Gemini", lang === "ar" ? "مجاني بمفتاح" : "free, with a key"], ["Claude", "API"], ["OpenAI", "API"]].map(([n, h], i) => `<span class="radio" role="radio" aria-checked="${i === 1}"><i></i>${n}<small>${esc(h)}</small></span>`).join("")}</div><div class="field"><input placeholder="API key" aria-label="API key" dir="ltr"></div>`
+      : `<h4>${tx("dlgTitle")}</h4><p style="margin: 0; color: var(--t2);">${esc(t("dlgBody"))}</p>`;
+    const foot = isSetup ? `<button class="btn accent" data-close>${esc(t("save"))}</button><button class="btn" data-close>${esc(t("cancel"))}</button>` : `<button class="btn danger" data-close>${esc(t("clear"))}</button><button class="btn" data-close>${esc(t("cancel"))}</button>`;
+    host.insertAdjacentHTML("beforeend", `<div class="scrim"><div class="dialog" role="dialog" aria-modal="true"><div class="content">${body}</div><div class="foot">${foot}</div></div></div>`);
+    const scrim = host.lastElementChild;
+    $$(".radio", scrim).forEach(r => r.addEventListener("click", () => $$(".radio", scrim).forEach(x => x.setAttribute("aria-checked", String(x === r)))));
+    $$("[data-close]", scrim).forEach(b => b.addEventListener("click", () => { scrim.remove(); if (isSetup) { const ib = $(".page .infobar", win); if (ib) { ib.className = "infobar ok slide"; ib.innerHTML = `<span class="bi">&#xE73E;</span><span><b>${tx("ibOkT")}</b>${tx("ibOk")}</span><span></span>`; } } }));
+  }
+
+  /* ---------- specimens ---------- */
+  function drawRamp() {
+    const ar = lang === "ar";
+    const R = [["CaptionTextBlockStyle", "12 / 16", 12, 16, 400, ar ? "بحث سريع" : "Quick lookup"], ["BodyTextBlockStyle", "14 / 20", 14, 20, 400, ar ? "لغة القوائم والأزرار والشروح في لمحة" : "The language of Lamha's menus, buttons and explanations"],
+      ["BodyStrongTextBlockStyle", "14 / 20", 14, 20, 600, ar ? "المظهر" : "Appearance"], ["BodyLargeTextBlockStyle", "18 / 24", 18, 24, 400, ar ? "كانت اللجنة مترددة في الموافقة على الخطة." : "The committee was reluctant to approve the plan."],
+      ["SubtitleTextBlockStyle", "20 / 28", 20, 28, 600, ar ? "سجل أخطائي" : "My mistake journal"], ["TitleTextBlockStyle", "28 / 36", 28, 36, 600, ar ? "ترجمة" : "Translate"],
+      ["TitleLargeTextBlockStyle", "40 / 52", 40, 52, 600, ar ? "أهلًا بك في لمحة" : "Welcome to Lamha"], ["DisplayTextBlockStyle", "68 / 92", 68, 92, 600, "٣٠"]];
+    const C = [["LamhaHeadwordTextStyle", "28 serif bold", "reluctant", `700 28px/36px var(--serif)`, "ltr"], ["LamhaMeaningTextStyle", "20 bold, line 34", "غير راغب", `700 20px/34px var(--ui)`, "rtl"],
+      ["LamhaReadingTextStyle", "14, line 24", "عدم الرغبة في القيام بشيء يتعارض مع عادتك", `400 14px/24px var(--ui)`, "rtl"]];
+    $("#ramp").innerHTML = R.map(([k, s, size, lh, w, x]) => `<div class="r"><span class="k">${k}</span><span class="s">${s}</span><span class="x" dir="${ar ? "rtl" : "ltr"}" style="font: ${w} ${size}px/${lh}px ${size >= 20 ? "var(--ui-display)" : "var(--ui)"};">${esc(x)}</span></div>`).join("")
+      + C.map(([k, s, x, f, d]) => `<div class="r"><span class="k">${k}</span><span class="s">${s}</span><span class="x" dir="${d}" style="font: ${f};">${esc(x)}</span></div>`).join("");
+  }
+  function drawSwatches() {
+    const W = [["TextFillColorPrimary", "--t1"], ["TextFillColorSecondary", "--t2"], ["TextFillColorTertiary", "--t3"], ["CardBackgroundFillColorDefault", "--card"], ["CardStrokeColorDefault", "--card-edge"],
+      ["SubtleFillColorSecondary", "--subtle-1"], ["ControlFillColorDefault", "--ctl"], ["DividerStrokeColorDefault", "--divider"], ["LayerFillColorDefault", "--layer"], ["AcrylicBackgroundFillColorDefault", "--acrylic"]];
+    const L = [["LamhaAccentBrush", "--accent", "can be pressed"], ["LamhaAccentFillBrush", "--accent-fill", "the main button, a switch on"], ["LamhaOkBrush", "--ok", "it worked"], ["LamhaDangerBrush", "--danger", "deletes, failed"], ["LamhaMarkBrush", "--mark", "what a search matched"], ["LamhaBrandBrush", "brand", "the mark, celebrations"]];
+    const val = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    $("#sw-win").innerHTML = W.map(([n, v]) => `<div class="sw"><div class="chipc" style="background: var(--mica);"><div style="height: 100%; background: var(${v}); ${v.startsWith("--t") ? "" : ""}"></div></div><div class="lab"><b>${n.replace("ColorDefault", "").replace("Color", "")}</b><span>${val(v)}</span></div></div>`).join("");
+    $("#sw-lamha").innerHTML = L.map(([n, v, m]) => `<div class="sw"><div class="chipc" style="background: ${v === "brand" ? "linear-gradient(135deg, #6366f1, #06b6d4)" : `var(${v})`};"></div><div class="lab"><b>${n}</b><span>${m}${v === "brand" ? "" : " · " + val(v)}</span></div></div>`).join("");
+  }
+  function drawIcons() {
+    $("#paneicons").innerHTML = ["translate", "write", "review", "history", "clipboard", "settings"].map(k => `<div class="pi">${COLOR[k]().replace("<svg", '<svg class="big"')}<div class="sm">${COLOR[k]()}<span>${esc(t(k))}</span></div></div>`).join("");
+    $("#icongrid").innerHTML = FLUENT.map(([n, hex, wn]) => `<div class="icell${n === "Bookmark" ? " ask" : ""}"><span class="nm">${n}<small>${hex}</small></span><span class="v" title="Lamha 2">${line(n)}</span><span class="v" title="Segoe Fluent Icons">${glyph(hex, n === "SpeakSmall" ? ' style="font-size: 12px"' : "")}</span><span class="tag">Lamha 2</span><span class="tag">${esc(wn)}</span></div>`).join("");
+  }
+  function drawJump() {
+    $("#jump").innerHTML = `<div class="grp">${esc(t("tasks"))}</div>` + ["translate", "write", "review", "clipboard"].map(k => `<div class="it">${COLOR[k]()}<span>${esc(t(k))}</span></div>`).join("")
+      + `<hr><div class="it"><i style="width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; font: normal 10px/1 var(--icons);">&#xF2B7;</i><span>${esc(t("lamha"))}</span></div>`;
+  }
+
+  /* ---------- motion demos ---------- */
+  const words = [["reluctant", "غير راغب"], ["candid", "صريح"], ["arduous", "شاق"]];
+  function drawDelete() {
+    $("#dl").innerHTML = words.map(([w, m], i) => `<div class="lrow" data-i="${i}"><span><span class="w" dir="ltr">${w}</span><span class="m" dir="rtl">${m}</span></span><span class="acts" style="opacity: 1;"><button class="ib" title="${esc(t("delete"))}"><span class="fi">&#xE74D;</span></button></span></div>`).join("");
+    $$("#dl .lrow").forEach(r => r.querySelector("button").addEventListener("click", () => {
+      const holder = r.parentElement, next = r.nextElementSibling;
+      r.classList.add("folding");
+      setTimeout(() => { r.remove(); r.classList.remove("folding");
+        toast(holder.closest(".stagebox"), t("deleted"), { label: t("undo"), run: () => { holder.insertBefore(r, next && next.isConnected ? next : null); r.classList.add("unfolding"); setTimeout(() => r.classList.remove("unfolding"), 300); } });
+      }, motionMs(250));
+    }));
+  }
+  function drawPin() {
+    const items = ["osamaomer6@gmail.com", "The committee was reluctant…", "https://github.com/osamaomer/lamha"];
+    $("#pl").innerHTML = items.map(w => `<div class="lrow"><span><span class="w" style="font-weight: 400;" dir="ltr">${esc(w)}</span></span><span class="acts" style="opacity: 1;"><button class="ib" title="${esc(t("pin"))}"><span class="fi">&#xE718;</span></button></span></div>`).join("");
+    $$("#pl .lrow").forEach(r => r.querySelector("button").addEventListener("click", () => {
+      const list = $("#pl"), before = new Map($$("#pl .lrow").map(x => [x, x.getBoundingClientRect().top]));
+      const on = !r.classList.contains("pinned");
+      r.classList.toggle("pinned", on); r.querySelector(".fi").innerHTML = on ? "&#xE842;" : "&#xE718;";
+      if (on) list.prepend(r); else list.append(r);
+      $$("#pl .lrow").forEach(x => { const dy = before.get(x) - x.getBoundingClientRect().top; if (!dy) return;
+        x.animate([{ transform: `translateY(${dy}px)` }, { transform: "none" }], { duration: motionMs(250), easing: "cubic-bezier(0,0,0,1)" }); });
+    }));
+  }
+  let level = "full";
+  const motionMs = ms => level === "off" ? 0 : level === "subtle" ? Math.round(ms * 0.67) : ms;
+  function setMotion(v) {
+    level = v;
+    document.documentElement.classList.add("motion-chosen");
+    document.documentElement.classList.toggle("motion-off", v === "off");
+    const r = document.documentElement.style;
+    [["--t-faster", 83], ["--t-fast", 167], ["--t-normal", 250], ["--t-slow", 333]].forEach(([k, ms]) => r.setProperty(k, motionMs(ms) + "ms"));
+  }
+  $("#cardbtn").addEventListener("click", () => {
+    const st = $("#cardstage"), old = $(".mini-card", st);
+    if (old) { old.classList.replace("in", "out"); setTimeout(() => old.remove(), motionMs(90)); return; }
+    st.insertAdjacentHTML("beforeend", `<div class="mini-card in"><div style="font: 700 20px/26px var(--serif);">reluctant</div><div style="font-size: 12px; color: var(--t2);">/rɪˈlʌktənt/</div><div dir="rtl" style="font: 700 18px/30px var(--ui); margin-top: 6px;">غير راغب</div></div>`);
+  });
+  $("#turn").addEventListener("click", () => $("#flash").classList.toggle("turned"));
+  $("#savekey").addEventListener("click", () => {
+    const f = $("#keyfield");
+    if (level === "full") { f.classList.remove("shake"); void f.offsetWidth; f.classList.add("shake"); }
+    $("#errslot").innerHTML = `<div class="infobar err slide"><span class="bi">&#xE711;</span><span><b>${tx("ibErrT")}</b>${tx("ibErr")}</span><span></span></div>`;
+  });
+
+  /* ---------- the switches on top ---------- */
+  function setSeg(name, v) { $$(`[data-ctl="${name}"] button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+  function applyText() {
+    $$("[data-s]").forEach(el => { const k = el.dataset.s; el.textContent = t(k); });
+    $$("[data-ph]").forEach(el => el.placeholder = t(el.dataset.ph));
+  }
+  function setLang(v) {
+    lang = v;
+    const dir = v === "ar" ? "rtl" : "ltr";
+    win.setAttribute("dir", dir); $("#comp").setAttribute("dir", dir); $("#mini").setAttribute("dir", dir);
+    $$(".demo-grid .stagebox, .jump").forEach(e => e.setAttribute("dir", dir));
+    applyText(); drawPane(); render(); drawRamp(); drawIcons(); drawJump(); drawDelete(); drawPin();
+  }
+  $$(".seg").forEach(seg => seg.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const name = seg.dataset.ctl, v = b.dataset.v;
+    setSeg(name, v);
+    if (name === "lang") setLang(v);
+    if (name === "theme") { document.documentElement.setAttribute("data-theme", v); setTimeout(drawSwatches, 30); }
+    if (name === "motion") setMotion(v);
+    if (name === "width") { win.classList.toggle("forced-narrow", v === "narrow"); win.classList.remove("pane-open"); setTimeout(() => placePill(false), 300); }
+  }));
+  $("#redline").addEventListener("click", e => { const s = e.currentTarget, on = s.getAttribute("aria-checked") !== "true"; s.setAttribute("aria-checked", String(on)); win.classList.toggle("redline", on); });
+  window.addEventListener("resize", () => placePill(false));
+
+  // Start: the theme the viewer's system uses, reflected on the switch; reduced motion starts at Off.
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  setSeg("theme", document.documentElement.getAttribute("data-theme") || (dark ? "dark" : "light"));
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { setSeg("motion", "off"); setMotion("off"); }
+  setLang("en");
+  wire(document.getElementById("comp"));
+  wire(document.getElementById("motiondemos"));
+  drawSwatches();
+})();
+</script>
