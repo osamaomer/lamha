@@ -629,7 +629,7 @@ button.scard:active { transform: scale(0.995); }
       uiLang: "Interface language", uiLangHint: "The language of Lamha's menus, buttons and explanations", targetLang: "Translation language", targetHint: "The language text is translated into",
       theme: "Theme", themeHint: "The look of Lamha: the card, its window and these settings", motion: "Animations", motionHintShort: "Transitions in Lamha's windows and card",
       cardBg: "The card's background", cardBgHint: "Translucent shows a little of what's behind the card; solid is clearer over busy pages",
-      ibInfoT: "The writing tools need an AI provider.", ibInfo: "Gemini is free with a key from Google.", setUp: "Set up",
+      ibInfoT: "The writing tools need an AI provider.", ibInfo: "Gemini is free with an API key from Google.", setUp: "Set up",
       ibOkT: "Saved.", ibOk: "Gemini is ready for the writing tools.", ibWarnT: "No internet.", ibWarn: "Words come from the built-in dictionary.",
       ibErrT: "That key doesn't work.", ibErr: "Copy it again from Google AI Studio.", retry: "Try again", showToast: "Show the toast",
       deleteHistory: "Clear history", emptyHistory: "Words you look up appear here.", translateSomething: "Translate a word", openCard: "Look up “reluctant”",
@@ -656,7 +656,7 @@ button.scard:active { transform: scale(0.995); }
       uiLang: "لغة الواجهة", uiLangHint: "لغة القوائم والأزرار والشروح في لمحة", targetLang: "لغة الترجمة", targetHint: "اللغة التي تُترجم إليها النصوص",
       theme: "السمة", themeHint: "مظهر لمحة: البطاقة والنافذة والإعدادات", motion: "الحركة", motionHintShort: "حركات الانتقال في النوافذ وبطاقة الترجمة",
       cardBg: "خلفية البطاقة", cardBgHint: "الشفافة تُظهر ما خلف البطاقة قليلًا، والثابتة أوضح فوق الصفحات المزدحمة",
-      ibInfoT: "تحتاج أدوات الكتابة إلى مصدر ذكاء اصطناعي.", ibInfo: "Gemini مجاني بمفتاح من Google.", setUp: "إعداد",
+      ibInfoT: "تتطلب أدوات الكتابة مزوّدًا لخدمات الذكاء الاصطناعي.", ibInfo: "يتوفر Gemini مجانًا باستخدام مفتاح API من Google.", setUp: "إعداد",
       ibOkT: "تم الحفظ.", ibOk: "Gemini جاهز لأدوات الكتابة.", ibWarnT: "لا يوجد إنترنت.", ibWarn: "الكلمات من القاموس المدمج.",
       ibErrT: "هذا المفتاح لا يعمل.", ibErr: "انسخه مرة أخرى من Google AI Studio.", retry: "حاول مجددًا", showToast: "أظهر الإشعار",
       deleteHistory: "مسح السجل", emptyHistory: "تظهر هنا الكلمات التي تبحث عنها.", translateSomething: "ترجم كلمة", openCard: "ابحث عن «reluctant»",
@@ -673,12 +673,15 @@ button.scard:active { transform: scale(0.995); }
   };
   // Words not in Lamha's string files yet: drafts, shown underlined.
   const DRAFT = new Set(["search", "rewrite", "ibInfoT", "ibInfo", "setUp", "ibOkT", "ibOk", "ibWarnT", "ibWarn", "ibErrT", "ibErr", "emptyHistory", "translateSomething", "pasteChip", "dlgTitle", "sgWords", "sgTranslate"]);
+  // The user's own wording (no longer a draft in that language).
+  const APPROVED = { ar: new Set(["ibInfoT", "ibInfo"]), en: new Set() };
   let lang = "en";
   const t = k => S[lang][k] ?? S.en[k] ?? k;
+  const isDraft = k => DRAFT.has(k) && !APPROVED[lang].has(k);
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const tx = k => DRAFT.has(k) ? `<span class="new">${esc(t(k))}</span>` : esc(t(k));
+  const tx = k => isDraft(k) ? `<span class="new">${esc(t(k))}</span>` : esc(t(k));
 
   /* ---------- the pane's coloured icons (drafts), 20 × 20 ---------- */
   let gid = 0;
@@ -981,7 +984,7 @@ button.scard:active { transform: scale(0.995); }
   /* ---------- the switches on top ---------- */
   function setSeg(name, v) { $$(`[data-ctl="${name}"] button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
   function applyText() {
-    $$("[data-s]").forEach(el => { const k = el.dataset.s; el.textContent = t(k); });
+    $$("[data-s]").forEach(el => { const k = el.dataset.s; el.textContent = t(k); if (DRAFT.has(k)) el.classList.toggle("new", isDraft(k)); });
     $$("[data-ph]").forEach(el => el.placeholder = t(el.dataset.ph));
   }
   function setLang(v) {
