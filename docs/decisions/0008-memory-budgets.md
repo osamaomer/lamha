@@ -1,6 +1,6 @@
 # 0008. Memory budgets on commit and Task Manager; idle memory handed back
 
-**Accepted, 2026-10-24, from phase 0's measurements.**
+**Accepted, 2026-10-24, from phase 0's measurements. The card's commit budget is 95 MB since decision 0015 (2026-10-26).**
 
 ## Decision
 

@@ -16,11 +16,11 @@ param(
 $ErrorActionPreference = "Stop"
 # MB. Task Manager's number drops to almost nothing once idle memory is handed back to Windows, so commit (the memory
 # Lamha actually holds) has its own budget: it's the honest one. Set from phase 0's measurements (docs/native-plan.md);
-# the main window's in decision 0013 (provisional until its pages are built).
+# the main window's in decision 0013 (provisional until its pages are built), the card's commit in decision 0015.
 $budgets = [ordered]@{
   "tray"        = @{ TaskManager = 35; Commit = 55 }
-  "card open"   = @{ TaskManager = 70; Commit = 85 }
-  "card closed" = @{ TaskManager = 45; Commit = 85 }
+  "card open"   = @{ TaskManager = 70; Commit = 95 }
+  "card closed" = @{ TaskManager = 45; Commit = 95 }
   "main window open"   = @{ TaskManager = 90; Commit = 110 }
   "main window closed" = @{ TaskManager = 45; Commit = 95 }
 }
