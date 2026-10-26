@@ -1,5 +1,10 @@
+using System.Numerics;
+using Lamha.App.Services;
+using Lamha.Core.Appearance;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
 using Path = Microsoft.UI.Xaml.Shapes.Path;
@@ -60,6 +65,9 @@ public sealed partial class LineIcon : UserControl
     public static readonly DependencyProperty StrokeWidthProperty =
         DependencyProperty.Register(nameof(StrokeWidth), typeof(double), typeof(LineIcon), new PropertyMetadata(2.0, (d, _) => ((LineIcon)d).Paint()));
 
+    public static readonly DependencyProperty WavingProperty =
+        DependencyProperty.Register(nameof(Waving), typeof(bool), typeof(LineIcon), new PropertyMetadata(false, (d, _) => ((LineIcon)d).Wave()));
+
     private static readonly Dictionary<Glyph, string[]> Paths = new()
     {
         [Glyph.Speak] = ["M11 5 6 9H2v6h4l5 4V5z", "M15.54 8.46a5 5 0 0 1 0 7.07", "M19.07 4.93a10 10 0 0 1 0 14.14"],
@@ -108,6 +116,7 @@ public sealed partial class LineIcon : UserControl
     /// <summary>Whose foreground the lines are drawn in: the button's around the icon, or null for its own.</summary>
     private FrameworkElement? _colour;
     private long _watch;
+    private bool _waved;
 
     public LineIcon()
     {
@@ -140,6 +149,16 @@ public sealed partial class LineIcon : UserControl
         set => SetValue(StrokeWidthProperty, value);
     }
 
+    /// <summary>
+    /// Speak's sound waves fade in and out, one after the other, while Listen plays (Lamha 2's <c>lm-wave</c>: 0.9 s,
+    /// the second wave 0.22 s later); still when animations are off.
+    /// </summary>
+    public bool Waving
+    {
+        get => (bool)GetValue(WavingProperty);
+        set => SetValue(WavingProperty, value);
+    }
+
     private void Draw()
     {
         _canvas.Children.Clear();
@@ -164,6 +183,41 @@ public sealed partial class LineIcon : UserControl
         }
 
         Paint();
+        Wave();
+    }
+
+    private void Wave()
+    {
+        var on = Waving && Glyph is Glyph.Speak or Glyph.SpeakSmall && Animations.Level != MotionLevel.Off;
+        if (!on && !_waved)
+        {
+            return;
+        }
+
+        _waved = on;
+        var waves = _canvas.Children.Skip(1).ToList(); // the speaker is the first line
+        for (var i = 0; i < waves.Count; i++)
+        {
+            var visual = ElementCompositionPreview.GetElementVisual(waves[i]);
+            if (!on)
+            {
+                visual.StopAnimation("Opacity");
+                visual.Opacity = 1;
+                continue;
+            }
+
+            var c = visual.Compositor;
+            var ease = c.CreateCubicBezierEasingFunction(new Vector2(0.42f, 0), new Vector2(0.58f, 1)); // CSS's ease-in-out
+            var pulse = c.CreateScalarKeyFrameAnimation();
+            pulse.InsertKeyFrame(0, 0.25f);
+            pulse.InsertKeyFrame(0.5f, 1, ease);
+            pulse.InsertKeyFrame(1, 0.25f, ease);
+            pulse.Duration = TimeSpan.FromMilliseconds(900);
+            pulse.DelayTime = TimeSpan.FromMilliseconds(220 * i);
+            pulse.DelayBehavior = AnimationDelayBehavior.SetInitialValueBeforeDelay;
+            pulse.IterationBehavior = AnimationIterationBehavior.Forever;
+            visual.StartAnimation("Opacity", pulse);
+        }
     }
 
     private void Paint()

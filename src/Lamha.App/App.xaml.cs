@@ -73,6 +73,7 @@ public partial class App : Application
         _clipboard = new ClipboardService(_messages, _brain, queue);
         _notes = new NotificationService(Notifications(_options.Profile), (title, body) => _tray?.Notify(title, body));
         _sentences = new SentenceReader();
+        Speech.Use(_brain);
         _updates = new UpdateService(new VelopackUpdates(_options.Updates, _options.RestartArgs()), _brain.Settings, _notes, idle, queue, automatic: !_options.Measure)
         {
             Exit = () =>

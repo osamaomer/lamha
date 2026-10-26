@@ -126,3 +126,13 @@ IUIAutomationTextRangeArray
 UIA_PATTERN_ID
 UIA_PROPERTY_ID
 UIA_CONTROLTYPE_ID
+
+// Listen: Google's and Windows' voices through the wave mapper (MP3 decoded by Windows' own codec)
+waveOutOpen
+waveOutPrepareHeader
+waveOutWrite
+waveOutUnprepareHeader
+waveOutReset
+waveOutClose
+WAVE_MAPPER
+WHDR_DONE

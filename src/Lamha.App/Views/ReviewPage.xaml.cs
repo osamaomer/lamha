@@ -84,20 +84,24 @@ public sealed partial class ReviewPage : UserControl
     public void FocusCard() => DispatcherQueue.TryEnqueue(() => (ViewModel.IsShown ? GoodButton : ShowButton).Focus(FocusState.Pointer));
 
     /// <summary>
-    /// Space or Enter shows the meaning; 1, 2, 3 answer once it shows (Arabic-Indic digits too), as in Lamha 2. Not
-    /// with Ctrl or Alt, which belong to the window and Windows.
+    /// Space or Enter shows the meaning, before a button has them (Listen, when it was clicked last), as in Lamha 2.
+    /// Not with Ctrl or Alt, which belong to the window and Windows.
     /// </summary>
+    private void OnPreviewKeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key is VirtualKey.Space or VirtualKey.Enter && !ViewModel.IsShown && ViewModel.IsCard
+            && !IsDown(VirtualKey.Control) && !IsDown(VirtualKey.Menu))
+        {
+            e.Handled = true;
+            ViewModel.RevealCommand.Execute(null);
+        }
+    }
+
+    /// <summary>1, 2, 3 answer once the meaning shows (Arabic-Indic digits too), as in Lamha 2; not with Ctrl or Alt.</summary>
     private void OnKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (IsDown(VirtualKey.Control) || IsDown(VirtualKey.Menu))
         {
-            return;
-        }
-
-        if (e.Key is VirtualKey.Space or VirtualKey.Enter && !ViewModel.IsShown && ViewModel.IsCard)
-        {
-            e.Handled = true;
-            ViewModel.RevealCommand.Execute(null);
             return;
         }
 

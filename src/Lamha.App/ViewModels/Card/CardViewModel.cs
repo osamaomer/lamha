@@ -474,6 +474,10 @@ public sealed partial class CardViewModel(Brain brain, ICardHost host) : Observa
         Links = answer.Links;
         View = CardView.Answer;
         host.Announce(answer.Spoken);
+        if (settings.AutoSpeak && result.IsWord)
+        {
+            _ = Speech.SayAsync(result.Query, result.Source); // Settings → Speak automatically (Lamha 2's autoSpeak)
+        }
     }
 
     /// <summary>

@@ -40,10 +40,11 @@
                  Text="{x:Bind Answer.Milestone, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
     </Border>
 
-    <!-- A word: the headword, how it sounds, what it's a form of; the bookmark -->
+    <!-- A word: the headword, how it sounds, what it's a form of; the bookmark and Listen -->
     <Grid ColumnSpacing="8" FlowDirection="{x:Bind Answer.SourceFlow, Mode=OneWay}" Visibility="{x:Bind Answer.IsWord, Mode=OneWay, FallbackValue=Collapsed}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
       <StackPanel>
@@ -64,20 +65,29 @@
                     AutomationProperties.Name="{x:Bind Answer.ReviewTooltip, Mode=OneWay}">
         <controls:LineIcon Glyph="Bookmark" Width="17" Height="17" Filled="{x:Bind Answer.InReview, Mode=OneWay}" />
       </ToggleButton>
+      <controls:SpeakButton x:Uid="Card_ListenPron" Grid.Column="2" VerticalAlignment="Top" Style="{StaticResource LamhaRoundSpeakButtonStyle}" Round="True"
+                            Text="{x:Bind Answer.Query, Mode=OneWay, FallbackValue=''}" Lang="{x:Bind Answer.Result.Source, Mode=OneWay, FallbackValue=''}" />
     </Grid>
 
-    <!-- A text: as selected, three lines until clicked -->
-    <TextBlock x:Name="SourceText" Style="{StaticResource LamhaSecondaryTextStyle}" MaxLines="3" TextTrimming="CharacterEllipsis"
-               FlowDirection="{x:Bind Answer.SourceFlow, Mode=OneWay}" Text="{x:Bind Answer.Query, Mode=OneWay}"
-               Visibility="{x:Bind TextShown(Answer.IsText), Mode=OneWay, FallbackValue=Collapsed}" Tapped="OnSourceTapped" ToolTipService.ToolTip="{x:Bind ShowAll}" />
+    <!-- A text: as selected, three lines until clicked; Listen -->
+    <Grid ColumnSpacing="8" FlowDirection="{x:Bind Answer.SourceFlow, Mode=OneWay}" Visibility="{x:Bind TextShown(Answer.IsText), Mode=OneWay, FallbackValue=Collapsed}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <TextBlock x:Name="SourceText" Style="{StaticResource LamhaSecondaryTextStyle}" MaxLines="3" TextTrimming="CharacterEllipsis"
+                 Text="{x:Bind Answer.Query, Mode=OneWay}" Tapped="OnSourceTapped" ToolTipService.ToolTip="{x:Bind ShowAll}" />
+      <controls:SpeakButton x:Uid="Card_ListenOrig" Grid.Column="1" VerticalAlignment="Top" Style="{StaticResource LamhaIconButtonStyle}"
+                            Text="{x:Bind Answer.Query, Mode=OneWay, FallbackValue=''}" Lang="{x:Bind Answer.Result.Source, Mode=OneWay, FallbackValue=''}" />
+    </Grid>
 
     <!-- Did you mean -->
     <TextBlock Margin="0,8,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" Visibility="{x:Bind controls:Show.IfText(Answer.Spell), Mode=OneWay, FallbackValue=Collapsed}">
       <Run Text="{x:Bind DidYouMean}" /><Hyperlink Click="OnSpellClick"><Run Text="{x:Bind Answer.Spell, Mode=OneWay}" /></Hyperlink><Run Text="{x:Bind DidYouMeanEnd}" />
     </TextBlock>
 
-    <!-- The hero: the meaning in this sentence, the sentence's translation around it; Copy -->
-    <!-- Lamha 2's hero is right to left in both languages: the meaning on the right, Copy on the left -->
+    <!-- The hero: the meaning in this sentence, the sentence's translation around it; Listen and Copy -->
+    <!-- Lamha 2's hero is right to left in both languages: the meaning on the right, Listen and Copy on the left -->
     <Border Margin="{x:Bind HeroMargin(Answer.IsText), Mode=OneWay}" Style="{StaticResource LamhaTintedBoxStyle}" FlowDirection="RightToLeft">
       <Grid ColumnSpacing="8">
         <Grid.ColumnDefinitions>
@@ -112,10 +122,13 @@
                        Text="{x:Bind Answer.HeroExample, Mode=OneWay}" />
           </Border>
         </StackPanel>
-        <Button x:Uid="Card_CopyTr" Grid.Column="1" VerticalAlignment="Top" Style="{StaticResource LamhaIconButtonStyle}"
-                Command="{x:Bind Answer.CopyMeaningCommand, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Answer.HeroText), Mode=OneWay, FallbackValue=Collapsed}">
-          <controls:LineIcon Glyph="Copy" Width="15" Height="15" />
-        </Button>
+        <StackPanel Grid.Column="1" VerticalAlignment="Top" Spacing="2" Visibility="{x:Bind controls:Show.IfText(Answer.HeroText), Mode=OneWay, FallbackValue=Collapsed}">
+          <controls:SpeakButton x:Uid="Card_ListenTr" Style="{StaticResource LamhaIconButtonStyle}"
+                                Text="{x:Bind Answer.HeroText, Mode=OneWay, FallbackValue=''}" Lang="{x:Bind Answer.Result.Target, Mode=OneWay, FallbackValue=''}" />
+          <Button x:Uid="Card_CopyTr" Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind Answer.CopyMeaningCommand, Mode=OneWay}">
+            <controls:LineIcon Glyph="Copy" Width="15" Height="15" />
+          </Button>
+        </StackPanel>
       </Grid>
     </Border>
     <TextBlock Margin="0,12,0,0" Style="{StaticResource LamhaSectionHeadingTextStyle}" Text="{x:Bind Answer.ExplainMissingNote, Mode=OneWay}"

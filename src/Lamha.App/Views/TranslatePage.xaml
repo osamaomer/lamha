@@ -178,12 +178,14 @@
           <Grid Margin="0,2,0,0" ColumnSpacing="8">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaHeadwordTextStyle}" FontSize="{StaticResource LamhaFontSizeHero}"
                        FlowDirection="LeftToRight" Text="{x:Bind ViewModel.Today.Word, Mode=OneWay}" IsTextSelectionEnabled="True" />
+            <controls:SpeakButton x:Uid="Listen" Grid.Column="1" Style="{StaticResource LamhaIconButtonStyle}" Text="{x:Bind ViewModel.Today.Word, Mode=OneWay, FallbackValue=''}" />
             <!-- The meaning at the row's end -->
-            <TextBlock Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource LamhaTextStyle}"
+            <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource LamhaTextStyle}"
                        FontSize="{StaticResource LamhaFontSizeHeroLong}" FontWeight="Bold"
                        FlowDirection="{x:Bind ViewModel.Today.MeaningFlow, Mode=OneWay}" Text="{x:Bind ViewModel.Today.Meaning, Mode=OneWay}" />
           </Grid>

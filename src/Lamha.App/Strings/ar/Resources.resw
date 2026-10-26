@@ -168,6 +168,14 @@
   <data name="Card_Copied" xml:space="preserve"><value>تم النسخ</value><comment>c.copiedToast</comment></data>
   <data name="Card_CopyTr.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>نسخ</value><comment>common.copy</comment></data>
   <data name="Card_CopyTr.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>نسخ الترجمة</value><comment>c.copyTr</comment></data>
+  <data name="Card_ListenPron.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>استمع للنطق</value><comment>c.listenPron</comment></data>
+  <data name="Card_ListenPron.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>استمع للنطق</value><comment>c.listenPron</comment></data>
+  <data name="Card_ListenOrig.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>استمع للنص الأصلي</value><comment>c.listenOrig</comment></data>
+  <data name="Card_ListenOrig.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>استمع للنص الأصلي</value><comment>c.listenOrig</comment></data>
+  <data name="Card_ListenTr.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>استمع</value><comment>common.listen</comment></data>
+  <data name="Card_ListenTr.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>استمع للترجمة</value><comment>c.listenTr</comment></data>
+  <data name="Listen.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>استمع</value><comment>common.listen</comment></data>
+  <data name="Listen.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>استمع</value><comment>common.listen</comment></data>
   <data name="Card_ErrNotFound" xml:space="preserve"><value>الكلمة غير موجودة في القاموس المحلي</value><comment>c.errNotFound</comment></data>
   <data name="Card_ErrLocalOnly" xml:space="preserve"><value>أنت في وضع «القاموس المحلي فقط». غيّر مصدر القاموس من الإعدادات للبحث عبر الإنترنت.</value><comment>c.errLocalOnly</comment></data>
   <data name="Card_ErrOfflineMode" xml:space="preserve"><value>ترجمة الجمل تحتاج إلى الإنترنت</value><comment>c.errOfflineMode</comment></data>

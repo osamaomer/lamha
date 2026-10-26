@@ -144,6 +144,12 @@
     <Setter Property="controls:Pill.IsPill" Value="True" />
   </Style>
 
+  <!-- Listen next to the headword: round, in the accent colour on its tint (the card's design) -->
+  <Style x:Key="LamhaRoundSpeakButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaRoundButtonStyle}">
+    <Setter Property="Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaAccentBrush}" />
+  </Style>
+
   <!-- A chip that does something once (a meaning or synonym to look up, "+3"): the chip's look on a button -->
   <Style x:Key="LamhaChipButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
     <Setter Property="Background" Value="{ThemeResource LamhaChipBrush}" />

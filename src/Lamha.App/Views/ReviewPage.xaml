@@ -8,7 +8,7 @@
        at most 420 px wide); Show meaning (Space), then Forgot / Hard / Knew it (1 / 2 / 3) with their intervals. -->
 
   <Grid>
-  <StackPanel x:Name="Root" KeyDown="OnKeyDown">
+  <StackPanel x:Name="Root" PreviewKeyDown="OnPreviewKeyDown" KeyDown="OnKeyDown">
     <!-- ===== Due and new, the totals ===== -->
     <Grid ColumnSpacing="8" Visibility="{x:Bind ViewModel.IsRead, Mode=OneWay}">
       <Grid.ColumnDefinitions>
@@ -62,8 +62,11 @@
                   Visibility="{x:Bind ViewModel.IsNew, Mode=OneWay}">
             <TextBlock Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind NewWord}" />
           </Border>
-          <TextBlock HorizontalAlignment="Center" Style="{StaticResource LamhaHeadwordTextStyle}" FontSize="30" LineHeight="36" FlowDirection="LeftToRight"
-                     TextAlignment="Center" Text="{x:Bind ViewModel.Word, Mode=OneWay}" IsTextSelectionEnabled="True" />
+          <StackPanel HorizontalAlignment="Center" FlowDirection="LeftToRight" Orientation="Horizontal" Spacing="8">
+            <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaHeadwordTextStyle}" FontSize="30" LineHeight="36"
+                       TextAlignment="Center" Text="{x:Bind ViewModel.Word, Mode=OneWay}" IsTextSelectionEnabled="True" />
+            <controls:SpeakButton x:Uid="Listen" Style="{StaticResource LamhaIconButtonStyle}" Text="{x:Bind ViewModel.Word, Mode=OneWay}" />
+          </StackPanel>
           <TextBlock MaxWidth="420" HorizontalAlignment="Center" Style="{StaticResource LamhaReadingTextStyle}" Foreground="{ThemeResource LamhaTextMutedBrush}"
                      FlowDirection="LeftToRight" TextAlignment="Center" Visibility="{x:Bind ViewModel.HasExample, Mode=OneWay}">
             <Run Text="{x:Bind ViewModel.ExampleBefore, Mode=OneWay}" /><Run Text="{x:Bind ViewModel.ExampleWord, Mode=OneWay}" FontWeight="Bold"

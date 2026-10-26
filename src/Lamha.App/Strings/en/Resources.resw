@@ -169,6 +169,14 @@
   <data name="Card_Copied" xml:space="preserve"><value>Copied</value><comment>c.copiedToast</comment></data>
   <data name="Card_CopyTr.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Copy</value><comment>common.copy</comment></data>
   <data name="Card_CopyTr.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Copy the translation</value><comment>c.copyTr</comment></data>
+  <data name="Card_ListenPron.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Listen to the pronunciation</value><comment>c.listenPron</comment></data>
+  <data name="Card_ListenPron.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Listen to the pronunciation</value><comment>c.listenPron</comment></data>
+  <data name="Card_ListenOrig.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Listen to the original</value><comment>c.listenOrig</comment></data>
+  <data name="Card_ListenOrig.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Listen to the original</value><comment>c.listenOrig</comment></data>
+  <data name="Card_ListenTr.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Listen</value><comment>common.listen</comment></data>
+  <data name="Card_ListenTr.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Listen to the translation</value><comment>c.listenTr</comment></data>
+  <data name="Listen.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Listen</value><comment>common.listen</comment></data>
+  <data name="Listen.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Listen</value><comment>common.listen</comment></data>
   <data name="Card_ErrNotFound" xml:space="preserve"><value>The word isn't in the offline dictionary</value><comment>c.errNotFound</comment></data>
   <data name="Card_ErrLocalOnly" xml:space="preserve"><value>You're in “Offline only” mode. Change the dictionary source in Settings to search online.</value><comment>c.errLocalOnly</comment></data>
   <data name="Card_ErrOfflineMode" xml:space="preserve"><value>Translating sentences needs the internet</value><comment>c.errOfflineMode</comment></data>

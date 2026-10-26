@@ -246,6 +246,21 @@ public sealed class GoogleTranslate(Http http)
         ]))];
     }
 
+    /// <summary>
+    /// One piece of Google's voice (an address from <see cref="SpeechUrls"/>): its MP3. Throws <see cref="HttpFailure"/>
+    /// when it can't be had within 8 s, as a word lookup waits, so Windows' voice can say it instead.
+    /// </summary>
+    public async Task<byte[]> SpeechPieceAsync(string url, CancellationToken cancel = default)
+    {
+        using var response = await http.SendAsync(Http.Get(url), TimeSpan.FromSeconds(8), cancel).ConfigureAwait(false);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpFailure(HttpFailureKind.Status, (int)response.StatusCode);
+        }
+
+        return await response.Content.ReadAsByteArrayAsync(cancel).ConfigureAwait(false);
+    }
+
     /// <summary>A GET (or a POST when <paramref name="form"/> is given) to a translate_a endpoint, failing over between addresses.</summary>
     private async Task<JsonNode?> RequestAsync(string path, List<KeyValuePair<string, string>> query, List<KeyValuePair<string, string>>? form, CancellationToken cancel)
     {
