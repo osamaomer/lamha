@@ -16,10 +16,13 @@ namespace Lamha.App.Services;
 /// </summary>
 public sealed partial class AccentService : IDisposable
 {
-    /// <summary>Lamha's own colours: Lamha 2's shared/ui.css (--accent, --accent-soft, --btn) for each theme.</summary>
+    /// <summary>
+    /// Lamha's own colours: Lamha 2's shared/ui.css (--accent, --accent-soft, --btn) for each theme, the dark button
+    /// the light accent itself, as Windows draws its accent buttons (decision 0020).
+    /// </summary>
     private static readonly (ThemeAccent Light, ThemeAccent Dark) Own = (
         new ThemeAccent(new Rgb(0x4F, 0x46, 0xE5), 0.09, new Rgb(0x4F, 0x46, 0xE5)),
-        new ThemeAccent(new Rgb(0x9A, 0xA1, 0xFF), 0.12, new Rgb(0x5E, 0x5C, 0xE6)));
+        new ThemeAccent(new Rgb(0x9A, 0xA1, 0xFF), 0.12, new Rgb(0x9A, 0xA1, 0xFF)));
 
     private readonly SettingsService _settings;
     private readonly DispatcherQueue _queue;
@@ -80,6 +83,10 @@ public sealed partial class AccentService : IDisposable
                 Set(brushes, "LamhaAccentBrush", accent.Accent, 1);
                 Set(brushes, "LamhaAccentSoftBrush", accent.Accent, accent.SoftAlpha);
                 Set(brushes, "LamhaButtonBrush", accent.Button, 1);
+                // The switch when on is the button's colour, as Windows' is its accent (Themes/Controls.xaml).
+                Set(brushes, "ToggleSwitchFillOn", accent.Button, 1);
+                Set(brushes, "ToggleSwitchFillOnPointerOver", accent.Button, 1);
+                Set(brushes, "ToggleSwitchFillOnPressed", accent.Button, 1);
             }
         }
     }

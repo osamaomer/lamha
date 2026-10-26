@@ -16,7 +16,7 @@
     <Border Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsOff, Mode=OneWay}">
       <StackPanel Padding="8,12,8,4" Spacing="8" HorizontalAlignment="Center" MaxWidth="440">
         <controls:FluentIcon Glyph="Clipboard" Size="Hero" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="16" Text="{x:Bind OptInTitle}" />
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}" Text="{x:Bind OptInTitle}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind OptInText}" />
         <Button Margin="0,4,0,0" HorizontalAlignment="Center" Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind EnableLabel}" Command="{x:Bind ViewModel.TurnOnCommand}" />
       </StackPanel>
@@ -30,7 +30,7 @@
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
       <Grid>
-        <Border Height="36" CornerRadius="{StaticResource LamhaRadiusMedium}" BorderThickness="1" BorderBrush="{ThemeResource LamhaFieldLineBrush}"
+        <Border Height="36" CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1" BorderBrush="{ThemeResource LamhaFieldLineBrush}"
                 Background="{ThemeResource LamhaSurfaceBrush}">
           <Grid>
             <TextBox x:Name="SearchBox" MinHeight="34" Padding="36,7,12,0" BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"
@@ -60,9 +60,9 @@
       <!-- All / Pinned: the chosen one raised on the surface (the card's language switch) -->
       <Border Grid.Column="1" Padding="2" VerticalAlignment="Center" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
         <StackPanel Orientation="Horizontal" AutomationProperties.Name="{x:Bind FilterLabel}">
-          <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" MinHeight="28" Padding="12,4" FontSize="12.5" Content="{x:Bind AllLabel}"
+          <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" MinHeight="28" Padding="12,4" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind AllLabel}"
                         IsChecked="{x:Bind controls:Show.Not(ViewModel.PinnedOnly), Mode=OneWay}" Command="{x:Bind ViewModel.FilterCommand}" CommandParameter="false" />
-          <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" MinHeight="28" Padding="12,4" FontSize="12.5" Content="{x:Bind PinnedLabel}"
+          <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" MinHeight="28" Padding="12,4" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind PinnedLabel}"
                         IsChecked="{x:Bind ViewModel.PinnedOnly, Mode=OneWay}" Command="{x:Bind ViewModel.FilterCommand}" CommandParameter="true" />
         </StackPanel>
       </Border>
@@ -85,7 +85,7 @@
     </Grid>
 
     <!-- ===== Paused: a banner, and Resume ===== -->
-    <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
+    <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
             Visibility="{x:Bind ViewModel.IsPaused, Mode=OneWay}">
       <Grid ColumnSpacing="12">
         <Grid.ColumnDefinitions>
@@ -94,7 +94,7 @@
         </Grid.ColumnDefinitions>
         <StackPanel VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite">
           <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontWeight="Bold" Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind PausedTitle}" />
-          <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontSize="12.5" Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind PausedText}" />
+          <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind PausedText}" />
         </StackPanel>
         <Button Grid.Column="1" Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind ResumeLabel}" Command="{x:Bind ViewModel.ResumeCommand}" />
       </Grid>
@@ -109,11 +109,11 @@
             <StackPanel>
               <!-- A line between copies, across the panel -->
               <Border Height="1" Background="{ThemeResource LamhaLineBrush}" Visibility="{x:Bind controls:Show.IfNot(IsFirst), Mode=OneWay}" />
-              <Grid Margin="4,2" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="Transparent" Tapped="OnRowTapped"
+              <Grid Margin="4,2" CornerRadius="{StaticResource LamhaRadiusControl}" Background="Transparent" Tapped="OnRowTapped"
                     PointerEntered="OnRowEntered" PointerExited="OnRowExited" AutomationProperties.Name="{x:Bind Text, Mode=OneWay}">
                 <!-- The hover tint, and the chosen copy's (the accent's tint) -->
-                <Border CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaHoverBrush}" Opacity="0" />
-                <Border CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind IsSelected, Mode=OneWay}" />
+                <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaHoverBrush}" Opacity="0" />
+                <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind IsSelected, Mode=OneWay}" />
                 <StackPanel Padding="16,10" Spacing="4">
                   <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
                              FlowDirection="{x:Bind LabelFlow, Mode=OneWay}" Text="{x:Bind Label, Mode=OneWay}" controls:Marked.Query="{x:Bind Query, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Label), Mode=OneWay}" />
@@ -161,8 +161,8 @@
 
                   <!-- A tool working -->
                   <StackPanel Margin="0,8,0,0" Spacing="8" Visibility="{x:Bind IsWorking, Mode=OneWay}">
-                    <controls:Skeleton Height="14" Margin="0,0,24,0" CornerRadius="{StaticResource LamhaRadiusSmall}" />
-                    <controls:Skeleton Height="14" Margin="0,0,120,0" CornerRadius="{StaticResource LamhaRadiusSmall}" />
+                    <controls:Skeleton Height="14" Margin="0,0,24,0" CornerRadius="{StaticResource LamhaRadiusControl}" />
+                    <controls:Skeleton Height="14" Margin="0,0,120,0" CornerRadius="{StaticResource LamhaRadiusControl}" />
                   </StackPanel>
 
                   <!-- A result: the summary's language, the text (Proofread's corrections struck through), Copy and Redo -->

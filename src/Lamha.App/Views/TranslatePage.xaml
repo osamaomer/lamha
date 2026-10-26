@@ -29,10 +29,10 @@
       <StackPanel>
         <Grid>
           <!-- The field: its 1 px edge, and Lamha's 2 px accent ring around it while it has the focus -->
-          <Border CornerRadius="{StaticResource LamhaRadiusMedium}" BorderThickness="1" BorderBrush="{ThemeResource LamhaFieldLineBrush}"
+          <Border CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1" BorderBrush="{ThemeResource LamhaFieldLineBrush}"
                   Background="{ThemeResource LamhaSurfaceBrush}">
             <TextBox x:Name="QueryBox" MinHeight="74" MaxHeight="160" Padding="16,12,44,12" BorderThickness="0" Background="Transparent"
-                     FontFamily="{StaticResource LamhaFontFamily}" FontSize="16.5"
+                     FontFamily="{StaticResource LamhaFontFamily}" FontSize="{StaticResource LamhaFontSizeBodyLarge}"
                      AcceptsReturn="True" TextWrapping="Wrap" IsSpellCheckEnabled="False"
                      TextReadingOrder="DetectFromContent" TextAlignment="{x:Bind controls:Show.BoxAlignment(ViewModel.HasQuery), Mode=OneWay}"
                      PlaceholderText="{x:Bind Placeholder}" AutomationProperties.Name="{x:Bind Placeholder}"
@@ -71,9 +71,9 @@
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="main:KeyPart">
                 <Grid VerticalAlignment="Center">
-                  <Border Padding="5,1" CornerRadius="5" BorderThickness="1,1,1,2" BorderBrush="{ThemeResource LamhaLineBrush}"
+                  <Border Padding="5,1" CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1,1,1,2" BorderBrush="{ThemeResource LamhaLineBrush}"
                           Background="{ThemeResource LamhaSurfaceBrush}" Visibility="{x:Bind IsKey}">
-                    <TextBlock FontFamily="{StaticResource LamhaFontFamily}" FontSize="{StaticResource LamhaFontSizeLabel}"
+                    <TextBlock FontFamily="{StaticResource LamhaFontFamily}" FontSize="{StaticResource LamhaFontSizeCaption}"
                                Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind Text}" />
                   </Border>
                   <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Text}" Visibility="{x:Bind controls:Show.IfNot(IsKey)}" />
@@ -90,10 +90,10 @@
       <StackPanel>
         <TextBlock Margin="0,0,0,12" Style="{StaticResource LamhaHeadwordTextStyle}" FlowDirection="LeftToRight" TextAlignment="{x:Bind controls:Show.LatinAlignment}"
                    Text="{x:Bind ViewModel.WaitingText, Mode=OneWay}" Visibility="{x:Bind ViewModel.WaitingIsWord, Mode=OneWay, FallbackValue=Collapsed}" />
-        <controls:Skeleton Height="52" CornerRadius="{StaticResource LamhaRadiusMedium}" />
-        <controls:Skeleton Height="12" Width="128" Margin="0,20,0,0" HorizontalAlignment="Left" CornerRadius="{StaticResource LamhaRadiusSmall}" />
-        <controls:Skeleton Height="12" Margin="0,12,32,0" CornerRadius="{StaticResource LamhaRadiusSmall}" />
-        <controls:Skeleton Height="12" Margin="0,8,88,0" CornerRadius="{StaticResource LamhaRadiusSmall}" />
+        <controls:Skeleton Height="52" CornerRadius="{StaticResource LamhaRadiusControl}" />
+        <controls:Skeleton Height="12" Width="128" Margin="0,20,0,0" HorizontalAlignment="Left" CornerRadius="{StaticResource LamhaRadiusControl}" />
+        <controls:Skeleton Height="12" Margin="0,12,32,0" CornerRadius="{StaticResource LamhaRadiusControl}" />
+        <controls:Skeleton Height="12" Margin="0,8,88,0" CornerRadius="{StaticResource LamhaRadiusControl}" />
       </StackPanel>
     </Border>
 
@@ -151,7 +151,7 @@
                                Fill="{ThemeResource LamhaButtonBrush}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.Today.IsMet), Mode=OneWay, FallbackValue=Collapsed}" />
             <controls:GoalRing Progress="1" Track="{ThemeResource LamhaChipBrush}" Fill="{ThemeResource LamhaOkBrush}"
                                Visibility="{x:Bind ViewModel.Today.IsMet, Mode=OneWay, FallbackValue=Collapsed}" />
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="{StaticResource LamhaFontFamily}" FontSize="13" FontWeight="Bold"
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="{StaticResource LamhaFontFamily}" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Bold"
                        Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.Today.Done, Mode=OneWay}" />
           </Grid>
           <StackPanel Grid.Column="1" VerticalAlignment="Center" Visibility="{x:Bind ViewModel.Today.HasGoal, Mode=OneWay, FallbackValue=Collapsed}">
@@ -181,12 +181,12 @@
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaHeadwordTextStyle}" FontSize="{StaticResource LamhaFontSizeHero}"
+            <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaHeadwordTextStyle}" FontSize="{StaticResource LamhaFontSizeSubtitle}"
                        FlowDirection="LeftToRight" Text="{x:Bind ViewModel.Today.Word, Mode=OneWay}" IsTextSelectionEnabled="True" />
             <controls:SpeakButton x:Uid="Listen" Grid.Column="1" Style="{StaticResource LamhaIconButtonStyle}" Text="{x:Bind ViewModel.Today.Word, Mode=OneWay, FallbackValue=''}" />
             <!-- The meaning at the row's end -->
             <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource LamhaTextStyle}"
-                       FontSize="{StaticResource LamhaFontSizeHeroLong}" FontWeight="Bold"
+                       FontSize="{StaticResource LamhaFontSizeBodyLarge}" FontWeight="Bold"
                        FlowDirection="{x:Bind ViewModel.Today.MeaningFlow, Mode=OneWay}" Text="{x:Bind ViewModel.Today.Meaning, Mode=OneWay}" />
           </Grid>
           <StackPanel Margin="0,4,0,8" FlowDirection="LeftToRight">

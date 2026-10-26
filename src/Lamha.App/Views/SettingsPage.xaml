@@ -14,11 +14,11 @@
     <!-- Keys as the design draws them: key caps (12 px, the chip's fill, a line under) joined by "+" -->
     <DataTemplate x:Key="KeyPartTemplate" x:DataType="main:KeyPart">
       <Grid>
-        <Border Padding="7,2" CornerRadius="6" Background="{ThemeResource LamhaChipBrush}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="1,1,1,2"
+        <Border Padding="7,2" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaChipBrush}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="1,1,1,2"
                 Visibility="{x:Bind IsKey}">
-          <TextBlock FontSize="12" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind Text}" />
+          <TextBlock FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind Text}" />
         </Border>
-        <TextBlock Margin="2,0" VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Text}"
+        <TextBlock Margin="2,0" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Text}"
                    Visibility="{x:Bind controls:Show.IfNot(IsKey)}" />
       </Grid>
     </DataTemplate>
@@ -37,7 +37,7 @@
                Visibility="{x:Bind ViewModel.IsHome, Mode=OneWay}" />
     <StackPanel Margin="0,0,0,24" Orientation="Horizontal" Spacing="8" Visibility="{x:Bind controls:Show.IfNot(ViewModel.IsHome), Mode=OneWay}">
       <HyperlinkButton x:Name="Crumb" Style="{StaticResource LamhaCrumbButtonStyle}" Command="{x:Bind ViewModel.GoHomeCommand}" Content="{x:Bind Title}" />
-      <controls:FluentIcon Glyph="Forward" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
+      <controls:FluentIcon Glyph="Chevron" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
       <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaPageTitleTextStyle}" Text="{x:Bind ViewModel.SectionTitle, Mode=OneWay}" AutomationProperties.HeadingLevel="Level1" />
     </StackPanel>
 
@@ -55,14 +55,14 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
-              <Border Width="32" Height="32" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaAccentSoftBrush}">
+              <Border Width="32" Height="32" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaAccentSoftBrush}">
                 <controls:FluentIcon Glyph="{x:Bind Glyph}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}" />
               </Border>
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Title}" />
                 <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{x:Bind Summary}" />
               </StackPanel>
-              <controls:FluentIcon Grid.Column="2" Glyph="Forward" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
+              <controls:FluentIcon Grid.Column="2" Glyph="Chevron" Size="Small" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
             </Grid>
           </Button>
         </DataTemplate>
@@ -95,7 +95,7 @@
       <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,0,0,4" Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Text="{x:Bind S.AiProvider}"
                  AutomationProperties.HeadingLevel="Level2" />
       <views:WritingSetupView Setup="{x:Bind ViewModel.Writing}" />
-      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" Text="{x:Bind S.AiPrivacy}" />
+      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Text="{x:Bind S.AiPrivacy}" />
     </StackPanel>
 
     <!-- ===== Clipboard ===== -->
@@ -157,7 +157,7 @@
             <ItemsControl ItemsSource="{x:Bind ViewModel.Clipboard.Seen, Mode=OneWay}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="main:SeenApp">
-                  <Button Style="{StaticResource LamhaChipButtonStyle}" FontSize="{StaticResource LamhaFontSizeSecondary}" Content="{x:Bind Label}" Command="{x:Bind Add}"
+                  <Button Style="{StaticResource LamhaChipButtonStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind Label}" Command="{x:Bind Add}"
                           ToolTipService.ToolTip="{x:Bind Tooltip}" />
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
@@ -182,7 +182,7 @@
           </Button>
         </StackPanel>
       </controls:SettingsCard>
-      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" Text="{x:Bind S.CbEncrypted}" />
+      <TextBlock TextReadingOrder="UseFlowDirection" Margin="0,8,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Text="{x:Bind S.CbEncrypted}" />
     </StackPanel>
 
     <!-- ===== Privacy & history ===== -->
@@ -239,9 +239,9 @@
           </Grid>
           <controls:StatusText Text="{x:Bind ViewModel.Privacy.ReportStatus, Mode=OneWay}" Kind="Ok" />
           <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" Content="{x:Bind S.ReportShow}" Command="{x:Bind ViewModel.Privacy.ToggleReportCommand}" />
-          <Border Padding="12,8" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaChipBrush}" FlowDirection="LeftToRight"
+          <Border Padding="12,8" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaChipBrush}" FlowDirection="LeftToRight"
                   Visibility="{x:Bind ViewModel.Privacy.IsReportShown, Mode=OneWay}">
-            <TextBlock FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource LamhaTextBrush}"
+            <TextBlock FontFamily="Consolas" FontSize="{StaticResource LamhaFontSizeCaption}" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource LamhaTextBrush}"
                        Text="{x:Bind ViewModel.Privacy.Report, Mode=OneWay}" />
           </Border>
         </StackPanel>
@@ -358,7 +358,7 @@
       <Border Style="{StaticResource LamhaSettingsPanelStyle}">
         <StackPanel Spacing="8">
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Credits}" AutomationProperties.HeadingLevel="Level2" />
-          <TextBlock FlowDirection="LeftToRight" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" LineHeight="21" controls:Markup.Text="{x:Bind S.CreditsList}" />
+          <TextBlock FlowDirection="LeftToRight" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" LineHeight="21" controls:Markup.Text="{x:Bind S.CreditsList}" />
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CreditsLicense}" />
         </StackPanel>
       </Border>
@@ -380,7 +380,7 @@
                         AutomationProperties.Name="{x:Bind S.Explain}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="main:ExplainChip">
-                <ToggleButton Style="{StaticResource LamhaChipStyle}" FontSize="{StaticResource LamhaFontSizeSecondary}" Padding="12,3"
+                <ToggleButton Style="{StaticResource LamhaChipStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Padding="12,3"
                               IsChecked="{x:Bind IsOn, Mode=TwoWay}" IsEnabled="{x:Bind CanChange, Mode=OneWay}" Content="{x:Bind Label}"
                               ToolTipService.ToolTip="{x:Bind Tooltip, Mode=OneWay}" />
               </DataTemplate>
@@ -545,19 +545,19 @@
             <ComboBox Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind ViewModel.MotionChoices}"
                       SelectedIndex="{x:Bind ViewModel.MotionIndex, Mode=TwoWay}" AutomationProperties.Name="{x:Bind S.Motion}" AutomationProperties.HelpText="{x:Bind S.MotionHint}" />
           </Grid>
-          <Grid Padding="12" MinHeight="76" ColumnSpacing="12" CornerRadius="{StaticResource LamhaRadiusLarge}" Background="{ThemeResource LamhaPageBrush}">
+          <Grid Padding="12" MinHeight="76" ColumnSpacing="12" CornerRadius="{StaticResource LamhaRadiusOverlay}" Background="{ThemeResource LamhaPageBrush}">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*" />
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <!-- Lamha 2's .md-card: the English word on the left in both languages, its meaning on the reading side -->
-            <Border x:Name="MotionDemoCard" Padding="12,10" CornerRadius="{StaticResource LamhaRadiusMedium}" VerticalAlignment="Center"
+            <Border x:Name="MotionDemoCard" Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" VerticalAlignment="Center"
                     Background="{ThemeResource LamhaSurfaceBrush}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="1"
                     AutomationProperties.AccessibilityView="Raw">
               <StackPanel Spacing="2">
-                <TextBlock FlowDirection="LeftToRight" TextAlignment="Left" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource LamhaTextBrush}"
+                <TextBlock FlowDirection="LeftToRight" TextAlignment="Left" FontSize="{StaticResource LamhaFontSizeBody}" FontWeight="Bold" Foreground="{ThemeResource LamhaTextBrush}"
                            Text="{x:Bind S.MotionDemoWord}" />
-                <TextBlock x:Name="MotionDemoMeaning" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind S.MotionDemoMeaning}" />
+                <TextBlock x:Name="MotionDemoMeaning" FontSize="{StaticResource LamhaFontSizeBodyLarge}" FontWeight="Bold" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind S.MotionDemoMeaning}" />
               </StackPanel>
             </Border>
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="8">

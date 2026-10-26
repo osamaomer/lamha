@@ -9,24 +9,24 @@
     <ResourceDictionary Source="ms-appx:///Themes/Tokens.xaml" />
   </ResourceDictionary.MergedDictionaries>
 
-  <!-- The switch: Lamha 2's green when on (LamhaSwitchOnBrush, 3:1 on both themes' surfaces) with a white knob, as designed; high contrast keeps
-       Windows' own. -->
+  <!-- The switch, as Windows': on in the accent fill (LamhaButtonBrush's colour; AccentService repaints these with it)
+       and the knob in the button's text colour; high contrast keeps Windows' own. -->
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Light">
-      <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#2E9E4F" />
-      <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#2E9E4F" />
-      <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#2E9E4F" />
+      <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#4F46E5" />
+      <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#4F46E5" />
+      <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#4F46E5" />
       <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#FFFFFF" />
       <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#FFFFFF" />
       <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#FFFFFF" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
-      <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#2E9E4F" />
-      <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#2E9E4F" />
-      <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#2E9E4F" />
-      <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#FFFFFF" />
-      <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#FFFFFF" />
-      <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#9AA1FF" />
+      <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#9AA1FF" />
+      <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#9AA1FF" />
+      <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#0B0B12" />
+      <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#0B0B12" />
+      <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#0B0B12" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="HighContrast" />
   </ResourceDictionary.ThemeDictionaries>
@@ -90,11 +90,11 @@
     <Setter Property="Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
     <Setter Property="BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="12,5" />
     <Setter Property="MinHeight" Value="32" />
     <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
-    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeSecondary}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -134,7 +134,7 @@
   <Style x:Key="LamhaIconButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="Width" Value="28" />
     <Setter Property="Height" Value="28" />
@@ -170,7 +170,7 @@
   <Style x:Key="LamhaFootLinkStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="8,4" />
     <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
@@ -183,7 +183,7 @@
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
     <Setter Property="BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="Width" Value="28" />
     <Setter Property="Height" Value="28" />
@@ -278,7 +278,7 @@
     <Setter Property="Padding" Value="10,2" />
     <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
     <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
-    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeLabel}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="UseSystemFocusVisuals" Value="True" />
@@ -433,7 +433,7 @@
   <!-- A skeleton: the grey shape of what's coming, with a light sweeping across it (Controls/Skeleton.cs moves it) -->
   <Style TargetType="controls:Skeleton">
     <Setter Property="Background" Value="{ThemeResource LamhaSkeletonBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="IsTabStop" Value="False" />
     <Setter Property="Template">
       <Setter.Value>
@@ -463,12 +463,12 @@
     <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
     <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusLarge}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusOverlay}" />
     <Setter Property="Padding" Value="20" />
   </Style>
   <Style x:Key="LamhaTintedBoxStyle" TargetType="Border">
     <Setter Property="Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="16,12" />
   </Style>
 
@@ -488,7 +488,7 @@
   <Style x:Key="LamhaRowButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="9,7" />
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
     <Setter Property="FontWeight" Value="Normal" />
@@ -515,7 +515,7 @@
     <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
     <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="15,11" />
     <Setter Property="MinHeight" Value="68" />
   </Style>
@@ -523,7 +523,7 @@
     <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
     <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="15,11" />
     <Setter Property="MinHeight" Value="68" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -554,7 +554,7 @@
     <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
     <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusSmall}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="15,11" />
     <Setter Property="MinHeight" Value="68" />
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
@@ -569,7 +569,7 @@
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="MinHeight" Value="0" />
     <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
-    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizePageTitle}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeTitle}" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
     <Setter Property="Background" Value="Transparent" />
@@ -665,7 +665,7 @@
   <Style x:Key="LamhaComboStyle" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
     <Setter Property="MinWidth" Value="200" />
     <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
   </Style>
@@ -673,7 +673,7 @@
   <!-- A text field and a key field in Settings: 36 px high (the dropdowns' and buttons' height), the inputs' corners -->
   <Style x:Key="LamhaFieldStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
     <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -681,7 +681,7 @@
   </Style>
   <Style x:Key="LamhaPasswordStyle" TargetType="PasswordBox" BasedOn="{StaticResource DefaultPasswordBoxStyle}">
     <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
     <Setter Property="VerticalContentAlignment" Value="Center" />

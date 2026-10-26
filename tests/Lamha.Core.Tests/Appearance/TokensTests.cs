@@ -33,8 +33,6 @@ public partial class TokensTests
         { "LamhaSkeletonBrush", "card", "skeleton" },
         { "LamhaAccentBrush", "ui", "accent" },
         { "LamhaAccentSoftBrush", "ui", "accent-soft" },
-        { "LamhaButtonBrush", "ui", "btn" },
-        { "LamhaButtonTextBrush", "ui", "btn-fg" },
         { "LamhaAccentTextBrush", "ui", "accent-fg" },
         { "LamhaOkBrush", "ui", "ok" },
         { "LamhaOkSoftBrush", "ui", "ok-soft" },
@@ -57,6 +55,20 @@ public partial class TokensTests
             var (rgb, alpha) = Brush(theme, key);
             Assert.True(rgb == css.Rgb && alpha == css.Alpha, $"{theme} {key}: {rgb.Hex} at {alpha}, Lamha 2's --{variable} is {css.Rgb.Hex} at {css.Alpha}");
         }
+    }
+
+    /// <summary>
+    /// The filled button: Lamha 2's in light; in dark, Windows' way, the light accent itself under dark text
+    /// (decision 0020), the same pair AccentPalette gives Windows' own accent.
+    /// </summary>
+    [Fact]
+    public void TheButtonIsLamhaTwosInLightAndTheAccentUnderDarkTextInDark()
+    {
+        var css = Lamha2Colours("ui", "Light");
+        Assert.Equal(css["btn"], Brush("Light", "LamhaButtonBrush"));
+        Assert.Equal(css["btn-fg"], Brush("Light", "LamhaButtonTextBrush"));
+        Assert.Equal(Brush("Dark", "LamhaAccentBrush"), Brush("Dark", "LamhaButtonBrush"));
+        Assert.Equal((AccentPalette.DarkButtonText, 255), Brush("Dark", "LamhaButtonTextBrush"));
     }
 
     [Theory]
@@ -116,7 +128,7 @@ public partial class TokensTests
         var edge = Ground(theme, "LamhaFieldLineBrush", page);
         Assert.True(Rgb.Contrast(edge, surface) >= 3, $"{theme}: field edge on the surface {Rgb.Contrast(edge, surface):F2}:1");
         Assert.True(Rgb.Contrast(edge, page) >= 3, $"{theme}: field edge on the page {Rgb.Contrast(edge, page):F2}:1");
-        var on = Ground(theme, "LamhaSwitchOnBrush", surface);
+        var on = Ground(theme, "LamhaButtonBrush", surface);
         Assert.True(Rgb.Contrast(on, surface) >= 3, $"{theme}: the switch when on {Rgb.Contrast(on, surface):F2}:1");
     }
 
@@ -188,18 +200,22 @@ public partial class TokensTests
         }
     }
 
+    /// <summary>The switch when on is the accent fill with the button's text colour as its knob, as Windows' (decision 0020).</summary>
     [Fact]
-    public void TheSwitchIsLamhaTwosGreen()
+    public void TheSwitchIsTheAccentFill()
     {
         var controls = XDocument.Load(Path.Combine(RealDictionary.RepositoryRoot, "src", "Lamha.App", "Themes", "Controls.xaml")).Root!
             .Elements().Single(e => e.Name.LocalName == "ResourceDictionary.ThemeDictionaries")
             .Elements().ToDictionary(d => d.Attribute(X + "Key")!.Value);
         foreach (var theme in new[] { "Light", "Dark" })
         {
-            var green = Brush(theme, "LamhaSwitchOnBrush");
-            var fills = controls[theme].Elements().Where(e => e.Attribute(X + "Key")!.Value.StartsWith("ToggleSwitchFillOn", StringComparison.Ordinal)).ToList();
+            List<XElement> Keyed(string prefix) => controls[theme].Elements().Where(e => e.Attribute(X + "Key")!.Value.StartsWith(prefix, StringComparison.Ordinal)).ToList();
+            var fills = Keyed("ToggleSwitchFillOn");
+            var knobs = Keyed("ToggleSwitchKnobFillOn");
             Assert.Equal(3, fills.Count);
-            Assert.All(fills, f => Assert.Equal(green, Colour(f.Attribute("Color")!.Value)));
+            Assert.Equal(3, knobs.Count);
+            Assert.All(fills, f => Assert.Equal(Brush(theme, "LamhaButtonBrush"), Colour(f.Attribute("Color")!.Value)));
+            Assert.All(knobs, k => Assert.Equal(Brush(theme, "LamhaButtonTextBrush"), Colour(k.Attribute("Color")!.Value)));
         }
 
         Assert.Empty(controls["HighContrast"].Elements()); // Windows' own colours

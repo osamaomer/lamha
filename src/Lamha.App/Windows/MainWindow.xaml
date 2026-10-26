@@ -17,9 +17,9 @@
           <controls:FluentIcon Glyph="{x:Bind Glyph}" VerticalAlignment="Center" />
           <TextBlock Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{x:Bind Label}" />
           <!-- The words to review (the design's badge): 16 px high, the button colour -->
-          <Border Grid.Column="2" MinWidth="16" Height="16" Padding="5,0" VerticalAlignment="Center" CornerRadius="8"
+          <Border Grid.Column="2" MinWidth="16" Height="16" Padding="5,0" VerticalAlignment="Center" CornerRadius="{StaticResource LamhaRadiusOverlay}"
                   Background="{ThemeResource LamhaButtonBrush}" Visibility="{x:Bind controls:Show.IfText(Badge), Mode=OneWay, FallbackValue=Collapsed}">
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeLabel}" FontWeight="SemiBold"
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="SemiBold"
                        Foreground="{ThemeResource LamhaButtonTextBrush}" Text="{x:Bind Badge, Mode=OneWay}" />
           </Border>
         </Grid>
@@ -63,7 +63,7 @@
 
       <!-- The page, on Windows' content layer over Mica -->
       <Border Grid.Column="1" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-              BorderThickness="1,1,0,0" CornerRadius="8,0,0,0">
+              BorderThickness="1,1,0,0" CornerRadius="{StaticResource LamhaPageCornerRadius}">
         <Grid>
           <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
             <!-- The page fills the layer up to 760 px (the design's), from the start side -->
@@ -85,7 +85,7 @@
                   controls:Pill.IsPill="True" Background="{ThemeResource LamhaToastBackgroundBrush}"
                   Visibility="{x:Bind controls:Show.IfText(ViewModel.Toast), Mode=OneWay, FallbackValue=Collapsed}">
             <StackPanel Orientation="Horizontal" Spacing="12">
-              <TextBlock VerticalAlignment="Center" FontSize="12.5" FontWeight="SemiBold" Foreground="{ThemeResource LamhaToastTextBrush}"
+              <TextBlock VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaToastTextBrush}"
                          Text="{x:Bind ViewModel.Toast, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
               <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" Command="{x:Bind ViewModel.RunToastActionCommand}"
                                Visibility="{x:Bind controls:Show.IfText(ViewModel.ToastAction), Mode=OneWay, FallbackValue=Collapsed}">

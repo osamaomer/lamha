@@ -34,7 +34,7 @@
     </StackPanel.Resources>
 
     <!-- 🎉 a milestone, or today's goal -->
-    <Border Margin="0,0,0,12" Padding="12,8" CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaOkSoftBrush}"
+    <Border Margin="0,0,0,12" Padding="12,8" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaOkSoftBrush}"
             Visibility="{x:Bind controls:Show.IfText(Answer.Milestone), Mode=OneWay, FallbackValue=Collapsed}">
       <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Foreground="{ThemeResource LamhaOkBrush}" FontWeight="SemiBold"
                  Text="{x:Bind Answer.Milestone, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
@@ -53,7 +53,7 @@
                    Visibility="{x:Bind controls:Show.IfText(Answer.Phonetic), Mode=OneWay, FallbackValue=Collapsed}" />
         <StackPanel Margin="0,4,0,0" Orientation="Horizontal" Visibility="{x:Bind controls:Show.IfText(Answer.FormOfText), Mode=OneWay, FallbackValue=Collapsed}">
           <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind Answer.FormOfText, Mode=OneWay}" />
-          <HyperlinkButton Padding="0" FontSize="{StaticResource LamhaFontSizeSecondary}" Content="{x:Bind Answer.FormOfWord, Mode=OneWay}"
+          <HyperlinkButton Padding="0" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind Answer.FormOfWord, Mode=OneWay}"
                            Command="{x:Bind Answer.OpenFormOfCommand, Mode=OneWay}"
                            Visibility="{x:Bind controls:Show.IfText(Answer.FormOfWord), Mode=OneWay, FallbackValue=Collapsed}" />
         </StackPanel>
@@ -148,7 +148,7 @@
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="card:MeaningLine">
             <Grid Margin="{x:Bind controls:Show.TintedMargin(Best)}">
-              <Border CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind Best, FallbackValue=Collapsed}" />
+              <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind Best, FallbackValue=Collapsed}" />
               <ItemsControl Margin="{x:Bind controls:Show.TintedPadding(Best)}" ItemsSource="{x:Bind Items}" ItemTemplateSelector="{StaticResource MeaningTemplates}"
                             ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False" />
             </Grid>
@@ -177,7 +177,7 @@
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="card:DefinitionItem">
                     <Grid Margin="{x:Bind controls:Show.DefinitionMargin(Best)}" ToolTipService.ToolTip="{x:Bind BestTooltip}">
-                      <Border CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind Best, FallbackValue=Collapsed}" />
+                      <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind Best, FallbackValue=Collapsed}" />
                       <Grid Margin="{x:Bind controls:Show.TintedPadding(Best)}" ColumnSpacing="8">
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="18" />
@@ -187,9 +187,9 @@
                       <Grid Width="18" Height="18" Margin="0,3,0,0" VerticalAlignment="Top">
                         <Ellipse Fill="{ThemeResource LamhaChipBrush}" Visibility="{x:Bind controls:Show.IfNot(Best), FallbackValue=Collapsed}" />
                         <Ellipse Fill="{ThemeResource LamhaButtonBrush}" Visibility="{x:Bind Best, FallbackValue=Collapsed}" />
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeLabel}" FontWeight="Bold"
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Bold"
                                    Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Number}" Visibility="{x:Bind controls:Show.IfNot(Best), FallbackValue=Collapsed}" />
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeLabel}" FontWeight="Bold"
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Bold"
                                    Foreground="{ThemeResource LamhaButtonTextBrush}" Text="{x:Bind Number}" Visibility="{x:Bind Best, FallbackValue=Collapsed}" />
                       </Grid>
                       <StackPanel Grid.Column="1">
@@ -198,7 +198,7 @@
                                    Text="{x:Bind ArabicWords}" Visibility="{x:Bind controls:Show.IfText(ArabicWords), FallbackValue=Collapsed}" />
                         <TextBlock Style="{StaticResource LamhaReadingTextStyle}" FlowDirection="RightToLeft" TextAlignment="{x:Bind controls:Show.ArabicAlignment}"
                                    Text="{x:Bind Translated, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Translated), Mode=OneWay, FallbackValue=Collapsed}" />
-                        <controls:Skeleton Height="12" Margin="0,6,48,6" CornerRadius="{StaticResource LamhaRadiusSmall}"
+                        <controls:Skeleton Height="12" Margin="0,6,48,6" CornerRadius="{StaticResource LamhaRadiusControl}"
                                 Visibility="{x:Bind Pending, Mode=OneWay, FallbackValue=Collapsed}" />
                         <TextBlock Margin="0,2,0,0" Style="{x:Bind controls:Show.GlossStyle(GlossIsRightToLeft)}"
                                    FlowDirection="{x:Bind controls:Show.Flow(GlossIsRightToLeft)}" TextAlignment="{x:Bind controls:Show.FlowAlignment(GlossIsRightToLeft)}"
@@ -262,7 +262,7 @@
           <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Border Width="64" Height="64" VerticalAlignment="Top" CornerRadius="{StaticResource LamhaRadiusMedium}"
+        <Border Width="64" Height="64" VerticalAlignment="Top" CornerRadius="{StaticResource LamhaRadiusControl}"
                 Visibility="{x:Bind controls:Show.IfSet(Answer.Wikipedia.Thumb), Mode=OneWay, FallbackValue=Collapsed}">
           <Image Stretch="UniformToFill" Source="{x:Bind controls:Show.Picture(Answer.Wikipedia.Thumb, 64), Mode=OneWay}" />
         </Border>

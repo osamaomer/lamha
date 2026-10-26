@@ -128,13 +128,14 @@ WinUI's ramp. The frame, Settings and controls use only these styles:
 
 ## 5. Icons
 
-**Segoe Fluent Icons,** Windows' icon font (`SymbolThemeFontFamily`), through Lamha's names. A screen asks for `Glyph.Copy`, never for a code point.
+**Segoe Fluent Icons,** Windows' icon font (`SymbolThemeFontFamily`), through Lamha's names (`Controls/FluentIcon.cs` holds the map; `Controls/BrandMark.cs` the mark). A screen asks for `Glyph.Copy` at a `Size` (Small, Normal, Large, Hero), never for a code point or a number.
 
 | Size | For |
 |---|---|
-| **12** | chevrons, the small × in a field |
-| **16** | buttons, rows, menus, the title bar's icon (`LamhaIconSize`) |
-| **20** | setting cards, the pane's coloured icons |
+| **12** (Small) | chevrons, the small × in a field |
+| **16** (Normal) | buttons, rows, menus |
+| **20** (Large) | setting cards, the pane's coloured icons |
+| **40** (Hero) | an empty state, first run's big moments |
 
 The 33 names, mapped (seen side by side with Lamha 2's in `system.html`):
 
@@ -170,6 +171,7 @@ The 33 names, mapped (seen side by side with Lamha 2's in `system.html`):
 | Down | E70D | ChevronDown |
 | List | E8FD | BulletedList |
 | Text | E8D2 | Font |
+| Chevron | E76C | ChevronRight (turns in Arabic): a breadcrumb's step, a card that opens a page |
 
 **The pane's coloured icons** are Lamha's own (drafts in `system.html`), in Windows Settings' style: 20 × 20, one main colour each, soft shading, the same in both themes with an edge that keeps them clear on dark.
 
@@ -213,7 +215,7 @@ The default is WinUI's own control and style. Lamha's styles only set tokens.
 
 Windows' timing and curves, through `Animations.cs`, at the user's level:
 - **Full:** as written.
-- **Subtle:** the same, a third faster, without the decorative ones.
+- **Subtle:** the same, a quarter faster (Lamha 2's rule), without the decorative ones.
 - **Off:** nothing moves.
 - **Automatic:** follows Windows' "Animation effects".
 

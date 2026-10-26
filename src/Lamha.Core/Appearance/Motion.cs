@@ -15,22 +15,23 @@ public enum MotionLevel
 
 /// <summary>
 /// Settings → Appearance → Animations ("auto", "full", "subtle", "off") on this PC, and the timings every window uses.
-/// Lamha 2's shared/motion.js (<c>resolve()</c>, <c>time()</c>, its default durations and easings) and
-/// desktop/app-rules.js (<c>motionHint()</c>), with their numbers.
+/// The levels are Lamha 2's shared/motion.js (<c>resolve()</c>, <c>time()</c>) and desktop/app-rules.js
+/// (<c>motionHint()</c>), with their numbers; the durations and curves are Windows' (WinUI's ControlFaster/Fast/Normal
+/// AnimationDuration and ControlFastOutSlowInKeySpline), as the design system has them (decision 0020).
 /// </summary>
 public static class Motion
 {
     /// <summary>The settings, in Settings' order.</summary>
     public static readonly IReadOnlyList<string> Settings = ["auto", "full", "subtle", "off"];
 
-    /// <summary>Something appearing (the card, a panel).</summary>
-    public const int EnterMilliseconds = 180;
+    /// <summary>Something appearing (the card, a panel, a menu): Windows' 167 ms.</summary>
+    public const int EnterMilliseconds = 167;
 
-    /// <summary>Something going away. Nothing waits on it longer than this.</summary>
-    public const int ExitMilliseconds = 110;
+    /// <summary>Something going away: Windows' 83 ms. Nothing waits on it longer than this.</summary>
+    public const int ExitMilliseconds = 83;
 
-    /// <summary>A box growing or shrinking to its new content.</summary>
-    public const int ResizeMilliseconds = 200;
+    /// <summary>A box growing or shrinking to its new content, a page, a list making room: Windows' 250 ms.</summary>
+    public const int ResizeMilliseconds = 250;
 
     /// <summary>A list's items coming in one after another (full only): each this much after the last, at most
     /// <see cref="StaggerMax"/> of them, rising <see cref="StaggerDistance"/> px over <see cref="StaggerMilliseconds"/>.</summary>
@@ -45,11 +46,11 @@ public static class Motion
     /// <summary>The waiting mark shows only after this, so an answer from the dictionary doesn't flicker.</summary>
     public const int WaitMarkDelayMilliseconds = 250;
 
-    /// <summary>Lamha 2's cubic-bezier(.2,.8,.2,1): quick, then settling.</summary>
-    public static readonly (float X1, float Y1, float X2, float Y2) EnterEasing = (0.2f, 0.8f, 0.2f, 1f);
+    /// <summary>Windows' fast out, slow in (0, 0, 0, 1): quick, then settling.</summary>
+    public static readonly (float X1, float Y1, float X2, float Y2) EnterEasing = (0f, 0f, 0f, 1f);
 
-    /// <summary>Lamha 2's cubic-bezier(.4,0,1,1): speeding up as it leaves.</summary>
-    public static readonly (float X1, float Y1, float X2, float Y2) ExitEasing = (0.4f, 0f, 1f, 1f);
+    /// <summary>Windows' (1, 0, 1, 1): speeding up as it leaves.</summary>
+    public static readonly (float X1, float Y1, float X2, float Y2) ExitEasing = (1f, 0f, 1f, 1f);
 
     /// <summary>
     /// The level for <paramref name="setting"/>. Automatic (and anything unknown) is off when Windows' Animation

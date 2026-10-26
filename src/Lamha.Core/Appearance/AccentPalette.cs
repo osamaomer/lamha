@@ -63,7 +63,10 @@ public readonly record struct Rgb(byte R, byte G, byte B)
 /// <summary>One theme's accent colours.</summary>
 /// <param name="Accent">Links, labels, icons: readable on the theme's cards and on its own tint.</param>
 /// <param name="SoftAlpha">The tint behind selected things: <see cref="Accent"/> at this opacity.</param>
-/// <param name="Button">Filled buttons and selected chips, under white text.</param>
+/// <param name="Button">
+/// Filled buttons, selected chips, a switch when on: under white text in light, and in dark the accent itself under
+/// <see cref="AccentPalette.DarkButtonText"/>, as Windows draws its accent buttons (decision 0020).
+/// </param>
 public sealed record ThemeAccent(Rgb Accent, double SoftAlpha, Rgb Button);
 
 /// <summary>
@@ -78,6 +81,9 @@ public static class AccentPalette
 
     public static readonly Rgb DarkSurface = new(44, 44, 46);
 
+    /// <summary>The text on a dark theme's filled button (Tokens.xaml's LamhaButtonTextBrush in dark).</summary>
+    public static readonly Rgb DarkButtonText = new(0x0B, 0x0B, 0x12);
+
     /// <summary>Both themes' colours from Windows' accent ("RRGGBB" or "RRGGBBAA"), or null when it isn't a colour.</summary>
     public static (ThemeAccent Light, ThemeAccent Dark)? From(string? windowsAccent) =>
         Rgb.Parse(windowsAccent) is { } rgb ? From(rgb) : null;
@@ -87,8 +93,11 @@ public static class AccentPalette
 
     private static ThemeAccent Theme(Rgb rgb, Rgb surface, Rgb toward)
     {
-        var alpha = toward == Rgb.White ? 0.12 : 0.09; // --accent-soft's, as in ui.css
-        return new ThemeAccent(Readable(rgb, surface, toward, alpha), alpha, Readable(rgb, Rgb.White, Rgb.Black, 0));
+        var dark = toward == Rgb.White;
+        var alpha = dark ? 0.12 : 0.09; // --accent-soft's, as in ui.css
+        var accent = Readable(rgb, surface, toward, alpha);
+        // Dark: Windows' way, the light accent under dark text (it reads at 4.5:1 on the dark cards, so far more on the text).
+        return new ThemeAccent(accent, alpha, dark ? accent : Readable(rgb, Rgb.White, Rgb.Black, 0));
     }
 
     /// <summary>

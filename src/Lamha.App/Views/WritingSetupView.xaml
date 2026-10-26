@@ -97,9 +97,9 @@
       </RadioButton>
       <StackPanel x:Name="GeminiSetup" x:Load="{x:Bind Setup.IsGemini, Mode=OneWay}" Style="{StaticResource LamhaProviderSetupStyle}">
         <ContentControl Content="{x:Bind Setup.Gemini}" ContentTemplate="{StaticResource KeyTemplate}" HorizontalContentAlignment="Stretch" IsTabStop="False" />
-        <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" controls:Markup.Text="{x:Bind S.GeminiTip}" />
-        <Border Padding="12,8" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaWarnBackgroundBrush}">
-          <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind S.GeminiWarn}" />
+        <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" controls:Markup.Text="{x:Bind S.GeminiTip}" />
+        <Border Padding="12,8" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaWarnBackgroundBrush}">
+          <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind S.GeminiWarn}" />
         </Border>
         <Grid ColumnSpacing="16">
           <Grid.ColumnDefinitions>
@@ -126,7 +126,7 @@
       </RadioButton>
       <StackPanel x:Name="ClaudeSetup" x:Load="{x:Bind Setup.IsClaude, Mode=OneWay}" Style="{StaticResource LamhaProviderSetupStyle}">
         <ContentControl Content="{x:Bind Setup.Claude}" ContentTemplate="{StaticResource KeyTemplate}" HorizontalContentAlignment="Stretch" IsTabStop="False" />
-        <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" controls:Markup.Text="{x:Bind S.ClaudeTip}" />
+        <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" controls:Markup.Text="{x:Bind S.ClaudeTip}" />
         <Grid ColumnSpacing="16">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -152,7 +152,7 @@
       </RadioButton>
       <StackPanel x:Name="OpenAiSetup" x:Load="{x:Bind Setup.IsOpenAi, Mode=OneWay}" Style="{StaticResource LamhaProviderSetupStyle}">
         <ContentControl Content="{x:Bind Setup.OpenAi}" ContentTemplate="{StaticResource KeyTemplate}" HorizontalContentAlignment="Stretch" IsTabStop="False" />
-        <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" controls:Markup.Text="{x:Bind S.OpenAiTip}" />
+        <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" controls:Markup.Text="{x:Bind S.OpenAiTip}" />
         <Grid ColumnSpacing="16">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />

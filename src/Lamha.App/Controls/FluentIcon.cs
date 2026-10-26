@@ -43,6 +43,7 @@ public enum Glyph
     Down,
     List,
     Text,
+    Chevron,
 }
 
 /// <summary>The design system's icon sizes (docs/design/system.md, Icons).</summary>
@@ -115,6 +116,7 @@ public sealed partial class FluentIcon : UserControl
         [Glyph.Down] = '', // ChevronDown
         [Glyph.List] = '', // BulletedList
         [Glyph.Text] = '', // Font
+        [Glyph.Chevron] = '', // ChevronRight: a breadcrumb's step, a setting card that opens a page
     };
 
     /// <summary>The filled glyph, where the icon shows a state: a word in review, a pinned copy.</summary>
@@ -203,8 +205,8 @@ public sealed partial class FluentIcon : UserControl
 
     private void Draw()
     {
-        // Only the arrows follow the text's direction.
-        _font.MirroredWhenRightToLeft = Glyph is Glyph.Back or Glyph.Forward;
+        // Only the arrows and the chevron follow the text's direction.
+        _font.MirroredWhenRightToLeft = Glyph is Glyph.Back or Glyph.Forward or Glyph.Chevron;
         _font.Glyph = Glyph == Glyph.None ? "" : (Filled && FilledGlyphs.TryGetValue(Glyph, out var filled) ? filled : Glyphs[Glyph]).ToString();
         Wave();
     }

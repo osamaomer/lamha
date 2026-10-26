@@ -45,7 +45,7 @@ The "one file" is **one document to read**, plus the code that holds the values:
 | `docs/design/system.md` | **The design system:** the rules, every token with its Windows equivalent, the icon map, the component list (each with its states and its Windows reference), the motion catalogue, spacing and layout per screen type, RTL rules. Every screen follows it, and a new component is added here first. |
 | `docs/design/system.html` | The same, drawn: every component in its states, both languages and themes, with motion demos. For sign-off, like phase 1's pages. |
 | `Themes/Tokens.xaml` | The values: colours, type ramp, radii, spacing, sizes |
-| `Themes/Icons.xaml` | **New:** each icon's name → its Segoe Fluent glyph (and the filled one for a selected page) |
+| `Controls/FluentIcon.cs` | Each icon's name → its Segoe Fluent glyph (and the filled one where an icon shows a state), at the system's sizes; `Controls/BrandMark.cs` the mark |
 | `Themes/Controls.xaml` | Lamha's styles over WinUI's controls, from the tokens only |
 | `Lamha.Core/Appearance/Motion.cs` | The timings and curves, and the levels |
 | `Services/Animations.cs` | **Every** animation goes through here, so the level always applies |
@@ -209,7 +209,17 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
    - the accent in dark the Windows way: a light indigo with dark text.
 
    **Signed off 2026-10-26** ([decision 0020](../decisions/0020-the-design-system.md)), all as recommended: the star, the six pane icons, the accent in dark, the wording (the user's Arabic for the InfoBars, the empty state and Rewrite; the other drafts as drawn).
-2. **Foundations in code:** the type ramp, Windows' brushes, the radii, the spacing tokens; Fluent icons through the same `Glyph` names; the typed sizes and radii replaced.
+2. **Foundations in code:** the type ramp, Windows' brushes, the radii, the spacing tokens; Fluent icons through the same `Glyph` names; the typed sizes and radii replaced. **Done 2026-10-26** (`lamha3/design-system`):
+   - **Icons:** `FluentIcon` replaces `LineIcon`, with the same names drawn from Segoe Fluent Icons at four named sizes. It has the star and Pinned, a Chevron for breadcrumbs and setting cards, and Speak's waves step through Volume 1–3. `BrandMark` is the mark (16, 56). The clipboard's empty states take the 40 icon.
+   - **Tokens:**
+     - type on Windows' ramp (12, 14, 18, 20, 28, 40, 68), Lamha's styles kept by name with those sizes;
+     - corners 4 (`LamhaRadiusControl`), 8 (`LamhaRadiusOverlay`), 2 (`LamhaRadiusBar`), and the page's 8,0,0,0;
+     - controls 32 high;
+     - the spacing tokens measured on Settings (card padding 16, content card 24, card gap 4, group gap 28, page padding 28).
+   - **Colour:** the button in dark is the light accent under dark text, Windows' accent included (`AccentPalette`); the switch is on in the accent fill, repainted with it; the switch's green token is gone.
+   - **Motion:** Windows' 167 / 83 / 250 ms and its curves (`Motion.cs`).
+   - **The screens:** the typed font sizes and corners became tokens (the fields' accent rings excepted: they go with step 4's fields).
+   - **Tests:** the button and the switch follow the new rules (446 pass).
 3. **The frame:** `NavigationView`, `TitleBar` with Back and ☰, the three widths, the pages in a `Frame` with transitions, the window remembered.
 4. **Components:** WinUI's own where they fit (`InfoBar`, `InfoBadge`, `SelectorBar`, `TeachingTip`, `ContentDialog`); Settings in Windows' pattern; the answer, Write and the card as in *Features from the study*.
 5. **Motion and feedback:** the catalogue above, through `Animations.cs`, at each level.

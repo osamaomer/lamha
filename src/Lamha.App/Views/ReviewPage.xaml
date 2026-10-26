@@ -33,18 +33,18 @@
           <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" FontWeight="Bold" Text="{x:Bind ViewModel.FreshText, Mode=OneWay}" />
         </Border>
       </Grid>
-      <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5"
+      <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
                  TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{x:Bind ViewModel.Totals, Mode=OneWay}" />
     </Grid>
 
     <!-- This sitting's progress: from the start side, once a card has been answered -->
-    <Grid Height="4" Margin="0,12,0,0" CornerRadius="2" Background="{ThemeResource LamhaChipBrush}" Visibility="{x:Bind ViewModel.HasProgress, Mode=OneWay}"
+    <Grid Height="4" Margin="0,12,0,0" CornerRadius="{StaticResource LamhaRadiusBar}" Background="{ThemeResource LamhaChipBrush}" Visibility="{x:Bind ViewModel.HasProgress, Mode=OneWay}"
           AutomationProperties.Name="{x:Bind ProgressLabel}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="{x:Bind controls:Show.Filled(ViewModel.Progress), Mode=OneWay}" />
         <ColumnDefinition Width="{x:Bind controls:Show.Unfilled(ViewModel.Progress), Mode=OneWay}" />
       </Grid.ColumnDefinitions>
-      <Border CornerRadius="2" Background="{ThemeResource LamhaButtonBrush}" />
+      <Border CornerRadius="{StaticResource LamhaRadiusBar}" Background="{ThemeResource LamhaButtonBrush}" />
     </Grid>
 
     <!-- ===== The flashcard ===== -->
@@ -63,7 +63,7 @@
             <TextBlock Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind NewWord}" />
           </Border>
           <StackPanel HorizontalAlignment="Center" FlowDirection="LeftToRight" Orientation="Horizontal" Spacing="8">
-            <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaHeadwordTextStyle}" FontSize="30" LineHeight="36"
+            <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaHeadwordTextStyle}" FontSize="{StaticResource LamhaFontSizeTitle}" LineHeight="36"
                        TextAlignment="Center" Text="{x:Bind ViewModel.Word, Mode=OneWay}" IsTextSelectionEnabled="True" />
             <controls:SpeakButton x:Uid="Listen" Style="{StaticResource LamhaIconButtonStyle}" Text="{x:Bind ViewModel.Word, Mode=OneWay}" />
           </StackPanel>
@@ -79,8 +79,8 @@
                 Command="{x:Bind ViewModel.RevealCommand}" AutomationProperties.Name="{x:Bind ShowLabel}" AutomationProperties.AcceleratorKey="Space" Visibility="{x:Bind controls:Show.IfNot(ViewModel.IsShown), Mode=OneWay}">
           <StackPanel Orientation="Horizontal" Spacing="8">
             <TextBlock VerticalAlignment="Center" Text="{x:Bind ShowLabel}" />
-            <Border Padding="5,1" VerticalAlignment="Center" CornerRadius="5" Background="#2EFFFFFF">
-              <TextBlock FontSize="{StaticResource LamhaFontSizeLabel}" FontWeight="Normal" Text="Space" />
+            <Border Padding="5,1" VerticalAlignment="Center" CornerRadius="{StaticResource LamhaRadiusControl}" Background="#2EFFFFFF">
+              <TextBlock FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Normal" Text="Space" />
             </Border>
           </StackPanel>
         </Button>
@@ -104,26 +104,26 @@
                     Command="{x:Bind ViewModel.GradeAgainCommand}" AutomationProperties.Name="{x:Bind AgainLabel}" ToolTipService.ToolTip="{x:Bind KeyOne}" AutomationProperties.AcceleratorKey="1">
               <StackPanel>
                 <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Text="{x:Bind AgainLabel}" />
-                <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource LamhaFontSizeLabel}" Opacity="0.8" Text="{x:Bind ViewModel.AgainIn, Mode=OneWay}" />
+                <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" Opacity="0.8" Text="{x:Bind ViewModel.AgainIn, Mode=OneWay}" />
               </StackPanel>
             </Button>
             <Button Grid.Column="1" Style="{StaticResource LamhaGradeButtonStyle}" Background="{ThemeResource LamhaChipBrush}" Foreground="{ThemeResource LamhaTextBrush}"
                     Command="{x:Bind ViewModel.GradeHardCommand}" AutomationProperties.Name="{x:Bind HardLabel}" ToolTipService.ToolTip="{x:Bind KeyTwo}" AutomationProperties.AcceleratorKey="2">
               <StackPanel>
                 <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Text="{x:Bind HardLabel}" />
-                <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource LamhaFontSizeLabel}" Opacity="0.8" Text="{x:Bind ViewModel.HardIn, Mode=OneWay}" />
+                <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" Opacity="0.8" Text="{x:Bind ViewModel.HardIn, Mode=OneWay}" />
               </StackPanel>
             </Button>
             <Button x:Name="GoodButton" Grid.Column="2" Style="{StaticResource LamhaGradeButtonStyle}" Background="{ThemeResource LamhaOkSoftBrush}" Foreground="{ThemeResource LamhaOkBrush}"
                     Command="{x:Bind ViewModel.GradeGoodCommand}" AutomationProperties.Name="{x:Bind GoodLabel}" ToolTipService.ToolTip="{x:Bind KeyThree}" AutomationProperties.AcceleratorKey="3">
               <StackPanel>
                 <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Text="{x:Bind GoodLabel}" />
-                <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource LamhaFontSizeLabel}" Opacity="0.8" Text="{x:Bind ViewModel.GoodIn, Mode=OneWay}" />
+                <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" Opacity="0.8" Text="{x:Bind ViewModel.GoodIn, Mode=OneWay}" />
               </StackPanel>
             </Button>
           </Grid>
           <HyperlinkButton x:Name="RemoveLink" HorizontalAlignment="Center" Style="{StaticResource LamhaLinkButtonStyle}" Command="{x:Bind ViewModel.RemoveCommand}">
-            <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" FontSize="12.5" FontWeight="Medium" Text="{x:Bind RemoveLabel}" />
+            <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Medium" Text="{x:Bind RemoveLabel}" />
           </HyperlinkButton>
         </StackPanel>
       </Grid>
@@ -132,7 +132,7 @@
     <!-- ===== Nothing to review now: what this sitting did, the next review, the streak ===== -->
     <Border x:Name="DoneBox" Margin="0,16,0,0" Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsDone, Mode=OneWay}">
       <StackPanel Padding="8,8,8,4" Spacing="4" AutomationProperties.LiveSetting="Polite">
-        <TextBlock x:Name="DoneTitleText" HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="16" Text="{x:Bind DoneTitle}" />
+        <TextBlock x:Name="DoneTitleText" HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}" Text="{x:Bind DoneTitle}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" FontWeight="SemiBold"
                    Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.Session, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(ViewModel.Session), Mode=OneWay}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}"
@@ -147,7 +147,7 @@
     <!-- ===== No words yet ===== -->
     <Border Margin="0,16,0,0" Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}">
       <StackPanel Padding="8,8,8,4" Spacing="4">
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="16" Text="{x:Bind EmptyTitle}" />
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}" Text="{x:Bind EmptyTitle}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind EmptyText}" />
       </StackPanel>
     </Border>

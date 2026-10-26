@@ -20,7 +20,7 @@ public class AccentPaletteTests
         Assert.True(Rgb.Contrast(light.Accent, AccentPalette.LightSurface) >= 4.5, "links on the light cards");
         Assert.True(Rgb.Contrast(dark.Accent, AccentPalette.DarkSurface) >= 4.5, "links on the dark cards");
         Assert.True(Rgb.Contrast(light.Button, Rgb.White) >= 4.5, "white text on its buttons");
-        Assert.True(Rgb.Contrast(dark.Button, Rgb.White) >= 4.5, "white text on its buttons");
+        Assert.True(Rgb.Contrast(dark.Button, AccentPalette.DarkButtonText) >= 4.5, "dark text on its buttons (Windows' way)");
         Assert.True(Rgb.Contrast(light.Accent, light.Accent.Over(light.SoftAlpha, AccentPalette.LightSurface)) >= 4.5, "light accent on its tint");
         Assert.True(Rgb.Contrast(dark.Accent, dark.Accent.Over(dark.SoftAlpha, AccentPalette.DarkSurface)) >= 4.5, "dark accent on its tint");
     }

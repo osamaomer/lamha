@@ -34,9 +34,9 @@ public class MotionTests
     [Fact]
     public void SubtleIsALittleFasterAndOffIsNone()
     {
-        Assert.Equal(TimeSpan.FromMilliseconds(180), Motion.Time(MotionLevel.Full, Motion.EnterMilliseconds));
-        Assert.Equal(TimeSpan.FromMilliseconds(135), Motion.Time(MotionLevel.Subtle, Motion.EnterMilliseconds));
-        Assert.Equal(TimeSpan.FromMilliseconds(83), Motion.Time(MotionLevel.Subtle, Motion.ExitMilliseconds)); // 82.5, rounded up as Lamha 2 did
+        Assert.Equal(TimeSpan.FromMilliseconds(167), Motion.Time(MotionLevel.Full, Motion.EnterMilliseconds));
+        Assert.Equal(TimeSpan.FromMilliseconds(125), Motion.Time(MotionLevel.Subtle, Motion.EnterMilliseconds)); // 125.25
+        Assert.Equal(TimeSpan.FromMilliseconds(188), Motion.Time(MotionLevel.Subtle, Motion.ResizeMilliseconds)); // 187.5, rounded up as Lamha 2 did
         Assert.Equal(TimeSpan.Zero, Motion.Time(MotionLevel.Off, Motion.EnterMilliseconds));
     }
 }

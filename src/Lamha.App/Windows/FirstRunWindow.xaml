@@ -13,11 +13,11 @@
       <!-- Keys as the design draws them: key caps (12 px, the chip's fill, a line under) joined by "+" -->
       <DataTemplate x:Key="KeyPartTemplate" x:DataType="main:KeyPart">
         <Grid>
-          <Border Padding="7,2" CornerRadius="6" Background="{ThemeResource LamhaSurfaceBrush}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="1,1,1,2"
+          <Border Padding="7,2" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaSurfaceBrush}" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="1,1,1,2"
                   Visibility="{x:Bind IsKey}">
-            <TextBlock FontSize="12" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind Text}" />
+            <TextBlock FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind Text}" />
           </Border>
-          <TextBlock Margin="2,0" VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Text}"
+          <TextBlock Margin="2,0" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Text}"
                      Visibility="{x:Bind controls:Show.IfNot(IsKey)}" />
         </Grid>
       </DataTemplate>
@@ -31,12 +31,12 @@
               <ColumnDefinition Width="*" />
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Border Width="28" Height="28" CornerRadius="8" Background="{ThemeResource LamhaAccentSoftBrush}">
+            <Border Width="28" Height="28" CornerRadius="{StaticResource LamhaRadiusOverlay}" Background="{ThemeResource LamhaAccentSoftBrush}">
               <controls:FluentIcon Glyph="{x:Bind Glyph}" Foreground="{ThemeResource LamhaAccentBrush}" />
             </Border>
             <TextBlock Grid.Column="1" VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}"
                        Text="{x:Bind Label}" />
-            <TextBlock Grid.Column="2" VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="12.5"
+            <TextBlock Grid.Column="2" VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
                        Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Count}" />
           </Grid>
         </StackPanel>
@@ -65,7 +65,7 @@
         <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusMedium}" />
+        <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
         <Setter Property="Padding" Value="16,4" />
       </Style>
     </Grid.Resources>
@@ -87,7 +87,7 @@
 
     <!-- The step, on Windows' content layer over Mica, 8 px in from the window's edges -->
     <Border Grid.Row="1" Margin="8,0,8,8" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1" CornerRadius="8">
+            BorderThickness="1" CornerRadius="{StaticResource LamhaRadiusOverlay}">
       <Grid>
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" />
@@ -127,20 +127,20 @@
                 </Grid.ColumnDefinitions>
                 <Grid>
                   <Border Style="{StaticResource BoxStyle}" Padding="0" />
-                  <Border BorderBrush="{ThemeResource LamhaButtonBrush}" BorderThickness="2" CornerRadius="{StaticResource LamhaRadiusMedium}"
+                  <Border BorderBrush="{ThemeResource LamhaButtonBrush}" BorderThickness="2" CornerRadius="{StaticResource LamhaRadiusControl}"
                           Visibility="{x:Bind ViewModel.IsArabic, Mode=OneWay}" />
                   <RadioButton x:Name="ArabicChoice" GroupName="UiLang" Style="{StaticResource LamhaRadioStyle}" Padding="16,14" FocusVisualMargin="0"
                                IsChecked="{x:Bind ViewModel.IsArabic, Mode=TwoWay}" AutomationProperties.Name="{x:Bind ViewModel.Arabic}">
-                    <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.Arabic}" />
+                    <TextBlock FontSize="{StaticResource LamhaFontSizeBody}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.Arabic}" />
                   </RadioButton>
                 </Grid>
                 <Grid Grid.Column="1">
                   <Border Style="{StaticResource BoxStyle}" Padding="0" />
-                  <Border BorderBrush="{ThemeResource LamhaButtonBrush}" BorderThickness="2" CornerRadius="{StaticResource LamhaRadiusMedium}"
+                  <Border BorderBrush="{ThemeResource LamhaButtonBrush}" BorderThickness="2" CornerRadius="{StaticResource LamhaRadiusControl}"
                           Visibility="{x:Bind ViewModel.IsEnglish, Mode=OneWay}" />
                   <RadioButton x:Name="EnglishChoice" GroupName="UiLang" Style="{StaticResource LamhaRadioStyle}" Padding="16,14" FocusVisualMargin="0"
                                IsChecked="{x:Bind ViewModel.IsEnglish, Mode=TwoWay}" AutomationProperties.Name="{x:Bind ViewModel.English}">
-                    <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.English}" />
+                    <TextBlock FontSize="{StaticResource LamhaFontSizeBody}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.English}" />
                   </RadioButton>
                 </Grid>
               </Grid>
@@ -155,32 +155,32 @@
                 <ItemsControl IsTabStop="False" ItemsSource="{x:Bind ViewModel.Lamha2Items}" ItemTemplate="{StaticResource MoveItemTemplate}" />
               </Border>
               <!-- A key or clipboard history Windows couldn't read here (the folder came from another account) -->
-              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
+              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
                       Visibility="{x:Bind ViewModel.KeysLost, Mode=OneWay}">
-                <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="13"
+                <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
                            Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind ViewModel.KeysLostText}" />
               </Border>
-              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
+              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaWarnBackgroundBrush}"
                       Visibility="{x:Bind ViewModel.ClipsLost, Mode=OneWay}">
-                <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="13"
+                <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
                            Foreground="{ThemeResource LamhaWarnTextBrush}" Text="{x:Bind ViewModel.ClipsLostText}" />
               </Border>
               <!-- What Lamha 2 had and Lamha 3 doesn't, of what this user used, so nothing seems to vanish -->
               <StackPanel Spacing="4" Visibility="{x:Bind ViewModel.HasDropped, Mode=OneWay}">
-                <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="13" FontWeight="SemiBold" Text="{x:Bind ViewModel.NotInLamha3}" />
+                <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="SemiBold" Text="{x:Bind ViewModel.NotInLamha3}" />
                 <ItemsControl IsTabStop="False" ItemsSource="{x:Bind ViewModel.Dropped, Mode=OneWay}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="x:String">
-                      <TextBlock Margin="0,2" TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="13"
+                      <TextBlock Margin="0,2" TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
                                  Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind}" />
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
               </StackPanel>
-              <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="13"
+              <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
                          Foreground="{ThemeResource LamhaDangerBrush}" Text="{x:Bind ViewModel.MoveFailedText}" Visibility="{x:Bind ViewModel.MoveFailed, Mode=OneWay}"
                          AutomationProperties.LiveSetting="Assertive" />
-              <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="12.5"
+              <TextBlock TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
                          Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind ViewModel.FolderStays}" />
             </StackPanel>
 
@@ -194,16 +194,16 @@
                               ItemTemplate="{StaticResource KeyPartTemplate}" ItemsPanel="{StaticResource KeysPanel}" />
               </StackPanel>
               <!-- Once the card has opened on it: the design's green line -->
-              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaOkSoftBrush}"
+              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaOkSoftBrush}"
                       Visibility="{x:Bind ViewModel.Tried, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <controls:FluentIcon Glyph="Check" VerticalAlignment="Center" Foreground="{ThemeResource LamhaOkBrush}" />
-                  <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="13.5" FontWeight="SemiBold"
+                  <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="SemiBold"
                              Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind ViewModel.TryOk}" AutomationProperties.LiveSetting="Polite" />
                 </StackPanel>
               </Border>
               <Border Style="{StaticResource BoxStyle}" Padding="20">
-                <TextBlock x:Name="SampleText" FlowDirection="LeftToRight" FontFamily="Georgia" FontSize="18" LineHeight="29" TextWrapping="Wrap"
+                <TextBlock x:Name="SampleText" FlowDirection="LeftToRight" FontFamily="Georgia" FontSize="{StaticResource LamhaFontSizeBodyLarge}" LineHeight="29" TextWrapping="Wrap"
                            Foreground="{ThemeResource LamhaTextBrush}" IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.Sample}" />
               </Border>
               <Border Style="{StaticResource BoxStyle}">

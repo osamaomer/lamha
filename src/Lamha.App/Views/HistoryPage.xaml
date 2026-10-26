@@ -17,7 +17,7 @@
       </Grid.ColumnDefinitions>
       <Grid>
         <!-- The field: its 1 px edge, and Lamha's 2 px accent ring around it while it has the focus (the Translate box's) -->
-        <Border Height="36" CornerRadius="{StaticResource LamhaRadiusMedium}" BorderThickness="1" BorderBrush="{ThemeResource LamhaFieldLineBrush}"
+        <Border Height="36" CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1" BorderBrush="{ThemeResource LamhaFieldLineBrush}"
                 Background="{ThemeResource LamhaSurfaceBrush}">
           <Grid>
             <TextBox x:Name="SearchBox" MinHeight="34" Padding="36,7,12,0" BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"
