@@ -1,6 +1,6 @@
 # 0019. The bridge: Lamha 2.1.0 offers Lamha 3 and starts its setup; Lamha 3 removes Lamha 2
 
-**Accepted, 2026-10-26, from phase 6's bridge update. The user's calls (2026-10-26): Lamha 2 asks before installing (not by itself, not only a link), and Lamha 3 removes a Lamha 2 installed for all users with one Windows admin prompt.**
+**Accepted, 2026-10-26, from phase 6's bridge update. The user's calls (2026-10-26): Lamha 2 asks before installing (not by itself, not only a link), Lamha 3 removes a Lamha 2 installed for all users with one Windows admin prompt, and someone who chooses Start fresh is offered the removal too.**
 
 ## Decision
 
@@ -10,7 +10,14 @@
   - **Windows 10:** not offered. Lamha 2 keeps its own updates, and Settings → Updates says Lamha 3 is for Windows 11 only.
   - **The Portable** takes the same path: Lamha 3's setup installs it.
 - **Releases, in this order:** 2.1.0 is a normal 2.x release (GitHub's Latest), so it reaches users first and stays quiet until 3.0 exists. 3.0's release, and every Latest Lamha 3 release after it, also carries 2.1.0's `latest.yml`, `Lamha-Setup-2.1.0.exe` and its blockmap. electron-updater reads `latest.yml` only from the Latest release, so a 2.0.x that never updated still finds the bridge.
-- **Lamha 3's half** (built in the released 3.0, never in a beta, since both run side by side until then): after a successful move, Lamha 3 removes Lamha 2. It runs Lamha 2's uninstaller quietly, found by its uninstall entry ("Lamha 2.x.y", Artwork Lab; Velopack's own entry is "Lamha"). Windows asks for an administrator once when Lamha 2 was installed for all users. Lamha 3 also removes Lamha 2's start-with-Windows entry (`com.artworklab.lamha`), and deletes `%APPDATA%\Lamha` 30 days later, keeping `wikipedia/` and `wikipedia.json`.
+- **Lamha 3's half** (`Services/Lamha2Removal`, Windows' `Shell/Lamha2Install` and `Shell/KeptShortcuts`, Data's `Lamha2Folder.ClearKeepingWikipedia`), in the released Lamha 3 only, never in a beta, since both run side by side until then:
+  - **Offered on first run's Ready** when Lamha 2 is installed: a third switch, **Remove Lamha 2**. It's on after a move and off after Start fresh, whose data stays where it is. It says Windows will ask for permission when Lamha 2 was installed for all users. **Start** runs the removal after the window closes.
+  - **Found** by its uninstall entry: electron-builder's key, named after the app id's GUID (`…\Uninstall\209ef46e-fba3-5a6c-954e-87ea4eaef519`), for this user (HKCU) or all users (HKLM). Velopack's own entry for Lamha 3 is "Lamha". Only a `QuietUninstallString` naming an "Uninstall Lamha.exe" that exists counts.
+  - **Removed** by that quiet command (`/currentuser /S` or `/allusers /S`), through Windows' administrator prompt ("runas") for all users. Cancelling the prompt leaves Lamha 2 as it was. NSIS returns at once and goes on from the temp folder, so the end shows as the entry gone (up to 5 minutes).
+  - **Lamha 3's shortcuts kept:** Lamha 2's uninstaller deletes the Start menu's and the desktop's `Lamha.lnk` whatever they point at (app-builder-lib's uninstaller.nsh), and Velopack gives Lamha 3's the same name. Each one that points into Lamha 3's folder is copied into Lamha's data folder first and put back once Lamha 2 is gone, then or at the next start.
+  - **Then** Lamha 2's start-with-Windows entry (`com.artworklab.lamha`, which its uninstaller leaves) goes too.
+  - **Lamha 2's folder** is emptied 30 days after the move, at a start once Lamha 2 is no longer installed. The Wikipedias stay: `wikipedia.json`, `wikipedia/`, and any folder of it holding a file that `wikipedia.json` names. The move's date is a file in Lamha's data folder (`lamha2-moved.txt`), never a setting, so a backup restored on another PC can't empty that PC's folder. Without a move (Start fresh) the folder is never touched.
+  - **Trying it:** `--remove-lamha2` turns it on in a beta or a build from source. It removes the Lamha 2 installed on that PC.
 - **Trying it:** `LAMHA_BRIDGE_TAG=v3.0.0-beta.N` makes Lamha 2 (from source too) look at that release instead of the latest; only a `v3` tag of this repository is accepted.
 
 ## Why
@@ -20,6 +27,8 @@
 - **The setup starts after Lamha 2 has quit:** Lamha 3 reads Lamha 2's files, which are saved by then, and 3.0 uses the same shortcuts, which are free by then.
 - **At most once a day:** a tray app runs for weeks, and the 6-hourly check would otherwise nag.
 - **Lamha 3 removes Lamha 2, not the other way round:** Lamha 2 can't uninstall itself while running, and if the setup failed the user would be left with neither.
+- **A switch on Ready, for Start fresh too:** 3.0 has Lamha 2's shortcuts, so the two can't run together. Whoever moved their data has said goodbye to Lamha 2, so it's on; whoever started fresh may still want it, so it's off. Ready already holds the other choices that apply at Start.
+- **Lamha 2's own uninstaller,** not deleting its folder: it removes its Firefox host, its app id and its files the way its setup knows them. Its process check matches Lamha 2's install folder (through PowerShell), so Lamha 3, also `Lamha.exe`, isn't closed. Only without PowerShell would it fall back to matching by name; then the shortcuts come back at Lamha 3's next start.
 
 ## Turned down
 

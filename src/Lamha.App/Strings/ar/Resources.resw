@@ -866,4 +866,8 @@
   <data name="FirstRun_KeysLost" xml:space="preserve"><value>تعذّرت قراءة مفاتيح الذكاء الاصطناعي على هذا الجهاز: أدخلها من جديد في أدوات الكتابة.</value><comment>new in Lamha 3 (phase 6), drafted: waiting for the user&apos;s wording</comment></data>
   <data name="FirstRun_ClipsLost" xml:space="preserve"><value>تعذّرت قراءة سجل الحافظة على هذا الجهاز.</value><comment>new in Lamha 3 (phase 6), drafted: waiting for the user&apos;s wording</comment></data>
   <data name="FirstRun_MoveFailed" xml:space="preserve"><value>تعذّر نقل بياناتك. لم يتغيّر شيء في مجلد لمحة 2: حاول مجددًا، أو ابدأ من جديد.</value><comment>new in Lamha 3 (phase 6), drafted: waiting for the user&apos;s wording</comment></data>
+  <data name="FirstRun_RemoveLamha2" xml:space="preserve"><value>إزالة لمحة 2</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording</comment></data>
+  <data name="FirstRun_RemoveLamha2HintMoved" xml:space="preserve"><value>تحل لمحة 3 محلها وتستخدم الاختصارات نفسها. يبقى مجلدها ٣٠ يومًا حتى لا يضيع شيء.</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording</comment></data>
+  <data name="FirstRun_RemoveLamha2HintFresh" xml:space="preserve"><value>تستخدم لمحة 3 الاختصارات نفسها، فلا تعملان معًا. تبقى بيانات لمحة 2 في مكانها.</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording</comment></data>
+  <data name="FirstRun_RemoveLamha2Admin" xml:space="preserve"><value>سيطلب منك Windows الإذن، لأن لمحة 2 مثبّتة لكل المستخدمين.</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording; after the hint</comment></data>
 </root>

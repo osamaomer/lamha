@@ -70,6 +70,73 @@ public sealed class Lamha2Folder(string path, Func<byte[], byte[]?> unprotect)
         return new Lamha2Data(sync, local, clips, keysLost, clipsLost, wikipedia?.Count ?? 0);
     }
 
+    /// <summary>
+    /// The folder emptied, 30 days after its data moved and Lamha 2 was removed (decision 0019), but for the downloaded
+    /// Wikipedias, kept for when offline Wikipedia returns (0005): wikipedia.json, the wikipedia folder, and any other
+    /// folder in it that holds a file wikipedia.json names. Only a folder with Lamha 2's storage files is touched; what
+    /// can't be deleted (a file in use) stays. How many entries went.
+    /// </summary>
+    public int ClearKeepingWikipedia()
+    {
+        if (!Exists)
+        {
+            return 0;
+        }
+
+        var keep = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "wikipedia.json", "wikipedia" };
+        if (Json(In("wikipedia.json")) is JsonObject wiki)
+        {
+            // desktop/wiki-library.js: { folder, files: [{ file }], downloads: [{ part }] }, full paths
+            var paths = new List<string?> { Text(wiki["folder"]) };
+            paths.AddRange((wiki["files"] as JsonArray ?? []).Select(f => Text(f?["file"])));
+            paths.AddRange((wiki["downloads"] as JsonArray ?? []).Select(d => Text(d?["part"])));
+            foreach (var p in paths.OfType<string>().Where(System.IO.Path.IsPathFullyQualified))
+            {
+                var rel = System.IO.Path.GetRelativePath(Path, p);
+                if (rel != "." && !rel.StartsWith("..", StringComparison.Ordinal) && !System.IO.Path.IsPathRooted(rel))
+                {
+                    keep.Add(rel.Split(System.IO.Path.DirectorySeparatorChar)[0]);
+                }
+            }
+        }
+
+        var gone = 0;
+        foreach (var entry in Directory.EnumerateFileSystemEntries(Path))
+        {
+            if (keep.Contains(System.IO.Path.GetFileName(entry)))
+            {
+                continue;
+            }
+
+            try
+            {
+                if (Directory.Exists(entry))
+                {
+                    Directory.Delete(entry, recursive: true);
+                }
+                else
+                {
+                    File.Delete(entry);
+                }
+
+                gone++;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // in use, or not ours to delete: it stays
+            }
+        }
+
+        if (!Directory.EnumerateFileSystemEntries(Path).Any())
+        {
+            Directory.Delete(Path); // no Wikipedia to keep: the folder goes too
+        }
+
+        return gone;
+    }
+
+    private static string? Text(JsonNode? node) => node is JsonValue v && v.TryGetValue<string>(out var s) && s.Length > 0 ? s : null;
+
     private string In(string name) => System.IO.Path.Combine(Path, name);
 
     /// <summary>A file's JSON, or null when it's missing or unreadable (Lamha 2 kept an unreadable store aside and started empty).</summary>

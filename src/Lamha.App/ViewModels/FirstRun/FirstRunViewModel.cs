@@ -6,6 +6,7 @@ using Lamha.App.ViewModels.Main;
 using Lamha.Core;
 using Lamha.Core.Import;
 using Lamha.Core.Settings;
+using Lamha.Windows.Shell;
 using Localization = Lamha.App.Services.Localization;
 
 namespace Lamha.App.ViewModels.FirstRun;
@@ -35,8 +36,8 @@ public interface IFirstRunHost
     /// <summary>Customise shortcuts: Settings → Keyboard shortcuts in the main window.</summary>
     void OpenShortcuts();
 
-    /// <summary>Start: the last step's two switches applied, and the window closes.</summary>
-    void Finish(bool startWithWindows, bool clipboard);
+    /// <summary>Start: the last step's switches applied (Remove Lamha 2 only when it was offered), and the window closes.</summary>
+    void Finish(bool startWithWindows, bool clipboard, bool removeLamha2);
 
     /// <summary>Lamha 2's data moved: remembered for the window made again in another language, and its theme applied.</summary>
     void Moved(Lamha2Summary summary);
@@ -55,6 +56,7 @@ public sealed partial class FirstRunViewModel : ObservableObject
     private readonly ShortcutService _shortcuts;
     private readonly IFirstRunHost _host;
     private readonly Lamha2Data? _lamha2;
+    private readonly Lamha2Install? _installed;
     private AiProviderKind _providerBefore;
 
     /// <param name="brain">Lamha's brain: the settings, and the writing tools' setup.</param>
@@ -64,12 +66,15 @@ public sealed partial class FirstRunViewModel : ObservableObject
     /// <param name="startWithWindows">Whether Lamha starts with Windows now; first run turns it on unless the user says no.</param>
     /// <param name="lamha2">Lamha 2's data, when it was found: its step comes after the language.</param>
     /// <param name="moved">What moved, when it already has (the window made again in another language).</param>
-    public FirstRunViewModel(Brain brain, ShortcutService shortcuts, IFirstRunHost host, FirstRunStep step, bool startWithWindows, Lamha2Data? lamha2 = null, Lamha2Summary? moved = null)
+    /// <param name="installed">Lamha 2 as installed here, when removing it is offered (the released Lamha 3: decision 0019).</param>
+    public FirstRunViewModel(Brain brain, ShortcutService shortcuts, IFirstRunHost host, FirstRunStep step, bool startWithWindows, Lamha2Data? lamha2 = null, Lamha2Summary? moved = null,
+        Lamha2Install? installed = null)
     {
         _brain = brain;
         _shortcuts = shortcuts;
         _host = host;
         _lamha2 = lamha2;
+        _installed = installed;
         _order = lamha2 is null
             ? [FirstRunStep.Language, FirstRunStep.Try, FirstRunStep.Writing, FirstRunStep.Ready]
             : [FirstRunStep.Language, FirstRunStep.Lamha2, FirstRunStep.Try, FirstRunStep.Writing, FirstRunStep.Ready];
@@ -135,7 +140,7 @@ public sealed partial class FirstRunViewModel : ObservableObject
 
     /// <summary>Lamha 2's data has moved: the step says so, and names what Lamha 3 doesn't have.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Lamha2Title), nameof(CanMove), nameof(ShowsNext))]
+    [NotifyPropertyChangedFor(nameof(Lamha2Title), nameof(CanMove), nameof(ShowsNext), nameof(RemoveHint))]
     public partial bool Moved { get; private set; }
 
     [ObservableProperty]
@@ -214,6 +219,7 @@ public sealed partial class FirstRunViewModel : ObservableObject
         KeysLost = summary.KeysLost;
         ClipsLost = summary.ClipsLost;
         Moved = true;
+        RemoveLamha2 = true; // its data is in Lamha 3 now: Ready removes it unless the user says no
     }
 
     /// <summary>The step's rows: what there is (a part with nothing in it isn't listed), and always the settings.</summary>
@@ -284,6 +290,18 @@ public sealed partial class FirstRunViewModel : ObservableObject
     [ObservableProperty]
     public partial bool ClipboardOn { get; set; }
 
+    /// <summary>Lamha 2 is installed here and Lamha 3 may remove it: Ready's third switch.</summary>
+    public bool OffersRemoval => _installed is not null;
+
+    /// <summary>Remove Lamha 2 at Start: on after a move, off after Start fresh (its data stays where it is either way).</summary>
+    [ObservableProperty]
+    public partial bool RemoveLamha2 { get; set; }
+
+    /// <summary>Why, and what's kept; Windows' prompt named when Lamha 2 was installed for all users.</summary>
+    public string RemoveHint =>
+        Localization.Get(Moved ? "FirstRun_RemoveLamha2HintMoved" : "FirstRun_RemoveLamha2HintFresh")
+        + (_installed?.ForAllUsers == true ? " " + Localization.Get("FirstRun_RemoveLamha2Admin") : "");
+
     // ----- moving between steps -----
 
     [RelayCommand]
@@ -348,7 +366,7 @@ public sealed partial class FirstRunViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Start() => _host.Finish(StartWithWindows, ClipboardOn);
+    private void Start() => _host.Finish(StartWithWindows, ClipboardOn, OffersRemoval && RemoveLamha2);
 
     [RelayCommand]
     private void Customize() => _host.OpenShortcuts();
@@ -447,6 +465,8 @@ public sealed partial class FirstRunViewModel : ObservableObject
     public string Clip { get; } = Localization.Get("Clipboard_Enable");
 
     public string ClipHint { get; } = Localization.Get("Clipboard_OptInText");
+
+    public string RemoveLabel { get; } = Localization.Get("FirstRun_RemoveLamha2");
 
     public string NextLabel { get; } = Localization.Get("FirstRun_Next");
 

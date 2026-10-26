@@ -1,6 +1,7 @@
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Card;
 using Lamha.App.ViewModels.FirstRun;
+using Lamha.Data.Import;
 using Lamha.Windows.Input;
 using Lamha.Windows.Selection;
 using Lamha.Windows.Shell;
@@ -134,12 +135,17 @@ public partial class App : Application
         };
         _card.SettingsOpener = section => _main.Show("settings", section);
         _panel.SettingsOpener = section => _main.Show("settings", section);
+
+        // Removing Lamha 2: the released Lamha 3 only (a beta runs next to it), or --remove-lamha2 to try it.
+        var removal = new Lamha2Removal(_brain.DataFolder, _options.Lamha2 ?? Lamha2Folder.DefaultPath, !UpdateService.Current.Contains('-', StringComparison.Ordinal) || _options.RemoveLamha2);
+        _ = Task.Run(removal.AtStart);
         _firstRun = new FirstRunService(_brain, shortcuts, _clipboard, idle, Notify)
         {
             Theme = _options.Theme,
             Startup = _options.Profile is null ? startup : null,
             SettingsOpener = section => _main.Show("settings", section),
             Lamha2Path = _options.Lamha2,
+            Removal = removal,
             LanguageChanged = () =>
             {
                 _tray?.Refresh();

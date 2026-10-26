@@ -296,6 +296,22 @@
                     <ToggleSwitch Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.ClipboardOn, Mode=TwoWay}"
                                   AutomationProperties.Name="{x:Bind ViewModel.Clip}" />
                   </Grid>
+                  <!-- Remove Lamha 2: only when it's installed here, in the released Lamha 3 (decision 0019) -->
+                  <StackPanel Visibility="{x:Bind ViewModel.OffersRemoval}">
+                    <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
+                    <Grid Padding="0,10" ColumnSpacing="16">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+                      <StackPanel VerticalAlignment="Center">
+                        <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}" Text="{x:Bind ViewModel.RemoveLabel}" />
+                        <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" TextWrapping="Wrap" Text="{x:Bind ViewModel.RemoveHint, Mode=OneWay}" />
+                      </StackPanel>
+                      <ToggleSwitch Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="{x:Bind ViewModel.RemoveLamha2, Mode=TwoWay}"
+                                    AutomationProperties.Name="{x:Bind ViewModel.RemoveLabel}" />
+                    </Grid>
+                  </StackPanel>
                 </StackPanel>
               </Border>
             </StackPanel>

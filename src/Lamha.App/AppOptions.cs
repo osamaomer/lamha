@@ -47,7 +47,11 @@ public enum CardLifetime
 /// <c>--lamha2=folder</c>: first run's Lamha 2 step reads Lamha 2's data from that folder instead of %APPDATA%\Lamha,
 /// to try the move on a copy (with <c>--first-run=lamha2</c> and a <c>--profile</c>).
 /// </param>
-public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null, string? Updates = null, string? Packs = null, string? Lamha2 = null)
+/// <param name="RemoveLamha2">
+/// <c>--remove-lamha2</c>: removing Lamha 2 (first run's Ready, the 30 days' clean-up) in a beta or a build from source,
+/// which never do it otherwise (decision 0019). It removes the Lamha 2 installed on this PC.
+/// </param>
+public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null, string? Updates = null, string? Packs = null, string? Lamha2 = null, bool RemoveLamha2 = false)
 {
     public static AppOptions FromArgs(IReadOnlyList<string> args)
     {
@@ -63,7 +67,8 @@ public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string?
         var packs = Value(args, "--packs=");
         var lamha2 = Value(args, "--lamha2=");
         return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language, theme, string.IsNullOrWhiteSpace(page) ? null : page, args.Contains("--panel", StringComparer.OrdinalIgnoreCase), firstRun, string.IsNullOrWhiteSpace(updates) ? null : updates,
-            string.IsNullOrWhiteSpace(packs) ? null : packs.TrimEnd('/') + "/", string.IsNullOrWhiteSpace(lamha2) ? null : Path.GetFullPath(lamha2));
+            string.IsNullOrWhiteSpace(packs) ? null : packs.TrimEnd('/') + "/", string.IsNullOrWhiteSpace(lamha2) ? null : Path.GetFullPath(lamha2),
+            args.Contains("--remove-lamha2", StringComparer.OrdinalIgnoreCase));
     }
 
     /// <summary>What Lamha starts with again after an update: the profile and the releases' folder, not a screenshot's page or sample.</summary>

@@ -28,6 +28,7 @@ public sealed partial class FirstRunService(Brain brain, ShortcutService shortcu
     private FirstRunWindow? _window;
     private bool _lamha2Read;
     private Lamha2Data? _lamha2;
+    private Lamha2Install? _installed;
     private Lamha2Summary? _moved;
 
     /// <summary><c>--theme</c>: the window's theme for this run instead of the setting.</summary>
@@ -44,6 +45,9 @@ public sealed partial class FirstRunService(Brain brain, ShortcutService shortcu
 
     /// <summary><c>--lamha2</c>: Lamha 2's data read from that folder instead of %APPDATA%\Lamha (a copy, to try the move).</summary>
     public string? Lamha2Path { get; init; }
+
+    /// <summary>Removing Lamha 2 (decision 0019): Ready's switch, and the move's date for the 30 days.</summary>
+    public Lamha2Removal? Removal { get; init; }
 
     public bool IsOpen => _window is not null;
 
@@ -84,10 +88,12 @@ public sealed partial class FirstRunService(Brain brain, ShortcutService shortcu
             {
                 _lamha2Read = true;
                 _lamha2 = ReadLamha2();
+                _installed = Removal?.Installed;
+                AppLog.Info(_installed is null ? "first run: Lamha 2 not offered for removal" : $"first run: Lamha 2 {_installed.Version} installed ({(_installed.ForAllUsers ? "all users" : "this user")})");
             }
 
             var settings = brain.Settings.Current;
-            var model = new FirstRunViewModel(brain, shortcuts, this, step, startWithWindows: true, _lamha2, _moved);
+            var model = new FirstRunViewModel(brain, shortcuts, this, step, startWithWindows: true, _lamha2, _moved, _installed);
             var window = _window = new FirstRunWindow(model, settings.WindowMica);
             window.UseTheme(Theme ?? settings.Theme);
             window.Closed += (_, _) =>
@@ -168,13 +174,20 @@ public sealed partial class FirstRunService(Brain brain, ShortcutService shortcu
     void IFirstRunHost.Moved(Lamha2Summary summary)
     {
         _moved = summary;
+        Removal?.Moved();
         var settings = brain.Settings.Current;
         _window?.UseTheme(Theme ?? settings.Theme);
         Animations.Refresh(settings);
     }
 
-    void IFirstRunHost.Finish(bool startWithWindows, bool clipboardOn)
+    void IFirstRunHost.Finish(bool startWithWindows, bool clipboardOn, bool removeLamha2)
     {
+        if (removeLamha2 && _installed is { } installed && Removal is { } removal)
+        {
+            // Windows' prompt (for all users) comes after the window closes; the uninstaller runs on its own
+            _ = Task.Run(() => removal.RemoveAsync(installed));
+        }
+
         if (Startup is { } startup && startup.IsOn != startWithWindows)
         {
             startup.Set(startWithWindows);
@@ -185,7 +198,7 @@ public sealed partial class FirstRunService(Brain brain, ShortcutService shortcu
             clipboard.SetOn(clipboardOn);
         }
 
-        AppLog.Info($"first run: start with Windows {(startWithWindows ? "on" : "off")}{(Startup is null ? " (not set: another profile)" : "")}, clipboard history {(clipboardOn ? "on" : "off")}");
+        AppLog.Info($"first run: start with Windows {(startWithWindows ? "on" : "off")}{(Startup is null ? " (not set: another profile)" : "")}, clipboard history {(clipboardOn ? "on" : "off")}{(_installed is null ? "" : removeLamha2 ? ", remove Lamha 2" : ", Lamha 2 kept")}");
         _window?.Close();
     }
 
