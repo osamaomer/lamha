@@ -2,7 +2,7 @@
 
 The plan for rebuilding Lamha as a native Windows 11 app (WinUI 3 + Windows App SDK) and dropping the Firefox extension and the Linux plan. Written 2026-10-24.
 
-**Where it stands:** phases 0 and 1 are done ([phase 0](#phase-0-results), [phase 1](#phase-1-progress)). Phase 2 (the brain) is built but for the parity tool ([progress](#phase-2-progress)), and phase 3 (Windows integration) is built ([progress](#phase-3-progress)). Phase 4 (the UI) is under way: the card is done and out as the first beta; the main window, Settings and the clipboard panel are built ([progress](#phase-4-progress)). Phase 5 is built: the updates, speech and the language packs ([progress](#phase-5-progress)); the next beta is the first that updates itself. Phase 6 (moving users over) has started with the importer ([progress](#phase-6-progress)).
+**Where it stands:** phases 0 and 1 are done ([phase 0](#phase-0-results), [phase 1](#phase-1-progress)). Phase 2 (the brain) is built but for the parity tool ([progress](#phase-2-progress)), and phase 3 (Windows integration) is built ([progress](#phase-3-progress)). Phase 4 (the UI) is under way: the card is done and out as the first beta; the main window, Settings and the clipboard panel are built ([progress](#phase-4-progress)). Phase 5 is built: the updates, speech and the language packs ([progress](#phase-5-progress)). Phase 6 (moving users over) is under way ([progress](#phase-6-progress)): the importer, the bridge (Lamha 2.1.0 on `release/2.x`, and Lamha 3 removing Lamha 2) and the release workflow are built; **beta.3** (2026-10-26, the first that updates itself) is out for you to try; then 2.1.0 and 3.0.0.
 
 **Branches:** the phases were built on `native/phase-0` … `native/phase-4`, one line of work in the order 0, 2, 3, 1, 4. On 2026-10-25 it was merged into `main` (decision 0003: `main` is Lamha 3) and those branches were deleted; the progress sections below still name the branch each phase was built on. New work goes on short `lamha3/<what>` branches, merged into `main`.
 
@@ -622,8 +622,13 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
   - Lamha 2's bridge now takes a `Lamha-beta-` setup only from a beta's release (2.x, 264 tests).
   - Lamha 2's checks run on `release/2.x` again (they only ran on `main`, which is Lamha 3 now).
   - **Tried:** `vpk pack` in the beta channel and a local upload with its setup and Portable taken out of `assets.beta-win-x64.json` (only the update package and the feed went), the filter on a list of one, the YAML parsed, `-p:VersionSuffix=` giving 3.0.0. **Not tried:** the workflow itself, which publishes; electron-updater 2.0.1 reading a `latest.yml` from a release whose tag is v3.0.0 (as far as its GitHub provider goes, it doesn't compare the two).
+- **Beta.3** (2026-10-26, Actions → Beta from `main`, all jobs passed; https://github.com/osamaomer/lamha/releases/tag/v3.0.0-beta.3): the importer, the bridge's Lamha 3 half (never offered in a beta) and the release changes, with deltas from beta.2. You asked to release 3.0.0; the answer was beta.3 first. **For you to try:**
+  - **The self-update:** beta.2 finds beta.3 about 15 s after start (or the tray's Check for updates), then Restart now; Settings → Lamha says 3.0.0-beta.3.
+  - **The move:** quit the beta, then `& "$env:LOCALAPPDATA\Lamha\current\Lamha.exe" --profile=C:\LamhaTest\p1 --first-run`. That reads your real `%APPDATA%\Lamha` without changing it and keeps the rest in the test folder. Check the counts, then the cards and history.
+  - **The bridge before 2.1.0 is out:** Lamha 2.1.0 from source (CLAUDE.md, *Lamha 2 from source*), with `LAMHA_BRIDGE_TAG=v3.0.0-beta.3` and `LAMHA_PROFILE=C:\LamhaTest\l2`, then `npm start` in its `desktop/`. The notification comes after about 15 s; Install Lamha 3 downloads beta.3's setup, Lamha 2 quits and the setup runs (on this PC, over the installed beta).
+  - **The programs you use Lamha in,** Arabic typing especially.
 - **The order to release in:**
-  1. The betas on your PCs: beta.3 is the first to update itself from beta.2.
+  1. Beta.3 on your PCs (above).
   2. Your wording, and 2.x's `npm run smoke`.
   3. Lamha 2.1.0: tag `v2.1.0` on `release/2.x`, which runs its release workflow.
   4. Lamha 3.0.0: VersionSuffix stays as it is; Actions → Release.
