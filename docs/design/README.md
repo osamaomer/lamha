@@ -11,4 +11,6 @@ The six screens of Lamha 3, as signed off by the user on 2026-10-25. Each page o
 | [first-run.html](first-run.html) | First run, its five steps | [link](https://claude.ai/artifact/HbHwXKVAr97Y4ncKoaoCPN) |
 | [tray-and-notifications.html](tray-and-notifications.html) | The tray menu and the notifications | [link](https://claude.ai/artifact/W3usYEcZDtTPsbGtXuRmes) |
 
+**Next:** one design system for every screen, with Windows' Settings as the reference: [system-plan.md](system-plan.md) (2026-10-26, waiting for the user's answers).
+
 Words underlined in orange were new drafts when the page was made; the user approved them with the sign-off. The "Questions" on each page are answered in the plan.
