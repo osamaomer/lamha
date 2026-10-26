@@ -50,6 +50,12 @@ public static class ErrorCodes
     public const string NotFoundOffline = "not_found_offline";
     public const string NotBackup = "not_backup";
 
+    /// <summary>Language packs (Lamha 2's packs.js): not one Lamha offers, already downloading, couldn't be downloaded, arrived damaged.</summary>
+    public const string PackUnknown = "pack_unknown";
+    public const string PackBusy = "pack_busy";
+    public const string PackDownload = "pack_download";
+    public const string PackBad = "pack_bad";
+
     /// <summary>Google answered with an error or something that isn't its JSON (shown as "something went wrong").</summary>
     public const string GoogleError = "google_error";
 

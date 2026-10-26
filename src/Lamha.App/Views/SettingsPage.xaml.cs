@@ -344,6 +344,10 @@ public sealed class SettingsStrings
 
     public string OnlineFirstHint { get; } = Localization.Get("Settings_OnlineFirstHint");
 
+    public string Packs { get; } = Localization.Get("Settings_Packs");
+
+    public string PacksHint { get; } = Localization.Get("Settings_PacksHint");
+
     public string Theme { get; } = Localization.Get("Settings_Theme");
 
     public string ThemeHint { get; } = Localization.Get("Settings_ThemeHint");

@@ -21,3 +21,4 @@ changes gets a new record that replaces the old one (the old one says so at the 
 | [0014](0014-notifications-windows-toasts-and-lamha-links.md) | Notifications: Windows' own toasts, their clicks as Lamha's links | Accepted, 2026-10-26 (built in phase 4) |
 | [0015](0015-card-memory-budget.md) | The card's commit budget: 95 MB, set from what the memory is | Accepted, 2026-10-26 (replaces 0008's 85 MB for the card) |
 | [0016](0016-speech-through-the-wave-player.md) | Listen plays through Windows' wave player (MP3 decoded by Windows' codec), not Media Foundation | Accepted, 2026-10-26 (built in phase 5) |
+| [0017](0017-language-packs-as-sqlite-files.md) | Language packs are SQLite files, converted from Lamha 2's and published as packs-v2 | Accepted, 2026-10-26 (built in phase 5) |

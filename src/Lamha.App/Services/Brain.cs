@@ -27,12 +27,15 @@ namespace Lamha.App.Services;
 public sealed partial class Brain : IDisposable
 {
     private readonly Lazy<Lookups> _lookups;
+    private readonly string? _packsFrom;
 
     /// <param name="dataFolder">Where lamha.db lives: %LOCALAPPDATA%\Lamha Data, or a <c>--profile</c> folder.</param>
     /// <param name="keyPrefix">Credential Manager names start with it ("Lamha/"; another for a <c>--profile</c>).</param>
-    public Brain(string dataFolder, string keyPrefix)
+    /// <param name="packsFrom">Where language packs are downloaded from instead of their release (<c>--packs=</c>), or null.</param>
+    public Brain(string dataFolder, string keyPrefix, string? packsFrom = null)
     {
         DataFolder = dataFolder;
+        _packsFrom = packsFrom;
         Database = LamhaDatabase.Open(Path.Combine(dataFolder, "lamha.db"));
         State = new SqliteStateStore(Database);
         Settings = new SettingsService(State);
@@ -82,6 +85,9 @@ public sealed partial class Brain : IDisposable
     public HistoryService History => _lookups.Value.History;
 
     public DiagnosticsReport Diagnostics => _lookups.Value.Diagnostics;
+
+    /// <summary>Settings → Dictionaries to download: the language packs, in the data folder's <c>packs</c>.</summary>
+    public LanguagePacks Packs => _lookups.Value.Packs;
 
     /// <summary>Settings → A copy of my data: save a copy, and restore one (Lamha 2's format).</summary>
     public BackupService Backup => _lookups.Value.Backup;
@@ -144,7 +150,7 @@ public sealed partial class Brain : IDisposable
             var dictionary = DictionaryFile is null ? null : new LocalDictionary(DictionaryFile);
             var errorLog = new ErrorLog(new SqliteErrorLogStore(db), clock);
             var ai = Ai = new AiService(settings, brain.Secrets, http);
-            var packs = new NoLanguagePacks(); // phase 5
+            var packs = Packs = new LanguagePacks(new PackFolder(Path.Combine(brain.DataFolder, "packs")), http, brain._packsFrom);
             var translation = Translation = new TranslationService(settings, ai, new GoogleTranslate(http), new AiTranslator(ai), network);
             var today = Today = new TodayService(activity, brain.State, deck, history, settings, clock, dictionary);
             Review = new ReviewService(deck, brain.State, history, settings, today, clock);
@@ -161,6 +167,8 @@ public sealed partial class Brain : IDisposable
         }
 
         public BackupService Backup { get; }
+
+        public LanguagePacks Packs { get; }
 
         public DictionaryFile? DictionaryFile { get; }
 
@@ -192,6 +200,7 @@ public sealed partial class Brain : IDisposable
         {
             _client.Dispose();
             DictionaryFile?.Dispose();
+            Packs.Dispose();
         }
 
         /// <summary>dict\lamha-dict.db next to Lamha.exe (built from Lamha 2's shards with the app); null when missing.</summary>

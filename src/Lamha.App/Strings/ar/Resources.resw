@@ -623,6 +623,12 @@
   <data name="Settings_AiProvider" xml:space="preserve"><value>مصدر الذكاء الاصطناعي</value><comment>o.aiProvider</comment></data>
   <data name="Settings_Model" xml:space="preserve"><value>النموذج</value><comment>o.model</comment></data>
   <data name="Settings_Packs" xml:space="preserve"><value>قواميس للتنزيل</value><comment>o.packs</comment></data>
+  <data name="Settings_PacksHint" xml:space="preserve"><value>لكل لغة قاموس بلغتها (فرنسي–فرنسي…) يُنزَّل مرة واحدة ويُحفظ على هذا الجهاز، فتُشرح كلماتها دون إنترنت ودون ذكاء اصطناعي. من ويكاموس (رخصة CC BY-SA).</value><comment>o.packsHint</comment></data>
+  <data name="Settings_PackInfo" xml:space="preserve"><value>{0} كلمة · {1} ميغابايت</value><comment>o.packInfo</comment></data>
+  <data name="Settings_PackGet" xml:space="preserve"><value>تنزيل</value><comment>o.packGet</comment></data>
+  <data name="Settings_PackGetting" xml:space="preserve"><value>{0}٪</value><comment>o.packGetting</comment></data>
+  <data name="Settings_PackFailed" xml:space="preserve"><value>تعذّر التنزيل. تحقّق من الاتصال وحاول مرة أخرى.</value><comment>o.packFailed</comment></data>
+  <data name="Settings_PackBad" xml:space="preserve"><value>وصل الملف تالفًا. حاول مرة أخرى.</value><comment>o.packBad</comment></data>
   <data name="Settings_CbEnable" xml:space="preserve"><value>تفعيل سجل الحافظة</value><comment>d.enable</comment></data>
   <data name="Settings_CbMax" xml:space="preserve"><value>عدد العناصر المحفوظة</value><comment>d.sMax</comment></data>
   <data name="Settings_CbApps" xml:space="preserve"><value>البرامج المستثناة</value><comment>d.sApps</comment></data>

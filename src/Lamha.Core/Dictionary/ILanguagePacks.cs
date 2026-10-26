@@ -5,7 +5,7 @@ public sealed record PackHit(string Word, string Form, DictionaryEntry Entry);
 
 /// <summary>
 /// The downloaded language packs (French–French, German–German, Spanish–Spanish, Turkish–Turkish): Lamha 2's
-/// packs.js. Downloading them comes in phase 5; lookups ask them through this.
+/// packs.js. Lookups ask them through this; <see cref="LanguagePacks"/> downloads and keeps them.
 /// </summary>
 public interface ILanguagePacks
 {

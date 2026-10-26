@@ -42,14 +42,17 @@ public sealed class Http(HttpClient client, TimeProvider time)
         }
     }
 
-    /// <summary>Sends a request with a timeout; network failures and timeouts become <see cref="HttpFailure"/>.</summary>
-    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, TimeSpan timeout, CancellationToken cancel = default)
+    /// <summary>
+    /// Sends a request with a timeout; network failures and timeouts become <see cref="HttpFailure"/>. With
+    /// <see cref="HttpCompletionOption.ResponseHeadersRead"/> (a download read as it comes) the timeout is for the headers.
+    /// </summary>
+    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, TimeSpan timeout, CancellationToken cancel = default, HttpCompletionOption completion = HttpCompletionOption.ResponseContentRead)
     {
         using var timer = new CancellationTokenSource(timeout, time);
         using var both = CancellationTokenSource.CreateLinkedTokenSource(timer.Token, cancel);
         try
         {
-            return await client.SendAsync(request, HttpCompletionOption.ResponseContentRead, both.Token).ConfigureAwait(false);
+            return await client.SendAsync(request, completion, both.Token).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (timer.IsCancellationRequested && !cancel.IsCancellationRequested)
         {

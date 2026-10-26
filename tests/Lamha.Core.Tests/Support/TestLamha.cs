@@ -9,6 +9,7 @@ using Lamha.Core.Translation;
 using Lamha.Core.Wikipedia;
 using Lamha.Core.Writing;
 using Lamha.Data.Database;
+using Lamha.Data.Dictionary;
 using Microsoft.Extensions.Time.Testing;
 
 namespace Lamha.Core.Tests.Support;
@@ -58,7 +59,7 @@ public sealed class TestLamha : IDisposable
 
     private readonly HttpClient _client;
 
-    public TestLamha(FakeNet net, LamhaSettings? settings = null, IReadOnlyDictionary<string, string>? keys = null, TimeZoneInfo? zone = null, bool realDict = false, ILanguagePacks? packs = null, DateTimeOffset? start = null)
+    public TestLamha(FakeNet net, LamhaSettings? settings = null, IReadOnlyDictionary<string, string>? keys = null, TimeZoneInfo? zone = null, bool realDict = false, ILanguagePacks? packs = null, DateTimeOffset? start = null, string? packFolder = null)
     {
         Net = net;
         Clock = new FakeTimeProvider(start ?? Start);
@@ -84,7 +85,8 @@ public sealed class TestLamha : IDisposable
         ErrorLog = new ErrorLog(Errors, Clock);
         Writing = new WritingService(Ai, Settings, Mistakes, Localization, Clock, ErrorLog);
         Dictionary = realDict ? new LocalDictionary(RealDictionary.Data) : null;
-        Packs = packs ?? new NoLanguagePacks();
+        PackService = packFolder is null ? null : new LanguagePacks(new PackFolder(packFolder), Http);
+        Packs = packs ?? PackService ?? (ILanguagePacks)new NoLanguagePacks();
         Google = new GoogleTranslate(Http);
         Translation = new TranslationService(Settings, Ai, Google, new AiTranslator(Ai), Network);
         HistoryService = new HistoryService(History, Clock);
@@ -131,6 +133,9 @@ public sealed class TestLamha : IDisposable
     public LocalDictionary? Dictionary { get; }
 
     public ILanguagePacks Packs { get; }
+
+    /// <summary>The real language packs, downloaded through the fake network into <c>packFolder</c> (Lamha 2's <c>packStore</c>).</summary>
+    public LanguagePacks? PackService { get; }
 
     public GoogleTranslate Google { get; }
 
@@ -205,6 +210,7 @@ public sealed class TestLamha : IDisposable
 
     public void Dispose()
     {
+        PackService?.Dispose();
         _client.Dispose();
         Db.Dispose();
     }

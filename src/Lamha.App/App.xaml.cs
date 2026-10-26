@@ -55,7 +55,7 @@ public partial class App : Application
         // The settings decide the interface language, so they open before anything shows.
         var folder = DataFolder.For(options.Profile);
         _hadDatabase = File.Exists(Path.Combine(folder, "lamha.db")); // a new one means a first start (first run)
-        _brain = new Brain(folder, options.Profile is null ? "Lamha/" : "Lamha-profile/");
+        _brain = new Brain(folder, options.Profile is null ? "Lamha/" : "Lamha-profile/", options.Packs);
         Localization.Apply(options.Language ?? _brain.Localization.Language);
         InitializeComponent();
         // The tray keeps Lamha running with no window open; only Quit ends it.

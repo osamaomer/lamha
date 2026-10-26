@@ -1,34 +1,74 @@
-# Builds the downloadable language packs (legacy/tools/build_packs.py) and publishes them as a GitHub Release when a packs tag
-# is pushed. packs.js downloads them from the release named in its RELEASE constant:
-#   git tag packs-v1 && git push origin packs-v1
-# The release is never marked "latest": installed copies of the Windows app look for their updates in the latest release.
+# The downloadable language packs for Lamha 3 (French–French, German–German, Spanish–Spanish, Turkish–Turkish), published
+# as a GitHub Release. Started by hand (Actions → Language packs → Run workflow); nothing starts it by itself.
+#
+# By default it converts Lamha 2's packs (the packs-v1 release, made by legacy/tools/build_packs.py) into Lamha 3's
+# SQLite packs with tools/DictionaryBuilder: the same words, kept the way Lamha 3 reads them. With "rebuild" it first
+# builds Lamha 2's packs again from each language's Wiktionary (kaikki.org, slow: French is 730 MB).
+#
+# Lamha 3 downloads <lang>.db.gz from the release named in src/Lamha.Core/Dictionary/LanguagePacks.cs (Release). The
+# release is never marked "latest": Lamha 2's updater reads the latest release. Lamha 2 keeps downloading packs-v1.
 name: Language packs
 
 on:
-  push:
-    tags: ["packs-v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The release to publish (the one LanguagePacks.cs names)"
+        required: true
+        default: "packs-v2"
+      from:
+        description: "Lamha 2's packs to convert (a release with <lang>.json.gz)"
+        required: true
+        default: "packs-v1"
+      rebuild:
+        description: "Build Lamha 2's packs again from Wiktionary first, instead of taking them from that release"
+        type: boolean
+        default: false
 
 permissions:
   contents: write # create the release and upload the packs (this run's own, temporary token)
 
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
 jobs:
   packs:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
 
-      - name: Build the packs (streams each Wiktionary edition from kaikki.org; French is the big one)
+      - name: Lamha 2's packs, from the release
+        if: ${{ !inputs.rebuild }}
+        run: gh release download "${{ inputs.from }}" --pattern "*.json.gz" --dir dist-packs
+
+      - name: Lamha 2's packs, built again from Wiktionary
+        if: ${{ inputs.rebuild }}
         run: |
-          python3 -m venv "$RUNNER_TEMP/venv"
-          . "$RUNNER_TEMP/venv/bin/activate"
+          python -m venv "$RUNNER_TEMP/venv"
+          . "$RUNNER_TEMP/venv/Scripts/activate"
           pip install --quiet wordfreq
           for lang in tr es de fr; do python legacy/tools/build_packs.py "$lang"; done
+
+      - name: Convert them (tools/DictionaryBuilder pack)
+        run: |
           ls -l dist-packs
+          dotnet run --project tools/DictionaryBuilder -c Release -- pack dist-packs/*.json.gz artifacts/packs
+
+      # Lamha's own tests, with the Turkish pack just made (LanguagePackTests.ARealPackFindsWordsAndTheirForms).
+      - name: Check them
+        run: dotnet test --project tests/Lamha.Core.Tests -c Release -- --filter-class "*LanguagePackTests"
 
       - name: Publish them (not as the latest release)
         run: |
-          gh release create "$GITHUB_REF_NAME" dist-packs/*.json.gz --verify-tag --latest=false \
-            --title "Language packs (${GITHUB_REF_NAME#packs-})" \
-            --notes "Offline dictionaries for Lamha, downloaded from Settings → Dictionary: French–French, German–German, Spanish–Spanish and Turkish–Turkish. From each language's Wiktionary (CC BY-SA 4.0) via kaikki.org; word frequencies from wordfreq."
+          gh release create "${{ inputs.tag }}" artifacts/packs/*.db.gz --target "$GITHUB_SHA" --latest=false \
+            --title "Language packs (${{ inputs.tag }})" \
+            --notes "Offline dictionaries for Lamha 3, downloaded from Settings → Without internet: French–French, German–German, Spanish–Spanish and Turkish–Turkish. From each language's Wiktionary (CC BY-SA 4.0) via kaikki.org; word frequencies from wordfreq. The words of ${{ inputs.from }}, as SQLite files."

@@ -107,6 +107,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         Shortcuts = new ShortcutsSetupViewModel(shortcuts);
         Clipboard = new ClipboardSetupViewModel(brain, clipboard, host);
         Privacy = new PrivacySetupViewModel(brain, host);
+        Offline = new OfflineSetupViewModel(brain);
         Tiles =
         [
             Tile("languages", Glyph.Translate, "Settings_Languages", "Settings_UiLang", "Settings_TargetLang", "Settings_Reverse"),
@@ -216,6 +217,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     public bool IsReview => Section == "review";
 
     public bool IsOffline => Section == "offline";
+
+    /// <summary>Dictionaries to download (the language packs).</summary>
+    public OfflineSetupViewModel Offline { get; }
 
     public bool IsAppearance => Section == "appearance";
 
@@ -397,6 +401,11 @@ public sealed partial class SettingsViewModel : ObservableObject
         {
             _attached = true;
             _brain.Settings.Changed += OnSettingsChanged;
+            if (IsOffline)
+            {
+                Offline.Attach();
+            }
+
             if (_updates is not null)
             {
                 _updates.Changed += OnUpdateChanged;
@@ -409,6 +418,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         _attached = false;
         _brain.Settings.Changed -= OnSettingsChanged;
+        Offline.Detach();
         if (_updates is not null)
         {
             _updates.Changed -= OnUpdateChanged;
@@ -534,6 +544,16 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// <summary>The section opens: Writing tools reads the keys and the chosen provider's models; Translation its model.</summary>
     partial void OnSectionChanged(string value)
     {
+        // The packs' list follows downloads only while it's on screen.
+        if (value == "offline" && _attached)
+        {
+            Offline.Attach();
+        }
+        else
+        {
+            Offline.Detach();
+        }
+
         if (value == "writing")
         {
             AiIntro = Localization.Format("Settings_AiIntro", _shortcutService.Keys(Shortcut.Write).ToString());

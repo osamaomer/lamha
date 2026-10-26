@@ -492,6 +492,36 @@
           </RadioButton>
         </StackPanel>
       </Border>
+
+      <!-- Dictionaries to download: each language with its size and Download (its progress while it comes) or Remove,
+           and why the last try failed under its name (Lamha 2's renderPacks()) -->
+      <Border Style="{StaticResource LamhaSettingsPanelStyle}">
+        <StackPanel Spacing="12">
+          <StackPanel Spacing="2">
+            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Packs}" AutomationProperties.HeadingLevel="Level2" />
+            <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.PacksHint}" />
+          </StackPanel>
+          <ItemsRepeater ItemsSource="{x:Bind ViewModel.Offline.Packs}">
+            <ItemsRepeater.ItemTemplate>
+              <DataTemplate x:DataType="main:PackRow">
+                <Grid MinHeight="48" Padding="0,8" ColumnSpacing="12" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="{x:Bind controls:Show.LineAbove(IsFirst)}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel VerticalAlignment="Center" Spacing="1">
+                    <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Name}" />
+                    <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Info, Mode=OneWay}" />
+                    <controls:StatusText Text="{x:Bind Error, Mode=OneWay}" Kind="Bad" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Style="{StaticResource LamhaQuietButtonStyle}" MinWidth="88" Command="{x:Bind ActCommand}"
+                          Content="{x:Bind Button, Mode=OneWay}" AutomationProperties.Name="{x:Bind ButtonName, Mode=OneWay}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+          </ItemsRepeater>
+        </StackPanel>
+      </Border>
     </StackPanel>
 
     <!-- ===== Appearance ===== -->

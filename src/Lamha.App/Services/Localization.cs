@@ -87,6 +87,9 @@ public static class Localization
     public static string Rate(decimal value) =>
         Digits(value.ToString(value >= 0.01m ? "#,0.####" : "0.########", IsArabic ? ArabicNumbers : EnglishNumbers));
 
+    /// <summary>A size in megabytes, one decimal at most ("5.9", "٥٫٩"): Lamha 2's <c>num(bytes / 1e6, { maximumFractionDigits: 1 })</c>.</summary>
+    public static string Megabytes(long bytes) => Digits((bytes / 1e6).ToString("#,0.#", IsArabic ? ArabicNumbers : EnglishNumbers));
+
     /// <summary>"25 October", "٢٥ أكتوبر".</summary>
     public static string DayAndMonth(DateOnly day) => Digits(day.ToString("d MMMM", IsArabic ? ArabicNumbers : EnglishNumbers));
 
