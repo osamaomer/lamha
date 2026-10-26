@@ -244,12 +244,12 @@ public partial class TokensTests
         return rgb.Over(alpha / 255.0, under);
     }
 
-    /// <summary>Lamha 2's colours for a theme: the first block, with the dark block's on top for dark.</summary>
+    /// <summary>Lamha 2's colours for a theme: the first block, with the dark block's on top for dark. From the copies
+    /// in Appearance/Lamha2 of its shared/ui.css and content/styles.js.</summary>
     private static Dictionary<string, (Rgb Rgb, int Alpha)> Lamha2Colours(string file, string theme)
     {
-        var (path, light, dark) = file == "ui"
-            ? (Path.Combine("legacy", "shared", "ui.css"), ":root {", ":root[data-theme=\"dark\"] {")
-            : (Path.Combine("legacy", "content", "styles.js"), ".root {", ".root.dark {");
+        var (light, dark) = file == "ui" ? (":root {", ":root[data-theme=\"dark\"] {") : (".root {", ".root.dark {");
+        var path = Path.Combine("tests", "Lamha.Core.Tests", "Appearance", "Lamha2", file == "ui" ? "ui.css" : "card.css");
         var text = File.ReadAllText(Path.Combine(RealDictionary.RepositoryRoot, path));
         var colours = Variables(Block(text, light));
         if (theme == "Dark")

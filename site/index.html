@@ -866,7 +866,7 @@ footer a { color: var(--muted); }
   </div>
 </footer>
 
-<!-- The site's build copies shared/changelog.js next to this page (.github/workflows/site.yml). -->
+<!-- changelog.js: what changed in each version (Lamha 2's, until Lamha 3 has its own). -->
 <script src="changelog.js"></script>
 <script>
 (() => {
@@ -1040,7 +1040,7 @@ footer a { color: var(--muted); }
     })
     .catch(() => { renderNews(""); });
 
-  /* --- what's new: shared/changelog.js, the entry of the released version --- */
+  /* --- what's new: changelog.js, the entry of the released version --- */
   let newsVersion = null;
   function renderNews(version) {
     if (version !== undefined) newsVersion = version;

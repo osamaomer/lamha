@@ -1,8 +1,12 @@
-/* Lamha — what changed in each version, in both interface languages. Shown in the Windows app's Settings → Updates
- * ("What's new"), and turned into the GitHub release notes by tools/release-notes.mjs in the release workflow, which
- * stops when the version being released has no entry here. Newest first; each note is [arabic, english]. */
+/* Lamha 2's changelog: what changed in each version, in both interface languages, for the website's "What's new"
+ * (index.html). Its own copy, which the Windows app shows and its release workflow turns into release notes, is
+ * shared/changelog.js on release/2.x. Newest first; each note is [arabic, english]. */
 // eslint-disable-next-line no-unused-vars
 var LamhaChangelog = [
+  { v: "2.1.0", date: "2026-10-26", notes: [
+    ["الطريق إلى لمحة 3: حين تصدر لمحة 3، الجديدة كليًا لويندوز 11، يخبرك تطبيق ويندوز بذلك ويثبّتها لك متى شئت، وتنتقل بياناتك كلها إليها.",
+      "On the way to Lamha 3: when Lamha 3, rebuilt for Windows 11, comes out, the Windows app tells you and installs it whenever you're ready, and all your data moves to it."]
+  ]},
   { v: "2.0.1", date: "2026-10-04", notes: [
     ["قراءة أسهل واستخدام أيسر: صار النص أوضح في الوضع الداكن، وصارت حواف مربعات النص والقوائم المنسدلة ظاهرة. كما يدعم التطبيق الآن سمات التباين في ويندوز، ويقرأ «الراوي» الترجمة فور ظهورها.",
       "Easier to read and use: text is clearer in dark mode, and the edges of text boxes and dropdowns are visible. The app now also supports Windows' contrast themes, and Narrator reads the translation as soon as it appears."],

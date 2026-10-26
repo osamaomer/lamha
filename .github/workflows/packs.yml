@@ -1,7 +1,7 @@
 # The downloadable language packs for Lamha 3 (French–French, German–German, Spanish–Spanish, Turkish–Turkish), published
 # as a GitHub Release. Started by hand (Actions → Language packs → Run workflow); nothing starts it by itself.
 #
-# By default it converts Lamha 2's packs (the packs-v1 release, made by legacy/tools/build_packs.py) into Lamha 3's
+# By default it converts Lamha 2's packs (the packs-v1 release, made by tools/build_packs.py on release/2.x) into Lamha 3's
 # SQLite packs with tools/DictionaryBuilder: the same words, kept the way Lamha 3 reads them. With "rebuild" it first
 # builds Lamha 2's packs again from each language's Wiktionary (kaikki.org, slow: French is 730 MB).
 #
@@ -50,13 +50,19 @@ jobs:
         if: ${{ !inputs.rebuild }}
         run: gh release download "${{ inputs.from }}" --pattern "*.json.gz" --dir dist-packs
 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ inputs.rebuild }}
+        with:
+          ref: release/2.x # Lamha 2, where its pack builder is
+          path: lamha2
+
       - name: Lamha 2's packs, built again from Wiktionary
         if: ${{ inputs.rebuild }}
         run: |
           python -m venv "$RUNNER_TEMP/venv"
           . "$RUNNER_TEMP/venv/Scripts/activate"
           pip install --quiet wordfreq
-          for lang in tr es de fr; do python legacy/tools/build_packs.py "$lang"; done
+          for lang in tr es de fr; do python lamha2/tools/build_packs.py "$lang"; done
 
       - name: Convert them (tools/DictionaryBuilder pack)
         run: |

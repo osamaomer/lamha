@@ -4,23 +4,25 @@
 //   node tools/Strings/lamha2-strings.mjs find <text>               keys whose Arabic or English contains <text>
 //   node tools/Strings/lamha2-strings.mjs resw Name=key [Name=key…]  the <data> lines for both .resw files
 //
-// The strings come from legacy/shared/i18n.js, options/i18n-options.js, desktop/renderer/i18n-desktop.js and
+// The strings come from Lamha 2's shared/i18n.js, options/i18n-options.js, desktop/renderer/i18n-desktop.js and
 // shared/lamha-ai.js (its ERRORS and CATEGORIES, named "ERRORS.<code>.title|hint" and "CATEGORIES.<name>.label|tip").
+// They are read from the release/2.x branch (git fetch first), where Lamha 2's code is since legacy/ left main.
 // Strings that are functions (Arabic counting, mostly) are listed apart: their C# port is written by hand.
 // The JSON is what tests/Lamha.Core.Tests/Strings/ResourcesTests.cs checks the .resw files against.
 
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const legacy = path.join(here, "..", "..", "legacy");
+const repo = path.join(here, "..", "..");
 const jsonFile = path.join(here, "lamha2-strings.json");
 
 function load() {
   const ctx = vm.createContext({});
-  const read = f => fs.readFileSync(path.join(legacy, f), "utf8");
+  const read = f => execFileSync("git", ["show", `origin/release/2.x:${f}`], { cwd: repo, encoding: "utf8", maxBuffer: 1 << 26 });
   // i18n.js keeps its table private: expose it to read every key.
   const i18n = read("shared/i18n.js").replace("const S = Object.create(null);", "const S = globalThis.__S = Object.create(null);");
   vm.runInContext(i18n, ctx, { filename: "shared/i18n.js" });

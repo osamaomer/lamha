@@ -15,11 +15,6 @@ indent_size = 2
 [*.md]
 trim_trailing_whitespace = false
 
-# Lamha 2 keeps its own style.
-[legacy/**]
-indent_size = unset
-end_of_line = unset
-
 [*.cs]
 # Layout
 csharp_new_line_before_open_brace = all

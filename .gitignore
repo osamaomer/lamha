@@ -15,18 +15,8 @@ Releases/
 Thumbs.db
 desktop.ini
 
-# ---- Lamha 2 (legacy/) ----
-# dependencies
+# ---- npm (the tools) ----
 node_modules/
-
-# build output (extension packages, desktop installers, the extension copy made by `npm run sync`)
-legacy/web-ext-artifacts/
-legacy/desktop/dist/
-legacy/desktop/ext/
-legacy/desktop/bin/
-
-# tools/compare-translation.mjs output
-translation-report.md
 
 # tools/build_packs.py output: the language packs, uploaded to a GitHub release
 dist-packs/

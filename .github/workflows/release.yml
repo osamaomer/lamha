@@ -82,7 +82,7 @@ jobs:
       - run: dotnet tool restore
 
       - name: The offline dictionary file (shipped next to Lamha.exe as dict/lamha-dict.db)
-        run: dotnet run --project tools/DictionaryBuilder -c Release -- legacy/dict artifacts/dict/lamha-dict.db
+        run: dotnet run --project tools/DictionaryBuilder -c Release -- dict artifacts/dict/lamha-dict.db
 
       # No suffix: a released version (Lamha 2's shortcuts, the normal channel, removing Lamha 2).
       - name: Publish (NativeAOT)

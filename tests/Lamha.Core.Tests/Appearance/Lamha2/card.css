@@ -1,0 +1,79 @@
+/* Lamha 2's card colours (content/styles.js), its light and dark blocks as they were when legacy/ left main (2026-10-26; Lamha 2's code is on release/2.x). TheColoursAreLamhaTwos reads them. */
+.root {
+  --font-ar: "SF Arabic", "Segoe UI", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", Tahoma, sans-serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Noto Sans Arabic", Roboto, Tahoma, sans-serif;
+  --font-head: "New York", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+
+  /* the same colours as the pages (shared/ui.css; --bg here is their --surface): tools/test-ui.mjs checks they match */
+  --bg: #ffffff;
+  --bg-solid: #ffffff;
+  --fg: #1d1d1f;
+  --muted: #5f5f64; /* 4.5:1 also on the tinted meaning box */
+  --faint: #707075;
+  --line: rgba(0, 0, 0, 0.08);
+  --field-line: rgba(0, 0, 0, 0.42);
+  --hover: rgba(0, 0, 0, 0.05);
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.09);
+  --accent-fg: #ffffff;
+  --btn: #4f46e5;
+  --btn-fg: #ffffff;
+  --ok-soft: rgba(22, 163, 74, 0.12);
+  --danger-soft: rgba(220, 38, 38, 0.1);
+  --toast-bg: #1c1c1e;
+  --toast-fg: #ffffff;
+  --toast-act: #a5b4fc;
+  --celebrate: linear-gradient(135deg, rgba(79, 70, 229, 0.11), rgba(6, 182, 212, 0.11));
+  --chip: rgba(0, 0, 0, 0.045);
+  --shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.28), 0 4px 14px rgba(0, 0, 0, 0.08), 0 0 0 0.5px rgba(0, 0, 0, 0.12);
+  --pill-bg: rgba(28, 28, 30, 0.92);
+  --pill-fg: #ffffff;
+  --skeleton: rgba(0, 0, 0, 0.06);
+  --ok: #166534;
+  --danger: #c81e1e;
+  --scroll: rgba(0, 0, 0, 0.22);
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+
+  /* scrollbars and form controls in the card's own theme: the shadow root would take the web page's (usually light) */
+  color-scheme: light;
+  scrollbar-color: var(--scroll) transparent;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  direction: rtl; /* the interface's own direction: \`all: initial\` doesn't reset it, so it would follow the web page */
+}
+
+.root.dark {
+  --bg: #2c2c2e;
+  --bg-solid: #2c2c2e;
+  --fg: #f5f5f7;
+  --muted: #a5a5aa;
+  --faint: #98989d;
+  --line: rgba(255, 255, 255, 0.1);
+  --field-line: rgba(255, 255, 255, 0.4);
+  --hover: rgba(255, 255, 255, 0.07);
+  --accent: #9aa1ff;
+  --accent-soft: rgba(154, 161, 255, 0.12);
+  --accent-fg: #0b0b12;
+  --btn: #5e5ce6;
+  --btn-fg: #ffffff;
+  --ok-soft: rgba(74, 222, 128, 0.13);
+  --danger-soft: rgba(252, 136, 136, 0.14);
+  --toast-bg: rgba(242, 242, 247, 0.96);
+  --toast-fg: #1c1c1e;
+  --toast-act: #4f46e5;
+  --celebrate: linear-gradient(135deg, rgba(139, 147, 255, 0.22), rgba(34, 211, 238, 0.13));
+  --chip: rgba(255, 255, 255, 0.07);
+  --shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.6), 0 4px 14px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.14);
+  --pill-bg: rgba(242, 242, 247, 0.95);
+  --pill-fg: #1c1c1e;
+  --skeleton: rgba(255, 255, 255, 0.08);
+  --ok: #4ade80;
+  --danger: #fc8888;
+  --scroll: rgba(255, 255, 255, 0.2);
+  color-scheme: dark;
+}

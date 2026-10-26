@@ -4,7 +4,7 @@
 
 Lamha is an Arabic-first dictionary, translator and English writing coach for Windows, inspired by the **Look Up** feature on iPhone and Mac. Select a word in any program and a small card shows what it means, in Arabic, in *this* sentence. Select a paragraph and it's translated. Select your own email and Lamha polishes it and explains, in Arabic, what you got wrong.
 
-> **Using Lamha today?** The current version is **Lamha 2**: download it from [Releases](https://github.com/osamaomer/lamha/releases/latest). Its full guide is in **[legacy/README.md](legacy/README.md)**.
+> **Using Lamha today?** The current version is **Lamha 2**: download it from [Releases](https://github.com/osamaomer/lamha/releases/latest). Its full guide is in **[Lamha 2's README](https://github.com/osamaomer/lamha/blob/release/2.x/README.md)** (its code is on the `release/2.x` branch).
 
 ## Lamha 3: the native Windows app (in development)
 
@@ -38,13 +38,13 @@ dotnet run --project src/Lamha.App          # tray icon; Ctrl+Alt+L on selected 
 | `src/Lamha.Windows` | Win32: shortcuts, the selection, the clipboard, the tray |
 | `src/Lamha.App` | The WinUI 3 app |
 | `tests/` | Tests for each project |
-| `tools/` | The memory check, and later the dictionary builder |
-| `legacy/` | Lamha 2 (Electron and the Firefox extension), kept as the reference for the port |
+| `tools/` | The dictionary builder, the strings tool, the memory check |
+| `dict/` | The offline dictionary's data (CC BY-SA 4.0: [dict/LICENSES.md](dict/LICENSES.md)), built into the app by the dictionary builder |
 | `site/` | The download page |
 
 ## Privacy and data sources
 
-See [legacy/README.md](legacy/README.md#-privacy-and-data-sources): Lamha 3 follows the same rules.
+See [Lamha 2's README](https://github.com/osamaomer/lamha/blob/release/2.x/README.md#-privacy-and-data-sources): Lamha 3 follows the same rules.
 
 ## License
 

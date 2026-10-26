@@ -69,7 +69,7 @@
     <Content Include="$(LamhaDictFile)" Link="dict\lamha-dict.db" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="LamhaNoDictionary" BeforeTargets="Build" Condition="!Exists('$(LamhaDictFile)')">
-    <Message Importance="high" Text="Lamha: no offline dictionary in artifacts/dict (dotnet run --project tools/DictionaryBuilder -- legacy/dict artifacts/dict/lamha-dict.db)" />
+    <Message Importance="high" Text="Lamha: no offline dictionary in artifacts/dict (dotnet run --project tools/DictionaryBuilder -- dict artifacts/dict/lamha-dict.db)" />
   </Target>
 
   <ItemGroup>

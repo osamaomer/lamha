@@ -1,5 +1,5 @@
 // dotnet run --project tools/DictionaryBuilder -- <shards folder> <output file>
-// e.g. dotnet run --project tools/DictionaryBuilder -- legacy/dict artifacts/dict/lamha-dict.db
+// e.g. dotnet run --project tools/DictionaryBuilder -- dict artifacts/dict/lamha-dict.db
 //
 // dotnet run --project tools/DictionaryBuilder -- pack <Lamha 2 pack.json.gz>… <output folder>
 // e.g. dotnet run --project tools/DictionaryBuilder -- pack packs-v1/fr.json.gz packs-v1/tr.json.gz artifacts/packs

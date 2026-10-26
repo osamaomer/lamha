@@ -633,7 +633,14 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
   3. Lamha 2.1.0: tag `v2.1.0` on `release/2.x`, which runs its release workflow.
   4. Lamha 3.0.0: VersionSuffix stays as it is; Actions → Release.
   5. The website and README, then removing `legacy/`.
-- **Not started:** the website and README for Lamha 3, removing `legacy/`.
+- **`legacy/` removed** (2026-10-26, on `lamha3/remove-legacy`, merged after 3.0.0 is out because Release builds from `main`). Lamha 2's code is on `release/2.x` (and the `electron-final` tag); what Lamha 3 still read from `legacy/` moved:
+  - **The dictionary's shards** to `dict/` (`git mv`, history kept, as 0003 asked); CI, Beta, Release and the tests build from there. The same file: 86,609 entries. CI no longer skips a change to them (it ignored `legacy/**`). Building them in CI from their sources (above) is still an idea.
+  - **The website's changelog** to `site/changelog.js` (Lamha 2's, with 2.1.0's entry, which only `release/2.x` had); Lamha 3's own comes with the website.
+  - **Lamha 2's colours,** which `TokensTests` checks the tokens against: their four blocks copied to `tests/Lamha.Core.Tests/Appearance/Lamha2/`.
+  - **The strings tool** reads Lamha 2's files from `origin/release/2.x` (`git show`); the JSON gained 2.1.0's bridge strings, nothing changed. **The packs workflow's rebuild** checks out `release/2.x` for `build_packs.py`.
+  - **Gone:** the legacy checks workflow (`release/2.x` runs its own), `legacy/`'s `.gitignore` and `.editorconfig` rules. The README links to Lamha 2's README on `release/2.x`; its rewrite is the website's step.
+  - 0 warnings; all the tests pass, with the dictionary built again from `dict/`.
+- **Not started:** the website and README for Lamha 3.
 
 **Ideas**
 - **Lamha 2's language packs:** the importer knows which languages a user had; the summary could offer to download them again (0017's format), instead of waiting for Settings.

@@ -3,7 +3,7 @@ using Lamha.Data.Dictionary;
 namespace Lamha.Core.Tests.Support;
 
 /// <summary>
-/// The real offline dictionary, built once from Lamha 2's shards (legacy/dict) next to the tests and opened read-only:
+/// The real offline dictionary, built once from Lamha 2's shards (dict/) next to the tests and opened read-only:
 /// Lamha 2's tests with <c>realDict: true</c>. It's built again when the shards or the builder change.
 /// </summary>
 public static class RealDictionary
@@ -31,7 +31,7 @@ public static class RealDictionary
 
     private static DictionaryFile Open()
     {
-        var shards = Path.Combine(RepositoryRoot, "legacy", "dict");
+        var shards = Path.Combine(RepositoryRoot, "dict");
         var path = Path.Combine(AppContext.BaseDirectory, "lamha-dict.db");
         var builtFrom = new[] { System.IO.File.GetLastWriteTimeUtc(Path.Combine(shards, "meta.json")), System.IO.File.GetLastWriteTimeUtc(Path.Combine(AppContext.BaseDirectory, "Lamha.Data.dll")) }.Max();
         if (!System.IO.File.Exists(path) || System.IO.File.GetLastWriteTimeUtc(path) < builtFrom)

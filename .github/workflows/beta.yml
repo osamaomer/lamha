@@ -51,7 +51,7 @@ jobs:
       - run: dotnet tool restore
 
       - name: The offline dictionary file (shipped next to Lamha.exe as dict/lamha-dict.db)
-        run: dotnet run --project tools/DictionaryBuilder -c Release -- legacy/dict artifacts/dict/lamha-dict.db
+        run: dotnet run --project tools/DictionaryBuilder -c Release -- dict artifacts/dict/lamha-dict.db
 
       # The beta's number in Lamha itself too (Report a problem, the log), not only in the installer.
       - name: Publish (NativeAOT)

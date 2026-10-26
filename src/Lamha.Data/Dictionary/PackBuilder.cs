@@ -7,7 +7,7 @@ using Microsoft.Data.Sqlite;
 namespace Lamha.Data.Dictionary;
 
 /// <summary>
-/// Makes a <see cref="PackFile"/> from one of Lamha 2's language packs (legacy/tools/build_packs.py): a gzip'd
+/// Makes a <see cref="PackFile"/> from one of Lamha 2's language packs (tools/build_packs.py on release/2.x): a gzip'd
 /// <c>{ "meta": { lang, format: 1, version, words, forms, built, source, license }, "shards": { "&lt;xx&gt;": { "w": {
 /// word: entry }, "f": { form: lemma } } } }</c>. Each entry is copied as its JSON (the dictionary's shape without
 /// the Arabic). The words are the same; only the way they're kept changes.

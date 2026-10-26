@@ -5,9 +5,9 @@ name: CI
 on:
   push:
     branches: [main, "native/**"]
-    paths-ignore: ["legacy/**", "site/**", "docs/**", "**.md"]
+    paths-ignore: ["site/**", "docs/**", "**.md"]
   pull_request:
-    paths-ignore: ["legacy/**", "site/**", "docs/**", "**.md"]
+    paths-ignore: ["site/**", "docs/**", "**.md"]
 
 permissions:
   contents: read
@@ -41,7 +41,7 @@ jobs:
       - run: dotnet tool restore
 
       - name: The offline dictionary file (shipped next to Lamha.exe as dict/lamha-dict.db)
-        run: dotnet run --project tools/DictionaryBuilder -c Release -- legacy/dict artifacts/dict/lamha-dict.db
+        run: dotnet run --project tools/DictionaryBuilder -c Release -- dict artifacts/dict/lamha-dict.db
 
       - name: Publish (NativeAOT)
         run: dotnet publish src/Lamha.App -c Release -r ${{ matrix.rid }} -o artifacts/publish/${{ matrix.rid }}
