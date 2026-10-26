@@ -24,7 +24,7 @@
         </StackPanel>
         <Button x:Uid="Card_CopyPrice" Grid.Column="1" VerticalAlignment="Top" Style="{StaticResource LamhaIconButtonStyle}"
                 Command="{x:Bind Price.Copy, Mode=OneWay}">
-          <controls:LineIcon Glyph="Copy" Width="15" Height="15" />
+          <controls:FluentIcon Glyph="Copy" />
         </Button>
       </Grid>
     </Border>

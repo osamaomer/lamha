@@ -17,7 +17,7 @@
         <Button Style="{StaticResource LamhaFootLinkStyle}" Command="{x:Bind Open}" ToolTipService.ToolTip="{x:Bind controls:Show.Tooltip(Tooltip)}"
                 AutomationProperties.Name="{x:Bind Label}">
           <StackPanel Orientation="Horizontal" Spacing="6">
-            <controls:LineIcon Glyph="{x:Bind Glyph}" Width="13" Height="13" />
+            <controls:FluentIcon Glyph="{x:Bind Glyph}" />
             <TextBlock Text="{x:Bind Label}" />
           </StackPanel>
         </Button>
@@ -55,7 +55,7 @@
                   IsHitTestVisible="False" Visibility="Collapsed" />
           <Button x:Uid="Translate_Clear" Margin="0,10,10,0" HorizontalAlignment="Right" VerticalAlignment="Top" Style="{StaticResource LamhaIconButtonStyle}"
                   Visibility="{x:Bind ViewModel.HasQuery, Mode=OneWay, FallbackValue=Collapsed}" Click="OnClear">
-            <controls:LineIcon Glyph="Close" Width="14" Height="14" />
+            <controls:FluentIcon Glyph="Close" />
           </Button>
         </Grid>
 
@@ -106,7 +106,7 @@
                 Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.RunErrorActionCommand}"
                 AutomationProperties.Name="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}">
           <StackPanel Orientation="Horizontal" Spacing="6">
-            <controls:LineIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Error), Mode=OneWay}" Width="14" Height="14" />
+            <controls:FluentIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Error), Mode=OneWay}" />
             <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}" />
           </StackPanel>
         </Button>

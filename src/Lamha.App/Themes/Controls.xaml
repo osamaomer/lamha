@@ -31,6 +31,11 @@
     <ResourceDictionary x:Key="HighContrast" />
   </ResourceDictionary.ThemeDictionaries>
 
+  <!-- Lamha's mark: its gradient, which follows the theme (Windows' highlight in high contrast) -->
+  <Style TargetType="controls:BrandMark">
+    <Setter Property="Background" Value="{ThemeResource LamhaBrandBrush}" />
+  </Style>
+
   <!-- Buttons: one template, coloured by the style. A hover tint over the fill, a little faded when pressed,
        Lamha 2's 0.45 when it can't be used; Windows draws the focus ring. -->
   <ControlTemplate x:Key="LamhaButtonTemplate" TargetType="Button">

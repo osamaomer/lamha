@@ -60,9 +60,7 @@
         <TextBlock VerticalAlignment="Bottom" Margin="0,0,0,1" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Hint}" />
       </StackPanel>
       <StackPanel Grid.Row="1" Padding="28,24" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Border Width="44" Height="44" Margin="0,0,0,4" HorizontalAlignment="Center" CornerRadius="12" Background="{ThemeResource LamhaAccentSoftBrush}">
-          <controls:LineIcon Glyph="Clipboard" Width="22" Height="22" Foreground="{ThemeResource LamhaAccentBrush}" />
-        </Border>
+        <controls:FluentIcon Glyph="Clipboard" Size="Hero" Margin="0,0,0,4" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind OptInTitle}" />
         <TextBlock MaxWidth="280" HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" LineHeight="22"
                    Text="{x:Bind OptInText}" />
@@ -129,7 +127,7 @@
                   <SolidColorBrush x:Key="TextControlElevationBorderFocusedBrush" Color="Transparent" />
                 </TextBox.Resources>
               </TextBox>
-              <controls:LineIcon Glyph="Search" Width="16" Height="16" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
+              <controls:FluentIcon Glyph="Search" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
                                  Foreground="{ThemeResource LamhaTextFaintBrush}" IsHitTestVisible="False" />
             </Grid>
           </Border>
@@ -178,7 +176,7 @@
                         </Border>
                         <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" FontSize="11.5" Foreground="{ThemeResource LamhaTextFaintBrush}"
                                    TextWrapping="NoWrap" Text="{x:Bind Meta, Mode=OneWay}" />
-                        <controls:LineIcon Glyph="Pin" Width="12" Height="12" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}"
+                        <controls:FluentIcon Glyph="Pin" Size="Small" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}"
                                            Visibility="{x:Bind Pinned, Mode=OneWay}" AutomationProperties.Name="{x:Bind PinnedName}" />
                       </StackPanel>
                     </StackPanel>
@@ -189,12 +187,12 @@
                       <ToggleButton Style="{StaticResource LamhaIconToggleStyle}" Width="28" Height="28" MinHeight="28" IsTabStop="False" IsChecked="{x:Bind Pinned, Mode=OneWay}"
                                     Command="{x:Bind Owner.TogglePinCommand}" ToolTipService.ToolTip="{x:Bind PinTooltip, Mode=OneWay}"
                                     AutomationProperties.Name="{x:Bind PinTooltip, Mode=OneWay}" AutomationProperties.AccessibilityView="{x:Bind controls:Show.Reachable(IsSelected), Mode=OneWay}">
-                        <controls:LineIcon Glyph="Pin" Width="15" Height="15" Filled="{x:Bind Pinned, Mode=OneWay}" />
+                        <controls:FluentIcon Glyph="Pin" Filled="{x:Bind Pinned, Mode=OneWay}" />
                       </ToggleButton>
                       <Button Style="{StaticResource LamhaIconButtonStyle}" IsTabStop="False" Command="{x:Bind Owner.DeleteCommand}"
                               ToolTipService.ToolTip="{x:Bind DeleteTooltip}" AutomationProperties.Name="{x:Bind DeleteTooltip}"
                               AutomationProperties.AccessibilityView="{x:Bind controls:Show.Reachable(IsSelected), Mode=OneWay}">
-                        <controls:LineIcon Glyph="Trash" Width="15" Height="15" />
+                        <controls:FluentIcon Glyph="Trash" />
                       </Button>
                     </StackPanel>
                   </Grid>
@@ -248,7 +246,7 @@
       <StackPanel Padding="12,10,12,0" Orientation="Horizontal" Spacing="4">
         <Button Style="{StaticResource LamhaIconButtonStyle}" IsTabStop="False" Command="{x:Bind ViewModel.BackToListCommand}"
                 ToolTipService.ToolTip="{x:Bind BackToList}" AutomationProperties.Name="{x:Bind BackToList}">
-          <controls:LineIcon Glyph="Back" Width="16" Height="16" />
+          <controls:FluentIcon Glyph="Back" />
         </Button>
         <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}" FontWeight="Bold" Text="{x:Bind ToolsTitle}" />
       </StackPanel>
@@ -284,7 +282,7 @@
                   <TextBlock VerticalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaLabelTextStyle}" FontWeight="Bold"
                              Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Number}" />
                   <Border Grid.Column="1" Width="28" Height="28" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaChipBrush}">
-                    <controls:LineIcon Glyph="{x:Bind Glyph}" Width="16" Height="16" Foreground="{ThemeResource LamhaAccentBrush}" />
+                    <controls:FluentIcon Glyph="{x:Bind Glyph}" Foreground="{ThemeResource LamhaAccentBrush}" />
                   </Border>
                   <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
                              Text="{x:Bind Label}" />
@@ -328,20 +326,20 @@
             <StackPanel Orientation="Horizontal" Spacing="6">
               <Button x:Name="PasteButton" Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind ViewModel.PasteResultCommand}" AutomationProperties.Name="{x:Bind PasteLabel}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                  <controls:LineIcon Glyph="Check" Width="14" Height="14" />
+                  <controls:FluentIcon Glyph="Check" />
                   <TextBlock Text="{x:Bind PasteLabel}" />
                   <TextBlock Margin="4,0,0,0" VerticalAlignment="Center" FontSize="11" FontWeight="Medium" Opacity="0.75" Text="Enter" />
                 </StackPanel>
               </Button>
               <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.List.CopyResultCommand}" AutomationProperties.Name="{x:Bind CopyLabel}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                  <controls:LineIcon Glyph="Copy" Width="14" Height="14" />
+                  <controls:FluentIcon Glyph="Copy" />
                   <TextBlock Text="{x:Bind CopyLabel}" />
                 </StackPanel>
               </Button>
               <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.List.RedoCommand}" ToolTipService.ToolTip="{x:Bind NewResult}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                  <controls:LineIcon Glyph="Retry" Width="14" Height="14" />
+                  <controls:FluentIcon Glyph="Retry" />
                   <TextBlock Text="{x:Bind RedoLabel}" />
                 </StackPanel>
               </Button>
@@ -380,7 +378,7 @@
           <!-- No mistakes, and Redo -->
           <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.ToolsRow.IsNoMistakes, Mode=OneWay, FallbackValue=Collapsed}">
             <StackPanel Orientation="Horizontal" Spacing="8">
-              <controls:LineIcon Glyph="Check" StrokeWidth="2.6" Foreground="{ThemeResource LamhaOkBrush}" />
+              <controls:FluentIcon Glyph="Check" Foreground="{ThemeResource LamhaOkBrush}" />
               <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind NoMistakes}" />
             </StackPanel>
             <Button x:Name="NoMistakesRedo" HorizontalAlignment="Left" Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.List.RedoCommand}"
@@ -400,7 +398,7 @@
             <Button x:Name="ErrorButton" Margin="0,6,0,0" HorizontalAlignment="Left" Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.List.RunErrorActionCommand}"
                     Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.ToolsRow.Error), Mode=OneWay, FallbackValue=Collapsed}">
               <StackPanel Orientation="Horizontal" Spacing="6">
-                <controls:LineIcon Glyph="Retry" Width="14" Height="14" />
+                <controls:FluentIcon Glyph="Retry" />
                 <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.ToolsRow.Error), Mode=OneWay, FallbackValue=''}" />
               </StackPanel>
             </Button>

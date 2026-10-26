@@ -37,7 +37,7 @@
                Visibility="{x:Bind ViewModel.IsHome, Mode=OneWay}" />
     <StackPanel Margin="0,0,0,24" Orientation="Horizontal" Spacing="8" Visibility="{x:Bind controls:Show.IfNot(ViewModel.IsHome), Mode=OneWay}">
       <HyperlinkButton x:Name="Crumb" Style="{StaticResource LamhaCrumbButtonStyle}" Command="{x:Bind ViewModel.GoHomeCommand}" Content="{x:Bind Title}" />
-      <controls:LineIcon Glyph="Forward" Width="16" Height="16" StrokeWidth="2.4" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
+      <controls:FluentIcon Glyph="Forward" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
       <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaPageTitleTextStyle}" Text="{x:Bind ViewModel.SectionTitle, Mode=OneWay}" AutomationProperties.HeadingLevel="Level1" />
     </StackPanel>
 
@@ -56,13 +56,13 @@
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
               <Border Width="32" Height="32" CornerRadius="{StaticResource LamhaRadiusSmall}" Background="{ThemeResource LamhaAccentSoftBrush}">
-                <controls:LineIcon Glyph="{x:Bind Glyph}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}" />
+                <controls:FluentIcon Glyph="{x:Bind Glyph}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}" />
               </Border>
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Title}" />
                 <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{x:Bind Summary}" />
               </StackPanel>
-              <controls:LineIcon Grid.Column="2" Glyph="Forward" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
+              <controls:FluentIcon Grid.Column="2" Glyph="Forward" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
             </Grid>
           </Button>
         </DataTemplate>
@@ -133,7 +133,7 @@
                   <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Exe}" />
                   <Button Grid.Column="1" Style="{StaticResource LamhaIconButtonStyle}" Width="32" Height="32" Command="{x:Bind Remove}"
                           ToolTipService.ToolTip="{x:Bind RemoveName}" AutomationProperties.Name="{x:Bind RemoveName}">
-                    <controls:LineIcon Glyph="Trash" Width="16" Height="16" />
+                    <controls:FluentIcon Glyph="Trash" />
                   </Button>
                 </Grid>
               </DataTemplate>
@@ -170,13 +170,13 @@
         <StackPanel Orientation="Horizontal" Spacing="8">
           <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Clipboard.ClearUnpinnedCommand}" AutomationProperties.Name="{x:Bind S.CbClearUnpinned}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:LineIcon Glyph="Trash" Width="14" Height="14" VerticalAlignment="Center" />
+              <controls:FluentIcon Glyph="Trash" VerticalAlignment="Center" />
               <TextBlock VerticalAlignment="Center" Text="{x:Bind S.CbClearUnpinned}" />
             </StackPanel>
           </Button>
           <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Clipboard.ClearAllCommand}" AutomationProperties.Name="{x:Bind S.CbClearAll}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:LineIcon Glyph="Trash" Width="14" Height="14" VerticalAlignment="Center" />
+              <controls:FluentIcon Glyph="Trash" VerticalAlignment="Center" />
               <TextBlock VerticalAlignment="Center" Text="{x:Bind S.CbClearAll}" />
             </StackPanel>
           </Button>
@@ -193,7 +193,7 @@
       <controls:SettingsCard Header="{x:Bind S.ClearHistory}" Description="{x:Bind ViewModel.Privacy.HistoryCount, Mode=OneWay}">
         <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Privacy.ClearHistoryCommand}" AutomationProperties.Name="{x:Bind S.ClearHistory}">
           <StackPanel Orientation="Horizontal" Spacing="6">
-            <controls:LineIcon Glyph="Trash" Width="14" Height="14" VerticalAlignment="Center" />
+            <controls:FluentIcon Glyph="Trash" VerticalAlignment="Center" />
             <TextBlock VerticalAlignment="Center" Text="{x:Bind S.Clear}" />
           </StackPanel>
         </Button>
@@ -252,7 +252,7 @@
         <StackPanel Orientation="Horizontal" Spacing="8">
           <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.Privacy.OpenFolderCommand}" AutomationProperties.Name="{x:Bind S.OpenFolder}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:LineIcon Glyph="Folder" Width="14" Height="14" VerticalAlignment="Center" />
+              <controls:FluentIcon Glyph="Folder" VerticalAlignment="Center" />
               <TextBlock VerticalAlignment="Center" Text="{x:Bind S.OpenFolder}" />
             </StackPanel>
           </Button>
@@ -272,7 +272,7 @@
                 <ColumnDefinition Width="32" />
               </Grid.ColumnDefinitions>
               <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.PrivacyMore}" />
-              <controls:LineIcon Grid.Column="1" Glyph="Down" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
+              <controls:FluentIcon Grid.Column="1" Glyph="Down" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{ThemeResource LamhaTextMutedBrush}" />
             </Grid>
           </Button>
           <TextBlock Margin="15,0,15,12" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind S.PrivacyText}"
@@ -303,7 +303,7 @@
                   <ToggleButton Grid.Column="2" Style="{StaticResource LamhaIconToggleStyle}" Width="32" Height="32" BorderThickness="0"
                                 IsChecked="{x:Bind IsCapturing, Mode=OneWay}" Command="{x:Bind Change}" CommandParameter="{x:Bind}"
                                 ToolTipService.ToolTip="{x:Bind ChangeLabel}" AutomationProperties.Name="{x:Bind ChangeName, Mode=OneWay}">
-                    <controls:LineIcon Glyph="Write" Width="16" Height="16" />
+                    <controls:FluentIcon Glyph="Write" />
                   </ToggleButton>
                 </Grid>
                 <controls:StatusText Text="{x:Bind Status, Mode=OneWay}" Kind="{x:Bind StatusKind, Mode=OneWay}" />
@@ -352,7 +352,7 @@
       <controls:SettingsCard Header="{x:Bind S.UpAll}" MinHeight="48">
         <Button Style="{StaticResource LamhaIconButtonStyle}" Width="32" Height="32" Command="{x:Bind ViewModel.OpenReleasesCommand}"
                 ToolTipService.ToolTip="{x:Bind S.UpAll}">
-          <controls:LineIcon Glyph="External" Width="16" Height="16" />
+          <controls:FluentIcon Glyph="External" />
         </Button>
       </controls:SettingsCard>
       <Border Style="{StaticResource LamhaSettingsPanelStyle}">
@@ -456,7 +456,7 @@
       <controls:SettingsCard Header="{x:Bind S.DeleteCards}" Description="{x:Bind S.DeleteCardsHint}">
         <Button Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.DeleteCardsCommand}" AutomationProperties.Name="{x:Bind S.DeleteCards}">
           <StackPanel Orientation="Horizontal" Spacing="6">
-            <controls:LineIcon Glyph="Trash" Width="14" Height="14" VerticalAlignment="Center" />
+            <controls:FluentIcon Glyph="Trash" VerticalAlignment="Center" />
             <TextBlock TextReadingOrder="UseFlowDirection" VerticalAlignment="Center" Text="{x:Bind S.Delete}" />
           </StackPanel>
         </Button>

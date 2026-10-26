@@ -38,7 +38,7 @@
                 <SolidColorBrush x:Key="TextControlElevationBorderFocusedBrush" Color="Transparent" />
               </TextBox.Resources>
             </TextBox>
-            <controls:LineIcon Glyph="Search" Width="16" Height="16" Margin="12,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
+            <controls:FluentIcon Glyph="Search" Margin="12,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
                                Foreground="{ThemeResource LamhaTextFaintBrush}" IsHitTestVisible="False" />
           </Grid>
         </Border>
@@ -87,7 +87,7 @@
                           <ToggleButton Grid.Column="3" Style="{StaticResource LamhaIconToggleStyle}" Visibility="{x:Bind CanReview}"
                                         IsChecked="{x:Bind InReview, Mode=OneWay}" Command="{x:Bind Review}" CommandParameter="{x:Bind}"
                                         ToolTipService.ToolTip="{x:Bind ReviewTooltip, Mode=OneWay}" AutomationProperties.Name="{x:Bind ReviewTooltip, Mode=OneWay}">
-                            <controls:LineIcon Glyph="Bookmark" Width="16" Height="16" Filled="{x:Bind InReview, Mode=OneWay}" />
+                            <controls:FluentIcon Glyph="Bookmark" Filled="{x:Bind InReview, Mode=OneWay}" />
                           </ToggleButton>
                         </Grid>
                       </Grid>

@@ -80,18 +80,18 @@
             <Button Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind ViewModel.UseResultCommand}" ToolTipService.ToolTip="{x:Bind UseItTitle}"
                     AutomationProperties.Name="{x:Bind UseIt}">
               <StackPanel Orientation="Horizontal" Spacing="6">
-                <controls:LineIcon Glyph="Check" Width="14" Height="14" />
+                <controls:FluentIcon Glyph="Check" />
                 <TextBlock Text="{x:Bind UseIt}" />
               </StackPanel>
             </Button>
             <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.CopyCommand}" AutomationProperties.Name="{x:Bind CopyLabel}">
               <StackPanel Orientation="Horizontal" Spacing="6">
-                <controls:LineIcon Glyph="Copy" Width="14" Height="14" />
+                <controls:FluentIcon Glyph="Copy" />
                 <TextBlock Text="{x:Bind CopyLabel}" />
               </StackPanel>
             </Button>
             <Button x:Uid="Card_Again" Style="{StaticResource LamhaIconButtonStyle}" VerticalAlignment="Center" Command="{x:Bind ViewModel.AgainCommand}">
-              <controls:LineIcon Glyph="Retry" Width="15" Height="15" />
+              <controls:FluentIcon Glyph="Retry" />
             </Button>
           </StackPanel>
 
@@ -126,7 +126,7 @@
 
         <!-- No mistakes -->
         <StackPanel Margin="0,16,0,0" Orientation="Horizontal" Spacing="8" Visibility="{x:Bind ViewModel.IsNoMistakes, Mode=OneWay, FallbackValue=Collapsed}">
-          <controls:LineIcon Glyph="Check" StrokeWidth="2.6" Foreground="{ThemeResource LamhaOkBrush}" />
+          <controls:FluentIcon Glyph="Check" Foreground="{ThemeResource LamhaOkBrush}" />
           <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind NoMistakes}" />
         </StackPanel>
 
@@ -138,7 +138,7 @@
                   Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.RunErrorActionCommand}"
                   AutomationProperties.Name="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:LineIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Error), Mode=OneWay}" Width="14" Height="14" />
+              <controls:FluentIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Error), Mode=OneWay}" />
               <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}" />
             </StackPanel>
           </Button>
@@ -262,7 +262,7 @@
           </StackPanel>
           <Button Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaDangerButtonStyle}" Command="{x:Bind ViewModel.Journal.ClearCommand}" AutomationProperties.Name="{x:Bind ClearTitle}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:LineIcon Glyph="Trash" Width="14" Height="14" />
+              <controls:FluentIcon Glyph="Trash" />
               <TextBlock Text="{x:Bind ClearLabel}" />
             </StackPanel>
           </Button>

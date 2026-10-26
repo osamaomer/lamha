@@ -32,7 +32,7 @@
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Border Width="28" Height="28" CornerRadius="8" Background="{ThemeResource LamhaAccentSoftBrush}">
-              <controls:LineIcon Glyph="{x:Bind Glyph}" Width="16" Height="16" StrokeWidth="2" Foreground="{ThemeResource LamhaAccentBrush}" />
+              <controls:FluentIcon Glyph="{x:Bind Glyph}" Foreground="{ThemeResource LamhaAccentBrush}" />
             </Border>
             <TextBlock Grid.Column="1" VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}"
                        Text="{x:Bind Label}" />
@@ -80,9 +80,7 @@
     <!-- The title bar: Lamha's mark and name; Windows draws the minimise and close buttons at its end -->
     <Grid x:Name="TitleBar" Padding="16,0,0,0" Background="Transparent">
       <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-        <Border Width="16" Height="16" CornerRadius="4" Background="{ThemeResource LamhaBrandBrush}">
-          <controls:LineIcon Glyph="Translate" Width="10" Height="10" StrokeWidth="2.8" Foreground="White" />
-        </Border>
+        <controls:BrandMark />
         <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.Lamha}" />
       </StackPanel>
     </Grid>
@@ -110,9 +108,7 @@
                   <ColumnDefinition Width="56" />
                   <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Border Width="56" Height="56" VerticalAlignment="Center" CornerRadius="{StaticResource LamhaRadiusLarge}" Background="{ThemeResource LamhaBrandBrush}">
-                  <controls:LineIcon Glyph="Translate" Width="30" Height="30" StrokeWidth="2.2" Foreground="White" />
-                </Border>
+                <controls:BrandMark IsLarge="True" Glyph="Translate" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                   <TextBlock Style="{StaticResource StepTitleStyle}" Text="{x:Bind ViewModel.Welcome}" AutomationProperties.HeadingLevel="Level1" />
                   <TextBlock Style="{StaticResource LeadStyle}" Text="{x:Bind ViewModel.Hero}" />
@@ -201,7 +197,7 @@
               <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusMedium}" Background="{ThemeResource LamhaOkSoftBrush}"
                       Visibility="{x:Bind ViewModel.Tried, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                  <controls:LineIcon Glyph="Check" Width="16" Height="16" StrokeWidth="2.6" VerticalAlignment="Center" Foreground="{ThemeResource LamhaOkBrush}" />
+                  <controls:FluentIcon Glyph="Check" VerticalAlignment="Center" Foreground="{ThemeResource LamhaOkBrush}" />
                   <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="13.5" FontWeight="SemiBold"
                              Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind ViewModel.TryOk}" AutomationProperties.LiveSetting="Polite" />
                 </StackPanel>
@@ -251,9 +247,7 @@
                   <ColumnDefinition Width="56" />
                   <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Border Width="56" Height="56" VerticalAlignment="Center" CornerRadius="{StaticResource LamhaRadiusLarge}" Background="{ThemeResource LamhaBrandBrush}">
-                  <controls:LineIcon Glyph="Check" Width="30" Height="30" StrokeWidth="2.2" Foreground="White" />
-                </Border>
+                <controls:BrandMark IsLarge="True" Glyph="Check" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                   <TextBlock Style="{StaticResource StepTitleStyle}" Text="{x:Bind ViewModel.ReadyTitle}" AutomationProperties.HeadingLevel="Level1" />
                   <!-- The line ends with the lookup's keys, as the design writes them -->

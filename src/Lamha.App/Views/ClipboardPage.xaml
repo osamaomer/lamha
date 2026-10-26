@@ -15,9 +15,7 @@
     <!-- ===== Off: what it keeps and where, and Turn on ===== -->
     <Border Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsOff, Mode=OneWay}">
       <StackPanel Padding="8,12,8,4" Spacing="8" HorizontalAlignment="Center" MaxWidth="440">
-        <Border Width="44" Height="44" HorizontalAlignment="Center" CornerRadius="{StaticResource LamhaRadiusLarge}" Background="{ThemeResource LamhaAccentSoftBrush}">
-          <controls:LineIcon Glyph="Clipboard" Width="22" Height="22" Foreground="{ThemeResource LamhaAccentBrush}" />
-        </Border>
+        <controls:FluentIcon Glyph="Clipboard" Size="Hero" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="16" Text="{x:Bind OptInTitle}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind OptInText}" />
         <Button Margin="0,4,0,0" HorizontalAlignment="Center" Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind EnableLabel}" Command="{x:Bind ViewModel.TurnOnCommand}" />
@@ -51,7 +49,7 @@
                 <SolidColorBrush x:Key="TextControlElevationBorderFocusedBrush" Color="Transparent" />
               </TextBox.Resources>
             </TextBox>
-            <controls:LineIcon Glyph="Search" Width="16" Height="16" Margin="12,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
+            <controls:FluentIcon Glyph="Search" Margin="12,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
                                Foreground="{ThemeResource LamhaTextFaintBrush}" IsHitTestVisible="False" />
           </Grid>
         </Border>
@@ -73,7 +71,7 @@
       <Button Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LamhaQuietButtonStyle}" IsEnabled="{x:Bind ViewModel.CanPause, Mode=OneWay}"
               AutomationProperties.Name="{x:Bind PauseLabel}">
         <StackPanel Orientation="Horizontal" Spacing="6">
-          <controls:LineIcon Glyph="Pause" Width="14" Height="14" />
+          <controls:FluentIcon Glyph="Pause" />
           <TextBlock Text="{x:Bind PauseLabel}" />
         </StackPanel>
         <Button.Flyout>
@@ -125,7 +123,7 @@
                   <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" MaxLines="1" TextTrimming="CharacterEllipsis" FlowDirection="RightToLeft"
                              Text="{x:Bind Translation, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Translation), Mode=OneWay}" />
                   <StackPanel Orientation="Horizontal" Spacing="6">
-                    <controls:LineIcon Glyph="Pin" Width="12" Height="12" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}"
+                    <controls:FluentIcon Glyph="Pin" Size="Small" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}"
                                        Visibility="{x:Bind Pinned, Mode=OneWay}" AutomationProperties.Name="{x:Bind PinnedName}" />
                     <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Foreground="{ThemeResource LamhaTextFaintBrush}"
                                TextWrapping="NoWrap" Text="{x:Bind Meta, Mode=OneWay}" />
@@ -153,11 +151,11 @@
                     <ToggleButton Grid.Column="1" VerticalAlignment="Top" Style="{StaticResource LamhaIconToggleStyle}" IsChecked="{x:Bind Pinned, Mode=OneWay}"
                                   Command="{x:Bind Owner.TogglePinCommand}" ToolTipService.ToolTip="{x:Bind PinTooltip, Mode=OneWay}"
                                   AutomationProperties.Name="{x:Bind PinTooltip, Mode=OneWay}">
-                      <controls:LineIcon Glyph="Pin" Width="15" Height="15" Filled="{x:Bind Pinned, Mode=OneWay}" />
+                      <controls:FluentIcon Glyph="Pin" Filled="{x:Bind Pinned, Mode=OneWay}" />
                     </ToggleButton>
                     <Button Grid.Column="2" VerticalAlignment="Top" Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind Owner.DeleteCommand}"
                             ToolTipService.ToolTip="{x:Bind DeleteTooltip}" AutomationProperties.Name="{x:Bind DeleteTooltip}">
-                      <controls:LineIcon Glyph="Trash" Width="15" Height="15" />
+                      <controls:FluentIcon Glyph="Trash" />
                     </Button>
                   </Grid>
 
@@ -187,13 +185,13 @@
                     <StackPanel Orientation="Horizontal" Spacing="6">
                       <Button Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind Owner.CopyResultCommand}" AutomationProperties.Name="{x:Bind CopyLabel}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                          <controls:LineIcon Glyph="Copy" Width="14" Height="14" />
+                          <controls:FluentIcon Glyph="Copy" />
                           <TextBlock Text="{x:Bind CopyLabel}" />
                         </StackPanel>
                       </Button>
                       <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind Owner.RedoCommand}" ToolTipService.ToolTip="{x:Bind NewResult}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                          <controls:LineIcon Glyph="Retry" Width="14" Height="14" />
+                          <controls:FluentIcon Glyph="Retry" />
                           <TextBlock Text="{x:Bind RedoLabel}" />
                         </StackPanel>
                       </Button>
@@ -231,7 +229,7 @@
 
                   <!-- No mistakes -->
                   <StackPanel Margin="0,8,0,0" Orientation="Horizontal" Spacing="8" Visibility="{x:Bind IsNoMistakes, Mode=OneWay}">
-                    <controls:LineIcon Glyph="Check" StrokeWidth="2.6" Foreground="{ThemeResource LamhaOkBrush}" />
+                    <controls:FluentIcon Glyph="Check" Foreground="{ThemeResource LamhaOkBrush}" />
                     <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind NoMistakes}" />
                   </StackPanel>
 
@@ -249,7 +247,7 @@
                     <Button Margin="0,6,0,0" HorizontalAlignment="Left" Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind Owner.RunErrorActionCommand}"
                             Visibility="{x:Bind controls:Show.ErrorButton(Error), Mode=OneWay, FallbackValue=Collapsed}">
                       <StackPanel Orientation="Horizontal" Spacing="6">
-                        <controls:LineIcon Glyph="Retry" Width="14" Height="14" />
+                        <controls:FluentIcon Glyph="Retry" />
                         <TextBlock Text="{x:Bind controls:Show.ErrorLabel(Error), Mode=OneWay}" />
                       </StackPanel>
                     </Button>

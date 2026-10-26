@@ -63,7 +63,7 @@
                     IsChecked="{x:Bind Answer.InReview, Mode=OneWay}" Command="{x:Bind Answer.ToggleReviewCommand, Mode=OneWay}"
                     ToolTipService.ToolTip="{x:Bind Answer.ReviewTooltip, Mode=OneWay}"
                     AutomationProperties.Name="{x:Bind Answer.ReviewTooltip, Mode=OneWay}">
-        <controls:LineIcon Glyph="Bookmark" Width="17" Height="17" Filled="{x:Bind Answer.InReview, Mode=OneWay}" />
+        <controls:FluentIcon Glyph="Bookmark" Filled="{x:Bind Answer.InReview, Mode=OneWay}" />
       </ToggleButton>
       <controls:SpeakButton x:Uid="Card_ListenPron" Grid.Column="2" VerticalAlignment="Top" Style="{StaticResource LamhaRoundSpeakButtonStyle}" Round="True"
                             Text="{x:Bind Answer.Query, Mode=OneWay, FallbackValue=''}" Lang="{x:Bind Answer.Result.Source, Mode=OneWay, FallbackValue=''}" />
@@ -126,7 +126,7 @@
           <controls:SpeakButton x:Uid="Card_ListenTr" Style="{StaticResource LamhaIconButtonStyle}"
                                 Text="{x:Bind Answer.HeroText, Mode=OneWay, FallbackValue=''}" Lang="{x:Bind Answer.Result.Target, Mode=OneWay, FallbackValue=''}" />
           <Button x:Uid="Card_CopyTr" Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind Answer.CopyMeaningCommand, Mode=OneWay}">
-            <controls:LineIcon Glyph="Copy" Width="15" Height="15" />
+            <controls:FluentIcon Glyph="Copy" />
           </Button>
         </StackPanel>
       </Grid>
@@ -274,7 +274,7 @@
                            Visibility="{x:Bind controls:Show.IfSet(Answer.Wikipedia.Url), Mode=OneWay, FallbackValue=Collapsed}">
             <StackPanel Orientation="Horizontal" Spacing="4">
               <TextBlock FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind ReadWiki}" />
-              <controls:LineIcon Glyph="External" Width="12" Height="12" Foreground="{ThemeResource LamhaAccentBrush}" />
+              <controls:FluentIcon Glyph="External" Size="Small" Foreground="{ThemeResource LamhaAccentBrush}" />
             </StackPanel>
           </HyperlinkButton>
         </StackPanel>

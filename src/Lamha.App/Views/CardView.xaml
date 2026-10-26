@@ -46,9 +46,7 @@
 
       <!-- Lamha's mark, its name when there's room, the languages or the title, the switch, and the source -->
       <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" ToolTipService.ToolTip="{x:Bind Lamha}">
-        <Border Width="18" Height="18" CornerRadius="5" Background="{ThemeResource LamhaBrandBrush}">
-          <controls:LineIcon Glyph="Translate" Width="11" Height="11" StrokeWidth="2.6" Foreground="White" />
-        </Border>
+        <controls:BrandMark />
         <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" FontWeight="Bold"
                    Text="{x:Bind Lamha}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.HasDictSwitch), Mode=OneWay, FallbackValue=Collapsed}" />
       </StackPanel>
@@ -73,7 +71,7 @@
                 VerticalAlignment="Center" Visibility="{x:Bind controls:Show.IfText(ViewModel.BadgeTooltip), Mode=OneWay, FallbackValue=Collapsed}"
                 ToolTipService.ToolTip="{x:Bind ViewModel.BadgeTooltip, Mode=OneWay}"
                 AutomationProperties.Name="{x:Bind ViewModel.BadgeTooltip, Mode=OneWay}">
-          <controls:LineIcon Glyph="{x:Bind controls:Show.BadgeGlyph(ViewModel.Badge), Mode=OneWay}" Width="12" Height="12" StrokeWidth="2.4"
+          <controls:FluentIcon Glyph="{x:Bind controls:Show.BadgeGlyph(ViewModel.Badge), Mode=OneWay}" Size="Small"
                              Foreground="{ThemeResource LamhaOkBrush}" />
         </Border>
       </StackPanel>
@@ -81,11 +79,11 @@
       <!-- Back and Forward, as a pair once a word has been followed -->
       <Button x:Uid="Card_Back" Grid.Column="2" Style="{StaticResource LamhaIconButtonStyle}"
               Visibility="{x:Bind ViewModel.ShowNavigation, Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.BackCommand}">
-        <controls:LineIcon Glyph="Back" />
+        <controls:FluentIcon Glyph="Back" />
       </Button>
       <Button x:Uid="Card_Forward" Grid.Column="3" Style="{StaticResource LamhaIconButtonStyle}"
               Visibility="{x:Bind ViewModel.ShowNavigation, Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.ForwardCommand}">
-        <controls:LineIcon Glyph="Forward" />
+        <controls:FluentIcon Glyph="Forward" />
       </Button>
       <Border Grid.Column="4" Width="1" Height="16" Margin="2,0" Background="{ThemeResource LamhaLineBrush}"
               Visibility="{x:Bind ViewModel.ShowNavigation, Mode=OneWay, FallbackValue=Collapsed}" />
@@ -93,14 +91,14 @@
                     IsChecked="{x:Bind ViewModel.IsPinned, Mode=OneWay}" Command="{x:Bind ViewModel.TogglePinCommand}"
                     ToolTipService.ToolTip="{x:Bind ViewModel.PinTooltip, Mode=OneWay}"
                     AutomationProperties.Name="{x:Bind ViewModel.PinTooltip, Mode=OneWay}">
-        <controls:LineIcon Glyph="Pin" Filled="{x:Bind ViewModel.IsPinned, Mode=OneWay}" />
+        <controls:FluentIcon Glyph="Pin" Filled="{x:Bind ViewModel.IsPinned, Mode=OneWay}" />
       </ToggleButton>
       <Button x:Uid="Card_Settings" Grid.Column="6" Style="{StaticResource LamhaIconButtonStyle}"
               Visibility="{x:Bind ViewModel.CanOpenSettings, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.SettingsCommand}">
-        <controls:LineIcon Glyph="Settings" />
+        <controls:FluentIcon Glyph="Settings" />
       </Button>
       <Button x:Uid="Card_Close" Grid.Column="7" Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind ViewModel.CloseCommand}">
-        <controls:LineIcon Glyph="Close" />
+        <controls:FluentIcon Glyph="Close" />
       </Button>
     </Grid>
 
@@ -133,7 +131,7 @@
                   Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.RunErrorActionCommand}"
                   AutomationProperties.Name="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <controls:LineIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Error), Mode=OneWay}" Width="14" Height="14" />
+              <controls:FluentIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Error), Mode=OneWay}" />
               <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}" />
             </StackPanel>
           </Button>
@@ -197,21 +195,21 @@
                         Visibility="{x:Bind ViewModel.Writing.CanReplaceResult, Mode=OneWay, FallbackValue=Collapsed}"
                         AutomationProperties.Name="{x:Bind ViewModel.Writing.ReplaceLabel, Mode=OneWay}">
                   <StackPanel Orientation="Horizontal" Spacing="6">
-                    <controls:LineIcon Glyph="Check" Width="14" Height="14" />
+                    <controls:FluentIcon Glyph="Check" />
                     <TextBlock Text="{x:Bind ViewModel.Writing.ReplaceLabel, Mode=OneWay}" />
                   </StackPanel>
                 </Button>
                 <Button Grid.Column="1" Style="{x:Bind controls:Show.CopyStyle(ViewModel.Writing.CanReplaceResult), Mode=OneWay}"
                         Command="{x:Bind ViewModel.Writing.CopyCommand, Mode=OneWay}" AutomationProperties.Name="{x:Bind CopyLabel}">
                   <StackPanel Orientation="Horizontal" Spacing="6">
-                    <controls:LineIcon Glyph="Copy" Width="14" Height="14" />
+                    <controls:FluentIcon Glyph="Copy" />
                     <TextBlock Text="{x:Bind CopyLabel}" />
                   </StackPanel>
                 </Button>
                 <Button Grid.Column="3" Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ViewModel.Writing.SecondaryLabel, Mode=OneWay}"
                         Command="{x:Bind ViewModel.Writing.SecondaryCommand, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(ViewModel.Writing.SecondaryLabel), Mode=OneWay, FallbackValue=Collapsed}" />
                 <Button x:Uid="Card_Again" Grid.Column="4" Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind ViewModel.Writing.AgainCommand, Mode=OneWay}">
-                  <controls:LineIcon Glyph="Retry" Width="15" Height="15" />
+                  <controls:FluentIcon Glyph="Retry" />
                 </Button>
               </Grid>
 
@@ -246,7 +244,7 @@
 
             <!-- No mistakes -->
             <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind ViewModel.Writing.IsNoMistakes, Mode=OneWay, FallbackValue=Collapsed}">
-              <controls:LineIcon Glyph="Check" StrokeWidth="2.6" Foreground="{ThemeResource LamhaOkBrush}" />
+              <controls:FluentIcon Glyph="Check" Foreground="{ThemeResource LamhaOkBrush}" />
               <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind NoMistakes}" />
             </StackPanel>
 
@@ -258,7 +256,7 @@
                       Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Writing.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.Writing.RunErrorActionCommand, Mode=OneWay}"
                       AutomationProperties.Name="{x:Bind controls:Show.ErrorLabel(ViewModel.Writing.Error), Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                  <controls:LineIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Writing.Error), Mode=OneWay}" Width="14" Height="14" />
+                  <controls:FluentIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Writing.Error), Mode=OneWay}" />
                   <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.Writing.Error), Mode=OneWay}" />
                 </StackPanel>
               </Button>
@@ -294,7 +292,7 @@
               </ItemsControl>
               <Button Margin="0,12,0,0" HorizontalAlignment="Left" Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind ViewModel.Writing.GoCommand, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                  <controls:LineIcon Glyph="Sparkle" Width="14" Height="14" />
+                  <controls:FluentIcon Glyph="Sparkle" />
                   <TextBlock Text="{x:Bind ViewModel.Writing.GoLabel, Mode=OneWay}" />
                   <TextBlock Margin="4,0,0,0" FontSize="{StaticResource LamhaFontSizeLabel}" FontWeight="Normal" Opacity="0.75" VerticalAlignment="Center" Text="Ctrl+Enter" />
                 </StackPanel>
@@ -319,7 +317,7 @@
             <Button Style="{StaticResource LamhaFootLinkStyle}" Command="{x:Bind Open}" ToolTipService.ToolTip="{x:Bind controls:Show.Tooltip(Tooltip)}"
                     AutomationProperties.Name="{x:Bind Label}">
               <StackPanel Orientation="Horizontal" Spacing="6">
-                <controls:LineIcon Glyph="{x:Bind Glyph}" Width="13" Height="13" />
+                <controls:FluentIcon Glyph="{x:Bind Glyph}" />
                 <TextBlock Text="{x:Bind Label}" />
               </StackPanel>
             </Button>

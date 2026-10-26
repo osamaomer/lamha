@@ -21,7 +21,7 @@ public sealed partial class SpeakButton : Button
     public static readonly DependencyProperty RoundProperty =
         DependencyProperty.Register(nameof(Round), typeof(bool), typeof(SpeakButton), new PropertyMetadata(false, (d, _) => ((SpeakButton)d).Shape()));
 
-    private readonly LineIcon _icon = new();
+    private readonly FluentIcon _icon = new();
 
     public SpeakButton()
     {
@@ -58,7 +58,6 @@ public sealed partial class SpeakButton : Button
     private void Shape()
     {
         _icon.Glyph = Round ? Glyph.Speak : Glyph.SpeakSmall;
-        _icon.Width = _icon.Height = Round ? 17 : 15;
     }
 
     private void Refresh()

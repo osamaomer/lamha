@@ -14,7 +14,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <controls:LineIcon Glyph="{x:Bind Glyph}" VerticalAlignment="Center" />
+          <controls:FluentIcon Glyph="{x:Bind Glyph}" VerticalAlignment="Center" />
           <TextBlock Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{x:Bind Label}" />
           <!-- The words to review (the design's badge): 16 px high, the button colour -->
           <Border Grid.Column="2" MinWidth="16" Height="16" Padding="5,0" VerticalAlignment="Center" CornerRadius="8"
@@ -36,9 +36,7 @@
     <!-- The title bar: Lamha's mark and name; Windows draws the minimise, maximise and close buttons at its end -->
     <Grid x:Name="TitleBar" Padding="16,0,0,0" Background="Transparent">
       <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-        <Border Width="16" Height="16" CornerRadius="4" Background="{ThemeResource LamhaBrandBrush}">
-          <controls:LineIcon Glyph="Translate" Width="10" Height="10" StrokeWidth="2.8" Foreground="White" />
-        </Border>
+        <controls:BrandMark />
         <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind Lamha}" />
       </StackPanel>
     </Grid>

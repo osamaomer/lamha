@@ -201,7 +201,7 @@ public sealed partial class FirstRunWindow : Window
     private StackPanel Step(StepItem item)
     {
         UIElement mark = item.IsDone
-            ? new LineIcon { Glyph = Glyph.Check, Width = 12, Height = 12, StrokeWidth = 3, Foreground = Brush("LamhaOkBrush"), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center }
+            ? new FluentIcon { Glyph = Glyph.Check, Size = IconSize.Small, Foreground = Brush("LamhaOkBrush"), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center }
             : new TextBlock
             {
                 Text = item.Number,
