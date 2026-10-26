@@ -11,7 +11,7 @@
 
   <StackPanel Spacing="16">
     <!-- ===== The draft, its tools, and what they give back ===== -->
-    <Border Style="{StaticResource LamhaPanelStyle}">
+    <Border Style="{StaticResource LamhaContentCardStyle}">
       <StackPanel>
         <Grid>
           <!-- The field: its 1 px edge, and Lamha's 2 px accent ring around it while it has the focus (the Translate box's) -->
@@ -157,7 +157,7 @@
     </StackPanel>
 
     <!-- ===== My mistake journal ===== -->
-    <Border x:Name="JournalBox" Style="{StaticResource LamhaPanelStyle}">
+    <Border x:Name="JournalBox" Style="{StaticResource LamhaContentCardStyle}">
       <StackPanel>
         <TextBlock Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind JournalTitle}" AutomationProperties.HeadingLevel="Level2" />
         <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind ViewModel.Journal.Summary, Mode=OneWay}" />

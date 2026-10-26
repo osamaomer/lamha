@@ -86,10 +86,6 @@ public sealed partial class TranslatePage : UserControl
         }
     }
 
-    /// <summary>The field's accent ring while the box has the focus.</summary>
-    private void OnQueryFocus(object sender, RoutedEventArgs e) =>
-        FieldRing.Visibility = QueryBox.FocusState == FocusState.Unfocused ? Visibility.Collapsed : Visibility.Visible;
-
     /// <summary>The ×: the box empties, and keeps the focus for the next word.</summary>
     private void OnClear(object sender, RoutedEventArgs e)
     {

@@ -314,13 +314,13 @@
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="card:LinkItem">
-            <Button Style="{StaticResource LamhaFootLinkStyle}" Command="{x:Bind Open}" ToolTipService.ToolTip="{x:Bind controls:Show.Tooltip(Tooltip)}"
-                    AutomationProperties.Name="{x:Bind Label}">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <controls:FluentIcon Glyph="{x:Bind Glyph}" />
+            <HyperlinkButton Style="{StaticResource LamhaFootLinkStyle}" Command="{x:Bind Open}" ToolTipService.ToolTip="{x:Bind controls:Show.Tooltip(Tooltip)}"
+                             AutomationProperties.Name="{x:Bind Label}">
+              <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace1}">
+                <controls:FluentIcon Glyph="{x:Bind Glyph}" Size="Small" />
                 <TextBlock Text="{x:Bind Label}" />
               </StackPanel>
-            </Button>
+            </HyperlinkButton>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>

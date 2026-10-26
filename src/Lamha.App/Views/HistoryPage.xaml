@@ -15,42 +15,21 @@
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
+      <!-- Windows' field, its accent line under it when focused; 🔍 at its end -->
       <Grid>
-        <!-- The field: its 1 px edge, and Lamha's 2 px accent ring around it while it has the focus (the Translate box's) -->
-        <Border Height="36" CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1" BorderBrush="{ThemeResource LamhaFieldLineBrush}"
-                Background="{ThemeResource LamhaSurfaceBrush}">
-          <Grid>
-            <TextBox x:Name="SearchBox" MinHeight="34" Padding="36,7,12,0" BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"
-                     FontFamily="{StaticResource LamhaFontFamily}" FontSize="{StaticResource LamhaFontSizeBody}" IsSpellCheckEnabled="False"
-                     TextReadingOrder="DetectFromContent" TextAlignment="{x:Bind controls:Show.BoxAlignment(ViewModel.HasQuery), Mode=OneWay}"
-                     PlaceholderText="{x:Bind Placeholder}" AutomationProperties.Name="{x:Bind Placeholder}"
-                     Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     KeyDown="OnSearchKeyDown" GotFocus="OnSearchFocus" LostFocus="OnSearchFocus">
-              <!-- Windows' own edge, fill and focus line give way to the field's -->
-              <TextBox.Resources>
-                <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlElevationBorderBrush" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlElevationBorderFocusedBrush" Color="Transparent" />
-              </TextBox.Resources>
-            </TextBox>
-            <controls:FluentIcon Glyph="Search" Margin="12,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
-                               Foreground="{ThemeResource LamhaTextFaintBrush}" IsHitTestVisible="False" />
-          </Grid>
-        </Border>
-        <Border x:Name="FieldRing" Margin="-2" CornerRadius="12" BorderThickness="2" BorderBrush="{ThemeResource LamhaAccentBrush}"
-                IsHitTestVisible="False" Visibility="Collapsed" />
+        <TextBox x:Name="SearchBox" Style="{StaticResource LamhaSearchFieldStyle}"
+                 TextAlignment="{x:Bind controls:Show.BoxAlignment(ViewModel.HasQuery), Mode=OneWay}"
+                 PlaceholderText="{x:Bind Placeholder}" AutomationProperties.Name="{x:Bind Placeholder}"
+                 Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 KeyDown="OnSearchKeyDown" />
+        <controls:FluentIcon Glyph="Search" Style="{StaticResource LamhaFieldGlyphStyle}" />
       </Grid>
       <Button Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.ClearHistoryCommand}"
               Content="{x:Bind ClearLabel}" />
     </Grid>
 
     <!-- ===== The words, by day ===== -->
-    <Border Padding="0,0,0,4" Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.HasDays, Mode=OneWay}">
+    <Border Padding="0,0,0,4" Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.HasDays, Mode=OneWay}">
       <ItemsRepeater ItemsSource="{x:Bind ViewModel.Days, Mode=OneWay}">
         <ItemsRepeater.ItemTemplate>
           <DataTemplate x:DataType="main:HistoryDayItem">
@@ -102,13 +81,13 @@
     </Border>
 
     <!-- ===== Nothing looked up yet; nothing that matches ===== -->
-    <Border Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}">
+    <Border Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}">
       <StackPanel Padding="8,8,8,4" Spacing="4">
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind EmptyTitle}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind EmptyHint}" />
       </StackPanel>
     </Border>
-    <Border Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsNoMatch, Mode=OneWay}">
+    <Border Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.IsNoMatch, Mode=OneWay}">
       <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind NoResults}"
                  AutomationProperties.LiveSetting="Polite" />
     </Border>

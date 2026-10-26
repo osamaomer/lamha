@@ -1,6 +1,5 @@
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Main;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
@@ -38,8 +37,4 @@ public sealed partial class HistoryPage : UserControl
             ViewModel.Query = "";
         }
     }
-
-    /// <summary>The field's accent ring while the search has the focus.</summary>
-    private void OnSearchFocus(object sender, RoutedEventArgs e) =>
-        FieldRing.Visibility = SearchBox.FocusState == FocusState.Unfocused ? Visibility.Collapsed : Visibility.Visible;
 }

@@ -46,8 +46,51 @@
     <Setter Property="Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
   </Style>
 
-  <!-- Buttons: one template, coloured by the style. A hover tint over the fill, a little faded when pressed,
-       Lamha 2's 0.45 when it can't be used; Windows draws the focus ring. -->
+  <!-- Buttons: Windows' own (docs/design/system.md §6): 32 high, padding 11,5,11,6, radius 4, Body, Windows' fills,
+       edges, hover and press. The accent button is the one main action of a view (Replace, Proofread, Next); the
+       standard one sits beside it (Copy, Cancel); the subtle one is a tool (the card's bar, a row's actions). -->
+  <Style x:Key="LamhaButtonStyle" TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}">
+    <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
+  </Style>
+  <Style x:Key="LamhaQuietButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
+  </Style>
+  <Style x:Key="LamhaSubtleButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
+    <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
+  </Style>
+
+  <!-- An icon alone (Copy, Listen, the card's bar): Windows' subtle button, 32 × 32 with a 16 icon; its name in its
+       tooltip and AutomationProperties.Name -->
+  <Style x:Key="LamhaIconButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <!-- Listen beside the headword: the main sound, its icon in the accent (the system's main icon button) -->
+  <Style x:Key="LamhaMainIconButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaIconButtonStyle}">
+    <Setter Property="Foreground" Value="{ThemeResource LamhaAccentBrush}" />
+  </Style>
+
+  <!-- A chip that does something once (a meaning or synonym to look up, "+3"): Windows' button as a pill, 28 high with
+       Body (24 with Caption) -->
+  <Style x:Key="LamhaChipButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="controls:Pill.IsPill" Value="True" />
+    <Setter Property="Padding" Value="11,3" />
+    <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
+  </Style>
+
+  <!-- A link to somewhere else (Google Translate, Cambridge, Read on Wikipedia): Windows' hyperlink button -->
+  <Style x:Key="LamhaFootLinkStyle" TargetType="HyperlinkButton" BasedOn="{StaticResource DefaultHyperlinkButtonStyle}">
+    <Setter Property="Padding" Value="4,2" />
+    <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
+  </Style>
+
+  <!-- Lamha's own coloured buttons, where the colour is the meaning (Review's answers, Delete): Windows' size, corners and
+       type, a hover tint over the fill, a little faded when pressed; Windows draws the focus ring -->
   <ControlTemplate x:Key="LamhaButtonTemplate" TargetType="Button">
     <Grid x:Name="Root"
           Background="{TemplateBinding Background}"
@@ -91,112 +134,52 @@
                         AutomationProperties.AccessibilityView="Raw" />
     </Grid>
   </ControlTemplate>
-
-  <!-- Filled: the one action that matters (Replace, Save & verify, Next). The card's sizes: 32 px high, 13 px
-       semibold, the inputs' 10 px corners. -->
-  <Style x:Key="LamhaButtonStyle" TargetType="Button">
+  <Style x:Key="LamhaPaintedButtonStyle" TargetType="Button">
     <Setter Property="Template" Value="{StaticResource LamhaButtonTemplate}" />
-    <Setter Property="Background" Value="{ThemeResource LamhaButtonBrush}" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
     <Setter Property="BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
-    <Setter Property="Padding" Value="12,5" />
-    <Setter Property="MinHeight" Value="32" />
-    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
-    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
-    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Padding" Value="{StaticResource ButtonPadding}" />
+    <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
+    <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="UseSystemFocusVisuals" Value="True" />
   </Style>
 
-  <!-- Quiet: everything next to the filled one (Copy, Restore, Cancel) -->
-  <Style x:Key="LamhaQuietButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
-    <Setter Property="Background" Value="{ThemeResource LamhaChipBrush}" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
-  </Style>
-
   <!-- Review's answers (Forgot / Hard / Knew it): the answer over when it brings the word back, filling its column;
        each sets its own tint and colour -->
-  <Style x:Key="LamhaGradeButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+  <Style x:Key="LamhaGradeButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaPaintedButtonStyle}">
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="Padding" Value="8" />
-    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
-    <Setter Property="FontWeight" Value="Normal" />
   </Style>
 
   <!-- "Delete" in a question (Lamha 2's dialog.js danger choice): the one red in both themes, white text at 4.8:1 -->
-  <Style x:Key="LamhaDialogDangerButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+  <Style x:Key="LamhaDialogDangerButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaPaintedButtonStyle}">
     <Setter Property="Background" Value="{ThemeResource LamhaDangerSolidBrush}" />
     <Setter Property="Foreground" Value="{ThemeResource LamhaDangerSolidTextBrush}" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
   </Style>
 
   <!-- Deletes something: never looks like a harmless action (Lamha 2's btn.danger) -->
-  <Style x:Key="LamhaDangerButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
+  <Style x:Key="LamhaDangerButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaPaintedButtonStyle}">
     <Setter Property="Background" Value="{ThemeResource LamhaDangerSoftBrush}" />
     <Setter Property="Foreground" Value="{ThemeResource LamhaDangerBrush}" />
   </Style>
 
-  <!-- An icon alone (the card's bar, Copy, Listen): 28 px, the name in its tooltip and AutomationProperties.Name -->
-  <Style x:Key="LamhaIconButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
-    <Setter Property="Padding" Value="0" />
-    <Setter Property="Width" Value="28" />
-    <Setter Property="Height" Value="28" />
-    <Setter Property="MinHeight" Value="28" />
-  </Style>
-
-  <!-- A round button next to the headword (the review bookmark, Listen): 34 px (the card's design) -->
-  <Style x:Key="LamhaRoundButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaIconButtonStyle}">
-    <Setter Property="Width" Value="34" />
-    <Setter Property="Height" Value="34" />
-    <Setter Property="MinHeight" Value="34" />
-    <Setter Property="controls:Pill.IsPill" Value="True" />
-  </Style>
-
-  <!-- Listen next to the headword: round, in the accent colour on its tint (the card's design) -->
-  <Style x:Key="LamhaRoundSpeakButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaRoundButtonStyle}">
-    <Setter Property="Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaAccentBrush}" />
-  </Style>
-
-  <!-- A chip that does something once (a meaning or synonym to look up, "+3"): the chip's look on a button -->
-  <Style x:Key="LamhaChipButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
-    <Setter Property="Background" Value="{ThemeResource LamhaChipBrush}" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
-    <Setter Property="controls:Pill.IsPill" Value="True" />
-    <Setter Property="Padding" Value="10,3" />
-    <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
-    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
-    <Setter Property="FontWeight" Value="Normal" />
-  </Style>
-
-  <!-- A link at the foot of the card (Google Translate, Better translation): an icon and a word, quiet until hovered -->
-  <Style x:Key="LamhaFootLinkStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
-    <Setter Property="Padding" Value="8,4" />
-    <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
-    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
-    <Setter Property="FontWeight" Value="Normal" />
-  </Style>
-
-  <!-- An icon that stays on (Pin, the review bookmark): muted, and in the accent colour on its tint when on -->
+  <!-- An icon that stays on (Pin, the star): Windows' subtle icon button, 32 × 32, its icon in the accent when on
+       (the star also fills: FluentIcon.Filled) -->
   <Style x:Key="LamhaIconToggleStyle" TargetType="ToggleButton">
     <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
     <Setter Property="BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="0" />
-    <Setter Property="Width" Value="28" />
-    <Setter Property="Height" Value="28" />
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="UseSystemFocusVisuals" Value="True" />
@@ -230,20 +213,17 @@
                 </VisualState>
                 <VisualState x:Name="Checked">
                   <VisualState.Setters>
-                    <Setter Target="Root.Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
                     <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaAccentBrush}" />
                   </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="CheckedPointerOver">
                   <VisualState.Setters>
-                    <Setter Target="Root.Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
                     <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaAccentBrush}" />
                     <Setter Target="Hover.Opacity" Value="1" />
                   </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="CheckedPressed">
                   <VisualState.Setters>
-                    <Setter Target="Root.Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
                     <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaAccentBrush}" />
                     <Setter Target="Presenter.Opacity" Value="0.8" />
                   </VisualState.Setters>
@@ -256,7 +236,7 @@
                 </VisualState>
               </VisualStateGroup>
             </VisualStateManager.VisualStateGroups>
-            <Border x:Name="Hover" Background="{ThemeResource LamhaHoverBrush}" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" />
+            <Border x:Name="Hover" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" />
             <ContentPresenter x:Name="Presenter"
                               Padding="{TemplateBinding Padding}"
                               HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -269,13 +249,6 @@
         </ControlTemplate>
       </Setter.Value>
     </Setter>
-  </Style>
-
-  <!-- The review bookmark next to the headword: round, 34 px; in the accent colour when the word is in review -->
-  <Style x:Key="LamhaRoundToggleStyle" TargetType="ToggleButton" BasedOn="{StaticResource LamhaIconToggleStyle}">
-    <Setter Property="Width" Value="34" />
-    <Setter Property="Height" Value="34" />
-    <Setter Property="controls:Pill.IsPill" Value="True" />
   </Style>
 
   <!-- A segment of a two-way switch in a pill (the card's العربية ⇄ English): the chosen one raised on the surface -->
@@ -351,93 +324,11 @@
     </Setter>
   </Style>
 
-  <!-- Chips: a meaning, a synonym, a writing tool, a choice. On (checked) in the button colour. -->
-  <Style x:Key="LamhaChipStyle" TargetType="ToggleButton">
-    <Setter Property="Background" Value="{ThemeResource LamhaChipBrush}" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
-    <Setter Property="BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
-    <Setter Property="BorderThickness" Value="1" />
+  <!-- Chips: a meaning, a writing tool, a choice, a filter. Windows' toggle button as a pill: on in the accent fill. -->
+  <Style x:Key="LamhaChipStyle" TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
     <Setter Property="controls:Pill.IsPill" Value="True" />
-    <Setter Property="Padding" Value="10,2" />
+    <Setter Property="Padding" Value="11,3" />
     <Setter Property="MinHeight" Value="{StaticResource LamhaMinTargetSize}" />
-    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
-    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
-    <Setter Property="HorizontalContentAlignment" Value="Center" />
-    <Setter Property="VerticalContentAlignment" Value="Center" />
-    <Setter Property="UseSystemFocusVisuals" Value="True" />
-    <Setter Property="Template">
-      <Setter.Value>
-        <ControlTemplate TargetType="ToggleButton">
-          <Grid x:Name="Root"
-                Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="{TemplateBinding CornerRadius}"
-                Control.IsTemplateFocusTarget="True">
-            <VisualStateManager.VisualStateGroups>
-              <VisualStateGroup x:Name="CommonStates">
-                <VisualState x:Name="Normal" />
-                <VisualState x:Name="PointerOver">
-                  <VisualState.Setters>
-                    <Setter Target="Hover.Opacity" Value="1" />
-                  </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="Pressed">
-                  <VisualState.Setters>
-                    <Setter Target="Hover.Opacity" Value="1" />
-                    <Setter Target="Presenter.Opacity" Value="0.8" />
-                  </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="Disabled">
-                  <VisualState.Setters>
-                    <Setter Target="Root.Opacity" Value="0.45" />
-                  </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="Checked">
-                  <VisualState.Setters>
-                    <Setter Target="Root.Background" Value="{ThemeResource LamhaButtonBrush}" />
-                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
-                  </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="CheckedPointerOver">
-                  <VisualState.Setters>
-                    <Setter Target="Root.Background" Value="{ThemeResource LamhaButtonBrush}" />
-                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
-                    <Setter Target="Hover.Opacity" Value="1" />
-                  </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="CheckedPressed">
-                  <VisualState.Setters>
-                    <Setter Target="Root.Background" Value="{ThemeResource LamhaButtonBrush}" />
-                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
-                    <Setter Target="Presenter.Opacity" Value="0.8" />
-                  </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="CheckedDisabled">
-                  <VisualState.Setters>
-                    <Setter Target="Root.Background" Value="{ThemeResource LamhaButtonBrush}" />
-                    <Setter Target="Presenter.Foreground" Value="{ThemeResource LamhaButtonTextBrush}" />
-                    <Setter Target="Root.Opacity" Value="0.45" />
-                  </VisualState.Setters>
-                </VisualState>
-              </VisualStateGroup>
-            </VisualStateManager.VisualStateGroups>
-            <Border x:Name="Hover" Background="{ThemeResource LamhaHoverBrush}" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" />
-            <ContentPresenter x:Name="Presenter"
-                              Padding="{TemplateBinding Padding}"
-                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                              Content="{TemplateBinding Content}"
-                              ContentTemplate="{TemplateBinding ContentTemplate}"
-                              FontFamily="{TemplateBinding FontFamily}"
-                              FontSize="{TemplateBinding FontSize}"
-                              FontWeight="{TemplateBinding FontWeight}"
-                              Foreground="{TemplateBinding Foreground}"
-                              AutomationProperties.AccessibilityView="Raw" />
-          </Grid>
-        </ControlTemplate>
-      </Setter.Value>
-    </Setter>
   </Style>
 
   <!-- A skeleton: the grey shape of what's coming, with a light sweeping across it (Controls/Skeleton.cs moves it) -->
@@ -467,19 +358,79 @@
     </Setter>
   </Style>
 
-  <!-- Boxes the screens repeat: a panel (Today, the answer, a group of settings) and the tinted box the meaning
-       sits in (the card's hero, the corrected text) -->
-  <Style x:Key="LamhaPanelStyle" TargetType="Border">
-    <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
+  <!-- A content card (the answer, Today, the journal's list): Windows' card fill and edge, rounded 8, 24 in. Never a
+       card inside a card. -->
+  <Style x:Key="LamhaContentCardStyle" TargetType="Border">
+    <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusOverlay}" />
-    <Setter Property="Padding" Value="20" />
+    <Setter Property="Padding" Value="{StaticResource LamhaContentCardPadding}" />
   </Style>
+  <!-- The tinted box the meaning sits in on the card, and the corrected text -->
   <Style x:Key="LamhaTintedBoxStyle" TargetType="Border">
     <Setter Property="Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
     <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="16,12" />
+  </Style>
+
+  <!-- The links under a content card's content (Google Translate, Cambridge): a divider above, their text in line with
+       the card's 24 (each link's own 4 inside) -->
+  <Style x:Key="LamhaCardFootStyle" TargetType="Border">
+    <Setter Property="Padding" Value="20,8" />
+    <Setter Property="BorderBrush" Value="{ThemeResource DividerStrokeColorDefaultBrush}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+
+  <!-- Fields: Windows' text box (32 high, padding 10,5,6,6, radius 4, its 2 px accent line under it when focused).
+       The large one is a box to write in (Translate, Write): Body large, wrapping, room at its end for the clear button. -->
+  <Style x:Key="LamhaLargeFieldStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+    <Setter Property="MinHeight" Value="72" />
+    <Setter Property="MaxHeight" Value="160" />
+    <Setter Property="Padding" Value="12,8,40,8" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBodyLarge}" />
+    <Setter Property="AcceptsReturn" Value="True" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="IsSpellCheckEnabled" Value="False" />
+    <Setter Property="TextReadingOrder" Value="DetectFromContent" />
+  </Style>
+  <!-- A search box (History, Clipboard): Windows' field, 32 high, 🔍 at its end (LamhaFieldGlyphStyle over it); it
+       searches as you type, so the icon is a sign, not a button -->
+  <Style x:Key="LamhaSearchFieldStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+    <Setter Property="MinHeight" Value="{StaticResource LamhaControlHeight}" />
+    <Setter Property="Padding" Value="10,5,36,6" />
+    <Setter Property="IsSpellCheckEnabled" Value="False" />
+    <Setter Property="TextReadingOrder" Value="DetectFromContent" />
+  </Style>
+  <Style x:Key="LamhaFieldGlyphStyle" TargetType="controls:FluentIcon">
+    <Setter Property="Margin" Value="0,0,12,0" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+  </Style>
+
+  <!-- The × at the top end of a large field: 24, a 12 icon, centred on the first line -->
+  <Style x:Key="LamhaFieldClearButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaIconButtonStyle}">
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Margin" Value="0,8,8,0" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+  </Style>
+
+  <!-- A key cap (Ctrl, Alt, L): Caption in the secondary colour on Windows' control fill and its edge, rounded 4 -->
+  <Style x:Key="LamhaKeyCapStyle" TargetType="Border">
+    <Setter Property="Padding" Value="4,1" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{ThemeResource ControlElevationBorderBrush}" />
+    <Setter Property="Background" Value="{ThemeResource ControlFillColorDefaultBrush}" />
+  </Style>
+  <Style x:Key="LamhaKeyCapTextStyle" TargetType="TextBlock" BasedOn="{StaticResource LamhaCaptionTextStyle}">
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+    <Setter Property="TextWrapping" Value="NoWrap" />
   </Style>
 
   <!-- A section's heading with the line after it ("Other meanings ———"): a Grid of the heading and a 1 px line -->
@@ -493,45 +444,41 @@
     <controls:WrapPanel HorizontalSpacing="6" VerticalSpacing="4" />
   </ItemsPanelTemplate>
 
-  <!-- A row that does something (a recent lookup): the whole row is the button, tinted under the mouse. Its text is
-       10 px in, the 1 px edge (seen in high contrast) included, so it lines up with the text around it. -->
-  <Style x:Key="LamhaRowButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
-    <Setter Property="Padding" Value="9,7" />
-    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
-    <Setter Property="FontWeight" Value="Normal" />
+  <!-- A row that does something (a recent lookup): the whole row is Windows' subtle button, 40 high at least (a list
+       row's height). Its text is 10 px in, the 1 px edge (seen in high contrast) included, so it lines up with the text
+       around it. -->
+  <Style x:Key="LamhaRowButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
+    <Setter Property="Padding" Value="9,4" />
+    <Setter Property="MinHeight" Value="40" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
 
-  <!-- A link in a line of text (Clear, See its meaning): the accent colour, 12.5 px semibold (Lamha 2's .link) -->
-  <Style x:Key="LamhaLinkButtonStyle" TargetType="HyperlinkButton">
-    <Setter Property="Padding" Value="0" />
-    <Setter Property="BorderThickness" Value="0" />
+  <!-- A link in a line of text (Clear, See its meaning): Windows' hyperlink button, its text where the line's text is
+       (the padding taken back by the margin), so only its hover fill reaches past it -->
+  <Style x:Key="LamhaLinkButtonStyle" TargetType="HyperlinkButton" BasedOn="{StaticResource DefaultHyperlinkButtonStyle}">
+    <Setter Property="Padding" Value="4,2" />
+    <Setter Property="Margin" Value="-4,-2" />
     <Setter Property="MinHeight" Value="0" />
-    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
-    <Setter Property="FontSize" Value="12.5" />
-    <Setter Property="FontWeight" Value="SemiBold" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaAccentBrush}" />
   </Style>
 
   <!-- ===== Settings (phase 1's Settings design) ===== -->
 
-  <!-- A settings card: the surface, its 1 px edge and 8 px corners, 68 px high (a short one sets 48); the text 16 px from
-       the edge, the edge included. A card that holds more than one control is a Border in LamhaSettingsPanelStyle. -->
+  <!-- A setting card (Windows' Settings): Windows' card fill and edge, rounded 4, 68 high at least (a short one sets
+       48); the text 16 from the edge, the edge included; the icon 20, 20 before the text; the name in Body over its hint
+       in Caption. A card that holds more than one control is a Border in LamhaSettingsPanelStyle. -->
   <Style x:Key="LamhaSettingsPanelStyle" TargetType="Border">
-    <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
+    <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="15,11" />
     <Setter Property="MinHeight" Value="68" />
   </Style>
   <Style TargetType="controls:SettingsCard">
-    <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
+    <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
     <Setter Property="Padding" Value="15,11" />
@@ -541,34 +488,38 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="controls:SettingsCard">
-          <Grid Padding="{TemplateBinding Padding}" MinHeight="{TemplateBinding MinHeight}" ColumnSpacing="16"
+          <Grid Padding="{TemplateBinding Padding}" MinHeight="{TemplateBinding MinHeight}"
                 Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
             <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="*" />
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <StackPanel VerticalAlignment="Center" Spacing="2">
-              <TextBlock Style="{StaticResource LamhaBodyTextStyle}" TextReadingOrder="UseFlowDirection" Text="{TemplateBinding Header}" />
-              <TextBlock x:Name="Description" Style="{StaticResource LamhaCaptionTextStyle}" TextReadingOrder="UseFlowDirection" Text="{TemplateBinding Description}" />
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <controls:FluentIcon x:Name="IconBox" Margin="0,0,20,0" VerticalAlignment="Center" Size="Large" Glyph="{TemplateBinding Icon}" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Style="{StaticResource LamhaBodyTextStyle}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextReadingOrder="UseFlowDirection" Text="{TemplateBinding Header}" />
+              <TextBlock x:Name="Description" Style="{StaticResource LamhaCaptionTextStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                         TextReadingOrder="UseFlowDirection" Text="{TemplateBinding Description}" />
             </StackPanel>
-            <ContentPresenter Grid.Column="1" VerticalAlignment="Center" Content="{TemplateBinding Content}" />
+            <ContentPresenter x:Name="Control" Grid.Column="2" VerticalAlignment="Center" Content="{TemplateBinding Content}" />
           </Grid>
         </ControlTemplate>
       </Setter.Value>
     </Setter>
   </Style>
 
-  <!-- A category on Settings' home: the card's look on a button, tinted under the mouse -->
-  <Style x:Key="LamhaTileButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaButtonStyle}">
-    <Setter Property="Background" Value="{ThemeResource LamhaSurfaceBrush}" />
-    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
-    <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
-    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
+  <!-- A setting card that opens a page (Settings' home): the card on Windows' button, its hover and press; the chevron
+       at its end is the content's -->
+  <Style x:Key="LamhaTileButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
     <Setter Property="Padding" Value="15,11" />
     <Setter Property="MinHeight" Value="68" />
-    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
-    <Setter Property="FontWeight" Value="Normal" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
   </Style>

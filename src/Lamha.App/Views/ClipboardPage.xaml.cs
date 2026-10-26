@@ -125,10 +125,6 @@ public sealed partial class ClipboardPage : UserControl
         }
     }
 
-    /// <summary>The field's accent ring while the search has the focus (History's).</summary>
-    private void OnSearchFocus(object sender, RoutedEventArgs e) =>
-        FieldRing.Visibility = SearchBox.FocusState == FocusState.Unfocused ? Visibility.Collapsed : Visibility.Visible;
-
     private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ClipboardViewModel.Selected) && ViewModel.Selected is { } row && ViewModel.Rows.IndexOf(row) is >= 0 and var at)

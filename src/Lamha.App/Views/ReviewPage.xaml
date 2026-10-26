@@ -48,7 +48,7 @@
     </Grid>
 
     <!-- ===== The flashcard ===== -->
-    <Border x:Name="CardBox" Margin="0,16,0,0" MinHeight="280" Padding="24,28,24,20" Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsCard, Mode=OneWay}">
+    <Border x:Name="CardBox" Margin="0,16,0,0" MinHeight="280" Padding="24,28,24,20" Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.IsCard, Mode=OneWay}">
       <Grid>
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" />
@@ -130,7 +130,7 @@
     </Border>
 
     <!-- ===== Nothing to review now: what this sitting did, the next review, the streak ===== -->
-    <Border x:Name="DoneBox" Margin="0,16,0,0" Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsDone, Mode=OneWay}">
+    <Border x:Name="DoneBox" Margin="0,16,0,0" Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.IsDone, Mode=OneWay}">
       <StackPanel Padding="8,8,8,4" Spacing="4" AutomationProperties.LiveSetting="Polite">
         <TextBlock x:Name="DoneTitleText" HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}" Text="{x:Bind DoneTitle}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" FontWeight="SemiBold"
@@ -145,7 +145,7 @@
     </Border>
 
     <!-- ===== No words yet ===== -->
-    <Border Margin="0,16,0,0" Style="{StaticResource LamhaPanelStyle}" Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}">
+    <Border Margin="0,16,0,0" Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}">
       <StackPanel Padding="8,8,8,4" Spacing="4">
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}" Text="{x:Bind EmptyTitle}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind EmptyText}" />

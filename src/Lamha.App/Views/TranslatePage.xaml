@@ -14,79 +14,40 @@
     <StackPanel.Resources>
       <!-- A link at the foot of the answer or the price: Google Translate, Cambridge, the rates' credit -->
       <DataTemplate x:Key="LinkTemplate" x:DataType="card:LinkItem">
-        <Button Style="{StaticResource LamhaFootLinkStyle}" Command="{x:Bind Open}" ToolTipService.ToolTip="{x:Bind controls:Show.Tooltip(Tooltip)}"
-                AutomationProperties.Name="{x:Bind Label}">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <controls:FluentIcon Glyph="{x:Bind Glyph}" />
+        <HyperlinkButton Style="{StaticResource LamhaFootLinkStyle}" Command="{x:Bind Open}" ToolTipService.ToolTip="{x:Bind controls:Show.Tooltip(Tooltip)}"
+                         AutomationProperties.Name="{x:Bind Label}">
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace1}">
+            <controls:FluentIcon Glyph="{x:Bind Glyph}" Size="Small" />
             <TextBlock Text="{x:Bind Label}" />
           </StackPanel>
-        </Button>
+        </HyperlinkButton>
       </DataTemplate>
     </StackPanel.Resources>
 
-    <!-- ===== The box ===== -->
-    <Border Style="{StaticResource LamhaPanelStyle}">
-      <StackPanel>
-        <Grid>
-          <!-- The field: its 1 px edge, and Lamha's 2 px accent ring around it while it has the focus -->
-          <Border CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1" BorderBrush="{ThemeResource LamhaFieldLineBrush}"
-                  Background="{ThemeResource LamhaSurfaceBrush}">
-            <TextBox x:Name="QueryBox" MinHeight="74" MaxHeight="160" Padding="16,12,44,12" BorderThickness="0" Background="Transparent"
-                     FontFamily="{StaticResource LamhaFontFamily}" FontSize="{StaticResource LamhaFontSizeBodyLarge}"
-                     AcceptsReturn="True" TextWrapping="Wrap" IsSpellCheckEnabled="False"
-                     TextReadingOrder="DetectFromContent" TextAlignment="{x:Bind controls:Show.BoxAlignment(ViewModel.HasQuery), Mode=OneWay}"
-                     PlaceholderText="{x:Bind Placeholder}" AutomationProperties.Name="{x:Bind Placeholder}"
-                     Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     PreviewKeyDown="OnQueryKeyDown" GotFocus="OnQueryFocus" LostFocus="OnQueryFocus">
-              <!-- Windows' own edge, fill and focus line give way to the field's -->
-              <TextBox.Resources>
-                <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlElevationBorderBrush" Color="Transparent" />
-                <SolidColorBrush x:Key="TextControlElevationBorderFocusedBrush" Color="Transparent" />
-              </TextBox.Resources>
-            </TextBox>
-          </Border>
-          <Border x:Name="FieldRing" Margin="-2" CornerRadius="12" BorderThickness="2" BorderBrush="{ThemeResource LamhaAccentBrush}"
-                  IsHitTestVisible="False" Visibility="Collapsed" />
-          <Button x:Uid="Translate_Clear" Margin="0,10,10,0" HorizontalAlignment="Right" VerticalAlignment="Top" Style="{StaticResource LamhaIconButtonStyle}"
-                  Visibility="{x:Bind ViewModel.HasQuery, Mode=OneWay, FallbackValue=Collapsed}" Click="OnClear">
-            <controls:FluentIcon Glyph="Close" />
-          </Button>
-        </Grid>
+    <!-- ===== The box: on the page, as a large Windows field (its accent line under it when focused); under it, the
+         shortcut as a caption (the study's T1, T2) ===== -->
+    <StackPanel Spacing="{StaticResource LamhaSpace2}">
+      <Grid>
+        <TextBox x:Name="QueryBox" Style="{StaticResource LamhaLargeFieldStyle}"
+                 TextAlignment="{x:Bind controls:Show.BoxAlignment(ViewModel.HasQuery), Mode=OneWay}"
+                 PlaceholderText="{x:Bind Placeholder}" AutomationProperties.Name="{x:Bind Placeholder}"
+                 Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 PreviewKeyDown="OnQueryKeyDown" />
+        <Button x:Uid="Translate_Clear" Style="{StaticResource LamhaFieldClearButtonStyle}"
+                Visibility="{x:Bind ViewModel.HasQuery, Mode=OneWay, FallbackValue=Collapsed}" Click="OnClear">
+          <controls:FluentIcon Glyph="Close" Size="Small" />
+        </Button>
+      </Grid>
 
-        <!-- Quick lookup Ctrl+Alt+L -->
-        <StackPanel Margin="0,8,0,0" Orientation="Horizontal" Spacing="6">
-          <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind QuickLookup}" />
-          <ItemsControl VerticalAlignment="Center" FlowDirection="LeftToRight" ItemsSource="{x:Bind ViewModel.Keys}" IsTabStop="False">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <StackPanel Orientation="Horizontal" />
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="main:KeyPart">
-                <Grid VerticalAlignment="Center">
-                  <Border Padding="5,1" CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1,1,1,2" BorderBrush="{ThemeResource LamhaLineBrush}"
-                          Background="{ThemeResource LamhaSurfaceBrush}" Visibility="{x:Bind IsKey}">
-                    <TextBlock FontFamily="{StaticResource LamhaFontFamily}" FontSize="{StaticResource LamhaFontSizeCaption}"
-                               Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind Text}" />
-                  </Border>
-                  <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Text}" Visibility="{x:Bind controls:Show.IfNot(IsKey)}" />
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </StackPanel>
+      <!-- Quick lookup Ctrl+Alt+L -->
+      <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
+        <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind QuickLookup}" />
+        <controls:KeyCaps Keys="{x:Bind ViewModel.Keys}" />
       </StackPanel>
-    </Border>
+    </StackPanel>
 
     <!-- ===== Waiting: the word at once, and shapes where the answer will be ===== -->
-    <Border x:Name="WaitingBox" x:Load="{x:Bind ViewModel.IsWaiting, Mode=OneWay}" Style="{StaticResource LamhaPanelStyle}">
+    <Border x:Name="WaitingBox" x:Load="{x:Bind ViewModel.IsWaiting, Mode=OneWay}" Style="{StaticResource LamhaContentCardStyle}">
       <StackPanel>
         <TextBlock Margin="0,0,0,12" Style="{StaticResource LamhaHeadwordTextStyle}" FlowDirection="LeftToRight" TextAlignment="{x:Bind controls:Show.LatinAlignment}"
                    Text="{x:Bind ViewModel.WaitingText, Mode=OneWay}" Visibility="{x:Bind ViewModel.WaitingIsWord, Mode=OneWay, FallbackValue=Collapsed}" />
@@ -97,45 +58,37 @@
       </StackPanel>
     </Border>
 
-    <!-- ===== An error: what happened, what to do, one button ===== -->
-    <Border x:Name="ErrorBox" x:Load="{x:Bind ViewModel.IsError, Mode=OneWay}" Style="{StaticResource LamhaPanelStyle}">
-      <StackPanel Padding="8,8,8,0" Spacing="4">
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind ViewModel.Error.Title, Mode=OneWay}" />
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind ViewModel.Error.Hint, Mode=OneWay}" />
-        <Button Margin="0,8,0,0" HorizontalAlignment="Center" Style="{StaticResource LamhaButtonStyle}"
-                Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.RunErrorActionCommand}"
-                AutomationProperties.Name="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <controls:FluentIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Error), Mode=OneWay}" />
-            <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}" />
-          </StackPanel>
-        </Button>
-      </StackPanel>
-    </Border>
+    <!-- ===== An error: Windows' InfoBar, what happened, what to do, one button ===== -->
+    <InfoBar x:Name="ErrorBox" x:Load="{x:Bind ViewModel.IsError, Mode=OneWay}" IsOpen="True" IsClosable="False" Severity="Error"
+             Title="{x:Bind ViewModel.Error.Title, Mode=OneWay}" Message="{x:Bind ViewModel.Error.Hint, Mode=OneWay}">
+      <InfoBar.ActionButton>
+        <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}"
+                Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.RunErrorActionCommand}" />
+      </InfoBar.ActionButton>
+    </InfoBar>
 
     <!-- ===== The answer, as on the card; the links at its foot ===== -->
-    <Border x:Name="AnswerBox" x:Load="{x:Bind ViewModel.IsAnswer, Mode=OneWay}" Style="{StaticResource LamhaPanelStyle}" Padding="0">
+    <Border x:Name="AnswerBox" x:Load="{x:Bind ViewModel.IsAnswer, Mode=OneWay}" Style="{StaticResource LamhaContentCardStyle}" Padding="0">
       <StackPanel>
-        <views:AnswerView Margin="20" Answer="{x:Bind ViewModel.Answer, Mode=OneWay}" ShowsText="False" />
-        <Border Padding="12,6" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,1,0,0"
-                Visibility="{x:Bind controls:Show.IfAny(ViewModel.Links.Count), Mode=OneWay, FallbackValue=Collapsed}">
+        <views:AnswerView Margin="{StaticResource LamhaContentCardPadding}" Answer="{x:Bind ViewModel.Answer, Mode=OneWay}" ShowsText="False" />
+        <Border Style="{StaticResource LamhaCardFootStyle}" Visibility="{x:Bind controls:Show.IfAny(ViewModel.Links.Count), Mode=OneWay, FallbackValue=Collapsed}">
           <ItemsControl ItemsSource="{x:Bind ViewModel.Links, Mode=OneWay}" ItemTemplate="{StaticResource LinkTemplate}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False" />
         </Border>
       </StackPanel>
     </Border>
 
     <!-- ===== A price, in your currency, as on the card; the rates' credit at its foot ===== -->
-    <Border x:Name="PriceBox" x:Load="{x:Bind ViewModel.IsPrice, Mode=OneWay}" Style="{StaticResource LamhaPanelStyle}" Padding="0">
+    <Border x:Name="PriceBox" x:Load="{x:Bind ViewModel.IsPrice, Mode=OneWay}" Style="{StaticResource LamhaContentCardStyle}" Padding="0">
       <StackPanel>
-        <views:PriceView Margin="20" Price="{x:Bind ViewModel.Price, Mode=OneWay}" />
-        <Border Padding="12,6" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,1,0,0">
+        <views:PriceView Margin="{StaticResource LamhaContentCardPadding}" Price="{x:Bind ViewModel.Price, Mode=OneWay}" />
+        <Border Style="{StaticResource LamhaCardFootStyle}">
           <ItemsControl ItemsSource="{x:Bind ViewModel.Links, Mode=OneWay}" ItemTemplate="{StaticResource LinkTemplate}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False" />
         </Border>
       </StackPanel>
     </Border>
 
     <!-- ===== Today: the goal's ring, the streak, the word of the day ===== -->
-    <Border x:Name="TodayBox" x:Load="{x:Bind ViewModel.IsToday, Mode=OneWay}" Style="{StaticResource LamhaPanelStyle}"
+    <Border x:Name="TodayBox" x:Load="{x:Bind ViewModel.IsToday, Mode=OneWay}" Style="{StaticResource LamhaContentCardStyle}"
             Visibility="{x:Bind controls:Show.IfSet(ViewModel.Today), Mode=OneWay, FallbackValue=Collapsed}" AutomationProperties.Name="{x:Bind TodayLabel}">
       <StackPanel>
         <Grid ColumnSpacing="16" Visibility="{x:Bind ViewModel.Today.HasHead, Mode=OneWay, FallbackValue=Collapsed}">
@@ -203,7 +156,7 @@
     </Border>
 
     <!-- ===== Recent lookups, two to a row; each looks itself up again ===== -->
-    <Border x:Name="RecentBox" x:Load="{x:Bind ViewModel.IsToday, Mode=OneWay}" Style="{StaticResource LamhaPanelStyle}"
+    <Border x:Name="RecentBox" x:Load="{x:Bind ViewModel.IsToday, Mode=OneWay}" Style="{StaticResource LamhaContentCardStyle}"
             Visibility="{x:Bind ViewModel.HasRecent, Mode=OneWay, FallbackValue=Collapsed}">
       <StackPanel>
         <Grid Margin="0,0,0,8" ColumnSpacing="8">

@@ -97,6 +97,15 @@ public static class Show
         lineFlow == Localization.FlowDirection ? TextAlignment.Left : TextAlignment.Right;
 
     /// <summary>
+    /// A meaning's English line under its Arabic one starts at the interface's side too, so the meaning has one straight
+    /// edge (the study's T6, the user's answer: docs/design/ux-study.md).
+    /// </summary>
+    public static TextAlignment InterfaceAlignment(bool rightToLeft) => InterfaceAligned(Flow(rightToLeft));
+
+    /// <summary>The interface's direction, for a panel inside a template whose items keep their own.</summary>
+    public static FlowDirection InterfaceFlow => Localization.FlowDirection;
+
+    /// <summary>
     /// A text box's text lines up as its language reads (English on the left in the Arabic window); an empty box starts
     /// where the interface starts, where Windows would otherwise put the caret on the left.
     /// </summary>
