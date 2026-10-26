@@ -633,7 +633,8 @@ On the `native/phase-4` branch (2026-10-25), from `native/phase-1`.
   3. Lamha 2.1.0: tag `v2.1.0` on `release/2.x`, which runs its release workflow.
   4. Lamha 3.0.0: VersionSuffix stays as it is; Actions → Release.
   5. The website and README, then removing `legacy/`.
-- **`legacy/` removed** (2026-10-26, on `lamha3/remove-legacy`, merged after 3.0.0 is out because Release builds from `main`). Lamha 2's code is on `release/2.x` (and the `electron-final` tag); what Lamha 3 still read from `legacy/` moved:
+- **Released** (2026-10-26): **Lamha 2.1.0** (tag `v2.1.0` on `release/2.x`; its workflow passed, Latest until 3.0) and then **Lamha 3.0.0** (Actions → Release, all jobs passed): GitHub's Latest is v3.0.0, its `latest.yml` still says 2.1.0 for a Lamha 2.0.x, the normal and beta channels' feeds have 3.0.0 (the beta's with a delta), and `Lamha-Setup.exe` is there for the website.
+- **`legacy/` removed** (2026-10-26, `lamha3/remove-legacy`, merged after 3.0.0 was out because Release builds from `main`). Lamha 2's code is on `release/2.x` (and the `electron-final` tag); what Lamha 3 still read from `legacy/` moved:
   - **The dictionary's shards** to `dict/` (`git mv`, history kept, as 0003 asked); CI, Beta, Release and the tests build from there. The same file: 86,609 entries. CI no longer skips a change to them (it ignored `legacy/**`). Building them in CI from their sources (above) is still an idea.
   - **The website's changelog** to `site/changelog.js` (Lamha 2's, with 2.1.0's entry, which only `release/2.x` had); Lamha 3's own comes with the website.
   - **Lamha 2's colours,** which `TokensTests` checks the tokens against: their four blocks copied to `tests/Lamha.Core.Tests/Appearance/Lamha2/`.
