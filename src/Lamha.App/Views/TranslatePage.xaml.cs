@@ -49,6 +49,29 @@ public sealed partial class TranslatePage : UserControl
 
     public string LookupTipTitle { get; } = Localization.Get("Translate_TipTitle");
 
+    /// <summary>Today and the recent lookups come in one after another as they show (the page opens, the box is emptied).</summary>
+    private void OnRecentLoaded(object sender, RoutedEventArgs e) => DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+    {
+        RecentList?.UpdateLayout();
+        Animations.Stagger(TodayAndRecent());
+    });
+
+    private IEnumerable<UIElement> TodayAndRecent()
+    {
+        if (TodayBox is { Visibility: Visibility.Visible } today)
+        {
+            yield return today;
+        }
+
+        if (RecentBox is { Visibility: Visibility.Visible } && RecentList is { } recent)
+        {
+            foreach (var row in ListMotion.Realized(recent, Lamha.Core.Appearance.Motion.StaggerMax))
+            {
+                yield return row;
+            }
+        }
+    }
+
     /// <summary>The first time the page shows: the hint, once laid out (it points at the line); seen once it's shown.</summary>
     private void OnLoadedOpenTip(object sender, RoutedEventArgs e)
     {

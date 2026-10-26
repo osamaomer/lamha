@@ -33,6 +33,9 @@ public static class Motion
     /// <summary>A box growing or shrinking to its new content, a page, a list making room: Windows' 250 ms.</summary>
     public const int ResizeMilliseconds = 250;
 
+    /// <summary>Celebrations and Review's moments (the goal's ring filling): the design system's 333 ms.</summary>
+    public const int SlowMilliseconds = 333;
+
     /// <summary>A list's items coming in one after another (full only): each this much after the last, at most
     /// <see cref="StaggerMax"/> of them, rising <see cref="StaggerDistance"/> px over <see cref="StaggerMilliseconds"/>.</summary>
     public const int StaggerEachMilliseconds = 22;
@@ -72,6 +75,40 @@ public static class Motion
     public static MotionLevel Hint(long totalMemoryBytes, int cores, bool accelerated) =>
         totalMemoryBytes <= 4.5 * 1024 * 1024 * 1024 || cores <= 2 || !accelerated ? MotionLevel.Subtle : MotionLevel.Full;
 
+    /// <summary>
+    /// How far along a curve is at <paramref name="progress"/> (0 to 1 of its time): the CSS cubic-bezier() a compositor
+    /// animation uses, for motion that's stepped by hand (the card's window growing to its answer).
+    /// </summary>
+    public static double Ease((float X1, float Y1, float X2, float Y2) curve, double progress)
+    {
+        if (progress <= 0)
+        {
+            return 0;
+        }
+
+        if (progress >= 1)
+        {
+            return 1;
+        }
+
+        // The point of the curve whose x is the time: x(t) only grows, so halving finds t.
+        double low = 0, high = 1, t = progress;
+        for (var i = 0; i < 32; i++)
+        {
+            t = (low + high) / 2;
+            if (Bezier(curve.X1, curve.X2, t) < progress)
+            {
+                low = t;
+            }
+            else
+            {
+                high = t;
+            }
+        }
+
+        return Bezier(curve.Y1, curve.Y2, t);
+    }
+
     /// <summary>A duration at <paramref name="level"/>: subtle is the same animation a little faster, off is none.</summary>
     public static TimeSpan Time(MotionLevel level, int milliseconds) => level switch
     {
@@ -79,4 +116,7 @@ public static class Motion
         MotionLevel.Subtle => TimeSpan.FromMilliseconds(Math.Floor((milliseconds * 0.75) + 0.5)), // JavaScript's Math.round
         _ => TimeSpan.FromMilliseconds(milliseconds),
     };
+
+    /// <summary>One coordinate of a cubic Bézier from 0 to 1 through <paramref name="a"/> and <paramref name="b"/>.</summary>
+    private static double Bezier(double a, double b, double t) => (3 * (1 - t) * (1 - t) * t * a) + (3 * (1 - t) * t * t * b) + (t * t * t);
 }

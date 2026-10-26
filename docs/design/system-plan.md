@@ -273,6 +273,19 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
      Step 4 adds nothing. The tray's 57 is over 0008's 55 for both, the PC as in 0020.
    - **Done 2026-10-26.** 460 tests (the five checks of Lamha 2's banner and toast colours went with them).
 5. **Motion and feedback:** the catalogue above, through `Animations.cs`, at each level.
+
+   **Built 2026-10-27:**
+   - **The card** grows in from 96 % on the side of the selection (167 ms), fades out in 83 ms before it hides (at once for Replace, which gives the focus back), and its window follows the answer's height on Windows' curve (250 ms; a height found while it comes in is taken at once). The answer is unloaded after the fade, and a card shown again meanwhile is left alone.
+   - **Toasts** (the main window's and the panel's) rise from the foot and fade out; **InfoBars** slide in from above: the lookup's and Write's errors, Clipboard's "paused" (`Controls/Reveal`).
+   - **Lists** (`Services/ListMotion`, Lamha 2's `stagger()` and `flip()` with their numbers, Full only): Today and the recent lookups, History's days and words, and the clipboard's copies come in one after another; a copy pinned, deleted or brought back by Undo makes the others glide (keyed by the copy, so recycled rows don't).
+   - **Feedback** (`Controls/Feedback`): Copy's icon turns into ✓ for 1.5 s; the star pops when it fills; Review's count in the pane pops when it goes up; icon buttons and Settings' cards dip to 98 % when pressed; Lamha's own hover fills fade in 83 ms.
+   - **Review's goal ring** fills from where it was (333 ms, `Motion.SlowMilliseconds`); the rest of Review's moments came with phase 4.
+   - **A field with a mistake shakes** (Full only): the AI key and the excluded program's name (`StatusText.Field`).
+   - **The clipboard panel** rises as it opens.
+   - **At each level:** everything a quarter faster at Subtle, without the lists and the shake; nothing at Off. Windows' curve as a function (`Motion.Ease`, tested) for what's stepped by hand.
+   - **Not done, on purpose:** the streak's number rolling (Review shows it as words with the number inside: a roll would need the number apart from them); a correction fading from the old word into the new one (Write's results are a new text, not words changed in place).
+   - **To the user:** the card's height following the answer is the window resizing frame by frame; please try it with a slow answer (Google or AI) and say if it looks smooth on your screen. Screenshots can't show motion.
+   - 461 tests. Memory to be measured with step 7.
 6. **The new features:** the mini translator, the jump list, paste and translate, side by side.
 7. **Every window revisited** against the system: the main window's pages, Settings, the card, the clipboard panel, first run. Each in both languages and themes, high contrast and 150 % text; screenshots for you; memory measured against the budgets (0008, 0013, 0015).
 8. **Kept that way:**

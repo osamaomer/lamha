@@ -23,7 +23,7 @@
           <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Price.RateLine, Mode=OneWay}" />
         </StackPanel>
         <Button x:Uid="Card_CopyPrice" Grid.Column="1" VerticalAlignment="Top" Style="{StaticResource LamhaIconButtonStyle}"
-                Command="{x:Bind Price.Copy, Mode=OneWay}">
+                Command="{x:Bind Price.Copy, Mode=OneWay}" controls:Feedback.Copy="True">
           <controls:FluentIcon Glyph="Copy" />
         </Button>
       </Grid>

@@ -66,7 +66,7 @@
     </Grid>
 
     <!-- ===== Paused: Windows' InfoBar, and Resume ===== -->
-    <InfoBar IsOpen="{x:Bind ViewModel.IsPaused, Mode=OneWay}" IsClosable="False" Severity="Warning" Title="{x:Bind PausedTitle}" Message="{x:Bind PausedText}">
+    <InfoBar Visibility="Collapsed" controls:Reveal.Shown="{x:Bind ViewModel.IsPaused, Mode=OneWay}" controls:Reveal.Rise="-8" IsOpen="True" IsClosable="False" Severity="Warning" Title="{x:Bind PausedTitle}" Message="{x:Bind PausedText}">
       <InfoBar.ActionButton>
         <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ResumeLabel}" Command="{x:Bind ViewModel.ResumeCommand}" />
       </InfoBar.ActionButton>
@@ -84,7 +84,7 @@
               <Grid Margin="4,2" CornerRadius="{StaticResource LamhaRadiusControl}" Background="Transparent" Tapped="OnRowTapped"
                     PointerEntered="OnRowEntered" PointerExited="OnRowExited" AutomationProperties.Name="{x:Bind Text, Mode=OneWay}">
                 <!-- The hover tint, and the chosen copy's (the accent's tint) -->
-                <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaHoverBrush}" Opacity="0" />
+                <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaHoverBrush}" Opacity="0" controls:Feedback.Fade="True" />
                 <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind IsSelected, Mode=OneWay}" />
                 <StackPanel Padding="16,10" Spacing="4">
                   <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
@@ -155,7 +155,7 @@
                                          Parts="{x:Bind Diff, Mode=OneWay}" Fallback="{x:Bind Result, Mode=OneWay}" />
                     </Border>
                     <StackPanel Orientation="Horizontal" Spacing="6">
-                      <Button Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind Owner.CopyResultCommand}" AutomationProperties.Name="{x:Bind CopyLabel}">
+                      <Button Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind Owner.CopyResultCommand}" AutomationProperties.Name="{x:Bind CopyLabel}" controls:Feedback.Copy="True">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                           <controls:FluentIcon Glyph="Copy" />
                           <TextBlock Text="{x:Bind CopyLabel}" />

@@ -1,3 +1,4 @@
+using Lamha.App.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -14,7 +15,8 @@ public enum StatusKind
 
 /// <summary>
 /// A line saying how a check went ("✓ Key saved.", "Checking the key…", an error), in the colour of how it went, in the
-/// element's own theme. Narrator reads it when it changes. Hidden while empty.
+/// element's own theme. Narrator reads it when it changes. Hidden while empty. A mistake shakes its
+/// <see cref="Field"/> once (the design system's "a field with a mistake shakes", full only).
 /// </summary>
 public sealed partial class StatusText : UserControl
 {
@@ -23,6 +25,15 @@ public sealed partial class StatusText : UserControl
 
     public static readonly DependencyProperty KindProperty =
         DependencyProperty.Register(nameof(Kind), typeof(StatusKind), typeof(StatusText), new PropertyMetadata(StatusKind.Neutral, (d, _) => ((StatusText)d).Update()));
+
+    public static readonly DependencyProperty FieldProperty =
+        DependencyProperty.Register(nameof(Field), typeof(UIElement), typeof(StatusText), new PropertyMetadata(null));
+
+    public static readonly DependencyProperty FieldNameProperty =
+        DependencyProperty.Register(nameof(FieldName), typeof(string), typeof(StatusText), new PropertyMetadata(""));
+
+    /// <summary>The mistake shaken last, so the same one isn't shaken again when the theme or its kind is read again.</summary>
+    private string _shaken = "";
 
     private readonly TextBlock _text = new()
     {
@@ -52,6 +63,20 @@ public sealed partial class StatusText : UserControl
         set => SetValue(KindProperty, value);
     }
 
+    /// <summary>The field the line is about, which shakes when it says a mistake.</summary>
+    public UIElement? Field
+    {
+        get => (UIElement?)GetValue(FieldProperty);
+        set => SetValue(FieldProperty, value);
+    }
+
+    /// <summary>The field by its x:Name, in a template, where x:Bind can't reach it.</summary>
+    public string FieldName
+    {
+        get => (string)GetValue(FieldNameProperty);
+        set => SetValue(FieldNameProperty, value);
+    }
+
     private void Update()
     {
         _text.Text = Text;
@@ -68,5 +93,13 @@ public sealed partial class StatusText : UserControl
         }
 
         _text.FontWeight = Kind == StatusKind.Neutral ? Microsoft.UI.Text.FontWeights.Normal : Microsoft.UI.Text.FontWeights.SemiBold;
+
+        var mistake = Kind == StatusKind.Bad ? Text : "";
+        if (mistake.Length > 0 && mistake != _shaken && IsLoaded && (Field ?? (FieldName.Length > 0 ? (Parent as FrameworkElement)?.FindName(FieldName) as UIElement : null)) is { } field)
+        {
+            Animations.Shake(field);
+        }
+
+        _shaken = mistake;
     }
 }

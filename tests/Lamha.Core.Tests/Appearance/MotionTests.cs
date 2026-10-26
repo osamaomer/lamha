@@ -39,4 +39,20 @@ public class MotionTests
         Assert.Equal(TimeSpan.FromMilliseconds(188), Motion.Time(MotionLevel.Subtle, Motion.ResizeMilliseconds)); // 187.5, rounded up as Lamha 2 did
         Assert.Equal(TimeSpan.Zero, Motion.Time(MotionLevel.Off, Motion.EnterMilliseconds));
     }
+
+    [Fact]
+    public void TheCurvesAreWindowsQuickThenSettlingAndSpeedingUpAsItLeaves()
+    {
+        // Fast out, slow in (0, 0, 0, 1): x = t³ and y = 3t² − 2t³, so halfway there at an eighth of the time.
+        Assert.Equal(0.5, Motion.Ease(Motion.EnterEasing, 0.125), 4);
+        Assert.Equal(0, Motion.Ease(Motion.EnterEasing, 0));
+        Assert.Equal(1, Motion.Ease(Motion.EnterEasing, 1));
+        Assert.Equal(1, Motion.Ease(Motion.EnterEasing, 1.5)); // a late frame stops where it ends
+
+        // (1, 0, 1, 1), its mirror: only halfway at seven eighths of the time.
+        Assert.Equal(0.5, Motion.Ease(Motion.ExitEasing, 0.875), 4);
+
+        // A straight line is itself.
+        Assert.Equal(0.3, Motion.Ease((0, 0, 1, 1), 0.3), 4);
+    }
 }

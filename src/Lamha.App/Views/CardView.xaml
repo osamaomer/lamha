@@ -201,7 +201,7 @@
                   </StackPanel>
                 </Button>
                 <Button Grid.Column="1" Style="{x:Bind controls:Show.CopyStyle(ViewModel.Writing.CanReplaceResult), Mode=OneWay}"
-                        Command="{x:Bind ViewModel.Writing.CopyCommand, Mode=OneWay}" AutomationProperties.Name="{x:Bind CopyLabel}">
+                        Command="{x:Bind ViewModel.Writing.CopyCommand, Mode=OneWay}" AutomationProperties.Name="{x:Bind CopyLabel}" controls:Feedback.Copy="True">
                   <StackPanel Orientation="Horizontal" Spacing="6">
                     <controls:FluentIcon Glyph="Copy" />
                     <TextBlock Text="{x:Bind CopyLabel}" />

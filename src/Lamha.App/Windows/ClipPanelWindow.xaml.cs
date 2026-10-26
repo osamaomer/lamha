@@ -3,6 +3,7 @@ using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Main;
 using Lamha.App.ViewModels.Panel;
+using Lamha.App.Views;
 using Lamha.Core.Layout;
 using Lamha.Windows.Shell;
 using Microsoft.UI;
@@ -32,6 +33,10 @@ public sealed partial class ClipPanelWindow : Window
     public const int PanelWidth = 380;
     public const int PanelHeight = 460;
 
+    /// <summary>How far the panel rises as it opens (as a toast does: Controls/Reveal).</summary>
+    private const float PanelRise = 8;
+
+    private readonly ListMotion _listMotion;
     private bool _focusOnActivate;
 
     public ClipPanelWindow(ClipPanelViewModel viewModel, bool solid)
@@ -75,6 +80,8 @@ public sealed partial class ClipPanelWindow : Window
         };
         ViewModel.PropertyChanged += OnViewModelChanged;
         ViewModel.List.PropertyChanged += OnListChanged;
+        _listMotion = new ListMotion(List, ViewModel.List, nameof(ClipboardViewModel.Rows), ClipboardPage.Key,
+            each: ClipboardPage.ClipStaggerEach, milliseconds: ClipboardPage.ClipStaggerMilliseconds);
     }
 
     public ClipPanelViewModel ViewModel { get; }
@@ -163,8 +170,11 @@ public sealed partial class ClipPanelWindow : Window
     {
         var bounds = CardPlacement.PlacePanel(cursor, workArea, Scaled(PanelWidth, scale), Scaled(PanelHeight, scale));
         ListScroller.ChangeView(null, 0, null, disableAnimation: true);
+        _listMotion.Entering();
         AppWindow.MoveAndResize(new RectInt32(bounds.X, bounds.Y, bounds.Width, bounds.Height));
         _focusOnActivate = true;
+        // It rises from the taskbar's side, as Windows' clipboard (Win+V) does.
+        Animations.Appear(Root, PanelRise);
         AppWindow.Show(activateWindow: true);
         Activate();
         ForegroundWindow.ForceForeground(Handle);

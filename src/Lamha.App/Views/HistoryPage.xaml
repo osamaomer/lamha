@@ -30,7 +30,7 @@
 
     <!-- ===== The words, by day ===== -->
     <Border Padding="0,0,0,4" Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.HasDays, Mode=OneWay}">
-      <ItemsRepeater ItemsSource="{x:Bind ViewModel.Days, Mode=OneWay}">
+      <ItemsRepeater x:Name="DayList" ItemsSource="{x:Bind ViewModel.Days, Mode=OneWay}">
         <ItemsRepeater.ItemTemplate>
           <DataTemplate x:DataType="main:HistoryDayItem">
             <StackPanel>
@@ -63,7 +63,7 @@
                           <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Foreground="{ThemeResource LamhaTextFaintBrush}"
                                      TextWrapping="NoWrap" TextAlignment="Right" Text="{x:Bind Time}" IsHitTestVisible="False" />
                           <!-- The review bookmark, as on the card: in the accent colour while the word is in review -->
-                          <ToggleButton Grid.Column="3" Style="{StaticResource LamhaIconToggleStyle}" Visibility="{x:Bind CanReview}"
+                          <ToggleButton Grid.Column="3" Style="{StaticResource LamhaIconToggleStyle}" Visibility="{x:Bind CanReview}" controls:Feedback.Pop="True"
                                         IsChecked="{x:Bind InReview, Mode=OneWay}" Command="{x:Bind Review}" CommandParameter="{x:Bind}"
                                         ToolTipService.ToolTip="{x:Bind ReviewTooltip, Mode=OneWay}" AutomationProperties.Name="{x:Bind ReviewTooltip, Mode=OneWay}">
                             <controls:FluentIcon Glyph="Bookmark" Filled="{x:Bind InReview, Mode=OneWay}" />

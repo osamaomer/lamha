@@ -16,13 +16,13 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <PasswordBox Style="{StaticResource LamhaPasswordStyle}" FlowDirection="LeftToRight" PlaceholderText="{x:Bind Placeholder, Mode=OneWay}"
+          <PasswordBox x:Name="KeyBox" Style="{StaticResource LamhaPasswordStyle}" FlowDirection="LeftToRight" PlaceholderText="{x:Bind Placeholder, Mode=OneWay}"
                        Password="{x:Bind Input, Mode=TwoWay}" AutomationProperties.Name="{x:Bind FieldName}" Tag="{x:Bind SaveCommand}" KeyDown="OnEnterCommits" />
           <Button Grid.Column="1" Style="{StaticResource LamhaButtonStyle}" MinHeight="36" Content="{x:Bind SaveLabel}" Command="{x:Bind SaveCommand}" />
           <Button Grid.Column="2" Style="{StaticResource LamhaQuietButtonStyle}" MinHeight="36" Content="{x:Bind RemoveLabel}" Command="{x:Bind RemoveCommand}"
                   Visibility="{x:Bind HasKey, Mode=OneWay}" />
         </Grid>
-        <controls:StatusText Text="{x:Bind Status, Mode=OneWay}" Kind="{x:Bind StatusKind, Mode=OneWay}" />
+        <controls:StatusText Text="{x:Bind Status, Mode=OneWay}" Kind="{x:Bind StatusKind, Mode=OneWay}" FieldName="KeyBox" />
       </StackPanel>
     </DataTemplate>
   </UserControl.Resources>

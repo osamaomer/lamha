@@ -21,7 +21,15 @@ public sealed partial class ClipboardPage : UserControl
         InitializeComponent();
         // The chosen copy stays in view when the keys move it.
         ViewModel.PropertyChanged += OnViewModelChanged;
+        _ = new ListMotion(List, ViewModel, nameof(ClipboardViewModel.Rows), Key, each: ClipStaggerEach, milliseconds: ClipStaggerMilliseconds);
     }
+
+    /// <summary>Lamha 2's clipboard list comes in a little quicker than its other lists (clip-list.js).</summary>
+    internal const int ClipStaggerEach = 15;
+    internal const int ClipStaggerMilliseconds = 180;
+
+    /// <summary>A copy is the same copy after the list changed (<see cref="ListMotion"/>).</summary>
+    internal static object Key(object row) => ((ClipRow)row).Id;
 
     public ClipboardViewModel ViewModel { get; }
 

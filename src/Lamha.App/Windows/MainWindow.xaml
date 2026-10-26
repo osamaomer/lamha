@@ -81,8 +81,8 @@
         </ScrollViewer>
 
         <!-- "Copied", "History cleared · Undo": a moment at the foot of the page (Lamha 2's flash) -->
-        <Border x:Name="ToastBox" Margin="{StaticResource LamhaToastMargin}" Style="{StaticResource LamhaToastStyle}"
-                Visibility="{x:Bind controls:Show.IfText(ViewModel.Toast), Mode=OneWay, FallbackValue=Collapsed}">
+        <Border x:Name="ToastBox" Margin="{StaticResource LamhaToastMargin}" Style="{StaticResource LamhaToastStyle}" Visibility="Collapsed"
+                controls:Reveal.Shown="{x:Bind ViewModel.IsToastShown, Mode=OneWay}">
           <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace3}">
             <TextBlock Style="{StaticResource LamhaToastTextStyle}" Text="{x:Bind ViewModel.Toast, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
             <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" Command="{x:Bind ViewModel.RunToastActionCommand}" Content="{x:Bind ViewModel.ToastAction, Mode=OneWay}"

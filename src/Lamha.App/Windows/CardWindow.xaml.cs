@@ -1,11 +1,13 @@
 using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Card;
+using Lamha.Core.Appearance;
 using Lamha.Core.Layout;
 using Lamha.Windows.Shell;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
 using WinRT;
 
@@ -16,6 +18,7 @@ namespace Lamha.App.Windows;
 /// always on top, not in Alt+Tab or the taskbar. Its height follows the card up to 540 px, then the middle scrolls
 /// (phase 1's design). It takes the focus when it opens (so Esc and typing work at once); Replace gives it back to the
 /// program the text came from before pasting. The hint ("Select some text first") shows without taking the focus.
+/// It moves as the design system has it: in from 96 % (167 ms), out in 83 ms, its height following the answer (250 ms).
 /// </summary>
 public sealed partial class CardWindow : Window
 {
@@ -24,9 +27,25 @@ public sealed partial class CardWindow : Window
     public const int HintWidth = 240;
     public const int HintHeight = 44;
 
+    /// <summary>The card grows in from this (docs/design/system.md, Motion).</summary>
+    private const float EnterScale = 0.96f;
+
     private PixelRect _workArea;
     private bool _above;
     private bool _shown;
+
+    /// <summary>Counts the shows and hides, so a card that fades out doesn't hide the one shown meanwhile.</summary>
+    private int _turn;
+
+    /// <summary>When it was shown: a height found while it comes in is taken at once, not animated.</summary>
+    private long _shownAt;
+
+    // The window's size going from one height to the next (Fit).
+    private PixelRect _from;
+    private PixelRect _to;
+    private long _resizeStart;
+    private TimeSpan _resizeTime;
+    private bool _resizing;
 
     public CardWindow(CardViewModel viewModel, bool solid)
     {
@@ -89,8 +108,13 @@ public sealed partial class CardWindow : Window
         var bounds = CardPlacement.Place(cursor, workArea, width, height, toast: hint).Window;
         _above = bounds.Y < cursor.Y;
         Card.ScrollToTop();
+        StopResize();
         AppWindow.MoveAndResize(new RectInt32(bounds.X, bounds.Y, bounds.Width, bounds.Height));
         _shown = true;
+        _turn++;
+        _shownAt = Environment.TickCount64;
+        // It grows from the side the selection is on.
+        Animations.Appear(Card, rise: 0, EnterScale, new System.Numerics.Vector2(0.5f, _above ? 1 : 0));
         if (hint)
         {
             AppWindow.Show(activateWindow: false);
@@ -103,10 +127,32 @@ public sealed partial class CardWindow : Window
         Fit();
     }
 
-    public void Hide()
+    /// <summary>
+    /// The card goes: it fades out first unless <paramref name="fade"/> is false (Replace, which gives the focus back at
+    /// once); then <paramref name="hidden"/> runs, unless the card was shown again meanwhile.
+    /// </summary>
+    public void Hide(bool fade = true, Action? hidden = null)
     {
         _shown = false;
-        AppWindow.Hide();
+        StopResize();
+        var turn = ++_turn;
+        void Gone()
+        {
+            if (turn == _turn)
+            {
+                AppWindow.Hide();
+                hidden?.Invoke();
+            }
+        }
+
+        if (fade && AppWindow.IsVisible)
+        {
+            Animations.Leave(Card, drop: 0, Gone);
+        }
+        else
+        {
+            Gone();
+        }
     }
 
     public void Announce(string text) => Card.Announce(text);
@@ -153,7 +199,50 @@ public sealed partial class CardWindow : Window
 
         var x = Math.Clamp(current.X - ((width - current.Width) / 2), _workArea.X, Math.Max(_workArea.X, _workArea.Right - width));
         var resized = CardPlacement.Resize(current with { X = x, Width = width }, height, _workArea, _above);
-        AppWindow.MoveAndResize(new RectInt32(resized.X, resized.Y, resized.Width, resized.Height));
+        if (_resizing && resized == _to)
+        {
+            return; // already on its way there
+        }
+
+        var time = Motion.Time(Animations.Level, Motion.ResizeMilliseconds);
+        if (time == TimeSpan.Zero || Environment.TickCount64 - _shownAt < Motion.EnterMilliseconds)
+        {
+            StopResize();
+            AppWindow.MoveAndResize(new RectInt32(resized.X, resized.Y, resized.Width, resized.Height));
+            return;
+        }
+
+        _from = current;
+        _to = resized;
+        _resizeStart = Environment.TickCount64;
+        _resizeTime = time;
+        if (!_resizing)
+        {
+            _resizing = true;
+            CompositionTarget.Rendering += OnResizeFrame;
+        }
+    }
+
+    /// <summary>A frame of the window growing or shrinking to its new height, on Windows' curve.</summary>
+    private void OnResizeFrame(object? sender, object e)
+    {
+        var progress = (Environment.TickCount64 - _resizeStart) / _resizeTime.TotalMilliseconds;
+        var at = Motion.Ease(Motion.EnterEasing, progress);
+        int Step(int from, int to) => from + (int)Math.Round((to - from) * at, MidpointRounding.AwayFromZero);
+        AppWindow.MoveAndResize(new RectInt32(Step(_from.X, _to.X), Step(_from.Y, _to.Y), Step(_from.Width, _to.Width), Step(_from.Height, _to.Height)));
+        if (progress >= 1)
+        {
+            StopResize();
+        }
+    }
+
+    private void StopResize()
+    {
+        if (_resizing)
+        {
+            _resizing = false;
+            CompositionTarget.Rendering -= OnResizeFrame;
+        }
     }
 
     private void OnActivated(object sender, WindowActivatedEventArgs args)

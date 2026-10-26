@@ -62,7 +62,7 @@
     </Border>
 
     <!-- ===== An error: Windows' InfoBar, what happened, what to do, one button ===== -->
-    <InfoBar x:Name="ErrorBox" x:Load="{x:Bind ViewModel.IsError, Mode=OneWay}" IsOpen="True" IsClosable="False" Severity="Error"
+    <InfoBar x:Name="ErrorBox" x:Load="{x:Bind ViewModel.IsError, Mode=OneWay}" controls:Reveal.OnLoad="True" controls:Reveal.Rise="-8" IsOpen="True" IsClosable="False" Severity="Error"
              Title="{x:Bind ViewModel.Error.Title, Mode=OneWay}" Message="{x:Bind ViewModel.Error.Hint, Mode=OneWay}">
       <InfoBar.ActionButton>
         <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}"
@@ -174,7 +174,7 @@
             <TextBlock Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind ClearLabel}" />
           </HyperlinkButton>
         </Grid>
-        <ItemsRepeater ItemsSource="{x:Bind ViewModel.Recent, Mode=OneWay}">
+        <ItemsRepeater x:Name="RecentList" ItemsSource="{x:Bind ViewModel.Recent, Mode=OneWay}" Loaded="OnRecentLoaded">
           <ItemsRepeater.Layout>
             <!-- Two columns 16 px apart; one when the window is narrow -->
             <UniformGridLayout MinItemWidth="200" MinColumnSpacing="16" MinRowSpacing="2" ItemsStretch="Fill" MaximumRowsOrColumns="2" />

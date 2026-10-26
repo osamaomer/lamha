@@ -74,7 +74,7 @@
                 <TextBlock Text="{x:Bind UseIt}" />
               </StackPanel>
             </Button>
-            <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.CopyCommand}" AutomationProperties.Name="{x:Bind CopyLabel}">
+            <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.CopyCommand}" AutomationProperties.Name="{x:Bind CopyLabel}" controls:Feedback.Copy="True">
               <StackPanel Orientation="Horizontal" Spacing="6">
                 <controls:FluentIcon Glyph="Copy" />
                 <TextBlock Text="{x:Bind CopyLabel}" />
@@ -123,7 +123,7 @@
     </Border>
 
     <!-- ===== An error (the key, the quota, the network…): Windows' InfoBar, one button ===== -->
-    <InfoBar x:Name="ErrorBar" x:Load="{x:Bind ViewModel.IsError, Mode=OneWay}" IsOpen="True" IsClosable="False" Severity="Error"
+    <InfoBar x:Name="ErrorBar" x:Load="{x:Bind ViewModel.IsError, Mode=OneWay}" controls:Reveal.OnLoad="True" controls:Reveal.Rise="-8" IsOpen="True" IsClosable="False" Severity="Error"
              Title="{x:Bind ViewModel.Error.Title, Mode=OneWay}" Message="{x:Bind ViewModel.Error.Hint, Mode=OneWay}">
       <InfoBar.ActionButton>
         <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}"

@@ -16,7 +16,7 @@ internal static class MeasureTimeline
     public static void Start(DispatcherQueue queue, CardService card, MainWindowService main, Action quit)
     {
         At(queue, TimeSpan.FromSeconds(20), card.ShowSample);
-        At(queue, TimeSpan.FromSeconds(35), card.Hide);
+        At(queue, TimeSpan.FromSeconds(35), () => card.Hide());
         At(queue, TimeSpan.FromSeconds(60), () => main.Show());
         At(queue, TimeSpan.FromSeconds(75), main.Close);
         At(queue, TimeSpan.FromSeconds(100), quit);

@@ -59,7 +59,7 @@
       </StackPanel>
       <controls:SpeakButton x:Uid="Card_ListenPron" Grid.Column="1" VerticalAlignment="Top" Style="{StaticResource LamhaMainIconButtonStyle}" Round="True"
                             Text="{x:Bind Answer.Query, Mode=OneWay, FallbackValue=''}" Lang="{x:Bind Answer.Result.Source, Mode=OneWay, FallbackValue=''}" />
-      <ToggleButton Grid.Column="2" VerticalAlignment="Top" Style="{StaticResource LamhaIconToggleStyle}"
+      <ToggleButton Grid.Column="2" VerticalAlignment="Top" Style="{StaticResource LamhaIconToggleStyle}" controls:Feedback.Pop="True"
                     Visibility="{x:Bind Answer.CanReview, Mode=OneWay, FallbackValue=Collapsed}"
                     IsChecked="{x:Bind Answer.InReview, Mode=OneWay}" Command="{x:Bind Answer.ToggleReviewCommand, Mode=OneWay}"
                     ToolTipService.ToolTip="{x:Bind Answer.ReviewTooltip, Mode=OneWay}"
@@ -97,7 +97,7 @@
           <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace1}">
             <controls:SpeakButton x:Uid="Card_ListenTr" Style="{StaticResource LamhaIconButtonStyle}"
                                   Text="{x:Bind Answer.HeroText, Mode=OneWay, FallbackValue=''}" Lang="{x:Bind Answer.Result.Target, Mode=OneWay, FallbackValue=''}" />
-            <Button x:Uid="Card_CopyTr" Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind Answer.CopyMeaningCommand, Mode=OneWay}">
+            <Button x:Uid="Card_CopyTr" Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind Answer.CopyMeaningCommand, Mode=OneWay}" controls:Feedback.Copy="True">
               <controls:FluentIcon Glyph="Copy" />
             </Button>
           </StackPanel>

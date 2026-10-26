@@ -412,12 +412,20 @@ public sealed partial class MainWindow : Window, IPageHost
         var badgeText = new TextBlock { Style = (Style)Application.Current.Resources["LamhaNavBadgeTextStyle"], Text = page.Badge };
         var badge = new Border { Style = (Style)Application.Current.Resources["LamhaNavBadgeStyle"], Child = badgeText };
         badge.Visibility = page.Badge.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        var count = page.Count;
         page.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(NavItem.Badge))
             {
                 badgeText.Text = page.Badge;
                 badge.Visibility = page.Badge.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+                // A word added to Review: the count ticks up (once laid out, when it has just appeared).
+                if (page.Count > count && badge.Visibility == Visibility.Visible)
+                {
+                    DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => Animations.Pop(badge));
+                }
+
+                count = page.Count;
             }
         };
 

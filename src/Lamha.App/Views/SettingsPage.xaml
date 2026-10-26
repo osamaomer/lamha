@@ -127,12 +127,12 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
-              <TextBox Style="{StaticResource LamhaFieldStyle}" FlowDirection="LeftToRight" PlaceholderText="program.exe" AutomationProperties.Name="{x:Bind S.CbAppName}"
+              <TextBox x:Name="AppNameBox" Style="{StaticResource LamhaFieldStyle}" FlowDirection="LeftToRight" PlaceholderText="program.exe" AutomationProperties.Name="{x:Bind S.CbAppName}"
                        Text="{x:Bind ViewModel.Clipboard.AppInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                        Tag="{x:Bind ViewModel.Clipboard.AddTypedCommand}" KeyDown="OnEnterCommits" />
               <Button Grid.Column="1" Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind S.CbAdd}" Command="{x:Bind ViewModel.Clipboard.AddTypedCommand}" />
             </Grid>
-            <controls:StatusText Text="{x:Bind ViewModel.Clipboard.AppError, Mode=OneWay}" Kind="Bad" />
+            <controls:StatusText Text="{x:Bind ViewModel.Clipboard.AppError, Mode=OneWay}" Kind="Bad" Field="{x:Bind AppNameBox}" />
             <StackPanel Spacing="{StaticResource LamhaSpace2}" Visibility="{x:Bind ViewModel.Clipboard.HasSeen, Mode=OneWay}">
               <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CbFromHistory}" />
               <ItemsControl ItemsSource="{x:Bind ViewModel.Clipboard.Seen, Mode=OneWay}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False">

@@ -86,7 +86,7 @@
       </StackPanel>
 
       <!-- Paused: Windows' InfoBar, and Resume -->
-      <InfoBar Grid.Row="1" Margin="16,10,16,0" IsOpen="{x:Bind ViewModel.List.IsPaused, Mode=OneWay}" IsClosable="False" Severity="Warning"
+      <InfoBar Grid.Row="1" Margin="16,10,16,0" Visibility="Collapsed" controls:Reveal.Shown="{x:Bind ViewModel.List.IsPaused, Mode=OneWay}" controls:Reveal.Rise="-8" IsOpen="True" IsClosable="False" Severity="Warning"
                Title="{x:Bind PausedTitle}" Message="{x:Bind PausedText}">
         <InfoBar.ActionButton>
           <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ResumeLabel}" Command="{x:Bind ViewModel.List.ResumeCommand}" />
@@ -323,7 +323,7 @@
                   <TextBlock Margin="4,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Medium" Opacity="0.75" Text="Enter" />
                 </StackPanel>
               </Button>
-              <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.List.CopyResultCommand}" AutomationProperties.Name="{x:Bind CopyLabel}">
+              <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.List.CopyResultCommand}" AutomationProperties.Name="{x:Bind CopyLabel}" controls:Feedback.Copy="True">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                   <controls:FluentIcon Glyph="Copy" />
                   <TextBlock Text="{x:Bind CopyLabel}" />
@@ -430,8 +430,8 @@
     </Grid>
 
     <!-- "Pinned", "Deleted · Undo": a moment above the foot (Lamha 2's lc-toast) -->
-    <Border Margin="0,0,0,44" Style="{StaticResource LamhaToastStyle}"
-            Visibility="{x:Bind controls:Show.IfText(ViewModel.Toast), Mode=OneWay, FallbackValue=Collapsed}">
+    <Border Margin="0,0,0,44" Style="{StaticResource LamhaToastStyle}" Visibility="Collapsed"
+            controls:Reveal.Shown="{x:Bind ViewModel.IsToastShown, Mode=OneWay}">
       <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace3}">
         <TextBlock Style="{StaticResource LamhaToastTextStyle}" Text="{x:Bind ViewModel.Toast, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
         <HyperlinkButton Style="{StaticResource LamhaLinkButtonStyle}" IsTabStop="False" Command="{x:Bind ViewModel.RunToastActionCommand}" Content="{x:Bind ViewModel.ToastAction, Mode=OneWay}"

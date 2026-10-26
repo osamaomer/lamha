@@ -73,6 +73,10 @@ public sealed partial class ClipPanelViewModel : ObservableObject
     [ObservableProperty]
     public partial string ToastAction { get; private set; } = "";
 
+    /// <summary>Whether the toast shows; its words stay while it fades out (Controls/Reveal).</summary>
+    [ObservableProperty]
+    public partial bool IsToastShown { get; private set; }
+
     /// <summary>The panel opens: a fresh list, read now (Lamha 2's <c>show()</c> and <c>reset()</c>).</summary>
     public void Open()
     {
@@ -99,6 +103,7 @@ public sealed partial class ClipPanelViewModel : ObservableObject
         Toast = text;
         ToastAction = run is null ? "" : action ?? "";
         _toastRun = run;
+        IsToastShown = true;
         try
         {
             await Task.Delay(run is null ? ToastTime : ToastActionTime, mine.Token).ConfigureAwait(true);
@@ -198,8 +203,7 @@ public sealed partial class ClipPanelViewModel : ObservableObject
 
     private void HideToast()
     {
-        Toast = "";
-        ToastAction = "";
+        IsToastShown = false;
         _toastRun = null;
     }
 }

@@ -15,6 +15,9 @@ public sealed partial class NavItem(string id, string label) : ObservableObject
     [ObservableProperty]
     public partial string Badge { get; set; } = "";
 
+    /// <summary>The count the badge shows, so the pane can tell when it goes up.</summary>
+    public int Count { get; set; }
+
     /// <summary>What Narrator reads for the list item.</summary>
     public override string ToString() => Label;
 }
@@ -68,6 +71,10 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     public partial string ToastAction { get; private set; } = "";
 
+    /// <summary>Whether the toast shows; its words stay while it fades out (Controls/Reveal).</summary>
+    [ObservableProperty]
+    public partial bool IsToastShown { get; private set; }
+
     /// <summary>Shows <paramref name="text"/>, with <paramref name="action"/> to <paramref name="run"/> if given; a new one replaces it.</summary>
     public async void ShowToast(string text, string? action = null, Action? run = null)
     {
@@ -76,6 +83,7 @@ public sealed partial class MainViewModel : ObservableObject
         Toast = text;
         ToastAction = run is null ? "" : action ?? "";
         _toastRun = run;
+        IsToastShown = true;
         try
         {
             await Task.Delay(run is null ? ToastTime : ToastActionTime, mine.Token).ConfigureAwait(true);
@@ -87,7 +95,12 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     /// <summary>The count on Review: words due and new ones for today (Lamha 2's <c>rvBadge</c>).</summary>
-    public void SetReviewCount(int count) => Find("review").Badge = count > 0 ? Localization.Number(count) : "";
+    public void SetReviewCount(int count)
+    {
+        var review = Find("review");
+        review.Count = count;
+        review.Badge = count > 0 ? Localization.Number(count) : "";
+    }
 
     /// <summary>The page <paramref name="id"/> ("translate", "settings"…), or Translate for one that doesn't exist.</summary>
     public NavItem Find(string id) => Pages.Concat(Footer).FirstOrDefault(p => p.Id == id) ?? Pages[0];
@@ -103,8 +116,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     private void HideToast()
     {
-        Toast = "";
-        ToastAction = "";
+        IsToastShown = false;
         _toastRun = null;
     }
 }

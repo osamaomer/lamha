@@ -124,7 +124,8 @@ public sealed partial class CardService(
         }
     }
 
-    public void Hide()
+    /// <summary>The card goes; it fades out first unless <paramref name="fade"/> is false (Replace).</summary>
+    public void Hide(bool fade = true)
     {
         if (_window is null || !_visible)
         {
@@ -132,15 +133,17 @@ public sealed partial class CardService(
         }
 
         _visible = false;
-        _window.ViewModel.Unload();
         idle.WindowClosed();
 
         if (lifetime == CardLifetime.Keep)
         {
-            _window.Hide();
+            // What was looked up goes from memory once the card is gone (not if it was shown again meanwhile).
+            var card = _window.ViewModel;
+            _window.Hide(fade, card.Unload);
         }
         else
         {
+            _window.ViewModel.Unload();
             _window.Close();
             _window = null;
         }
@@ -154,7 +157,7 @@ public sealed partial class CardService(
     async Task ICardHost.ReplaceAsync(string text)
     {
         var source = _source;
-        Hide();
+        Hide(fade: false);
         if (source is null || !await selection.PasteIntoAsync(source.Window, text).ConfigureAwait(true))
         {
             // The program went away or refused the focus: leave the text on the clipboard instead, and say so.
