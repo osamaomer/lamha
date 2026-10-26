@@ -207,6 +207,8 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
    - the six coloured pane icons, drafted;
    - setting cards rounded 4 (the control radius), measured;
    - the accent in dark the Windows way: a light indigo with dark text.
+
+   **Signed off 2026-10-26** ([decision 0020](../decisions/0020-the-design-system.md)), all as recommended: the star, the six pane icons, the accent in dark, the wording (the user's Arabic for the InfoBars, the empty state and Rewrite; the other drafts as drawn).
 2. **Foundations in code:** the type ramp, Windows' brushes, the radii, the spacing tokens; Fluent icons through the same `Glyph` names; the typed sizes and radii replaced.
 3. **The frame:** `NavigationView`, `TitleBar` with Back and ☰, the three widths, the pages in a `Frame` with transitions, the window remembered.
 4. **Components:** WinUI's own where they fit (`InfoBar`, `InfoBadge`, `SelectorBar`, `TeachingTip`, `ContentDialog`); Settings in Windows' pattern; the answer, Write and the card as in *Features from the study*.

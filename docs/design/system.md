@@ -2,7 +2,13 @@
 
 **The one place every screen follows.** Windows' Settings is the reference. Its sizes are WinUI's own, measured on Windows 11 in [the UX study](ux-study.md). Lamha's character stays where it means something: the card's answer, Review, the accent and the celebrations.
 
-Status: **draft for sign-off**, 2026-10-26 ([the plan](system-plan.md), step 1). Drawn in `system.html`. Once signed off, the values move into `Themes/` (step 2) and this page is kept in step with them.
+Status: **signed off by the user, 2026-10-26** ([the plan](system-plan.md), step 1; [decision 0020](../decisions/0020-the-design-system.md)). Drawn in `system.html` ([online](https://claude.ai/artifact/SfLssJ2QPaXQwjPCHEGfYw)).
+- **Decided at sign-off:**
+  - the bookmark is the star (filled once the word is in Review);
+  - the six coloured pane icons as drawn;
+  - the accent in dark the Windows way;
+  - the new wording as drawn, with the user's Arabic rewordings.
+- From step 2 the values live in `Themes/`, and this page is kept in step with them.
 
 **How to use it:**
 - A screen uses only what's named here: a style, a token, an icon name, a motion. It never types a colour, a size, a radius, a gap or a glyph. A test fails when it does (step 8).
@@ -146,7 +152,7 @@ The 33 names, mapped (seen side by side with Lamha 2's in `system.html`):
 | Retry | E72C | Refresh |
 | Book | E82D | Dictionary |
 | Sparkle | F4A5 | Sparkle |
-| Bookmark | E734, filled E735 | FavoriteStar (Fluent has no bookmark: a question) |
+| Bookmark | E734, filled E735 | FavoriteStar (Fluent has no bookmark; decided at sign-off) |
 | Pin | E718, filled E842 | Pin / Pinned |
 | Write | E70F | Edit |
 | Review | E7C4 | TaskView (two cards) |

@@ -24,3 +24,4 @@ changes gets a new record that replaces the old one (the old one says so at the 
 | [0017](0017-language-packs-as-sqlite-files.md) | Language packs are SQLite files, converted from Lamha 2's and published as packs-v2 | Accepted, 2026-10-26 (built in phase 5) |
 | [0018](0018-importing-lamha-2.md) | Lamha 2's data moves at first run, read in place (safeStorage decrypted in Lamha) and merged as a backup is | Accepted, 2026-10-26 (built in phase 6) |
 | [0019](0019-the-bridge-update.md) | The bridge: Lamha 2.1.0 offers Lamha 3 and starts its setup; Lamha 3 removes Lamha 2 | Accepted, 2026-10-26 (built in phase 6: 2.1.0, and Lamha 3's removal) |
+| [0020](0020-the-design-system.md) | One design system, with Windows' Settings as the reference: its measurements, Fluent icons, Windows' brushes and motion | Accepted, 2026-10-26 (signed off; built from step 2 of docs/design/system-plan.md) |
