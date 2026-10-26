@@ -292,10 +292,24 @@ public sealed partial class FluentIcon : UserControl
     /// when Windows is dark, where the button's text is the card's grey. A callback, not a Binding: Bindings made in
     /// code cost the published card 1 MB.
     /// </summary>
+    /// <summary>The icon's style gives it a colour of its own (an empty state's tertiary, a field's 🔍).</summary>
+    private bool StyleColours()
+    {
+        for (var style = Style; style is not null; style = style.BasedOn)
+        {
+            if (style.Setters.OfType<Setter>().Any(s => s.Property == ForegroundProperty))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void Watch()
     {
         Unwatch();
-        _colour = ReadLocalValue(ForegroundProperty) == DependencyProperty.UnsetValue ? Button() : null;
+        _colour = ReadLocalValue(ForegroundProperty) == DependencyProperty.UnsetValue && !StyleColours() ? Button() : null;
         _watch = _colour switch
         {
             ContentPresenter presenter => presenter.RegisterPropertyChangedCallback(ContentPresenter.ForegroundProperty, (_, _) => Paint()),

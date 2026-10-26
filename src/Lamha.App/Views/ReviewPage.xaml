@@ -146,10 +146,7 @@
 
     <!-- ===== No words yet ===== -->
     <Border Margin="0,16,0,0" Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}">
-      <StackPanel Padding="8,8,8,4" Spacing="4">
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}" Text="{x:Bind EmptyTitle}" />
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind EmptyText}" />
-      </StackPanel>
+      <controls:EmptyState Glyph="Review" Title="{x:Bind EmptyTitle}" Text="{x:Bind EmptyText}" />
     </Border>
   </StackPanel>
 

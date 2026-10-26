@@ -22,7 +22,7 @@ public sealed partial class HistoryPage : UserControl
 
     public string ClearLabel { get; } = Localization.Get("Common_Clear");
 
-    public string EmptyTitle { get; } = Localization.Get("History_Empty");
+    public string TranslateWordLabel { get; } = Localization.Get("History_TranslateWord");
 
     public string EmptyHint { get; } = Localization.Get("History_EmptyHint");
 

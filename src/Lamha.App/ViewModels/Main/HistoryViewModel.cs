@@ -129,6 +129,10 @@ public sealed partial class HistoryViewModel : ObservableObject
     /// Clear: the whole history goes, and "History cleared" offers Undo for a few seconds (Lamha 2's, as on the Translate
     /// page).
     /// </summary>
+    /// <summary>The empty state's way on: the Translate page, its box ready.</summary>
+    [RelayCommand]
+    private void TranslateWord() => _host.Translate("");
+
     [RelayCommand]
     private void ClearHistory()
     {

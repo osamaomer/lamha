@@ -82,10 +82,7 @@
 
     <!-- ===== Nothing looked up yet; nothing that matches ===== -->
     <Border Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}">
-      <StackPanel Padding="8,8,8,4" Spacing="4">
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind EmptyTitle}" />
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind EmptyHint}" />
-      </StackPanel>
+      <controls:EmptyState Glyph="History" Text="{x:Bind EmptyHint}" Action="{x:Bind TranslateWordLabel}" Command="{x:Bind ViewModel.TranslateWordCommand}" />
     </Border>
     <Border Style="{StaticResource LamhaContentCardStyle}" Visibility="{x:Bind ViewModel.IsNoMatch, Mode=OneWay}">
       <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind NoResults}"

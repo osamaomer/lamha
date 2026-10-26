@@ -63,8 +63,8 @@
   <data name="History_Today" xml:space="preserve"><value>Today</value><comment>td.label</comment></data>
   <data name="History_Yesterday" xml:space="preserve"><value>Yesterday</value><comment>d.yesterday</comment></data>
   <data name="History_NoResults" xml:space="preserve"><value>No results</value><comment>d.noResults</comment></data>
-  <data name="History_Empty" xml:space="preserve"><value>No words yet</value><comment>rv.emptyTitle</comment></data>
-  <data name="History_EmptyHint" xml:space="preserve"><value>Every word you look up appears here, by day.</value><comment>new in Lamha 3, approved with the History page 2026-10-25</comment></data>
+  <data name="History_EmptyHint" xml:space="preserve"><value>Words you look up appear here.</value><comment>new in Lamha 3, approved with the design system 2026-10-26: History's empty state (it was "Every word you look up appears here, by day.")</comment></data>
+  <data name="History_TranslateWord" xml:space="preserve"><value>Translate a word</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the empty state's button</comment></data>
   <data name="Write_Placeholder" xml:space="preserve"><value>Write your message here in English — or in Arabic to turn it into natural English…</value><comment>p.draftPlaceholder</comment></data>
   <data name="Tool_ImproveShort" xml:space="preserve"><value>Improve</value><comment>tool.improveShort</comment></data>
   <data name="Tool_ToEnglishShort" xml:space="preserve"><value>In English</value><comment>tool.toEnglishShort</comment></data>

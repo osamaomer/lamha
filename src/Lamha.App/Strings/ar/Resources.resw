@@ -62,8 +62,8 @@
   <data name="History_Today" xml:space="preserve"><value>اليوم</value><comment>td.label</comment></data>
   <data name="History_Yesterday" xml:space="preserve"><value>أمس</value><comment>d.yesterday</comment></data>
   <data name="History_NoResults" xml:space="preserve"><value>لا نتائج</value><comment>d.noResults</comment></data>
-  <data name="History_Empty" xml:space="preserve"><value>لا توجد كلمات بعد</value><comment>rv.emptyTitle</comment></data>
-  <data name="History_EmptyHint" xml:space="preserve"><value>تظهر هنا كل كلمة تبحث عنها، مرتّبة حسب اليوم.</value><comment>new in Lamha 3, approved with the History page 2026-10-25</comment></data>
+  <data name="History_EmptyHint" xml:space="preserve"><value>ستظهر هنا الكلمات التي تبحث عنها.</value><comment>new in Lamha 3, approved with the design system 2026-10-26, the user's Arabic: History's empty state</comment></data>
+  <data name="History_TranslateWord" xml:space="preserve"><value>ترجم كلمة</value><comment>new in Lamha 3, approved with the design system 2026-10-26, the user's Arabic: the empty state's button</comment></data>
   <data name="Write_Placeholder" xml:space="preserve"><value>اكتب رسالتك هنا بالإنجليزية — أو بالعربية لتحويلها إلى إنجليزية طبيعية…</value><comment>p.draftPlaceholder</comment></data>
   <data name="Tool_ImproveShort" xml:space="preserve"><value>تحسين</value><comment>tool.improveShort</comment></data>
   <data name="Tool_ToEnglishShort" xml:space="preserve"><value>بالإنجليزية</value><comment>tool.toEnglishShort</comment></data>

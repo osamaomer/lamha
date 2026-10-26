@@ -67,12 +67,13 @@
                           Command="{x:Bind ViewModel.SetDictCommand}" CommandParameter="true" />
           </StackPanel>
         </Border>
-        <Border Margin="4,0,0,0" Padding="4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaOkSoftBrush}"
+        <!-- Where the answer came from (the dictionary, or AI): Windows' icon in the secondary colour, said by its tooltip
+             (the study's C2) -->
+        <Border Margin="4,0,0,0" Padding="4" Background="Transparent"
                 VerticalAlignment="Center" Visibility="{x:Bind controls:Show.IfText(ViewModel.BadgeTooltip), Mode=OneWay, FallbackValue=Collapsed}"
                 ToolTipService.ToolTip="{x:Bind ViewModel.BadgeTooltip, Mode=OneWay}"
                 AutomationProperties.Name="{x:Bind ViewModel.BadgeTooltip, Mode=OneWay}">
-          <controls:FluentIcon Glyph="{x:Bind controls:Show.BadgeGlyph(ViewModel.Badge), Mode=OneWay}" Size="Small"
-                             Foreground="{ThemeResource LamhaOkBrush}" />
+          <controls:FluentIcon Glyph="{x:Bind controls:Show.BadgeGlyph(ViewModel.Badge), Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
         </Border>
       </StackPanel>
 

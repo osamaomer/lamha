@@ -447,6 +447,13 @@
     <Setter Property="TextWrapping" Value="NoWrap" />
   </Style>
 
+  <!-- The empty state's icon (Controls/EmptyState.cs): 40, in the tertiary colour -->
+  <Style x:Key="LamhaEmptyIconStyle" TargetType="controls:FluentIcon">
+    <Setter Property="Size" Value="Hero" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorTertiaryBrush}" />
+  </Style>
+
   <!-- A key cap (Ctrl, Alt, L): Caption in the secondary colour on Windows' control fill and its edge, rounded 4 -->
   <Style x:Key="LamhaKeyCapStyle" TargetType="Border">
     <Setter Property="Padding" Value="4,1" />
