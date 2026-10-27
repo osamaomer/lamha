@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Lamha.Core.Clipboard;
 using global::Windows.Win32;
 using global::Windows.Win32.Foundation;
 using global::Windows.Win32.System.Memory;
@@ -174,6 +175,15 @@ public static unsafe class Clipboard
         var format = Register(name);
         return format != 0 && PInvoke.IsClipboardFormatAvailable(format);
     }
+
+    /// <summary>
+    /// What a copy says about itself before its text is read: the marks a program puts on it to say "don't keep this",
+    /// and the program that copied it (<paramref name="sourceApp"/>, or the clipboard owner's).
+    /// </summary>
+    public static ClipFormats Formats(nint owner, string? sourceApp = null) => new(
+        HasFormat("ExcludeClipboardContentFromMonitorProcessing") || HasFormat("Clipboard Viewer Ignore"),
+        HasFormat("CanIncludeInClipboardHistory") ? ReadDword(owner, "CanIncludeInClipboardHistory") ?? 0 : null,
+        sourceApp ?? (Shell.ForegroundWindow.ProcessName(PInvoke.GetClipboardOwner()) is { Length: > 0 } name ? name : "unknown"));
 
     /// <summary>The first four bytes of format <paramref name="name"/> as a number, or null when it's missing or unreadable.</summary>
     public static uint? ReadDword(nint owner, string name)

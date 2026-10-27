@@ -170,6 +170,19 @@
     <Setter Property="Foreground" Value="{ThemeResource LamhaDangerBrush}" />
   </Style>
 
+  <!-- A suggestion taken in one click (Paste and translate's "Translate what you copied: “…”"): a pill 32 high in the
+       accent's soft tint, the accent's text, its icon at the start (system.html, New features) -->
+  <Style x:Key="LamhaSuggestionChipStyle" TargetType="Button" BasedOn="{StaticResource LamhaPaintedButtonStyle}">
+    <Setter Property="controls:Pill.IsPill" Value="True" />
+    <Setter Property="controls:Feedback.Dip" Value="True" />
+    <Setter Property="Background" Value="{ThemeResource LamhaAccentSoftBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaAccentBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+  </Style>
+
   <!-- An icon that stays on (Pin, the star): Windows' subtle icon button, 32 × 32, its icon in the accent when on
        (the star also fills: FluentIcon.Filled) -->
   <Style x:Key="LamhaIconToggleStyle" TargetType="ToggleButton">

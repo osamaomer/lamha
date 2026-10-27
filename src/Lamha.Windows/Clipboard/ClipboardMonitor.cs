@@ -169,10 +169,7 @@ public sealed class ClipboardMonitor(MessageWindow window, ClipboardHistory hist
 
             var current = settings.Current;
             var owner = window.Handle;
-            var formats = new ClipFormats(
-                Clipboard.HasFormat("ExcludeClipboardContentFromMonitorProcessing") || Clipboard.HasFormat("Clipboard Viewer Ignore"),
-                Clipboard.HasFormat("CanIncludeInClipboardHistory") ? Clipboard.ReadDword(owner, "CanIncludeInClipboardHistory") ?? 0 : null,
-                SourceApp());
+            var formats = Clipboard.Formats(owner, SourceApp());
             var skip = ClipCapture.BeforeReading(formats, current, Paused);
             if (skip == ClipSkip.Off)
             {

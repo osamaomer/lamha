@@ -8,6 +8,9 @@ public enum Answer
     Other,
 }
 
+/// <summary>The clipboard's text, as the Translate page's empty box may offer it, and the copy's sequence number.</summary>
+public sealed record CopiedText(string Text, uint Sequence);
+
 /// <summary>
 /// What clipboard history's list asks of the window it's in: the main window (its Clipboard page), or the clipboard
 /// panel.
@@ -55,6 +58,12 @@ public interface IPageHost : IClipHost
 
     /// <summary>The day's goal reached: <see cref="IClipHost.Toast"/>, with Lamha 2's burst of letters from it.</summary>
     void Celebrate(string text);
+
+    /// <summary>
+    /// What's on the clipboard, when Paste and translate may offer it (Core's <c>PasteOffer</c>): not a copy Lamha made
+    /// itself, nor the copy numbered <paramref name="unless"/> (already offered and taken). Null otherwise.
+    /// </summary>
+    CopiedText? Copied(uint unless);
 
     /// <summary>Opens <paramref name="folder"/> in File Explorer.</summary>
     void OpenFolder(string folder);

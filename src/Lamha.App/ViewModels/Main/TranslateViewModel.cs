@@ -4,6 +4,7 @@ using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Card;
 using Lamha.Core;
+using Lamha.Core.Clipboard;
 using Lamha.Core.Review;
 using Lamha.Core.Text;
 using Lamha.Core.Translation;
@@ -83,6 +84,10 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
     /// <summary>The text the answer (or the error) is for, and whether the AI was asked for it.</summary>
     private (string Text, bool ForceAi) _shown = ("", false);
 
+    /// <summary>The copy the box offers, by its clipboard sequence number; and the one taken, which isn't offered again.</summary>
+    private uint _pasteSequence;
+    private uint _pasteTaken;
+
     /// <param name="brain">Lamha's brain: the lookup, Today and the history.</param>
     /// <param name="host">The main window.</param>
     /// <param name="lookupKeys">The quick-lookup shortcut, as the tray menu writes it ("Ctrl+Alt+L").</param>
@@ -98,10 +103,54 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
     // ----- the box -----
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasQuery))]
+    [NotifyPropertyChangedFor(nameof(HasQuery), nameof(ShowsPaste))]
     public partial string Query { get; set; } = "";
 
     public bool HasQuery => Query.Trim().Length > 0;
+
+    // ----- paste and translate -----
+
+    /// <summary>The copy the empty box offers ("" when none), and the chip's quote of it.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowsPaste), nameof(PasteSpoken))]
+    public partial string PasteText { get; private set; } = "";
+
+    [ObservableProperty]
+    public partial string PastePreview { get; private set; } = "";
+
+    [ObservableProperty]
+    public partial FlowDirection PasteFlow { get; private set; }
+
+    public bool ShowsPaste => PasteText.Length > 0 && !HasQuery;
+
+    /// <summary>"Translate what you copied:"</summary>
+    public string PasteLabel { get; } = Localization.Get("Translate_PasteChip");
+
+    /// <summary>What Narrator reads for the chip: the label and the quote.</summary>
+    public string PasteSpoken => $"{PasteLabel} {PastePreview}";
+
+    /// <summary>
+    /// The clipboard read again for the empty box's offer: when the page shows, when the box is emptied, and when the
+    /// window comes back from another program.
+    /// </summary>
+    public void OfferPaste()
+    {
+        var copy = HasQuery ? null : _host.Copied(_pasteTaken);
+        PastePreview = copy is null ? "" : PasteOffer.Preview(copy.Text);
+        PasteFlow = copy is not null && Scripts.IsArabicText(PastePreview) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
+        _pasteSequence = copy?.Sequence ?? 0;
+        PasteText = copy?.Text ?? "";
+    }
+
+    /// <summary>The chip: the copy into the box, looked up at once.</summary>
+    [RelayCommand]
+    private void Paste()
+    {
+        var text = PasteText;
+        _pasteTaken = _pasteSequence;
+        PasteText = "";
+        Navigate(text);
+    }
 
     /// <summary>Ctrl, +, Alt, +, L.</summary>
     public List<KeyPart> Keys { get; }
@@ -187,6 +236,7 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
 
         Today = TodayItem.From(_brain.Today.Info(), LookUpCommand);
         RefreshRecent();
+        OfferPaste();
     }
 
     /// <summary>Enter in the box: no waiting for the pause.</summary>

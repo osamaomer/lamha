@@ -3,6 +3,7 @@ using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Main;
 using Lamha.App.Views;
+using Lamha.Core.Clipboard;
 using Lamha.Core.Layout;
 using Lamha.Core.Search;
 using Lamha.Windows.Shell;
@@ -59,6 +60,9 @@ public sealed partial class MainWindow : Window, IPageHost
     /// <summary>The page is changing because of Back: it isn't added to where Back goes, and it slides in from the start.</summary>
     private bool _goingBack;
 
+    /// <summary>The clipboard's sequence number after Lamha's own Copy here.</summary>
+    private uint _ownCopy;
+
     /// <summary>Where the window is when neither maximised nor minimised: saved when it closes.</summary>
     private WindowPlace? _normal;
 
@@ -101,6 +105,14 @@ public sealed partial class MainWindow : Window, IPageHost
         Nav.SelectedItem = _items[ViewModel.Page.Id];
         ViewModel.PropertyChanged += OnViewModelChanged;
         Root.PointerPressed += OnPointerPressed;
+        // Back from another program, perhaps with something copied: the Translate page's empty box offers it.
+        Activated += (_, e) =>
+        {
+            if (e.WindowActivationState != WindowActivationState.Deactivated && PageHost.Content is TranslatePage translate)
+            {
+                translate.ViewModel.OfferPaste();
+            }
+        };
         ShowPage();
         // The first focus goes to the Translate page's box, ready to type (Write's draft, Review's card likewise); on
         // other pages to the pane's row, as if clicked.
@@ -301,7 +313,24 @@ public sealed partial class MainWindow : Window, IPageHost
 
     // ----- IPageHost -----
 
-    public void Copy(string text) => ClipboardApi.WriteText(Handle, text, keepOutOfHistory: false);
+    public void Copy(string text)
+    {
+        if (ClipboardApi.WriteText(Handle, text, keepOutOfHistory: false))
+        {
+            _ownCopy = ClipboardApi.SequenceNumber; // not offered back by Paste and translate
+        }
+    }
+
+    public CopiedText? Copied(uint unless)
+    {
+        var sequence = ClipboardApi.SequenceNumber;
+        if (sequence == unless || sequence == _ownCopy || !ClipboardApi.HasText || !PasteOffer.MayRead(ClipboardApi.Formats(Handle), _brain.Settings.Current))
+        {
+            return null;
+        }
+
+        return PasteOffer.Offer(ClipboardApi.ReadText(Handle)) is { } text ? new CopiedText(text, sequence) : null;
+    }
 
     public void OpenLink(Uri uri) => _ = global::Windows.System.Launcher.LaunchUriAsync(uri);
 

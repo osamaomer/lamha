@@ -49,6 +49,23 @@
       </StackPanel>
     </StackPanel>
 
+    <!-- ===== Paste and translate: the empty box offers what was copied, in one click ===== -->
+    <Button x:Name="PasteChip" x:Load="{x:Bind ViewModel.ShowsPaste, Mode=OneWay}" controls:Reveal.OnLoad="True" controls:Reveal.Rise="-8"
+            Style="{StaticResource LamhaSuggestionChipStyle}" Command="{x:Bind ViewModel.PasteCommand}"
+            ToolTipService.ToolTip="{x:Bind ViewModel.PasteSpoken, Mode=OneWay}" AutomationProperties.Name="{x:Bind ViewModel.PasteSpoken, Mode=OneWay}">
+      <Grid ColumnSpacing="{StaticResource LamhaSpace2}">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <controls:FluentIcon VerticalAlignment="Center" Glyph="Clipboard" />
+        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{x:Bind ViewModel.PasteLabel}" />
+        <TextBlock Grid.Column="2" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" IsTextTrimmedChanged="OnPasteTrimmedChanged"
+                   FlowDirection="{x:Bind ViewModel.PasteFlow, Mode=OneWay}" Text="{x:Bind ViewModel.PastePreview, Mode=OneWay}" />
+      </Grid>
+    </Button>
+
     <!-- ===== Waiting: the word at once, and shapes where the answer will be ===== -->
     <Border x:Name="WaitingBox" x:Load="{x:Bind ViewModel.IsWaiting, Mode=OneWay}" Style="{StaticResource LamhaContentCardStyle}">
       <StackPanel>

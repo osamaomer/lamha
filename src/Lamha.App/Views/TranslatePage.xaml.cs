@@ -72,6 +72,18 @@ public sealed partial class TranslatePage : UserControl
         }
     }
 
+    /// <summary>
+    /// A copy too long for the chip is cut with "…": the chip then reaches the box's far edge, as the drawing's (a cut
+    /// text measures only to its last letter); a short one stays as wide as its words.
+    /// </summary>
+    private void OnPasteTrimmedChanged(TextBlock sender, IsTextTrimmedChangedEventArgs args)
+    {
+        if (PasteChip is { } chip)
+        {
+            chip.HorizontalAlignment = sender.IsTextTrimmed ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+        }
+    }
+
     /// <summary>The first time the page shows: the hint, once laid out (it points at the line); seen once it's shown.</summary>
     private void OnLoadedOpenTip(object sender, RoutedEventArgs e)
     {
