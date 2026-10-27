@@ -30,6 +30,17 @@ The design system release: every screen measured against Windows' own Settings, 
 | **The parity tool** | Runs Lamha 2's brain and Lamha 3's side by side on the same words | Started on the `lamha3/parity-tool` branch |
 | **Code signing** | No SmartScreen warning on the installer | The owner's call (about $10 a month, or a Microsoft Store listing, which signs it) |
 
+## Later: removing Lamha 2's code
+
+No one uses Lamha 2 (the user, 2026-10-27), so what Lamha 3 carries for moving from it can go. Kept for now; one task when we come back to it:
+
+| What | Where | What goes with it |
+|---|---|---|
+| **The importer** (first run's Lamha 2 step) | Core's and Data's `Import/`, first run's step | [Decision 0018](decisions/0018-importing-lamha-2.md) marked replaced; first run one step shorter |
+| **Removing Lamha 2** (first run's offer on Ready, `--remove-lamha2`) | `Services/Lamha2Removal` | [Decision 0019](decisions/0019-the-bridge-update.md)'s Lamha 3 side |
+| **The beta's own shortcuts** (Ctrl+Alt+L / W / V, so a beta could run beside Lamha 2) | the shortcuts' defaults, the Beta workflow | Betas take Alt+Shift as releases do |
+| **`release/2.x` as the port's reference** | CLAUDE.md's porting rule, `tools/Strings` (`ResourcesTests` checks Lamha 2's wording) | Decide whether the branch stays as an archive or the rule ends |
+
 ## Ideas, not decided
 
 ### Translating without Google's unofficial endpoint
