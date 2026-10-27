@@ -39,6 +39,8 @@ public sealed partial class TranslatePage : UserControl
                 QueryBox.Select(QueryBox.Text.Length, 0);
             }
         };
+        // A paragraph shows side by side only when there's room for two columns.
+        SizeChanged += (_, e) => ViewModel.IsWide = e.NewSize.Width >= TranslateViewModel.SideBySideWidth;
         if (viewModel.ShowsLookupTip)
         {
             Loaded += OnLoadedOpenTip;

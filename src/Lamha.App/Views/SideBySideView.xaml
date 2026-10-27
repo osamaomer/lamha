@@ -1,0 +1,63 @@
+<UserControl
+    x:Class="Lamha.App.Views.SideBySideView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Lamha.App.Controls"
+    xmlns:main="using:Lamha.App.ViewModels.Main">
+  <!-- Side by side (docs/design/system.html, New features): a paragraph's answer as two columns, the text at the start
+       and its translation beside it, a sentence beside its translation; the row under the pointer lights up on both
+       sides. Each column's text sits 24 from its edge, as the content card's; the divider runs from top to bottom. -->
+
+  <Grid x:Name="Root">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Column="1" Grid.RowSpan="2" Width="1" Background="{ThemeResource LamhaLineBrush}" />
+
+    <!-- Each column's language, and Listen (Copy for the translation), where its text starts -->
+    <StackPanel Margin="24,16,24,4" Orientation="Horizontal" Spacing="{StaticResource LamhaSpace1}" FlowDirection="{x:Bind Side.SourceFlow, Mode=OneWay, FallbackValue=LeftToRight}">
+      <TextBlock VerticalAlignment="Center" Margin="0,0,4,0" Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaTextMutedBrush}"
+                 FlowDirection="{x:Bind controls:Show.InterfaceFlow}" Text="{x:Bind Side.SourceName, Mode=OneWay, FallbackValue=''}" />
+      <controls:SpeakButton x:Uid="Card_ListenOrig" Style="{StaticResource LamhaIconButtonStyle}"
+                            Text="{x:Bind Side.SourceText, Mode=OneWay, FallbackValue=''}" Lang="{x:Bind Side.SourceLang, Mode=OneWay, FallbackValue=''}" />
+    </StackPanel>
+    <StackPanel Grid.Column="2" Margin="24,16,24,4" Orientation="Horizontal" Spacing="{StaticResource LamhaSpace1}" FlowDirection="{x:Bind Side.TranslationFlow, Mode=OneWay, FallbackValue=RightToLeft}">
+      <TextBlock VerticalAlignment="Center" Margin="0,0,4,0" Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaTextMutedBrush}"
+                 FlowDirection="{x:Bind controls:Show.InterfaceFlow}" Text="{x:Bind Side.TranslationName, Mode=OneWay, FallbackValue=''}" />
+      <controls:SpeakButton x:Uid="Card_ListenTr" Style="{StaticResource LamhaIconButtonStyle}"
+                            Text="{x:Bind Side.TranslationText, Mode=OneWay, FallbackValue=''}" Lang="{x:Bind Side.TranslationLang, Mode=OneWay, FallbackValue=''}" />
+      <Button x:Uid="Card_CopyTr" Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind CopyCommand, Mode=OneWay}" controls:Feedback.Copy="True">
+        <controls:FluentIcon Glyph="Copy" />
+      </Button>
+    </StackPanel>
+
+    <!-- The sentences: each row's two cells 16 in, their text 8 more (24 from the edge, and from the foot), the mark behind both on hover -->
+    <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" Margin="0,0,0,22" ItemsSource="{x:Bind Side.Rows, Mode=OneWay}" IsTabStop="False">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="main:SideRowItem">
+          <Grid Margin="{x:Bind Margin}" Background="Transparent" PointerEntered="OnRowEntered" PointerExited="OnRowExited" PointerCanceled="OnRowExited"
+                AutomationProperties.Name="{x:Bind Spoken}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="1" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border Margin="16,0" Padding="8,2" CornerRadius="{StaticResource LamhaRadiusControl}" FlowDirection="{x:Bind SourceFlow}">
+              <TextBlock Style="{StaticResource LamhaReadingTextStyle}" IsTextSelectionEnabled="True" Text="{x:Bind Source}" />
+            </Border>
+            <Border Grid.Column="2" Margin="16,0" Padding="8,2" CornerRadius="{StaticResource LamhaRadiusControl}" FlowDirection="{x:Bind TranslationFlow}">
+              <TextBlock Style="{StaticResource LamhaReadingTextStyle}" IsTextSelectionEnabled="True" Text="{x:Bind Translation}" />
+            </Border>
+          </Grid>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </Grid>
+</UserControl>

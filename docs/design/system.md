@@ -227,6 +227,7 @@ The default is WinUI's own control and style. Lamha's styles only set tokens.
 | **Progress** | `ProgressRing` (16 inline, 32 for a page), `ProgressBar`; skeletons for an answer that loads |
 | **Key cap** | Caption, padding 4,1, radius 4, the control fill and its edge (`Controls/KeyCaps.cs`) |
 | **Empty state** | a 40 icon in the tertiary colour, one line (Body), one button (`Controls/EmptyState.cs`) |
+| **Side by side** | a content card in two equal columns, a 1 px divider from top to bottom; each column headed by its language (Caption strong, secondary) with Listen (and Copy for the translation) where its text starts; a sentence beside its translation (reading lines, 24 high), their text 24 from the edges; 12 after a paragraph; the row under the pointer marked on both sides. From 560 wide, otherwise the answer as usual (`Views/SideBySideView.xaml`) |
 | **Suggestion chip** | a pill 32 high, padding 12,0, the accent's soft tint and the accent's text, a 16 icon 8 from its words; as wide as its words, or to the far edge when they're cut with "…" (`LamhaSuggestionChipStyle`): Paste and translate |
 
 **Targets:** nothing pressable smaller than 24; rows and the pane 36 or more.

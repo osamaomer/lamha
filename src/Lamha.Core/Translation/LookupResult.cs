@@ -78,6 +78,11 @@ public sealed record DefinitionGroup(PartOfSpeech Pos, IReadOnlyList<Definition>
 /// <param name="Untranslated">The translation kept the word as it was: a name ("Gemini"), not its meaning.</param>
 public sealed record ContextMeaning(string Word, string Before, string After, bool Untranslated = false);
 
+/// <summary>A sentence of a text and its translation, as Google splits them (<c>sentences</c>: <c>orig</c>, <c>trans</c>).</summary>
+/// <param name="Source">The sentence as it was in the text, its spaces and line breaks after it included.</param>
+/// <param name="Translation">Its translation, with the same.</param>
+public sealed record SentencePair(string Source, string Translation);
+
 /// <summary>
 /// What a lookup gives the card: a word's meanings and definitions, or a text's translation. Lamha 2's lookup result
 /// object, field for field (its names in the comments where they differ).
@@ -103,6 +108,12 @@ public sealed record LookupResult
 
     /// <summary>The source's pronunciation: IPA from the dictionary, Google's transliteration (<c>srcTranslit</c>).</summary>
     public string SourceTranslit { get; init; } = "";
+
+    /// <summary>
+    /// A text's sentences, each with its translation, in order: Google's, for Translate's side by side. Empty for a
+    /// word, and from the AI (which answers with the whole translation).
+    /// </summary>
+    public IReadOnlyList<SentencePair> Sentences { get; init; } = [];
 
     /// <summary>Google's "Did you mean" (<c>spell</c>).</summary>
     public string Spell { get; init; } = "";

@@ -122,7 +122,9 @@ public sealed class GoogleTranslate(Http http)
             var first = await LookupAsync(pieces[0].Text, source, target, false, interfaceLanguage, null, cancel).ConfigureAwait(false);
             var rest = await TranslateAsync([.. pieces.Skip(1).Select(p => p.Text)], target, first.Source.Length > 0 ? first.Source : source, false, cancel).ConfigureAwait(false);
             var joined = string.Concat(new[] { first.Translation }.Concat(rest).Select((t, i) => t + pieces[i].Separator));
-            return first with { Query = text, Translation = joined, Translit = "", SourceTranslit = "" };
+            // The first piece by its sentences, the rest a piece at a time (the batch doesn't split them).
+            var pairs = first.Sentences.Concat(rest.Select((t, i) => new SentencePair(pieces[i + 1].Text + pieces[i + 1].Separator, t + pieces[i + 1].Separator)));
+            return first with { Query = text, Translation = joined, Translit = "", SourceTranslit = "", Sentences = [.. pairs] };
         }
 
         // Labels (noun, verb…) come in the interface language.
@@ -155,6 +157,7 @@ public sealed class GoogleTranslate(Http http)
             SourceTranslit = sentences.Select(s => Str(s?["src_translit"])).FirstOrDefault(t => t.Length > 0) ?? "",
             Spell = Html.StripTags(Str(data?["spell"]?["spell_res"])),
             From = ResultSource.Online,
+            Sentences = word ? [] : [.. sentences.Where(s => s?["orig"] is not null).Select(s => new SentencePair(Str(s?["orig"]), Str(s?["trans"])))],
         };
         if (!word)
         {

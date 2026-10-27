@@ -90,7 +90,11 @@
     <!-- ===== The answer, as on the card; the links at its foot ===== -->
     <Border x:Name="AnswerBox" x:Load="{x:Bind ViewModel.IsAnswer, Mode=OneWay}" Style="{StaticResource LamhaContentCardStyle}" Padding="0">
       <StackPanel>
-        <views:AnswerView Margin="{StaticResource LamhaContentCardPadding}" Answer="{x:Bind ViewModel.Answer, Mode=OneWay}" ShowsText="False" />
+        <views:AnswerView Margin="{StaticResource LamhaContentCardPadding}" Answer="{x:Bind ViewModel.Answer, Mode=OneWay}" ShowsText="False"
+                          Visibility="{x:Bind ViewModel.IsSingle, Mode=OneWay}" />
+        <!-- A paragraph, with room for two columns: side by side -->
+        <views:SideBySideView x:Name="SideBox" x:Load="{x:Bind ViewModel.IsSideBySide, Mode=OneWay}" Side="{x:Bind ViewModel.Side, Mode=OneWay}"
+                              CopyCommand="{x:Bind ViewModel.Answer.CopyMeaningCommand, Mode=OneWay}" />
         <Border Style="{StaticResource LamhaCardFootStyle}" Visibility="{x:Bind controls:Show.IfAny(ViewModel.Links.Count), Mode=OneWay, FallbackValue=Collapsed}">
           <ItemsControl ItemsSource="{x:Bind ViewModel.Links, Mode=OneWay}" ItemTemplate="{StaticResource LinkTemplate}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False" />
         </Border>

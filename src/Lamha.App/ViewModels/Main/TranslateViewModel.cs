@@ -200,6 +200,26 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
     [ObservableProperty]
     public partial WordAnswer? Answer { get; private set; }
 
+    // ----- side by side -----
+
+    /// <summary>The page is at least this wide for two columns (two of 280); narrower, a paragraph shows as before.</summary>
+    public const double SideBySideWidth = 560;
+
+    /// <summary>A paragraph's answer as two columns, or null for a word or a sentence.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSideBySide), nameof(IsSingle))]
+    public partial SideBySideAnswer? Side { get; private set; }
+
+    /// <summary>The page is wide enough for <see cref="Side"/> (set by the page as it's resized).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSideBySide), nameof(IsSingle))]
+    public partial bool IsWide { get; set; } = true;
+
+    public bool IsSideBySide => Side is not null && IsWide;
+
+    /// <summary>The answer as the card shows it: not side by side.</summary>
+    public bool IsSingle => !IsSideBySide;
+
     [ObservableProperty]
     public partial PriceAnswer? Price { get; private set; }
 
@@ -350,6 +370,7 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
             _lookup?.Cancel();
             _shown = ("", false);
             Answer = null;
+            Side = null;
             Price = null;
             Error = null;
             Links = [];
@@ -417,6 +438,7 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
 
             var answer = WordAnswer.For(_brain, result, this, writingTools: WritingReady());
             Error = null;
+            Side = SideBySideAnswer.For(result);
             Answer = answer;
             Links = answer.Links;
             View = TranslateView.Answer;
