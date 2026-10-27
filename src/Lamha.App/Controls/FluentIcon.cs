@@ -62,6 +62,10 @@ public enum Glyph
     Motion,
     Brush,
     Picture,
+
+    // The mini translator (step 6), as Windows' Calculator keeps itself on top and goes back
+    Mini,
+    FullView,
 }
 
 /// <summary>The design system's icon sizes (docs/design/system.md, Icons).</summary>
@@ -151,6 +155,8 @@ public sealed partial class FluentIcon : UserControl
         [Glyph.Motion] = '', // LightningBolt: animations (system.html's)
         [Glyph.Brush] = '', // Personalize: the accent colour from Windows
         [Glyph.Picture] = '', // Picture: the wallpaper behind the window
+        [Glyph.Mini] = '', // MiniContract2: the mini translator, on top
+        [Glyph.FullView] = '', // MiniExpand2: back to Lamha's window
     };
 
     /// <summary>The filled glyph, where the icon shows a state: a word in review, a pinned copy.</summary>

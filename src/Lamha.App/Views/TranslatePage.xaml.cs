@@ -104,6 +104,9 @@ public sealed partial class TranslatePage : UserControl
 
     public string QuickLookup { get; } = Localization.Get("Translate_QuickLookup");
 
+    /// <summary>"Mini translator, always on top"</summary>
+    public string MiniLabel { get; } = Localization.Get("Translate_Mini");
+
     public string TodayLabel { get; } = Localization.Get("Today_Label");
 
     public string StreakTitle { get; } = Localization.Get("Today_StreakTitle");

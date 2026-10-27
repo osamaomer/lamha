@@ -1,0 +1,68 @@
+<Window
+    x:Class="Lamha.App.Windows.MiniWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Lamha.App.Controls">
+  <!-- The mini translator (docs/design/system.html, New features): Windows' compact overlay, always on top, 340 wide at
+       100 %. A 32 title bar with Lamha's mark and name 8 apart and Back to Lamha before Windows' Close; under it, 4 below
+       and 12 in, the box, and 12 under it the answer as one line: the headword beside its meaning, or the translation. -->
+  <Grid x:Name="Root">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="32" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <!-- Lamha's page colour instead of Mica (Settings → Appearance → the wallpaper behind the window) -->
+    <Border x:Name="Solid" Grid.RowSpan="2" Background="{ThemeResource LamhaPageBrush}" Visibility="Collapsed" />
+
+    <!-- The title bar: the drag area with the mark and name; Back to Lamha; room for Windows' Close -->
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition x:Name="CaptionInset" Width="0" />
+      </Grid.ColumnDefinitions>
+      <Grid x:Name="DragArea" Padding="12,0,0,0" Background="Transparent">
+        <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}" VerticalAlignment="Center">
+          <controls:BrandMark VerticalAlignment="Center" />
+          <TextBlock VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind Lamha}" />
+        </StackPanel>
+      </Grid>
+      <Button x:Name="BackButton" Grid.Column="1" Width="40" Height="32" Style="{StaticResource LamhaTitleBarButtonStyle}" CornerRadius="0"
+              Click="OnBack" ToolTipService.ToolTip="{x:Bind BackLabel}" AutomationProperties.Name="{x:Bind BackLabel}">
+        <controls:FluentIcon Glyph="FullView" Size="Small" />
+      </Button>
+    </Grid>
+
+    <Grid Grid.Row="1" Padding="12,4,12,12" RowSpacing="{StaticResource LamhaSpace3}">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <TextBox x:Name="Box" Style="{StaticResource LamhaFieldStyle}" PlaceholderText="{x:Bind ViewModel.Placeholder}" AutomationProperties.Name="{x:Bind ViewModel.Placeholder}"
+               TextAlignment="{x:Bind controls:Show.BoxAlignment(ViewModel.HasQuery), Mode=OneWay}"
+               Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnBoxKeyDown" />
+
+      <!-- On its way: one shimmering line where the answer will be -->
+      <controls:Skeleton x:Name="Waiting" Visibility="{x:Bind ViewModel.IsWaiting, Mode=OneWay}" Grid.Row="1" Height="12" Margin="0,6,64,0" VerticalAlignment="Top"
+                         CornerRadius="{StaticResource LamhaRadiusControl}" />
+
+      <!-- A word: the headword beside its meaning, on one line while they fit -->
+      <controls:WrapPanel x:Name="WordLine" Visibility="{x:Bind ViewModel.IsWord, Mode=OneWay}" Grid.Row="1" VerticalAlignment="Top" HorizontalSpacing="{StaticResource LamhaSpace3}">
+        <TextBlock Style="{StaticResource LamhaHeadwordTextStyle}" FontSize="{StaticResource LamhaFontSizeBodyLarge}" IsTextSelectionEnabled="True"
+                   FlowDirection="{x:Bind ViewModel.HeadwordFlow, Mode=OneWay}" Text="{x:Bind ViewModel.Headword, Mode=OneWay}" />
+        <TextBlock Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeBodyLarge}" FontWeight="Bold" TextWrapping="Wrap" IsTextSelectionEnabled="True"
+                   FlowDirection="{x:Bind ViewModel.MeaningFlow, Mode=OneWay}" Text="{x:Bind ViewModel.Meaning, Mode=OneWay}" />
+      </controls:WrapPanel>
+
+      <!-- A sentence or more: its translation, scrolled when it's longer than the window -->
+      <ScrollViewer x:Name="TextAnswer" Visibility="{x:Bind ViewModel.IsText, Mode=OneWay}" Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <TextBlock Style="{StaticResource LamhaReadingTextStyle}" IsTextSelectionEnabled="True"
+                   FlowDirection="{x:Bind ViewModel.MeaningFlow, Mode=OneWay}" Text="{x:Bind ViewModel.Meaning, Mode=OneWay}" />
+      </ScrollViewer>
+
+      <TextBlock x:Name="Problem" Visibility="{x:Bind ViewModel.IsError, Mode=OneWay}" Grid.Row="1" Style="{StaticResource LamhaSecondaryTextStyle}"
+                 Foreground="{ThemeResource LamhaDangerBrush}" Text="{x:Bind ViewModel.ErrorLine, Mode=OneWay}" />
+    </Grid>
+  </Grid>
+</Window>

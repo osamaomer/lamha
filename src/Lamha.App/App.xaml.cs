@@ -51,6 +51,7 @@ public partial class App : Application
     private CardService? _card;
     private ClipPanelService? _panel;
     private MainWindowService? _main;
+    private MiniService? _mini;
     private FirstRunService? _firstRun;
     private readonly bool _hadDatabase;
 
@@ -139,6 +140,14 @@ public partial class App : Application
             DeleteData = DeleteDataAndQuit,
         };
         _accent.Repainted += (_, _) => _main.AccentChanged();
+
+        // The mini translator takes the main window's place (as Windows' picture in picture), and gives it back.
+        var mini = _mini = new MiniService(_brain, idle) { Theme = _options.Theme, BackToMain = _main.ShowTranslate };
+        _main.Mini = text =>
+        {
+            mini.Show(text);
+            _main.Close();
+        };
         _card.SettingsOpener = section => _main.Show("settings", section);
         _panel.SettingsOpener = section => _main.Show("settings", section);
 
@@ -186,8 +195,12 @@ public partial class App : Application
                     return;
                 }
 
-                // A jump list task: the main window on its page (first run first, while it's open).
-                if (JumpListService.PageOf(arguments) is { } page && _firstRun?.IsOpen != true)
+                // A jump list task: the main window on its page (first run first, while it's open); --mini, the mini translator.
+                if (arguments.Contains("--mini", StringComparison.OrdinalIgnoreCase) && _firstRun?.IsOpen != true)
+                {
+                    mini.Show();
+                }
+                else if (JumpListService.PageOf(arguments) is { } page && _firstRun?.IsOpen != true)
                 {
                     OpenPage(page);
                 }
@@ -198,7 +211,11 @@ public partial class App : Application
             });
         };
 
-        if (_options.Page is { } page)
+        if (_options.Mini)
+        {
+            mini.Show(_options.Sample ?? "");
+        }
+        else if (_options.Page is { } page)
         {
             var at = page.IndexOf(':', StringComparison.Ordinal);
             _main.Show(at < 0 ? page : page[..at], at < 0 ? "" : page[(at + 1)..]);
@@ -333,6 +350,7 @@ public partial class App : Application
     {
         _firstRun?.Dispose();
         _main?.Dispose();
+        _mini?.Dispose();
         _panel?.Dispose();
         _card?.Dispose();
         _hotkeys?.Dispose();

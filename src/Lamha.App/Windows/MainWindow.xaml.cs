@@ -161,6 +161,9 @@ public sealed partial class MainWindow : Window, IPageHost
     /// <summary>The updates, for Settings → Lamha; set before the window shows a page.</summary>
     public UpdateService? Updates { get; set; }
 
+    /// <summary>The mini translator with a text (the app's: it opens it and closes this window).</summary>
+    public Action<string>? Mini { get; set; }
+
     /// <summary>Settings → Delete my data: deletes everything and quits (the app's).</summary>
     public Action? DeleteData { get; set; }
 
@@ -360,6 +363,9 @@ public sealed partial class MainWindow : Window, IPageHost
             translate.FocusBox();
         }
     }
+
+    // Queued: it closes this window, which shouldn't happen inside the window's own call.
+    public void OpenMini(string text) => DispatcherQueue.TryEnqueue(() => Mini?.Invoke(text));
 
     public void Write(string text)
     {

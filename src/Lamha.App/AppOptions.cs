@@ -51,7 +51,11 @@ public enum CardLifetime
 /// <c>--remove-lamha2</c>: removing Lamha 2 (first run's Ready, the 30 days' clean-up) in a beta or a build from source,
 /// which never do it otherwise (decision 0019). It removes the Lamha 2 installed on this PC.
 /// </param>
-public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null, string? Updates = null, string? Packs = null, string? Lamha2 = null, bool RemoveLamha2 = false)
+/// <param name="Mini">
+/// <c>--mini</c>: the mini translator at start (with <c>--sample=text</c>, that text looked up in it), for screenshots;
+/// a second start with it opens the mini translator in the Lamha already running.
+/// </param>
+public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null, string? Updates = null, string? Packs = null, string? Lamha2 = null, bool RemoveLamha2 = false, bool Mini = false)
 {
     public static AppOptions FromArgs(IReadOnlyList<string> args)
     {
@@ -68,7 +72,7 @@ public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string?
         var lamha2 = Value(args, "--lamha2=");
         return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language, theme, string.IsNullOrWhiteSpace(page) ? null : page, args.Contains("--panel", StringComparer.OrdinalIgnoreCase), firstRun, string.IsNullOrWhiteSpace(updates) ? null : updates,
             string.IsNullOrWhiteSpace(packs) ? null : packs.TrimEnd('/') + "/", string.IsNullOrWhiteSpace(lamha2) ? null : Path.GetFullPath(lamha2),
-            args.Contains("--remove-lamha2", StringComparer.OrdinalIgnoreCase));
+            args.Contains("--remove-lamha2", StringComparer.OrdinalIgnoreCase), args.Contains("--mini", StringComparer.OrdinalIgnoreCase));
     }
 
     /// <summary>What Lamha starts with again after an update: the profile and the releases' folder, not a screenshot's page or sample.</summary>

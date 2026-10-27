@@ -37,6 +37,9 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
     /// <summary>Settings → Delete my data, after its question: the app deletes everything and quits.</summary>
     public Action? DeleteData { get; init; }
 
+    /// <summary>Translate's mini translator: opens it with the box's text (the app closes this window).</summary>
+    public Action<string>? Mini { get; set; }
+
     public bool IsOpen => _window is not null;
 
     /// <summary>The accent changed (AccentService): the open window's Windows controls take it.</summary>
@@ -66,6 +69,7 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
             window.Startup = Startup;
             window.Updates = Updates;
             window.DeleteData = DeleteData;
+            window.Mini = Mini;
             window.Go(page, section);
             // Settings → Appearance applies to the open window at once (the card reads it each time it opens).
             void Apply(object? sender, LamhaSettings settings) => window.DispatcherQueue.TryEnqueue(() =>
@@ -99,6 +103,16 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
         {
             // Called from the tray and a second start: an exception there would end Lamha without a word in the log.
             AppLog.Error("main window", ex);
+        }
+    }
+
+    /// <summary>The Translate page with <paramref name="text"/> looked up in its box (the mini translator's Back to Lamha).</summary>
+    public void ShowTranslate(string text)
+    {
+        Show("translate");
+        if (text.Length > 0)
+        {
+            _window?.Translate(text);
         }
     }
 

@@ -47,6 +47,9 @@ public interface IPageHost : IClipHost
 {
     void OpenLink(Uri uri);
 
+    /// <summary>The mini translator, always on top, with <paramref name="text"/> in its box; the main window closes.</summary>
+    void OpenMini(string text);
+
     /// <summary>The Write page, with <paramref name="text"/> in its draft (Translate's "Writing tools").</summary>
     void Write(string text);
 

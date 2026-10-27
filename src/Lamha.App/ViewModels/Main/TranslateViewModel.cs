@@ -323,6 +323,10 @@ public sealed partial class TranslateViewModel : ObservableObject, IAnswerAction
 
     // ----- commands -----
 
+    /// <summary>The mini translator, always on top, with the box's text: the main window makes way for it.</summary>
+    [RelayCommand]
+    private void OpenMini() => _host.OpenMini(Query.Trim());
+
     /// <summary>The box's ×: empty, and Today back (Lamha 2's <c>clearQ</c>).</summary>
     [RelayCommand]
     private void Clear() => Query = "";

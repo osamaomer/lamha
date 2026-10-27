@@ -194,6 +194,13 @@ Added in step 4, for setting cards the names above didn't cover (each setting ca
 | Brush | E771 | Personalize: the accent colour from Windows |
 | Picture | E8B9 | Picture: the wallpaper behind the window |
 
+Added in step 6, for the mini translator, as Windows' Calculator keeps itself on top and goes back:
+
+| Name | Glyph | Windows' name: for |
+|---|---|---|
+| Mini | EE49 | MiniContract2: the mini translator, always on top (Translate's button) |
+| FullView | EE47 | MiniExpand2: back to Lamha's window (the mini translator's title bar) |
+
 **The pane's coloured icons** are Lamha's own (drafts in `system.html`), in Windows Settings' style: 20 × 20, one main colour each, soft shading, the same in both themes with an edge that keeps them clear on dark.
 
 **Animated icons** (WinUI's): Back, ☰, Settings, Search, the expander's chevron, Accept (Copy's ✓).
