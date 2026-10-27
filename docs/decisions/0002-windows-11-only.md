@@ -4,7 +4,7 @@
 
 ## Decision
 
-Lamha 3 runs on Windows 11 (22H2, build 22621, and later), x64 and ARM64. The Firefox extension is dropped, and so is the Linux plan in `docs/ideas.md`.
+Lamha 3 runs on Windows 11 (22H2, build 22621, and later), x64 and ARM64. The Firefox extension is dropped, and so is the Linux plan in `docs/ideas.md` (kept on `release/2.x`).
 
 ## Why
 

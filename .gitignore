@@ -15,8 +15,5 @@ Releases/
 Thumbs.db
 desktop.ini
 
-# ---- npm (the tools) ----
+# npm (tools/Strings, tools/Icons)
 node_modules/
-
-# tools/build_packs.py output: the language packs, uploaded to a GitHub release
-dist-packs/

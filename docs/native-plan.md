@@ -32,7 +32,7 @@ Why C# rather than C++/WinRT: it's the language WinUI 3 is mainly documented and
 **Dropped:**
 - The Firefox extension, with everything that only exists there: page translation, the double-click Write button, the pill on web pages, per-site switches (`disabledSites`, `showInInputs`, `writeOnDblClick`, `trPages`).
 - The Firefox ↔ app link: native messaging, `host.bat` / `host.ps1`, the named pipe, and the deck sync between them.
-- The Linux plan in [ideas.md](ideas.md).
+- The Linux plan in Lamha 2's `docs/ideas.md` (on `release/2.x`); what's still open from it is in [roadmap.md](roadmap.md).
 - Windows 10.
 
 **On hold:** offline Wikipedia (downloaded `.zim` files) and the reader window. Users' downloaded files **stay on disk**, untouched, so they work again when the feature returns.
@@ -203,7 +203,7 @@ Lamha/
 │   ├── architecture.md           this plan's architecture, kept up to date once built
 │   ├── design/                   tokens, components, each screen's design
 │   ├── decisions/                one short file per big decision (ADR)
-│   ├── history.md · ideas.md
+│   ├── history.md · roadmap.md
 │   └── native-plan.md            this file
 │
 ├── site/                         the download page
