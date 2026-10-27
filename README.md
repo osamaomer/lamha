@@ -122,11 +122,13 @@ Lamha 3 is a native Windows 11 app: **WinUI 3, C# / .NET 10, compiled ahead of t
 
 **Light by design.** Measured like Task Manager, against budgets the build is checked on:
 
-| | Lamha 2 (Electron) | Lamha 3 |
-|---|---|---|
-| Waiting in the tray | ~150 MB | **~1 MB** in Task Manager (52 MB committed) |
-| The card open | | ~42 MB |
-| The installer | 117 MB | **~52 MB** |
+| | Memory |
+|---|---|
+| Waiting in the tray | **~1 MB** in Task Manager (52 MB committed) |
+| The card open | ~42 MB |
+| The main window open | ~40 MB |
+
+The installer is about 52 MB, and Lamha updates itself.
 
 **One design system.** Every screen uses Windows' own sizes, measured side by side with Windows Settings, plus Lamha's colours and its own pane icons. A test fails if a screen types a colour, a font size or a gap off the 4 px grid ([docs/design/system.md](docs/design/system.md)).
 
@@ -137,7 +139,7 @@ Lamha 3 is a native Windows 11 app: **WinUI 3, C# / .NET 10, compiled ahead of t
 **Lamha 3.1** is on `main`: the new design system, a **mini translator** that floats over what you read, **side by side** translation of paragraphs, **paste and translate**, and a pinnable card.
 
 After that, in [the roadmap](docs/roadmap.md):
-- 📖 **Offline Wikipedia** and a reader, back from Lamha 2
+- 📖 **Offline Wikipedia** and a reader, with no internet
 - 🧠 **FSRS** reviews (Anki's newer scheduler), **export to Anki**, and practice built from your own mistakes
 - 🌍 **Translation packs** that translate sentences with no internet and no AI
 - …and ideas waiting for a decision
@@ -159,7 +161,7 @@ dotnet run --project src/Lamha.App -- --gallery                      # every com
 | Folder | What's in it |
 |---|---|
 | `src/Lamha.Core` | The brain, with no Windows dependency |
-| `src/Lamha.Data` | SQLite: your data, the dictionary, the language packs, the Lamha 2 importer |
+| `src/Lamha.Data` | SQLite: your data, the dictionary, the language packs |
 | `src/Lamha.Windows` | Win32: shortcuts, the selection, the clipboard, the tray, voices |
 | `src/Lamha.App` | The WinUI 3 app and its design system (`Themes/`) |
 | `tests/` | One test project per `src` project, running the real brain on in-memory SQLite |
@@ -168,11 +170,7 @@ dotnet run --project src/Lamha.App -- --gallery                      # every com
 | `site/` | The download page |
 | `docs/` | [The plan, decisions, design and roadmap](docs/README.md) |
 
-The rules the code follows (layers, NativeAOT, strings in both languages, privacy, memory) are in [CLAUDE.md](CLAUDE.md). Branches: `main` is Lamha 3; each piece of work gets a short `lamha3/<what>` branch.
-
-## 👋 Coming from Lamha 2?
-
-Lamha 3 moves your settings, history, review deck, mistake journal and clipboard history over on first run, then offers to remove Lamha 2. Lamha 2's code and its full guide are on the [`release/2.x`](https://github.com/osamaomer/lamha/tree/release/2.x) branch.
+The rules the code follows (layers, NativeAOT, strings in both languages, privacy, memory) are in [CLAUDE.md](CLAUDE.md). Branches: `main` is the app; each piece of work gets a short `lamha3/<what>` branch, merged when it's done.
 
 ## License
 

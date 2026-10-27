@@ -20,8 +20,8 @@ The design system release: every screen measured against Windows' own Settings, 
 
 | What | Why | Details |
 |---|---|---|
-| **Offline Wikipedia and the reader** | 2.x had it; held back so 3.0 shipped without a web view. Downloaded files are still on users' PCs, waiting | [native-plan.md → Future](native-plan.md#future-offline-wikipedia-and-the-reader): a native reader, title search in SQLite, downloads through BITS |
-| **FSRS reviews** | Anki's newer scheduler: fewer reviews for the same memory | A choice in Settings → Review; SM-2 stays the default so imported decks behave as before |
+| **Offline Wikipedia and the reader** | Whole articles with no internet; held back so 3.0 shipped without a web view | [native-plan.md → Future](native-plan.md#future-offline-wikipedia-and-the-reader): a native reader, title search in SQLite, downloads through BITS |
+| **FSRS reviews** | Anki's newer scheduler: fewer reviews for the same memory | A choice in Settings → Review, beside today's SM-2 |
 | **A second example on the review card** | So a meaning doesn't stick to one sentence | From the dictionary, on the back |
 | **Export to Anki** | For people who already have a routine there | `.apkg` or CSV |
 | **Practice from the mistake journal** | Turns "you often miss *the*" into a short quiz with your own sentences | Built from the journal's mistake kinds |
@@ -55,7 +55,7 @@ Settle the Google question before charging for translation. Not legal or tax adv
 
 ## Left out on purpose
 
-- **The Firefox extension, Linux and Windows 10:** Lamha 3 is a Windows 11 app ([decision 0002](decisions/0002-windows-11-only.md)). The Firefox extension's last version and Lamha 2's notes, the Linux plan included, are on the `release/2.x` branch.
+- **The Firefox extension, Linux and Windows 10:** Lamha is a Windows 11 app ([decision 0002](decisions/0002-windows-11-only.md)). Lamha 2, the Electron app and Firefox extension it replaced, is kept for reference on the `release/2.x` branch.
 
 ## Add-ons: where new things plug in
 
