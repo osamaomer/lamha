@@ -406,9 +406,6 @@ public sealed partial class ClipPanelWindow : Window
     }
 
     /// <summary>The field's accent ring while the search has the focus (the Clipboard page's).</summary>
-    private void OnSearchFocus(object sender, RoutedEventArgs e) =>
-        FieldRing.Visibility = SearchBox.FocusState == FocusState.Unfocused ? Visibility.Collapsed : Visibility.Visible;
-
     private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(ClipPanelViewModel.ToolsRow))

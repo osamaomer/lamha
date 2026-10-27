@@ -115,7 +115,7 @@
                   <Border Style="{StaticResource BoxStyle}" Padding="0" />
                   <Border BorderBrush="{ThemeResource LamhaButtonBrush}" BorderThickness="2" CornerRadius="{StaticResource LamhaRadiusControl}"
                           Visibility="{x:Bind ViewModel.IsArabic, Mode=OneWay}" />
-                  <RadioButton x:Name="ArabicChoice" GroupName="UiLang" Style="{StaticResource LamhaRadioStyle}" Padding="16,14" FocusVisualMargin="0"
+                  <RadioButton x:Name="ArabicChoice" GroupName="UiLang" Style="{StaticResource LamhaRadioStyle}" Margin="16,10" FocusVisualMargin="-16,-10"
                                IsChecked="{x:Bind ViewModel.IsArabic, Mode=TwoWay}" AutomationProperties.Name="{x:Bind ViewModel.Arabic}">
                     <TextBlock FontSize="{StaticResource LamhaFontSizeBody}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.Arabic}" />
                   </RadioButton>
@@ -124,7 +124,7 @@
                   <Border Style="{StaticResource BoxStyle}" Padding="0" />
                   <Border BorderBrush="{ThemeResource LamhaButtonBrush}" BorderThickness="2" CornerRadius="{StaticResource LamhaRadiusControl}"
                           Visibility="{x:Bind ViewModel.IsEnglish, Mode=OneWay}" />
-                  <RadioButton x:Name="EnglishChoice" GroupName="UiLang" Style="{StaticResource LamhaRadioStyle}" Padding="16,14" FocusVisualMargin="0"
+                  <RadioButton x:Name="EnglishChoice" GroupName="UiLang" Style="{StaticResource LamhaRadioStyle}" Margin="16,10" FocusVisualMargin="-16,-10"
                                IsChecked="{x:Bind ViewModel.IsEnglish, Mode=TwoWay}" AutomationProperties.Name="{x:Bind ViewModel.English}">
                     <TextBlock FontSize="{StaticResource LamhaFontSizeBody}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.English}" />
                   </RadioButton>

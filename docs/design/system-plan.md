@@ -363,6 +363,26 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
    - **Tried:**
      - closed on Settings and opened again on Write (jump list): Write shown, Back fresh;
      - Translate → mini translator → Back to Lamha, with the text in each box.
+
+   **Every window revisited (2026-10-27):** 28 screens (the five pages, Settings' home and its 11 categories, the card's word, text and error, the clipboard panel, the mini translator, first run's steps), each in Arabic and English, light and dark, from a test profile with words, cards, copies and mistakes in it.
+   - **Measured on the screenshots:** setting cards 68 high and 4 apart, as the system says.
+   - **Fixed:**
+     - **Clipboard** (the page and the panel): a copy in the other language starts at the interface's side with its source line under it, so each copy has one straight edge (§2's rule; History already did it).
+     - **The panel's search** is Windows' field with its accent line, as the Clipboard page's (step 4 had missed it): Lamha 2's ring is gone.
+     - **The first-time tip** opens toward the reading direction (`BottomRight`, which WinUI turns in Arabic): it ran over the pane.
+     - **First run's two languages:** the radio is centred on its language's name and 16 from the card's edge (it sat at the top corner).
+     - **The mini translator:** the headword and its meaning share a baseline (one text of two runs).
+     - **Back** has nothing behind it when the window opens on a page (jump list, tray, `--page`), as Windows' Settings opened on a page; it went back to Translate.
+     - **Word review's two lines** name ☆ for 🔖, as Review's empty line does (the bookmark is the star); the clipboard's "Added “bank” to review" ends with ★ (your call: the word is in Review).
+   - **system.md:** the switch in a setting card has no "On / Off", as drawn and as built.
+   - **Measured** (NativeAOT, no warnings), in commit MB: tray 51, card open 87 and closed 85, main window open 105 and closed 103, all within budget. The mini translator, five opens and closes: 52 → 83 after the first, then about 1 MB more each (WinUI's), 88 after five; Task Manager back to 1 MB after each close.
+   - **Your answers:**
+     - high contrast and 150 % text: you'll check them yourself;
+     - Settings → Lamha's English sources stay on the left in Arabic, by recommendation: §2's rule is for one item of two languages, and a list of English needs its bullets in a line (Windows' Arabic Settings keeps English blocks left to right).
+   - **Left as they are:**
+     - the tip covers the paste chip under it while it shows (the first time only);
+     - first run's Writing tools step: the provider card runs under the buttons with no gap (it scrolls);
+     - Settings → Appearance's animation preview is a box inside a card.
 8. **Kept that way:**
    - a test fails when a screen types a colour, a font size, a radius or a glyph, or a gap that isn't on the 4 px grid;
    - the `--gallery` window;

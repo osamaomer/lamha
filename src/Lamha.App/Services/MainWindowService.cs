@@ -89,6 +89,7 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
             window.DeleteData = DeleteData;
             window.Mini = Mini;
             window.Go(page, section);
+            window.StartBackHere(); // opened on a page, it has nothing behind it (the Translate page it was built on)
             // Settings → Appearance applies to the open window at once (the card reads it each time it opens).
             void Apply(object? sender, LamhaSettings settings) => window.DispatcherQueue.TryEnqueue(() =>
             {

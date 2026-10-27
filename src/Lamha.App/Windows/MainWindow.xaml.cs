@@ -699,6 +699,16 @@ public sealed partial class MainWindow : Window, IPageHost
         }
     }
 
+    /// <summary>
+    /// Back's list starts on the page shown: a window opened on a page asked for has nothing behind it, as Windows'
+    /// Settings opened on a page.
+    /// </summary>
+    public void StartBackHere()
+    {
+        _back.Clear();
+        AppTitleBar.IsBackButtonEnabled = false;
+    }
+
     /// <summary>Somewhere new: where we were goes on Back's list (not when going back), and the title bar's Back follows.</summary>
     private void Arrive((string Page, string Section) to)
     {

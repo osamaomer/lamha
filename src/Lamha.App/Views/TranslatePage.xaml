@@ -49,7 +49,7 @@
           <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind QuickLookup}" />
           <controls:KeyCaps Keys="{x:Bind ViewModel.Keys}" />
           <!-- The first time: Windows' teaching tip at this line, Lamha's main gesture -->
-          <TeachingTip x:Name="LookupTip" Target="{x:Bind QuickLine}" PreferredPlacement="BottomLeft" Title="{x:Bind LookupTipTitle}"
+          <TeachingTip x:Name="LookupTip" Target="{x:Bind QuickLine}" PreferredPlacement="BottomRight" Title="{x:Bind LookupTipTitle}"
                        Subtitle="{x:Bind ViewModel.LookupTipText}" Closed="OnLookupTipClosed" />
         </StackPanel>
         <Button Grid.Column="1" Style="{StaticResource LamhaIconButtonStyle}" Command="{x:Bind ViewModel.OpenMiniCommand}"

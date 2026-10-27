@@ -88,11 +88,11 @@
                 <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind IsSelected, Mode=OneWay}" />
                 <StackPanel Padding="16,10" Spacing="4">
                   <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
-                             FlowDirection="{x:Bind LabelFlow, Mode=OneWay}" Text="{x:Bind Label, Mode=OneWay}" controls:Marked.Query="{x:Bind Query, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Label), Mode=OneWay}" />
+                             FlowDirection="{x:Bind LabelFlow, Mode=OneWay}" TextAlignment="{x:Bind controls:Show.InterfaceAligned(LabelFlow), Mode=OneWay}" Text="{x:Bind Label, Mode=OneWay}" controls:Marked.Query="{x:Bind Query, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Label), Mode=OneWay}" />
                   <TextBlock Style="{StaticResource LamhaBodyTextStyle}" MaxLines="2" TextTrimming="CharacterEllipsis"
-                             FlowDirection="{x:Bind TextFlow, Mode=OneWay}" Text="{x:Bind Text, Mode=OneWay}" controls:Marked.Query="{x:Bind Query, Mode=OneWay}" />
+                             FlowDirection="{x:Bind TextFlow, Mode=OneWay}" TextAlignment="{x:Bind controls:Show.InterfaceAligned(TextFlow), Mode=OneWay}" Text="{x:Bind Text, Mode=OneWay}" controls:Marked.Query="{x:Bind Query, Mode=OneWay}" />
                   <!-- An English copy's translation, once it's been translated -->
-                  <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" MaxLines="1" TextTrimming="CharacterEllipsis" FlowDirection="RightToLeft"
+                  <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" MaxLines="1" TextTrimming="CharacterEllipsis" FlowDirection="RightToLeft" TextAlignment="{x:Bind controls:Show.ArabicAlignment}"
                              Text="{x:Bind Translation, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Translation), Mode=OneWay}" />
                   <StackPanel Orientation="Horizontal" Spacing="6">
                     <controls:FluentIcon Glyph="Pin" Size="Small" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}"

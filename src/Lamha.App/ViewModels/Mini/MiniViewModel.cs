@@ -57,12 +57,9 @@ public sealed partial class MiniViewModel(Brain brain) : ObservableObject, IAnsw
 
     public bool IsError => View == MiniView.Error;
 
-    /// <summary>A word as looked up (its dictionary form), and its direction.</summary>
+    /// <summary>A word as looked up (its dictionary form).</summary>
     [ObservableProperty]
     public partial string Headword { get; private set; } = "";
-
-    [ObservableProperty]
-    public partial FlowDirection HeadwordFlow { get; private set; }
 
     /// <summary>The meaning, or a text's translation, and its direction.</summary>
     [ObservableProperty]
@@ -173,7 +170,6 @@ public sealed partial class MiniViewModel(Brain brain) : ObservableObject, IAnsw
 
             var answer = WordAnswer.For(brain, result, this, writingTools: false);
             Headword = answer.Query;
-            HeadwordFlow = answer.SourceFlow;
             Meaning = answer.HeroText.Length > 0 ? answer.HeroText : answer.HeroNone;
             MeaningFlow = answer.HeroText.Length > 0 ? answer.HeroFlow : Localization.FlowDirection;
             View = answer.IsWord ? MiniView.Word : MiniView.Text;

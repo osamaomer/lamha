@@ -220,7 +220,7 @@ The default is WinUI's own control and style. Lamha's styles only set tokens.
 | **Field** | 32 high (multi-line grows), padding 10,5,6,6, radius 4; focused: **a 2 px accent line under it** |
 | **Search box** | `AutoSuggestBox`, 32 high, 🔍 at its end |
 | **Dropdown** | `ComboBox`, 32 high, radius 4 |
-| **Switch** | `ToggleSwitch`, on in the accent; its "On / Off" at the start |
+| **Switch** | `ToggleSwitch`, on in the accent; in a setting card only the switch, without Windows' "On / Off", ending where the dropdowns end (as drawn in `system.html`; `LamhaSettingsSwitchStyle`) |
 | **Setting card** | **68** high at least, padding 16, icon 20, 20 to the text, name (Body) over description (Caption, secondary); its control at the end, then a 12 chevron when it opens a page. **Wraps** below 476 (WinUI's threshold): the control moves under the text. What belongs under the text (a status, a list, a preview) is its `Detail`, 12 below, where the text starts (`Controls/SettingsCard.cs`) |
 | **Expander** | 48 high at least; a setting with options under it |
 | **Group** | a heading (Body strong), 11 from its baseline to the first card; cards 4 apart; 28 before the next heading |

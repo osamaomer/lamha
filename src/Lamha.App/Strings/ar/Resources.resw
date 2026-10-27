@@ -498,7 +498,7 @@
   <data name="Clipboard_SummaryLang" xml:space="preserve"><value>لغة الملخص</value><comment>d.summaryLang</comment></data>
   <data name="Clipboard_ErrNoTranslation" xml:space="preserve"><value>لا توجد ترجمة لهذا النص</value><comment>d.errNoTranslation</comment></data>
   <data name="Clipboard_ErrNoTranslationHint" xml:space="preserve"><value>جرّب البحث عنه بدل ذلك.</value><comment>d.errNoTranslationHint</comment></data>
-  <data name="Clipboard_AddedReview" xml:space="preserve"><value>أُضيفت «{0}» إلى المراجعة 🔖</value><comment>d.addedReview</comment></data>
+  <data name="Clipboard_AddedReview" xml:space="preserve"><value>أُضيفت «{0}» إلى المراجعة ★</value><comment>d.addedReview, reworded 2026-10-27 (the user's call): ★ for 🔖, the word being in Review (decision 0020)</comment></data>
   <data name="Clipboard_RemovedReview" xml:space="preserve"><value>أُزيلت «{0}» من المراجعة</value><comment>d.removedReview</comment></data>
   <data name="Clipboard_Copied" xml:space="preserve"><value>نُسخ ✓</value><comment>d.copied</comment></data>
   <data name="Clipboard_AppLamha" xml:space="preserve"><value>لمحة</value><comment>d.appLamha</comment></data>
@@ -574,7 +574,7 @@
   <data name="Settings_TrProviderHint" xml:space="preserve"><value>يمكن أن يختلف عن أدوات الكتابة، مثلًا Gemini للكتابة و Ollama للترجمة</value><comment>o.trProviderHint</comment></data>
   <data name="Settings_TrSameAsWriting" xml:space="preserve"><value>مثل أدوات الكتابة</value><comment>o.trSameAsWriting</comment></data>
   <data name="Settings_CardsAuto" xml:space="preserve"><value>إضافة الكلمات تلقائيًا</value><comment>o.cardsAuto</comment></data>
-  <data name="Settings_CardsAutoHint" xml:space="preserve"><value>شغّله لتُضاف كل كلمة إنجليزية تبحث عنها إلى المراجعة. وإلا فأنت تختار: أضف الكلمة بزر 🔖 في بطاقة البحث.</value><comment>o.cardsAutoHint</comment></data>
+  <data name="Settings_CardsAutoHint" xml:space="preserve"><value>شغّله لتُضاف كل كلمة إنجليزية تبحث عنها إلى المراجعة. وإلا فأنت تختار: أضف الكلمة بزر ☆ في بطاقة البحث.</value><comment>o.cardsAutoHint, reworded 2026-10-27: ☆ for 🔖, as Review_EmptyText (the bookmark is the star: decision 0020)</comment></data>
   <data name="Settings_NewPerDay" xml:space="preserve"><value>كلمات جديدة في اليوم</value><comment>o.newPerDay</comment></data>
   <data name="Settings_NewPerDayHint" xml:space="preserve"><value>عدد الكلمات الجديدة التي تظهر للمراجعة كل يوم</value><comment>o.newPerDayHint</comment></data>
   <data name="Settings_Goal" xml:space="preserve"><value>هدف اليوم</value><comment>o.dailyGoal</comment></data>
@@ -612,7 +612,7 @@
   <data name="Settings_AccentHint" xml:space="preserve"><value>تأخذ الأزرار والروابط لون التمييز الذي اخترته في Windows، معدّلًا ليبقى مقروءًا</value><comment>d.accentHint</comment></data>
   <data name="Settings_Mica" xml:space="preserve"><value>إظهار خلفية سطح المكتب خلف النافذة</value><comment>d.mica</comment></data>
   <data name="Settings_MicaHint" xml:space="preserve"><value>لمسة من خلفية سطح المكتب خلف نافذة لمحة والإعدادات، كما في تطبيقات Windows 11 نفسها. تبقى البطاقات بلونها فيبقى النص واضحًا</value><comment>d.micaHint</comment></data>
-  <data name="Settings_ReviewIntro" xml:space="preserve"><value>الكلمات التي تضيفها بزر 🔖 في بطاقة البحث تصير بطاقات مراجعة مع الجملة التي وجدتها فيها. راجعها من صفحة «مراجعة» في نافذة لمحة، وستعود كل كلمة في الوقت المناسب قبل أن تنساها.</value><comment>o.reviewIntro reworded 2026-10-25 (approved with the Settings design): Review is a page</comment></data>
+  <data name="Settings_ReviewIntro" xml:space="preserve"><value>الكلمات التي تضيفها بزر ☆ في بطاقة البحث تصير بطاقات مراجعة مع الجملة التي وجدتها فيها. راجعها من صفحة «مراجعة» في نافذة لمحة، وستعود كل كلمة في الوقت المناسب قبل أن تنساها.</value><comment>o.reviewIntro reworded 2026-10-25 (approved with the Settings design): Review is a page; reworded 2026-10-27: ☆ for 🔖, as Review_EmptyText (the bookmark is the star: decision 0020)</comment></data>
   <data name="Settings_CardBg" xml:space="preserve"><value>خلفية البطاقة</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
   <data name="Settings_CardBgHint" xml:space="preserve"><value>الشفافة تُظهر ما خلف البطاقة قليلًا، والثابتة أوضح فوق الصفحات المزدحمة</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
   <data name="Settings_Translucent" xml:space="preserve"><value>شفافة</value><comment>new in Lamha 3, approved with the Settings design 2026-10-25</comment></data>
