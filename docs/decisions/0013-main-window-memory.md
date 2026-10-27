@@ -1,6 +1,6 @@
 # 0013. The main window's memory: closed after use, .NET's spare memory given back, 95 MB after it for now
 
-**Accepted, 2026-10-25, from the main window's first measurements (phase 4). Provisional: the numbers after the main window are set again once its pages are built.** **Amended 2026-10-26 by [0020](0020-the-design-system.md):** back in the tray after the main window, 100 MB commit (was 95), for Windows' navigation pane.
+**Accepted, 2026-10-25, from the main window's first measurements (phase 4). Provisional: the numbers after the main window are set again once its pages are built.** **Amended 2026-10-26 by [0020](0020-the-design-system.md):** back in the tray after the main window, 100 MB commit (was 95), for Windows' navigation pane. **Replaced in part 2026-10-27 by [0021](0021-main-window-kept.md):** the main window is hidden, not closed (WinUI never frees a closed window), and 105 MB after it.
 
 ## Decision
 

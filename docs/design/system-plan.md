@@ -332,13 +332,37 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
      | Main window open | 106 | 106 |
      | Main window closed | 104 | 103 |
 
-     Step 6 adds nothing. **Main window closed is over 0013's 100 MB with step 5's motion** (step 4 measured 96), which is step 7's to look into. The mini translator isn't in the timeline yet: also step 7.
+     Step 6 adds nothing. Main window closed was over 0013's 100 MB: not step 5's motion, as first thought, but a leak at every open of the main window since 3.0.0 (step 7, decision 0021). The mini translator isn't in the timeline yet: also step 7.
    - **To the user:**
      - the jump list (right-click Lamha on the taskbar; an installed build, since a build from source has its own taskbar ID);
      - side by side's highlight under the pointer;
      - the chip after copying in another program;
      - the mini over an article or a film.
 7. **Every window revisited** against the system: the main window's pages, Settings, the card, the clipboard panel, first run. Each in both languages and themes, high contrast and 150 % text; screenshots for you; memory measured against the budgets (0008, 0013, 0015).
+
+   **Memory first (2026-10-27):**
+   - **Every open and close of the main window kept 3–5 MB, since 3.0.0:**
+     - five opens and closes, NativeAOT: 3.0.0 87 → 99 MB, step 6 102 → 120;
+     - the budget's one-open timeline only showed one of them, hence "over 100".
+   - **It's WinUI's:**
+     - .NET's heap stays at 2 MB while commit grows, and the closed windows stay alive with no .NET reference to them;
+     - a bare WinUI window doesn't leak, while each control the main window uses loses a little.
+   - **What didn't stop it:**
+     - x:Bind's known Activated subscription on a Window, removed by hand;
+     - the window's own handlers unsubscribed;
+     - its content emptied on close;
+     - a second collection after the finalizers;
+     - Mica off.
+   - **No newer Windows App SDK to try:** Lamha has the newest stable release, and the experimental ones don't build it (WMC9999).
+   - **Your call: the main window is kept and hidden** ([decision 0021](../decisions/0021-main-window-kept.md)):
+     - closing hides it, and opening shows it again on the page asked for, fresh;
+     - it really closes when Lamha ends and when first run changes the language;
+     - five opens and closes now stay at 102 MB, and it opens in 15 ms instead of 60–80;
+     - the budget after it is 105 MB.
+   - **Measured** (NativeAOT, no warnings): tray 1 / 51, card open 42 / 88 and closed 3 / 85, main window open 39 / 106 and closed 5 / 104, all within budget.
+   - **Tried:**
+     - closed on Settings and opened again on Write (jump list): Write shown, Back fresh;
+     - Translate → mini translator → Back to Lamha, with the text in each box.
 8. **Kept that way:**
    - a test fails when a screen types a colour, a font size, a radius or a glyph, or a gap that isn't on the 4 px grid;
    - the `--gallery` window;

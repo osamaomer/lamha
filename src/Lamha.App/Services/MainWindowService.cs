@@ -6,8 +6,10 @@ using Lamha.Windows.Shell;
 namespace Lamha.App.Services;
 
 /// <summary>
-/// Opens the main window, or brings it to the front if it's open. Closing it ends it, so its memory goes back to
-/// Windows (the memory rules: only the tray icon, the shortcuts and the clipboard listener stay).
+/// Opens the main window, or brings it to the front if it's open. Windows' close hides it, and the next open shows the
+/// same window again (decision 0021): WinUI never frees a closed window, so a new one at every open added a few MB
+/// each time. While it's hidden its working set goes back to Windows (IdleMemory); it ends when Lamha does, or when
+/// the interface language changes.
 /// </summary>
 /// <param name="brain">Lamha's brain, for the pages.</param>
 /// <param name="idle">Told when the window opens and closes.</param>
@@ -16,6 +18,9 @@ namespace Lamha.App.Services;
 public sealed partial class MainWindowService(Brain brain, IdleMemory idle, ShortcutService shortcuts, ClipboardService clipboard) : IDisposable
 {
     private MainWindow? _window;
+
+    /// <summary>The window is shown (not hidden): IdleMemory counts it open.</summary>
+    private bool _shown;
     private string? _sample;
 
     /// <summary><c>--theme</c>: the window's theme for this run instead of the setting.</summary>
@@ -40,7 +45,8 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
     /// <summary>Translate's mini translator: opens it with the box's text (the app closes this window).</summary>
     public Action<string>? Mini { get; set; }
 
-    public bool IsOpen => _window is not null;
+    /// <summary>Shown, not hidden.</summary>
+    public bool IsOpen => _window is not null && _shown;
 
     /// <summary>The accent changed (AccentService): the open window's Windows controls take it.</summary>
     public void AccentChanged() => _window?.DispatcherQueue.TryEnqueue(() => _window?.RefreshAccent(Theme ?? brain.Settings.Current.Theme));
@@ -56,10 +62,22 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
     {
         try
         {
-            if (_window is { } open)
+            if (_window is { } open && _shown)
             {
                 open.Go(page, section);
                 open.BringToFront();
+                return;
+            }
+
+            if (_window is { } hidden)
+            {
+                var again = Environment.TickCount64;
+                Animations.Refresh(brain.Settings.Current);
+                hidden.UseTheme(Theme ?? brain.Settings.Current.Theme);
+                _shown = true;
+                idle.WindowOpened();
+                hidden.ShowAgain(page, section);
+                AppLog.Info($"main window shown again in {Environment.TickCount64 - again} ms ({page})");
                 return;
             }
 
@@ -79,15 +97,27 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
                 Animations.Refresh(settings);
             });
             brain.Settings.Changed += Apply;
+            void OutOfSight()
+            {
+                if (_window == window && _shown)
+                {
+                    _shown = false;
+                    idle.WindowClosed();
+                }
+            }
+
+            window.Hidden += OutOfSight;
             window.Closed += (_, _) =>
             {
                 brain.Settings.Changed -= Apply;
+                window.Hidden -= OutOfSight;
+                OutOfSight();
                 if (_window == window)
                 {
                     _window = null;
-                    idle.WindowClosed();
                 }
             };
+            _shown = true;
             idle.WindowOpened();
             var cursor = Screens.Cursor;
             window.ShowCentred(Screens.WorkAreaAt(cursor), Screens.ScaleAt(cursor));
@@ -116,7 +146,13 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
         }
     }
 
-    public void Close() => _window?.Close();
+    /// <summary>Out of sight, as Windows' close does (the mini translator takes its place).</summary>
+    public void Hide() => _window?.Hide();
 
-    public void Dispose() => Close();
+    /// <summary>
+    /// The window really closes: the interface language changed (it's made again in the new one), or Lamha is ending.
+    /// </summary>
+    public void End() => _window?.End();
+
+    public void Dispose() => End();
 }

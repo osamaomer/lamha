@@ -146,7 +146,7 @@ public partial class App : Application
         _main.Mini = text =>
         {
             mini.Show(text);
-            _main.Close();
+            _main.Hide();
         };
         _card.SettingsOpener = section => _main.Show("settings", section);
         _panel.SettingsOpener = section => _main.Show("settings", section);
@@ -165,6 +165,7 @@ public partial class App : Application
             {
                 _tray?.Refresh();
                 JumpListService.Refresh(_options.Profile);
+                _main.End(); // made again in the new language at the next open
                 _card.Dispose(); // made again in the new language at the next lookup
                 _panel.Dispose();
             },

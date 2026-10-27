@@ -22,7 +22,7 @@ $budgets = [ordered]@{
   "card open"   = @{ TaskManager = 70; Commit = 95 }
   "card closed" = @{ TaskManager = 45; Commit = 95 }
   "main window open"   = @{ TaskManager = 90; Commit = 110 }
-  "main window closed" = @{ TaskManager = 45; Commit = 100 } # 0013, raised by 0020: Windows' navigation pane
+  "main window closed" = @{ TaskManager = 45; Commit = 105 } # 0013, raised by 0020 (Windows' navigation pane) and 0021 (the window is kept, hidden)
 }
 $exe = (Resolve-Path $Exe).Path
 

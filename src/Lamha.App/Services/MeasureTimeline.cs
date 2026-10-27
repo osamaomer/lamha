@@ -18,7 +18,7 @@ internal static class MeasureTimeline
         At(queue, TimeSpan.FromSeconds(20), card.ShowSample);
         At(queue, TimeSpan.FromSeconds(35), () => card.Hide());
         At(queue, TimeSpan.FromSeconds(60), () => main.Show());
-        At(queue, TimeSpan.FromSeconds(75), main.Close);
+        At(queue, TimeSpan.FromSeconds(75), main.Hide); // as Windows' close does (decision 0021)
         At(queue, TimeSpan.FromSeconds(100), quit);
         foreach (var (seconds, stage) in new[] { (15, "tray"), (30, "card open"), (55, "card closed"), (70, "main window open"), (95, "main window closed") })
         {

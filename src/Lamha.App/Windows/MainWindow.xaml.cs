@@ -63,6 +63,9 @@ public sealed partial class MainWindow : Window, IPageHost
     /// <summary>The clipboard's sequence number after Lamha's own Copy here.</summary>
     private uint _ownCopy;
 
+    /// <summary>Lamha is ending: Windows' close really closes the window.</summary>
+    private bool _ending;
+
     /// <summary>Where the window is when neither maximised nor minimised: saved when it closes.</summary>
     private WindowPlace? _normal;
 
@@ -114,44 +117,16 @@ public sealed partial class MainWindow : Window, IPageHost
             }
         };
         ShowPage();
-        // The first focus goes to the Translate page's box, ready to type (Write's draft, Review's card likewise); on
-        // other pages to the pane's row, as if clicked.
-        Root.Loaded += (_, _) =>
-        {
-            if (PageHost.Content is TranslatePage translate)
-            {
-                translate.FocusBox();
-            }
-            else if (PageHost.Content is WritePage write)
-            {
-                write.FocusDraft();
-            }
-            else if (PageHost.Content is ReviewPage review)
-            {
-                review.FocusCard(); // so Space shows the meaning at once, not the page under the pane's focus
-            }
-            else if (PageHost.Content is ClipboardPage clipboard && clipboard.ViewModel.IsOn)
-            {
-                clipboard.FocusSearch(); // typing searches, and ↑ ↓ choose a copy (Lamha 2's)
-            }
-            else
-            {
-                _items[ViewModel.Page.Id].Focus(FocusState.Pointer);
-            }
-        };
-        Closed += (_, _) =>
-        {
-            SavePlace();
-            _translate?.ViewModel.Unload();
-            _write?.ViewModel.Unload();
-            if (ReferenceEquals(PageHost.Content, _clipboardPage))
-            {
-                _clipboardPage?.ViewModel.Detach();
-            }
+        Root.Loaded += (_, _) => FocusPage();
 
-            _settings?.ViewModel.Detach();
-        };
+        // Windows' close hides the window, which opens again as it was made (decision 0021): WinUI never frees a
+        // closed window, so making a new one at every open added a few MB each time. It really closes when Lamha ends.
+        AppWindow.Closing += OnClosing;
+        Closed += (_, _) => Rest();
     }
+
+    /// <summary>Hidden by Windows' close (or the mini translator): the app's IdleMemory is told.</summary>
+    public event Action? Hidden;
 
     public MainViewModel ViewModel { get; }
 
@@ -265,6 +240,40 @@ public sealed partial class MainWindow : Window, IPageHost
         // Started again from the Start menu, Lamha (already running) isn't the program in front, and Windows would
         // open the window behind the others.
         ForegroundWindow.ForceForeground(Handle);
+    }
+
+    /// <summary>Lamha is ending (Quit, Delete my data, another interface language): the window really closes.</summary>
+    public void End()
+    {
+        _ending = true;
+        Close();
+    }
+
+    /// <summary>Windows' close, the mini translator: the window rests out of sight until it's opened again.</summary>
+    public void Hide()
+    {
+        if (!AppWindow.IsVisible)
+        {
+            return;
+        }
+
+        Rest();
+        AppWindow.Hide();
+        Hidden?.Invoke();
+    }
+
+    /// <summary>Opened again after <see cref="Hide"/>: on the page asked for, as fresh as a new window, where it was.</summary>
+    public void ShowAgain(string page, string section)
+    {
+        Go(page, section);
+        if (PageHost.Content is null)
+        {
+            ShowPage(); // the same page as before: Go didn't change it
+        }
+
+        AppWindow.Show(activateWindow: true);
+        BringToFront();
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, FocusPage);
     }
 
     /// <summary>Brings an open window to the front, restored if it was minimised.</summary>
@@ -415,6 +424,65 @@ public sealed partial class MainWindow : Window, IPageHost
             ContentDialogResult.Secondary => Answer.Other,
             _ => Answer.Cancel,
         };
+    }
+
+    private void OnClosing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        if (!_ending)
+        {
+            args.Cancel = true;
+            Hide();
+        }
+    }
+
+    /// <summary>
+    /// Out of sight (hidden or closed): its place is saved, what the pages were waiting for is dropped, clipboard
+    /// history's decrypted copies and Settings' listeners go, and the page is taken out, so it comes back fresh (and
+    /// Back starts again) when the window does.
+    /// </summary>
+    private void Rest()
+    {
+        SavePlace();
+        _translate?.ViewModel.Unload();
+        _write?.ViewModel.Unload();
+        if (ReferenceEquals(PageHost.Content, _clipboardPage))
+        {
+            _clipboardPage?.ViewModel.Detach();
+        }
+
+        _settings?.ViewModel.Detach();
+        PageHost.Content = null;
+        _back.Clear();
+        _here = ("", "");
+        AppTitleBar.IsBackButtonEnabled = false;
+    }
+
+    /// <summary>
+    /// The first focus goes to the Translate page's box, ready to type (Write's draft, Review's card likewise); on other
+    /// pages to the pane's row, as if clicked.
+    /// </summary>
+    private void FocusPage()
+    {
+        if (PageHost.Content is TranslatePage translate)
+        {
+            translate.FocusBox();
+        }
+        else if (PageHost.Content is WritePage write)
+        {
+            write.FocusDraft();
+        }
+        else if (PageHost.Content is ReviewPage review)
+        {
+            review.FocusCard(); // so Space shows the meaning at once, not the page under the pane's focus
+        }
+        else if (PageHost.Content is ClipboardPage clipboard && clipboard.ViewModel.IsOn)
+        {
+            clipboard.FocusSearch(); // typing searches, and ↑ ↓ choose a copy (Lamha 2's)
+        }
+        else
+        {
+            _items[ViewModel.Page.Id].Focus(FocusState.Pointer);
+        }
     }
 
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
