@@ -389,6 +389,27 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
    - CLAUDE.md's rule ("a screen uses only the system; a new component goes into it first");
    - decision record 0020.
 
+   **Built 2026-10-27:**
+   - **The test** (`tests/Lamha.Core.Tests/Appearance/ScreensTests.cs`):
+     - it reads the screens' XAML (`Views/`, `Windows/`, the setters of their own styles included) and their C# (code-behind, view models);
+     - it fails on a typed colour, font size, corner radius or glyph, and on a gap off the 4 px grid;
+     - a Windows measurement off the grid is named in it with where Windows has it: one today, the clipboard rows' 4,2 inset (WinUI's `NavigationViewItemButtonMargin`); a name no longer used fails too.
+   - **Your call: every gap rounded to the grid** rather than listed (141 places in 14 files):
+     - an icon beside its label 8 apart (6 before), as WinUI's buttons; chips and buttons 8 apart;
+     - stacked lines 4 apart (2), a heading to its chips 8 (6), a name over its hint 0, as Windows' setting cards;
+     - pills inset 4 around 24-high segments, so the segmented switch is 32 high as a control (28 before);
+     - the row buttons' text 12 in (Windows' button padding 11 and its edge) and pulled out by 12 (10 before), the edge kept for high contrast;
+     - the answer's numbered circles centred in a 24 box (they sat 3 down); the panel's heading and hint, and the mini translator's word and meaning, one text of two runs on one baseline;
+     - the journal's bar and Review's key cap take tokens (`LamhaBrandBarBrush`, `LamhaKeyOnAccentBrush`); first run's step marks take Caption and the pill.
+   - **Visible changes from it:**
+     - first run's step titles are Subtitle (20, were 22);
+     - the clipboard panel's keys and foot are Caption (12, were 10.5 and 11.5), so **the panel is 400 wide** (Lamha 2's 380) to keep its foot on one line;
+     - the rest moves by 2 px or less; before and after compared in both languages and themes.
+   - **`--gallery`** (`Windows/GalleryWindow`): the type ramp, the colours (Lamha's and Windows'), every icon and the four sizes, the buttons (and disabled), fields and choices, setting cards, the expander, a content card, InfoBars, the toast, the empty state, progress and key caps; in either language, with a switch for the theme. Its headings are new strings (`Gallery_`, Claude's draft); the components show Lamha's own.
+   - **CLAUDE.md** has the rule, and the gallery's command; **decision 0020** says how the system is kept; **system.md** names the test, the two new brushes, row buttons and the segmented switch.
+   - **Measured** (NativeAOT, no warnings), in commit MB: tray 52, card open 88 and closed 86, main window open 106 and closed 104, all within budget.
+   - 490 tests (7 new).
+
 Released as **Lamha 3.1**, after betas. The website follows, with the new screenshots.
 
 ## Questions

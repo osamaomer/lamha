@@ -17,19 +17,19 @@
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
       <Grid>
-        <Border Padding="10,3" controls:Pill.IsPill="True" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind ViewModel.HasDue, Mode=OneWay}">
+        <Border Padding="12,4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind ViewModel.HasDue, Mode=OneWay}">
           <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" FontWeight="Bold" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind ViewModel.DueText, Mode=OneWay}" />
         </Border>
         <!-- Nothing waiting: quiet (Lamha 2's .zero) -->
-        <Border Padding="10,3" controls:Pill.IsPill="True" Background="{ThemeResource LamhaHoverBrush}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.HasDue), Mode=OneWay}">
+        <Border Padding="12,4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaHoverBrush}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.HasDue), Mode=OneWay}">
           <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" FontWeight="Bold" Text="{x:Bind ViewModel.DueText, Mode=OneWay}" />
         </Border>
       </Grid>
       <Grid Grid.Column="1">
-        <Border Padding="10,3" controls:Pill.IsPill="True" Background="{ThemeResource LamhaOkSoftBrush}" Visibility="{x:Bind ViewModel.HasFresh, Mode=OneWay}">
+        <Border Padding="12,4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaOkSoftBrush}" Visibility="{x:Bind ViewModel.HasFresh, Mode=OneWay}">
           <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" FontWeight="Bold" Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind ViewModel.FreshText, Mode=OneWay}" />
         </Border>
-        <Border Padding="10,3" controls:Pill.IsPill="True" Background="{ThemeResource LamhaHoverBrush}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.HasFresh), Mode=OneWay}">
+        <Border Padding="12,4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaHoverBrush}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.HasFresh), Mode=OneWay}">
           <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" FontWeight="Bold" Text="{x:Bind ViewModel.FreshText, Mode=OneWay}" />
         </Border>
       </Grid>
@@ -79,7 +79,7 @@
                 Command="{x:Bind ViewModel.RevealCommand}" AutomationProperties.Name="{x:Bind ShowLabel}" AutomationProperties.AcceleratorKey="Space" Visibility="{x:Bind controls:Show.IfNot(ViewModel.IsShown), Mode=OneWay}">
           <StackPanel Orientation="Horizontal" Spacing="8">
             <TextBlock VerticalAlignment="Center" Text="{x:Bind ShowLabel}" />
-            <Border Padding="5,1" VerticalAlignment="Center" CornerRadius="{StaticResource LamhaRadiusControl}" Background="#2EFFFFFF">
+            <Border Padding="4,0" VerticalAlignment="Center" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaKeyOnAccentBrush}">
               <TextBlock FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Normal" Text="Space" />
             </Border>
           </StackPanel>
@@ -87,7 +87,7 @@
 
         <!-- The back: the meaning (or the definition first) under a dashed line; the three answers; Remove -->
         <StackPanel x:Name="BackBox" Grid.Row="2" MaxWidth="420" Margin="0,12,0,0" Spacing="12" Visibility="{x:Bind ViewModel.IsShown, Mode=OneWay}">
-          <StackPanel Spacing="2">
+          <StackPanel Spacing="4">
             <Line X1="0" X2="420" Stretch="Fill" Stroke="{ThemeResource LamhaLineBrush}" StrokeThickness="1" StrokeDashArray="4,3" />
             <TextBlock Margin="0,12,0,0" Style="{StaticResource LamhaHeroTextStyle}" TextAlignment="Center"
                        FlowDirection="{x:Bind ViewModel.BackMainFlow, Mode=OneWay}" Text="{x:Bind ViewModel.BackMain, Mode=OneWay}" IsTextSelectionEnabled="True" />
@@ -137,7 +137,7 @@
                    Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.Session, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(ViewModel.Session), Mode=OneWay}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaSecondaryTextStyle}"
                    Text="{x:Bind ViewModel.Next, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(ViewModel.Next), Mode=OneWay}" />
-        <Border Margin="0,4,0,0" Padding="10,3" HorizontalAlignment="Center" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}"
+        <Border Margin="0,4,0,0" Padding="12,4" HorizontalAlignment="Center" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}"
                 Visibility="{x:Bind controls:Show.IfText(ViewModel.Streak), Mode=OneWay}">
           <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" FontWeight="Bold" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.Streak, Mode=OneWay}" />
         </Border>

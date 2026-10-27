@@ -148,7 +148,7 @@
             <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Foreground="{ThemeResource LamhaOkBrush}" FontWeight="SemiBold"
                        Text="{x:Bind ViewModel.Today.LeftText, Mode=OneWay}" Visibility="{x:Bind ViewModel.Today.IsMet, Mode=OneWay, FallbackValue=Collapsed}" />
           </StackPanel>
-          <Border Grid.Column="2" Padding="10,3" VerticalAlignment="Center" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}"
+          <Border Grid.Column="2" Padding="12,4" VerticalAlignment="Center" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}"
                   Visibility="{x:Bind ViewModel.Today.HasStreak, Mode=OneWay, FallbackValue=Collapsed}" ToolTipService.ToolTip="{x:Bind StreakTitle}">
             <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" FontWeight="Bold" Foreground="{ThemeResource LamhaTextBrush}"
                        Text="{x:Bind ViewModel.Today.StreakText, Mode=OneWay}" />
@@ -162,7 +162,7 @@
         <StackPanel Visibility="{x:Bind ViewModel.Today.HasWord, Mode=OneWay, FallbackValue=Collapsed}">
           <TextBlock Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind ViewModel.Today.WordLabel, Mode=OneWay}"
                      ToolTipService.ToolTip="{x:Bind ViewModel.Today.WordLabelTooltip, Mode=OneWay}" />
-          <Grid Margin="0,2,0,0" ColumnSpacing="8">
+          <Grid Margin="0,4,0,0" ColumnSpacing="8">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
@@ -212,10 +212,10 @@
           </ItemsRepeater.Layout>
           <ItemsRepeater.ItemTemplate>
             <DataTemplate x:DataType="main:RecentItem">
-              <!-- The row reaches 10 px past its column, so its text lines up with the panel's -->
-              <Button Margin="-10,0" Style="{StaticResource LamhaRowButtonStyle}" Command="{x:Bind Open}"
+              <!-- The row reaches 12 px past its column, so its text lines up with the panel's -->
+              <Button Margin="-12,0" Style="{StaticResource LamhaRowButtonStyle}" Command="{x:Bind Open}"
                       ToolTipService.ToolTip="{x:Bind Tooltip}" AutomationProperties.Name="{x:Bind Spoken}">
-                <Grid ColumnSpacing="10">
+                <Grid ColumnSpacing="12">
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" MaxWidth="190" />
                     <ColumnDefinition Width="*" />

@@ -29,8 +29,11 @@ namespace Lamha.App.Windows;
 /// </summary>
 public sealed partial class ClipPanelWindow : Window
 {
-    /// <summary>Lamha 2's panel, at 100 %.</summary>
-    public const int PanelWidth = 380;
+    /// <summary>
+    /// The panel at 100 %: Lamha 2's height, and 20 wider than its 380 so the keys at the foot fit on one line at Windows'
+    /// smallest type (Caption, 12; design system step 8).
+    /// </summary>
+    public const int PanelWidth = 400;
     public const int PanelHeight = 460;
 
     /// <summary>How far the panel rises as it opens (as a toast does: Controls/Reveal).</summary>

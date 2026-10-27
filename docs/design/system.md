@@ -11,8 +11,8 @@ Status: **signed off by the user, 2026-10-26** ([the plan](system-plan.md), step
 - From step 2 the values live in `Themes/`, and this page is kept in step with them.
 
 **How to use it:**
-- A screen uses only what's named here: a style, a token, an icon name, a motion. It never types a colour, a size, a radius, a gap or a glyph. A test fails when it does (step 8).
-- Something new is added here first, with its Windows reference, its measurements and its states, then built.
+- A screen uses only what's named here: a style, a token, an icon name, a motion. It never types a colour, a font size, a radius or a glyph, and a gap it types is on the 4 px grid. `ScreensTests` (Core's tests) fails when it does; a Windows measurement off the grid is named there with where Windows has it.
+- Something new is added here first, with its Windows reference, its measurements and its states, then built, and shown in the `--gallery` window (every component live, in either language and theme).
 - Where Windows has a measurement, Lamha takes it exactly, even off the 4 px grid. Everything else is on the 4 px grid.
 
 All sizes are in design pixels (what WinUI calls effective pixels); Windows scales them with the display.
@@ -103,6 +103,8 @@ WinUI's ramp. The frame, Settings and controls use only these styles:
 | `LamhaDangerBrush` | #C81E1E | #FC8888 | it deletes or failed |
 | `LamhaMarkBrush` | amber 30 % | amber 32 % | what a search matched |
 | `LamhaBrandBrush` | #6366F1 → #06B6D4 | the same | the mark, celebrations |
+| `LamhaBrandBarBrush` | the same, from start to end | the same | a bar: the mistake journal's |
+| `LamhaKeyOnAccentBrush` | white 18 % | the same | a key cap on the accent button (Review's Show meaning · Space) |
 
 - **The accent** is Lamha's indigo, or Windows' accent when Settings → Appearance asks; `AccentService` repaints the two accent tokens.
 - **Warnings and errors** use `InfoBar`'s own colours.
@@ -225,7 +227,9 @@ The default is WinUI's own control and style. Lamha's styles only set tokens.
 | **Expander** | 48 high at least; a setting with options under it |
 | **Group** | a heading (Body strong), 11 from its baseline to the first card; cards 4 apart; 28 before the next heading |
 | **Content card** | radius 8, padding 24, `CardBackgroundFillColorDefault` and its edge |
-| **List row** | 40 high at least, radius 4, hover fill; the selected row's pill as the pane's |
+| **List row** | 40 high at least, radius 4, hover fill; the selected row's pill as the pane's; inset 4,2 as the pane's rows (WinUI's `NavigationViewItemButtonMargin`) |
+| **Row button** | a whole row that does something (a recent lookup, a History word): Windows' subtle button, its text 12 in (Windows' button padding 11 and its 1 px edge), pulled out by 12 so its text lines up with the text around it (`LamhaRowButtonStyle`); 12 by 8 in a card's list (`LamhaCardRowButtonStyle`) |
+| **Segmented switch** | one of a few (العربية ⇄ English, All / Pinned): a pill in the chip colour, inset 4, round 24-high segments, so 32 high as a control (`LamhaSwitchSegmentStyle`) |
 | **InfoBar** | 48 high at least, padding 16: information, success, warning, error; at the top of what it's about |
 | **Toast** | Acrylic, radius 8, Body, rising from the page's foot 16 above it; 4 s, or until its action is used |
 | **Dialog** | `ContentDialog`, 320 to 548 wide; the main action is the accent button; Delete in the danger colour |

@@ -253,7 +253,7 @@
         <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ViewModel.UpButton, Mode=OneWay}"
                 Command="{x:Bind ViewModel.CheckUpdatesCommand}" Visibility="{x:Bind ViewModel.HasUpdates}" />
         <controls:SettingsCard.Detail>
-          <controls:StatusText Margin="0,-10,0,0" Text="{x:Bind ViewModel.UpStatus, Mode=OneWay}" Kind="{x:Bind ViewModel.UpStatusKind, Mode=OneWay}" />
+          <controls:StatusText Margin="0,-12,0,0" Text="{x:Bind ViewModel.UpStatus, Mode=OneWay}" Kind="{x:Bind ViewModel.UpStatusKind, Mode=OneWay}" />
         </controls:SettingsCard.Detail>
       </controls:SettingsCard>
       <controls:SettingsCard Icon="Update" Header="{x:Bind S.UpAuto}" Description="{x:Bind S.UpAutoHint}" Visibility="{x:Bind ViewModel.HasUpdates}">
@@ -440,7 +440,7 @@
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <!-- Lamha 2's .md-card: the English word on the left in both languages, its meaning on the reading side -->
-            <Border x:Name="MotionDemoCard" Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" VerticalAlignment="Center"
+            <Border x:Name="MotionDemoCard" Padding="12,8" CornerRadius="{StaticResource LamhaRadiusControl}" VerticalAlignment="Center"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
                     AutomationProperties.AccessibilityView="Raw">
               <StackPanel>

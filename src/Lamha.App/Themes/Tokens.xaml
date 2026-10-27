@@ -49,6 +49,13 @@
         <GradientStop Offset="0" Color="#6366F1" />
         <GradientStop Offset="1" Color="#06B6D4" />
       </LinearGradientBrush>
+      <!-- The same, from the start to the end: a bar (the mistake journal's) -->
+      <LinearGradientBrush x:Key="LamhaBrandBarBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Offset="0" Color="#6366F1" />
+        <GradientStop Offset="1" Color="#06B6D4" />
+      </LinearGradientBrush>
+      <!-- A key cap on the filled button (Review's Show meaning · Space): the button's own colour, lifted -->
+      <SolidColorBrush x:Key="LamhaKeyOnAccentBrush" Color="#2EFFFFFF" />
       <LinearGradientBrush x:Key="LamhaCelebrateBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Offset="0" Color="#1C4F46E5" />
         <GradientStop Offset="1" Color="#1C06B6D4" />
@@ -92,6 +99,13 @@
         <GradientStop Offset="0" Color="#6366F1" />
         <GradientStop Offset="1" Color="#06B6D4" />
       </LinearGradientBrush>
+      <!-- The same, from the start to the end: a bar (the mistake journal's) -->
+      <LinearGradientBrush x:Key="LamhaBrandBarBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Offset="0" Color="#6366F1" />
+        <GradientStop Offset="1" Color="#06B6D4" />
+      </LinearGradientBrush>
+      <!-- A key cap on the filled button (Review's Show meaning · Space): the button's own colour, lifted -->
+      <SolidColorBrush x:Key="LamhaKeyOnAccentBrush" Color="#2EFFFFFF" />
       <LinearGradientBrush x:Key="LamhaCelebrateBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Offset="0" Color="#388B93FF" />
         <GradientStop Offset="1" Color="#2122D3EE" />
@@ -132,6 +146,8 @@
       <SolidColorBrush x:Key="LamhaMarkBrush" Color="{ThemeResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="LamhaMarkTextBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
       <SolidColorBrush x:Key="LamhaBrandBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="LamhaBrandBarBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="LamhaKeyOnAccentBrush" Color="{ThemeResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="LamhaCelebrateBrush" Color="{ThemeResource SystemColorWindowColor}" />
       <StaticResource x:Key="LamhaCardTintColor" ResourceKey="SystemColorWindowColor" />
       <StaticResource x:Key="LamhaCardFallbackColor" ResourceKey="SystemColorWindowColor" />

@@ -17,7 +17,7 @@
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <StackPanel>
-          <TextBlock Margin="0,0,0,2" Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}"
+          <TextBlock Margin="0,0,0,4" Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}"
                      Text="{x:Bind Price.Label, Mode=OneWay}" />
           <TextBlock Style="{StaticResource LamhaHeroTextStyle}" Text="{x:Bind Price.Value, Mode=OneWay}" IsTextSelectionEnabled="True" />
           <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Price.RateLine, Mode=OneWay}" />

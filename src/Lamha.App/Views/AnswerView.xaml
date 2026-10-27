@@ -12,7 +12,7 @@
     <StackPanel.Resources>
       <!-- Lines of meanings: a part of speech, chips, a sense's hint, "+3" -->
       <DataTemplate x:Key="PosTemplate" x:DataType="card:PosItem">
-        <TextBlock Margin="0,0,2,0" VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Label}" />
+        <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Label}" />
       </DataTemplate>
       <DataTemplate x:Key="ChipTemplate" x:DataType="card:ChipItem">
         <Button Style="{StaticResource LamhaChipButtonStyle}" Command="{x:Bind Open}"
@@ -89,7 +89,7 @@
          translation around it. Lamha 2's hero is right to left in both languages: the meaning on the right. -->
     <Border Margin="{x:Bind HeroMargin(Answer.IsText), Mode=OneWay}" Style="{StaticResource LamhaTintedBoxStyle}" FlowDirection="RightToLeft">
       <StackPanel>
-        <TextBlock Margin="0,0,0,2" Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}"
+        <TextBlock Margin="0,0,0,4" Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}"
                    FlowDirection="{x:Bind InterfaceFlow}" Text="{x:Bind Answer.HeroLabel, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Answer.HeroLabel), Mode=OneWay, FallbackValue=Collapsed}" />
         <controls:WrapPanel HorizontalSpacing="{StaticResource LamhaSpace2}" Visibility="{x:Bind controls:Show.IfText(Answer.HeroText), Mode=OneWay, FallbackValue=Collapsed}">
           <TextBlock Style="{x:Bind controls:Show.HeroStyle(Answer.HeroIsLong), Mode=OneWay}" IsTextSelectionEnabled="True"
@@ -165,7 +165,7 @@
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="card:DefinitionGroupItem">
             <StackPanel>
-              <TextBlock Margin="0,0,0,6" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Pos}" Visibility="{x:Bind controls:Show.IfText(Pos), FallbackValue=Collapsed}" />
+              <TextBlock Margin="0,0,0,4" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Pos}" Visibility="{x:Bind controls:Show.IfText(Pos), FallbackValue=Collapsed}" />
               <ItemsControl ItemsSource="{x:Bind Entries}" IsTabStop="False">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="card:DefinitionItem">
@@ -176,10 +176,10 @@
                         <ColumnDefinition Width="18" />
                         <ColumnDefinition Width="*" />
                       </Grid.ColumnDefinitions>
-                      <!-- The number: a small circle, the button colour on the best one -->
-                      <Grid Width="18" Height="18" Margin="0,3,0,0" VerticalAlignment="Top">
-                        <Ellipse Fill="{ThemeResource LamhaChipBrush}" Visibility="{x:Bind controls:Show.IfNot(Best), FallbackValue=Collapsed}" />
-                        <Ellipse Fill="{ThemeResource LamhaButtonBrush}" Visibility="{x:Bind Best, FallbackValue=Collapsed}" />
+                      <!-- The number: a small circle, the button colour on the best one, centred on the reading line's 24 -->
+                      <Grid Width="18" Height="24" VerticalAlignment="Top">
+                        <Ellipse Height="18" Fill="{ThemeResource LamhaChipBrush}" Visibility="{x:Bind controls:Show.IfNot(Best), FallbackValue=Collapsed}" />
+                        <Ellipse Height="18" Fill="{ThemeResource LamhaButtonBrush}" Visibility="{x:Bind Best, FallbackValue=Collapsed}" />
                         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Bold"
                                    Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Number}" Visibility="{x:Bind controls:Show.IfNot(Best), FallbackValue=Collapsed}" />
                         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Bold"
@@ -191,9 +191,9 @@
                                    Text="{x:Bind ArabicWords}" Visibility="{x:Bind controls:Show.IfText(ArabicWords), FallbackValue=Collapsed}" />
                         <TextBlock Style="{StaticResource LamhaReadingTextStyle}" FlowDirection="RightToLeft" TextAlignment="{x:Bind controls:Show.ArabicAlignment}"
                                    Text="{x:Bind Translated, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Translated), Mode=OneWay, FallbackValue=Collapsed}" />
-                        <controls:Skeleton Height="12" Margin="0,6,48,6" CornerRadius="{StaticResource LamhaRadiusControl}"
+                        <controls:Skeleton Height="12" Margin="0,4,48,8" CornerRadius="{StaticResource LamhaRadiusControl}"
                                 Visibility="{x:Bind Pending, Mode=OneWay, FallbackValue=Collapsed}" />
-                        <TextBlock Margin="0,2,0,0" Style="{x:Bind controls:Show.GlossStyle(GlossIsRightToLeft)}"
+                        <TextBlock Margin="0,4,0,0" Style="{x:Bind controls:Show.GlossStyle(GlossIsRightToLeft)}"
                                    FlowDirection="{x:Bind controls:Show.Flow(GlossIsRightToLeft)}" TextAlignment="{x:Bind controls:Show.InterfaceAlignment(GlossIsRightToLeft)}"
                                    Text="{x:Bind Gloss}" IsTextSelectionEnabled="True" />
                         <Border Margin="0,4,0,0" Padding="8,0,0,0" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="2,0,0,0"
@@ -201,7 +201,7 @@
                           <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontStyle="Italic" FlowDirection="{x:Bind controls:Show.Flow(GlossIsRightToLeft)}"
                                      TextAlignment="{x:Bind controls:Show.InterfaceAlignment(GlossIsRightToLeft)}" Text="{x:Bind Example}" />
                         </Border>
-                        <ItemsControl Margin="0,6,0,0" ItemsSource="{x:Bind Synonyms}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False"
+                        <ItemsControl Margin="0,8,0,0" ItemsSource="{x:Bind Synonyms}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False"
                                       FlowDirection="{x:Bind controls:Show.InterfaceFlow}" Visibility="{x:Bind controls:Show.IfAny(Synonyms.Count), FallbackValue=Collapsed}">
                           <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="card:ChipItem">
@@ -235,7 +235,7 @@
       <ItemsControl ItemsSource="{x:Bind Answer.Examples, Mode=OneWay}" IsTabStop="False">
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="x:String">
-            <TextBlock Margin="0,0,0,6" Style="{StaticResource LamhaSecondaryTextStyle}" FlowDirection="LeftToRight" Text="{x:Bind}" />
+            <TextBlock Margin="0,0,0,8" Style="{StaticResource LamhaSecondaryTextStyle}" FlowDirection="LeftToRight" Text="{x:Bind}" />
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
@@ -264,7 +264,7 @@
           <TextBlock Style="{StaticResource LamhaReadingTextStyle}" MaxLines="5" TextTrimming="CharacterEllipsis"
                      FlowDirection="{x:Bind Answer.Wikipedia.Flow, Mode=OneWay, FallbackValue=RightToLeft}"
                      Text="{x:Bind Answer.Wikipedia.Extract, Mode=OneWay}" IsTextSelectionEnabled="True" />
-          <HyperlinkButton Margin="-4,2,-4,0" Style="{StaticResource LamhaFootLinkStyle}" FlowDirection="{x:Bind InterfaceFlow}" Command="{x:Bind Answer.Wikipedia.Read, Mode=OneWay}"
+          <HyperlinkButton Margin="-4,4,-4,0" Style="{StaticResource LamhaFootLinkStyle}" FlowDirection="{x:Bind InterfaceFlow}" Command="{x:Bind Answer.Wikipedia.Read, Mode=OneWay}"
                            Visibility="{x:Bind controls:Show.IfSet(Answer.Wikipedia.Url), Mode=OneWay, FallbackValue=Collapsed}">
             <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace1}">
               <TextBlock Text="{x:Bind ReadWiki}" />

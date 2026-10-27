@@ -39,7 +39,7 @@
     </StackPanel>
 
     <!-- The sentences: each row's two cells 16 in, their text 8 more (24 from the edge, and from the foot), the mark behind both on hover -->
-    <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" Margin="0,0,0,22" ItemsSource="{x:Bind Side.Rows, Mode=OneWay}" IsTabStop="False">
+    <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" Margin="0,0,0,24" ItemsSource="{x:Bind Side.Rows, Mode=OneWay}" IsTabStop="False">
       <ItemsControl.ItemTemplate>
         <DataTemplate x:DataType="main:SideRowItem">
           <Grid Margin="{x:Bind Margin}" Background="Transparent" PointerEntered="OnRowEntered" PointerExited="OnRowExited" PointerCanceled="OnRowExited"
@@ -49,10 +49,10 @@
               <ColumnDefinition Width="1" />
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Border Margin="16,0" Padding="8,2" CornerRadius="{StaticResource LamhaRadiusControl}" FlowDirection="{x:Bind SourceFlow}">
+            <Border Margin="16,0" Padding="8,4" CornerRadius="{StaticResource LamhaRadiusControl}" FlowDirection="{x:Bind SourceFlow}">
               <TextBlock Style="{StaticResource LamhaReadingTextStyle}" IsTextSelectionEnabled="True" Text="{x:Bind Source}" />
             </Border>
-            <Border Grid.Column="2" Margin="16,0" Padding="8,2" CornerRadius="{StaticResource LamhaRadiusControl}" FlowDirection="{x:Bind TranslationFlow}">
+            <Border Grid.Column="2" Margin="16,0" Padding="8,4" CornerRadius="{StaticResource LamhaRadiusControl}" FlowDirection="{x:Bind TranslationFlow}">
               <TextBlock Style="{StaticResource LamhaReadingTextStyle}" IsTextSelectionEnabled="True" Text="{x:Bind Translation}" />
             </Border>
           </Grid>

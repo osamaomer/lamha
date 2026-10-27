@@ -14,7 +14,7 @@
       <DataTemplate x:Key="MoveItemTemplate" x:DataType="firstRun:MoveItem">
         <StackPanel>
           <Border Height="1" Background="{ThemeResource LamhaLineBrush}" Visibility="{x:Bind controls:Show.IfNot(IsFirst)}" />
-          <Grid Padding="0,10" ColumnSpacing="12">
+          <Grid Padding="0,12" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="28" />
               <ColumnDefinition Width="*" />
@@ -31,9 +31,9 @@
         </StackPanel>
       </DataTemplate>
       <Style x:Key="StepTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource LamhaTextStyle}">
-        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeSubtitle}" />
         <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="LineHeight" Value="29" />
+        <Setter Property="LineHeight" Value="28" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="TextReadingOrder" Value="UseFlowDirection" />
       </Style>
@@ -115,7 +115,7 @@
                   <Border Style="{StaticResource BoxStyle}" Padding="0" />
                   <Border BorderBrush="{ThemeResource LamhaButtonBrush}" BorderThickness="2" CornerRadius="{StaticResource LamhaRadiusControl}"
                           Visibility="{x:Bind ViewModel.IsArabic, Mode=OneWay}" />
-                  <RadioButton x:Name="ArabicChoice" GroupName="UiLang" Style="{StaticResource LamhaRadioStyle}" Margin="16,10" FocusVisualMargin="-16,-10"
+                  <RadioButton x:Name="ArabicChoice" GroupName="UiLang" Style="{StaticResource LamhaRadioStyle}" Margin="16,8" FocusVisualMargin="-16,-8"
                                IsChecked="{x:Bind ViewModel.IsArabic, Mode=TwoWay}" AutomationProperties.Name="{x:Bind ViewModel.Arabic}">
                     <TextBlock FontSize="{StaticResource LamhaFontSizeBody}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.Arabic}" />
                   </RadioButton>
@@ -124,7 +124,7 @@
                   <Border Style="{StaticResource BoxStyle}" Padding="0" />
                   <Border BorderBrush="{ThemeResource LamhaButtonBrush}" BorderThickness="2" CornerRadius="{StaticResource LamhaRadiusControl}"
                           Visibility="{x:Bind ViewModel.IsEnglish, Mode=OneWay}" />
-                  <RadioButton x:Name="EnglishChoice" GroupName="UiLang" Style="{StaticResource LamhaRadioStyle}" Margin="16,10" FocusVisualMargin="-16,-10"
+                  <RadioButton x:Name="EnglishChoice" GroupName="UiLang" Style="{StaticResource LamhaRadioStyle}" Margin="16,8" FocusVisualMargin="-16,-8"
                                IsChecked="{x:Bind ViewModel.IsEnglish, Mode=TwoWay}" AutomationProperties.Name="{x:Bind ViewModel.English}">
                     <TextBlock FontSize="{StaticResource LamhaFontSizeBody}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaTextBrush}" Text="{x:Bind ViewModel.English}" />
                   </RadioButton>
@@ -149,7 +149,7 @@
                 <ItemsControl IsTabStop="False" ItemsSource="{x:Bind ViewModel.Dropped, Mode=OneWay}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="x:String">
-                      <TextBlock Margin="0,2" TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
+                      <TextBlock Margin="0,0,0,4" TextReadingOrder="UseFlowDirection" TextWrapping="Wrap" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}"
                                  Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind}" />
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
@@ -165,13 +165,13 @@
             <!-- ===== 2. Try it: select a word in the sentence and press the shortcut; the real card opens ===== -->
             <StackPanel x:Name="TryStep" Visibility="{x:Bind ViewModel.IsTry, Mode=OneWay}" Spacing="12">
               <TextBlock Style="{StaticResource StepTitleStyle}" Text="{x:Bind ViewModel.TryTitle}" AutomationProperties.HeadingLevel="Level1" />
-              <StackPanel Orientation="Horizontal" Spacing="6" Visibility="{x:Bind controls:Show.IfNot(ViewModel.Tried), Mode=OneWay}">
+              <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind controls:Show.IfNot(ViewModel.Tried), Mode=OneWay}">
                 <TextBlock VerticalAlignment="Center" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaTextStyle}" FontSize="{StaticResource LamhaFontSizeBody}"
                            Text="{x:Bind ViewModel.TryText}" />
                 <controls:KeyCaps Keys="{x:Bind ViewModel.LookupKeys, Mode=OneWay}" />
               </StackPanel>
               <!-- Once the card has opened on it: the design's green line -->
-              <Border Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaOkSoftBrush}"
+              <Border Padding="12,8" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaOkSoftBrush}"
                       Visibility="{x:Bind ViewModel.Tried, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <controls:FluentIcon Glyph="Check" VerticalAlignment="Center" Foreground="{ThemeResource LamhaOkBrush}" />
@@ -185,7 +185,7 @@
               </Border>
               <Border Style="{StaticResource BoxStyle}">
                 <StackPanel>
-                  <Grid Padding="0,10" ColumnSpacing="12">
+                  <Grid Padding="0,12" ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
@@ -195,7 +195,7 @@
                     <controls:KeyCaps Grid.Column="1" Keys="{x:Bind ViewModel.WriteKeys, Mode=OneWay}" />
                   </Grid>
                   <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
-                  <Grid Padding="0,10" ColumnSpacing="12">
+                  <Grid Padding="0,12" ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
@@ -231,7 +231,7 @@
                     <Paragraph>
                       <Run Text="{x:Bind ViewModel.ReadyText}" />
                       <InlineUIContainer>
-                        <controls:KeyCaps Margin="0,0,0,-5" Keys="{x:Bind ViewModel.LookupKeys, Mode=OneWay}" />
+                        <controls:KeyCaps Margin="0,0,0,-4" Keys="{x:Bind ViewModel.LookupKeys, Mode=OneWay}" />
                       </InlineUIContainer>
                     </Paragraph>
                   </RichTextBlock>
@@ -239,7 +239,7 @@
               </Grid>
               <Border Margin="0,8,0,0" Style="{StaticResource BoxStyle}">
                 <StackPanel>
-                  <Grid Padding="0,10" ColumnSpacing="16">
+                  <Grid Padding="0,12" ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
@@ -252,7 +252,7 @@
                                   AutomationProperties.Name="{x:Bind ViewModel.Login}" />
                   </Grid>
                   <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
-                  <Grid Padding="0,10" ColumnSpacing="16">
+                  <Grid Padding="0,12" ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
@@ -267,7 +267,7 @@
                   <!-- Remove Lamha 2: only when it's installed here, in the released Lamha 3 (decision 0019) -->
                   <StackPanel Visibility="{x:Bind ViewModel.OffersRemoval}">
                     <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
-                    <Grid Padding="0,10" ColumnSpacing="16">
+                    <Grid Padding="0,12" ColumnSpacing="16">
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -294,10 +294,10 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <Button Style="{StaticResource LamhaQuietButtonStyle}" Margin="-8,0,0,0" Padding="8,6" Background="Transparent" FontWeight="Normal"
+          <Button Style="{StaticResource LamhaQuietButtonStyle}" Margin="-8,0,0,0" Padding="8,4" Background="Transparent" FontWeight="Normal"
                   Foreground="{ThemeResource LamhaTextMutedBrush}" Content="{x:Bind ViewModel.CustomizeLabel}" Command="{x:Bind ViewModel.CustomizeCommand}"
                   Visibility="{x:Bind ViewModel.IsTry, Mode=OneWay}" />
-          <Button Style="{StaticResource LamhaQuietButtonStyle}" Margin="-8,0,0,0" Padding="8,6" Background="Transparent" FontWeight="Normal"
+          <Button Style="{StaticResource LamhaQuietButtonStyle}" Margin="-8,0,0,0" Padding="8,4" Background="Transparent" FontWeight="Normal"
                   Foreground="{ThemeResource LamhaTextMutedBrush}" Content="{x:Bind ViewModel.FreshLabel}" Command="{x:Bind ViewModel.FreshCommand}"
                   Visibility="{x:Bind ViewModel.CanMove, Mode=OneWay}" />
           <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">

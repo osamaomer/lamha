@@ -66,16 +66,16 @@
             <controls:DiffText FlowDirection="{x:Bind ViewModel.ResultFlow, Mode=OneWay}" TextStyle="{StaticResource LamhaReadingTextStyle}"
                                Parts="{x:Bind ViewModel.Diff, Mode=OneWay}" Fallback="{x:Bind ViewModel.Result, Mode=OneWay}" />
           </Border>
-          <StackPanel Margin="0,8,0,0" Orientation="Horizontal" Spacing="6">
+          <StackPanel Margin="0,8,0,0" Orientation="Horizontal" Spacing="8">
             <Button Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind ViewModel.UseResultCommand}" ToolTipService.ToolTip="{x:Bind UseItTitle}"
                     AutomationProperties.Name="{x:Bind UseIt}">
-              <StackPanel Orientation="Horizontal" Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="8">
                 <controls:FluentIcon Glyph="Check" />
                 <TextBlock Text="{x:Bind UseIt}" />
               </StackPanel>
             </Button>
             <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.CopyCommand}" AutomationProperties.Name="{x:Bind CopyLabel}" controls:Feedback.Copy="True">
-              <StackPanel Orientation="Horizontal" Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="8">
                 <controls:FluentIcon Glyph="Copy" />
                 <TextBlock Text="{x:Bind CopyLabel}" />
               </StackPanel>
@@ -102,11 +102,11 @@
                     <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FlowDirection="LeftToRight" TextAlignment="{x:Bind controls:Show.LatinAlignment}">
                       <Run Text="{x:Bind Original}" Foreground="{ThemeResource LamhaDangerBrush}" TextDecorations="Strikethrough" /><Run Text=" → " /><Run Text="{x:Bind Fix}" Foreground="{ThemeResource LamhaOkBrush}" FontWeight="SemiBold" />
                     </TextBlock>
-                    <Border Margin="0,4,0,0" Padding="8,1" HorizontalAlignment="Left" controls:Pill.IsPill="True"
+                    <Border Margin="0,4,0,0" Padding="8,0" HorizontalAlignment="Left" controls:Pill.IsPill="True"
                             Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind HasCategory, FallbackValue=Collapsed}">
                       <TextBlock Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind Category}" />
                     </Border>
-                    <TextBlock Margin="0,2,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}" />
+                    <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}" />
                   </StackPanel>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
@@ -154,12 +154,12 @@
                         Visibility="{x:Bind ViewModel.Journal.HasBars, Mode=OneWay, FallbackValue=Collapsed}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="main:JournalBar">
-                <!-- The row reaches 10 px past the panel's text, so its name lines up with the lines around it -->
-                <Button Margin="-10,0,-10,4" Padding="9,7" MinHeight="0" Style="{StaticResource LamhaRowButtonStyle}" Command="{x:Bind Pick}" AutomationProperties.Name="{x:Bind Spoken}">
+                <!-- The row reaches 12 px past the panel's text, so its name lines up with the lines around it -->
+                <Button Margin="-12,0,-12,4" Style="{StaticResource LamhaCardRowButtonStyle}" Command="{x:Bind Pick}" AutomationProperties.Name="{x:Bind Spoken}">
                   <Grid>
-                    <Border Margin="-9,-7" CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1" BorderBrush="{ThemeResource LamhaAccentBrush}"
+                    <Border Margin="-12,-8" CornerRadius="{StaticResource LamhaRadiusControl}" BorderThickness="1" BorderBrush="{ThemeResource LamhaAccentBrush}"
                             Background="{ThemeResource LamhaHoverBrush}" Visibility="{x:Bind IsOn, Mode=OneWay}" />
-                    <Grid ColumnSpacing="10">
+                    <Grid ColumnSpacing="12">
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="{x:Bind LabelWidth, Mode=OneWay}" />
                         <ColumnDefinition Width="*" />
@@ -173,14 +173,7 @@
                           <ColumnDefinition Width="{x:Bind Fill}" />
                           <ColumnDefinition Width="{x:Bind Rest}" />
                         </Grid.ColumnDefinitions>
-                        <Border CornerRadius="{StaticResource LamhaRadiusControl}">
-                          <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                              <GradientStop Offset="0" Color="#6366F1" />
-                              <GradientStop Offset="1" Color="#06B6D4" />
-                            </LinearGradientBrush>
-                          </Border.Background>
-                        </Border>
+                        <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaBrandBarBrush}" />
                       </Grid>
                       <TextBlock Grid.Column="2" VerticalAlignment="Center" TextAlignment="Right" Style="{StaticResource LamhaSecondaryTextStyle}"
                                  FontWeight="Bold" Text="{x:Bind Count}" />
@@ -216,7 +209,7 @@
                                TextAlignment="{x:Bind controls:Show.LatinAlignment}">
                       <Run Text="{x:Bind Original}" Foreground="{ThemeResource LamhaDangerBrush}" TextDecorations="Strikethrough" /><Run Text=" → " /><Run Text="{x:Bind Fix}" Foreground="{ThemeResource LamhaOkBrush}" FontWeight="SemiBold" />
                     </TextBlock>
-                    <TextBlock Margin="0,2,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}"
+                    <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaCaptionTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}"
                                Visibility="{x:Bind HasWhy}" />
                   </StackPanel>
                 </DataTemplate>

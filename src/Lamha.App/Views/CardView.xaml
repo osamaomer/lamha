@@ -24,13 +24,13 @@
     <Border x:Name="SolidBackground" Grid.RowSpan="3" Background="{ThemeResource LamhaSurfaceBrush}" Visibility="Collapsed" />
 
     <!-- The hint: "Select some text first", a pill next to the mouse -->
-    <Border x:Name="HintBox" Grid.RowSpan="3" x:Load="{x:Bind ViewModel.IsHint, Mode=OneWay}" Padding="16,10">
+    <Border x:Name="HintBox" Grid.RowSpan="3" x:Load="{x:Bind ViewModel.IsHint, Mode=OneWay}" Padding="16,8">
       <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}"
                  FontWeight="SemiBold" Text="{x:Bind ViewModel.HintText}" />
     </Border>
 
     <!-- ===== The bar: Lamha's mark and what the card shows; Back / Forward, Pin, Settings, Close ===== -->
-    <Grid x:Name="Bar" Padding="16,8,10,8" ColumnSpacing="4" Background="Transparent"
+    <Grid x:Name="Bar" Padding="16,8,8,8" ColumnSpacing="4" Background="Transparent"
           BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,0,0,1"
           Visibility="{x:Bind ViewModel.HasBar, Mode=OneWay, FallbackValue=Collapsed}" PointerPressed="OnBarPressed">
       <Grid.ColumnDefinitions>
@@ -45,7 +45,7 @@
       </Grid.ColumnDefinitions>
 
       <!-- Lamha's mark, its name when there's room, the languages or the title, the switch, and the source -->
-      <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" ToolTipService.ToolTip="{x:Bind Lamha}">
+      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" ToolTipService.ToolTip="{x:Bind Lamha}">
         <controls:BrandMark />
         <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" FontWeight="Bold"
                    Text="{x:Bind Lamha}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.HasDictSwitch), Mode=OneWay, FallbackValue=Collapsed}" />
@@ -56,7 +56,7 @@
                    TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
                    Text="{x:Bind ViewModel.BarTitle, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(ViewModel.BarTitle), Mode=OneWay, FallbackValue=Collapsed}" />
         <!-- العربية ⇄ English: the word translated, or explained in its own language -->
-        <Border Margin="6,0,0,0" Padding="2" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}"
+        <Border Margin="8,0,0,0" Padding="4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}"
                 Visibility="{x:Bind ViewModel.HasDictSwitch, Mode=OneWay, FallbackValue=Collapsed}" ToolTipService.ToolTip="{x:Bind DictSwitchName}">
           <StackPanel Orientation="Horizontal" AutomationProperties.Name="{x:Bind DictSwitchName}">
             <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind ViewModel.DictTranslatedLabel, Mode=OneWay}"
@@ -86,7 +86,7 @@
               Visibility="{x:Bind ViewModel.ShowNavigation, Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.ForwardCommand}">
         <controls:FluentIcon Glyph="Forward" />
       </Button>
-      <Border Grid.Column="4" Width="1" Height="16" Margin="2,0" Background="{ThemeResource LamhaLineBrush}"
+      <Border Grid.Column="4" Width="1" Height="16" Margin="4,0" Background="{ThemeResource LamhaLineBrush}"
               Visibility="{x:Bind ViewModel.ShowNavigation, Mode=OneWay, FallbackValue=Collapsed}" />
       <ToggleButton Grid.Column="5" Style="{StaticResource LamhaIconToggleStyle}"
                     IsChecked="{x:Bind ViewModel.IsPinned, Mode=OneWay}" Command="{x:Bind ViewModel.TogglePinCommand}"
@@ -131,7 +131,7 @@
           <Button Margin="0,8,0,0" HorizontalAlignment="Center" Style="{StaticResource LamhaButtonStyle}"
                   Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.RunErrorActionCommand}"
                   AutomationProperties.Name="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}">
-            <StackPanel Orientation="Horizontal" Spacing="6">
+            <StackPanel Orientation="Horizontal" Spacing="8">
               <controls:FluentIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Error), Mode=OneWay}" />
               <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.Error), Mode=OneWay}" />
             </StackPanel>
@@ -154,14 +154,14 @@
                         Visibility="{x:Bind ViewModel.Writing.HasTools, Mode=OneWay, FallbackValue=Collapsed}" AutomationProperties.Name="{x:Bind WritingToolsName}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
-                <controls:WrapPanel HorizontalSpacing="6" VerticalSpacing="6" />
+                <controls:WrapPanel HorizontalSpacing="8" VerticalSpacing="8" />
               </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="card:ToolChip">
                 <ToggleButton Style="{StaticResource LamhaChipStyle}" IsChecked="{x:Bind IsOn, Mode=TwoWay}" Command="{x:Bind Pick}"
                               IsEnabled="True" ToolTipService.ToolTip="{x:Bind Tooltip}" AutomationProperties.AcceleratorKey="{x:Bind Keys}">
-                  <StackPanel Orientation="Horizontal" Spacing="5">
+                  <StackPanel Orientation="Horizontal" Spacing="4">
                     <TextBlock FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Bold" Opacity="0.65" VerticalAlignment="Center" Text="{x:Bind Number}" />
                     <TextBlock Text="{x:Bind Label}" VerticalAlignment="Center" />
                   </StackPanel>
@@ -184,7 +184,7 @@
                 <controls:DiffText FlowDirection="{x:Bind ViewModel.Writing.ResultFlow, Mode=OneWay}" TextStyle="{StaticResource LamhaReadingTextStyle}"
                                    Parts="{x:Bind ViewModel.Writing.Diff, Mode=OneWay}" Fallback="{x:Bind ViewModel.Writing.Result, Mode=OneWay}" />
               </Border>
-              <Grid Margin="0,8,0,0" ColumnSpacing="6">
+              <Grid Margin="0,8,0,0" ColumnSpacing="8">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="Auto" />
                   <ColumnDefinition Width="Auto" />
@@ -195,14 +195,14 @@
                 <Button Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind ViewModel.Writing.ReplaceCommand, Mode=OneWay}"
                         Visibility="{x:Bind ViewModel.Writing.CanReplaceResult, Mode=OneWay, FallbackValue=Collapsed}"
                         AutomationProperties.Name="{x:Bind ViewModel.Writing.ReplaceLabel, Mode=OneWay}">
-                  <StackPanel Orientation="Horizontal" Spacing="6">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
                     <controls:FluentIcon Glyph="Check" />
                     <TextBlock Text="{x:Bind ViewModel.Writing.ReplaceLabel, Mode=OneWay}" />
                   </StackPanel>
                 </Button>
                 <Button Grid.Column="1" Style="{x:Bind controls:Show.CopyStyle(ViewModel.Writing.CanReplaceResult), Mode=OneWay}"
                         Command="{x:Bind ViewModel.Writing.CopyCommand, Mode=OneWay}" AutomationProperties.Name="{x:Bind CopyLabel}" controls:Feedback.Copy="True">
-                  <StackPanel Orientation="Horizontal" Spacing="6">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
                     <controls:FluentIcon Glyph="Copy" />
                     <TextBlock Text="{x:Bind CopyLabel}" />
                   </StackPanel>
@@ -231,11 +231,11 @@
                         <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FlowDirection="LeftToRight" TextAlignment="{x:Bind controls:Show.LatinAlignment}">
                           <Run Text="{x:Bind Original}" Foreground="{ThemeResource LamhaDangerBrush}" TextDecorations="Strikethrough" /><Run Text=" → " /><Run Text="{x:Bind Fix}" Foreground="{ThemeResource LamhaOkBrush}" FontWeight="SemiBold" />
                         </TextBlock>
-                        <Border Margin="0,4,0,0" Padding="8,1" HorizontalAlignment="Left" controls:Pill.IsPill="True"
+                        <Border Margin="0,4,0,0" Padding="8,0" HorizontalAlignment="Left" controls:Pill.IsPill="True"
                                 Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind HasCategory, FallbackValue=Collapsed}">
                           <TextBlock Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind Category}" />
                         </Border>
-                        <TextBlock Margin="0,2,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}" />
+                        <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}" />
                       </StackPanel>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
@@ -256,7 +256,7 @@
               <Button Margin="0,8,0,0" HorizontalAlignment="Center" Style="{StaticResource LamhaButtonStyle}"
                       Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.Writing.Error), Mode=OneWay, FallbackValue=Collapsed}" Command="{x:Bind ViewModel.Writing.RunErrorActionCommand, Mode=OneWay}"
                       AutomationProperties.Name="{x:Bind controls:Show.ErrorLabel(ViewModel.Writing.Error), Mode=OneWay}">
-                <StackPanel Orientation="Horizontal" Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
                   <controls:FluentIcon Glyph="{x:Bind controls:Show.ErrorGlyph(ViewModel.Writing.Error), Mode=OneWay}" />
                   <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.Writing.Error), Mode=OneWay}" />
                 </StackPanel>
@@ -275,7 +275,7 @@
               </TextBox>
               <StackPanel Visibility="{x:Bind ViewModel.Writing.ShowKinds, Mode=OneWay, FallbackValue=Collapsed}">
                 <TextBlock Margin="0,12,0,0" Style="{StaticResource LamhaSectionHeadingTextStyle}" Text="{x:Bind KindHeading}" />
-                <ItemsControl Margin="0,6,0,0" ItemsSource="{x:Bind ViewModel.Writing.Kinds, Mode=OneWay}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False">
+                <ItemsControl Margin="0,8,0,0" ItemsSource="{x:Bind ViewModel.Writing.Kinds, Mode=OneWay}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="card:ChoiceChip">
                       <ToggleButton Style="{StaticResource LamhaChipStyle}" IsChecked="{x:Bind IsOn, Mode=TwoWay}" Content="{x:Bind Label}" Click="OnChoice" />
@@ -284,7 +284,7 @@
                 </ItemsControl>
               </StackPanel>
               <TextBlock Margin="0,12,0,0" Style="{StaticResource LamhaSectionHeadingTextStyle}" Text="{x:Bind ToneHeading}" />
-              <ItemsControl Margin="0,6,0,0" ItemsSource="{x:Bind ViewModel.Writing.Tones, Mode=OneWay}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False">
+              <ItemsControl Margin="0,8,0,0" ItemsSource="{x:Bind ViewModel.Writing.Tones, Mode=OneWay}" ItemsPanel="{StaticResource LamhaWrapChipsPanel}" IsTabStop="False">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="card:ChoiceChip">
                     <ToggleButton Style="{StaticResource LamhaChipStyle}" IsChecked="{x:Bind IsOn, Mode=TwoWay}" Content="{x:Bind Label}" Click="OnChoice" />
@@ -292,7 +292,7 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
               <Button Margin="0,12,0,0" HorizontalAlignment="Left" Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind ViewModel.Writing.GoCommand, Mode=OneWay}">
-                <StackPanel Orientation="Horizontal" Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
                   <controls:FluentIcon Glyph="Sparkle" />
                   <TextBlock Text="{x:Bind ViewModel.Writing.GoLabel, Mode=OneWay}" />
                   <TextBlock Margin="4,0,0,0" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Normal" Opacity="0.75" VerticalAlignment="Center" Text="Ctrl+Enter" />
@@ -305,7 +305,7 @@
     </ScrollViewer>
 
     <!-- ===== The links at the foot ===== -->
-    <Border x:Name="Foot" Grid.Row="2" Padding="8,6" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,1,0,0"
+    <Border x:Name="Foot" Grid.Row="2" Padding="8,4" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,1,0,0"
             Visibility="{x:Bind controls:Show.IfAny(ViewModel.Links.Count), Mode=OneWay, FallbackValue=Collapsed}" SizeChanged="OnContentSizeChanged">
       <ItemsControl ItemsSource="{x:Bind ViewModel.Links, Mode=OneWay}" IsTabStop="False">
         <ItemsControl.ItemsPanel>

@@ -44,7 +44,7 @@
                Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnBoxKeyDown" />
 
       <!-- On its way: one shimmering line where the answer will be -->
-      <controls:Skeleton x:Name="Waiting" Visibility="{x:Bind ViewModel.IsWaiting, Mode=OneWay}" Grid.Row="1" Height="12" Margin="0,6,64,0" VerticalAlignment="Top"
+      <controls:Skeleton x:Name="Waiting" Visibility="{x:Bind ViewModel.IsWaiting, Mode=OneWay}" Grid.Row="1" Height="12" Margin="0,4,64,0" VerticalAlignment="Top"
                          CornerRadius="{StaticResource LamhaRadiusControl}" />
 
       <!-- A word: the headword beside its meaning, on one line while they fit. One text of two runs, so the serif

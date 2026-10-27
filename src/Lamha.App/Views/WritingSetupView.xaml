@@ -32,13 +32,13 @@
       <!-- Ollama -->
       <RadioButton GroupName="AiProvider" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind Setup.IsOllama, Mode=TwoWay}"
                    AutomationProperties.Name="{x:Bind S.OllamaFree}" AutomationProperties.HelpText="{x:Bind S.OllamaHint}">
-        <StackPanel Spacing="1">
+        <StackPanel Spacing="0">
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.OllamaFree}" />
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.OllamaHint}" />
         </StackPanel>
       </RadioButton>
       <StackPanel x:Name="OllamaSetup" x:Load="{x:Bind Setup.IsOllama, Mode=OneWay}" Style="{StaticResource LamhaProviderSetupStyle}">
-        <Grid ColumnSpacing="8" RowSpacing="6">
+        <Grid ColumnSpacing="8" RowSpacing="8">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -54,7 +54,7 @@
           <TextBlock Grid.Row="1" Grid.Column="1" TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaSecondaryTextStyle}" Foreground="{ThemeResource LamhaTextBrush}"
                      controls:Markup.Text="{x:Bind S.Ollama3}" />
         </Grid>
-        <StackPanel Spacing="2">
+        <StackPanel Spacing="0">
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.OllamaUrl}" />
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.OllamaUrlHint}" />
         </StackPanel>
@@ -73,7 +73,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center" Spacing="2">
+          <StackPanel VerticalAlignment="Center" Spacing="0">
             <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Model}" />
             <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.OllamaModelsHint}" />
           </StackPanel>
@@ -90,7 +90,7 @@
       <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
       <RadioButton GroupName="AiProvider" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind Setup.IsGemini, Mode=TwoWay}"
                    AutomationProperties.Name="{x:Bind S.GeminiFree}" AutomationProperties.HelpText="{x:Bind S.GeminiHint}">
-        <StackPanel Spacing="1">
+        <StackPanel Spacing="0">
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.GeminiFree}" />
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.GeminiHint}" />
         </StackPanel>
@@ -105,7 +105,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center" Spacing="2">
+          <StackPanel VerticalAlignment="Center" Spacing="0">
             <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Model}" />
             <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.GeminiModelsHint}" />
           </StackPanel>
@@ -118,7 +118,7 @@
       <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
       <RadioButton GroupName="AiProvider" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind Setup.IsClaude, Mode=TwoWay}"
                    AutomationProperties.Name="{x:Bind S.ClaudeBest}" AutomationProperties.HelpText="{x:Bind S.ClaudeHint}">
-        <StackPanel Spacing="1">
+        <StackPanel Spacing="0">
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.ClaudeBest}" />
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.ClaudeHint}" />
         </StackPanel>
@@ -131,7 +131,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center" Spacing="2">
+          <StackPanel VerticalAlignment="Center" Spacing="0">
             <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Model}" />
             <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.ClaudeModelsHint}" />
           </StackPanel>
@@ -144,7 +144,7 @@
       <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
       <RadioButton GroupName="AiProvider" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind Setup.IsOpenAi, Mode=TwoWay}"
                    AutomationProperties.Name="{x:Bind Setup.OpenAiName}" AutomationProperties.HelpText="{x:Bind S.OpenAiHint}">
-        <StackPanel Spacing="1">
+        <StackPanel Spacing="0">
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Setup.OpenAiName}" />
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.OpenAiHint}" />
         </StackPanel>
@@ -157,7 +157,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center" Spacing="2">
+          <StackPanel VerticalAlignment="Center" Spacing="0">
             <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Model}" />
             <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.OpenAiModels}" />
           </StackPanel>
@@ -170,20 +170,20 @@
       <Border Height="1" Background="{ThemeResource LamhaLineBrush}" />
       <RadioButton GroupName="AiProvider" Style="{StaticResource LamhaRadioStyle}" IsChecked="{x:Bind Setup.IsCustom, Mode=TwoWay}"
                    AutomationProperties.Name="{x:Bind Setup.CustomName}" AutomationProperties.HelpText="{x:Bind S.CustomHint}">
-        <StackPanel Spacing="1">
+        <StackPanel Spacing="0">
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Setup.CustomName}" />
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.CustomHint}" />
         </StackPanel>
       </RadioButton>
       <StackPanel x:Name="CustomSetup" x:Load="{x:Bind Setup.IsCustom, Mode=OneWay}" Style="{StaticResource LamhaProviderSetupStyle}">
-        <StackPanel Spacing="2">
+        <StackPanel Spacing="0">
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.ServerUrl}" />
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.ServerUrlHint}" />
         </StackPanel>
         <TextBox Style="{StaticResource LamhaFieldStyle}" FlowDirection="LeftToRight" PlaceholderText="http://localhost:1234/v1" AutomationProperties.Name="{x:Bind S.ServerUrl}"
                  Text="{x:Bind Setup.CustomUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  Tag="{x:Bind Setup.CommitCustomCommand}" KeyDown="OnEnterCommits" LostFocus="OnLeaveCommits" />
-        <StackPanel Spacing="2">
+        <StackPanel Spacing="0">
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.ServerKey}" />
           <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.ServerKeyHint}" />
         </StackPanel>
@@ -195,7 +195,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center" Spacing="2">
+          <StackPanel VerticalAlignment="Center" Spacing="0">
             <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind S.Model}" />
             <TextBlock TextReadingOrder="UseFlowDirection" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind S.ServerModels}" />
           </StackPanel>

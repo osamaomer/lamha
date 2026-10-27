@@ -49,3 +49,10 @@
   - Windows' NavigationView keeps about 3 MB of commit after the main window closes, and its TitleBar about 1 MB: 99 / 97 MB open and closed, against `main`'s 95 / 94.
   - **The user's call (2026-10-26):** keep Windows' controls and raise 0013's "back in the tray after the main window" to **100 MB** commit, rather than a hand-built pane in Windows' look.
   - The tray measured 57 MB for `main` and this branch alike that day, above 0008's 55: that's the PC, not the design system. It stays to be looked into.
+- **Kept that way (step 8, 2026-10-27):**
+  - `ScreensTests` (Core's tests) reads the screens' XAML (`Views/`, `Windows/`, their own styles included) and their C# (code-behind, view models). It fails on a typed colour, font size, corner radius or glyph, and on a gap off the 4 px grid. A Windows measurement off the grid is named in the test with where Windows has it; today there's one, the clipboard rows' 4,2 inset (WinUI's `NavigationViewItemButtonMargin`). The system itself (`Themes/`, `Controls/`) is where those values live and isn't read.
+  - **The user's call:** the 135 gaps off the grid that were there (most of them Lamha 2's 2, 6 and 10) were rounded, screen by screen, rather than listed as exceptions. Visible changes from it:
+    - first run's step titles are Subtitle (20, was 22);
+    - the clipboard panel's keys and foot use Caption (12, were 10.5 and 11.5), so the panel is 400 wide (Lamha 2's was 380) for its foot to stay on one line.
+  - `--gallery` shows every component live, from the system's styles, in either language and theme.
+  - CLAUDE.md carries the rule.

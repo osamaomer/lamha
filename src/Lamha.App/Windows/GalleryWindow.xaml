@@ -1,0 +1,211 @@
+<Window
+    x:Class="Lamha.App.Windows.GalleryWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Lamha.App.Controls">
+  <!-- The design system, live (started with "gallery"): every component from the system's own styles, in the groups of
+       docs/design/system.md, for checking and screenshots as WinUI 3 Gallery is for Windows' controls. A page as the
+       main window's: Windows' 48 title bar, then the page padded 28, its title, and groups of cards 28 apart. -->
+  <Grid x:Name="Root">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="48" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <!-- The title bar: the drag area with the mark and the name; the theme's switch; room for Windows' buttons -->
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition x:Name="CaptionInset" Width="0" />
+      </Grid.ColumnDefinitions>
+      <Grid x:Name="DragArea" Padding="16,0,0,0" Background="Transparent">
+        <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace4}" VerticalAlignment="Center">
+          <controls:BrandMark VerticalAlignment="Center" />
+          <TextBlock VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind Title}" />
+        </StackPanel>
+      </Grid>
+      <StackPanel Grid.Column="1" Margin="0,0,16,0" Orientation="Horizontal" Spacing="{StaticResource LamhaSpace3}" VerticalAlignment="Center">
+        <TextBlock VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind DarkLabel}" />
+        <ToggleSwitch x:Name="DarkSwitch" VerticalAlignment="Center" Style="{StaticResource LamhaSettingsSwitchStyle}" Toggled="OnDarkToggled"
+                      AutomationProperties.Name="{x:Bind DarkLabel}" />
+      </StackPanel>
+    </Grid>
+
+    <ScrollViewer Grid.Row="1">
+      <StackPanel x:Name="Page" Margin="{StaticResource LamhaPageMargin}" MaxWidth="1000" Spacing="{StaticResource LamhaCardGap}">
+        <TextBlock Style="{StaticResource LamhaPageTitleTextStyle}" Text="{x:Bind Title}" AutomationProperties.HeadingLevel="Level1" />
+        <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind Intro}" />
+
+        <!-- ===== Type: Windows' ramp, then Lamha's content styles (the names in code) ===== -->
+        <TextBlock Margin="0,28,0,8" Style="{StaticResource LamhaGroupHeadingTextStyle}" Text="{x:Bind TypeHeading}" AutomationProperties.HeadingLevel="Level2" />
+        <Border Style="{StaticResource LamhaContentCardStyle}">
+          <StackPanel x:Name="TypeList" Spacing="{StaticResource LamhaSpace3}" />
+        </Border>
+
+        <!-- ===== Colours: Lamha's brushes for meaning, and Windows' for the frame (drawn in code, in the window's theme) ===== -->
+        <TextBlock Margin="0,28,0,8" Style="{StaticResource LamhaGroupHeadingTextStyle}" Text="{x:Bind ColoursHeading}" AutomationProperties.HeadingLevel="Level2" />
+        <Border Style="{StaticResource LamhaContentCardStyle}">
+          <controls:WrapPanel x:Name="Swatches" HorizontalSpacing="{StaticResource LamhaSpace4}" VerticalSpacing="{StaticResource LamhaSpace4}" />
+        </Border>
+
+        <!-- ===== Icons: every name at 16, then the four sizes ===== -->
+        <TextBlock Margin="0,28,0,8" Style="{StaticResource LamhaGroupHeadingTextStyle}" Text="{x:Bind IconsHeading}" AutomationProperties.HeadingLevel="Level2" />
+        <Border Style="{StaticResource LamhaContentCardStyle}">
+          <StackPanel Spacing="{StaticResource LamhaSpace6}">
+            <controls:WrapPanel x:Name="Icons" HorizontalSpacing="{StaticResource LamhaSpace2}" VerticalSpacing="{StaticResource LamhaSpace2}" />
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace6}">
+              <controls:FluentIcon Glyph="Translate" Size="Small" VerticalAlignment="Center" />
+              <controls:FluentIcon Glyph="Translate" Size="Normal" VerticalAlignment="Center" />
+              <controls:FluentIcon Glyph="Translate" Size="Large" VerticalAlignment="Center" />
+              <controls:FluentIcon Glyph="Translate" Size="Hero" VerticalAlignment="Center" />
+              <controls:BrandMark VerticalAlignment="Center" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- ===== Buttons: each kind, then disabled ===== -->
+        <TextBlock Margin="0,28,0,8" Style="{StaticResource LamhaGroupHeadingTextStyle}" Text="{x:Bind ButtonsHeading}" AutomationProperties.HeadingLevel="Level2" />
+        <Border Style="{StaticResource LamhaContentCardStyle}">
+          <StackPanel Spacing="{StaticResource LamhaSpace4}">
+            <controls:WrapPanel HorizontalSpacing="{StaticResource LamhaSpace2}" VerticalSpacing="{StaticResource LamhaSpace2}">
+              <Button Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind Proofread}" />
+              <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind Copy}" />
+              <Button Style="{StaticResource LamhaSubtleButtonStyle}" Content="{x:Bind SetUp}" />
+              <DropDownButton Content="{x:Bind Rewrite}" MinHeight="{StaticResource LamhaControlHeight}" />
+              <Button Style="{StaticResource LamhaDangerButtonStyle}" Content="{x:Bind Delete}" />
+              <HyperlinkButton Content="{x:Bind Clear}" />
+              <Button Style="{StaticResource LamhaIconButtonStyle}" ToolTipService.ToolTip="{x:Bind Copy}" AutomationProperties.Name="{x:Bind Copy}">
+                <controls:FluentIcon Glyph="Copy" />
+              </Button>
+              <Button Style="{StaticResource LamhaMainIconButtonStyle}" ToolTipService.ToolTip="{x:Bind Listen}" AutomationProperties.Name="{x:Bind Listen}">
+                <controls:FluentIcon Glyph="Speak" />
+              </Button>
+              <ToggleButton Style="{StaticResource LamhaIconToggleStyle}" IsChecked="True" ToolTipService.ToolTip="{x:Bind Pinned}" AutomationProperties.Name="{x:Bind Pinned}">
+                <controls:FluentIcon Glyph="Pin" />
+              </ToggleButton>
+            </controls:WrapPanel>
+            <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind DisabledLabel}" />
+            <controls:WrapPanel HorizontalSpacing="{StaticResource LamhaSpace2}" VerticalSpacing="{StaticResource LamhaSpace2}">
+              <Button Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind Proofread}" IsEnabled="False" />
+              <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind Copy}" IsEnabled="False" />
+              <Button Style="{StaticResource LamhaSubtleButtonStyle}" Content="{x:Bind SetUp}" IsEnabled="False" />
+              <Button Style="{StaticResource LamhaIconButtonStyle}" IsEnabled="False" AutomationProperties.Name="{x:Bind Copy}">
+                <controls:FluentIcon Glyph="Copy" />
+              </Button>
+            </controls:WrapPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- ===== Fields and choices ===== -->
+        <TextBlock Margin="0,28,0,8" Style="{StaticResource LamhaGroupHeadingTextStyle}" Text="{x:Bind FieldsHeading}" AutomationProperties.HeadingLevel="Level2" />
+        <Border Style="{StaticResource LamhaContentCardStyle}">
+          <StackPanel Spacing="{StaticResource LamhaSpace4}">
+            <TextBox Style="{StaticResource LamhaFieldStyle}" PlaceholderText="{x:Bind Placeholder}" />
+            <Grid>
+              <TextBox Style="{StaticResource LamhaSearchFieldStyle}" PlaceholderText="{x:Bind SearchPlaceholder}" />
+              <controls:FluentIcon Glyph="Search" Style="{StaticResource LamhaFieldGlyphStyle}" />
+            </Grid>
+            <controls:WrapPanel HorizontalSpacing="{StaticResource LamhaSpace4}" VerticalSpacing="{StaticResource LamhaSpace2}">
+              <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind LanguageNames}" SelectedIndex="0" />
+              <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="True" />
+              <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" />
+              <TextBox Style="{StaticResource LamhaFieldStyle}" PlaceholderText="{x:Bind Placeholder}" IsEnabled="False" />
+            </controls:WrapPanel>
+            <StackPanel>
+              <RadioButton GroupName="GalleryChoice" Style="{StaticResource LamhaRadioStyle}" Content="{x:Bind Arabic}" IsChecked="True" />
+              <RadioButton GroupName="GalleryChoice" Style="{StaticResource LamhaRadioStyle}" Content="{x:Bind English}" />
+            </StackPanel>
+            <controls:WrapPanel HorizontalSpacing="{StaticResource LamhaSpace2}" VerticalSpacing="{StaticResource LamhaSpace2}">
+              <!-- One of a few: the segmented switch, 32 high (a 4 inset round 24 segments) -->
+              <Border Padding="4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
+                <StackPanel Orientation="Horizontal">
+                  <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind All}" IsChecked="True" />
+                  <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind Pinned}" />
+                </StackPanel>
+              </Border>
+              <ToggleButton Style="{StaticResource LamhaChipStyle}" Content="{x:Bind Proofread}" IsChecked="True" />
+              <ToggleButton Style="{StaticResource LamhaChipStyle}" Content="{x:Bind Rewrite}" />
+              <Button Style="{StaticResource LamhaChipButtonStyle}" Content="{x:Bind Translate}" />
+            </controls:WrapPanel>
+            <Button HorizontalAlignment="Left" Style="{StaticResource LamhaSuggestionChipStyle}">
+              <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace2}">
+                <controls:FluentIcon Glyph="Clipboard" VerticalAlignment="Center" />
+                <TextBlock VerticalAlignment="Center" Text="{x:Bind PasteChip}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Border>
+
+        <!-- ===== Cards: setting cards (a switch, a dropdown, a page), an expander, a content card, the tinted box ===== -->
+        <TextBlock Margin="0,28,0,8" Style="{StaticResource LamhaGroupHeadingTextStyle}" Text="{x:Bind CardsHeading}" AutomationProperties.HeadingLevel="Level2" />
+        <controls:SettingsCard Icon="Update" Header="{x:Bind UpAuto}" Description="{x:Bind UpAutoHint}">
+          <ToggleSwitch Style="{StaticResource LamhaSettingsSwitchStyle}" IsOn="True" />
+        </controls:SettingsCard>
+        <controls:SettingsCard Icon="Globe" Header="{x:Bind UiLang}" Description="{x:Bind UiLangHint}">
+          <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind LanguageNames}" SelectedIndex="0" />
+        </controls:SettingsCard>
+        <Button Style="{StaticResource LamhaTileButtonStyle}" AutomationProperties.Name="{x:Bind Languages}">
+          <Grid ColumnSpacing="{StaticResource LamhaSpace5}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <controls:FluentIcon Glyph="Globe" Size="Large" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind Languages}" />
+            <controls:FluentIcon Grid.Column="2" Glyph="Chevron" Size="Small" VerticalAlignment="Center" />
+          </Grid>
+        </Button>
+        <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+          <Expander.Header>
+            <StackPanel Orientation="Horizontal">
+              <controls:FluentIcon Margin="0,0,20,0" Glyph="Shield" Size="Large" VerticalAlignment="Center" />
+              <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaBodyTextStyle}" Text="{x:Bind PrivacyMore}" />
+            </StackPanel>
+          </Expander.Header>
+          <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind UpAutoHint}" />
+        </Expander>
+        <Border Margin="0,16,0,0" Style="{StaticResource LamhaContentCardStyle}">
+          <StackPanel Spacing="{StaticResource LamhaSpace3}">
+            <TextBlock Style="{StaticResource LamhaHeadwordTextStyle}" Text="{x:Bind SampleText}" />
+            <Border Style="{StaticResource LamhaTintedBoxStyle}">
+              <TextBlock Style="{StaticResource LamhaHeroTextStyle}" Text="{x:Bind Lamha}" />
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <!-- ===== Messages: InfoBars, the toast, an empty state ===== -->
+        <TextBlock Margin="0,28,0,8" Style="{StaticResource LamhaGroupHeadingTextStyle}" Text="{x:Bind MessagesHeading}" AutomationProperties.HeadingLevel="Level2" />
+        <StackPanel Spacing="{StaticResource LamhaSpace2}">
+          <InfoBar IsOpen="True" IsClosable="False" Severity="Informational" Title="{x:Bind SetupTitle}" Message="{x:Bind SetupText}" />
+          <InfoBar IsOpen="True" IsClosable="False" Severity="Success" Title="{x:Bind Copied}" />
+          <InfoBar IsOpen="True" IsClosable="False" Severity="Warning" Title="{x:Bind Paused}" />
+          <InfoBar IsOpen="True" IsClosable="False" Severity="Error" Title="{x:Bind Problem}" />
+          <Border Margin="0,8,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource LamhaToastStyle}">
+            <TextBlock Style="{StaticResource LamhaToastTextStyle}" Text="{x:Bind Copied}" />
+          </Border>
+          <Border Margin="0,8,0,0" Style="{StaticResource LamhaContentCardStyle}">
+            <controls:EmptyState Glyph="Review" Title="{x:Bind EmptyTitle}" Text="{x:Bind EmptyText}" />
+          </Border>
+        </StackPanel>
+
+        <!-- ===== Progress and keys ===== -->
+        <TextBlock Margin="0,28,0,8" Style="{StaticResource LamhaGroupHeadingTextStyle}" Text="{x:Bind ProgressHeading}" AutomationProperties.HeadingLevel="Level2" />
+        <Border Style="{StaticResource LamhaContentCardStyle}">
+          <StackPanel Spacing="{StaticResource LamhaSpace4}">
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace6}">
+              <ProgressRing Width="16" Height="16" IsActive="True" />
+              <ProgressRing Width="32" Height="32" IsActive="True" />
+              <controls:KeyCaps x:Name="Keys" VerticalAlignment="Center" />
+            </StackPanel>
+            <ProgressBar IsIndeterminate="True" />
+            <ProgressBar Value="60" />
+            <controls:Skeleton Height="12" Margin="0,0,96,0" CornerRadius="{StaticResource LamhaRadiusControl}" />
+            <controls:Skeleton Height="12" Margin="0,0,192,0" CornerRadius="{StaticResource LamhaRadiusControl}" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</Window>

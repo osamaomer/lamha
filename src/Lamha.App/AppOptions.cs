@@ -33,7 +33,7 @@ public enum CardLifetime
 /// <param name="FirstRun">
 /// <c>--first-run</c>: first run at start even when it's done (<c>--first-run=lamha2</c>, <c>try</c>, <c>writing</c> or
 /// <c>ready</c> at that step), for screenshots. Without it, first run shows only at the first start, and never with <c>--measure</c>,
-/// <c>--page</c>, <c>--panel</c> or <c>--sample</c>.
+/// <c>--page</c>, <c>--panel</c>, <c>--sample</c> or <c>--gallery</c>.
 /// </param>
 /// <param name="Updates">
 /// <c>--updates=folder</c> (or an address): Velopack's releases from there instead of GitHub, to try an update with
@@ -55,7 +55,11 @@ public enum CardLifetime
 /// <c>--mini</c>: the mini translator at start (with <c>--sample=text</c>, that text looked up in it), for screenshots;
 /// a second start with it opens the mini translator in the Lamha already running.
 /// </param>
-public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null, string? Updates = null, string? Packs = null, string? Lamha2 = null, bool RemoveLamha2 = false, bool Mini = false)
+/// <param name="Gallery">
+/// <c>--gallery</c>: the design system live, every component from its own styles (with <c>--lang</c> and <c>--theme</c>),
+/// for checking a change in one place and for screenshots.
+/// </param>
+public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null, string? Updates = null, string? Packs = null, string? Lamha2 = null, bool RemoveLamha2 = false, bool Mini = false, bool Gallery = false)
 {
     public static AppOptions FromArgs(IReadOnlyList<string> args)
     {
@@ -72,7 +76,8 @@ public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string?
         var lamha2 = Value(args, "--lamha2=");
         return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language, theme, string.IsNullOrWhiteSpace(page) ? null : page, args.Contains("--panel", StringComparer.OrdinalIgnoreCase), firstRun, string.IsNullOrWhiteSpace(updates) ? null : updates,
             string.IsNullOrWhiteSpace(packs) ? null : packs.TrimEnd('/') + "/", string.IsNullOrWhiteSpace(lamha2) ? null : Path.GetFullPath(lamha2),
-            args.Contains("--remove-lamha2", StringComparer.OrdinalIgnoreCase), args.Contains("--mini", StringComparer.OrdinalIgnoreCase));
+            args.Contains("--remove-lamha2", StringComparer.OrdinalIgnoreCase), args.Contains("--mini", StringComparer.OrdinalIgnoreCase),
+            args.Contains("--gallery", StringComparer.OrdinalIgnoreCase));
     }
 
     /// <summary>What Lamha starts with again after an update: the profile and the releases' folder, not a screenshot's page or sample.</summary>

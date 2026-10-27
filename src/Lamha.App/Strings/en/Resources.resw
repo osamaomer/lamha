@@ -883,4 +883,16 @@ What did you expect?
   <data name="Translate_PasteChip" xml:space="preserve"><value>Translate what you copied:</value><comment>new in Lamha 3 (design system step 6), signed off as drawn in system.html 2026-10-26 (decision 0020): Paste and translate's chip under the empty box, before a quote of the copy</comment></data>
   <data name="Translate_Mini" xml:space="preserve"><value>Mini translator, always on top</value><comment>new in Lamha 3 (design system step 6), Claude's draft, yours to reword: the Translate page's button that opens the mini translator (its tooltip and name)</comment></data>
   <data name="Mini_Back" xml:space="preserve"><value>Back to Lamha</value><comment>new in Lamha 3 (design system step 6), Claude's draft, yours to reword: the mini translator's title bar button back to the main window (its tooltip and name)</comment></data>
+  <data name="Gallery_Title" xml:space="preserve"><value>Lamha's design system</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Intro" xml:space="preserve"><value>Every component from the system's own styles, as the screens use them (docs/design/system.md).</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Dark" xml:space="preserve"><value>Dark</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Type" xml:space="preserve"><value>Type</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Colours" xml:space="preserve"><value>Colours</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Icons" xml:space="preserve"><value>Icons</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Buttons" xml:space="preserve"><value>Buttons</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Fields" xml:space="preserve"><value>Fields and choices</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Cards" xml:space="preserve"><value>Cards</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Messages" xml:space="preserve"><value>Messages</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Progress" xml:space="preserve"><value>Progress and keys</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
+  <data name="Gallery_Disabled" xml:space="preserve"><value>Disabled</value><comment>the --gallery window (development only, design system step 8), Claude's draft</comment></data>
 </root>

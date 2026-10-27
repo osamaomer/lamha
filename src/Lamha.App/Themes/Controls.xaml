@@ -494,14 +494,19 @@
   </ItemsPanelTemplate>
 
   <!-- A row that does something (a recent lookup): the whole row is Windows' subtle button, 40 high at least (a list
-       row's height). Its text is 10 px in, the 1 px edge (seen in high contrast) included, so it lines up with the text
-       around it. -->
+       row's height). Its text is 12 px in, Windows' button padding (11) and its 1 px edge (seen in high contrast), so a
+       row pulled out by 12 lines its text up with the text around it. -->
   <Style x:Key="LamhaRowButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
-    <Setter Property="Padding" Value="9,4" />
+    <Setter Property="Padding" Value="11,4" />
     <Setter Property="MinHeight" Value="40" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <!-- A taller row of a list in a card (the mistake journal's bars): its content 12 by 8 from the edge, the edge included -->
+  <Style x:Key="LamhaCardRowButtonStyle" TargetType="Button" BasedOn="{StaticResource LamhaRowButtonStyle}">
+    <Setter Property="Padding" Value="11,7" />
+    <Setter Property="MinHeight" Value="0" />
   </Style>
 
   <!-- A link in a line of text (Clear, See its meaning): Windows' hyperlink button, its text where the line's text is

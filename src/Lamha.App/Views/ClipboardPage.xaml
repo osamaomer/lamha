@@ -39,7 +39,7 @@
       </Grid>
 
       <!-- All / Pinned: the chosen one raised on the surface (the card's language switch) -->
-      <Border Grid.Column="1" Padding="2" VerticalAlignment="Center" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
+      <Border Grid.Column="1" Padding="4" VerticalAlignment="Center" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
         <StackPanel Orientation="Horizontal" AutomationProperties.Name="{x:Bind FilterLabel}">
           <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" MinHeight="28" Padding="12,4" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind AllLabel}"
                         IsChecked="{x:Bind controls:Show.Not(ViewModel.PinnedOnly), Mode=OneWay}" Command="{x:Bind ViewModel.FilterCommand}" CommandParameter="false" />
@@ -86,7 +86,7 @@
                 <!-- The hover tint, and the chosen copy's (the accent's tint) -->
                 <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaHoverBrush}" Opacity="0" controls:Feedback.Fade="True" />
                 <Border CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind IsSelected, Mode=OneWay}" />
-                <StackPanel Padding="16,10" Spacing="4">
+                <StackPanel Padding="16,8" Spacing="4">
                   <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
                              FlowDirection="{x:Bind LabelFlow, Mode=OneWay}" TextAlignment="{x:Bind controls:Show.InterfaceAligned(LabelFlow), Mode=OneWay}" Text="{x:Bind Label, Mode=OneWay}" controls:Marked.Query="{x:Bind Query, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Label), Mode=OneWay}" />
                   <TextBlock Style="{StaticResource LamhaBodyTextStyle}" MaxLines="2" TextTrimming="CharacterEllipsis"
@@ -94,7 +94,7 @@
                   <!-- An English copy's translation, once it's been translated -->
                   <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" MaxLines="1" TextTrimming="CharacterEllipsis" FlowDirection="RightToLeft" TextAlignment="{x:Bind controls:Show.ArabicAlignment}"
                              Text="{x:Bind Translation, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Translation), Mode=OneWay}" />
-                  <StackPanel Orientation="Horizontal" Spacing="6">
+                  <StackPanel Orientation="Horizontal" Spacing="4">
                     <controls:FluentIcon Glyph="Pin" Size="Small" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}"
                                        Visibility="{x:Bind Pinned, Mode=OneWay}" AutomationProperties.Name="{x:Bind PinnedName}" />
                     <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Foreground="{ThemeResource LamhaTextFaintBrush}"
@@ -102,7 +102,7 @@
                   </StackPanel>
 
                   <!-- The chosen copy: the tools that fit it, pin and delete -->
-                  <Grid Margin="0,6,0,0" ColumnSpacing="4" Visibility="{x:Bind IsSelected, Mode=OneWay}">
+                  <Grid Margin="0,8,0,0" ColumnSpacing="4" Visibility="{x:Bind IsSelected, Mode=OneWay}">
                     <Grid.ColumnDefinitions>
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
@@ -111,7 +111,7 @@
                     <ItemsControl ItemsSource="{x:Bind Tools}" IsTabStop="False">
                       <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                          <controls:WrapPanel HorizontalSpacing="6" VerticalSpacing="6" />
+                          <controls:WrapPanel HorizontalSpacing="8" VerticalSpacing="8" />
                         </ItemsPanelTemplate>
                       </ItemsControl.ItemsPanel>
                       <ItemsControl.ItemTemplate>
@@ -141,7 +141,7 @@
                   <StackPanel Margin="0,8,0,0" Spacing="8" Visibility="{x:Bind IsResult, Mode=OneWay}">
                     <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind IsSummary, Mode=OneWay}" AutomationProperties.Name="{x:Bind SummaryLangName}">
                       <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind SummaryLangColon}" />
-                      <Border Padding="2" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
+                      <Border Padding="4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
                         <StackPanel Orientation="Horizontal">
                           <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="العربية" IsChecked="{x:Bind controls:Show.Not(SummaryInEnglish), Mode=OneWay}"
                                         Command="{x:Bind Owner.SummaryInCommand}" CommandParameter="ar" />
@@ -154,15 +154,15 @@
                       <controls:DiffText FlowDirection="{x:Bind ResultFlow, Mode=OneWay}" TextStyle="{StaticResource LamhaReadingTextStyle}"
                                          Parts="{x:Bind Diff, Mode=OneWay}" Fallback="{x:Bind Result, Mode=OneWay}" />
                     </Border>
-                    <StackPanel Orientation="Horizontal" Spacing="6">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
                       <Button Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind Owner.CopyResultCommand}" AutomationProperties.Name="{x:Bind CopyLabel}" controls:Feedback.Copy="True">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
                           <controls:FluentIcon Glyph="Copy" />
                           <TextBlock Text="{x:Bind CopyLabel}" />
                         </StackPanel>
                       </Button>
                       <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind Owner.RedoCommand}" ToolTipService.ToolTip="{x:Bind NewResult}">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
                           <controls:FluentIcon Glyph="Retry" />
                           <TextBlock Text="{x:Bind RedoLabel}" />
                         </StackPanel>
@@ -187,11 +187,11 @@
                               <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FlowDirection="LeftToRight" TextAlignment="{x:Bind controls:Show.LatinAlignment}">
                                 <Run Text="{x:Bind Original}" Foreground="{ThemeResource LamhaDangerBrush}" TextDecorations="Strikethrough" /><Run Text=" → " /><Run Text="{x:Bind Fix}" Foreground="{ThemeResource LamhaOkBrush}" FontWeight="SemiBold" />
                               </TextBlock>
-                              <Border Margin="0,4,0,0" Padding="8,1" HorizontalAlignment="Left" controls:Pill.IsPill="True"
+                              <Border Margin="0,4,0,0" Padding="8,0" HorizontalAlignment="Left" controls:Pill.IsPill="True"
                                       Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind HasCategory, FallbackValue=Collapsed}">
                                 <TextBlock Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind Category}" />
                               </Border>
-                              <TextBlock Margin="0,2,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}" />
+                              <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}" />
                             </StackPanel>
                           </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -206,19 +206,19 @@
                   </StackPanel>
 
                   <!-- Added to review, or removed: the word's meaning under it -->
-                  <StackPanel Margin="0,8,0,0" Spacing="2" Visibility="{x:Bind IsDone, Mode=OneWay}">
+                  <StackPanel Margin="0,8,0,0" Spacing="4" Visibility="{x:Bind IsDone, Mode=OneWay}">
                     <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind DoneText, Mode=OneWay}" />
                     <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" TextReadingOrder="DetectFromContent" Text="{x:Bind DoneMeaning, Mode=OneWay}"
                                Visibility="{x:Bind controls:Show.IfText(DoneMeaning), Mode=OneWay}" />
                   </StackPanel>
 
                   <!-- An error: what happened, what to do, Try again -->
-                  <StackPanel Margin="0,8,0,0" Spacing="2" Visibility="{x:Bind IsError, Mode=OneWay}">
+                  <StackPanel Margin="0,8,0,0" Spacing="4" Visibility="{x:Bind IsError, Mode=OneWay}">
                     <TextBlock Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind Error.Title, Mode=OneWay}" />
                     <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind Error.Hint, Mode=OneWay}" />
-                    <Button Margin="0,6,0,0" HorizontalAlignment="Left" Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind Owner.RunErrorActionCommand}"
+                    <Button Margin="0,8,0,0" HorizontalAlignment="Left" Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind Owner.RunErrorActionCommand}"
                             Visibility="{x:Bind controls:Show.ErrorButton(Error), Mode=OneWay, FallbackValue=Collapsed}">
-                      <StackPanel Orientation="Horizontal" Spacing="6">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
                         <controls:FluentIcon Glyph="Retry" />
                         <TextBlock Text="{x:Bind controls:Show.ErrorLabel(Error), Mode=OneWay}" />
                       </StackPanel>

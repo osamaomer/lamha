@@ -212,7 +212,11 @@ public partial class App : Application
             });
         };
 
-        if (_options.Mini)
+        if (_options.Gallery)
+        {
+            new Windows.GalleryWindow(_options.Theme ?? _brain.Settings.Current.Theme).ShowCentred();
+        }
+        else if (_options.Mini)
         {
             mini.Show(_options.Sample ?? "");
         }

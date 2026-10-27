@@ -5,7 +5,7 @@
     xmlns:controls="using:Lamha.App.Controls"
     xmlns:card="using:Lamha.App.ViewModels.Card"
     xmlns:main="using:Lamha.App.ViewModels.Main">
-  <!-- The clipboard quick panel, as signed off in phase 1 (docs/design/clipboard-panel.html): Lamha 2's 380 × 460 panel
+  <!-- The clipboard quick panel, as signed off in phase 1 (docs/design/clipboard-panel.html): Lamha 2's 380 × 460 panel (400 wide since design system step 8)
        in the card's kind of window. The list (search, All / Pinned, the copies, the keys at the foot); Tab: the chosen
        copy's tools, numbered; a tool's result before it's pasted; the paused banner; and "not turned on yet". -->
   <Grid x:Name="Root" KeyboardAcceleratorPlacementMode="Hidden" PreviewKeyDown="OnPreviewKeyDown">
@@ -14,29 +14,28 @@
       <Style x:Key="PanelKeyStyle" TargetType="Border">
         <Setter Property="Padding" Value="4,0" />
         <Setter Property="MinWidth" Value="16" />
-        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
         <Setter Property="Background" Value="{ThemeResource LamhaChipBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource LamhaLineBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="VerticalAlignment" Value="Center" />
       </Style>
       <Style x:Key="PanelKeyTextStyle" TargetType="TextBlock" BasedOn="{StaticResource LamhaTextStyle}">
-        <Setter Property="FontSize" Value="10.5" />
-        <Setter Property="LineHeight" Value="15" />
+        <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
+        <Setter Property="LineHeight" Value="16" />
         <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
         <Setter Property="TextAlignment" Value="Center" />
         <Setter Property="TextWrapping" Value="NoWrap" />
       </Style>
       <Style x:Key="PanelFootTextStyle" TargetType="TextBlock" BasedOn="{StaticResource LamhaTextStyle}">
-        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
         <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="TextWrapping" Value="NoWrap" />
       </Style>
       <!-- A tool in the menu: the keyboard's choice is tinted (it has the focus; the mouse moves it), as Lamha 2's -->
-      <Style x:Key="PanelToolStyle" TargetType="Button" BasedOn="{StaticResource LamhaRowButtonStyle}">
+      <Style x:Key="PanelToolStyle" TargetType="Button" BasedOn="{StaticResource LamhaCardRowButtonStyle}">
         <Setter Property="MinHeight" Value="44" />
-        <Setter Property="Padding" Value="8,6" />
         <Setter Property="UseSystemFocusVisuals" Value="False" />
       </Style>
       <!-- A tool's result before it's pasted: 16.5 px bold (the design's) -->
@@ -55,10 +54,10 @@
         <RowDefinition Height="Auto" />
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
-      <StackPanel Padding="16,12,16,0" Orientation="Horizontal" Spacing="8">
-        <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="Bold" Text="{x:Bind Heading}" />
-        <TextBlock VerticalAlignment="Bottom" Margin="0,0,0,1" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Hint}" />
-      </StackPanel>
+      <!-- The heading and its hint on one baseline: one text of two runs, an en and a hair space between them -->
+      <TextBlock Margin="16,12,16,0" Style="{StaticResource LamhaBodyTextStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis">
+        <Run FontWeight="Bold" Text="{x:Bind Heading}" /><Run Text="&#x2002;&#x200A;" /><Run FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Hint}" />
+      </TextBlock>
       <StackPanel Grid.Row="1" Padding="28,24" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
         <controls:FluentIcon Glyph="Clipboard" Size="Hero" Margin="0,0,0,4" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind OptInTitle}" />
@@ -80,13 +79,13 @@
         <RowDefinition Height="*" />
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
-      <StackPanel Padding="16,12,16,0" Orientation="Horizontal" Spacing="8">
-        <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="Bold" Text="{x:Bind Heading}" />
-        <TextBlock VerticalAlignment="Bottom" Margin="0,0,0,1" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind Hint}" />
-      </StackPanel>
+      <!-- The heading and its hint on one baseline: one text of two runs, an en and a hair space between them -->
+      <TextBlock Margin="16,12,16,0" Style="{StaticResource LamhaBodyTextStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis">
+        <Run FontWeight="Bold" Text="{x:Bind Heading}" /><Run Text="&#x2002;&#x200A;" /><Run FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Hint}" />
+      </TextBlock>
 
       <!-- Paused: Windows' InfoBar, and Resume -->
-      <InfoBar Grid.Row="1" Margin="16,10,16,0" Visibility="Collapsed" controls:Reveal.Shown="{x:Bind ViewModel.List.IsPaused, Mode=OneWay}" controls:Reveal.Rise="-8" IsOpen="True" IsClosable="False" Severity="Warning"
+      <InfoBar Grid.Row="1" Margin="16,8,16,0" Visibility="Collapsed" controls:Reveal.Shown="{x:Bind ViewModel.List.IsPaused, Mode=OneWay}" controls:Reveal.Rise="-8" IsOpen="True" IsClosable="False" Severity="Warning"
                Title="{x:Bind PausedTitle}" Message="{x:Bind PausedText}">
         <InfoBar.ActionButton>
           <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind ResumeLabel}" Command="{x:Bind ViewModel.List.ResumeCommand}" />
@@ -94,7 +93,7 @@
       </InfoBar>
 
       <!-- Search, All / Pinned -->
-      <Grid Grid.Row="2" Padding="16,10" ColumnSpacing="8">
+      <Grid Grid.Row="2" Padding="16,8" ColumnSpacing="8">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*" />
           <ColumnDefinition Width="Auto" />
@@ -107,11 +106,11 @@
                    Text="{x:Bind ViewModel.List.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
           <controls:FluentIcon Glyph="Search" Style="{StaticResource LamhaFieldGlyphStyle}" />
         </Grid>
-        <Border Grid.Column="1" Padding="2" VerticalAlignment="Center" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
+        <Border Grid.Column="1" Padding="4" VerticalAlignment="Center" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
           <StackPanel Orientation="Horizontal" AutomationProperties.Name="{x:Bind FilterLabel}">
-            <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" MinHeight="28" Padding="10,4" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind AllLabel}" IsTabStop="False"
+            <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Padding="12,4" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind AllLabel}" IsTabStop="False"
                           IsChecked="{x:Bind controls:Show.Not(ViewModel.List.PinnedOnly), Mode=OneWay}" Command="{x:Bind ViewModel.List.FilterCommand}" CommandParameter="false" />
-            <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" MinHeight="28" Padding="10,4" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind PinnedLabel}" IsTabStop="False"
+            <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Padding="12,4" FontSize="{StaticResource LamhaFontSizeCaption}" Content="{x:Bind PinnedLabel}" IsTabStop="False"
                           IsChecked="{x:Bind ViewModel.List.PinnedOnly, Mode=OneWay}" Command="{x:Bind ViewModel.List.FilterCommand}" CommandParameter="true" />
           </StackPanel>
         </Border>
@@ -122,7 +121,7 @@
         <StackPanel Padding="0,0,0,8">
           <ItemsRepeater x:Name="List" ItemsSource="{x:Bind ViewModel.List.Rows, Mode=OneWay}" AutomationProperties.Name="{x:Bind HistoryLabel}">
             <ItemsRepeater.Layout>
-              <StackLayout Spacing="2" />
+              <StackLayout Spacing="4" />
             </ItemsRepeater.Layout>
             <ItemsRepeater.ItemTemplate>
               <DataTemplate x:DataType="main:ClipRow">
@@ -134,7 +133,7 @@
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Spacing="2">
+                    <StackPanel Spacing="4">
                       <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontWeight="Bold" Foreground="{ThemeResource LamhaTextBrush}" TextWrapping="NoWrap"
                                  TextTrimming="CharacterEllipsis" FlowDirection="{x:Bind LabelFlow, Mode=OneWay}" TextAlignment="{x:Bind controls:Show.InterfaceAligned(LabelFlow), Mode=OneWay}" Text="{x:Bind Label, Mode=OneWay}" controls:Marked.Query="{x:Bind Query, Mode=OneWay}"
                                  Visibility="{x:Bind controls:Show.IfText(Label), Mode=OneWay}" />
@@ -143,7 +142,7 @@
                       <!-- An English copy's translation, once it's been translated -->
                       <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" MaxLines="1" TextTrimming="CharacterEllipsis" FlowDirection="RightToLeft" TextAlignment="{x:Bind controls:Show.ArabicAlignment}"
                                  Text="{x:Bind Translation, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Translation), Mode=OneWay}" />
-                      <StackPanel Orientation="Horizontal" Spacing="6">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
                         <Border Style="{StaticResource PanelKeyStyle}" Padding="4,0" Visibility="{x:Bind controls:Show.IfText(Number), Mode=OneWay}">
                           <TextBlock Style="{StaticResource PanelKeyTextStyle}" Foreground="{ThemeResource LamhaTextMutedBrush}" Text="{x:Bind Number, Mode=OneWay}" />
                         </Border>
@@ -155,7 +154,7 @@
                     </StackPanel>
                     <!-- Pin and delete keep their room on every copy, so a copy's text doesn't reflow when it's chosen (Lamha 2's);
                          they act on the chosen copy, so only its own are there for the mouse and Narrator -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Top" Orientation="Horizontal" Spacing="2" Opacity="{x:Bind controls:Show.Opaque(IsSelected), Mode=OneWay}"
+                    <StackPanel Grid.Column="1" VerticalAlignment="Top" Orientation="Horizontal" Spacing="4" Opacity="{x:Bind controls:Show.Opaque(IsSelected), Mode=OneWay}"
                                 IsHitTestVisible="{x:Bind IsSelected, Mode=OneWay}">
                       <ToggleButton Style="{StaticResource LamhaIconToggleStyle}" Width="28" Height="28" MinHeight="28" IsTabStop="False" IsChecked="{x:Bind Pinned, Mode=OneWay}"
                                     Command="{x:Bind Owner.TogglePinCommand}" ToolTipService.ToolTip="{x:Bind PinTooltip, Mode=OneWay}"
@@ -183,13 +182,13 @@
 
       <!-- The keys -->
       <Border Grid.Row="4" Padding="16,8" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource LamhaLineBrush}">
-        <controls:WrapPanel HorizontalSpacing="14" VerticalSpacing="4">
+        <controls:WrapPanel HorizontalSpacing="12" VerticalSpacing="4">
           <StackPanel Orientation="Horizontal" Spacing="4">
             <Border Style="{StaticResource PanelKeyStyle}"><TextBlock Style="{StaticResource PanelKeyTextStyle}" Text="Enter" /></Border>
             <TextBlock Style="{StaticResource PanelFootTextStyle}" Text="{x:Bind KeyPaste}" />
           </StackPanel>
           <StackPanel Orientation="Horizontal" Spacing="4">
-            <StackPanel FlowDirection="LeftToRight" Orientation="Horizontal" Spacing="1">
+            <StackPanel FlowDirection="LeftToRight" Orientation="Horizontal" Spacing="0">
               <Border Style="{StaticResource PanelKeyStyle}"><TextBlock Style="{StaticResource PanelKeyTextStyle}" Text="Shift" /></Border>
               <TextBlock Style="{StaticResource PanelFootTextStyle}" Text="+" />
               <Border Style="{StaticResource PanelKeyStyle}"><TextBlock Style="{StaticResource PanelKeyTextStyle}" Text="Enter" /></Border>
@@ -216,7 +215,7 @@
         <RowDefinition Height="*" />
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
-      <StackPanel Padding="12,10,12,0" Orientation="Horizontal" Spacing="4">
+      <StackPanel Padding="12,8,12,0" Orientation="Horizontal" Spacing="4">
         <Button Style="{StaticResource LamhaIconButtonStyle}" IsTabStop="False" Command="{x:Bind ViewModel.BackToListCommand}"
                 ToolTipService.ToolTip="{x:Bind BackToList}" AutomationProperties.Name="{x:Bind BackToList}">
           <controls:FluentIcon Glyph="Back" />
@@ -225,8 +224,8 @@
       </StackPanel>
 
       <!-- The copy -->
-      <Border Grid.Row="1" Margin="16,8" Padding="12,10" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaChipBrush}">
-        <StackPanel Spacing="2">
+      <Border Grid.Row="1" Margin="16,8" Padding="12,8" CornerRadius="{StaticResource LamhaRadiusControl}" Background="{ThemeResource LamhaChipBrush}">
+        <StackPanel Spacing="4">
           <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" MaxLines="2" TextTrimming="CharacterEllipsis"
                      FlowDirection="{x:Bind ViewModel.ToolsTextFlow, Mode=OneWay}" Text="{x:Bind ViewModel.ToolsText, Mode=OneWay}" />
           <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" Foreground="{ThemeResource LamhaTextFaintBrush}" TextWrapping="NoWrap"
@@ -239,13 +238,13 @@
                     Visibility="{x:Bind ViewModel.ToolsRow.IsIdle, Mode=OneWay, FallbackValue=Collapsed}">
         <ItemsRepeater x:Name="ToolList" ItemsSource="{x:Bind ViewModel.ToolsRow.Tools, Mode=OneWay}" AutomationProperties.Name="{x:Bind ToolsLabel}">
           <ItemsRepeater.Layout>
-            <StackLayout Spacing="2" />
+            <StackLayout Spacing="4" />
           </ItemsRepeater.Layout>
           <ItemsRepeater.ItemTemplate>
             <DataTemplate x:DataType="main:ClipTool">
               <Button Style="{StaticResource PanelToolStyle}" Command="{x:Bind Run}" AutomationProperties.Name="{x:Bind Label}" AutomationProperties.HelpText="{x:Bind Hint}"
                       GotFocus="OnToolFocus" LostFocus="OnToolFocus" PointerEntered="OnToolPointerEntered">
-                <Grid ColumnSpacing="10">
+                <Grid ColumnSpacing="8">
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="14" />
                     <ColumnDefinition Width="Auto" />
@@ -282,7 +281,7 @@
             <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind ViewModel.ToolsRow.IsSummary, Mode=OneWay, FallbackValue=Collapsed}"
                         AutomationProperties.Name="{x:Bind SummaryLangName}">
               <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind SummaryLangColon}" />
-              <Border Padding="2" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
+              <Border Padding="4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
                 <StackPanel Orientation="Horizontal">
                   <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="العربية"
                                 IsChecked="{x:Bind controls:Show.Not(ViewModel.ToolsRow.SummaryInEnglish), Mode=OneWay, FallbackValue=False}"
@@ -296,22 +295,22 @@
               <controls:DiffText FlowDirection="{x:Bind ViewModel.ToolsRow.ResultFlow, Mode=OneWay, FallbackValue=LeftToRight}" TextStyle="{StaticResource PanelResultTextStyle}"
                                  Parts="{x:Bind ViewModel.ToolsRow.Diff, Mode=OneWay}" Fallback="{x:Bind ViewModel.ToolsRow.Result, Mode=OneWay, FallbackValue=''}" />
             </Border>
-            <StackPanel Orientation="Horizontal" Spacing="6">
+            <StackPanel Orientation="Horizontal" Spacing="8">
               <Button x:Name="PasteButton" Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind ViewModel.PasteResultCommand}" AutomationProperties.Name="{x:Bind PasteLabel}">
-                <StackPanel Orientation="Horizontal" Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
                   <controls:FluentIcon Glyph="Check" />
                   <TextBlock Text="{x:Bind PasteLabel}" />
                   <TextBlock Margin="4,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource LamhaFontSizeCaption}" FontWeight="Medium" Opacity="0.75" Text="Enter" />
                 </StackPanel>
               </Button>
               <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.List.CopyResultCommand}" AutomationProperties.Name="{x:Bind CopyLabel}" controls:Feedback.Copy="True">
-                <StackPanel Orientation="Horizontal" Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
                   <controls:FluentIcon Glyph="Copy" />
                   <TextBlock Text="{x:Bind CopyLabel}" />
                 </StackPanel>
               </Button>
               <Button Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.List.RedoCommand}" ToolTipService.ToolTip="{x:Bind NewResult}">
-                <StackPanel Orientation="Horizontal" Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
                   <controls:FluentIcon Glyph="Retry" />
                   <TextBlock Text="{x:Bind RedoLabel}" />
                 </StackPanel>
@@ -336,11 +335,11 @@
                       <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FlowDirection="LeftToRight" TextAlignment="{x:Bind controls:Show.LatinAlignment}">
                         <Run Text="{x:Bind Original}" Foreground="{ThemeResource LamhaDangerBrush}" TextDecorations="Strikethrough" /><Run Text=" → " /><Run Text="{x:Bind Fix}" Foreground="{ThemeResource LamhaOkBrush}" FontWeight="SemiBold" />
                       </TextBlock>
-                      <Border Margin="0,4,0,0" Padding="8,1" HorizontalAlignment="Left" controls:Pill.IsPill="True"
+                      <Border Margin="0,4,0,0" Padding="8,0" HorizontalAlignment="Left" controls:Pill.IsPill="True"
                               Background="{ThemeResource LamhaAccentSoftBrush}" Visibility="{x:Bind HasCategory, FallbackValue=Collapsed}">
                         <TextBlock Style="{StaticResource LamhaLabelTextStyle}" Foreground="{ThemeResource LamhaAccentBrush}" Text="{x:Bind Category}" />
                       </Border>
-                      <TextBlock Margin="0,2,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}" />
+                      <TextBlock Margin="0,4,0,0" Style="{StaticResource LamhaSecondaryTextStyle}" FlowDirection="{x:Bind WhyFlow}" Text="{x:Bind Why}" />
                     </StackPanel>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -359,18 +358,18 @@
           </StackPanel>
 
           <!-- Added to review, or removed: the word's meaning under it -->
-          <StackPanel Spacing="2" Visibility="{x:Bind ViewModel.ToolsRow.IsDone, Mode=OneWay, FallbackValue=Collapsed}">
+          <StackPanel Spacing="4" Visibility="{x:Bind ViewModel.ToolsRow.IsDone, Mode=OneWay, FallbackValue=Collapsed}">
             <TextBlock Style="{StaticResource LamhaBodyTextStyle}" FontWeight="SemiBold" Foreground="{ThemeResource LamhaOkBrush}" Text="{x:Bind ViewModel.ToolsRow.DoneText, Mode=OneWay, FallbackValue=''}" />
             <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" TextReadingOrder="DetectFromContent" Text="{x:Bind ViewModel.ToolsRow.DoneMeaning, Mode=OneWay, FallbackValue=''}" />
           </StackPanel>
 
           <!-- An error: what happened, what to do, Try again or Settings -->
-          <StackPanel Spacing="2" Visibility="{x:Bind ViewModel.ToolsRow.IsError, Mode=OneWay, FallbackValue=Collapsed}">
+          <StackPanel Spacing="4" Visibility="{x:Bind ViewModel.ToolsRow.IsError, Mode=OneWay, FallbackValue=Collapsed}">
             <TextBlock Style="{StaticResource LamhaTitleTextStyle}" Text="{x:Bind ViewModel.ToolsRow.Error.Title, Mode=OneWay, FallbackValue=''}" />
             <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Text="{x:Bind ViewModel.ToolsRow.Error.Hint, Mode=OneWay, FallbackValue=''}" />
-            <Button x:Name="ErrorButton" Margin="0,6,0,0" HorizontalAlignment="Left" Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.List.RunErrorActionCommand}"
+            <Button x:Name="ErrorButton" Margin="0,8,0,0" HorizontalAlignment="Left" Style="{StaticResource LamhaQuietButtonStyle}" Command="{x:Bind ViewModel.List.RunErrorActionCommand}"
                     Visibility="{x:Bind controls:Show.ErrorButton(ViewModel.ToolsRow.Error), Mode=OneWay, FallbackValue=Collapsed}">
-              <StackPanel Orientation="Horizontal" Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="8">
                 <controls:FluentIcon Glyph="Retry" />
                 <TextBlock Text="{x:Bind controls:Show.ErrorLabel(ViewModel.ToolsRow.Error), Mode=OneWay, FallbackValue=''}" />
               </StackPanel>
@@ -382,7 +381,7 @@
       <!-- The keys: the tools' (Enter, 1–n, Esc), or a result's (Enter pastes, Esc back to the tools) -->
       <Border Grid.Row="3" Padding="16,8" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource LamhaLineBrush}">
         <Grid>
-          <controls:WrapPanel HorizontalSpacing="14" VerticalSpacing="4" Visibility="{x:Bind ViewModel.ToolsRow.IsIdle, Mode=OneWay, FallbackValue=Collapsed}">
+          <controls:WrapPanel HorizontalSpacing="12" VerticalSpacing="4" Visibility="{x:Bind ViewModel.ToolsRow.IsIdle, Mode=OneWay, FallbackValue=Collapsed}">
             <StackPanel Orientation="Horizontal" Spacing="4">
               <Border Style="{StaticResource PanelKeyStyle}"><TextBlock Style="{StaticResource PanelKeyTextStyle}" Text="Enter" /></Border>
               <TextBlock Style="{StaticResource PanelFootTextStyle}" Text="{x:Bind KeyRun}" />
@@ -396,7 +395,7 @@
               <TextBlock Style="{StaticResource PanelFootTextStyle}" Text="{x:Bind KeyBack}" />
             </StackPanel>
           </controls:WrapPanel>
-          <controls:WrapPanel HorizontalSpacing="14" VerticalSpacing="4" Visibility="{x:Bind controls:Show.IfNot(ViewModel.ToolsRow.IsIdle), Mode=OneWay, FallbackValue=Collapsed}">
+          <controls:WrapPanel HorizontalSpacing="12" VerticalSpacing="4" Visibility="{x:Bind controls:Show.IfNot(ViewModel.ToolsRow.IsIdle), Mode=OneWay, FallbackValue=Collapsed}">
             <StackPanel Orientation="Horizontal" Spacing="4" Visibility="{x:Bind ViewModel.ToolsRow.IsResult, Mode=OneWay, FallbackValue=Collapsed}">
               <Border Style="{StaticResource PanelKeyStyle}"><TextBlock Style="{StaticResource PanelKeyTextStyle}" Text="Enter" /></Border>
               <TextBlock Style="{StaticResource PanelFootTextStyle}" Text="{x:Bind KeyPaste}" />

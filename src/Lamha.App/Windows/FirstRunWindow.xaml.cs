@@ -205,7 +205,7 @@ public sealed partial class FirstRunWindow : Window
             : new TextBlock
             {
                 Text = item.Number,
-                FontSize = 11,
+                FontSize = Size("LamhaFontSizeCaption"),
                 FontWeight = Microsoft.UI.Text.FontWeights.Bold,
                 Foreground = Brush(item.IsCurrent ? "LamhaButtonTextBrush" : "LamhaTextMutedBrush"),
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -215,14 +215,14 @@ public sealed partial class FirstRunWindow : Window
         {
             Width = 20,
             Height = 20,
-            CornerRadius = new CornerRadius(10),
             Background = Brush(item.IsDone ? "LamhaOkSoftBrush" : item.IsCurrent ? "LamhaButtonBrush" : "LamhaChipBrush"),
             Child = mark,
         };
+        Pill.SetIsPill(circle, true);
         var label = new TextBlock
         {
             Text = item.Label,
-            FontSize = 12,
+            FontSize = Size("LamhaFontSizeCaption"),
             VerticalAlignment = VerticalAlignment.Center,
             FontWeight = item.IsCurrent ? Microsoft.UI.Text.FontWeights.SemiBold : Microsoft.UI.Text.FontWeights.Normal,
             Foreground = Brush(item.IsCurrent ? "LamhaTextBrush" : "LamhaTextFaintBrush"),
@@ -233,6 +233,9 @@ public sealed partial class FirstRunWindow : Window
     }
 
     private Brush? Brush(string key) => ThemeLookup.Get(Root, key) as Brush;
+
+    /// <summary>A size from the design system's tokens (Tokens.xaml): the same in every theme.</summary>
+    private static double Size(string key) => (double)Application.Current.Resources[key];
 
     private static int Scaled(double dips, double scale) => (int)Math.Round(dips * scale, MidpointRounding.AwayFromZero);
 }
