@@ -287,6 +287,57 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
    - **To the user:** the card's height following the answer is the window resizing frame by frame; please try it with a slow answer (Google or AI) and say if it looks smooth on your screen. Screenshots can't show motion.
    - 461 tests. Memory to be measured with step 7.
 6. **The new features:** the mini translator, the jump list, paste and translate, side by side.
+
+   **Built 2026-10-27:**
+   - **The jump list** (`Lamha.Windows/Shell/JumpList`, `Services/JumpListService`):
+     - Translate, Write, Review and Clipboard under Windows' Tasks, each with its pane icon;
+     - Windows keeps and draws it, so it costs nothing while Lamha runs;
+     - a task starts Lamha with `--page=…`, which the running Lamha takes as a second start;
+     - it's under the process's AppUserModelID: an installed Lamha's is Velopack's (`velopack.Lamha`), the same as its shortcuts';
+     - the icons are drawn from system.html by `tools/Icons/jump-icons.mjs` (Edge, 16–48 px) into `Assets/Jump/*.ico`.
+   - **Paste and translate** (Core's `PasteOffer`):
+     - the empty box offers the copy in a suggestion chip, "Translate what you copied: “…”" (the signed-off wording);
+     - the copy is read only under clipboard history's own rules (a program's "don't keep this", the excluded programs), whether history is on or not;
+     - not offered: a card number, a copy over 5,000 characters, Lamha's own Copy, or a copy already taken;
+     - offered when the page shows, when the box is emptied, and when the window comes back from another program.
+   - **Side by side** (Core's `SideBySide`, `Views/SideBySideView`):
+     - a paragraph (two sentences or more) shows as two columns, a sentence beside its translation, with the paragraphs kept;
+     - each column is headed by its language, with Listen (and Copy for the translation);
+     - Google's answer now keeps its sentence pairs (`LookupResult.Sentences`); the AI's translation is paired line by line when the lines match, or whole;
+     - from 560 wide; narrower, and for a word or one sentence, the answer shows as before.
+   - **The mini translator** (`Windows/MiniWindow`, `Services/MiniService`):
+     - Windows' compact overlay, always on top, 340 wide, its own 32 title bar;
+     - the box, and the answer as one line: the headword beside the card's meaning, or a text's translation;
+     - opened from the Translate page (Windows' Keep on top icon at the end of the quick lookup line) with the box's text, and the main window makes way;
+     - Back to Lamha reopens the Translate page with the mini's text;
+     - it opens where it was last, or at the top end of the screen; `--mini` (with `--sample=`) for screenshots.
+   - **Not as drawn, on purpose:**
+     - side by side lights up the sentence under the pointer on both sides, not the word, because Google's free answer pairs sentences, not words;
+     - the mini's title bar has Back to Lamha (Calculator's MiniExpand, EE47) where the drawing had a pin, because the compact overlay is always on top.
+   - **New wording, drafted** (yours to reword): "Mini translator, always on top" / "المترجم المصغّر، فوق النوافذ دائمًا", and "Back to Lamha" / "العودة إلى لمحة".
+   - **Seen** in Debug and NativeAOT (no warnings), with test profiles:
+     - the chip in both languages and themes, with a word, a long English copy and an Arabic one;
+     - side by side with a real Google answer (English light, Arabic dark);
+     - the mini with a word and a sentence;
+     - Translate → mini → back, through UI Automation;
+     - the jump list written by Windows with its four tasks.
+   - 483 tests (22 new).
+   - **Measured** (NativeAOT), step 5's last commit then step 6, built and measured the same way on this PC the same day, in commit MB:
+
+     | Stage | Step 5 | Step 6 |
+     |---|---|---|
+     | Tray | 51 | 51 |
+     | Card open | 86 | 87 |
+     | Card closed | 84 | 85 |
+     | Main window open | 106 | 106 |
+     | Main window closed | 104 | 103 |
+
+     Step 6 adds nothing. **Main window closed is over 0013's 100 MB with step 5's motion** (step 4 measured 96), which is step 7's to look into. The mini translator isn't in the timeline yet: also step 7.
+   - **To the user:**
+     - the jump list (right-click Lamha on the taskbar; an installed build, since a build from source has its own taskbar ID);
+     - side by side's highlight under the pointer;
+     - the chip after copying in another program;
+     - the mini over an article or a film.
 7. **Every window revisited** against the system: the main window's pages, Settings, the card, the clipboard panel, first run. Each in both languages and themes, high contrast and 150 % text; screenshots for you; memory measured against the budgets (0008, 0013, 0015).
 8. **Kept that way:**
    - a test fails when a screen types a colour, a font size, a radius or a glyph, or a gap that isn't on the 4 px grid;
