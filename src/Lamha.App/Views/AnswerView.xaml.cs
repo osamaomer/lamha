@@ -58,8 +58,6 @@ public sealed partial class AnswerView : UserControl
 
     public string WikipediaHeading { get; } = Localization.Get("Card_Wikipedia");
 
-    public string ReadWiki { get; } = Localization.Get("Card_ReadWiki");
-
     public Visibility TextShown(bool isText) => isText && ShowsText ? Visibility.Visible : Visibility.Collapsed;
 
     /// <summary>The meaning's box is 12 px under the headword or the text; first in the answer when the text isn't shown.</summary>

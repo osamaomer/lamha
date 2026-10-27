@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.App.ViewModels.Main;
 using Microsoft.UI.Input;
@@ -113,7 +114,7 @@ public sealed partial class ClipboardPage : UserControl
     private void OnRowTapped(object sender, TappedRoutedEventArgs e)
     {
         // A tool, pin or delete keeps its own click.
-        if (sender is FrameworkElement { DataContext: ClipRow row } && !IsInButton(e.OriginalSource as DependencyObject, (DependencyObject)sender))
+        if (RepeaterItem.Of(List, sender as DependencyObject) is ClipRow row && !IsInButton(e.OriginalSource as DependencyObject, (DependencyObject)sender))
         {
             ViewModel.Choose(row);
         }

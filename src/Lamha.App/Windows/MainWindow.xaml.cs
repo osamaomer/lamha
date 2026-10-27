@@ -87,7 +87,8 @@ public sealed partial class MainWindow : Window, IPageHost
         UseMica(brain.Settings.Current.WindowMica);
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
-        AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall; // Windows' buttons as tall as the title bar
+        // Windows' buttons at their standard 32 high, at the top of the 48 bar, as Settings' (measured side by side)
+        AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Standard;
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "Lamha.ico"));
         Handle = Win32Interop.GetWindowFromWindowId(AppWindow.Id);
         if (Localization.IsArabic)
@@ -118,6 +119,7 @@ public sealed partial class MainWindow : Window, IPageHost
         };
         ShowPage();
         Root.Loaded += (_, _) => FocusPage();
+        Root.SizeChanged += (_, _) => CentreSearch();
 
         // Windows' close hides the window, which opens again as it was made (decision 0021): WinUI never frees a
         // closed window, so making a new one at every open added a few MB each time. It really closes when Lamha ends.
@@ -150,6 +152,9 @@ public sealed partial class MainWindow : Window, IPageHost
     public string Lamha { get; } = Localization.Get("Common_Lamha");
 
     public string SearchPlaceholder { get; } = Localization.Get("Search_Placeholder");
+
+    /// <summary>"Version 3.0.0", under the name in the pane's header.</summary>
+    public string Version { get; } = Localization.Format("Main_Version", UpdateService.Shown(UpdateService.Current));
 
     /// <summary>Settings → Appearance → Theme: "light", "dark", or "auto" (Windows'); the title bar's buttons follow.</summary>
     public void UseTheme(string theme)
@@ -298,7 +303,7 @@ public sealed partial class MainWindow : Window, IPageHost
         {
             void Type()
             {
-                Search.Visibility = Visibility.Visible;
+                SearchArea.Visibility = Visibility.Visible;
                 Search.Text = text["search:".Length..];
                 Search.ItemsSource = Suggestions(Search.Text);
                 Search.Focus(FocusState.Programmatic);
@@ -575,19 +580,76 @@ public sealed partial class MainWindow : Window, IPageHost
         }
     }
 
-    /// <summary>Narrow, the pane hides and ☰ appears in the title bar, and the search becomes a 🔍 button (Windows' Settings).</summary>
+    /// <summary>
+    /// Narrow, the pane hides and ☰ appears in the title bar, the name moves after it, and the search becomes a 🔍
+    /// button right after the name (Windows' Settings).
+    /// </summary>
     private void OnDisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)
     {
         var narrow = args.DisplayMode == NavigationViewDisplayMode.Minimal;
         AppTitleBar.IsPaneToggleButtonVisible = narrow;
+        TitleName.Margin = (Thickness)Application.Current.Resources[narrow ? "LamhaTitleBarNameNarrowMargin" : "LamhaTitleBarNameMargin"];
         SearchButton.Visibility = narrow ? Visibility.Visible : Visibility.Collapsed;
-        Search.Visibility = narrow && Search.FocusState == FocusState.Unfocused ? Visibility.Collapsed : Visibility.Visible;
+        SearchArea.Visibility = narrow && Search.FocusState == FocusState.Unfocused ? Visibility.Collapsed : Visibility.Visible;
+        CentreSearch();
+        PageLayer(narrow);
+    }
+
+    /// <summary>
+    /// Narrow, the page sits on the window itself, as Settings' does; WinUI keeps its content layer's fill and top line
+    /// there, so they're taken off (and given back, from WinUI's template, when the pane opens again).
+    /// </summary>
+    private void PageLayer(bool narrow)
+    {
+        if (Named(Nav, "ContentGrid") is not Grid layer)
+        {
+            return;
+        }
+
+        if (narrow)
+        {
+            layer.Background = null;
+            layer.BorderBrush = null;
+        }
+        else
+        {
+            layer.ClearValue(Panel.BackgroundProperty);
+            layer.ClearValue(Grid.BorderBrushProperty);
+        }
+    }
+
+    /// <summary>
+    /// The element called <paramref name="name"/> in <paramref name="root"/>'s visual tree (a part of its template),
+    /// not looking inside the pane's rows, whose templates have parts of the same names.
+    /// </summary>
+    private static FrameworkElement? Named(DependencyObject root, string name)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            if (child is NavigationViewItemBase)
+            {
+                continue;
+            }
+
+            if ((child as FrameworkElement)?.Name == name)
+            {
+                return (FrameworkElement)child;
+            }
+
+            if (Named(child, name) is { } found)
+            {
+                return found;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>Narrow: the 🔍 button opens the box, ready to type.</summary>
     private void OnSearchButton(object sender, RoutedEventArgs e)
     {
-        Search.Visibility = Visibility.Visible;
+        SearchArea.Visibility = Visibility.Visible;
         SearchButton.Visibility = Visibility.Collapsed;
         Search.Focus(FocusState.Programmatic);
     }
@@ -597,9 +659,50 @@ public sealed partial class MainWindow : Window, IPageHost
     {
         if (Nav.DisplayMode == NavigationViewDisplayMode.Minimal && Search.Text.Length == 0)
         {
-            Search.Visibility = Visibility.Collapsed;
+            SearchArea.Visibility = Visibility.Collapsed;
             SearchButton.Visibility = Visibility.Visible;
         }
+    }
+
+    private void OnSearchSlotChanged(object sender, SizeChangedEventArgs e) => CentreSearch();
+
+    /// <summary>
+    /// The search centred in the window, as Settings' (512 wide at most), not in the title bar's middle, which starts
+    /// after the name; moved off the centre only as far as the room needs. Narrow, the opened box fills the middle.
+    /// </summary>
+    private void CentreSearch()
+    {
+        if (Nav.DisplayMode == NavigationViewDisplayMode.Minimal || SearchSlot.ActualWidth <= 0)
+        {
+            SearchArea.HorizontalAlignment = HorizontalAlignment.Stretch;
+            SearchArea.Width = double.NaN;
+            SearchArea.Margin = default;
+            return;
+        }
+
+        // WinUI's title bar keeps room for Windows' buttons in pixels as if they were design pixels (half as much again
+        // as they need at 150 %), so the box may run past the end of its slot, up to WinUI's 48 for dragging before
+        // Windows' buttons. The title bar lets the pointer through to the box wherever the box is.
+        var scale = Root.XamlRoot?.RasterizationScale ?? 1;
+        var buttons = Math.Max(AppWindow.TitleBar.LeftInset, AppWindow.TitleBar.RightInset) / scale;
+        var start = SearchSlot.TransformToVisual(Root).TransformPoint(default).X;
+        var room = Math.Max(SearchSlot.ActualWidth, Root.ActualWidth - buttons - (double)Application.Current.Resources["TitleBarMinDragRegionWidth"] - start);
+        var width = Math.Min((double)Application.Current.Resources["LamhaSearchMaxWidth"], room);
+        var at = Math.Clamp(((Root.ActualWidth - width) / 2) - start, 0, room - width);
+        SearchArea.HorizontalAlignment = HorizontalAlignment.Left;
+        SearchArea.Width = width;
+        SearchArea.Margin = new Thickness(at, 0, Math.Min(0, SearchSlot.ActualWidth - at - width), 0);
+    }
+
+    /// <summary>The pane's header: Settings → Lamha (the pane closes first when it's over the page).</summary>
+    private void OnHeaderClick(object sender, RoutedEventArgs e)
+    {
+        if (Nav.DisplayMode == NavigationViewDisplayMode.Minimal)
+        {
+            Nav.IsPaneOpen = false;
+        }
+
+        Go("settings", "about");
     }
 
     /// <summary>The suggestions as the user types: settings, words looked up, copies (when clipboard history is on), and "Translate …".</summary>

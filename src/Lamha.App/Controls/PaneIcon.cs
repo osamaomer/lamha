@@ -5,16 +5,20 @@ using Microsoft.UI.Xaml.Markup;
 namespace Lamha.App.Controls;
 
 /// <summary>
-/// The main window's pages in the pane: Lamha's own coloured icons, in Windows Settings' style (20 × 20, one main
-/// colour each, soft shading, the same in both themes). Drawn as XAML from the signed-off drafts in
-/// docs/design/system.html (decision 0020): Translate, Write, Review, History, Clipboard and Settings.
+/// The main window's pages in the pane: Lamha's own coloured icons, in Windows Settings' style (one main colour each,
+/// soft shading, the same in both themes). Drawn as XAML from the signed-off drafts in docs/design/system.html (decision
+/// 0020): Translate, Write, Review, History, Clipboard and Settings. The drafts are 20 × 20 with room around them; shown
+/// in a 24 box, they're about 20 across, as Settings' icons (measured side by side).
 /// </summary>
 public sealed partial class PaneIcon : UserControl
 {
     public static readonly DependencyProperty PageProperty =
         DependencyProperty.Register(nameof(Page), typeof(string), typeof(PaneIcon), new PropertyMetadata("", (d, _) => ((PaneIcon)d).Draw()));
 
-    private const string Ns = "xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"";
+    /// <summary>The box the 20 × 20 drawing fills.</summary>
+    private const double Box = 24;
+
+    private const string Ns ="xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"";
 
     /// <summary>A gradient from the top left to the bottom right, as the drafts' SVG.</summary>
     private static string Gradient(string from, string to, string end = "1,1") =>
@@ -66,7 +70,7 @@ public sealed partial class PaneIcon : UserControl
 
     public PaneIcon()
     {
-        Width = Height = FluentIcon.Pixels(IconSize.Large);
+        Width = Height = Box;
         IsTabStop = false;
         // Arabic mirrors the window, not the drawings: a pencil and a clock read the same either way.
         FlowDirection = FlowDirection.LeftToRight;

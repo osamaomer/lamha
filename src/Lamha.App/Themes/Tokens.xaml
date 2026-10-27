@@ -274,21 +274,34 @@
   <x:Double x:Key="LamhaGroupGap">28</x:Double>
   <x:Double x:Key="LamhaPagePadding">28</x:Double>
 
-  <!-- The main window, measured on Windows' Settings: the pane open at 300, hidden behind ☰ below 720 px; the page 28
-       from each side (its title's baseline 37 under the title bar), up to 1000 wide; the toast 16 above the foot; the
-       mark in the title bar beside its name -->
+  <!-- The main window, measured on Windows' Settings (side by side at 150 %): the pane open at 300, hidden behind ☰
+       below 720 px; the page 28 from each side (its title's baseline 37 under the title bar), up to 1000 wide; the toast
+       16 above the foot; the name in the title bar where Settings has its own -->
   <x:Double x:Key="LamhaPaneWidth">300</x:Double>
-  <!-- A pane row starts 18 from the window's edge (WinUI's 4 plus this 14), its icon 11 into it and its name 45 in -->
-  <Thickness x:Key="LamhaNavItemMargin">14,0,0,0</Thickness>
-  <Thickness x:Key="LamhaNavRowMargin">-2,0,0,0</Thickness>
-  <x:Double x:Key="LamhaNavIconGap">14</x:Double>
+  <!-- A pane row's fill starts 16 from the window's edge (WinUI's 4 plus this 12); its icon's 24 box is 8 into it, so the
+       drawing shows about 20, as Settings' icons, centred 36 from the edge; its name 62 from the edge -->
+  <Thickness x:Key="LamhaNavItemMargin">12,0,0,0</Thickness>
+  <Thickness x:Key="LamhaNavRowMargin">-4,0,0,0</Thickness>
+  <x:Double x:Key="LamhaNavIconGap">12</x:Double>
   <x:Double x:Key="LamhaPaneHideWidth">720</x:Double>
+  <!-- The pane's header, where Settings has the account (measured side by side at 150 %): Lamha's icon in a 64 box, its
+       art 60 as Settings' picture, its left edge on the rows' fill, 6 under the pane's top and 26 above the first row's
+       fill; the name and version 12 from the art -->
+  <x:Double x:Key="LamhaPaneHeaderIconSize">64</x:Double>
+  <Thickness x:Key="LamhaPaneHeaderMargin">14,4,4,22</Thickness>
+  <x:Double x:Key="LamhaPaneHeaderGap">10</x:Double>
+  <!-- The card's bar: Lamha's icon in a 24 box (its art 22.5), 16 from the edge as the text under it, beside the
+       32-high switch; Windows' 16 title-bar icon looked small there (the user, 2026-10-27) -->
+  <x:Double x:Key="LamhaCardIconSize">24</x:Double>
   <!-- The title bar's search, as Settings' "Find a setting": 512 wide at most -->
   <x:Double x:Key="LamhaSearchMaxWidth">512</x:Double>
   <x:Double x:Key="LamhaPageMaxWidth">1000</x:Double>
   <Thickness x:Key="LamhaPageMargin">28,4,28,40</Thickness>
   <Thickness x:Key="LamhaToastMargin">0,0,0,16</Thickness>
-  <Thickness x:Key="LamhaTitleBarMarkMargin">4,0,16,0</Thickness>
+  <!-- The name in the title bar, its first letter where Settings' is: 51 from the window's edge, 99 when ☰ is there
+       (Settings' Back and ☰ are 40 apart, WinUI's 44) -->
+  <Thickness x:Key="LamhaTitleBarNameMargin">6,0,0,0</Thickness>
+  <Thickness x:Key="LamhaTitleBarNameNarrowMargin">10,0,0,0</Thickness>
 
   <!-- Sizes: Windows' 32 for text boxes, dropdowns and the buttons next to them, and nothing that can be clicked is
        smaller than 24 px (WCAG 2.5.8) -->

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Lamha.App.Controls;
 using Lamha.Core.Appearance;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -117,7 +118,7 @@ public sealed class ListMotion
         var before = new Dictionary<object, double>();
         foreach (var row in Rows())
         {
-            if (row.DataContext is { } item)
+            if (RepeaterItem.Of(_list, row) is { } item)
             {
                 before[_key(item)] = row.ActualOffset.Y;
             }
@@ -146,7 +147,7 @@ public sealed class ListMotion
                     break;
                 }
 
-                if (row.DataContext is not { } item)
+                if (RepeaterItem.Of(_list, row) is not { } item)
                 {
                     continue;
                 }

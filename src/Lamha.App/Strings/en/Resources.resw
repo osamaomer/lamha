@@ -9,7 +9,6 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
 
   <data name="Common_Lamha" xml:space="preserve"><value>Lamha</value><comment>common.lamha</comment></data>
-  <data name="Card_Close.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Close (Esc)</value><comment>c.closeEsc</comment></data>
   <data name="Card_Close.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Close (Esc)</value><comment>c.closeEsc</comment></data>
   <data name="Card_SelectFirst" xml:space="preserve"><value>Select some text first</value><comment>c.selectFirst</comment></data>
   <data name="Card_Replace" xml:space="preserve"><value>Replace</value><comment>c.replace</comment></data>
@@ -120,11 +119,8 @@
   <data name="Common_Copy" xml:space="preserve"><value>Copy</value><comment>common.copy</comment></data>
   <data name="Lang_ar" xml:space="preserve"><value>Arabic</value><comment>lang.ar</comment></data>
   <data name="Lang_en" xml:space="preserve"><value>English</value><comment>lang.en</comment></data>
-  <data name="Card_Back.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Back</value><comment>common.back</comment></data>
   <data name="Card_Back.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Back</value><comment>common.back</comment></data>
-  <data name="Card_Forward.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Forward</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
   <data name="Card_Forward.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Forward</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
-  <data name="Card_Settings.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Settings</value><comment>common.settings</comment></data>
   <data name="Card_Settings.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Settings</value><comment>common.settings</comment></data>
   <data name="Card_Pin" xml:space="preserve"><value>Pin the card</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
   <data name="Card_Pinned" xml:space="preserve"><value>Pinned: click to unpin</value><comment>new in Lamha 3, approved with the card's design 2026-10-25</comment></data>
@@ -161,7 +157,8 @@
   <data name="Card_Definition" xml:space="preserve"><value>Definition</value><comment>c.definition</comment></data>
   <data name="Card_Examples" xml:space="preserve"><value>Examples</value><comment>c.examples</comment></data>
   <data name="Card_Wikipedia" xml:space="preserve"><value>Wikipedia</value><comment>c.wikipedia</comment></data>
-  <data name="Card_ReadWiki" xml:space="preserve"><value>Read more on Wikipedia</value><comment>c.readWiki</comment></data>
+  <data name="Card_ReadWikiAr" xml:space="preserve"><value>اقرأ المزيد على ويكيبيديا</value><comment>under an Arabic summary, the same in both files (Lamha 2's c.readWiki, في reworded على by the user 2026-10-27)</comment></data>
+  <data name="Card_ReadWikiEn" xml:space="preserve"><value>Read more on Wikipedia</value><comment>under an English summary, the same in both files (Lamha 2's c.readWiki)</comment></data>
   <data name="Card_Google" xml:space="preserve"><value>Google Translate</value><comment>c.google</comment></data>
   <data name="Card_Cambridge" xml:space="preserve"><value>Cambridge Dictionary</value><comment>c.cambridge</comment></data>
   <data name="Card_BetterTr" xml:space="preserve"><value>Better translation</value><comment>c.betterTr</comment></data>
@@ -872,6 +869,7 @@ What did you expect?
   <data name="FirstRun_RemoveLamha2HintFresh" xml:space="preserve"><value>Lamha 3 uses the same shortcuts, so the two can&apos;t run together. Lamha 2&apos;s data stays where it is.</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording</comment></data>
   <data name="FirstRun_RemoveLamha2Admin" xml:space="preserve"><value>Windows will ask for permission: Lamha 2 was installed for all users.</value><comment>new in Lamha 3 (phase 6, decision 0019), drafted: waiting for the user&apos;s wording; after the hint</comment></data>
   <data name="Search_Placeholder" xml:space="preserve"><value>Search settings, words and copies</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the title bar's search</comment></data>
+  <data name="Main_Version" xml:space="preserve"><value>Version {0}</value><comment>new in Lamha 3, approved 2026-10-27: under Lamha's name in the pane's header (Settings' account); the version is {0}</comment></data>
   <data name="Search_Translate" xml:space="preserve"><value>Translate “{0}”</value><comment>new in Lamha 3, approved with the design system 2026-10-26: the search's last suggestion</comment></data>
   <data name="Common_Close" xml:space="preserve"><value>Close</value><comment>common.close</comment></data>
   <data name="Write_SetupTitle" xml:space="preserve"><value>The writing tools need an AI provider.</value><comment>new in Lamha 3, approved with the design system 2026-10-26: Write's InfoBar when no provider is set up</comment></data>

@@ -409,6 +409,20 @@ Chosen 2026-10-26 from [the UX study](ux-study.md):
    - **CLAUDE.md** has the rule, and the gallery's command; **decision 0020** says how the system is kept; **system.md** names the test, the two new brushes, row buttons and the segmented switch.
    - **Measured** (NativeAOT, no warnings), in commit MB: tray 52, card open 88 and closed 86, main window open 106 and closed 104, all within budget.
    - 490 tests (7 new).
+9. **Side by side with Settings** (2026-10-27, from your screenshots at 150 %):
+   - **Your call:** Lamha's app icon (60, as the account picture), its name and "Version 3.0.0" (new string, `Main_Version`) at the top of the pane, where Settings has the account; it opens Settings → Lamha. The title bar keeps Back and the name only, as Settings'.
+   - **Measured and matched:**
+     - the pane's rows were 2 px (at 150 %) to the right of Settings', and the coloured icons showed about 16 across against Settings' 20: now drawn in a 24 box, every edge within a pixel;
+     - the title bar's search is Settings' pill, 🔍 at its start, centred in the window (WinUI's title bar kept it off centre, see system.md);
+     - narrow, 🔍 is right after the name, and the page has no content layer, as Settings';
+     - Windows' buttons are the standard 32 high at the top of the bar, as Settings' (they were the tall ones).
+   - **Fixed:** clicking a copy on the Clipboard page (and in the clipboard panel, to paste it) did nothing: ItemsRepeater gives an x:Bind row no DataContext, so the rows now ask the repeater (`Controls/RepeaterItem`). The lists' glides, which looked rows up the same way, run now too.
+10. **The card** (2026-10-27, your notes):
+    - no tooltips anywhere in the card (`Controls/NoToolTips` takes them off after each layout, whatever set them); every control keeps its name for screen readers;
+    - Lamha's own icon (the taskbar's) in the bar, 24 (it was the 16 gradient mark): its art starts 16 from the edge, as the headword;
+    - a pinned card stays when you look up something else: the new lookup opens another card, and a closed pinned card's window is kept for the next one;
+    - its ⚙ opens Settings and the card stays over it;
+    - Wikipedia's "Read more" is in the summary's language and on its side ("اقرأ المزيد على ويكيبيديا", your wording, under an Arabic one).
 
 Released as **Lamha 3.1**, after betas. The website follows, with the new screenshots.
 

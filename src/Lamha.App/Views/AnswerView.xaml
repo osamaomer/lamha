@@ -260,14 +260,14 @@
                 Visibility="{x:Bind controls:Show.IfSet(Answer.Wikipedia.Thumb), Mode=OneWay, FallbackValue=Collapsed}">
           <Image Stretch="UniformToFill" Source="{x:Bind controls:Show.Picture(Answer.Wikipedia.Thumb, 64), Mode=OneWay}" />
         </Border>
-        <StackPanel Grid.Column="1">
+        <!-- The summary and its link run its own way: an English one from the left, its link under its first letter -->
+        <StackPanel Grid.Column="1" FlowDirection="{x:Bind Answer.Wikipedia.Flow, Mode=OneWay, FallbackValue=RightToLeft}">
           <TextBlock Style="{StaticResource LamhaReadingTextStyle}" MaxLines="5" TextTrimming="CharacterEllipsis"
-                     FlowDirection="{x:Bind Answer.Wikipedia.Flow, Mode=OneWay, FallbackValue=RightToLeft}"
                      Text="{x:Bind Answer.Wikipedia.Extract, Mode=OneWay}" IsTextSelectionEnabled="True" />
-          <HyperlinkButton Margin="-4,4,-4,0" Style="{StaticResource LamhaFootLinkStyle}" FlowDirection="{x:Bind InterfaceFlow}" Command="{x:Bind Answer.Wikipedia.Read, Mode=OneWay}"
+          <HyperlinkButton Margin="-4,4,-4,0" HorizontalAlignment="Left" Style="{StaticResource LamhaFootLinkStyle}" Command="{x:Bind Answer.Wikipedia.Read, Mode=OneWay}"
                            Visibility="{x:Bind controls:Show.IfSet(Answer.Wikipedia.Url), Mode=OneWay, FallbackValue=Collapsed}">
             <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaSpace1}">
-              <TextBlock Text="{x:Bind ReadWiki}" />
+              <TextBlock Text="{x:Bind Answer.Wikipedia.ReadLabel, Mode=OneWay}" />
               <controls:FluentIcon Glyph="External" Size="Small" />
             </StackPanel>
           </HyperlinkButton>

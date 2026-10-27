@@ -11,7 +11,8 @@ namespace Lamha.App.Services;
 /// <summary>
 /// Opens the card on what's selected in the program in front, and carries out what the card asks (Replace / Insert,
 /// Copy, links, Close). Lamha 2's onHotkey / showCard / card-replace in main.js. <c>notify</c> shows a notification
-/// (title, body) when Replace couldn't paste.
+/// (title, body) when Replace couldn't paste. A pinned card stays where it is: the next lookup opens another card, and
+/// the pinned one's window is kept for later cards once it's closed (WinUI never frees a window: decision 0021).
 /// </summary>
 public sealed partial class CardService(
     SelectionService selection,
@@ -20,7 +21,7 @@ public sealed partial class CardService(
     Brain brain,
     CardLifetime lifetime,
     IdleMemory idle,
-    Action<string, string> notify) : ICardHost, IDisposable
+    Action<string, string> notify) : IDisposable
 {
     /// <summary>Clicking elsewhere this soon after the card opened doesn't close it (the shortcut's own key-up).</summary>
     private const long DeactivateGraceMs = 400;
@@ -31,12 +32,15 @@ public sealed partial class CardService(
     /// <summary>The longest the shortcut waits for the sentence around a word (Lamha 2's 700 ms).</summary>
     private static readonly TimeSpan SentenceTimeout = TimeSpan.FromMilliseconds(700);
 
-    private CardWindow? _window;
-    private bool _windowSolid;
-    private SelectionCapture? _source;
-    private long _shownAt;
+    /// <summary>The cards pinned and still open, besides the one the shortcuts use.</summary>
+    private readonly List<Card> _pinned = [];
+
+    /// <summary>Cards closed after being pinned, hidden, for the next lookup's card.</summary>
+    private readonly List<Card> _spare = [];
+
+    /// <summary>The card the shortcuts open (and the hint).</summary>
+    private Card? _card;
     private bool _busy;
-    private bool _visible;
     private int _shown;
 
     /// <summary>
@@ -97,7 +101,7 @@ public sealed partial class CardService(
             Show(new SelectionCapture(0, text, IsTerminal: false), write ? CardMode.Write : CardMode.Lookup, null);
             if (error is not null)
             {
-                _window?.ViewModel.ShowError(new LamhaException(error));
+                _card?.Window.ViewModel.ShowError(new LamhaException(error));
             }
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
@@ -124,28 +128,12 @@ public sealed partial class CardService(
         }
     }
 
-    /// <summary>The card goes; it fades out first unless <paramref name="fade"/> is false (Replace).</summary>
-    public void Hide(bool fade = true)
+    /// <summary>The shortcuts' card goes (tools/Measure); a pinned card stays.</summary>
+    public void Hide()
     {
-        if (_window is null || !_visible)
+        if (_card is { } card)
         {
-            return;
-        }
-
-        _visible = false;
-        idle.WindowClosed();
-
-        if (lifetime == CardLifetime.Keep)
-        {
-            // What was looked up goes from memory once the card is gone (not if it was shown again meanwhile).
-            var card = _window.ViewModel;
-            _window.Hide(fade, card.Unload);
-        }
-        else
-        {
-            _window.ViewModel.Unload();
-            _window.Close();
-            _window = null;
+            Hide(card);
         }
     }
 
@@ -154,10 +142,62 @@ public sealed partial class CardService(
 
     public bool CanOpenSettings => SettingsOpener is not null;
 
-    async Task ICardHost.ReplaceAsync(string text)
+    public void Dispose()
     {
-        var source = _source;
-        Hide(fade: false);
+        var cards = new List<Card>(_pinned.Concat(_spare));
+        if (_card is not null)
+        {
+            cards.Add(_card);
+        }
+
+        _card = null;
+        _pinned.Clear();
+        _spare.Clear();
+        foreach (var card in cards)
+        {
+            Close(card);
+        }
+    }
+
+    /// <summary>A card goes; it fades out first unless <paramref name="fade"/> is false (Replace).</summary>
+    private void Hide(Card card, bool fade = true)
+    {
+        if (!card.Visible)
+        {
+            return;
+        }
+
+        card.Visible = false;
+        idle.WindowClosed();
+        var wasPinned = _pinned.Remove(card);
+        if (lifetime == CardLifetime.Keep)
+        {
+            if (wasPinned)
+            {
+                _spare.Add(card);
+            }
+
+            // What was looked up goes from memory once the card is gone (not if it was shown again meanwhile).
+            card.Window.Hide(fade, card.Window.ViewModel.Unload);
+        }
+        else
+        {
+            if (card == _card)
+            {
+                _card = null;
+            }
+
+            card.Window.ViewModel.Unload();
+            Close(card);
+        }
+    }
+
+    private void Copy(string text) => selection.Copy(text);
+
+    private async Task ReplaceAsync(Card card, string text)
+    {
+        var source = card.Source;
+        Hide(card, fade: false);
         if (source is null || !await selection.PasteIntoAsync(source.Window, text).ConfigureAwait(true))
         {
             // The program went away or refused the focus: leave the text on the clipboard instead, and say so.
@@ -166,57 +206,66 @@ public sealed partial class CardService(
         }
     }
 
-    void ICardHost.Copy(string text) => selection.Copy(text);
-
-    void ICardHost.OpenLink(Uri uri) => _ = global::Windows.System.Launcher.LaunchUriAsync(uri);
-
-    /// <summary>The card's Settings (its bar, or an error's button): the card goes, Settings opens at the category.</summary>
-    void ICardHost.OpenSettings(string section)
+    /// <summary>
+    /// The card's Settings (its bar, or an error's button): Settings opens at the category, and the card stays over it
+    /// (it would go as the main window takes the focus); once it's had the focus again, it goes as usual.
+    /// </summary>
+    private void OpenSettings(Card card, string section)
     {
-        Hide();
+        card.StayOnce = true;
         SettingsOpener?.Invoke(section);
-    }
-
-    void ICardHost.Close() => Hide();
-
-    void ICardHost.Announce(string text) => _window?.Announce(text);
-
-    public void Dispose()
-    {
-        var window = _window;
-        _window = null; // first, so Closing doesn't turn the close into a hide
-        window?.Close();
     }
 
     private void Show(SelectionCapture capture, CardMode mode, WordContext? context)
     {
         var started = Environment.TickCount64;
-        _source = capture;
 
-        // The card's background is chosen when its window is made (Acrylic or solid): a change makes a new one.
-        var solid = brain.Settings.Current.CardSolid;
-        if (_window is not null && solid != _windowSolid)
+        // A pinned card stays as it is: this lookup gets another card.
+        if (_card is { Visible: true } current && current.Window.ViewModel.IsPinned)
         {
-            Dispose();
+            _pinned.Add(current);
+            _card = null;
+        }
+
+        // The card's background is chosen when its window is made (Acrylic or solid): a change makes new ones.
+        var solid = brain.Settings.Current.CardSolid;
+        if (_card is not null && _card.Solid != solid)
+        {
+            Close(_card);
+            _card = null;
+        }
+
+        foreach (var old in _spare.Where(c => c.Solid != solid).ToList())
+        {
+            _spare.Remove(old);
+            Close(old);
         }
 
         Animations.Refresh(brain.Settings.Current);
-        var created = _window is null;
-        var window = _window ??= Create(solid);
-        window.UseTheme(Theme ?? brain.Settings.Current.Theme);
-        window.ViewModel.Load(capture, mode, context);
+        var created = _card is null && _spare.Count == 0;
+        if (_card is null)
+        {
+            _card = _spare.Count > 0 ? _spare[^1] : Create(solid);
+            _spare.Remove(_card);
+        }
+
+        var card = _card;
+        card.Source = capture;
+        card.StayOnce = false;
+        card.Window.UseTheme(Theme ?? brain.Settings.Current.Theme);
+        card.Window.ViewModel.Load(capture, mode, context);
 
         var cursor = Screens.Cursor;
-        _shownAt = Environment.TickCount64;
-        if (!_visible)
+        card.ShownAt = Environment.TickCount64;
+        if (!card.Visible)
         {
-            _visible = true;
+            card.Visible = true;
             idle.WindowOpened();
         }
 
-        window.ShowAt(cursor, Screens.WorkAreaAt(cursor), Screens.ScaleAt(cursor));
-        AppLog.Info($"card shown in {Environment.TickCount64 - started} ms ({(created ? "new window" : "kept window")}, {mode}, {capture.Text.Length} characters)");
-        if (window.ViewModel.IsHint)
+        card.Window.ShowAt(cursor, Screens.WorkAreaAt(cursor), Screens.ScaleAt(cursor));
+        AppLog.Info($"card shown in {Environment.TickCount64 - started} ms ({(created ? "new window" : "kept window")}, {mode}, {capture.Text.Length} characters, {_pinned.Count} pinned)");
+        if (card.Window.ViewModel.IsHint)
         {
             _ = HideHintAsync(++_shown);
         }
@@ -230,33 +279,88 @@ public sealed partial class CardService(
     private async Task HideHintAsync(int shown)
     {
         await Task.Delay(HintTime).ConfigureAwait(true);
-        if (shown == _shown && _window?.ViewModel.IsHint == true)
+        if (shown == _shown && _card is { } card && card.Window.ViewModel.IsHint)
         {
-            Hide();
+            Hide(card);
         }
     }
 
-    private CardWindow Create(bool solid)
+    /// <summary>Really closes a card's window: Windows' close isn't turned into a hide.</summary>
+    private static void Close(Card card)
     {
-        _windowSolid = solid;
-        var window = new CardWindow(new CardViewModel(brain, this), solid);
-        window.Deactivated += () =>
+        card.Closed = true;
+        card.Window.Close();
+    }
+
+    private Card Create(bool solid)
+    {
+        var card = new Card(this, brain, solid);
+        card.Window.Deactivated += () =>
         {
-            // A pinned card stays while the user works elsewhere.
-            if (Environment.TickCount64 - _shownAt > DeactivateGraceMs && !window.ViewModel.IsPinned && !window.ViewModel.IsHint)
+            // A pinned card stays while the user works elsewhere; so does one that has just opened Settings.
+            var view = card.Window.ViewModel;
+            if (card.StayOnce)
             {
-                Hide();
+                card.StayOnce = false;
+            }
+            else if (Environment.TickCount64 - card.ShownAt > DeactivateGraceMs && !view.IsPinned && !view.IsHint)
+            {
+                Hide(card);
             }
         };
-        window.AppWindow.Closing += (_, args) =>
+        card.Window.AppWindow.Closing += (_, args) =>
         {
             // Alt+F4 on a kept card only hides it.
-            if (lifetime == CardLifetime.Keep && _window is not null)
+            if (lifetime == CardLifetime.Keep && !card.Closed)
             {
                 args.Cancel = true;
-                Hide();
+                Hide(card);
             }
         };
-        return window;
+        return card;
+    }
+
+    /// <summary>One card: its window, the text it was opened on (where Replace pastes), and its state.</summary>
+    private sealed class Card : ICardHost
+    {
+        private readonly CardService _owner;
+
+        public Card(CardService owner, Brain brain, bool solid)
+        {
+            _owner = owner;
+            Solid = solid;
+            Window = new CardWindow(new CardViewModel(brain, this), solid);
+        }
+
+        public CardWindow Window { get; }
+
+        /// <summary>Acrylic or solid: chosen when the window is made.</summary>
+        public bool Solid { get; }
+
+        public SelectionCapture? Source { get; set; }
+
+        public long ShownAt { get; set; }
+
+        public bool Visible { get; set; }
+
+        /// <summary>The next loss of focus leaves the card open (Settings, opened from it, takes the focus).</summary>
+        public bool StayOnce { get; set; }
+
+        /// <summary>Really closing (Lamha ending, another background).</summary>
+        public bool Closed { get; set; }
+
+        public bool CanOpenSettings => _owner.CanOpenSettings;
+
+        public Task ReplaceAsync(string text) => _owner.ReplaceAsync(this, text);
+
+        public void Copy(string text) => _owner.Copy(text);
+
+        public void OpenLink(Uri uri) => _ = global::Windows.System.Launcher.LaunchUriAsync(uri);
+
+        public void OpenSettings(string section) => _owner.OpenSettings(this, section);
+
+        public void Close() => _owner.Hide(this);
+
+        public void Announce(string text) => Window.Announce(text);
     }
 }

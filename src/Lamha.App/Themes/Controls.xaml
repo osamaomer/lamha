@@ -27,6 +27,50 @@
     <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
   </Style>
 
+  <!-- The title bar's search, as Settings' "Find a setting" (measured side by side at 150 %): a pill 32 high and 512 wide
+       at most, Windows' button edge at rest (no line under it), 🔍 at its start (LamhaTitleSearchGlyphStyle over it,
+       centred 20 in) and the text 42 in; hovered and focused, Windows' text field. A Grid holds the box and its glyph. -->
+  <Style x:Key="LamhaTitleSearchTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource AutoSuggestBoxTextBoxStyle}">
+    <Setter Property="Padding" Value="41,5,6,6" />
+  </Style>
+  <Style x:Key="LamhaTitleSearchStyle" TargetType="AutoSuggestBox" BasedOn="{StaticResource DefaultAutoSuggestBoxStyle}">
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="BorderBrush" Value="{ThemeResource ControlElevationBorderBrush}" />
+    <Setter Property="TextBoxStyle" Value="{StaticResource LamhaTitleSearchTextBoxStyle}" />
+  </Style>
+  <Style x:Key="LamhaTitleSearchGlyphStyle" TargetType="controls:FluentIcon">
+    <Setter Property="Margin" Value="12,0,0,0" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+  </Style>
+
+  <!-- The pane's header, where Settings has the account: Lamha's icon, its name (Body Strong) and version (Caption), both
+       in the text's colour as Settings'. A button that opens Settings → Lamha, with no fill, as Settings' account: it
+       dips when pressed, and Windows' focus ring shows it to the keyboard. -->
+  <Style x:Key="LamhaPaneHeaderStyle" TargetType="Button">
+    <Setter Property="controls:Feedback.Dip" Value="True" />
+    <Setter Property="Margin" Value="{StaticResource LamhaPaneHeaderMargin}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <ContentPresenter Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="{TemplateBinding CornerRadius}"
+                            Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" AutomationProperties.AccessibilityView="Raw" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <!-- The count beside Review in the pane, as Windows' InfoBadge (16 high, its 11 px number, the accent fill), with
        Lamha's own digits (Arabic ones in Arabic), which InfoBadge can't show -->
   <Style x:Key="LamhaNavBadgeStyle" TargetType="Border">

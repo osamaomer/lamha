@@ -85,6 +85,16 @@
                 <controls:FluentIcon Glyph="Pin" />
               </ToggleButton>
             </controls:WrapPanel>
+            <!-- The pane's header (the main window's, where Settings has the account) -->
+            <Button Width="{StaticResource LamhaPaneWidth}" HorizontalAlignment="Left" Style="{StaticResource LamhaPaneHeaderStyle}" AutomationProperties.Name="{x:Bind Lamha}">
+              <StackPanel Orientation="Horizontal" Spacing="{StaticResource LamhaPaneHeaderGap}">
+                <controls:AppIcon Size="{StaticResource LamhaPaneHeaderIconSize}" />
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind Lamha}" />
+                  <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind Version}" />
+                </StackPanel>
+              </StackPanel>
+            </Button>
             <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind DisabledLabel}" />
             <controls:WrapPanel HorizontalSpacing="{StaticResource LamhaSpace2}" VerticalSpacing="{StaticResource LamhaSpace2}">
               <Button Style="{StaticResource LamhaButtonStyle}" Content="{x:Bind Proofread}" IsEnabled="False" />
@@ -105,6 +115,11 @@
             <Grid>
               <TextBox Style="{StaticResource LamhaSearchFieldStyle}" PlaceholderText="{x:Bind SearchPlaceholder}" />
               <controls:FluentIcon Glyph="Search" Style="{StaticResource LamhaFieldGlyphStyle}" />
+            </Grid>
+            <!-- The title bar's search (the main window centres it in the window) -->
+            <Grid MaxWidth="{StaticResource LamhaSearchMaxWidth}" HorizontalAlignment="Left">
+              <AutoSuggestBox Style="{StaticResource LamhaTitleSearchStyle}" PlaceholderText="{x:Bind TitleSearchPlaceholder}" />
+              <controls:FluentIcon Glyph="Search" Style="{StaticResource LamhaTitleSearchGlyphStyle}" />
             </Grid>
             <controls:WrapPanel HorizontalSpacing="{StaticResource LamhaSpace4}" VerticalSpacing="{StaticResource LamhaSpace2}">
               <ComboBox Style="{StaticResource LamhaComboStyle}" ItemsSource="{x:Bind LanguageNames}" SelectedIndex="0" />

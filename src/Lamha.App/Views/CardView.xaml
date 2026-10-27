@@ -9,7 +9,8 @@
        links at the foot. Sizes and gaps are the design's, on the 4 px grid; the text starts 16 px from either edge.
        Windows/CardWindow places it, sizes it to its content and draws its backdrop. -->
 
-  <Grid x:Name="Root" KeyboardAcceleratorPlacementMode="Hidden" KeyDown="OnKeyDown">
+  <!-- No tooltips anywhere in the card (the user's call, 2026-10-27); every control keeps its name for screen readers -->
+  <Grid x:Name="Root" KeyboardAcceleratorPlacementMode="Hidden" KeyDown="OnKeyDown" controls:NoToolTips.IsOn="True">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
@@ -29,7 +30,7 @@
                  FontWeight="SemiBold" Text="{x:Bind ViewModel.HintText}" />
     </Border>
 
-    <!-- ===== The bar: Lamha's mark and what the card shows; Back / Forward, Pin, Settings, Close ===== -->
+    <!-- ===== The bar: Lamha's icon and what the card shows; Back / Forward, Pin, Settings, Close ===== -->
     <Grid x:Name="Bar" Padding="16,8,8,8" ColumnSpacing="4" Background="Transparent"
           BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,0,0,1"
           Visibility="{x:Bind ViewModel.HasBar, Mode=OneWay, FallbackValue=Collapsed}" PointerPressed="OnBarPressed">
@@ -44,9 +45,9 @@
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
 
-      <!-- Lamha's mark, its name when there's room, the languages or the title, the switch, and the source -->
-      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" ToolTipService.ToolTip="{x:Bind Lamha}">
-        <controls:BrandMark />
+      <!-- Lamha's icon, its name when there's room, the languages or the title, the switch, and the source -->
+      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <controls:AppIcon Size="{StaticResource LamhaCardIconSize}" VerticalAlignment="Center" />
         <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" FontWeight="Bold"
                    Text="{x:Bind Lamha}" Visibility="{x:Bind controls:Show.IfNot(ViewModel.HasDictSwitch), Mode=OneWay, FallbackValue=Collapsed}" />
       </StackPanel>
@@ -57,7 +58,7 @@
                    Text="{x:Bind ViewModel.BarTitle, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(ViewModel.BarTitle), Mode=OneWay, FallbackValue=Collapsed}" />
         <!-- العربية ⇄ English: the word translated, or explained in its own language -->
         <Border Margin="8,0,0,0" Padding="4" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}"
-                Visibility="{x:Bind ViewModel.HasDictSwitch, Mode=OneWay, FallbackValue=Collapsed}" ToolTipService.ToolTip="{x:Bind DictSwitchName}">
+                Visibility="{x:Bind ViewModel.HasDictSwitch, Mode=OneWay, FallbackValue=Collapsed}">
           <StackPanel Orientation="Horizontal" AutomationProperties.Name="{x:Bind DictSwitchName}">
             <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind ViewModel.DictTranslatedLabel, Mode=OneWay}"
                           IsChecked="{x:Bind controls:Show.Not(ViewModel.DictExplained), Mode=OneWay}"
@@ -67,11 +68,10 @@
                           Command="{x:Bind ViewModel.SetDictCommand}" CommandParameter="true" />
           </StackPanel>
         </Border>
-        <!-- Where the answer came from (the dictionary, or AI): Windows' icon in the secondary colour, said by its tooltip
-             (the study's C2) -->
+        <!-- Where the answer came from (the dictionary, or AI): Windows' icon in the secondary colour, named for screen
+             readers (the study's C2) -->
         <Border Margin="4,0,0,0" Padding="4" Background="Transparent"
                 VerticalAlignment="Center" Visibility="{x:Bind controls:Show.IfText(ViewModel.BadgeTooltip), Mode=OneWay, FallbackValue=Collapsed}"
-                ToolTipService.ToolTip="{x:Bind ViewModel.BadgeTooltip, Mode=OneWay}"
                 AutomationProperties.Name="{x:Bind ViewModel.BadgeTooltip, Mode=OneWay}">
           <controls:FluentIcon Glyph="{x:Bind controls:Show.BadgeGlyph(ViewModel.Badge), Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
         </Border>
@@ -90,7 +90,6 @@
               Visibility="{x:Bind ViewModel.ShowNavigation, Mode=OneWay, FallbackValue=Collapsed}" />
       <ToggleButton Grid.Column="5" Style="{StaticResource LamhaIconToggleStyle}"
                     IsChecked="{x:Bind ViewModel.IsPinned, Mode=OneWay}" Command="{x:Bind ViewModel.TogglePinCommand}"
-                    ToolTipService.ToolTip="{x:Bind ViewModel.PinTooltip, Mode=OneWay}"
                     AutomationProperties.Name="{x:Bind ViewModel.PinTooltip, Mode=OneWay}">
         <controls:FluentIcon Glyph="Pin" Filled="{x:Bind ViewModel.IsPinned, Mode=OneWay}" />
       </ToggleButton>

@@ -20,23 +20,29 @@ All sizes are in design pixels (what WinUI calls effective pixels); Windows scal
 ## 1. The window
 
 ### Title bar: `TitleBar`
+Measured against Settings side by side at 150 % (2026-10-27).
+
 | Part | Measurement |
 |---|---|
 | Height | **48** (`LamhaTitleBarHeight`) |
 | Back | 40 × 36, at the very start; dimmed when there's nowhere to go back to; Alt+←, the mouse's back button, and Backspace outside a text field |
 | ☰ (narrow only) | 40 × 36, after Back |
-| App icon | 16, then "Lamha" (Caption, 12) |
-| Search | centred in the window, **512** wide at most, 32 high; **🔍 button** (40 × 36) when narrow |
-| Windows' buttons | at the end; on the left in Arabic |
+| Name | "Lamha" (Caption, 12), no icon (the icon is the pane's header, as Settings has no icon here): its first letter 51 from the window's edge, 99 when ☰ is there |
+| Search | Settings' "Find a setting": a pill (radius 16), 32 high, **512** wide at most, **centred in the window**; 🔍 at its start (centred 20 in), the text 42 in; Windows' button edge at rest, no line under it; hovered and focused, Windows' text field (`LamhaTitleSearchStyle`) |
+| 🔍 button (narrow) | 40 × 36, right after the name, as Settings'; it opens the box |
+| Windows' buttons | Windows' standard 46 × 32, at the top of the bar, as Settings' (not the tall ones); at the end, on the left in Arabic |
+
+WinUI's `TitleBar` keeps room for Windows' buttons in pixels as if they were design pixels (half as much again as they need at 150 %), so the main window lets the search run past the end of its slot, up to WinUI's 48 for dragging.
 
 ### Pane: `NavigationView`, left, two widths
 | Part | Measurement |
 |---|---|
 | Open | **300** wide (`LamhaPaneWidth`) |
-| Hidden | when the window is narrower than Settings' breakpoint (measured in step 2); ☰ opens it over the page |
-| Row | **36** high, 40 apart, starting 18 from the window's edge |
-| Coloured icon | **20**, 11 into the row |
-| Name | Body (14), 63 from the window's edge |
+| Hidden | when the window is narrower than Settings' breakpoint (measured in step 2); ☰ opens it over the page, and the page sits on the window itself, with no content layer, as Settings' |
+| Header | where Settings has the account: Lamha's app icon, its art **60** (in a 64 box), its left edge on the rows' fill and 6 under the pane's top; "Lamha" (Body Strong) over "Version 3.0.0" (Caption), both in the text's colour, 12 from the art; 26 above the first row's fill. A button with no fill, as Settings' account: it opens Settings → Lamha (`LamhaPaneHeaderStyle`) |
+| Row | **36** high, 40 apart, its fill starting 16 from the window's edge |
+| Coloured icon | drawn on 20 × 20, shown in a **24** box so it's about 20 across, as Settings' icons; centred 36 from the window's edge |
+| Name | Body (14), 62 from the window's edge |
 | Selected | Windows' fill, plus the **3 × 16 pill** in the accent, rounded 2, gliding from the old row to the new |
 | Count (Review) | `InfoBadge`: 16 high, Caption-size number, the accent |
 | Order | Translate, Write, Review, History, Clipboard; Settings at the foot |
@@ -130,13 +136,13 @@ WinUI's ramp. The frame, Settings and controls use only these styles:
 
 ## 5. Icons
 
-**Segoe Fluent Icons,** Windows' icon font (`SymbolThemeFontFamily`), through Lamha's names (`Controls/FluentIcon.cs` holds the map; `Controls/BrandMark.cs` the mark). A screen asks for `Glyph.Copy` at a `Size` (Small, Normal, Large, Hero), never for a code point or a number.
+**Segoe Fluent Icons,** Windows' icon font (`SymbolThemeFontFamily`), through Lamha's names (`Controls/FluentIcon.cs` holds the map; `Controls/BrandMark.cs` the mark, `Controls/AppIcon.cs` Lamha's own icon: 24 in the card's bar, its art 16 from the edge as the text under it; 64 in the pane's header). A screen asks for `Glyph.Copy` at a `Size` (Small, Normal, Large, Hero), never for a code point or a number.
 
 | Size | For |
 |---|---|
 | **12** (Small) | chevrons, the small × in a field |
 | **16** (Normal) | buttons, rows, menus |
-| **20** (Large) | setting cards, the pane's coloured icons |
+| **20** (Large) | setting cards (the pane's coloured icons are drawn on 20, shown in 24) |
 | **40** (Hero) | an empty state, first run's big moments |
 
 The 33 names, mapped (seen side by side with Lamha 2's in `system.html`):
@@ -203,7 +209,7 @@ Added in step 6, for the mini translator, as Windows' Calculator keeps itself on
 | Mini | EE49 | MiniContract2: the mini translator, always on top (Translate's button) |
 | FullView | EE47 | MiniExpand2: back to Lamha's window (the mini translator's title bar) |
 
-**The pane's coloured icons** are Lamha's own (drafts in `system.html`), in Windows Settings' style: 20 × 20, one main colour each, soft shading, the same in both themes with an edge that keeps them clear on dark.
+**The pane's coloured icons** are Lamha's own (drafts in `system.html`), in Windows Settings' style: drawn on 20 × 20 and shown in a 24 box (so about 20 across, as Settings'), one main colour each, soft shading, the same in both themes with an edge that keeps them clear on dark.
 
 **Animated icons** (WinUI's): Back, ☰, Settings, Search, the expander's chevron, Accept (Copy's ✓).
 
@@ -216,7 +222,7 @@ The default is WinUI's own control and style. Lamha's styles only set tokens.
 | **Accent button** | 32 high, padding 11,5,11,6, radius 4, the accent fill. **One per view**: the main action |
 | **Button** | the same, Windows' control fill |
 | **Subtle button** | the same, transparent until hovered: toolbars, the card |
-| **Icon button** | **32 × 32**, a 16 icon, subtle; a tooltip with its name and shortcut |
+| **Icon button** | **32 × 32**, a 16 icon, subtle; a tooltip with its name and shortcut, except in the card, which shows no tooltips at all (the user's call: they got in the way; `Controls/NoToolTips`); its name is always there for screen readers |
 | **Hyperlink button** | the accent text, no fill |
 | **Split / drop-down button** | as the button, with a 12 chevron: Write's **Rewrite ▾** |
 | **Field** | 32 high (multi-line grows), padding 10,5,6,6, radius 4; focused: **a 2 px accent line under it** |

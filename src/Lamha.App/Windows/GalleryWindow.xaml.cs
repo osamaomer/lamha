@@ -154,6 +154,10 @@ public sealed partial class GalleryWindow : Window
 
     public string Lamha { get; } = Localization.Get("Common_Lamha");
 
+    public string Version { get; } = Localization.Format("Main_Version", UpdateService.Shown(UpdateService.Current));
+
+    public string TitleSearchPlaceholder { get; } = Localization.Get("Search_Placeholder");
+
     /// <summary>Opens in the middle of the screen the mouse is on, at its size.</summary>
     public void ShowCentred()
     {

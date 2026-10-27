@@ -6,7 +6,8 @@ namespace Lamha.App.Controls;
 
 /// <summary>
 /// Lamha's mark: Translate (or another icon) in white on the brand gradient, in one of two sizes: 16 beside a window's
-/// name (the title bar, the card), 56 for first run's big moments (docs/design/system.md). The gradient is the implicit
+/// name (the mini translator's title bar), 56 for first run's big moments (docs/design/system.md). The card and the main
+/// window show Lamha's own icon instead (<see cref="AppIcon"/>). The gradient is the implicit
 /// style's Background in Themes/Controls.xaml, so it follows the theme (Windows' highlight in high contrast).
 /// </summary>
 public sealed partial class BrandMark : UserControl

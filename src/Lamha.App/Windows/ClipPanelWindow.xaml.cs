@@ -392,7 +392,7 @@ public sealed partial class ClipPanelWindow : Window
     /// <summary>A click on a copy pastes it (a pin or delete keeps its own click).</summary>
     private void OnRowTapped(object sender, TappedRoutedEventArgs e)
     {
-        if (sender is FrameworkElement { DataContext: ClipRow row } && !IsInButton(e.OriginalSource as DependencyObject, (DependencyObject)sender))
+        if (RepeaterItem.Of(List, sender as DependencyObject) is ClipRow row && !IsInButton(e.OriginalSource as DependencyObject, (DependencyObject)sender))
         {
             ViewModel.List.Choose(row);
             ViewModel.Paste(row, plain: false);
@@ -402,7 +402,7 @@ public sealed partial class ClipPanelWindow : Window
     /// <summary>The mouse chooses the copy it moves over (Lamha 2's <c>mousemove</c>), not one that scrolls under it.</summary>
     private void OnRowPointerMoved(object sender, PointerRoutedEventArgs e)
     {
-        if (sender is FrameworkElement { DataContext: ClipRow row } && ViewModel.List.Selected != row)
+        if (RepeaterItem.Of(List, sender as DependencyObject) is ClipRow row && ViewModel.List.Selected != row)
         {
             ViewModel.List.Choose(row);
         }

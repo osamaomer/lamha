@@ -84,8 +84,11 @@ public sealed partial class DefinitionItem : ObservableObject
 /// <summary>A part of speech's definitions.</summary>
 public sealed record DefinitionGroupItem(string Pos, List<DefinitionItem> Entries);
 
-/// <summary>The Wikipedia summary, under the answer when it arrives.</summary>
-public sealed record WikiItem(string Extract, FlowDirection Flow, Uri? Url, Uri? Thumb, IRelayCommand Read);
+/// <summary>
+/// The Wikipedia summary, under the answer when it arrives: its text, which way it runs, and "Read more on Wikipedia"
+/// in the summary's own language (Arabic or English), on its side.
+/// </summary>
+public sealed record WikiItem(string Extract, FlowDirection Flow, Uri? Url, Uri? Thumb, string ReadLabel, IRelayCommand Read);
 
 /// <summary>A link at the foot of the card: Google Translate, Cambridge, Better translation, Writing tools.</summary>
 public sealed record LinkItem(Glyph Glyph, string Label, string Tooltip, IRelayCommand Open);
@@ -495,7 +498,10 @@ public sealed partial class WordAnswer : ObservableObject
         ArgumentNullException.ThrowIfNull(summary);
         Uri.TryCreate(summary.Url, UriKind.Absolute, out var url);
         Uri.TryCreate(summary.Thumb, UriKind.Absolute, out var thumb);
-        Wikipedia = new WikiItem(summary.Extract, Localization.FlowOf(summary.Lang), url, thumb, new RelayCommand(() =>
+        // "Read more" in the summary's language (another language's summary: the interface's).
+        var lang = summary.Lang.Split('-')[0];
+        var read = Localization.Get(lang == "ar" || (lang != "en" && Localization.IsArabic) ? "Card_ReadWikiAr" : "Card_ReadWikiEn");
+        Wikipedia = new WikiItem(summary.Extract, Localization.FlowOf(summary.Lang), url, thumb, read, new RelayCommand(() =>
         {
             if (url is not null)
             {
