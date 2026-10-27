@@ -136,3 +136,15 @@ waveOutReset
 waveOutClose
 WAVE_MAPPER
 WHDR_DONE
+
+// the jump list: Translate, Write, Review and Clipboard on Lamha's taskbar button
+DestinationList
+ICustomDestinationList
+EnumerableObjectCollection
+IObjectCollection
+IObjectArray
+ShellLink
+IShellLinkW
+IPropertyStore
+PKEY_Title
+PROPVARIANT

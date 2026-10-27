@@ -155,6 +155,7 @@ public partial class App : Application
             LanguageChanged = () =>
             {
                 _tray?.Refresh();
+                JumpListService.Refresh(_options.Profile);
                 _card.Dispose(); // made again in the new language at the next lookup
                 _panel.Dispose();
             },
@@ -165,6 +166,11 @@ public partial class App : Application
         _reminders = new ReviewReminderService(_brain, _notes, () => shortcuts.IsOn && !_main.IsInUse && _firstRun?.IsOpen != true, queue) { OpenReview = () => OpenPage("review") };
         _reminders.Changed += _tray.SetWaiting;
         _notes.Register();
+        if (!_options.Measure)
+        {
+            JumpListService.Refresh(_options.Profile);
+        }
+
         NotifyTaken(shortcuts);
         var fromNotification = _notes.Open(Environment.CommandLine); // a click on a notification that started Lamha
         queue.TryEnqueue(DispatcherQueuePriority.Low, _reminders.Recount); // the count, and a reminder if one is due (Lamha 2's, at start)
@@ -175,7 +181,17 @@ public partial class App : Application
             var arguments = Arguments(e);
             queue.TryEnqueue(() =>
             {
-                if (_notes?.Open(arguments) != true)
+                if (_notes?.Open(arguments) == true)
+                {
+                    return;
+                }
+
+                // A jump list task: the main window on its page (first run first, while it's open).
+                if (JumpListService.PageOf(arguments) is { } page && _firstRun?.IsOpen != true)
+                {
+                    OpenPage(page);
+                }
+                else
                 {
                     OpenMain();
                 }

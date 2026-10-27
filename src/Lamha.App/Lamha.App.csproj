@@ -75,5 +75,7 @@
   <ItemGroup>
     <Content Include="Assets\Lamha.ico" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Lamha-256.png" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The jump list's icons (tools/Icons/jump-icons.mjs): Windows reads them from files -->
+    <Content Include="Assets\Jump\*.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
