@@ -30,6 +30,12 @@ public sealed partial class GalleryWindow : Window
         "LamhaHeadwordTextStyle", "LamhaHeroTextStyle", "LamhaReadingTextStyle",
     ];
 
+    // The reader's book text (RichTextBlock styles), each shown on a line of Pride and Prejudice.
+    private static readonly string[] BookStyles =
+    [
+        "LamhaBookChapterTextStyle", "LamhaBookHeadingTextStyle", "LamhaBookTextStyle", "LamhaBookFixedTextStyle",
+    ];
+
     /// <summary>Lamha's colours for meaning, then Windows' for the frame (system.md §3).</summary>
     private static readonly string[] Brushes =
     [
@@ -184,6 +190,15 @@ public sealed partial class GalleryWindow : Window
         foreach (var key in TypeStyles)
         {
             TypeList.Children.Add(new TextBlock { Style = (Style)Application.Current.Resources[key], Text = key, TextWrapping = TextWrapping.NoWrap });
+        }
+
+        foreach (var key in BookStyles)
+        {
+            var book = new RichTextBlock { Style = (Style)Application.Current.Resources[key], MaxWidth = (double)Application.Current.Resources["LamhaBookMeasure"] };
+            var line = new Microsoft.UI.Xaml.Documents.Paragraph();
+            line.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run { Text = $"{key}: It is a truth universally acknowledged, that a single man in possession of a good fortune must be in want of a wife." });
+            book.Blocks.Add(line);
+            TypeList.Children.Add(book);
         }
 
         // Drawn as XAML so each colour follows the theme switch, as a screen's ThemeResource does.

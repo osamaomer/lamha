@@ -59,7 +59,11 @@ public enum CardLifetime
 /// <c>--gallery</c>: the design system live, every component from its own styles (with <c>--lang</c> and <c>--theme</c>),
 /// for checking a change in one place and for screenshots.
 /// </param>
-public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null, string? Updates = null, string? Packs = null, string? Lamha2 = null, bool RemoveLamha2 = false, bool Mini = false, bool Gallery = false)
+/// <param name="Book">
+/// <c>--book=file</c> (or a library book's id): this Lamha is the reader for that book, in its own window and process
+/// (decision 0022), beside the Lamha in the tray; a file is added to the library first. Closing the book ends it.
+/// </param>
+public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string? Profile = null, string? Sample = null, string? Language = null, string? Theme = null, string? Page = null, bool Panel = false, string? FirstRun = null, string? Updates = null, string? Packs = null, string? Lamha2 = null, bool RemoveLamha2 = false, bool Mini = false, bool Gallery = false, string? Book = null)
 {
     public static AppOptions FromArgs(IReadOnlyList<string> args)
     {
@@ -77,8 +81,11 @@ public sealed record AppOptions(CardLifetime CardLifetime, bool Measure, string?
         return new AppOptions(lifetime, args.Contains("--measure", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(profile) ? null : Path.GetFullPath(profile), sample, language, theme, string.IsNullOrWhiteSpace(page) ? null : page, args.Contains("--panel", StringComparer.OrdinalIgnoreCase), firstRun, string.IsNullOrWhiteSpace(updates) ? null : updates,
             string.IsNullOrWhiteSpace(packs) ? null : packs.TrimEnd('/') + "/", string.IsNullOrWhiteSpace(lamha2) ? null : Path.GetFullPath(lamha2),
             args.Contains("--remove-lamha2", StringComparer.OrdinalIgnoreCase), args.Contains("--mini", StringComparer.OrdinalIgnoreCase),
-            args.Contains("--gallery", StringComparer.OrdinalIgnoreCase));
+            args.Contains("--gallery", StringComparer.OrdinalIgnoreCase), string.IsNullOrWhiteSpace(Value(args, "--book=")) ? null : Value(args, "--book="));
     }
+
+    /// <summary>Whether this start is a book's reader, which runs beside the Lamha in the tray rather than handing over to it.</summary>
+    public static bool IsReader(IReadOnlyList<string> args) => !string.IsNullOrWhiteSpace(Value(args, "--book="));
 
     /// <summary>What Lamha starts with again after an update: the profile and the releases' folder, not a screenshot's page or sample.</summary>
     public string[] RestartArgs() =>

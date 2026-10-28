@@ -79,8 +79,17 @@ WinUI's ramp. The frame, Settings and controls use only these styles:
 | `LamhaMeaningTextStyle` | 20, bold | the meaning in context (Arabic) |
 | `LamhaReadingTextStyle` | 14, line 24 | running Arabic: glosses, Wikipedia, the written text |
 
+**The reader's book** ([reader.html](reader.html), decision 0022): rich text (`RichTextBlock`), set by `BookBlockView` from a book's blocks, in a column at most `LamhaBookMeasure` (620) wide, blocks 16 apart (24 after a heading):
+| Style | Is | For |
+|---|---|---|
+| `LamhaBookTextStyle` | 18, Sitka (`LamhaBookFontFamily`), line 30 (1.7), selectable | a book's paragraphs, list items, quotations |
+| `LamhaBookChapterTextStyle` | 28, Sitka, semibold, line 36 | a chapter's heading (level 1) |
+| `LamhaBookHeadingTextStyle` | 20, Sitka, semibold, line 28 | the headings under it |
+| `LamhaBookFixedTextStyle` | 14, Cascadia Mono, line 24 | a book's preformatted text (code, verse set line by line) |
+
 **Rules:**
-- **Fonts:** Segoe UI Variable for Latin, Segoe UI for Arabic (Windows' own fallback), and the serif only for the headword.
+- **Fonts:** Segoe UI Variable for Latin, Segoe UI for Arabic (Windows' own fallback), the serif only for the headword, and Sitka (Windows' reading face) only for a book's text.
+- **A book's text reads in its own direction:** an Arabic paragraph right to left in an English interface, an English one left to right in Arabic.
 - **Arabic lines** are taller: 1.7 × the size for reading, 1.5 for the rest. They're set by the style, never by hand.
 - **Colours of text:** `TextFillColorPrimaryBrush` (the main), `Secondary` (descriptions, glosses), `Tertiary` (hints, placeholders), `Disabled`. Text is never in the accent unless it can be pressed.
 - **Lines of two languages in one item** start at the interface's side.

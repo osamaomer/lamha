@@ -25,6 +25,18 @@ public static class Program
             .Run();
 
         WinRT.ComWrappersSupport.InitializeComWrappers();
+        if (AppOptions.IsReader(args))
+        {
+            // A book's reader: a Lamha of its own beside the one in the tray, so closing the book gives all its memory
+            // back (decision 0022). It never takes the single-instance key nor installs a pending update.
+            Application.Start(callback =>
+            {
+                SynchronizationContext.SetSynchronizationContext(new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread()));
+                _ = new App(AppOptions.FromArgs(args), instance: null);
+            });
+            return 0;
+        }
+
         var instance = AppInstance.FindOrRegisterForKey(InstanceKey);
         if (!instance.IsCurrent)
         {

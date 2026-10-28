@@ -17,7 +17,7 @@ namespace Lamha.App.Services;
 public sealed partial class CardService(
     SelectionService selection,
     SentenceReader sentences,
-    ClipboardService clipboard,
+    ClipboardService? clipboard,
     Brain brain,
     CardLifetime lifetime,
     IdleMemory idle,
@@ -58,7 +58,9 @@ public sealed partial class CardService(
         try
         {
             // Lamha's own Ctrl+C isn't a copy of the user's, so clipboard history doesn't record it.
-            var capture = await clipboard.Monitor.SuppressAsync(selection.CaptureAsync).ConfigureAwait(true);
+            var capture = clipboard is null
+                ? await selection.CaptureAsync().ConfigureAwait(true)
+                : await clipboard.Monitor.SuppressAsync(selection.CaptureAsync).ConfigureAwait(true);
             var text = capture.Text.Trim();
             WordContext? context = null;
             if (mode == CardMode.Lookup && text.Length > 0 && TextKind.IsLookupCandidate(text) && brain.Settings.Current.UseContext)

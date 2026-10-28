@@ -7,11 +7,13 @@ using Lamha.Core.Money;
 using Lamha.Core.Dictionary;
 using Lamha.Core.Import;
 using Lamha.Core.Net;
+using Lamha.Core.Reading;
 using Lamha.Core.Review;
 using Lamha.Core.Settings;
 using Lamha.Core.Translation;
 using Lamha.Core.Wikipedia;
 using Lamha.Core.Writing;
+using Lamha.Data.Books;
 using Lamha.Data.Database;
 using Lamha.Data.Dictionary;
 using Lamha.Windows.Security;
@@ -44,6 +46,7 @@ public sealed partial class Brain : IDisposable
         Localization = new CoreLocalization(Settings);
         ClipboardHistory = new ClipboardHistory(new SqliteClipStore(Database), new Dpapi(), State, Settings, TimeProvider.System);
         Reminder = new ReviewReminder(new SqliteDeckStore(Database), State, Settings, TimeProvider.System);
+        Library = new Library(new SqliteBookStore(Database), new BookFolder(Path.Combine(dataFolder, "books")), TimeProvider.System);
         _lookups = new Lazy<Lookups>(() => new Lookups(this));
     }
 
@@ -68,6 +71,9 @@ public sealed partial class Brain : IDisposable
 
     /// <summary>The tray's count of words waiting for review, and when to remind: read from the deck, without a lookup's parts.</summary>
     public ReviewReminder Reminder { get; }
+
+    /// <summary>The reader's books (decision 0022): Lamha's copies in the data folder's <c>books</c>, with their places and marks.</summary>
+    public Library Library { get; }
 
     /// <summary>The review deck changed (once a lookup has built it), on the thread that changed it.</summary>
     public event Action? ReviewChanged;

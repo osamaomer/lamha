@@ -63,6 +63,7 @@ dotnet test --solution Lamha.slnx                         # all tests
 dotnet test --project tests/Lamha.Core.Tests              # one project
 dotnet run --project src/Lamha.App                        # the app, Debug (tray icon; Ctrl+Alt+L / W); add -- --profile=<folder> for test data
 dotnet run --project src/Lamha.App -- --gallery             # the design system live, every component (with --lang=ar|en, --theme=light|dark)
+dotnet run --project src/Lamha.App -- --book=<file>          # a book in the reader, its own process beside the tray's Lamha (decision 0022); add --profile=<folder> for test data
 dotnet publish src/Lamha.App -c Release -r win-x64 -o artifacts/publish/win-x64   # NativeAOT
 ./tools/Measure/measure.ps1 -Budget                       # memory of the published build
 dotnet run --project tools/DictionaryBuilder -- dict artifacts/dict/lamha-dict.db   # the dictionary file (the app ships it; build it once before running the app)

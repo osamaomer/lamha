@@ -161,7 +161,7 @@ public sealed class Library(IBookStore store, IBookFiles files, TimeProvider clo
     /// Words as the reader counts them for the time left: runs of letters or digits, with their marks (Arabic's vowels:
     /// "مرحبًا" is one word) and the apostrophes and hyphens inside them ("it's", "well-known").
     /// </summary>
-    internal static int CountWords(string text)
+    public static int CountWords(string text)
     {
         var words = 0;
         var inWord = false;

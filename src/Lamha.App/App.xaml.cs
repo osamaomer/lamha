@@ -37,7 +37,8 @@ public partial class App : Application
     private const string LinkScheme = "lamha";
 
     private readonly AppOptions _options;
-    private readonly AppInstance _instance;
+    private readonly AppInstance? _instance;
+    private ReaderService? _reader;
     private MessageWindow? _messages;
     private Hotkeys? _hotkeys;
     private readonly Brain _brain;
@@ -55,7 +56,9 @@ public partial class App : Application
     private FirstRunService? _firstRun;
     private readonly bool _hadDatabase;
 
-    public App(AppOptions options, AppInstance instance)
+    /// <param name="options">The command line's options.</param>
+    /// <param name="instance">The single-instance key's owner; null for a book's reader, which runs beside the tray's Lamha.</param>
+    public App(AppOptions options, AppInstance? instance)
     {
         _options = options;
         _instance = instance;
@@ -68,13 +71,19 @@ public partial class App : Application
         // The tray keeps Lamha running with no window open; only Quit ends it.
         DispatcherShutdownMode = DispatcherShutdownMode.OnExplicitShutdown;
         UnhandledException += (_, e) => AppLog.Error("unhandled", e.Exception);
-        AppLog.Info($"start {Brain.Version} card={options.CardLifetime} measure={options.Measure} profile={(options.Profile is null ? "default" : "other")}");
+        AppLog.Info($"start {Brain.Version} card={options.CardLifetime} measure={options.Measure} profile={(options.Profile is null ? "default" : "other")}{(options.Book is null ? "" : " reader")}");
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         var queue = DispatcherQueue.GetForCurrentThread();
         var idle = new IdleMemory(queue);
+        if (_options.Book is { } book)
+        {
+            OpenReader(book, queue, idle);
+            return;
+        }
+
         _messages = new MessageWindow();
         _accent = new AccentService(_brain.Settings, queue); // kept: it listens to Windows for as long as Lamha runs
         _clipboard = new ClipboardService(_messages, _brain, queue);
@@ -186,7 +195,7 @@ public partial class App : Application
         queue.TryEnqueue(DispatcherQueuePriority.Low, _reminders.Recount); // the count, and a reminder if one is due (Lamha 2's, at start)
 
         // A second start of Lamha lands here (on a background thread): a notification's link, or the main window.
-        _instance.Activated += (_, e) =>
+        _instance!.Activated += (_, e) =>
         {
             var arguments = Arguments(e);
             queue.TryEnqueue(() =>
@@ -252,6 +261,33 @@ public partial class App : Application
         }
 
         idle.Schedule(); // start-up's own memory, once the tray is ready
+    }
+
+    /// <summary>
+    /// A book's reader (<c>--book</c>, decision 0022): the book's window and the card its words open, and nothing of the
+    /// tray's (no shortcuts, clipboard history, notifications or updates: the Lamha in the tray has those). Closing the
+    /// book ends this Lamha.
+    /// </summary>
+    private void OpenReader(string book, DispatcherQueue queue, IdleMemory idle)
+    {
+        _messages = new MessageWindow();
+        _accent = new AccentService(_brain.Settings, queue);
+        _sentences = new SentenceReader();
+        Speech.Use(_brain);
+        _card = new CardService(new SelectionService(_messages), _sentences, clipboard: null, _brain, _options.CardLifetime, idle, (_, _) => { })
+        {
+            Theme = _options.Theme,
+        };
+        _reader = new ReaderService(_brain, _card, idle)
+        {
+            Theme = _options.Theme,
+            Ended = () =>
+            {
+                Close();
+                Exit();
+            },
+        };
+        _ = _reader.OpenAsync(book);
     }
 
     /// <summary>
@@ -353,6 +389,7 @@ public partial class App : Application
     /// <summary>Everything Lamha holds, closed: windows, shortcuts, the clipboard listener, the tray, the database.</summary>
     private void Close()
     {
+        _reader?.Dispose();
         _firstRun?.Dispose();
         _main?.Dispose();
         _mini?.Dispose();

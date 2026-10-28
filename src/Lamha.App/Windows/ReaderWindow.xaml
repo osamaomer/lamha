@@ -1,0 +1,50 @@
+<Window
+    x:Class="Lamha.App.Windows.ReaderWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Lamha.App.Controls"
+    xmlns:reader="using:Lamha.App.ViewModels.Reader">
+  <!-- The reading page (docs/design/reader.html, signed off; decision 0022): Windows' title bar with the book's title and
+       author; the book on Windows' content layer, its blocks in a column up to 620 wide, 32 from the top and 28 from the
+       sides; and a 40 footer with the chapter and how far through the book. Mica, or Lamha's page colour. -->
+  <Grid x:Name="Root">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="40" />
+    </Grid.RowDefinitions>
+
+    <!-- Lamha's page colour instead of Mica (Settings → Appearance → the wallpaper behind the window) -->
+    <Border x:Name="Solid" Grid.RowSpan="3" Background="{ThemeResource LamhaPageBrush}" Visibility="Collapsed" />
+
+    <TitleBar x:Name="AppTitleBar" Title="{x:Bind BookTitle}" Subtitle="{x:Bind BookAuthor}"
+              IsBackButtonVisible="False" IsPaneToggleButtonVisible="False" />
+
+    <!-- The book's page: Windows' content layer, as the main window's page -->
+    <Border Grid.Row="1" Grid.RowSpan="2" Background="{ThemeResource LayerFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" />
+
+    <ScrollViewer x:Name="Scroller" Grid.Row="1" HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto"
+                  VerticalAnchorRatio="0" ViewChanged="OnViewChanged">
+      <ItemsRepeater x:Name="Page" Margin="28,32,28,48" MaxWidth="{StaticResource LamhaBookMeasure}" HorizontalAlignment="Stretch"
+                     ItemsSource="{x:Bind ViewModel.Blocks}">
+        <ItemsRepeater.ItemTemplate>
+          <DataTemplate x:DataType="reader:ReaderBlock">
+            <controls:BookBlockView Block="{x:Bind}" />
+          </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+      </ItemsRepeater>
+    </ScrollViewer>
+
+    <!-- Opening the book, or why it can't open -->
+    <controls:EmptyState x:Name="Message" Grid.Row="1" VerticalAlignment="Center" Glyph="Book" Title="{x:Bind MessageTitle}"
+                         Text="{x:Bind MessageText}" />
+
+    <Grid x:Name="Footer" Grid.Row="2" Padding="28,0" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,1,0,0" Visibility="Collapsed">
+      <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind ViewModel.Chapter, Mode=OneWay}"
+                 TextTrimming="CharacterEllipsis" Margin="0,0,120,0" />
+      <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}"
+                 Text="{x:Bind ViewModel.Progress, Mode=OneWay}" />
+    </Grid>
+  </Grid>
+</Window>

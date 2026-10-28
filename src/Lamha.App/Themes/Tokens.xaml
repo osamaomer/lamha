@@ -231,6 +231,36 @@
     <Setter Property="LineHeight" Value="18" />
     <Setter Property="Foreground" Value="{ThemeResource LamhaTextMutedBrush}" />
   </Style>
+  <!-- The reader's book (docs/design/reader.html, decision 0022): Windows' reading face, Sitka, at Body large on a 1.7
+       line (30), in a column at most 620 wide; its headings in the same face, a chapter's at Title, the rest at Subtitle.
+       Arabic text in a book takes Segoe UI's Arabic through the face's fallback. A page's blocks are 16 apart. -->
+  <FontFamily x:Key="LamhaBookFontFamily">Sitka Text, Georgia, Segoe UI</FontFamily>
+  <x:Double x:Key="LamhaBookMeasure">620</x:Double>
+  <Style x:Key="LamhaBookTextStyle" TargetType="RichTextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource LamhaBookFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBodyLarge}" />
+    <Setter Property="LineHeight" Value="30" />
+    <Setter Property="Foreground" Value="{ThemeResource LamhaTextBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="IsTextSelectionEnabled" Value="True" />
+  </Style>
+  <Style x:Key="LamhaBookChapterTextStyle" TargetType="RichTextBlock" BasedOn="{StaticResource LamhaBookTextStyle}">
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeTitle}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="LineHeight" Value="36" />
+  </Style>
+  <Style x:Key="LamhaBookHeadingTextStyle" TargetType="RichTextBlock" BasedOn="{StaticResource LamhaBookTextStyle}">
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeSubtitle}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="LineHeight" Value="28" />
+  </Style>
+  <!-- A book's preformatted text (verse set line by line, code): Body in Windows' fixed-width face -->
+  <Style x:Key="LamhaBookFixedTextStyle" TargetType="RichTextBlock" BasedOn="{StaticResource LamhaBookTextStyle}">
+    <Setter Property="FontFamily" Value="Cascadia Mono, Consolas" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeBody}" />
+    <Setter Property="LineHeight" Value="24" />
+  </Style>
+
   <!-- Part of speech, the footer, small links (Windows' Caption) -->
   <Style x:Key="LamhaCaptionTextStyle" TargetType="TextBlock" BasedOn="{StaticResource LamhaTextStyle}">
     <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
