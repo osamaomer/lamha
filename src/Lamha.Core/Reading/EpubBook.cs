@@ -106,6 +106,8 @@ public sealed class EpubBook : IDisposable
         }
         catch (InvalidDataException e)
         {
+            // Not a ZIP: the archive never took the stream, so it's closed here (the file can then be deleted).
+            stream.Dispose();
             throw new LamhaException(ErrorCodes.BookBad, e);
         }
 

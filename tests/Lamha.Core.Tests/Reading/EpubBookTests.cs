@@ -84,7 +84,7 @@ public class EpubBookTests
     [Fact]
     public void ReadsTheDetailsOfAnEpub3()
     {
-        using var book = OpenBook3();
+        using var book = EpubBook.Open(Book3(), "book.epub");
 
         Assert.Equal("Pride and Prejudice", book.Info.Title);
         Assert.Equal(["Jane Austen"], book.Info.Authors);
@@ -99,7 +99,7 @@ public class EpubBookTests
     [Fact]
     public void TheReadingOrderFollowsTheSpine()
     {
-        using var book = OpenBook3();
+        using var book = EpubBook.Open(Book3(), "book.epub");
 
         Assert.Equal(
             [new BookPart("OEBPS/text/chapter 1.xhtml", true), new BookPart("OEBPS/text/ch2.xhtml", true), new BookPart("OEBPS/text/notes.xhtml", false)],
@@ -109,7 +109,7 @@ public class EpubBookTests
     [Fact]
     public void TheContentsComeFromTheNavsToc()
     {
-        using var book = OpenBook3();
+        using var book = EpubBook.Open(Book3(), "book.epub");
 
         var volume = Assert.Single(book.Contents, c => c.Title == "Volume I");
         Assert.Equal("OEBPS/text/chapter 1.xhtml", volume.Path);
@@ -122,7 +122,7 @@ public class EpubBookTests
     [Fact]
     public void AChapterBecomesBlocks()
     {
-        using var book = OpenBook3();
+        using var book = EpubBook.Open(Book3(), "book.epub");
 
         var blocks = book.ReadPart(book.Parts[0]);
 
@@ -140,7 +140,7 @@ public class EpubBookTests
     [Fact]
     public void SpacesCollapseAndStylesBecomeRuns()
     {
-        using var book = OpenBook3();
+        using var book = EpubBook.Open(Book3(), "book.epub");
 
         var first = book.ReadPart(book.Parts[0])[1];
 
@@ -154,7 +154,7 @@ public class EpubBookTests
     [Fact]
     public void LineBreaksPicturesListsAndQuotations()
     {
-        using var book = OpenBook3();
+        using var book = EpubBook.Open(Book3(), "book.epub");
         var blocks = book.ReadPart(book.Parts[0]);
 
         Assert.Equal("Netherfield" + Nbsp + "Park\nis let at last.", blocks[2].Text);
@@ -174,7 +174,7 @@ public class EpubBookTests
     [Fact]
     public void PreformattedTextKeepsItsLinesAndWebLinksStayAsTheyAre()
     {
-        using var book = OpenBook3();
+        using var book = EpubBook.Open(Book3(), "book.epub");
         var blocks = book.ReadPart(book.Parts[0]);
 
         Assert.Contains("line one\n", blocks[12].Text, StringComparison.Ordinal);
@@ -241,25 +241,26 @@ public class EpubBookTests
             </encryption>
             """;
 
-        var locked = Assert.Throws<LamhaException>(() => OpenBook3(("META-INF/encryption.xml", Encryption("http://www.w3.org/2001/04/xmlenc#aes128-cbc"))));
+        var locked = Assert.Throws<LamhaException>(() => EpubBook.Open(Book3(("META-INF/encryption.xml", Encryption("http://www.w3.org/2001/04/xmlenc#aes128-cbc"))), "book.epub"));
         Assert.Equal(ErrorCodes.BookLocked, locked.Code);
 
-        using var fonts = OpenBook3(("META-INF/encryption.xml", Encryption("http://www.idpf.org/2008/embedding")));
+        using var fonts = EpubBook.Open(Book3(("META-INF/encryption.xml", Encryption("http://www.idpf.org/2008/embedding"))), "book.epub");
         Assert.Equal("Pride and Prejudice", fonts.Info.Title);
     }
 
     [Fact]
     public void AMissingPartIsBad()
     {
-        using var book = OpenBook3();
+        using var book = EpubBook.Open(Book3(), "book.epub");
         Assert.Equal(ErrorCodes.BookBad, Assert.Throws<LamhaException>(() => book.ReadPart(new BookPart("OEBPS/text/gone.xhtml", true))).Code);
     }
 
-    private static EpubBook OpenBook3(params (string Path, string Text)[] extra) => EpubBook.Open(Zip(
+    /// <summary>The EPUB 3 these tests read (Pride and Prejudice's start), as a file; <paramref name="extra"/> files are added to it.</summary>
+    internal static MemoryStream Book3(params (string Path, string Text)[] extra) => Zip(
         [("META-INF/container.xml", Container), ("OEBPS/content.opf", Package3), ("OEBPS/nav.xhtml", Nav), ("OEBPS/images/cover.jpg", "jpg"),
-         ("OEBPS/text/chapter 1.xhtml", Chapter1), ("OEBPS/text/ch2.xhtml", Simple), ("OEBPS/text/notes.xhtml", Simple), .. extra]), "book.epub");
+         ("OEBPS/text/chapter 1.xhtml", Chapter1), ("OEBPS/text/ch2.xhtml", Simple), ("OEBPS/text/notes.xhtml", Simple), .. extra]);
 
-    private static MemoryStream Zip(params (string Path, string Text)[] files)
+    internal static MemoryStream Zip(params (string Path, string Text)[] files)
     {
         var stream = new MemoryStream();
         using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))

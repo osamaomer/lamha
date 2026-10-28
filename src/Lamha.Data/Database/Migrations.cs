@@ -95,6 +95,48 @@ internal static class Migrations
         ) WITHOUT ROWID;
         CREATE INDEX clips_by_activity ON clips (max(last_copied, last_used) DESC, id DESC);
         """,
+
+        // 3: the reader's library (decision 0022). A book is known by its file's SHA-256; its copy and cover are files in
+        // the data folder's "books". Authors are one per line. A removed book keeps its row until it's purged (Undo).
+        // A mark's place is a part of the book's reading order, a block of it, and characters in the block's text.
+        """
+        CREATE TABLE books (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            authors TEXT NOT NULL,
+            language TEXT NOT NULL,
+            format TEXT NOT NULL,
+            file TEXT NOT NULL,
+            cover TEXT NOT NULL,
+            original_name TEXT NOT NULL,
+            source TEXT NOT NULL,
+            size INTEGER NOT NULL,
+            words INTEGER NOT NULL,
+            added INTEGER NOT NULL,
+            opened INTEGER,
+            finished INTEGER,
+            place_part INTEGER NOT NULL,
+            place_block INTEGER NOT NULL,
+            progress REAL NOT NULL,
+            removed INTEGER
+        ) WITHOUT ROWID;
+
+        CREATE TABLE marks (
+            id INTEGER PRIMARY KEY,
+            book TEXT NOT NULL,
+            kind TEXT NOT NULL,
+            part INTEGER NOT NULL,
+            block INTEGER NOT NULL,
+            start_at INTEGER NOT NULL,
+            end_at INTEGER NOT NULL,
+            color TEXT NOT NULL,
+            note TEXT NOT NULL,
+            text TEXT NOT NULL,
+            created INTEGER NOT NULL,
+            modified INTEGER NOT NULL
+        );
+        CREATE INDEX marks_in_order ON marks (book, part, block, start_at);
+        """,
     ];
 
     /// <summary>The schema version this build of Lamha writes.</summary>
