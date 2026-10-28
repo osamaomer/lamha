@@ -1,0 +1,635 @@
+<title>Lamha Library</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a design page like the others in docs/design: Lamha's main window first, on its new Read page (the
+   library), live and at its real size, then its states, what's new in it, and the questions. The window is the
+   design system's (system.html); book covers made from a title add their own colours, like pictures. */
+:root {
+  --ground: #eef0f5; --sheet: #ffffff; --ink: #1b1b1f; --ink-2: #5d5d66; --ink-3: #7c7c86; --rule: rgba(20, 20, 40, 0.10); --draft: #e8590c;
+  --mica: linear-gradient(140deg, #e9ecf6 0%, #f1edf3 50%, #ecf2f3 100%);
+  --layer: rgba(255, 255, 255, 0.55); --layer-edge: rgba(0, 0, 0, 0.06);
+  --card: rgba(255, 255, 255, 0.72); --card-edge: rgba(0, 0, 0, 0.07);
+  --subtle-1: rgba(0, 0, 0, 0.037); --subtle-2: rgba(0, 0, 0, 0.024);
+  --ctl: rgba(255, 255, 255, 0.72); --ctl-2: rgba(249, 249, 249, 0.6); --ctl-edge: rgba(0, 0, 0, 0.07); --ctl-edge-low: rgba(0, 0, 0, 0.16);
+  --t1: rgba(0, 0, 0, 0.9); --t2: rgba(0, 0, 0, 0.61); --t3: rgba(0, 0, 0, 0.45); --t4: rgba(0, 0, 0, 0.36);
+  --divider: rgba(0, 0, 0, 0.08);
+  --acrylic: rgba(252, 252, 252, 0.96); --shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --accent: #4f46e5; --accent-fill: #4f46e5; --on-accent: #ffffff; --accent-soft: rgba(79, 70, 229, 0.12);
+  --ok: #166534; --danger: #c42b1c; --info-soft: rgba(79, 70, 229, 0.08);
+  --win-edge: rgba(0, 0, 0, 0.18); --win-shadow: 0 30px 70px -20px rgba(20, 20, 50, 0.35), 0 6px 18px rgba(0, 0, 0, 0.08);
+  --cover-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.12);
+  /* covers made from a book's title: pictures, the same in both themes */
+  --cv0: #2f3d34; --cv0-ink: #efe6cf; --cv1: #5b1f1f; --cv1-ink: #f2d9b8; --cv2: #2e3440; --cv2-ink: #d8dee9; --cv3: #134e4a; --cv3-ink: #ccfbf1;
+  --cv4: #3730a3; --cv4-ink: #e0e7ff; --cv5: #0f1b33; --cv5-ink: #e7c873; --cv6: #6b1d2f; --cv6-ink: #f8e1c4; --cv7: #7c3a4a; --cv7-ink: #fff1f2;
+  --cv-doc: #f4f5f7; --cv-doc-ink: #2b579a; --cv-doc-2: #6b7280; --cv-txt: #fbfaf5; --cv-txt-ink: #44403c;
+  --ui: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", "Noto Sans Arabic", Tahoma, system-ui, sans-serif;
+  --ui-display: "Segoe UI Variable Display", "Segoe UI Variable Text", "Segoe UI", "Noto Sans Arabic", Tahoma, system-ui, sans-serif;
+  --serif: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --icons: "Segoe Fluent Icons", "Segoe MDL2 Assets";
+  --t-faster: 83ms; --t-fast: 167ms; --t-normal: 250ms; --t-slow: 333ms;
+  --ease-in: cubic-bezier(0, 0, 0, 1); --ease-out: cubic-bezier(1, 0, 1, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #15161b; --sheet: #1d1e24; --ink: #f2f2f5; --ink-2: #a9a9b3; --ink-3: #8b8b95; --rule: rgba(255, 255, 255, 0.09); --draft: #ff922b;
+    --mica: linear-gradient(140deg, #1c1e27 0%, #211c22 50%, #1a2024 100%);
+    --layer: rgba(58, 58, 58, 0.30); --layer-edge: rgba(0, 0, 0, 0.25);
+    --card: rgba(255, 255, 255, 0.051); --card-edge: rgba(0, 0, 0, 0.18);
+    --subtle-1: rgba(255, 255, 255, 0.061); --subtle-2: rgba(255, 255, 255, 0.042);
+    --ctl: rgba(255, 255, 255, 0.061); --ctl-2: rgba(255, 255, 255, 0.084); --ctl-edge: rgba(255, 255, 255, 0.07); --ctl-edge-low: rgba(255, 255, 255, 0.05);
+    --t1: #ffffff; --t2: rgba(255, 255, 255, 0.79); --t3: rgba(255, 255, 255, 0.55); --t4: rgba(255, 255, 255, 0.36);
+    --divider: rgba(255, 255, 255, 0.084);
+    --acrylic: rgba(44, 44, 44, 0.96); --shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+    --accent: #9aa1ff; --accent-fill: #9aa1ff; --on-accent: #0b0b12; --accent-soft: rgba(154, 161, 255, 0.16);
+    --ok: #6ccb5f; --danger: #ff99a4; --info-soft: rgba(154, 161, 255, 0.10);
+    --win-edge: rgba(255, 255, 255, 0.12); --win-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.8), 0 6px 18px rgba(0, 0, 0, 0.35);
+    --cover-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #15161b; --sheet: #1d1e24; --ink: #f2f2f5; --ink-2: #a9a9b3; --ink-3: #8b8b95; --rule: rgba(255, 255, 255, 0.09); --draft: #ff922b;
+  --mica: linear-gradient(140deg, #1c1e27 0%, #211c22 50%, #1a2024 100%);
+  --layer: rgba(58, 58, 58, 0.30); --layer-edge: rgba(0, 0, 0, 0.25);
+  --card: rgba(255, 255, 255, 0.051); --card-edge: rgba(0, 0, 0, 0.18);
+  --subtle-1: rgba(255, 255, 255, 0.061); --subtle-2: rgba(255, 255, 255, 0.042);
+  --ctl: rgba(255, 255, 255, 0.061); --ctl-2: rgba(255, 255, 255, 0.084); --ctl-edge: rgba(255, 255, 255, 0.07); --ctl-edge-low: rgba(255, 255, 255, 0.05);
+  --t1: #ffffff; --t2: rgba(255, 255, 255, 0.79); --t3: rgba(255, 255, 255, 0.55); --t4: rgba(255, 255, 255, 0.36);
+  --divider: rgba(255, 255, 255, 0.084);
+  --acrylic: rgba(44, 44, 44, 0.96); --shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --accent: #9aa1ff; --accent-fill: #9aa1ff; --on-accent: #0b0b12; --accent-soft: rgba(154, 161, 255, 0.16);
+  --ok: #6ccb5f; --danger: #ff99a4; --info-soft: rgba(154, 161, 255, 0.10);
+  --win-edge: rgba(255, 255, 255, 0.12); --win-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.8), 0 6px 18px rgba(0, 0, 0, 0.35);
+  --cover-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 14px/1.5 var(--ui); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 72px; }
+
+/* ---------- the page's own frame ---------- */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ground); }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--ground) 88%, transparent); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); }
+.bar .wrap { display: flex; align-items: center; gap: 12px 20px; flex-wrap: wrap; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 600 15px/1 var(--ui-display); margin-inline-end: auto; }
+.brand i { width: 20px; height: 20px; border-radius: 5px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; font: normal 12px/1 var(--icons); }
+.seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 6px; background: var(--subtle-1); border: 1px solid var(--rule); }
+.seg button { border: 0; background: none; color: var(--ink-2); font: 12px/1 var(--ui); padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--sheet); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+.seg-label { font-size: 12px; color: var(--ink-3); margin-inline-end: 6px; }
+.ctl-group { display: flex; align-items: center; }
+header.intro { padding-block: 44px 28px; display: grid; gap: 14px; }
+header.intro h1 { margin: 0; font: 600 40px/1.15 var(--ui-display); letter-spacing: -0.01em; text-wrap: balance; }
+header.intro p { margin: 0; max-width: 70ch; color: var(--ink-2); font-size: 15px; }
+.meta { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+.meta b { color: var(--ink-2); font-weight: 600; }
+.meta a { color: var(--accent); }
+section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); margin-top: 48px; }
+.chapter > .head { display: grid; grid-template-columns: 56px 1fr; gap: 4px 16px; margin-bottom: 24px; }
+.chapter > .head .no { font: 600 13px/36px var(--ui); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.chapter > .head h2 { margin: 0; font: 600 28px/36px var(--ui-display); text-wrap: balance; }
+.chapter > .head p { grid-column: 2; margin: 0; color: var(--ink-2); max-width: 72ch; }
+@media (max-width: 640px) { .chapter > .head { grid-template-columns: 1fr; } .chapter > .head p { grid-column: 1; } }
+.stage { display: grid; gap: 12px; }
+.stage-tools { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.caption { font-size: 12px; color: var(--ink-3); text-align: center; margin: 0; }
+.sheet { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: 24px; min-width: 0; }
+.facts { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.facts li { display: grid; grid-template-columns: 24px 1fr; gap: 12px; }
+.facts .fi { font-size: 16px; color: var(--ink-2); line-height: 22px; }
+.facts b { font-weight: 600; }
+.qs { display: grid; gap: 12px; counter-reset: q; }
+.q { display: grid; grid-template-columns: 32px 1fr; gap: 4px 12px; padding: 16px 20px; border-radius: 8px; background: var(--sheet); border: 1px solid var(--rule); }
+.q::before { counter-increment: q; content: counter(q); width: 24px; height: 24px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font: 600 12px/24px var(--ui); text-align: center; }
+.q h4 { margin: 0; font: 600 14px/24px var(--ui); }
+.q p { grid-column: 2; margin: 0; color: var(--ink-2); font-size: 13px; }
+.q .rec { color: var(--ink); }
+
+/* ---------- the main window (system.html's frame) ---------- */
+.fi { font-family: var(--icons); font-style: normal; font-weight: normal; line-height: 1; display: inline-block; }
+.win { position: relative; width: 100%; max-width: 1000px; height: 660px; margin-inline: auto; border-radius: 8px; overflow: hidden; background: var(--mica);
+  border: 1px solid var(--win-edge); box-shadow: var(--win-shadow); font: 14px/20px var(--ui); color: var(--t1); container-type: inline-size; container-name: win;
+  display: grid; grid-template-rows: 48px 1fr; transition: max-width var(--t-normal) var(--ease-in); }
+.win.forced-narrow { max-width: 560px; }
+.tb { position: relative; display: flex; align-items: center; height: 48px; padding-inline-start: 4px; }
+.navbtn { width: 40px; height: 36px; flex: none; border: 0; border-radius: 4px; background: transparent; color: var(--t1); display: grid; place-items: center; cursor: pointer; font: 16px/1 var(--icons); }
+.navbtn:hover:not(:disabled) { background: var(--subtle-1); }
+.navbtn:disabled { color: var(--t4); cursor: default; }
+.rtlflip { display: inline-block; }
+.win[dir="rtl"] .rtlflip { transform: scaleX(-1); }
+.tb .app { padding-inline: 8px 16px; font-size: 12px; white-space: nowrap; }
+.tb .search { position: absolute; left: 50%; transform: translateX(-50%); width: min(512px, 46%); }
+.tb .caps { margin-inline-start: auto; display: flex; align-self: flex-start; }
+.tb .caps span { width: 46px; height: 32px; display: grid; place-items: center; font: 10px/1 var(--icons); color: var(--t1); }
+.only-narrow { display: none !important; }
+.body { position: relative; display: grid; grid-template-columns: 300px 1fr; min-height: 0; }
+.pane { position: relative; display: flex; flex-direction: column; padding-block: 4px 8px; padding-inline: 14px 10px; min-height: 0; }
+.pane .rows { display: grid; gap: 4px; }
+.pane .foot { margin-top: auto; }
+.phdr { display: flex; align-items: center; gap: 12px; padding: 2px 0 0 2px; margin-bottom: 22px; border: 0; background: none; color: var(--t1); font: inherit; text-align: start; cursor: pointer; border-radius: 4px; }
+.win[dir="rtl"] .phdr { padding: 2px 2px 0 0; }
+.phdr svg { width: 64px; height: 64px; flex: none; }
+.phdr b { display: block; font-weight: 600; }
+.phdr small { display: block; font-size: 12px; line-height: 16px; }
+.navrow { position: relative; display: flex; align-items: center; gap: 14px; height: 36px; padding-inline-start: 11px; border-radius: 4px; cursor: pointer; color: var(--t1); border: 0; background: transparent; width: 100%; font: inherit; text-align: start; }
+.navrow:hover { background: var(--subtle-1); }
+.navrow[aria-current="page"] { background: var(--subtle-1); }
+.navrow[aria-current="page"]::before { content: ""; position: absolute; inset-inline-start: 0; top: 10px; width: 3px; height: 16px; border-radius: 2px; background: var(--accent); }
+.navrow .ico { width: 20px; height: 20px; flex: none; }
+.navrow .badge { margin-inline-start: auto; margin-inline-end: 12px; min-width: 16px; height: 16px; padding: 0 5px; border-radius: 8px; background: var(--accent-fill); color: var(--on-accent); font: 600 11px/16px var(--ui); text-align: center; }
+.navrow .newdot { margin-inline-start: auto; margin-inline-end: 12px; font: 600 11px/16px var(--ui); color: var(--draft); }
+.page { position: relative; min-height: 0; background: var(--layer); border-top: 1px solid var(--layer-edge); border-inline-start: 1px solid var(--layer-edge); border-start-start-radius: 8px; overflow: hidden; }
+.page .scroller { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 10px 28px 40px; }
+.title { font: 600 28px/36px var(--ui-display); margin: 0 0 17px; }
+.group-h { font: 600 14px/20px var(--ui); margin: 0; }
+@container win (max-width: 680px) {
+  .tb .search { display: none; }
+  .only-narrow { display: grid !important; }
+  .body { grid-template-columns: 1fr; }
+  .pane { position: absolute; inset-block: 0; inset-inline-start: 0; width: 300px; z-index: 6; background: var(--acrylic); box-shadow: var(--shadow); border-start-end-radius: 8px; border-end-end-radius: 8px;
+    transform: translateX(-104%); transition: transform var(--t-fast) var(--ease-in); }
+  .win[dir="rtl"] .pane { transform: translateX(104%); }
+  .win.pane-open .pane { transform: none; }
+  .page { border-start-start-radius: 0; border-inline-start: 0; }
+}
+
+/* ---------- controls ---------- */
+.btn { height: 32px; padding: 5px 11px 6px; border-radius: 4px; border: 1px solid var(--ctl-edge); border-bottom-color: var(--ctl-edge-low); background: var(--ctl); color: var(--t1);
+  font: 14px/20px var(--ui); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap; transition: background var(--t-faster), transform var(--t-faster); }
+.btn:hover { background: var(--ctl-2); }
+.btn:active { color: var(--t2); transform: scale(0.98); }
+.btn.accent { background: var(--accent-fill); color: var(--on-accent); border-color: transparent; }
+.btn.accent:hover { filter: brightness(1.08); }
+.btn.subtle { background: transparent; border-color: transparent; }
+.btn.subtle:hover { background: var(--subtle-1); }
+.btn .fi { font-size: 16px; }
+.btn .chev { font-size: 12px; }
+.ib { width: 32px; height: 32px; flex: none; border: 0; border-radius: 4px; background: transparent; color: var(--t1); display: inline-grid; place-items: center; cursor: pointer; transition: background var(--t-faster); }
+.ib:hover { background: var(--subtle-1); }
+.ib .fi { font-size: 16px; }
+:is(.btn, .ib, .navrow, .navbtn, .seg button, .segsw button, .cover-btn, .phdr, .link-card):focus-visible { outline: 2px solid var(--t1); outline-offset: 1px; }
+.field { position: relative; border-radius: 4px; background: var(--ctl); border: 1px solid var(--ctl-edge); border-bottom-color: var(--ctl-edge-low); min-height: 32px; }
+.field::after { content: ""; position: absolute; inset-inline: -1px; bottom: -1px; height: 2px; border-radius: 0 0 4px 4px; background: var(--accent); transform: scaleX(0); transition: transform var(--t-fast) var(--ease-in); }
+.field:focus-within { background: var(--acrylic); }
+.field:focus-within::after { transform: scaleX(1); }
+.field input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--t1); font: 14px/20px var(--ui); padding: 5px 34px 6px 10px; display: block; }
+.win[dir="rtl"] .field input { padding: 5px 10px 6px 34px; }
+.field input::placeholder { color: var(--t3); }
+.field .glass { position: absolute; inset-inline-end: 10px; top: 8px; font: 14px/1 var(--icons); color: var(--t2); pointer-events: none; }
+.segsw { display: inline-grid; grid-auto-flow: column; height: 32px; padding: 3px; border-radius: 16px; background: var(--subtle-1); border: 1px solid var(--ctl-edge); }
+.segsw button { border: 0; border-radius: 12px; background: none; color: var(--t2); font: 14px/1 var(--ui); cursor: pointer; padding: 0 12px; white-space: nowrap; }
+.segsw button:hover { color: var(--t1); }
+.segsw button[aria-selected="true"] { background: var(--ctl-2); color: var(--t1); box-shadow: 0 0 0 1px var(--ctl-edge), 0 1px 2px rgba(0, 0, 0, 0.08); font-weight: 600; }
+.segsw small { font-size: 12px; color: var(--t3); margin-inline-start: 4px; font-weight: 400; }
+.menu { position: absolute; z-index: 9; min-width: 220px; padding: 4px; border-radius: 8px; background: var(--acrylic); border: 1px solid var(--ctl-edge); box-shadow: var(--shadow); animation: menu-in var(--t-fast) var(--ease-in); }
+@keyframes menu-in { from { opacity: 0; transform: translateY(-6px); } }
+.menu button { display: flex; align-items: center; gap: 12px; width: 100%; height: 32px; padding: 0 11px; border: 0; border-radius: 4px; background: none; color: var(--t1); font: 14px/20px var(--ui); cursor: pointer; text-align: start; }
+.menu button:hover { background: var(--subtle-1); }
+.menu button[aria-checked="true"]::after { content: "\E73E"; font: 12px/1 var(--icons); margin-inline-start: auto; color: var(--accent); }
+.menu .fi { font-size: 16px; width: 16px; }
+.menu hr { border: 0; border-top: 1px solid var(--divider); margin: 4px 0; }
+.menu .danger { color: var(--danger); }
+.toast { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 12; display: flex; align-items: center; gap: 12px; padding: 6px 8px 6px 16px; border-radius: 8px; background: var(--acrylic);
+  border: 1px solid var(--ctl-edge); box-shadow: var(--shadow); color: var(--t1); white-space: nowrap; max-width: calc(100% - 32px); animation: toast-in var(--t-fast) var(--ease-in); min-height: 44px; }
+.win[dir="rtl"] .toast { padding: 6px 16px 6px 8px; }
+.toast span { overflow: hidden; text-overflow: ellipsis; }
+.toast .fi { color: var(--ok); }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 16px); } }
+
+/* ---------- the Read page ---------- */
+.cont { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 24px; padding: 24px; border-radius: 8px; background: var(--card); border: 1px solid var(--card-edge); margin-bottom: 28px; }
+.cont .cover { width: 96px; }
+.cont .eyebrow { font-size: 12px; line-height: 16px; color: var(--t2); }
+.cont h3 { margin: 4px 0 0; font: 600 20px/28px var(--ui-display); }
+.cont .au { color: var(--t2); }
+.cont .prog { display: flex; align-items: center; gap: 12px; margin-top: 16px; font-size: 12px; line-height: 16px; color: var(--t2); flex-wrap: wrap; }
+.pb { height: 4px; border-radius: 2px; background: var(--ctl-edge-low); overflow: hidden; }
+.pb i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+.cont .prog .pb { width: 200px; max-width: 100%; }
+.cont .know { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--t2); }
+.cont .know .fi { font-size: 14px; color: var(--accent); }
+.cont .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.lib-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 12px; }
+.lib-head .group-h { margin-inline-end: auto; }
+.lib-head .field { width: 220px; }
+.lib-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 20px; }
+.lib-tools .sp { flex: 1; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 28px 24px; }
+.tile { position: relative; min-width: 0; }
+.tile.adding { animation: tile-in var(--t-normal) var(--ease-in); }
+@keyframes tile-in { from { opacity: 0; transform: translateY(12px) scale(0.96); } }
+.tile.leaving { animation: tile-out var(--t-normal) var(--ease-out) forwards; }
+@keyframes tile-out { to { opacity: 0; transform: scale(0.94); } }
+.cover-btn { display: grid; gap: 8px; width: 100%; padding: 0; border: 0; background: none; color: var(--t1); font: inherit; text-align: start; cursor: pointer; border-radius: 4px; }
+.cover-btn .cover { transition: transform var(--t-fast) var(--ease-in), box-shadow var(--t-fast); }
+.cover-btn:hover .cover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 10px 22px rgba(0, 0, 0, 0.18); }
+.cover-btn:active .cover { transform: translateY(-1px) scale(0.99); }
+.tile .tt { font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tile .ta { font-size: 12px; line-height: 16px; color: var(--t2); margin-top: -6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile .st { display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: var(--t2); }
+.tile .st .pb { flex: 1; height: 3px; }
+.tile .st .new { padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.tile .st .done .fi { color: var(--ok); font-size: 12px; margin-inline-end: 4px; }
+.tile .more { position: absolute; top: 6px; inset-inline-end: 6px; background: var(--acrylic); box-shadow: var(--shadow); opacity: 0; transition: opacity var(--t-faster); }
+.tile:hover .more, .tile .more:focus-visible, .tile .more[aria-expanded="true"] { opacity: 1; }
+.tile .more:hover { background: var(--acrylic); }
+/* a cover made from the book's title, until the book has its own */
+.cover { position: relative; width: 100%; aspect-ratio: 2 / 3; max-width: 100%; border-radius: 4px; overflow: hidden; box-shadow: var(--cover-shadow); display: grid; grid-template-rows: auto 1fr auto; padding: 12% 10%; text-align: center; background: var(--c); color: var(--ci); }
+.cover::before { content: ""; position: absolute; inset: 5%; border: 1px solid var(--ci); opacity: 0.35; border-radius: 2px; pointer-events: none; }
+.cover::after { content: ""; position: absolute; inset-block: 0; left: 0; width: 6%; background: linear-gradient(90deg, rgba(0, 0, 0, 0.22), transparent); }
+.cover .ca { font: 600 0.62em/1.3 var(--serif); letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.85; }
+.cover .ct { align-self: center; font: 700 1.05em/1.2 var(--serif); text-wrap: balance; }
+.cover .cy { font: 0.6em/1 var(--serif); opacity: 0.7; letter-spacing: 0.08em; }
+.cover.doc, .cover.txt { text-align: start; grid-template-rows: auto 1fr auto; }
+.cover.doc::before, .cover.txt::before { display: none; }
+.cover.doc::after, .cover.txt::after { display: none; }
+.cover.doc { --c: var(--cv-doc); --ci: var(--cv-doc-ink); }
+.cover.txt { --c: var(--cv-txt); --ci: var(--cv-txt-ink); }
+.cover .fglyph { font: 1.6em/1 var(--icons); }
+.cover .lines { align-self: center; display: grid; gap: 6px; }
+.cover .lines i { display: block; height: 3px; border-radius: 2px; background: var(--cv-doc-2); opacity: 0.25; }
+.cover .lines i:nth-child(3n) { width: 70%; }
+.cover .dn { font: 600 0.72em/1.25 var(--ui); color: var(--cv-doc-2); overflow-wrap: anywhere; }
+.tile .cover { font-size: 14px; }
+.cont .cover { font-size: 11px; }
+.empty { display: grid; justify-items: center; gap: 12px; padding: 48px 16px 32px; text-align: center; }
+.empty .fi { font-size: 40px; color: var(--t3); }
+.empty p { margin: 0; color: var(--t2); max-width: 40ch; }
+.empty b { font-weight: 600; font-size: 16px; }
+.nomatch { grid-column: 1 / -1; color: var(--t2); padding: 24px 0; }
+.free { margin-top: 36px; }
+.free .group-h { margin-bottom: 8px; }
+.link-card { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; gap: 20px; min-height: 68px; padding: 13px 16px; border-radius: 4px; background: var(--card); border: 1px solid var(--card-edge); color: var(--t1); text-decoration: none; transition: background var(--t-faster); }
+.link-card + .link-card { margin-top: 4px; }
+.link-card:hover { background: var(--ctl-2); }
+.link-card .fi { font-size: 20px; }
+.link-card .ds { display: block; font-size: 12px; line-height: 16px; color: var(--t2); }
+.link-card .go { font-size: 12px; color: var(--t2); }
+.drop { position: absolute; inset: 8px; z-index: 5; border-radius: 8px; border: 2px dashed var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--acrylic)); display: none; place-items: center; text-align: center; animation: menu-in var(--t-fast) var(--ease-in); }
+.win.dropping .drop { display: grid; }
+.drop .fi { font-size: 40px; color: var(--accent); }
+.drop b { display: block; margin-top: 12px; font: 600 20px/28px var(--ui-display); }
+.drop span { color: var(--t2); }
+@container win (max-width: 560px) {
+  .cont { grid-template-columns: 72px minmax(0, 1fr); gap: 16px; padding: 16px; }
+  .cont .cover { width: 72px; font-size: 9px; }
+  .lib-head .field { width: 100%; order: 3; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: 24px 16px; }
+}
+.motion-off *, .motion-off *::before, .motion-off *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+</style>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="brand"><i aria-hidden="true">&#xE82D;</i>Lamha Reader</div>
+    <div class="ctl-group"><span class="seg-label">Language</span><div class="seg" data-ctl="lang"><button data-v="en" aria-pressed="true">English</button><button data-v="ar" aria-pressed="false">العربية</button></div></div>
+    <div class="ctl-group"><span class="seg-label">Theme</span><div class="seg" data-ctl="theme"><button data-v="light" aria-pressed="false">Light</button><button data-v="dark" aria-pressed="false">Dark</button></div></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="intro">
+    <h1>The library</h1>
+    <p>The second design of Lamha Reader: a new <b>Read</b> page in Lamha's main window, with the book you're reading, your books, and where to find free ones. Click a book to open it, use its ⋯ menu, add a book, or drop an EPUB, Word or text file on the window. All of the wording is a draft for you to rewrite.</p>
+    <div class="meta"><span><b>Status</b> First draft, for your comments</span><span><b>Date</b> 28 October 2026</span><span><b>Before it</b> <a href="https://claude.ai/artifact/WaegiRZC7HKWBpBvZSSoW6" target="_blank" rel="noopener">the reading page</a>, signed off</span><span><b>Icons</b> Segoe Fluent Icons: open this page on Windows 11 to see them</span></div>
+  </header>
+
+  <section class="chapter" id="library" style="border-top: 0; margin-top: 0; padding-top: 8px;">
+    <div class="head"><span class="no">01</span><h2>The Read page</h2><p>Lamha's main window as the design system has it, with Read in the pane. The states switch shows the library empty and with a file dragged over it; the width switch shows the narrow window, where the pane hides behind ☰.</p></div>
+    <div class="stage">
+      <div class="stage-tools">
+        <div class="ctl-group"><span class="seg-label">State</span><div class="seg" data-ctl="state"><button data-v="books" aria-pressed="true">With books</button><button data-v="empty" aria-pressed="false">Empty</button><button data-v="drop" aria-pressed="false">Dragging a file</button></div></div>
+        <div class="ctl-group"><span class="seg-label">Width</span><div class="seg" data-ctl="width"><button data-v="wide" aria-pressed="true">Wide</button><button data-v="narrow" aria-pressed="false">Narrow</button></div></div>
+      </div>
+      <div class="win" id="win" dir="ltr">
+        <div class="tb">
+          <button class="navbtn" disabled data-a="back"><span class="rtlflip">&#xE72B;</span></button>
+          <button class="navbtn only-narrow" id="hamb" data-a="nav">&#xE700;</button>
+          <div class="app" data-s="lamha"></div>
+          <div class="search"><div class="field"><input id="tq" data-ph="search" autocomplete="off"><span class="glass">&#xE721;</span></div></div>
+          <div class="caps" aria-hidden="true"><span>&#xE921;</span><span>&#xE922;</span><span>&#xE8BB;</span></div>
+        </div>
+        <div class="body">
+          <nav class="pane" id="pane"></nav>
+          <main class="page"><div class="scroller" id="scroller"></div></main>
+        </div>
+        <div class="drop" id="drop"><div><span class="fi">&#xE896;</span><b data-s="dropHere"></b><span data-s="dropTypes"></span></div></div>
+      </div>
+      <p class="caption">1000 × 660, the window's real size at 100 %, as in the design system.</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="what">
+    <div class="head"><span class="no">02</span><h2>What's on the page</h2><p>From the top, and what each part is for.</p></div>
+    <div class="sheet">
+      <ul class="facts">
+        <li><span class="fi">&#xE82D;</span><span><b>Read, a new page in the pane,</b> between Write and Review: reading feeds Review. Its coloured icon is an open book, drawn like the others (drafts in Windows Settings' style).</span></li>
+        <li><span class="fi">&#xE768;</span><span><b>Continue reading:</b> the last book you read, where you are, the time left, and Continue, the page's one accent button. "Words from this book" opens Review with them.</span></li>
+        <li><span class="fi">&#xE9D2;</span><span><b>You know 94% of its words:</b> worked out on this PC from the words in your History and Review, so you can tell how hard a book will be before you start. Shown here and in a book's details.</span></li>
+        <li><span class="fi">&#xE8F1;</span><span><b>Your books,</b> as covers: the book's own cover when the EPUB has one, or one made from its title, as drawn. A Word or text file gets a page-like cover with its name. Under each: how far you've read, New, or Finished.</span></li>
+        <li><span class="fi">&#xE71C;</span><span><b>Find, filter and sort:</b> search by title or author; All, Reading, New, Finished; sort by recent, title or author.</span></li>
+        <li><span class="fi">&#xE712;</span><span><b>Each book's ⋯ menu:</b> Open, Mark as finished, Remove from library (with Undo, as everywhere in Lamha). Removing it from the library deletes Lamha's copy, never your original file.</span></li>
+        <li><span class="fi">&#xE896;</span><span><b>Add a book</b> from a file, or drop one on the window: EPUB, DOCX or TXT. Lamha keeps its own copy in its data folder, so the book stays if the original moves.</span></li>
+        <li><span class="fi">&#xE774;</span><span><b>Free books to read:</b> Project Gutenberg and Standard Ebooks, opened in the browser. Download an EPUB there, then add it here.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="questions">
+    <div class="head"><span class="no">03</span><h2>Questions</h2><p>Each with a recommendation.</p></div>
+    <div class="qs">
+      <div class="q"><h4>Where does Read go in the pane?</h4><p><span class="rec">Recommended: between Write and Review,</span> as drawn. Reading leads to Review.</p></div>
+      <div class="q"><h4>"You know 94% of its words": show it?</h4><p><span class="rec">Recommended: yes, on Continue reading and in a book's details,</span> not on every cover, where it would crowd the grid.</p></div>
+      <div class="q"><h4>Covers made from a title, when a book has none?</h4><p><span class="rec">Recommended: yes, as drawn,</span> in a few colours chosen from the title so the same book always looks the same.</p></div>
+      <div class="q"><h4>Does Lamha keep its own copy of each book?</h4><p><span class="rec">Recommended: yes, in Lamha's data folder,</span> so moving or deleting the original doesn't lose the book or its highlights. "A copy of my data" in Settings would then include them.</p></div>
+      <div class="q"><h4>Free books: links, or a catalogue inside Lamha?</h4><p><span class="rec">Recommended: links now.</span> Standard Ebooks and Project Gutenberg both publish catalogues Lamha could browse and download from later (an idea for after the reader works).</p></div>
+      <div class="q"><h4>The pane's name in Arabic?</h4><p>"قراءة" in this draft, as the other pages are nouns (ترجمة، كتابة، مراجعة). Yours to choose.</p></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const S = {
+    en: {
+      lamha: "Lamha", version: "Version 3.1.0", translate: "Translate", write: "Write", read: "Read", review: "Review", history: "History", clipboard: "Clipboard", settings: "Settings",
+      search: "Search settings, words and copies", back: "Back", nav: "Navigation",
+      continueReading: "Continue reading", cont: "Continue", wordsFrom: "Words from this book", chapterOf: "Chapter {0} of {1}", timeLeft: "about {0} h {1} min left",
+      lastRead: "Last read today", know: "You know {0}% of its words", knowHint: "From the words in your History and Review",
+      yourBooks: "Your books", searchBooks: "Search your books", addBook: "Add a book", all: "All", reading: "Reading", newF: "New", finished: "Finished",
+      sortBy: "Sort", recent: "Recent", byTitle: "Title", byAuthor: "Author", newTag: "New", done: "Finished", more: "More options",
+      open: "Open", markFinished: "Mark as finished", remove: "Remove from library", removed: "Removed from your library", undo: "Undo",
+      added: "Added to your library", opens: "Opens “{0}” in its own window", reviewOpens: "Opens Review with this book's words",
+      emptyTitle: "Your books appear here", emptyBody: "Add an EPUB, a Word file or a text file, or drop one on this window.",
+      dropHere: "Drop it to add it to your library", dropTypes: "EPUB, DOCX or TXT", noMatch: "No books match “{0}”.",
+      freeBooks: "Free books to read", gutenberg: "More than 75,000 free books whose copyright has ended", standard: "Free classics, carefully edited, with good covers",
+      wordDoc: "Word document", textFile: "Text file", otherPage: "This design shows the Read page", account: "Opens Settings → Lamha"
+    },
+    ar: {
+      lamha: "لمحة", version: "الإصدار 3.1.0", translate: "ترجمة", write: "كتابة", read: "قراءة", review: "مراجعة", history: "السجل", clipboard: "الحافظة", settings: "الإعدادات",
+      search: "ابحث في الإعدادات والكلمات والمنسوخات", back: "رجوع", nav: "التنقل",
+      continueReading: "تابع القراءة", cont: "تابع", wordsFrom: "كلمات من هذا الكتاب", chapterOf: "الفصل {0} من {1}", timeLeft: "بقي نحو {0} س و{1} د",
+      lastRead: "آخر قراءة اليوم", know: "تعرف {0}٪ من كلماته", knowHint: "حسب الكلمات في سجلك ومراجعتك",
+      yourBooks: "كتبك", searchBooks: "ابحث في كتبك", addBook: "أضف كتابًا", all: "الكل", reading: "أقرؤها", newF: "جديدة", finished: "انتهيت منها",
+      sortBy: "ترتيب", recent: "الأحدث", byTitle: "العنوان", byAuthor: "المؤلف", newTag: "جديد", done: "انتهيت منه", more: "خيارات أخرى",
+      open: "افتح", markFinished: "علّمه منتهيًا", remove: "أزله من المكتبة", removed: "أُزيل من مكتبتك", undo: "تراجع",
+      added: "أُضيف إلى مكتبتك", opens: "يفتح «{0}» في نافذته الخاصة", reviewOpens: "تفتح المراجعة بكلمات هذا الكتاب",
+      emptyTitle: "ستظهر كتبك هنا", emptyBody: "أضف ملف EPUB أو ملف Word أو ملفًا نصيًا، أو أفلته على هذه النافذة.",
+      dropHere: "أفلته لإضافته إلى مكتبتك", dropTypes: "EPUB أو DOCX أو TXT", noMatch: "لا كتب تطابق «{0}».",
+      freeBooks: "كتب مجانية للقراءة", gutenberg: "أكثر من ٧٥ ألف كتاب مجاني انتهت حقوق نشرها", standard: "كتب كلاسيكية مجانية، محرّرة بعناية وبأغلفة جميلة",
+      wordDoc: "مستند Word", textFile: "ملف نصي", otherPage: "يعرض هذا التصميم صفحة القراءة", account: "تفتح الإعدادات ← لمحة"
+    }
+  };
+  // Lamha's books: public-domain classics, and one of the user's own files. last = days since read, or since added.
+  const START = [
+    { id: 1, title: "Pride and Prejudice", author: "Jane Austen", year: 1813, cv: 0, pct: 3, last: 0, know: 94, ch: [1, 61], left: [6, 20], words: 12 },
+    { id: 2, title: "The Adventures of Sherlock Holmes", author: "Arthur Conan Doyle", year: 1892, cv: 1, pct: 42, last: 2, know: 91 },
+    { id: 3, title: "Graduation project, chapter 2", file: "chapter-2.docx", fmt: "doc", pct: 10, last: 1, know: 97 },
+    { id: 4, title: "Frankenstein", author: "Mary Shelley", year: 1818, cv: 2, pct: 18, last: 5, know: 88 },
+    { id: 5, title: "The Time Machine", author: "H. G. Wells", year: 1895, cv: 3, pct: 67, last: 9, know: 93 },
+    { id: 6, title: "The Great Gatsby", author: "F. Scott Fitzgerald", year: 1925, cv: 5, pct: 0, last: 3, know: 90 },
+    { id: 7, title: "A Christmas Carol", author: "Charles Dickens", year: 1843, cv: 6, pct: 0, last: 12, know: 92 },
+    { id: 8, title: "Alice's Adventures in Wonderland", author: "Lewis Carroll", year: 1865, cv: 4, pct: 100, last: 20, know: 95 },
+    { id: 9, title: "Little Women", author: "Louisa May Alcott", year: 1868, cv: 7, pct: 0, last: 30, know: 93 }
+  ];
+  const ADDABLE = [
+    { title: "Moby-Dick", author: "Herman Melville", year: 1851, cv: 2 },
+    { title: "Dracula", author: "Bram Stoker", year: 1897, cv: 1 },
+    { title: "Jane Eyre", author: "Charlotte Brontë", year: 1847, cv: 0 }
+  ];
+  let books = START.map(b => ({ ...b }));
+  let lang = "en", filter = "all", sort = "recent", query = "", state = "books", nextId = 100, added = 0;
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const t = k => S[lang][k] ?? S.en[k] ?? k;
+  const n = x => lang === "ar" ? String(x).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]) : String(x);
+  const fmt = (s, ...a) => s.replace(/\{(\d)\}/g, (_, i) => a[i]);
+  const uiDir = () => lang === "ar" ? "rtl" : "ltr";
+  const win = $("#win"), scroller = $("#scroller");
+
+  /* ---------- the pane's coloured icons (system.html's drafts, and Read's new one) ---------- */
+  let gid = 0;
+  function gear(cx, cy, ro, ri, k) {
+    let d = "";
+    for (let i = 0; i < k; i++) {
+      const a = (i / k) * Math.PI * 2, w = Math.PI / k * 0.55;
+      [[ri, a - w * 1.25], [ro, a - w * 0.7], [ro, a + w * 0.7], [ri, a + w * 1.25]].forEach(([r, ang], j) => { d += `${i === 0 && j === 0 ? "M" : "L"}${(cx + r * Math.cos(ang)).toFixed(2)} ${(cy + r * Math.sin(ang)).toFixed(2)} `; });
+    }
+    return d + "Z";
+  }
+  const COLOR = {
+    translate: () => { const a = `g${gid++}`, b = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ee0f2"/><stop offset="1" stop-color="#0891b2"/></linearGradient><linearGradient id="${b}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9ea6ff"/><stop offset="1" stop-color="#4f46e5"/></linearGradient></defs><path d="M8.2 2.2h8.3a1.6 1.6 0 0 1 1.6 1.6v5.9a1.6 1.6 0 0 1-1.6 1.6h-1.3v2.3l-2.7-2.3H8.2a1.6 1.6 0 0 1-1.6-1.6V3.8a1.6 1.6 0 0 1 1.6-1.6z" fill="url(#${a})"/><text x="12.35" y="9.4" font-size="6.6" font-weight="700" fill="#fff" text-anchor="middle" font-family="Segoe UI, Tahoma, sans-serif">ع</text><path d="M3.5 7.3h8.4a1.6 1.6 0 0 1 1.6 1.6v5.5a1.6 1.6 0 0 1-1.6 1.6H7.5l-2.8 2.3v-2.3H3.5a1.6 1.6 0 0 1-1.6-1.6V8.9a1.6 1.6 0 0 1 1.6-1.6z" fill="url(#${b})"/><text x="7.7" y="14.2" font-size="6.4" font-weight="700" fill="#fff" text-anchor="middle" font-family="Segoe UI, sans-serif">A</text></svg>`; },
+    write: () => { const a = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fcd34d"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><g transform="rotate(-45 10 10)"><rect x="4.2" y="7.9" width="9.6" height="4.2" fill="url(#${a})"/><path d="M4.2 7.9h9.6v1.4H4.2z" fill="#fde68a" opacity=".7"/><rect x="2.1" y="7.9" width="1.6" height="4.2" rx=".2" fill="#9ca3af"/><path d="M2.1 7.9h-.4a1.3 1.3 0 0 0-1.3 1.3v1.6a1.3 1.3 0 0 0 1.3 1.3h.4z" fill="#f472b6"/><path d="M13.8 7.9 18.4 10l-4.6 2.1z" fill="#fde3b5"/><path d="M16.9 9.3 18.4 10l-1.5.7z" fill="#374151"/></g><path d="M3 18.2h6" stroke="#9ca3af" stroke-width="1.1" stroke-linecap="round"/></svg>`; },
+    read: () => { const a = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fda4af"/><stop offset="1" stop-color="#e11d48"/></linearGradient></defs><path d="M1.4 5.4C4.4 4.3 7.6 4.5 10 6.1c2.4-1.6 5.6-1.8 8.6-.7v11.4c-3-.9-6.2-.7-8.6.8-2.4-1.5-5.6-1.7-8.6-.8z" fill="url(#${a})"/><path d="M2.9 4.2c2.5-.8 5.1-.5 6.6 1v10.6c-1.5-1.3-4.1-1.5-6.6-.8z" fill="#fff"/><path d="M17.1 4.2c-2.5-.8-5.1-.5-6.6 1v10.6c1.5-1.3 4.1-1.5 6.6-.8z" fill="#fff1f2"/><path d="M4.5 7.3c1.3-.3 2.6-.2 3.5.4M4.5 9.7c1.3-.3 2.6-.2 3.5.4M4.5 12.1c1.3-.3 2.6-.2 3.5.4M12 7.7c.9-.6 2.2-.7 3.5-.4M12 10.1c.9-.6 2.2-.7 3.5-.4" stroke="#fda4af" stroke-width=".9" stroke-linecap="round" fill="none"/></svg>`; },
+    review: () => { const a = `g${gid++}`, b = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#0d9488"/></linearGradient><linearGradient id="${b}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a5b4fc"/><stop offset="1" stop-color="#4f46e5"/></linearGradient></defs><rect x="6.4" y="1.9" width="10.6" height="12.8" rx="2" fill="url(#${a})" transform="rotate(9 11.7 8.3)"/><rect x="2.8" y="5" width="10.6" height="13" rx="2" fill="url(#${b})"/><path d="m5.6 11.6 2 2 3.9-4.3" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`; },
+    history: () => { const a = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#0369a1"/></linearGradient></defs><circle cx="10.5" cy="10.5" r="7.6" fill="url(#${a})"/><circle cx="10.5" cy="10.5" r="7.6" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width=".8"/><path d="M10.5 6.3v4.4l2.9 1.8" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.6 4.6 2 8.1l3.4-.9" fill="none" stroke="#0369a1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`; },
+    clipboard: () => { const a = `g${gid++}`, b = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbbf24"/><stop offset="1" stop-color="#b45309"/></linearGradient><linearGradient id="${b}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f4f6"/><stop offset="1" stop-color="#9ca3af"/></linearGradient></defs><rect x="3.3" y="3" width="13.4" height="15.6" rx="2" fill="url(#${a})"/><rect x="5.3" y="5.6" width="9.4" height="11.2" rx="1" fill="#fff"/><path d="M7.3 9.2h5.4M7.3 11.7h5.4M7.3 14.2h3.2" stroke="#cbd5e1" stroke-width="1.1" stroke-linecap="round"/><rect x="6.9" y="1.6" width="6.2" height="3.6" rx="1.3" fill="url(#${b})" stroke="#6b7280" stroke-width=".5"/></svg>`; },
+    settings: () => { const a = `g${gid++}`; return `<svg viewBox="0 0 20 20" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c3c8d2"/><stop offset="1" stop-color="#555c6b"/></linearGradient></defs><path fill-rule="evenodd" fill="url(#${a})" d="${gear(10, 10, 8.4, 6.4, 8)} M10 6.9a3.1 3.1 0 1 0 0 6.2a3.1 3.1 0 1 0 0-6.2z"/><circle cx="10" cy="10" r="3.1" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width=".7"/></svg>`; }
+  };
+  // Lamha's own icon (Assets/Lamha-256.png), drawn: 60 in a 64 box.
+  const appIcon = () => { const a = `g${gid++}`; return `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${a}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="14" fill="url(#${a})"/><circle cx="27" cy="27" r="13.5" fill="#fff" fill-opacity=".25" stroke="#fff" stroke-width="5"/><path d="M37 37l11 11" stroke="#fff" stroke-width="6" stroke-linecap="round"/><path d="M21.5 22h11M23.5 27.5h9M26 33h6.5" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="21.5" cy="33" r="1.9" fill="#fff"/></svg>`; };
+
+  function drawPane() {
+    const row = (k, extra = "") => `<button class="navrow" data-page="${k}" ${k === "read" ? 'aria-current="page"' : ""}>${COLOR[k]().replace("<svg", '<svg class="ico"')}<span>${esc(t(k))}</span>${extra}</button>`;
+    $("#pane").innerHTML = `<button class="phdr" data-page="account">${appIcon()}<span><b>${esc(t("lamha"))}</b><small>${esc(t("version"))}</small></span></button>` +
+      `<div class="rows">${row("translate")}${row("write")}${row("read")}${row("review", '<span class="badge">12</span>')}${row("history")}${row("clipboard")}</div>` +
+      `<div class="rows foot">${row("settings")}</div>`;
+  }
+  $("#pane").addEventListener("click", e => {
+    const r = e.target.closest("[data-page]");
+    if (!r || r.dataset.page === "read") { win.classList.remove("pane-open"); return; }
+    toast(r.dataset.page === "account" ? t("account") : t("otherPage"), "&#xE946;");
+  });
+  $("#hamb").addEventListener("click", () => win.classList.toggle("pane-open"));
+
+  /* ---------- covers ---------- */
+  function cover(b) {
+    if (b.fmt === "doc" || b.fmt === "txt") {
+      return `<div class="cover ${b.fmt}" aria-hidden="true"><span class="fglyph">${b.fmt === "doc" ? "&#xE8A5;" : "&#xE8D2;"}</span><span class="lines"><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="dn" dir="ltr">${esc(b.file)}</span></div>`;
+    }
+    return `<div class="cover" aria-hidden="true" style="--c: var(--cv${b.cv}); --ci: var(--cv${b.cv}-ink)"><span class="ca">${esc(b.author)}</span><span class="ct">${esc(b.title)}</span><span class="cy">${b.year}</span></div>`;
+  }
+  const authorOf = b => b.fmt === "doc" ? t("wordDoc") : b.fmt === "txt" ? t("textFile") : b.fmt === "epub-file" ? "EPUB" : b.author;
+
+  /* ---------- the page ---------- */
+  function visible() {
+    const q = query.toLowerCase();
+    let list = books.filter(b => filter === "all" || (filter === "reading" && b.pct > 0 && b.pct < 100) || (filter === "new" && b.pct === 0) || (filter === "finished" && b.pct === 100));
+    if (q) list = list.filter(b => (b.title + " " + (b.author || "") + " " + (b.file || "")).toLowerCase().includes(q));
+    const by = { recent: (x, y) => x.last - y.last, title: (x, y) => x.title.localeCompare(y.title), author: (x, y) => (x.author || "~").localeCompare(y.author || "~") }[sort];
+    return list.sort(by);
+  }
+  function tileHTML(b) {
+    const st = b.pct === 100 ? `<span class="done"><span class="fi">&#xE73E;</span>${esc(t("done"))}</span>`
+      : b.pct === 0 ? `<span class="new">${esc(t("newTag"))}</span>`
+      : `<span class="pb"><i style="width:${b.pct}%"></i></span><span>${n(b.pct)}${lang === "ar" ? "٪" : "%"}</span>`;
+    return `<div class="tile${b.adding ? " adding" : ""}" data-id="${b.id}"><button class="cover-btn" data-open="${b.id}" aria-label="${esc(b.title)}">${cover(b)}<span class="tt" dir="ltr">${esc(b.title)}</span><span class="ta" ${b.fmt ? "" : 'dir="ltr"'}>${esc(authorOf(b))}</span><span class="st">${st}</span></button><button class="ib more" data-more="${b.id}" aria-label="${esc(t("more"))}" title="${esc(t("more"))}" aria-haspopup="menu" aria-expanded="false"><span class="fi">&#xE712;</span></button></div>`;
+  }
+  function renderPage() {
+    const top = scroller.scrollTop;
+    let html = `<h1 class="title">${esc(t("read"))}</h1>`;
+    if (state === "empty" || !books.length) {
+      html += `<div class="empty"><span class="fi">&#xE82D;</span><b>${esc(t("emptyTitle"))}</b><p>${esc(t("emptyBody"))}</p><button class="btn accent" data-add><span class="fi">&#xE710;</span>${esc(t("addBook"))}</button></div>`;
+    } else {
+      const cur = [...books].filter(b => b.pct > 0 && b.pct < 100).sort((x, y) => x.last - y.last)[0];
+      if (cur) {
+        const ch = cur.ch || [Math.max(1, Math.round(cur.pct / 100 * 12)), 12];
+        const left = cur.left || [Math.floor((100 - cur.pct) / 100 * 5), 40];
+        html += `<section class="cont" aria-label="${esc(t("continueReading"))}">${cover(cur)}<div style="min-width:0"><div class="eyebrow">${esc(t("continueReading"))} · ${esc(t("lastRead"))}</div><h3 dir="ltr" style="text-align:${lang === "ar" ? "right" : "left"}">${esc(cur.title)}</h3><div class="au">${esc(authorOf(cur))}</div>` +
+          `<div class="prog"><span class="pb"><i style="width:${cur.pct}%"></i></span><span>${esc(fmt(t("chapterOf"), n(ch[0]), n(ch[1])))} · ${esc(fmt(t("timeLeft"), n(left[0]), n(left[1])))}</span></div>` +
+          `<div class="know" title="${esc(t("knowHint"))}"><span class="fi">&#xE9D2;</span><span>${esc(fmt(t("know"), n(cur.know)))}</span></div>` +
+          `<div class="acts"><button class="btn accent" data-open="${cur.id}"><span class="fi">&#xE768;</span>${esc(t("cont"))}</button><button class="btn" data-words><span class="fi">&#xE7C4;</span>${esc(t("wordsFrom"))} · ${n(cur.words || 8)}</button></div></div></section>`;
+      }
+      const count = k => books.filter(b => k === "all" || (k === "reading" && b.pct > 0 && b.pct < 100) || (k === "new" && b.pct === 0) || (k === "finished" && b.pct === 100)).length;
+      html += `<div class="lib-head"><h2 class="group-h">${esc(t("yourBooks"))}</h2><div class="field"><input id="bq" value="${esc(query)}" placeholder="${esc(t("searchBooks"))}" aria-label="${esc(t("searchBooks"))}" autocomplete="off"><span class="glass">&#xE721;</span></div><button class="btn" data-add><span class="fi">&#xE710;</span>${esc(t("addBook"))}</button></div>` +
+        `<div class="lib-tools"><div class="segsw" role="tablist">${[["all", "all"], ["reading", "reading"], ["new", "newF"], ["finished", "finished"]].map(([k, s]) => `<button role="tab" aria-selected="${filter === k}" data-filter="${k}">${esc(t(s))}<small>${n(count(k))}</small></button>`).join("")}</div><span class="sp"></span><button class="btn subtle" data-sort aria-haspopup="menu"><span class="fi">&#xE8CB;</span>${esc(t("sortBy"))}: ${esc(t({ recent: "recent", title: "byTitle", author: "byAuthor" }[sort]))}<span class="fi chev">&#xE70D;</span></button></div>`;
+      const list = visible();
+      html += `<div class="grid">${list.length ? list.map(tileHTML).join("") : `<p class="nomatch">${esc(fmt(t("noMatch"), query))}</p>`}</div>`;
+    }
+    html += `<div class="free"><h2 class="group-h">${esc(t("freeBooks"))}</h2>` +
+      `<a class="link-card" href="https://www.gutenberg.org/" target="_blank" rel="noopener"><span class="fi">&#xE774;</span><span><span dir="ltr">Project Gutenberg</span><span class="ds">${esc(t("gutenberg"))}</span></span><span class="fi go">&#xE8A7;</span></a>` +
+      `<a class="link-card" href="https://standardebooks.org/" target="_blank" rel="noopener"><span class="fi">&#xE774;</span><span><span dir="ltr">Standard Ebooks</span><span class="ds">${esc(t("standard"))}</span></span><span class="fi go">&#xE8A7;</span></a></div>`;
+    scroller.innerHTML = html;
+    scroller.scrollTop = top;
+    books.forEach(b => delete b.adding);
+    const bq = $("#bq");
+    if (bq) bq.addEventListener("input", e => {
+      query = e.target.value;
+      const grid = $(".grid", scroller), list = visible();
+      grid.innerHTML = list.length ? list.map(tileHTML).join("") : `<p class="nomatch">${esc(fmt(t("noMatch"), query))}</p>`;
+    });
+  }
+
+  /* ---------- actions ---------- */
+  let lastRemoved = null;
+  function toast(text, glyph = "&#xE73E;", action) {
+    $$(".toast", win).forEach(x => x.remove());
+    const el = document.createElement("div");
+    el.className = "toast"; el.setAttribute("role", "status"); el.dir = uiDir();
+    el.innerHTML = `<span class="fi">${glyph}</span><span>${esc(text)}</span>` + (action ? `<button class="btn subtle" data-undo>${esc(action)}</button>` : "");
+    win.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+  function closeMenus() { $$(".menu", win).forEach(m => m.remove()); $$('[aria-expanded="true"]', win).forEach(b => b.setAttribute("aria-expanded", "false")); }
+  function menu(anchor, items) {
+    closeMenus();
+    const m = document.createElement("div");
+    m.className = "menu"; m.dir = uiDir(); m.setAttribute("role", "menu");
+    m.innerHTML = items.map(it => it === "-" ? "<hr>" : `<button role="${it.check !== undefined ? "menuitemradio" : "menuitem"}" ${it.check !== undefined ? `aria-checked="${it.check}"` : ""} class="${it.danger ? "danger" : ""}" data-m="${it.id}">${it.glyph ? `<span class="fi">${it.glyph}</span>` : ""}${esc(it.label)}</button>`).join("");
+    win.appendChild(m);
+    const wr = win.getBoundingClientRect(), r = anchor.getBoundingClientRect();
+    const left = lang === "ar" ? r.left - wr.left : r.right - wr.left - m.offsetWidth;
+    let top = r.bottom - wr.top + 4;
+    if (top + m.offsetHeight > wr.height - 8) top = r.top - wr.top - m.offsetHeight - 4;
+    m.style.left = Math.min(Math.max(8, left), wr.width - m.offsetWidth - 8) + "px";
+    m.style.top = top + "px";
+    anchor.setAttribute("aria-expanded", "true");
+    return m;
+  }
+  function addBook(name, fmtKind) {
+    const base = name ? { title: name.replace(/\.[^.]+$/, ""), file: name, fmt: fmtKind, author: "" } : ADDABLE[added++ % ADDABLE.length];
+    const b = { ...base, id: nextId++, pct: 0, last: -1, know: 90, adding: true };
+    if (!name) b.cv = base.cv;
+    books.push(b);
+    state = "books"; setSeg("state", "books"); filter = "all"; query = "";
+    renderPage();
+    toast(t("added"));
+    const tile = $(`.tile[data-id="${b.id}"]`, scroller);
+    if (tile) scroller.scrollTo({ top: Math.max(0, tile.offsetTop - 120), behavior: "smooth" });
+  }
+  scroller.addEventListener("click", e => {
+    const open = e.target.closest("[data-open]");
+    if (open) {
+      const b = books.find(x => x.id === +open.dataset.open);
+      toast(fmt(t("opens"), b.title), "&#xE8A7;");
+      return;
+    }
+    const more = e.target.closest("[data-more]");
+    if (more) {
+      const id = +more.dataset.more, b = books.find(x => x.id === id);
+      const m = menu(more, [{ id: "open", label: t("open"), glyph: "&#xE8A7;" }, ...(b.pct < 100 ? [{ id: "finish", label: t("markFinished"), glyph: "&#xE73E;" }] : []), "-", { id: "remove", label: t("remove"), glyph: "&#xE74D;", danger: true }]);
+      m.addEventListener("click", ev => {
+        const it = ev.target.closest("[data-m]");
+        if (!it) return;
+        closeMenus();
+        if (it.dataset.m === "open") toast(fmt(t("opens"), b.title), "&#xE8A7;");
+        else if (it.dataset.m === "finish") { b.pct = 100; renderPage(); }
+        else if (it.dataset.m === "remove") {
+          const tile = $(`.tile[data-id="${id}"]`, scroller);
+          lastRemoved = { b, at: books.indexOf(b) };
+          const done = () => { books = books.filter(x => x.id !== id); renderPage(); toast(t("removed"), "&#xE74D;", t("undo")); };
+          if (tile) { tile.classList.add("leaving"); tile.addEventListener("animationend", done, { once: true }); setTimeout(() => { if (books.includes(b)) done(); }, 400); } else done();
+        }
+      });
+      return;
+    }
+    if (e.target.closest("[data-add]")) { addBook(); return; }
+    if (e.target.closest("[data-words]")) { toast(t("reviewOpens"), "&#xE7C4;"); return; }
+    const f = e.target.closest("[data-filter]");
+    if (f) { filter = f.dataset.filter; renderPage(); return; }
+    const s = e.target.closest("[data-sort]");
+    if (s) {
+      const m = menu(s, [["recent", "recent"], ["title", "byTitle"], ["author", "byAuthor"]].map(([id, k]) => ({ id, label: t(k), check: sort === id })));
+      m.addEventListener("click", ev => { const it = ev.target.closest("[data-m]"); if (!it) return; sort = it.dataset.m; closeMenus(); renderPage(); });
+    }
+  });
+  win.addEventListener("click", e => {
+    if (!e.target.closest("[data-undo]") || !lastRemoved) return;
+    books.splice(lastRemoved.at, 0, { ...lastRemoved.b, adding: true });
+    lastRemoved = null;
+    $$(".toast", win).forEach(x => x.remove());
+    renderPage();
+  });
+  win.addEventListener("mousedown", e => { if (!e.target.closest(".menu") && !e.target.closest("[data-more], [data-sort]")) closeMenus(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeMenus(); win.classList.remove("pane-open"); } });
+
+  /* ---------- a file dropped on the window: added for real (its name only) ---------- */
+  let depth = 0;
+  win.addEventListener("dragenter", e => { if ([...(e.dataTransfer?.types || [])].includes("Files")) { depth++; win.classList.add("dropping"); } });
+  win.addEventListener("dragleave", () => { depth = Math.max(0, depth - 1); if (!depth && state !== "drop") win.classList.remove("dropping"); });
+  win.addEventListener("dragover", e => e.preventDefault());
+  win.addEventListener("drop", e => {
+    e.preventDefault(); depth = 0;
+    if (state !== "drop") win.classList.remove("dropping");
+    const f = e.dataTransfer?.files?.[0];
+    if (!f) return;
+    const ext = (f.name.split(".").pop() || "").toLowerCase();
+    if (ext === "epub") addBook(f.name, "epub-file");
+    else addBook(f.name, ext === "docx" || ext === "doc" ? "doc" : "txt");
+  });
+  // An EPUB dropped here has no cover in this design: give it one made from its name.
+  const _cover = cover;
+  cover = b => b.fmt === "epub-file" ? _cover({ ...b, fmt: undefined, author: "EPUB", year: "", cv: (b.title.length % 8) }) : _cover(b);
+
+  /* ---------- language, theme, state, width ---------- */
+  function applyLang() {
+    win.dir = uiDir();
+    $$("[data-s]").forEach(el => el.textContent = t(el.dataset.s));
+    $$("[data-a]", win).forEach(el => { el.setAttribute("aria-label", t(el.dataset.a)); el.title = t(el.dataset.a); });
+    $$("[data-ph]", win).forEach(el => { el.placeholder = t(el.dataset.ph); el.setAttribute("aria-label", t(el.dataset.ph)); });
+    closeMenus(); drawPane(); renderPage();
+  }
+  function setSeg(ctl, v) { $$(`.seg[data-ctl="${ctl}"] button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+  $$(".seg[data-ctl]").forEach(seg => seg.addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const ctl = seg.dataset.ctl, v = b.dataset.v;
+    setSeg(ctl, v);
+    if (ctl === "lang") { lang = v; applyLang(); }
+    else if (ctl === "theme") document.documentElement.dataset.theme = v;
+    else if (ctl === "width") { closeMenus(); win.classList.remove("pane-open"); win.classList.toggle("forced-narrow", v === "narrow"); }
+    else if (ctl === "state") {
+      state = v;
+      if (v === "empty") books = [];
+      else if (!books.length) books = START.map(x => ({ ...x }));
+      win.classList.toggle("dropping", v === "drop");
+      renderPage();
+    }
+  }));
+  setSeg("theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  applyLang();
+})();
+</script>

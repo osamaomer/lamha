@@ -20,6 +20,7 @@ The design system release: every screen measured against Windows' own Settings, 
 
 | What | Why | Details |
 |---|---|---|
+| **Lamha Reader** | Books read with Lamha's card, translation and Review in the page; EPUB first, PDF later | [native-plan.md → Future](native-plan.md#future-lamha-reader): the reading page signed off ([design](design/reader.html)); the library drafted, waiting for sign-off ([design](design/library.html)) |
 | **Offline Wikipedia and the reader** | Whole articles with no internet; held back so 3.0 shipped without a web view | [native-plan.md → Future](native-plan.md#future-offline-wikipedia-and-the-reader): a native reader, title search in SQLite, downloads through BITS |
 | **FSRS reviews** | Anki's newer scheduler: fewer reviews for the same memory | A choice in Settings → Review, beside today's SM-2 |
 | **A second example on the review card** | So a meaning doesn't stick to one sentence | From the dictionary, on the back |
@@ -47,7 +48,7 @@ No one uses Lamha 2 (the user, 2026-10-27), so what Lamha 3 carries for moving f
 
 Sentences and word-in-context use Google's free endpoint, which Google could limit. Single words don't need it (the offline dictionary and language packs), and the AI translator already takes over when Google fails.
 
-1. **Translation packs, offline:** Mozilla's Bergamot (Firefox's own translator, ~20–40 MB per language pair, fast on a CPU) downloaded from Settings like the language packs. Free per use, works with no internet and no Ollama. The order would become Google → local → AI. Measure Arabic quality first: below Google's for idioms.
+1. **Translation packs, offline:** Mozilla's Bergamot (Firefox's own translator, ~20–40 MB per language pair, fast on a CPU) downloaded from Settings like the language packs. Free per use, works with no internet and no Ollama. The order would become Google → local → AI. Measure Arabic quality first: below Google's for idioms. What it gives, the test before any code (Firefox's `about:translations`), how it would be built and the open questions: [native-plan.md → Future](native-plan.md#future-translation-packs-offline).
 2. **An official service** for a paid version, with the key on Lamha's server: Microsoft Translator (generous free tier, cheapest after) or Google Cloud Translation. They return only the translation, so the parts of speech come from the offline dictionary.
 
 Prices change: check them before deciding.

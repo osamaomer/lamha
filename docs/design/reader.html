@@ -1,0 +1,1091 @@
+<title>Lamha Reader</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a design page like the others in docs/design: the reading window first, live and at its real size, then
+   what the reader can hold, how it fits Lamha, and the questions. The window is drawn with the design system's
+   Windows 11 brushes; the book's page adds its own colours (paper, black) and four highlight colours. */
+:root {
+  --ground: #eef0f5; --sheet: #ffffff; --ink: #1b1b1f; --ink-2: #5d5d66; --ink-3: #7c7c86; --rule: rgba(20, 20, 40, 0.10); --draft: #e8590c;
+  --mica: linear-gradient(140deg, #e9ecf6 0%, #f1edf3 50%, #ecf2f3 100%);
+  --layer: rgba(255, 255, 255, 0.55); --layer-edge: rgba(0, 0, 0, 0.06);
+  --card: rgba(255, 255, 255, 0.72); --card-edge: rgba(0, 0, 0, 0.07);
+  --subtle-1: rgba(0, 0, 0, 0.037); --subtle-2: rgba(0, 0, 0, 0.024);
+  --ctl: rgba(255, 255, 255, 0.72); --ctl-2: rgba(249, 249, 249, 0.6); --ctl-edge: rgba(0, 0, 0, 0.07); --ctl-edge-low: rgba(0, 0, 0, 0.16);
+  --t1: rgba(0, 0, 0, 0.9); --t2: rgba(0, 0, 0, 0.61); --t3: rgba(0, 0, 0, 0.45); --t4: rgba(0, 0, 0, 0.36);
+  --divider: rgba(0, 0, 0, 0.08);
+  --acrylic: rgba(252, 252, 252, 0.96); --shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --accent: #4f46e5; --accent-fill: #4f46e5; --on-accent: #ffffff; --accent-soft: rgba(79, 70, 229, 0.12);
+  --ok: #166534; --info-soft: rgba(79, 70, 229, 0.08); --mark: rgba(245, 158, 11, 0.30);
+  --win-edge: rgba(0, 0, 0, 0.18); --win-shadow: 0 30px 70px -20px rgba(20, 20, 50, 0.35), 0 6px 18px rgba(0, 0, 0, 0.08);
+  /* the reader's own: highlights, and the book's page */
+  --hl-y: rgba(250, 204, 21, 0.40); --hl-g: rgba(74, 222, 128, 0.34); --hl-b: rgba(96, 165, 250, 0.34); --hl-p: rgba(244, 114, 182, 0.30);
+  --dot-y: #eab308; --dot-g: #22c55e; --dot-b: #3b82f6; --dot-p: #ec4899;
+  --paper-bg: #f5eedc; --paper-ink: #3a2e1f; --paper-ink-2: rgba(58, 46, 31, 0.72); --paper-ink-3: rgba(58, 46, 31, 0.5); --paper-fill: rgba(120, 90, 40, 0.08); --paper-divider: rgba(58, 46, 31, 0.14);
+  --black-bg: #000000; --black-ink: #d4d4d4; --black-ink-2: #9a9a9a; --black-ink-3: #6e6e6e; --black-fill: rgba(255, 255, 255, 0.08); --black-divider: rgba(255, 255, 255, 0.12);
+  --cover-bg: #2f3d34; --cover-ink: #efe6cf; --cover-rule: rgba(239, 230, 207, 0.45);
+  --book-bg: var(--layer); --book-ink: var(--t1); --book-ink-2: var(--t2); --book-ink-3: var(--t3); --book-fill: var(--subtle-1); --book-hover: var(--subtle-1); --book-divider: var(--divider);
+  --ui: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", "Noto Sans Arabic", Tahoma, system-ui, sans-serif;
+  --ui-display: "Segoe UI Variable Display", "Segoe UI Variable Text", "Segoe UI", "Noto Sans Arabic", Tahoma, system-ui, sans-serif;
+  --serif: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sitka: "Sitka Text", "Sitka Small", Georgia, "Times New Roman", serif;
+  --icons: "Segoe Fluent Icons", "Segoe MDL2 Assets";
+  --t-faster: 83ms; --t-fast: 167ms; --t-normal: 250ms; --t-slow: 333ms;
+  --ease-in: cubic-bezier(0, 0, 0, 1); --ease-out: cubic-bezier(1, 0, 1, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #15161b; --sheet: #1d1e24; --ink: #f2f2f5; --ink-2: #a9a9b3; --ink-3: #8b8b95; --rule: rgba(255, 255, 255, 0.09); --draft: #ff922b;
+    --mica: linear-gradient(140deg, #1c1e27 0%, #211c22 50%, #1a2024 100%);
+    --layer: rgba(58, 58, 58, 0.30); --layer-edge: rgba(0, 0, 0, 0.25);
+    --card: rgba(255, 255, 255, 0.051); --card-edge: rgba(0, 0, 0, 0.18);
+    --subtle-1: rgba(255, 255, 255, 0.061); --subtle-2: rgba(255, 255, 255, 0.042);
+    --ctl: rgba(255, 255, 255, 0.061); --ctl-2: rgba(255, 255, 255, 0.084); --ctl-edge: rgba(255, 255, 255, 0.07); --ctl-edge-low: rgba(255, 255, 255, 0.05);
+    --t1: #ffffff; --t2: rgba(255, 255, 255, 0.79); --t3: rgba(255, 255, 255, 0.55); --t4: rgba(255, 255, 255, 0.36);
+    --divider: rgba(255, 255, 255, 0.084);
+    --acrylic: rgba(44, 44, 44, 0.96); --shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+    --accent: #9aa1ff; --accent-fill: #9aa1ff; --on-accent: #0b0b12; --accent-soft: rgba(154, 161, 255, 0.16);
+    --ok: #6ccb5f; --info-soft: rgba(154, 161, 255, 0.10); --mark: rgba(245, 158, 11, 0.32);
+    --win-edge: rgba(255, 255, 255, 0.12); --win-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.8), 0 6px 18px rgba(0, 0, 0, 0.35);
+    --hl-y: rgba(250, 204, 21, 0.30); --hl-g: rgba(74, 222, 128, 0.26); --hl-b: rgba(96, 165, 250, 0.30); --hl-p: rgba(244, 114, 182, 0.28);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #15161b; --sheet: #1d1e24; --ink: #f2f2f5; --ink-2: #a9a9b3; --ink-3: #8b8b95; --rule: rgba(255, 255, 255, 0.09); --draft: #ff922b;
+  --mica: linear-gradient(140deg, #1c1e27 0%, #211c22 50%, #1a2024 100%);
+  --layer: rgba(58, 58, 58, 0.30); --layer-edge: rgba(0, 0, 0, 0.25);
+  --card: rgba(255, 255, 255, 0.051); --card-edge: rgba(0, 0, 0, 0.18);
+  --subtle-1: rgba(255, 255, 255, 0.061); --subtle-2: rgba(255, 255, 255, 0.042);
+  --ctl: rgba(255, 255, 255, 0.061); --ctl-2: rgba(255, 255, 255, 0.084); --ctl-edge: rgba(255, 255, 255, 0.07); --ctl-edge-low: rgba(255, 255, 255, 0.05);
+  --t1: #ffffff; --t2: rgba(255, 255, 255, 0.79); --t3: rgba(255, 255, 255, 0.55); --t4: rgba(255, 255, 255, 0.36);
+  --divider: rgba(255, 255, 255, 0.084);
+  --acrylic: rgba(44, 44, 44, 0.96); --shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --accent: #9aa1ff; --accent-fill: #9aa1ff; --on-accent: #0b0b12; --accent-soft: rgba(154, 161, 255, 0.16);
+  --ok: #6ccb5f; --info-soft: rgba(154, 161, 255, 0.10); --mark: rgba(245, 158, 11, 0.32);
+  --win-edge: rgba(255, 255, 255, 0.12); --win-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.8), 0 6px 18px rgba(0, 0, 0, 0.35);
+  --hl-y: rgba(250, 204, 21, 0.30); --hl-g: rgba(74, 222, 128, 0.26); --hl-b: rgba(96, 165, 250, 0.30); --hl-p: rgba(244, 114, 182, 0.28);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 14px/1.5 var(--ui); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 72px; }
+
+/* ---------- the page's own frame ---------- */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ground); }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--ground) 88%, transparent); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); }
+.bar .wrap { display: flex; align-items: center; gap: 12px 20px; flex-wrap: wrap; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 600 15px/1 var(--ui-display); margin-inline-end: auto; }
+.brand i { width: 20px; height: 20px; border-radius: 5px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: grid; place-items: center; color: #fff; font: normal 12px/1 var(--icons); }
+.seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 6px; background: var(--subtle-1); border: 1px solid var(--rule); }
+.seg button { border: 0; background: none; color: var(--ink-2); font: 12px/1 var(--ui); padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--sheet); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+.seg-label { font-size: 12px; color: var(--ink-3); margin-inline-end: 6px; }
+.ctl-group { display: flex; align-items: center; }
+header.intro { padding-block: 44px 28px; display: grid; gap: 14px; }
+header.intro h1 { margin: 0; font: 600 40px/1.15 var(--ui-display); letter-spacing: -0.01em; text-wrap: balance; }
+header.intro p { margin: 0; max-width: 70ch; color: var(--ink-2); font-size: 15px; }
+.meta { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+.meta b { color: var(--ink-2); font-weight: 600; }
+section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); margin-top: 48px; }
+.chapter > .head { display: grid; grid-template-columns: 56px 1fr; gap: 4px 16px; margin-bottom: 24px; }
+.chapter > .head .no { font: 600 13px/36px var(--ui); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.chapter > .head h2 { margin: 0; font: 600 28px/36px var(--ui-display); text-wrap: balance; }
+.chapter > .head p { grid-column: 2; margin: 0; color: var(--ink-2); max-width: 72ch; }
+@media (max-width: 640px) { .chapter > .head { grid-template-columns: 1fr; } .chapter > .head p { grid-column: 1; } }
+.stage { display: grid; gap: 12px; }
+.stage-tools { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.try { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink-2); margin: 0; padding: 0; list-style: none; }
+.try li::before { content: "\E76C"; font: 10px/1 var(--icons); color: var(--ink-3); margin-inline-end: 6px; }
+[dir="rtl"] .try li::before { display: inline-block; transform: scaleX(-1); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 16px; }
+.sheet { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: 24px; min-width: 0; }
+.sheet h3 { margin: 0 0 4px; font: 600 16px/24px var(--ui-display); }
+.sheet > p { margin: 0 0 16px; color: var(--ink-2); font-size: 13px; }
+.feats { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.feats li { display: grid; grid-template-columns: 104px 1fr; gap: 12px; align-items: baseline; font-size: 14px; }
+.tag { justify-self: start; font: 600 11px/18px var(--ui); padding: 0 8px; border-radius: 9px; white-space: nowrap; }
+.tag.in { background: var(--accent-soft); color: var(--accent); }
+.tag.next { background: var(--subtle-1); color: var(--ink-2); border: 1px solid var(--rule); }
+.tag.idea { color: var(--draft); border: 1px solid color-mix(in srgb, var(--draft) 45%, transparent); }
+@media (max-width: 480px) { .feats li { grid-template-columns: 1fr; gap: 2px; } }
+.facts { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.facts li { display: grid; grid-template-columns: 24px 1fr; gap: 12px; }
+.facts .fi { font-size: 16px; color: var(--ink-2); line-height: 22px; }
+.facts b { font-weight: 600; }
+.qs { display: grid; gap: 12px; counter-reset: q; }
+.q { display: grid; grid-template-columns: 32px 1fr; gap: 4px 12px; padding: 16px 20px; border-radius: 8px; background: var(--sheet); border: 1px solid var(--rule); }
+.q::before { counter-increment: q; content: counter(q); width: 24px; height: 24px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font: 600 12px/24px var(--ui); text-align: center; }
+.q h4 { margin: 0; font: 600 14px/24px var(--ui); }
+.q p { grid-column: 2; margin: 0; color: var(--ink-2); font-size: 13px; }
+.q .rec { color: var(--ink); }
+code { font: 12px/1 Consolas, "Cascadia Mono", monospace; background: var(--subtle-1); padding: 2px 5px; border-radius: 4px; }
+
+/* ---------- the window (Windows 11) ---------- */
+.fi { font-family: var(--icons); font-style: normal; font-weight: normal; line-height: 1; display: inline-block; }
+.win { position: relative; width: 100%; max-width: 1100px; height: 700px; margin-inline: auto; border-radius: 8px; overflow: hidden; background: var(--mica);
+  border: 1px solid var(--win-edge); box-shadow: var(--win-shadow); font: 14px/20px var(--ui); color: var(--t1); container-type: inline-size; container-name: win;
+  display: grid; grid-template-rows: 48px 1fr; transition: max-width var(--t-normal) var(--ease-in); }
+.win.forced-narrow { max-width: 560px; }
+.tb { position: relative; display: flex; align-items: center; height: 48px; padding-inline-start: 4px; min-width: 0; }
+.navbtn { width: 40px; height: 36px; flex: none; border: 0; border-radius: 4px; background: transparent; color: var(--t1); display: grid; place-items: center; cursor: pointer; font: 16px/1 var(--icons); transition: background var(--t-faster); }
+.navbtn:hover { background: var(--subtle-1); }
+.navbtn:active { background: var(--subtle-2); color: var(--t2); }
+.navbtn[aria-pressed="true"] { background: var(--subtle-1); color: var(--accent); }
+.rtlflip { display: inline-block; }
+.win[dir="rtl"] .rtlflip { transform: scaleX(-1); }
+.tb .ttl { display: flex; align-items: baseline; gap: 8px; padding-inline: 8px 16px; font-size: 12px; white-space: nowrap; min-width: 0; overflow: hidden; }
+.tb .ttl span { overflow: hidden; text-overflow: ellipsis; }
+.tb .ttl small { font-size: 12px; color: var(--t2); }
+.tb .search { position: absolute; left: 50%; transform: translateX(-50%); width: min(320px, 28%); }
+.tb .tools { margin-inline-start: auto; display: flex; flex: none; }
+.tb .caps { display: flex; flex: none; align-self: flex-start; }
+.tb .caps span { width: 46px; height: 32px; display: grid; place-items: center; font: 10px/1 var(--icons); color: var(--t1); }
+.tb .sbtn { display: none; }
+.aa-glyph { font: 600 14px/1 var(--ui); letter-spacing: -0.02em; }
+
+.rbody { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); min-height: 0; }
+.win.panel-on .rbody { grid-template-columns: minmax(0, 1fr) 320px; }
+.rpage { position: relative; min-height: 0; overflow: hidden; background: var(--book-bg); color: var(--book-ink); border-top: 1px solid var(--layer-edge); transition: background var(--t-normal); }
+.win.panel-on .rpage { border-inline-end: 1px solid var(--layer-edge); border-start-end-radius: 8px; }
+.rpage.page-paper { --book-bg: var(--paper-bg); --book-ink: var(--paper-ink); --book-ink-2: var(--paper-ink-2); --book-ink-3: var(--paper-ink-3); --book-fill: var(--paper-fill); --book-hover: var(--paper-fill); --book-divider: var(--paper-divider); }
+.rpage.page-black { --book-bg: var(--black-bg); --book-ink: var(--black-ink); --book-ink-2: var(--black-ink-2); --book-ink-3: var(--black-ink-3); --book-fill: var(--black-fill); --book-hover: var(--black-fill); --book-divider: var(--black-divider); }
+.rpage .scroller { position: absolute; inset: 0 0 40px; overflow-x: hidden; overflow-y: auto; padding: 32px 28px 48px; scrollbar-color: var(--book-ink-3) transparent; }
+
+/* ---------- the book ---------- */
+.book { --book-font: var(--sitka); --book-size: 18px; --book-line: 1.7; --measure: 620px;
+  max-width: var(--measure); margin-inline: auto; font-family: var(--book-font); font-size: var(--book-size); line-height: var(--book-line); transition: max-width var(--t-normal) var(--ease-in); }
+.book .ch { margin: 0 0 28px; font: 600 calc(var(--book-size) * 1.6)/1.25 var(--book-font); }
+.book .ch small { display: block; margin-bottom: 8px; font: 600 12px/16px var(--ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--book-ink-2); }
+.para { position: relative; margin-bottom: 16px; }
+.para > p { margin: 0; }
+.w { border-radius: 3px; cursor: pointer; transition: background var(--t-faster); }
+.w:hover { background: var(--book-hover); }
+.book.mark-seen .w.seen { text-decoration: underline dotted var(--book-ink-3); text-decoration-thickness: 1.5px; text-underline-offset: 5px; }
+.w.on { background: var(--accent-soft); }
+.w.found { background: var(--mark); }
+.w.reading { background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent-soft); }
+.w.flash { animation: flash 1.2s var(--ease-in); }
+@keyframes flash { 0%, 40% { background: var(--accent-soft); box-shadow: 0 0 0 4px var(--accent-soft); } }
+mark.hl { color: inherit; border-radius: 2px; padding: 1px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.hl.y { background: var(--hl-y); } .hl.g { background: var(--hl-g); } .hl.b { background: var(--hl-b); } .hl.p { background: var(--hl-p); }
+mark.hl.noted::after { content: "\E70B"; font: 12px/1 var(--icons); color: var(--book-ink-2); margin-inline-start: 3px; vertical-align: 4px; }
+.ptr { position: absolute; top: 0; right: -48px; opacity: 0; transition: opacity var(--t-faster); }
+.para:hover .ptr, .ptr:focus-visible { opacity: 1; }
+.rpage .ib { color: var(--book-ink-2); }
+.rpage .ib:hover { background: var(--book-hover); color: var(--book-ink); }
+.tr { margin-top: 12px; padding: 8px 16px 14px; border-radius: 4px; background: var(--book-fill); font-family: var(--ui); animation: tr-in var(--t-normal) var(--ease-in); }
+@keyframes tr-in { from { opacity: 0; transform: translateY(-4px); } }
+.tr .h { display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: 12px; line-height: 16px; color: var(--book-ink-2); }
+.tr .h .fi { font-size: 14px; }
+.tr .h .sp { flex: 1; }
+.tr .h .ib { width: 28px; height: 28px; }
+.tr .ar { font: 17px/1.8 var(--ui); color: var(--book-ink); }
+.tr .txt { font: 15px/1.7 var(--ui); color: var(--book-ink); }
+.book .end { margin-top: 32px; font: 12px/16px var(--ui); color: var(--book-ink-3); text-align: center; }
+.book.sbs { max-width: 1040px; }
+.sbs-head, .sbs-row { display: grid; grid-template-columns: 1fr 1fr; }
+.sbs-head { font: 600 12px/16px var(--ui); color: var(--book-ink-2); position: sticky; top: -32px; background: var(--book-bg); z-index: 1; padding-block: 8px; border-bottom: 1px solid var(--book-divider); }
+.sbs-head > span, .sbs-row > * { padding: 6px 24px; margin: 0; }
+.sbs-head > span + span, .sbs-row > .ar { border-left: 1px solid var(--book-divider); }
+.sbs-row { border-radius: 4px; transition: background var(--t-faster); }
+.sbs-row:hover { background: var(--book-hover); }
+.sbs-row > p:first-child { padding-block: 6px 12px; }
+.sbs-row > .ar { font: 16px/1.85 var(--ui); padding-block: 6px 12px; }
+
+/* ---------- controls (the design system's) ---------- */
+.btn { height: 32px; padding: 5px 11px 6px; border-radius: 4px; border: 1px solid var(--ctl-edge); border-bottom-color: var(--ctl-edge-low); background: var(--ctl); color: var(--t1);
+  font: 14px/20px var(--ui); display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; white-space: nowrap; transition: background var(--t-faster), transform var(--t-faster); }
+.btn:hover { background: var(--ctl-2); }
+.btn:active { color: var(--t2); transform: scale(0.98); }
+.btn.accent { background: var(--accent-fill); color: var(--on-accent); border-color: transparent; }
+.btn.accent:hover { filter: brightness(1.08); }
+.btn.subtle { background: transparent; border-color: transparent; }
+.btn.subtle:hover { background: var(--subtle-1); }
+.btn.link { background: none; border-color: transparent; color: var(--accent); padding-inline: 4px; height: auto; padding-block: 2px; font-size: 12px; }
+.btn.link:hover { text-decoration: underline; }
+.btn .fi { font-size: 16px; }
+.ib { width: 32px; height: 32px; flex: none; border: 0; border-radius: 4px; background: transparent; color: var(--t1); display: inline-grid; place-items: center; cursor: pointer; transition: background var(--t-faster), transform var(--t-faster); }
+.ib:hover { background: var(--subtle-1); }
+.ib:active { transform: scale(0.96); }
+.ib .fi { font-size: 16px; }
+.ib.on .fi { color: var(--accent); }
+.ib .fi.pop { animation: pop var(--t-fast) var(--ease-in); }
+@keyframes pop { 40% { transform: scale(1.25); } }
+:is(.btn, .ib, .navbtn, .seg button, .segsw button, .wrow, .nrow, .crow, .swatch, .dot):focus-visible { outline: 2px solid var(--t1); outline-offset: 1px; }
+.field { position: relative; border-radius: 4px; background: var(--ctl); border: 1px solid var(--ctl-edge); border-bottom-color: var(--ctl-edge-low); min-height: 32px; }
+.field::after { content: ""; position: absolute; inset-inline: -1px; bottom: -1px; height: 2px; border-radius: 0 0 4px 4px; background: var(--accent); transform: scaleX(0); transition: transform var(--t-fast) var(--ease-in); }
+.field:focus-within { background: var(--acrylic); }
+.field:focus-within::after { transform: scaleX(1); }
+.field input, .field textarea { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--t1); font: 14px/20px var(--ui); padding: 5px 10px 6px; display: block; }
+.field input::placeholder, .field textarea::placeholder { color: var(--t3); }
+.field.search input { padding-inline-end: 64px; }
+.field.search .glass { position: absolute; inset-inline-end: 10px; top: 8px; font: 14px/1 var(--icons); color: var(--t2); pointer-events: none; }
+.field.search .count { position: absolute; inset-inline-end: 32px; top: 7px; font-size: 12px; line-height: 16px; color: var(--t3); }
+.switch { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; border: 0; background: none; color: var(--t1); font: 14px/20px var(--ui); padding: 0; text-align: start; }
+.switch .track { flex: none; width: 40px; height: 20px; border-radius: 10px; border: 1px solid var(--t2); position: relative; transition: background var(--t-faster); }
+.switch .knob { position: absolute; top: 3px; inset-inline-start: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--t2); transition: inset-inline-start var(--t-fast) var(--ease-in); }
+.switch[aria-checked="true"] .track { background: var(--accent-fill); border-color: var(--accent-fill); }
+.switch[aria-checked="true"] .knob { inset-inline-start: 23px; background: var(--on-accent); }
+.segsw { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; height: 32px; padding: 3px; border-radius: 16px; background: var(--subtle-1); border: 1px solid var(--ctl-edge); }
+.segsw button { border: 0; border-radius: 12px; background: none; color: var(--t2); font: 13px/1 var(--ui); cursor: pointer; padding: 0 10px; white-space: nowrap; }
+.segsw button:hover { color: var(--t1); }
+.segsw button[aria-selected="true"] { background: var(--ctl-2); color: var(--t1); box-shadow: 0 0 0 1px var(--ctl-edge), 0 1px 2px rgba(0, 0, 0, 0.08); font-weight: 600; }
+.toast { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); z-index: 12; display: flex; align-items: center; gap: 12px; padding: 8px 16px; border-radius: 8px; background: var(--acrylic);
+  border: 1px solid var(--ctl-edge); box-shadow: var(--shadow); color: var(--t1); white-space: nowrap; max-width: calc(100% - 32px); animation: toast-in var(--t-fast) var(--ease-in); }
+.toast span { overflow: hidden; text-overflow: ellipsis; }
+.toast .fi { color: var(--ok); }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 16px); } }
+.flyout { position: absolute; z-index: 9; border-radius: 8px; background: var(--acrylic); border: 1px solid var(--ctl-edge); box-shadow: var(--shadow); color: var(--t1); animation: fly-in var(--t-fast) var(--ease-in); }
+@keyframes fly-in { from { opacity: 0; transform: translateY(-6px); } }
+
+/* ---------- the word card: the lookup card's answer, in the book ---------- */
+.wcard { width: 360px; max-width: calc(100% - 24px); padding: 16px 20px 12px; }
+.wcard .hw { display: flex; align-items: flex-start; gap: 12px; }
+.wcard .hw .word { font: 700 28px/36px var(--serif); letter-spacing: -0.01em; }
+.wcard .hw .ipa { font-size: 12px; line-height: 16px; color: var(--t2); direction: ltr; unicode-bidi: isolate; }
+.wcard .hw .acts { margin-inline-start: auto; display: flex; gap: 2px; }
+.wcard .lbl { margin-top: 12px; font-size: 12px; line-height: 16px; color: var(--t2); }
+.wcard .mean { display: flex; }
+.wcard .mean span { font: 700 20px/34px var(--ui); }
+.wcard .cn { margin: 2px 0 0; color: var(--t2); }
+.wcard .culture { display: grid; grid-template-columns: 16px 1fr; gap: 8px; margin-top: 12px; padding: 8px 12px; border-radius: 4px; background: var(--info-soft); font-size: 12px; line-height: 18px; }
+.wcard .culture .fi { font-size: 14px; color: var(--accent); margin-top: 2px; }
+.wcard .culture b { font-weight: 600; display: block; }
+.defs { margin-top: 12px; }
+.def { display: grid; grid-template-columns: 20px 1fr; gap: 2px 10px; padding-block: 4px; }
+.def .num { width: 20px; height: 20px; border-radius: 10px; background: var(--subtle-1); font: 600 11px/20px var(--ui); text-align: center; color: var(--t2); margin-top: 2px; }
+.def .gl-ar { font-size: 14px; line-height: 24px; }
+.def .gl-en { grid-column: 2; font-size: 12px; line-height: 18px; color: var(--t2); }
+.win[dir="ltr"] .def .gl-ar, .win[dir="ltr"] .def .gl-en { text-align: left; }
+.win[dir="rtl"] .def .gl-ar, .win[dir="rtl"] .def .gl-en { text-align: right; }
+.wcard .links { display: flex; gap: 4px 16px; flex-wrap: wrap; margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--divider); }
+
+/* ---------- selection toolbar, note, Aa, read aloud, teaching tip ---------- */
+.seltb { display: flex; align-items: center; gap: 2px; padding: 4px; }
+.seltb .sep { width: 1px; height: 20px; background: var(--divider); margin-inline: 4px; }
+.dot { width: 32px; height: 32px; border: 0; border-radius: 4px; background: none; display: grid; place-items: center; cursor: pointer; }
+.dot:hover { background: var(--subtle-1); }
+.dot i { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, 0.12); }
+.dot.y i { background: var(--dot-y); } .dot.g i { background: var(--dot-g); } .dot.b i { background: var(--dot-b); } .dot.p i { background: var(--dot-p); }
+.noteed { width: 300px; max-width: calc(100% - 24px); padding: 12px; display: grid; gap: 12px; }
+.noteed .row { display: flex; justify-content: flex-end; gap: 8px; }
+.aa { width: 320px; max-width: calc(100% - 24px); padding: 16px; display: grid; gap: 16px; }
+.aa .lab { font-size: 12px; line-height: 16px; color: var(--t2); margin-bottom: 8px; }
+.aa .sizer { display: flex; align-items: center; gap: 12px; }
+.aa .sizer b { flex: 1; text-align: center; font: 600 14px/20px var(--ui); font-variant-numeric: tabular-nums; }
+.aa .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.swatch { height: 56px; border-radius: 4px; border: 1px solid var(--ctl-edge); cursor: pointer; display: grid; place-items: center; gap: 0; font: 12px/16px var(--ui); padding: 4px; }
+.swatch b { font: 600 16px/20px var(--sitka); }
+.swatch.lamha { background: var(--layer); color: var(--t1); }
+.swatch.paper { background: var(--paper-bg); color: var(--paper-ink); }
+.swatch.black { background: var(--black-bg); color: var(--black-ink); }
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent); border-color: transparent; }
+.player { position: absolute; z-index: 8; bottom: 52px; left: 50%; transform: translateX(-50%); animation: toast-in var(--t-fast) var(--ease-in); display: flex; align-items: center; gap: 4px; padding: 4px 4px 4px 12px; border-radius: 24px; white-space: nowrap; }
+.win[dir="rtl"] .player { padding: 4px 12px 4px 4px; }
+.player .waves { display: flex; align-items: center; gap: 2px; height: 16px; margin-inline-end: 8px; }
+.player .waves i { width: 3px; border-radius: 2px; background: var(--accent); animation: wave 900ms ease-in-out infinite; }
+.player .waves i:nth-child(1) { height: 6px; } .player .waves i:nth-child(2) { height: 14px; animation-delay: -300ms; } .player .waves i:nth-child(3) { height: 9px; animation-delay: -600ms; }
+.player.paused .waves i { animation-play-state: paused; }
+@keyframes wave { 50% { transform: scaleY(0.4); } }
+.player .lbl { font-size: 12px; color: var(--t2); margin-inline-end: 8px; }
+.player .btn { height: 32px; min-width: 44px; font-variant-numeric: tabular-nums; }
+.tip { width: 300px; max-width: calc(100% - 24px); padding: 12px 16px 16px; display: grid; gap: 4px; }
+.tip b { font-weight: 600; }
+.tip p { margin: 0; color: var(--t2); }
+.tip .row { display: flex; justify-content: flex-end; margin-top: 8px; }
+.tip::before { content: ""; position: absolute; left: var(--beak, 24px); width: 12px; height: 12px; background: var(--acrylic); border: 1px solid var(--ctl-edge); transform: rotate(45deg); }
+.tip.below::before { top: -7px; border-right: 0; border-bottom: 0; }
+.tip.above::before { bottom: -7px; border-left: 0; border-top: 0; }
+
+/* ---------- the panel: contents, notes, words ---------- */
+.rpanel { display: none; flex-direction: column; min-height: 0; padding: 8px 16px 16px; gap: 12px; }
+.win.panel-on .rpanel { display: flex; }
+.rpanel .phead { font-size: 12px; line-height: 16px; color: var(--t2); padding-inline: 4px; }
+.plist { flex: 1; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 2px; margin-inline: -4px; padding-inline: 4px; }
+.pfoot { display: grid; gap: 8px; }
+.pfoot .btn { width: 100%; }
+.wrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 52px; padding: 6px 4px 6px 12px; border-radius: 4px; cursor: pointer; }
+.win[dir="rtl"] .wrow { padding: 6px 12px 6px 4px; }
+.wrow:hover { background: var(--subtle-1); }
+.wrow .w1 { font-weight: 600; }
+.wrow .m { color: var(--t2); }
+.win[dir="ltr"] .wrow .m { text-align: left; }
+.win[dir="rtl"] .wrow .w1 { text-align: right; }
+.nrow { display: grid; gap: 6px; padding: 10px 12px; border-radius: 4px; cursor: pointer; }
+.nrow:hover { background: var(--subtle-1); }
+.nrow .qt { font: 15px/1.6 var(--sitka); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.win[dir="rtl"] .nrow .qt { text-align: right; }
+.nrow .nt { display: grid; grid-template-columns: 16px 1fr; gap: 8px; color: var(--t1); }
+.nrow .nt .fi { font-size: 14px; color: var(--t2); margin-top: 3px; }
+.nrow .where { font-size: 12px; line-height: 16px; color: var(--t3); }
+.bookhead { display: grid; grid-template-columns: 64px 1fr; gap: 16px; align-items: center; padding: 4px 4px 12px; }
+.cover { width: 64px; height: 96px; border-radius: 4px; background: var(--cover-bg); color: var(--cover-ink); padding: 8px 6px; display: grid; align-content: space-between; text-align: center; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); }
+.cover b { font: 600 10px/1.2 var(--serif); }
+.cover i { display: block; height: 1px; background: var(--cover-rule); margin: 0 6px; }
+.cover small { font: 8px/1.2 var(--serif); letter-spacing: 0.06em; text-transform: uppercase; }
+.bookhead .bt { font-weight: 600; }
+.bookhead .ba { color: var(--t2); }
+.bookhead .pb { height: 3px; border-radius: 2px; background: var(--ctl-edge-low); margin: 10px 0 6px; overflow: hidden; }
+.bookhead .pb i { display: block; height: 100%; width: 3%; background: var(--accent); border-radius: 2px; }
+.bookhead .pp { font-size: 12px; line-height: 16px; color: var(--t2); }
+.crow { position: relative; display: flex; align-items: center; height: 36px; padding-inline: 12px; border-radius: 4px; cursor: pointer; flex: none; }
+.crow:hover, .crow[aria-current="true"] { background: var(--subtle-1); }
+.crow[aria-current="true"]::before { content: ""; position: absolute; inset-inline-start: 0; top: 10px; width: 3px; height: 16px; border-radius: 2px; background: var(--accent); }
+.crow small { margin-inline-start: auto; color: var(--t3); font-size: 12px; }
+.empty { display: grid; justify-items: center; gap: 8px; padding: 40px 16px; text-align: center; color: var(--t2); }
+.empty .fi { font-size: 40px; color: var(--t3); }
+
+.rfoot { position: absolute; inset: auto 0 0; height: 40px; display: flex; align-items: center; gap: 12px; padding-inline: 28px; font-size: 12px; color: var(--book-ink-2); border-top: 1px solid var(--book-divider); }
+.rfoot .ln { position: absolute; inset: -1px 0 auto; height: 2px; }
+.rfoot .ln i { display: block; height: 100%; width: 0; background: var(--accent); transition: width var(--t-fast); }
+.rfoot .sp { flex: 1; }
+
+/* Narrow, as Windows' Settings: the panel comes over the page, the search becomes a button */
+@container win (max-width: 960px) {
+  .tb .search { display: none; }
+  .tb .sbtn { display: grid; }
+  .win.search-open .tb .search { display: block; z-index: 3; left: auto; transform: none; inset-inline: 44px 8px; width: auto; border-radius: 4px; background: var(--acrylic); }
+}
+@container win (max-width: 760px) {
+  .win.panel-on .rbody { grid-template-columns: minmax(0, 1fr); }
+  .win.panel-on .rpage { border-inline-end: 0; border-radius: 0; }
+  .rpanel { position: absolute; inset-block: 0; inset-inline-end: 0; width: min(320px, 92%); z-index: 6; background: var(--acrylic); box-shadow: var(--shadow); }
+  .ptr { display: none; }
+  .tb .ttl small { display: none; }
+  .rpage .scroller { padding-inline: 20px; }
+  .book.sbs .sbs-head > span, .book.sbs .sbs-row > * { padding-inline: 12px; }
+}
+@container win (max-width: 520px) {
+  .tb .opt { display: none; }
+  .tb .caps span { width: 40px; }
+}
+.motion-off *, .motion-off *::before, .motion-off *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+</style>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="brand"><i aria-hidden="true">&#xE82D;</i>Lamha Reader</div>
+    <div class="ctl-group"><span class="seg-label">Language</span><div class="seg" data-ctl="lang"><button data-v="en" aria-pressed="true">English</button><button data-v="ar" aria-pressed="false">العربية</button></div></div>
+    <div class="ctl-group"><span class="seg-label">Theme</span><div class="seg" data-ctl="theme"><button data-v="light" aria-pressed="false">Light</button><button data-v="dark" aria-pressed="false">Dark</button></div></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="intro">
+    <h1>The reading page</h1>
+    <p>The first design of Lamha Reader: an EPUB open in its own window, with Lamha's card, translation and Review built into the page. Click a word, select a sentence, open <b>Aa</b>. It's drawn at its real size with Lamha's design system, in both languages and themes. All of the reader's wording is a draft for you to rewrite.</p>
+    <div class="meta"><span><b>Status</b> Signed off 28 October 2026 (decisions in native-plan.md, Future: Lamha Reader)</span><span><b>Date</b> 28 October 2026</span><span><b>Book</b> Pride and Prejudice, Jane Austen (1813, public domain)</span><span><b>Icons</b> Segoe Fluent Icons: open this page on Windows 11 to see them</span></div>
+  </header>
+
+  <section class="chapter" id="reader" style="border-top: 0; margin-top: 0; padding-top: 8px;">
+    <div class="head"><span class="no">01</span><h2>Reading a book</h2><p>Everything here works. The panel keeps the words you've looked up in this book, your highlights and notes, and the contents. The width switch shows the window narrow, where the panel comes over the page.</p></div>
+    <div class="stage">
+      <div class="stage-tools">
+        <div class="ctl-group"><span class="seg-label">Width</span><div class="seg" data-ctl="width"><button data-v="wide" aria-pressed="true">Wide</button><button data-v="narrow" aria-pressed="false">Narrow</button></div></div>
+        <ul class="try"><li>Click <b>let</b>, then <b>want</b> in the first line</li><li>Select a sentence to highlight, note, translate or explain it</li><li>Turn on side by side</li><li>Press Read aloud</li><li>Try paper and black in Aa</li></ul>
+      </div>
+      <div class="win panel-on" id="win" dir="ltr">
+        <div class="tb">
+          <button class="navbtn" data-t="back" data-a="library"><span class="rtlflip">&#xE72B;</span></button>
+          <div class="ttl"><span>Pride and Prejudice</span><small data-s="author"></small></div>
+          <div class="search"><div class="field search"><input id="q" data-ph="searchBook" autocomplete="off"><span class="count" id="qcount"></span><span class="glass">&#xE721;</span></div></div>
+          <div class="tools">
+            <button class="navbtn sbtn" data-t="search" data-a="searchBook">&#xE721;</button>
+            <button class="navbtn opt" data-t="sbs" data-a="sideBySide" aria-pressed="false">&#xE89A;</button>
+            <button class="navbtn" data-t="read" data-a="readAloud" aria-pressed="false">&#xE767;</button>
+            <button class="navbtn" data-t="aa" data-a="readingSettings" aria-expanded="false"><span class="aa-glyph" aria-hidden="true">Aa</span></button>
+            <button class="navbtn opt" data-t="mark" data-a="bookmark" aria-pressed="false">&#xE8A4;</button>
+            <button class="navbtn" data-t="panel" data-a="panel" aria-pressed="true">&#xE8A0;</button>
+          </div>
+          <div class="caps" aria-hidden="true"><span>&#xE921;</span><span>&#xE922;</span><span>&#xE8BB;</span></div>
+        </div>
+        <div class="rbody">
+          <div class="rpage" id="rpage">
+            <div class="scroller" id="scroller"><article class="book mark-seen" id="book" lang="en" dir="ltr"></article></div>
+            <div class="rfoot"><div class="ln"><i id="pline"></i></div><span id="pchap"></span><span class="sp"></span><span id="pleft"></span></div>
+          </div>
+          <aside class="rpanel" id="panel"></aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="features">
+    <div class="head"><span class="no">02</span><h2>What the reader can hold</h2><p>The brainstorm, in four parts. <span class="tag in">In this design</span> is drawn above; <span class="tag next">Next design</span> is the library; <span class="tag idea">Idea</span> waits for your call.</p></div>
+    <div class="grid2">
+      <div class="sheet">
+        <h3>Reading</h3><p>A calm page that's yours to set.</p>
+        <ul class="feats">
+          <li><span class="tag in">In this design</span><span>Windows' reading font (Sitka) or another, your text size, line spacing and line width.</span></li>
+          <li><span class="tag in">In this design</span><span>The page's colour: Lamha's own, paper, or black for reading at night.</span></li>
+          <li><span class="tag in">In this design</span><span>Search in the book, a bookmark, the contents, and how much of the chapter is left.</span></li>
+          <li><span class="tag next">Next design</span><span>The library: your books with their covers and how far you've read. Open a file or drop it in.</span></li>
+          <li><span class="tag idea">Idea</span><span>Pages that turn, as well as scrolling.</span></li>
+          <li><span class="tag idea">Idea</span><span>Focus mode: only the text, until the mouse moves.</span></li>
+        </ul>
+      </div>
+      <div class="sheet">
+        <h3>Understanding</h3><p>Lamha's brain, right in the page.</p>
+        <ul class="feats">
+          <li><span class="tag in">In this design</span><span>Click a word for its meaning in this sentence: "let" here means rented out, not allowed.</span></li>
+          <li><span class="tag in">In this design</span><span>Phrases open as one: "in want of", not "want".</span></li>
+          <li><span class="tag in">In this design</span><span>A paragraph translated under itself, or the whole page side by side.</span></li>
+          <li><span class="tag in">In this design</span><span>Explain a passage with the AI: its tone, its irony, what a reader of its time knew (needs a writing provider).</span></li>
+          <li><span class="tag in">In this design</span><span>Notes about the time in the card: Michaelmas, a chaise and four.</span></li>
+          <li><span class="tag in">In this design</span><span>Read aloud, each word lit as it's spoken, or just what you selected.</span></li>
+          <li><span class="tag idea">Idea</span><span>With no internet: the dictionary for words, the translation packs for sentences.</span></li>
+        </ul>
+      </div>
+      <div class="sheet">
+        <h3>Remembering</h3><p>The words you meet in a book become your words.</p>
+        <ul class="feats">
+          <li><span class="tag in">In this design</span><span>Add a word to Review with its sentence from the book, so the card's example is the book's own.</span></li>
+          <li><span class="tag in">In this design</span><span>The words you looked up in this book, in the panel and faintly underlined in the text.</span></li>
+          <li><span class="tag idea">Idea</span><span>Before a chapter: its five hardest words, to learn first.</span></li>
+          <li><span class="tag idea">Idea</span><span>After a chapter: a short quiz on the words you looked up.</span></li>
+          <li><span class="tag idea">Idea</span><span>Reading counts toward the day's goal, in minutes or pages.</span></li>
+        </ul>
+      </div>
+      <div class="sheet">
+        <h3>Better than paper</h3><p>What a printed book can't do.</p>
+        <ul class="feats">
+          <li><span class="tag in">In this design</span><span>Highlights in four colours, notes on them, all listed in the panel.</span></li>
+          <li><span class="tag in">In this design</span><span>Copy all your highlights and notes as text.</span></li>
+          <li><span class="tag idea">Idea</span><span>How hard a book is for you: the share of its words you already know, from your History and Review.</span></li>
+          <li><span class="tag idea">Idea</span><span>Find a highlight or note from any book in Lamha's search.</span></li>
+          <li><span class="tag idea">Idea</span><span>Reading time, pages and a streak.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="fit">
+    <div class="head"><span class="no">03</span><h2>How it fits Lamha</h2><p>What building it would mean, in short. The cost estimate is in the conversation; the plan gets it once you approve a design.</p></div>
+    <div class="sheet">
+      <ul class="facts">
+        <li><span class="fi">&#xE82D;</span><span><b>Most of it exists.</b> The card, the translators, the AI, Review, Listen and side by side are in Core already. The reader adds an EPUB reader and a page to show it on.</span></li>
+        <li><span class="fi">&#xE8D2;</span><span><b>Native text, no web view.</b> An EPUB is a ZIP of web pages. Core reads it and the page shows it as WinUI text (<code>RichTextBlock</code>): the same reader offline Wikipedia needs.</span></li>
+        <li><span class="fi">&#xE737;</span><span><b>Its own window and process.</b> Closing the book gives all its memory back (WinUI keeps a closed window: decision 0021).</span></li>
+        <li><span class="fi">&#xEA18;</span><span><b>Your marks stay on this PC.</b> Highlights, notes and your place are kept in Lamha's database, tied to the book's file.</span></li>
+        <li><span class="fi">&#xE946;</span><span><b>Only books without DRM open:</b> Project Gutenberg, Standard Ebooks, your own files. Books bought on Kindle or Google Play are locked to their own apps.</span></li>
+        <li><span class="fi">&#xE790;</span><span><b>New in the design system:</b> the paper and black pages, four highlight colours, and icon names for Highlight (E7E6), Note (E70B), Side by side (E89A), Panel (E8A0), Bookmark (E8A4) and Library (E8F1), to be checked on Windows.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="questions">
+    <div class="head"><span class="no">04</span><h2>Questions</h2><p>Each with a recommendation.</p></div>
+    <div class="qs">
+      <div class="q"><h4>Where does the reader start?</h4><p><span class="rec">Recommended: a Read page in Lamha's pane, which is the library; a book opens in its own window.</span> The window can then close and give its memory back.</p></div>
+      <div class="q"><h4>Does one click on a word open the card?</h4><p><span class="rec">Recommended: yes, as on a Kindle.</span> A drag selects text, and a double-click selects one word to highlight it.</p></div>
+      <div class="q"><h4>Paper and black pages: a new kind of colour?</h4><p><span class="rec">Recommended: yes, for the book's page only.</span> They'd be the first colours outside the system's "colour carries meaning" rule.</p></div>
+      <div class="q"><h4>Scroll or turning pages?</h4><p><span class="rec">Recommended: scroll first,</span> which is simpler and works with side by side. Pages could come later.</p></div>
+      <div class="q"><h4>Underline the words you've looked up?</h4><p><span class="rec">Recommended: on, with a switch in Aa.</span> Meeting a word again and remembering it is the point.</p></div>
+      <div class="q"><h4>Notes about the time (Michaelmas): from where?</h4><p><span class="rec">Recommended: from the AI, saved with the book.</span> Offline notes for famous classics could come later.</p></div>
+      <div class="q"><h4>The name?</h4><p>"Lamha Reader" and "قارئ لمحة" in this draft, with "Read" for the pane. Yours to choose.</p></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const S = {
+    en: {
+      library: "Library", author: "Jane Austen", searchBook: "Search in this book", sideBySide: "Side by side", readAloud: "Read aloud",
+      readingSettings: "Reading settings", bookmark: "Bookmark this place", panel: "Words and notes",
+      contents: "Contents", notes: "Notes", words: "Words", chapter: "Chapter {0}", chapterOf: "Chapter {0} of {1}",
+      inThisSentence: "In this sentence", listen: "Listen", copy: "Copy", addReview: "Add to review", inReview: "In review",
+      translatePara: "Translate the paragraph", translateSentence: "Translate the sentence", openInLamha: "Open in Lamha",
+      highlight: "Highlight", y: "Yellow", g: "Green", b: "Blue", p: "Pink", note: "Note", notePh: "Write a note…", save: "Save", cancel: "Cancel",
+      translate: "Translate", explain: "Explain", translation: "Translation", explainedBy: "Explained by the AI", close: "Close",
+      explainNone: "In the reader, the AI explains any passage you select: what it means, its tone, and what a reader of its time would know.",
+      sampleOnly: "This design has meanings for: {0}.", inTime: "In Austen's time",
+      wordsHint: "Words you looked up in this book", wordsCount: "{0} words · {1} in review", reviewThese: "Review these words",
+      wordsEmpty: "Words you look up in this book appear here.", notesHint: "Your highlights and notes", notesEmpty: "Select text to highlight it or add a note.",
+      copyAll: "Copy all as text", ofBook: "{0}% of the book", chapters: "{0} chapters", left: "{0}% of the chapter · about {1} min left",
+      pos: { noun: "noun", verb: "verb", adjective: "adjective", adverb: "adverb", phrase: "phrase" },
+      english: "English", arabic: "Arabic", font: "Font", size: "Text size", spacing: "Line spacing", width: "Line width",
+      narrowW: "Narrow", normalW: "Normal", wideW: "Wide", page: "Page", pLamha: "Lamha", pPaper: "Paper", pBlack: "Black", markSeen: "Underline words I've looked up",
+      added: "Added to review, with its sentence from the book", copied: "Copied", copiedAll: "Highlights and notes copied", onlyCh1: "This design has chapter 1 only",
+      bookmarked: "Bookmarked", toLibrary: "The library is the next design", opensMain: "Opens Lamha's Translate page", reviewOpens: "Opens Review with this book's words",
+      tipTitle: "Click any word", tipBody: "Lamha explains it in this sentence. Select text to highlight it, note it or translate it.", gotIt: "Got it",
+      readingAloud: "Reading aloud", pause: "Pause", play: "Play", stop: "Stop", found: "{0} found", startOnly: "This design shows the start of chapter 1.",
+      smaller: "Smaller", larger: "Larger"
+    },
+    ar: {
+      library: "المكتبة", author: "جين أوستن", searchBook: "ابحث في هذا الكتاب", sideBySide: "جنبًا إلى جنب", readAloud: "القراءة بصوت عالٍ",
+      readingSettings: "إعدادات القراءة", bookmark: "ضع علامة هنا", panel: "الكلمات والملاحظات",
+      contents: "المحتويات", notes: "الملاحظات", words: "الكلمات", chapter: "الفصل {0}", chapterOf: "الفصل {0} من {1}",
+      inThisSentence: "في هذه الجملة", listen: "استمع", copy: "نسخ", addReview: "أضف إلى المراجعة", inReview: "في المراجعة",
+      translatePara: "ترجم الفقرة", translateSentence: "ترجم الجملة", openInLamha: "افتح في لمحة",
+      highlight: "تظليل", y: "أصفر", g: "أخضر", b: "أزرق", p: "وردي", note: "ملاحظة", notePh: "اكتب ملاحظة…", save: "حفظ", cancel: "إلغاء",
+      translate: "ترجمة", explain: "اشرح", translation: "الترجمة", explainedBy: "شرح الذكاء الاصطناعي", close: "إغلاق",
+      explainNone: "في القارئ يشرح الذكاء الاصطناعي أي مقطع تحدده: معناه ونبرته وما كان يعرفه قارئ زمانه.",
+      sampleOnly: "الكلمات التي لها معانٍ في هذا التصميم: {0}.", inTime: "في زمن أوستن",
+      wordsHint: "كلمات بحثت عنها في هذا الكتاب", wordsCount: "{0} كلمات · {1} في المراجعة", reviewThese: "راجع هذه الكلمات",
+      wordsEmpty: "ستظهر هنا الكلمات التي تبحث عنها في هذا الكتاب.", notesHint: "تظليلاتك وملاحظاتك", notesEmpty: "حدّد نصًا لتظلّله أو تضيف ملاحظة.",
+      copyAll: "انسخ الكل نصًا", ofBook: "{0}٪ من الكتاب", chapters: "{0} فصلًا", left: "{0}٪ من الفصل · بقي نحو {1} دقائق",
+      pos: { noun: "اسم", verb: "فعل", adjective: "صفة", adverb: "ظرف", phrase: "عبارة" },
+      english: "الإنجليزية", arabic: "العربية", font: "الخط", size: "حجم النص", spacing: "تباعد الأسطر", width: "عرض السطر",
+      narrowW: "ضيق", normalW: "عادي", wideW: "واسع", page: "الصفحة", pLamha: "لمحة", pPaper: "ورقية", pBlack: "سوداء", markSeen: "ضع خطًا تحت الكلمات التي بحثت عنها",
+      added: "أُضيفت إلى المراجعة مع جملتها من الكتاب", copied: "تم النسخ", copiedAll: "نُسخت التظليلات والملاحظات", onlyCh1: "في هذا التصميم الفصل الأول فقط",
+      bookmarked: "وُضعت العلامة", toLibrary: "المكتبة في التصميم التالي", opensMain: "تفتح صفحة الترجمة في لمحة", reviewOpens: "تفتح المراجعة بكلمات هذا الكتاب",
+      tipTitle: "انقر أي كلمة", tipBody: "تشرحها لمحة في سياق جملتها. وحدّد نصًا لتظلّله أو تكتب عليه ملاحظة أو تترجمه.", gotIt: "حسنًا",
+      readingAloud: "قراءة بصوت عالٍ", pause: "إيقاف مؤقت", play: "تشغيل", stop: "إيقاف", found: "{0} نتيجة", startOnly: "يعرض هذا التصميم بداية الفصل الأول.",
+      smaller: "أصغر", larger: "أكبر"
+    }
+  };
+
+  // The start of chapter 1, with an Arabic translation of each paragraph.
+  const P = [
+    { en: "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+      ar: "من الحقائق المسلَّم بها عالميًا أن الرجل الأعزب الذي يملك ثروة طائلة لا بد أن يكون بحاجة إلى زوجة." },
+    { en: "However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered the rightful property of some one or other of their daughters.",
+      ar: "ومهما قلّ ما يُعرف عن مشاعر مثل هذا الرجل أو آرائه حين يحلّ أول مرة في حيٍّ ما، فإن هذه الحقيقة راسخة في أذهان العائلات المجاورة حتى إنهم يعدّونه حقًّا مشروعًا لإحدى بناتهم." },
+    { en: "“My dear Mr. Bennet,” said his lady to him one day, “have you heard that Netherfield Park is let at last?”",
+      ar: "قالت له زوجته ذات يوم: «عزيزي السيد بينيت، هل سمعت أن نذرفيلد بارك قد أُجِّرت أخيرًا؟»" },
+    { en: "Mr. Bennet replied that he had not.", ar: "فأجاب السيد بينيت بأنه لم يسمع." },
+    { en: "“But it is,” returned she; “for Mrs. Long has just been here, and she told me all about it.”",
+      ar: "فردّت: «لكنها أُجِّرت، فقد كانت السيدة لونغ هنا للتو وأخبرتني بكل شيء.»" },
+    { en: "Mr. Bennet made no answer.", ar: "لم يُجب السيد بينيت بشيء." },
+    { en: "“Do you not want to know who has taken it?” cried his wife impatiently.", ar: "صاحت زوجته بنفاد صبر: «ألا تريد أن تعرف من استأجرها؟»" },
+    { en: "“You want to tell me, and I have no objection to hearing it.”", ar: "«أنتِ تريدين أن تخبريني، ولا مانع عندي من أن أسمع.»" },
+    { en: "This was invitation enough.", ar: "وكانت هذه دعوة كافية." },
+    { en: "“Why, my dear, you must know, Mrs. Long says that Netherfield is taken by a young man of large fortune from the north of England; that he came down on Monday in a chaise and four to see the place, and was so much delighted with it, that he agreed with Mr. Morris immediately; that he is to take possession before Michaelmas, and some of his servants are to be in the house by the end of next week.”",
+      ar: "«اعلم يا عزيزي أن السيدة لونغ تقول إن نذرفيلد استأجرها شاب ذو ثروة كبيرة من شمال إنجلترا، وإنه جاء يوم الاثنين في عربة يجرّها أربعة خيول ليرى المكان، فأُعجب به أيّما إعجاب حتى اتفق مع السيد موريس في الحال، وإنه سيتسلّمه قبل عيد القديس ميخائيل، وسيكون بعض خدمه في البيت بنهاية الأسبوع القادم.»" },
+    { en: "“What is his name?”", ar: "«ما اسمه؟»" },
+    { en: "“Bingley.”", ar: "«بينغلي.»" },
+    { en: "“Is he married or single?”", ar: "«أهو متزوج أم أعزب؟»" },
+    { en: "“Oh! Single, my dear, to be sure! A single man of large fortune; four or five thousand a year. What a fine thing for our girls!”",
+      ar: "«أوه! أعزب يا عزيزي، بالتأكيد! رجل أعزب ذو ثروة كبيرة، أربعة أو خمسة آلاف في السنة. يا له من أمر رائع لبناتنا!»" }
+  ];
+
+  // The sample dictionary: each word's meaning in its sentence, as Lamha's card gives it.
+  const D = {
+    acknowledged: { w: "acknowledged", ipa: "/əkˈnɒlɪdʒd/", pos: "adjective", ctx: "مُسلَّم به",
+      defs: [{ ar: "مُعترَف به، مُسلَّم به", en: "accepted as true by most people" }] },
+    possession: { w: "possession", ipa: "/pəˈzeʃn/", pos: "noun", ctx: "يملك",
+      cn: { en: "“In possession of” means owning.", ar: "in possession of تعني «يملك»." },
+      defs: [{ ar: "امتلاك، حيازة", en: "the state of owning something" }, { ar: "ممتلكات", en: "things you own" }] },
+    fortune: { w: "fortune", ipa: "/ˈfɔːtʃuːn/", pos: "noun", ctx: "ثروة",
+      defs: [{ ar: "ثروة، مال كثير", en: "a large amount of money" }, { ar: "حظ", en: "chance or luck" }] },
+    "in want of": { w: "in want of", ipa: "/ɪn wɒnt əv/", pos: "phrase", ctx: "بحاجة إلى",
+      cn: { en: "Old-fashioned for “needing”. Today we'd say “in need of”.", ar: "أسلوب قديم بمعنى «يحتاج إلى»، ونقول اليوم in need of." },
+      defs: [{ ar: "في حاجة إلى", en: "lacking or needing something" }] },
+    want: { w: "want", ipa: "/wɒnt/", pos: "verb", ctx: "تريد",
+      defs: [{ ar: "يريد، يرغب في", en: "to wish to have or do something" }, { ar: "يحتاج إلى", en: "to need (old-fashioned)" }] },
+    neighbourhood: { w: "neighbourhood", ipa: "/ˈneɪbəhʊd/", pos: "noun", ctx: "حيّ",
+      cn: { en: "British spelling. American English writes “neighborhood”.", ar: "تهجئة بريطانية، والأمريكية neighborhood." },
+      defs: [{ ar: "حيّ، منطقة سكنية", en: "an area of a town and the people who live there" }] },
+    rightful: { w: "rightful", ipa: "/ˈraɪtfl/", pos: "adjective", ctx: "مشروع، مستحَق",
+      defs: [{ ar: "مشروع، شرعي", en: "having a legal or moral right to something" }] },
+    let: { w: "let", ipa: "/let/", pos: "verb", ctx: "أُجِّرت",
+      cn: { en: "Here: rented out to someone. Usually it means “allow”.", ar: "هنا: أُجِّرت لأحد. ومعناها المعتاد «يسمح»." },
+      defs: [{ ar: "يؤجِّر (بيتًا أو أرضًا)", en: "to rent out a house or land" }, { ar: "يسمح، يدَع", en: "to allow" }] },
+    impatiently: { w: "impatiently", ipa: "/ɪmˈpeɪʃntli/", pos: "adverb", ctx: "بنفاد صبر",
+      defs: [{ ar: "بنفاد صبر", en: "in a way that shows you don't want to wait" }] },
+    objection: { w: "objection", ipa: "/əbˈdʒekʃn/", pos: "noun", ctx: "مانع، اعتراض",
+      cn: { en: "“I have no objection” means “I don't mind”.", ar: "I have no objection تعني «لا مانع عندي»." },
+      defs: [{ ar: "اعتراض", en: "a reason why you disagree" }] },
+    chaise: { w: "chaise", ipa: "/ʃeɪz/", pos: "noun", ctx: "عربة خيول",
+      culture: { en: "“A chaise and four” is a light carriage pulled by four horses: a sign that he's rich.", ar: "a chaise and four: عربة خفيفة يجرّها أربعة خيول، علامة على أنه ثري." },
+      defs: [{ ar: "عربة خفيفة تجرّها الخيول", en: "a light carriage pulled by horses" }] },
+    michaelmas: { w: "Michaelmas", ipa: "/ˈmɪklməs/", pos: "noun", ctx: "عيد القديس ميخائيل",
+      culture: { en: "29 September. In Austen's England, rents and contracts often began on this day.", ar: "٢٩ سبتمبر. في إنجلترا زمن أوستن كانت الإيجارات والعقود تبدأ غالبًا في هذا اليوم." },
+      defs: [{ ar: "عيد مسيحي في ٢٩ سبتمبر", en: "a Christian feast on 29 September" }] }
+  };
+
+  // The AI's explanations, for a few paragraphs.
+  const EX = {
+    0: { en: "Austen opens with irony. The “truth” isn't universal at all: it's what families with daughters want to believe. The rich man doesn't need a wife; the neighbours need him to want one.",
+         ar: "تبدأ أوستن بسخرية: هذه «الحقيقة» ليست عامة أبدًا، بل هي ما تحب العائلات التي لديها بنات أن تصدّقه. الرجل الغني لا يحتاج إلى زوجة، بل الجيران هم من يحتاجون أن يرغب في واحدة." },
+    1: { en: "The joke goes on: nobody knows what the man thinks, yet the families already treat him as “property” to be won by one of their daughters.",
+         ar: "تستمر السخرية: لا أحد يعرف ما يفكر فيه الرجل، ومع ذلك تعامله العائلات كأنه «ملك» ستفوز به إحدى بناتها." },
+    9: { en: "Mrs. Bennet's long, breathless sentence shows her excitement: she has every detail, from the day he came to when his servants arrive. “A chaise and four” tells her he's rich.",
+         ar: "جملة السيدة بينيت الطويلة اللاهثة تكشف حماسها: لديها كل التفاصيل، من يوم قدومه إلى موعد وصول خدمه. وعبارة «عربة بأربعة خيول» تخبرها أنه ثري." },
+    13: { en: "“Four or five thousand a year” was a very large income in 1813, many times what most families had. That's why Mrs. Bennet thinks of her five daughters at once.",
+          ar: "«أربعة أو خمسة آلاف في السنة» دخل كبير جدًا عام ١٨١٣، يفوق دخل أغلب العائلات بأضعاف، ولهذا تفكر السيدة بينيت في بناتها الخمس فورًا." }
+  };
+
+  const tokenize = s => {
+    const out = [], re = /[A-Za-z]+(?:['’][A-Za-z]+)*/g;
+    let last = 0, k = 0, m;
+    while ((m = re.exec(s))) {
+      if (m.index > last) out.push({ t: s.slice(last, m.index) });
+      out.push({ t: m[0], k: k++, key: m[0].toLowerCase() });
+      last = re.lastIndex;
+    }
+    if (last < s.length) out.push({ t: s.slice(last) });
+    return out;
+  };
+  P.forEach(p => { p.tok = tokenize(p.en); p.words = p.tok.filter(x => x.k !== undefined); });
+
+  /* ---------- state ---------- */
+  let lang = "en";
+  const looked = ["neighbourhood", "fortune"];
+  const seen = new Set(looked);
+  const stars = new Set(["fortune"]);
+  let hid = 2;
+  const HL = [
+    { id: 1, i: 0, a: 0, b: 5, c: "y", note: { en: "The famous first line. Austen means the opposite of what it says.", ar: "السطر الأول الشهير، وتقصد أوستن عكس ما يقوله." } },
+    { id: 2, i: 9, a: 14, b: 24, c: "g" }
+  ];
+  const OPEN = new Map([[0, "tr"]]);
+  let sbs = false, tab = "words", bookmarked = false;
+  const RS = { font: "sitka", size: 18, line: 1.7, width: "normal", page: "lamha", markSeen: true };
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const t = k => S[lang][k] ?? S.en[k] ?? k;
+  const n = x => lang === "ar" ? String(x).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]) : String(x);
+  const fmt = (s, ...a) => s.replace(/\{(\d)\}/g, (_, i) => a[i]);
+  const local = v => (v && typeof v === "object") ? (v[lang] ?? v.en) : (v ?? "");
+  const uiDir = () => lang === "ar" ? "rtl" : "ltr";
+  const win = $("#win"), book = $("#book"), scroller = $("#scroller"), panel = $("#panel"), rpage = $("#rpage");
+  const ib = (act, label, glyph, extra = "") => `<button class="ib ${extra}" ${act} aria-label="${esc(label)}" title="${esc(label)}"><span class="fi">${glyph}</span></button>`;
+
+  /* ---------- the book ---------- */
+  const wordHTML = (tk, i) => `<span class="w${seen.has(tk.key) ? " seen" : ""}" data-i="${i}" data-k="${tk.k}" data-key="${esc(tk.key)}">${esc(tk.t)}</span>`;
+  function paraHTML(i) {
+    const hs = HL.filter(h => h.i === i);
+    let html = "", open = null;
+    for (const tk of P[i].tok) {
+      if (tk.k === undefined) { html += esc(tk.t); continue; }
+      const h = !open && hs.find(h => h.a === tk.k);
+      if (h) { html += `<mark class="hl ${h.c}${h.note ? " noted" : ""}" data-h="${h.id}">`; open = h; }
+      html += wordHTML(tk, i);
+      if (open && open.b === tk.k) { html += "</mark>"; open = null; }
+    }
+    return open ? html + "</mark>" : html;
+  }
+  function blockHTML(i) {
+    const kind = OPEN.get(i);
+    if (!kind || sbs) return "";
+    const close = ib(`data-act="close" data-i="${i}"`, t("close"), "&#xE711;");
+    if (kind === "tr") {
+      return `<div class="tr"><div class="h" dir="${uiDir()}"><span class="fi">&#xF2B7;</span><span>${esc(t("translation"))} · Google</span><span class="sp"></span>${ib(`data-act="listen"`, t("listen"), "&#xE767;")}${ib(`data-act="copytr" data-i="${i}"`, t("copy"), "&#xE8C8;")}${close}</div><div class="ar" dir="rtl" lang="ar">${esc(P[i].ar)}</div></div>`;
+    }
+    const text = EX[i] ? local(EX[i]) : t("explainNone");
+    return `<div class="tr ex"><div class="h" dir="${uiDir()}"><span class="fi">&#xF4A5;</span><span>${esc(t("explainedBy"))}</span><span class="sp"></span>${close}</div><div class="txt" dir="${uiDir()}" lang="${lang}">${esc(text)}</div></div>`;
+  }
+  function renderBook() {
+    const top = scroller.scrollTop;
+    const head = `<header class="ch"><small>Volume I</small>Chapter 1</header>`;
+    if (sbs) {
+      book.innerHTML = head + `<div class="sbs-head"><span>${esc(t("english"))}</span><span dir="rtl" style="text-align:right">${esc(S.ar.arabic)}</span></div>` +
+        P.map((p, i) => `<div class="sbs-row para" data-i="${i}"><p>${paraHTML(i)}</p><p class="ar" dir="rtl" lang="ar">${esc(p.ar)}</p></div>`).join("") +
+        `<p class="end" dir="${uiDir()}">${esc(t("startOnly"))}</p>`;
+    } else {
+      book.innerHTML = head + P.map((p, i) => `<div class="para" data-i="${i}"><p>${paraHTML(i)}</p>${ib(`data-act="tr" data-i="${i}"`, t("translatePara"), "&#xF2B7;", "ptr")}${blockHTML(i)}</div>`).join("") +
+        `<p class="end" dir="${uiDir()}">${esc(t("startOnly"))}</p>`;
+    }
+    book.classList.toggle("sbs", sbs);
+    scroller.scrollTop = top;
+    progress();
+  }
+  function progress() {
+    const max = scroller.scrollHeight - scroller.clientHeight;
+    const pct = max > 0 ? Math.round(scroller.scrollTop / max * 100) : 0;
+    $("#pline").style.width = pct + "%";
+    $("#pchap").textContent = fmt(t("chapterOf"), n(1), n(61));
+    $("#pleft").textContent = fmt(t("left"), n(pct), n(Math.max(1, Math.round((100 - pct) / 100 * 4))));
+  }
+  scroller.addEventListener("scroll", progress, { passive: true });
+
+  /* ---------- the panel ---------- */
+  const quoteOf = h => {
+    let on = false, s = "";
+    for (const tk of P[h.i].tok) {
+      if (tk.k === h.a) on = true;
+      if (on) s += tk.t;
+      if (tk.k === h.b) break;
+    }
+    return s;
+  };
+  function renderPanel() {
+    const tabs = ["contents", "notes", "words"].map(k => `<button role="tab" aria-selected="${tab === k}" data-tab="${k}">${esc(t(k))}</button>`).join("");
+    let body = "", foot = "";
+    if (tab === "words") {
+      const inRev = looked.filter(k => stars.has(k)).length;
+      body = looked.length ? `<div class="phead">${esc(t("wordsHint"))} · ${esc(fmt(t("wordsCount"), n(looked.length), n(inRev)))}</div><div class="plist">` + looked.map(k => {
+        const e = D[k], on = stars.has(k);
+        return `<div class="wrow" role="button" tabindex="0" data-key="${esc(k)}"><div><div class="w1" dir="ltr">${esc(e.w)}</div><div class="m" dir="rtl" lang="ar">${esc(e.ctx)}</div></div>${ib(`data-p="star" data-key="${esc(k)}"`, on ? t("inReview") : t("addReview"), on ? "&#xE735;" : "&#xE734;", on ? "on" : "")}</div>`;
+      }).join("") + `</div>` : `<div class="plist"><div class="empty"><span class="fi">&#xE82D;</span><span>${esc(t("wordsEmpty"))}</span></div></div>`;
+      foot = `<div class="pfoot"><button class="btn accent" data-p="review"><span class="fi">&#xE7C4;</span>${esc(t("reviewThese"))}</button></div>`;
+    } else if (tab === "notes") {
+      const list = [...HL].sort((x, y) => x.i - y.i || x.a - y.a);
+      body = list.length ? `<div class="phead">${esc(t("notesHint"))}</div><div class="plist">` + list.map(h => `<div class="nrow" role="button" tabindex="0" data-h="${h.id}"><div class="qt" dir="ltr" lang="en"><mark class="hl ${h.c}">${esc(quoteOf(h))}</mark></div>${h.note ? `<div class="nt"><span class="fi">&#xE70B;</span><span>${esc(local(h.note))}</span></div>` : ""}<div class="where">${esc(fmt(t("chapter"), n(1)))}</div></div>`).join("") + `</div>`
+        : `<div class="plist"><div class="empty"><span class="fi">&#xE7E6;</span><span>${esc(t("notesEmpty"))}</span></div></div>`;
+      foot = `<div class="pfoot"><button class="btn" data-p="copyall"><span class="fi">&#xE8C8;</span>${esc(t("copyAll"))}</button></div>`;
+    } else {
+      body = `<div class="bookhead"><div class="cover" aria-hidden="true"><small>Jane Austen</small><i></i><b>Pride and Prejudice</b><i></i><small>1813</small></div><div><div class="bt">Pride and Prejudice</div><div class="ba">${esc(t("author"))}</div><div class="pb"><i></i></div><div class="pp">${esc(fmt(t("ofBook"), n(1)))} · ${esc(fmt(t("chapters"), n(61)))}</div></div></div>` +
+        `<div class="plist">` + Array.from({ length: 61 }, (_, c) => `<div class="crow" role="button" tabindex="0" data-ch="${c + 1}" ${c === 0 ? 'aria-current="true"' : ""}>${esc(fmt(t("chapter"), n(c + 1)))}${c === 0 ? `<small>${esc(fmt(t("ofBook"), n(1)))}</small>` : ""}</div>`).join("") + `</div>`;
+    }
+    panel.innerHTML = `<div class="segsw" role="tablist">${tabs}</div>${body}${foot}`;
+  }
+  panel.addEventListener("click", e => {
+    const b = e.target.closest("[data-tab]");
+    if (b) { tab = b.dataset.tab; renderPanel(); return; }
+    const p = e.target.closest("[data-p]");
+    if (p) {
+      if (p.dataset.p === "star") { toggleStar(p.dataset.key); return; }
+      if (p.dataset.p === "review") toast(t("reviewOpens"), "&#xE7C4;");
+      if (p.dataset.p === "copyall") { copyText(HL.map(h => `“${quoteOf(h)}”${h.note ? "\n" + local(h.note) : ""}`).join("\n\n")); toast(t("copiedAll")); }
+      return;
+    }
+    const w = e.target.closest(".wrow");
+    if (w) { const s = book.querySelector(`.w[data-key="${CSS.escape(w.dataset.key.split(" ").length > 1 ? "want" : w.dataset.key)}"]`); if (s) reveal(s); return; }
+    const nr = e.target.closest(".nrow");
+    if (nr) { const m = book.querySelector(`mark[data-h="${nr.dataset.h}"]`); if (m) reveal(m.querySelector(".w") || m); return; }
+    const c = e.target.closest(".crow");
+    if (c && c.dataset.ch !== "1") toast(t("onlyCh1"), "&#xE946;");
+    else if (c) scroller.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  panel.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches("[role=button]")) { e.preventDefault(); e.target.click(); } });
+  function reveal(el) {
+    const y = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
+    scroller.scrollTo({ top: Math.max(0, y - 140), behavior: "smooth" });
+    el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+    if (win.clientWidth <= 760) setPanel(false);
+  }
+
+  /* ---------- popups ---------- */
+  function closePopups(except) {
+    $$(".flyout", win).forEach(f => { if (f !== except && !f.classList.contains("player")) f.remove(); });
+    $$(".w.on", book).forEach(s => s.classList.remove("on"));
+    $('[data-t="aa"]').setAttribute("aria-expanded", "false");
+  }
+  function place(el, x, yBelow, yAbove) {
+    const W = win.clientWidth, H = win.clientHeight, w = el.offsetWidth, h = el.offsetHeight;
+    let top = yBelow;
+    if (top + h > H - 12) top = Math.max(56, yAbove - h);
+    el.style.left = Math.min(Math.max(12, x), W - w - 12) + "px";
+    el.style.top = top + "px";
+    return top === yBelow;
+  }
+  const rel = r => { const wr = win.getBoundingClientRect(); return { l: r.left - wr.left, r: r.right - wr.left, t: r.top - wr.top, b: r.bottom - wr.top, w: r.width }; };
+  function toast(text, glyph = "&#xE73E;") {
+    $$(".toast", win).forEach(x => x.remove());
+    const el = document.createElement("div");
+    el.className = "toast"; el.setAttribute("role", "status"); el.dir = uiDir();
+    el.innerHTML = `<span class="fi">${glyph}</span><span>${esc(text)}</span>`;
+    win.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+  function copyText(s) { try { navigator.clipboard.writeText(s).catch(() => {}); } catch (_) {} }
+
+  /* ---------- the word card ---------- */
+  function entryFor(span) {
+    const i = +span.dataset.i, k = +span.dataset.k, key = span.dataset.key, ws = P[i].words;
+    if (key === "want" && ws[k - 1]?.key === "in" && ws[k + 1]?.key === "of") return { key: "in want of", e: D["in want of"], ks: [k - 1, k, k + 1], i };
+    return { key, e: D[key], ks: [k], i };
+  }
+  function openCard(span) {
+    closePopups();
+    const { key, e, ks, i } = entryFor(span);
+    ks.forEach(k => book.querySelector(`.w[data-i="${i}"][data-k="${k}"]`)?.classList.add("on"));
+    const card = document.createElement("div");
+    card.className = "flyout wcard"; card.dir = uiDir(); card.setAttribute("role", "dialog");
+    if (e) {
+      if (!looked.includes(key)) looked.unshift(key);
+      if (!seen.has(key) && key.indexOf(" ") < 0) { seen.add(key); $$(`.w[data-key="${CSS.escape(key)}"]`, book).forEach(s => s.classList.add("seen")); }
+      const on = stars.has(key);
+      card.innerHTML = `<div class="hw"><div><div class="word" dir="ltr">${esc(e.w)}</div><div class="ipa"><span dir="ltr">${esc(e.ipa)}</span> · ${esc(t("pos")[e.pos])}</div></div><div class="acts">${ib('data-c="listen"', t("listen"), "&#xE767;")}${ib(`data-c="star" data-key="${esc(key)}"`, on ? t("inReview") : t("addReview"), on ? "&#xE735;" : "&#xE734;", on ? "on" : "")}</div></div>` +
+        `<div class="lbl">${esc(t("inThisSentence"))}</div><div class="mean"><span dir="rtl" lang="ar">${esc(e.ctx)}</span></div>` +
+        (e.cn ? `<p class="cn">${esc(local(e.cn))}</p>` : "") +
+        (e.culture ? `<div class="culture"><span class="fi">&#xE946;</span><div><b>${esc(t("inTime"))}</b>${esc(local(e.culture))}</div></div>` : "") +
+        `<div class="defs">${e.defs.map((d, x) => `<div class="def"><span class="num">${n(x + 1)}</span><div class="gl-ar" dir="rtl" lang="ar">${esc(d.ar)}</div><div class="gl-en" dir="ltr">${esc(d.en)}</div></div>`).join("")}</div>` +
+        `<div class="links"><button class="btn link" data-c="sentence" data-i="${i}">${esc(t("translateSentence"))}</button><button class="btn link" data-c="open">${esc(t("openInLamha"))}</button></div>`;
+      if (tab === "words") renderPanel();
+    } else {
+      card.innerHTML = `<div class="hw"><div><div class="word" dir="ltr">${esc(span.textContent)}</div></div><div class="acts">${ib('data-c="listen"', t("listen"), "&#xE767;")}</div></div><p class="cn">${esc(fmt(t("sampleOnly"), "let, acknowledged, possession, fortune, in want of, neighbourhood, rightful, impatiently, objection, chaise, Michaelmas"))}</p>`;
+    }
+    win.appendChild(card);
+    const r = rel(span.getBoundingClientRect());
+    place(card, r.l - 24, r.b + 8, r.t - 8);
+  }
+  function toggleStar(key) {
+    if (stars.has(key)) stars.delete(key); else { stars.add(key); toast(t("added"), "&#xE735;"); }
+    const b = $(`.wcard [data-c="star"]`, win);
+    if (b && b.dataset.key === key) {
+      const on = stars.has(key);
+      b.classList.toggle("on", on); b.setAttribute("aria-label", on ? t("inReview") : t("addReview")); b.title = b.getAttribute("aria-label");
+      b.innerHTML = `<span class="fi pop">${on ? "&#xE735;" : "&#xE734;"}</span>`;
+    }
+    if (tab === "words") renderPanel();
+  }
+  win.addEventListener("click", e => {
+    const c = e.target.closest(".wcard [data-c]");
+    if (!c) return;
+    const act = c.dataset.c;
+    if (act === "star") toggleStar(c.dataset.key);
+    else if (act === "listen") { const f = c.querySelector(".fi"); f.classList.remove("pop"); void f.offsetWidth; f.classList.add("pop"); }
+    else if (act === "sentence") { closePopups(); if (!sbs) { OPEN.set(+c.dataset.i, "tr"); renderBook(); } }
+    else if (act === "open") { closePopups(); toast(t("opensMain"), "&#xE8A7;"); }
+  });
+
+  /* ---------- selection: highlight, note, translate, explain, listen, copy ---------- */
+  let pending = null;
+  function groupsOf(range) {
+    const spans = $$(".w", book).filter(s => range.intersectsNode(s) && s.textContent.trim());
+    const g = new Map();
+    spans.forEach(s => { const i = +s.dataset.i, k = +s.dataset.k, x = g.get(i); if (!x) g.set(i, { i, a: k, b: k }); else { x.a = Math.min(x.a, k); x.b = Math.max(x.b, k); } });
+    return [...g.values()];
+  }
+  function showSelTools() {
+    const sel = getSelection();
+    if (!sel.rangeCount || sel.isCollapsed) return;
+    const range = sel.getRangeAt(0);
+    if (!book.contains(range.commonAncestorContainer)) return;
+    const groups = groupsOf(range);
+    if (!groups.length) return;
+    closePopups();
+    pending = { groups, text: sel.toString() };
+    const tb = document.createElement("div");
+    tb.className = "flyout seltb"; tb.dir = uiDir(); tb.setAttribute("role", "toolbar");
+    tb.innerHTML = ["y", "g", "b", "p"].map(c => `<button class="dot ${c}" data-s="hl" data-c="${c}" aria-label="${esc(t("highlight") + ": " + t(c))}" title="${esc(t("highlight") + ": " + t(c))}"><i></i></button>`).join("") +
+      `<span class="sep"></span>` + ib('data-s="note"', t("note"), "&#xE70B;") + (sbs ? "" : ib('data-s="tr"', t("translate"), "&#xF2B7;")) +
+      ib('data-s="explain"', t("explain"), "&#xF4A5;") + ib('data-s="listen"', t("listen"), "&#xE767;") + ib('data-s="copy"', t("copy"), "&#xE8C8;");
+    tb.addEventListener("mousedown", e => e.preventDefault());
+    win.appendChild(tb);
+    const r = rel(range.getBoundingClientRect());
+    place(tb, r.l + r.w / 2 - tb.offsetWidth / 2, r.t - tb.offsetHeight - 8 < 52 ? r.b + 8 : r.t - tb.offsetHeight - 8, r.t - 8);
+  }
+  function addHighlights(c) {
+    const made = [];
+    pending.groups.forEach(g => {
+      for (let x = HL.length - 1; x >= 0; x--) { const h = HL[x]; if (h.i === g.i && !(h.b < g.a || h.a > g.b)) HL.splice(x, 1); }
+      const h = { id: ++hid, i: g.i, a: g.a, b: g.b, c };
+      HL.push(h); made.push(h);
+    });
+    return made;
+  }
+  win.addEventListener("click", e => {
+    const b = e.target.closest(".seltb [data-s]");
+    if (!b || !pending) return;
+    const act = b.dataset.s, first = pending.groups[0];
+    const box = rel(b.closest(".seltb").getBoundingClientRect());
+    closePopups(); getSelection().removeAllRanges();
+    if (act === "hl") { addHighlights(b.dataset.c); renderBook(); if (tab === "notes") renderPanel(); }
+    else if (act === "note") { const [h] = addHighlights("y"); renderBook(); openNote(h, box); }
+    else if (act === "tr") { OPEN.set(first.i, "tr"); renderBook(); }
+    else if (act === "explain") { if (sbs) { sbs = false; syncTools(); } OPEN.set(first.i, "ex"); renderBook(); }
+    else if (act === "listen") { const last = pending.groups[pending.groups.length - 1]; startReading({ i: first.i, k: first.a }, { i: last.i, k: last.b }); }
+    else if (act === "copy") { copyText(pending.text); toast(t("copied")); }
+    pending = null;
+  });
+  function openNote(h, box) {
+    const ed = document.createElement("div");
+    ed.className = "flyout noteed"; ed.dir = uiDir();
+    ed.innerHTML = `<div class="field"><textarea id="note-text" rows="3" placeholder="${esc(t("notePh"))}" aria-label="${esc(t("note"))}"></textarea></div><div class="row"><button class="btn" data-n="cancel">${esc(t("cancel"))}</button><button class="btn accent" data-n="save">${esc(t("save"))}</button></div>`;
+    win.appendChild(ed);
+    place(ed, box.l, box.t, box.b);
+    $("textarea", ed).focus();
+    ed.addEventListener("click", e => {
+      const a = e.target.closest("[data-n]");
+      if (!a) return;
+      const v = $("textarea", ed).value.trim();
+      if (a.dataset.n === "save" && v) h.note = v;
+      ed.remove();
+      renderBook(); tab = "notes"; renderPanel();
+    });
+  }
+  scroller.addEventListener("mouseup", () => setTimeout(showSelTools, 0));
+  scroller.addEventListener("keyup", e => { if (e.shiftKey) showSelTools(); });
+  scroller.addEventListener("click", e => {
+    const a = e.target.closest("[data-act]");
+    if (a) {
+      const i = +a.dataset.i, act = a.dataset.act;
+      if (act === "tr") { OPEN.get(i) === "tr" ? OPEN.delete(i) : OPEN.set(i, "tr"); renderBook(); }
+      else if (act === "close") { OPEN.delete(i); renderBook(); }
+      else if (act === "copytr") { copyText(P[i].ar); toast(t("copied")); }
+      return;
+    }
+    const w = e.target.closest(".w");
+    if (w && getSelection().isCollapsed) openCard(w);
+  });
+
+  /* ---------- read aloud: each word lit as it's spoken ---------- */
+  let reading = null;
+  const speeds = [1, 1.25, 1.5, 0.75];
+  function startReading(from, to) {
+    stopReading();
+    const seq = [];
+    P.forEach((p, i) => p.words.forEach(w => seq.push({ i, k: w.k })));
+    let start = 0;
+    if (from) start = seq.findIndex(x => x.i === from.i && x.k === from.k);
+    else {
+      const top = scroller.getBoundingClientRect().top;
+      const firstVisible = $$(".w", book).find(s => s.getBoundingClientRect().top >= top);
+      if (firstVisible) start = seq.findIndex(x => x.i === +firstVisible.dataset.i && x.k === +firstVisible.dataset.k);
+    }
+    const end = to ? seq.findIndex(x => x.i === to.i && x.k === to.k) : seq.length - 1;
+    reading = { seq, at: Math.max(0, start), end, speed: 1, paused: false, timer: 0 };
+    const pl = document.createElement("div");
+    pl.className = "flyout player"; pl.dir = uiDir();
+    win.appendChild(pl);
+    drawPlayer(); tick();
+    $('[data-t="read"]').setAttribute("aria-pressed", "true");
+  }
+  function drawPlayer() {
+    const pl = $(".player", win); if (!pl || !reading) return;
+    pl.classList.toggle("paused", reading.paused);
+    pl.innerHTML = `<span class="waves" aria-hidden="true"><i></i><i></i><i></i></span><span class="lbl">${esc(t("readingAloud"))}</span>` +
+      ib('data-r="pp"', reading.paused ? t("play") : t("pause"), reading.paused ? "&#xE768;" : "&#xE769;") +
+      `<button class="btn subtle" data-r="speed" aria-label="${esc(n(reading.speed) + "×")}">${n(reading.speed)}×</button>` + ib('data-r="stop"', t("stop"), "&#xE711;");
+  }
+  function tick() {
+    if (!reading || reading.paused) return;
+    $$(".w.reading", book).forEach(s => s.classList.remove("reading"));
+    if (reading.at > reading.end) { stopReading(); return; }
+    const x = reading.seq[reading.at++];
+    const s = book.querySelector(`.w[data-i="${x.i}"][data-k="${x.k}"]`);
+    if (s) {
+      s.classList.add("reading");
+      const sr = scroller.getBoundingClientRect(), r = s.getBoundingClientRect();
+      if (r.bottom > sr.bottom - 40 || r.top < sr.top) scroller.scrollTo({ top: scroller.scrollTop + (r.top - sr.top) - 120, behavior: "smooth" });
+    }
+    reading.timer = setTimeout(tick, 330 / reading.speed);
+  }
+  function stopReading() {
+    if (!reading) return;
+    clearTimeout(reading.timer); reading = null;
+    $$(".w.reading", book).forEach(s => s.classList.remove("reading"));
+    $(".player", win)?.remove();
+    $('[data-t="read"]').setAttribute("aria-pressed", "false");
+  }
+  win.addEventListener("click", e => {
+    const r = e.target.closest(".player [data-r]");
+    if (!r || !reading) return;
+    if (r.dataset.r === "pp") { reading.paused = !reading.paused; drawPlayer(); if (!reading.paused) tick(); else clearTimeout(reading.timer); }
+    else if (r.dataset.r === "speed") { reading.speed = speeds[(speeds.indexOf(reading.speed) + 1) % speeds.length]; drawPlayer(); }
+    else stopReading();
+  });
+
+  /* ---------- reading settings (Aa) ---------- */
+  const FONTS = { sitka: ["Sitka", "var(--sitka)"], georgia: ["Georgia", 'Georgia, "Times New Roman", serif'], segoe: ["Segoe UI", "var(--ui)"] };
+  const WIDTHS = { narrow: 520, normal: 620, wide: 760 };
+  function applyRS() {
+    book.style.setProperty("--book-font", FONTS[RS.font][1]);
+    book.style.setProperty("--book-size", RS.size + "px");
+    book.style.setProperty("--book-line", RS.line);
+    book.style.setProperty("--measure", WIDTHS[RS.width] + "px");
+    book.classList.toggle("mark-seen", RS.markSeen);
+    rpage.classList.toggle("page-paper", RS.page === "paper");
+    rpage.classList.toggle("page-black", RS.page === "black");
+    progress();
+  }
+  function aaHTML() {
+    const seg = (key, opts) => `<div class="segsw" role="radiogroup">${opts.map(([v, label]) => `<button role="radio" aria-selected="${RS[key] === v}" aria-checked="${RS[key] === v}" data-rs="${key}" data-v="${v}">${esc(label)}</button>`).join("")}</div>`;
+    return `<div><div class="lab">${esc(t("font"))}</div>${seg("font", Object.entries(FONTS).map(([k, v]) => [k, v[0]]))}</div>` +
+      `<div><div class="lab">${esc(t("size"))}</div><div class="sizer"><button class="btn" data-rs="size" data-v="-2" aria-label="${esc(t("smaller"))}">A−</button><b>${n(RS.size)}</b><button class="btn" data-rs="size" data-v="2" aria-label="${esc(t("larger"))}">A+</button></div></div>` +
+      `<div><div class="lab">${esc(t("spacing"))}</div>${seg("line", [[1.5, n("1.5")], [1.7, n("1.7")], [2, n("2.0")]])}</div>` +
+      `<div><div class="lab">${esc(t("width"))}</div>${seg("width", [["narrow", t("narrowW")], ["normal", t("normalW")], ["wide", t("wideW")]])}</div>` +
+      `<div><div class="lab">${esc(t("page"))}</div><div class="swatches">${[["lamha", t("pLamha")], ["paper", t("pPaper")], ["black", t("pBlack")]].map(([v, l]) => `<button class="swatch ${v}" data-rs="page" data-v="${v}" aria-pressed="${RS.page === v}"><b>Aa</b>${esc(l)}</button>`).join("")}</div></div>` +
+      `<button class="switch" role="switch" aria-checked="${RS.markSeen}" data-rs="markSeen"><span class="track"><span class="knob"></span></span><span>${esc(t("markSeen"))}</span></button>`;
+  }
+  function openAa() {
+    const btn = $('[data-t="aa"]');
+    if ($(".aa", win)) { closePopups(); return; }
+    closePopups();
+    const f = document.createElement("div");
+    f.className = "flyout aa"; f.dir = uiDir(); f.setAttribute("role", "dialog"); f.setAttribute("aria-label", t("readingSettings"));
+    f.innerHTML = aaHTML();
+    win.appendChild(f);
+    const r = rel(btn.getBoundingClientRect());
+    place(f, lang === "ar" ? r.l : r.r - f.offsetWidth, r.b + 4, r.b + 4);
+    btn.setAttribute("aria-expanded", "true");
+    f.addEventListener("click", e => {
+      const c = e.target.closest("[data-rs]");
+      if (!c) return;
+      const k = c.dataset.rs, v = c.dataset.v;
+      if (k === "size") RS.size = Math.min(28, Math.max(14, RS.size + +v));
+      else if (k === "line") RS.line = +v;
+      else if (k === "markSeen") RS.markSeen = !RS.markSeen;
+      else RS[k] = v;
+      applyRS(); f.innerHTML = aaHTML();
+    });
+  }
+
+  /* ---------- the title bar ---------- */
+  function setPanel(on) { win.classList.toggle("panel-on", on); $('[data-t="panel"]').setAttribute("aria-pressed", String(on)); }
+  function syncTools() { $('[data-t="sbs"]').setAttribute("aria-pressed", String(sbs)); }
+  $(".tb").addEventListener("click", e => {
+    const b = e.target.closest("[data-t]");
+    if (!b) return;
+    const what = b.dataset.t;
+    if (what === "back") toast(t("toLibrary"), "&#xE8F1;");
+    else if (what === "sbs") { sbs = !sbs; syncTools(); closePopups(); renderBook(); }
+    else if (what === "read") reading ? stopReading() : startReading();
+    else if (what === "aa") openAa();
+    else if (what === "mark") { bookmarked = !bookmarked; b.setAttribute("aria-pressed", String(bookmarked)); if (bookmarked) toast(t("bookmarked"), "&#xE8A4;"); }
+    else if (what === "panel") setPanel(!win.classList.contains("panel-on"));
+    else if (what === "search") { win.classList.add("search-open"); $("#q").focus(); }
+  });
+  $("#q").addEventListener("blur", () => win.classList.remove("search-open"));
+  let found = [], foundAt = 0;
+  $("#q").addEventListener("input", e => {
+    const q = e.target.value.trim().toLowerCase();
+    $$(".w.found", book).forEach(s => s.classList.remove("found"));
+    found = q.length >= 2 ? $$(".w", book).filter(s => s.dataset.key.includes(q)) : [];
+    found.forEach(s => s.classList.add("found"));
+    foundAt = 0;
+    $("#qcount").textContent = q.length >= 2 ? fmt(t("found"), n(found.length)) : "";
+    if (found[0]) reveal(found[0]);
+  });
+  $("#q").addEventListener("keydown", e => { if (e.key === "Enter" && found.length) { foundAt = (foundAt + 1) % found.length; reveal(found[foundAt]); } });
+
+  /* ---------- closing what's open ---------- */
+  win.addEventListener("mousedown", e => {
+    $(".tip", win)?.remove();
+    if (e.target.closest(".flyout") || e.target.closest('[data-t="aa"]')) return;
+    closePopups();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closePopups(); $(".tip", win)?.remove(); } });
+
+  /* ---------- the first-time tip, pointing at "let" ---------- */
+  function showTip() {
+    const s = book.querySelector('.w[data-key="let"]');
+    if (!s) return;
+    const tip = document.createElement("div");
+    tip.className = "flyout tip"; tip.dir = uiDir(); tip.setAttribute("role", "dialog");
+    tip.innerHTML = `<b>${esc(t("tipTitle"))}</b><p>${esc(t("tipBody"))}</p><div class="row"><button class="btn accent" data-tip="ok">${esc(t("gotIt"))}</button></div>`;
+    win.appendChild(tip);
+    const r = rel(s.getBoundingClientRect());
+    const below = place(tip, r.l + r.w / 2 - 30, r.b + 12, r.t - 12);
+    tip.classList.add(below ? "below" : "above");
+    tip.style.setProperty("--beak", Math.max(12, Math.min(tip.offsetWidth - 24, r.l + r.w / 2 - parseFloat(tip.style.left) - 6)) + "px");
+    tip.addEventListener("click", e => { if (e.target.closest("[data-tip]")) tip.remove(); });
+  }
+
+  /* ---------- language, theme, width ---------- */
+  function applyLang() {
+    win.dir = uiDir();
+    $$("[data-s]", win).forEach(el => { if (S.en[el.dataset.s]) el.textContent = t(el.dataset.s); });
+    $$("[data-a]", win).forEach(el => { el.setAttribute("aria-label", t(el.dataset.a)); el.title = t(el.dataset.a); });
+    $$("[data-ph]", win).forEach(el => { el.placeholder = t(el.dataset.ph); el.setAttribute("aria-label", t(el.dataset.ph)); });
+    $("#q").dispatchEvent(new Event("input"));
+    closePopups(); stopReading(); $(".tip", win)?.remove();
+    renderBook(); renderPanel();
+  }
+  function setSeg(ctl, v) { $$(`.seg[data-ctl="${ctl}"] button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+  $$(".seg[data-ctl]").forEach(seg => seg.addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const ctl = seg.dataset.ctl, v = b.dataset.v;
+    setSeg(ctl, v);
+    if (ctl === "lang") { lang = v; applyLang(); }
+    else if (ctl === "theme") document.documentElement.dataset.theme = v;
+    else if (ctl === "width") { closePopups(); win.classList.toggle("forced-narrow", v === "narrow"); setPanel(v !== "narrow"); }
+  }));
+  setSeg("theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+
+  applyLang();
+  applyRS();
+  if (win.clientWidth <= 760) setPanel(false);
+  const ready = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+  ready.then(() => requestAnimationFrame(showTip));
+})();
+</script>

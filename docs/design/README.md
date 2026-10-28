@@ -13,4 +13,11 @@ The six screens of Lamha 3, as signed off by the user on 2026-10-25. Each page o
 
 **Next:** one design system for every screen, with Windows' Settings as the reference: [system-plan.md](system-plan.md), the [UX study](ux-study.md), and the system itself, [system.md](system.md), drawn in [system.html](system.html) ([online](https://claude.ai/artifact/SfLssJ2QPaXQwjPCHEGfYw)), waiting for the user's sign-off (2026-10-26).
 
+**Lamha Reader** (after 3.1; [native-plan.md → Future: Lamha Reader](../native-plan.md#future-lamha-reader)), one design at a time:
+
+| Page | Screen | Online |
+|---|---|---|
+| [reader.html](reader.html) | The reading page: a book with the card, selection, Aa and the panel (clickable). Signed off 2026-10-28 | [link](https://claude.ai/artifact/WaegiRZC7HKWBpBvZSSoW6) |
+| [library.html](library.html) | The library: the Read page in the main window, with books, empty and a file dropped (clickable). Draft, waiting for sign-off | [link](https://claude.ai/artifact/E7seLQFu1ZJjGZBLKEdiDw) |
+
 Words underlined in orange were new drafts when the page was made; the user approved them with the sign-off. The "Questions" on each page are answered in the plan.

@@ -686,6 +686,67 @@ Held back from 3.0 so the first release has no web view. Ideas for doing it bett
 - Native reader, web view, or both?
 - Keep the 2.x ZIM reader's rules (Wikipedia files only, ZIM 6+, no old xz files)?
 
+## Future: translation packs, offline
+
+An idea from the roadmap ([Translating without Google's unofficial endpoint](roadmap.md#translating-without-googles-unofficial-endpoint)), discussed 2026-10-28: sentences translated on the PC by Mozilla's Bergamot (Firefox's own translator, built on Marian), its models downloaded from Settings like the language packs. Not decided: the test below comes first.
+
+**What it gives**
+- **Independence from Google's unofficial endpoint,** the main reason: sentences keep working for everyone if Google limits it, not only for people with an AI key or Ollama.
+- **Sentences with no internet:** "Offline only" says today that sentences are translated only when the translator is Ollama on the PC; the packs close that gap.
+- **Privacy:** selected and copied text never leaves the PC, a selling point.
+- **Speed:** no network; tens of milliseconds a sentence on a CPU.
+- **Free per use:** keeps a paid version's server costs down (the roadmap's *Earning from Lamha*).
+
+**What it costs**
+- **Arabic below Google's,** most for idioms, dialects and long sentences; a translation only (no alternatives, no parts of speech: those come from the offline dictionary, as now).
+- **Native C++** (bergamot-translator) to build in CI for x64 and ARM64; this PC can't build ARM64.
+- **Memory:** a loaded model takes about 100–200 MB, so never in the tray process ([decision 0008](decisions/0008-memory-budgets.md)).
+- **Downloads:** Arabic needs two models (ar→en, en→ar), about 20–40 MB each; other pairs go through English (French → English → Arabic).
+
+**The test, before any app code**
+1. **Is the Arabic good enough?** Firefox 141 or later translates Arabic both ways with the same models, at `about:translations`. 40–50 sentences of the kinds Lamha gets (news, emails, chat, idioms, technical text, long sentences; Arabic → English too, formal and dialect), each translated by Firefox and by Google, side by side, Firefox's scored 3 (as good or close), 2 (understandable but awkward), 1 (wrong or misleading). Some with the internet off once the models are down. Mostly 3s and 2s: build it, first when offline. Many 2s: a fallback only. Many 1s: stop.
+2. **Speed and memory:** a long paragraph's time; the "inference" process in `about:processes` or Task Manager while translating; the size of the first download.
+3. **Numbers, only if 1 is borderline:** 200 FLORES-200 sentences (professional Arabic translations) through Google and an offline model, scored with chrF. Python and a few hundred MB of downloads. OPUS-MT through CTranslate2 is the alternative engine to compare.
+
+**How it would be built, if the test passes**
+1. **A translator process of its own,** `Lamha.Translator.exe` (C++ with bergamot-translator), requests on stdin and answers on stdout; started when a sentence needs it, quitting after about a minute idle, so the tray's memory doesn't change and a native crash stays out of Lamha. Core gets an `ILocalTranslator` in `Abstractions/` (no Windows dependency); Lamha.Windows starts the process and talks to it.
+2. **The order:** `Engine.Local` in `TranslationService.Plan()`: Google → local → AI as a rule; offline or "Offline only", local first, then the AI only if it's on this PC. The card could mark these answers ("Translated on this PC") through `Translated.Rough` or a flag of its own.
+3. **The packs:** the language packs' way ([decision 0017](decisions/0017-language-packs-as-sqlite-files.md): `PackFolder`, the download checked before it replaces the old one, Remove), the models on a release of their own (e.g. `translate-v1`) published by an Actions workflow.
+4. **Settings → Without internet:** a "Translation without internet" part beside "Dictionaries to download"; its wording is the user's, in both languages.
+5. **Tests and measuring:** Core tests on a fake `ILocalTranslator` for the order and the fallbacks; `measure.ps1 -Budget` with the process running and after it quits; a decision record (a native part and a second process).
+
+**Questions (for when it's taken up)**
+- Which languages: Arabic ↔ English first, or the four language-pack languages too, through English?
+- If Arabic is clearly weaker: a fallback only (when Google and the AI both fail), never first?
+- Is 50–80 MB of downloads for Arabic acceptable, or offer a smaller, weaker model first?
+- Mozilla's model licence, and which Arabic models are released (and at what quality tier): check before building.
+
+## Future: Lamha Reader
+
+Decided 2026-10-28: Lamha gets a reader for books, with Lamha's card, translation and Review built into the page. **EPUB first** (the user's call); PDF later. The reading page is **signed off** ([reader.html](design/reader.html), [online](https://claude.ai/artifact/WaegiRZC7HKWBpBvZSSoW6)); one design at a time, each signed off before it's built. **The library** is drafted, waiting for the user's sign-off ([library.html](design/library.html), [online](https://claude.ai/artifact/E7seLQFu1ZJjGZBLKEdiDw)): a **Read** page in the main window's pane (between Write and Review, a new coloured open-book icon) with Continue reading (the place, the time left, "You know 94% of its words" from History and Review, the book's words → Review), the books as covers (the EPUB's own, or one made from its title; a Word or text file as a page), search, All / Reading / New / Finished, sort, each book's ⋯ menu (Open, Mark as finished, Remove with Undo), Add a book and a file dropped on the window (EPUB, DOCX, TXT), and links to free books (Project Gutenberg, Standard Ebooks). Its six questions are on the page (where Read goes in the pane; where "you know __%" shows; covers made from a title; Lamha keeping its own copy of each book; links or a catalogue; the pane's Arabic name).
+
+**Why:** in its own reader Lamha knows the word, its sentence, its paragraph and the book, which UI Automation can't always give it (PDF readers least of all). Every card added to Review carries the book's sentence. It turns Lamha from a tool called up by a shortcut into a place people read in every day, and it's what Google Translate and DeepL don't do: help someone *read* in English rather than replace the English.
+
+**Decided (2026-10-28)**
+- **Where it starts:** a **Read** page in Lamha's pane is the library; a book opens in **its own window, in its own process,** so closing it gives all its memory back (WinUI keeps a closed window: decision 0021).
+- **Page colours:** Lamha's own page, **paper and black**, for the book's page only: the first colours outside the design system's "colour carries meaning" rule, added to the system as reader tokens.
+- **Scroll first;** turning pages may come later.
+
+**The reading page, as signed off:** a word clicked opens the card with its meaning in that sentence (phrases as one: "in want of"; notes about the book's time: Michaelmas); a selection gets a toolbar (highlight in four colours, note, translate under the paragraph, explain with the AI, listen, copy); side by side for the page; read aloud with each word lit; Aa (font, with Windows' Sitka; size; line spacing; line width; page colour; underline looked-up words); search in the book; a bookmark; a panel with the book's words (star = Review, with the sentence), highlights and notes (copied as text), and the contents; how much of the chapter is left. All its wording is a draft for the user.
+
+**How it would be built**
+- **EPUB** is a ZIP of XHTML pages: Core reads it; the page shows it as WinUI text (`RichTextBlock`), no web view: the same native reader as offline Wikipedia's.
+- Highlights, notes, bookmarks and the place are kept in Lamha's database, tied to the book's file (its hash).
+- Only books without DRM open (Project Gutenberg, Standard Ebooks, the user's own files); Kindle and Google Play books are locked to their apps.
+- New in the design system: the reader's page colours, four highlight colours, and icon names for Highlight (E7E6), Note (E70B), Side by side (E89A), Panel (E8A0), Bookmark (E8A4), Library (E8F1), to be checked on Windows.
+- **Stages,** each shippable: (1) EPUB, plus TXT and DOCX shown as flowing text (Open XML SDK, MIT), with the card, selection, highlights and notes, the place, and Review with the book's sentence; (2) PDF through PDFium (page images and their text; Arabic text in PDFs is often stored badly, so test it first; MuPDF is AGPL and out); (3) the rest: side by side, read aloud with each word lit, explain, export. The libraries are free; the cost is the work.
+
+**Open questions (each page's recommendation)**
+- One click on a word opens the card? Recommended: yes, as on a Kindle; a drag selects, a double-click selects one word.
+- Underline the words looked up? Recommended: on, with Aa's switch.
+- Notes about the time (Michaelmas): from where? Recommended: from the AI, saved with the book.
+- The name: "Lamha Reader" / "قارئ لمحة", with "Read" for the pane? The user's to choose.
+
 ## Questions by phase
 
 Phase 0's four and the two it raised, phase 2's four, phase 1's four, phase 3's two and phase 4's are answered (see each section). The first GitHub pre-release comes right after phase 4's card. Phase 6's were answered on 2026-10-26: as recommended (code signing stays the user's call, once everything else is done):
