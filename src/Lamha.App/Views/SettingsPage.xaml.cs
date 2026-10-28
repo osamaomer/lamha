@@ -42,7 +42,8 @@ public sealed partial class SettingsPage : UserControl
     /// </summary>
     private void PlayMotionPreview()
     {
-        if (MotionDemoCard is not { } card)
+        // Only on screen: Appearance being unloaded still holds the card, and its animations then throw.
+        if (MotionDemoCard is not { IsLoaded: true } card)
         {
             return;
         }

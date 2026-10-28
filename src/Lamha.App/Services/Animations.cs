@@ -302,6 +302,9 @@ public static class Animations
         var visual = ElementCompositionPreview.GetElementVisual(element);
         visual.StopAnimation("Opacity");
         visual.Opacity = 1;
+        // Translation exists only once it's on: stopping it on an element never moved threw (animations off crashed
+        // the main window's first page; Appearance's preview on a card not laid out yet crashed Settings).
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
         visual.StopAnimation("Translation");
         visual.Properties.InsertVector3("Translation", Vector3.Zero); // read only where translation is on
     }

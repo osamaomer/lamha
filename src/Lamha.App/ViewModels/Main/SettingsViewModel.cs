@@ -365,17 +365,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     public partial bool WindowMica { get; set; }
 
     /// <summary>The page shows: at its home, with the settings as they are now.</summary>
-    public void Refresh()
-    {
-        Section = "";
-        Load(_brain.Settings.Current);
-    }
+    public void Refresh() => Go("");
 
     /// <summary>
     /// A category straight away: an error's Settings button ("writing", "translation", "offline"), or the home for one
     /// that doesn't exist.
     /// </summary>
-    public void Open(string section) => Section = Tiles.Any(t => t.Id == section) ? section : "";
+    public void Open(string section) => Go(Tiles.Any(t => t.Id == section) ? section : "");
 
     /// <summary>
     /// The page is on screen: changes made elsewhere (the card's language switch, the tray) show here. Detach when it
@@ -415,7 +411,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     /// <summary>The breadcrumb's "Settings", Alt+←: back to the home.</summary>
     [RelayCommand]
-    private void GoHome() => Section = "";
+    private void GoHome() => Go("");
 
     /// <summary>Delete all cards, after Lamha 2's question: the words and the progress.</summary>
     [RelayCommand]
@@ -527,6 +523,27 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     partial void OnCurrencyIndexChanged(int value) => Save(s => s with { Currency = value <= 0 ? "" : Prices.Named[value - 1] });
 
+    /// <summary>
+    /// To a category, or the home. Its controls are made and the old ones let go (x:Load), and a list can write its
+    /// choice back while that happens (the log caught Animations' level changing as a category was unloaded, which ran
+    /// Appearance's preview on a card not laid out): nothing written then is saved or previewed, and what the settings
+    /// say is shown again after.
+    /// </summary>
+    private void Go(string section)
+    {
+        _loading = true;
+        try
+        {
+            Section = section;
+        }
+        finally
+        {
+            _loading = false;
+        }
+
+        Load(_brain.Settings.Current);
+    }
+
     /// <summary>The section opens: Writing tools reads the keys and the chosen provider's models; Translation its model.</summary>
     partial void OnSectionChanged(string value)
     {
@@ -565,9 +582,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         else if (value == "about" && _startup is not null)
         {
             // Read each time: Windows' Startup settings or the tray may have changed it.
+            var loading = _loading;
             _loading = true;
             StartsWithWindows = _startup.IsOn;
-            _loading = false;
+            _loading = loading;
         }
     }
 
@@ -766,6 +784,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     private void ShowTrModels(List<ModelChoice> choices, string chosen)
     {
+        var loading = _loading; // called while a category opens too (Go), which still needs it after
         _loading = true;
         try
         {
@@ -774,7 +793,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
         finally
         {
-            _loading = false;
+            _loading = loading;
         }
     }
 
@@ -840,7 +859,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     private SettingsTile Tile(SettingsCategory category) =>
-        new(category.Id, category.Glyph, Localization.Get(category.Title), SettingsCategories.Summary(category), new RelayCommand(() => Section = category.Id));
+        new(category.Id, category.Glyph, Localization.Get(category.Title), SettingsCategories.Summary(category), new RelayCommand(() => Go(category.Id)));
 
     /// <summary>A setting's place in its choices; the first (its default's place in Lamha 2's lists) for one that isn't there.</summary>
     private static int Index<T>(IReadOnlyList<T> choices, T value)
