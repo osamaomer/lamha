@@ -89,8 +89,12 @@ public sealed partial class ClipRow : ObservableObject
     [ObservableProperty]
     public partial FlowDirection LabelFlow { get; private set; }
 
+    /// <summary>The line under the text: an English copy's translation, or an Arabic copy's English.</summary>
     [ObservableProperty]
     public partial string Translation { get; private set; } = "";
+
+    [ObservableProperty]
+    public partial FlowDirection TranslationFlow { get; private set; }
 
     /// <summary>"Notepad · 5 minutes ago".</summary>
     [ObservableProperty]
@@ -105,7 +109,9 @@ public sealed partial class ClipRow : ObservableObject
     [ObservableProperty]
     public partial bool IsSelected { get; set; }
 
-    public List<ClipTool> Tools { get; }
+    /// <summary>The tools that fit the copy: made again when Replace changed its language.</summary>
+    [ObservableProperty]
+    public partial List<ClipTool> Tools { get; set; }
 
     // The row's own words (a row's template sees only the row).
     public string PinnedName { get; } = Localization.Get("Clipboard_Pinned");
@@ -120,6 +126,10 @@ public sealed partial class ClipRow : ObservableObject
 
     public string RedoLabel { get; } = Localization.Get("Clipboard_Redo");
 
+    public string ReplaceLabel { get; } = Localization.Get("Card_Replace");
+
+    public string ReplaceTooltip { get; } = Localization.Get("Clipboard_ReplaceTitle");
+
     public string NewResult { get; } = Localization.Get("Clipboard_NewResult");
 
     public string CachedNote { get; } = Localization.Get("Clipboard_Cached");
@@ -129,7 +139,7 @@ public sealed partial class ClipRow : ObservableObject
     // ----- a tool's result -----
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsIdle), nameof(IsWorking), nameof(IsResult), nameof(IsProofread), nameof(IsNoMistakes), nameof(IsDone), nameof(IsError))]
+    [NotifyPropertyChangedFor(nameof(IsIdle), nameof(IsWorking), nameof(IsResult), nameof(IsProofread), nameof(IsNoMistakes), nameof(IsDone), nameof(IsError), nameof(CanReplace))]
     public partial ClipResultView View { get; set; }
 
     /// <summary>No tool has answered yet: the clipboard panel shows its menu of tools.</summary>
@@ -148,7 +158,11 @@ public sealed partial class ClipRow : ObservableObject
 
     public bool IsError => View == ClipResultView.Error;
 
+    /// <summary>The result can take the copy's place: Proofread's corrections, or its English.</summary>
+    public bool CanReplace => IsResult && ClipActions.CanReplace(Action);
+
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanReplace))]
     public partial ClipAction Action { get; set; }
 
     [ObservableProperty]
@@ -192,11 +206,12 @@ public sealed partial class ClipRow : ObservableObject
     {
         FullText = clip.Text;
         Lang = clip.Lang;
-        Text =clip.Text.TrimStart()[..Math.Min(clip.Text.TrimStart().Length, 300)];
+        Text = clip.Text.TrimStart()[..Math.Min(clip.Text.TrimStart().Length, 300)];
         TextFlow = clip.Lang == "ar" || (clip.Lang == "mixed" && Scripts.IsArabicText(clip.Text)) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
         Label = clip.Label;
         LabelFlow = Scripts.IsArabicText(clip.Label) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
         Translation = clip.Translation;
+        TranslationFlow = Scripts.IsArabicText(clip.Translation) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
         Pinned = clip.Pinned;
         Meta = $"{AppName(clip.SourceApp)} · {Ago(Math.Max(clip.LastCopiedAt, clip.LastUsedAt))}";
     }
@@ -493,6 +508,40 @@ public sealed partial class ClipboardViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Replace: Proofread's corrections, or the English, take the chosen copy's place, and go on the clipboard for the
+    /// next paste (not recorded again: the copy is there already). Undo, for a few seconds, puts both back.
+    /// </summary>
+    [RelayCommand]
+    private void ReplaceResult()
+    {
+        if (Selected is not { CanReplace: true } row)
+        {
+            return;
+        }
+
+        ClipReplaced replaced;
+        try
+        {
+            replaced = _brain.ClipActions.Replace(row.Id, row.Action);
+        }
+        catch (LamhaException)
+        {
+            _host.Toast(Localization.Get("Note_ReplaceFailed"));
+            return;
+        }
+
+        Dismiss(row);
+        CopyUnrecorded(replaced.Text);
+        _host.Toast(Localization.Get("Clipboard_Replaced"), Localization.Get("Common_Undo"), () =>
+        {
+            if (_brain.ClipboardHistory.UndoReplace(replaced))
+            {
+                CopyUnrecorded(replaced.Before.Text);
+            }
+        });
+    }
+
     /// <summary>Redo: asks again instead of the copy's saved result.</summary>
     [RelayCommand]
     private void Redo()
@@ -609,6 +658,12 @@ public sealed partial class ClipboardViewModel : ObservableObject
             // The same row object for the same copy, so a tool's result stays while new copies come in.
             if (_rows.TryGetValue(clip.Id, out var row))
             {
+                if (row.Lang != clip.Lang)
+                {
+                    var same = row;
+                    row.Tools = ToolsFor(clip, () => same); // replaced by its English: an English copy's tools now
+                }
+
                 row.Update(clip);
             }
             else
@@ -661,17 +716,29 @@ public sealed partial class ClipboardViewModel : ObservableObject
     private ClipRow NewRow(ClipPreview clip)
     {
         ClipRow? row = null;
-        var tools = ClipActions.Available(clip.Text, clip.Lang, clip.Length, _panel)
-            .Select((a, i) => new ClipTool(a, Localization.Get("Clipboard_" + a), new RelayCommand(() => _ = RunAsync(row!, a, fresh: false, null)))
-            {
-                Number = _panel && i < 9 ? Localization.Number(i + 1) : "",
-                Glyph = ToolGlyph(a),
-                Hint = _panel ? ToolHint(a) : "",
-            })
-            .ToList();
-        row = new ClipRow(clip, tools, this);
+        row = new ClipRow(clip, ToolsFor(clip, () => row!), this);
         return row;
     }
+
+    /// <summary>The tools that fit the copy, each running on its row (asked for when it runs: the row is made after its tools).</summary>
+    private List<ClipTool> ToolsFor(ClipPreview clip, Func<ClipRow> row) => ClipActions.Available(clip.Text, clip.Lang, clip.Length, _panel)
+        .Select((a, i) => new ClipTool(a, Localization.Get("Clipboard_" + a), new RelayCommand(() => _ = RunAsync(row(), a, fresh: false, null)))
+        {
+            Number = _panel && i < 9 ? Localization.Number(i + 1) : "",
+            Glyph = ToolGlyph(a),
+            Hint = _panel ? ToolHint(a) : "",
+        })
+        .ToList();
+
+    /// <summary>
+    /// Replace's text (and Undo's) on the clipboard, as the user's Copy is, but not recorded again in clipboard history,
+    /// where the copy itself has it.
+    /// </summary>
+    private void CopyUnrecorded(string text) => _ = _clipboard.Monitor.SuppressAsync(() =>
+    {
+        _host.Copy(text);
+        return Task.FromResult(true);
+    });
 
     /// <summary>Each tool's icon (Lamha 2's clip-list.js <c>ICONS</c>).</summary>
     private static Glyph ToolGlyph(ClipAction action) => action switch

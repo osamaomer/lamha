@@ -492,6 +492,8 @@
   <data name="Clipboard_Redo" xml:space="preserve"><value>Redo</value><comment>d.redo</comment></data>
   <data name="Clipboard_NewResult" xml:space="preserve"><value>A new result</value><comment>d.newResult</comment></data>
   <data name="Clipboard_Cached" xml:space="preserve"><value>Saved result — “Redo” asks for a new one</value><comment>d.cached</comment></data>
+  <data name="Clipboard_ReplaceTitle" xml:space="preserve"><value>Put it in the copy’s place, and on the clipboard</value><comment>new in Lamha 3, drafted by Claude for the clipboard’s Replace 2026-10-28 (the user asked for a draft)</comment></data>
+  <data name="Clipboard_Replaced" xml:space="preserve"><value>Replaced, and on the clipboard</value><comment>new in Lamha 3, drafted by Claude for the clipboard’s Replace 2026-10-28 (the user asked for a draft)</comment></data>
   <data name="Clipboard_SummaryLangColon" xml:space="preserve"><value>Summary language:</value><comment>d.summaryLangColon</comment></data>
   <data name="Clipboard_SummaryLang" xml:space="preserve"><value>Summary language</value><comment>d.summaryLang</comment></data>
   <data name="Clipboard_ErrNoTranslation" xml:space="preserve"><value>No translation for this text</value><comment>d.errNoTranslation</comment></data>

@@ -64,7 +64,16 @@ public sealed record Clip
     public ClipCache Cache { get; init; } = new();
 }
 
-/// <summary>A row of the history list: the first 300 characters, and the translation for English copies.</summary>
+/// <summary>
+/// A copy's text changed by <see cref="ClipboardHistory.Replace"/>: the copy as it was, the text it has now, and the
+/// copy of that text merged into it (deleted, for <see cref="ClipboardHistory.UndoReplace"/> to bring back), if any.
+/// </summary>
+public sealed record ClipReplaced(Clip Before, string Text, string? MergedId);
+
+/// <summary>
+/// A row of the history list: the first 300 characters, and the line under them: an English copy's translation, or an
+/// Arabic copy's English ("Write it in English").
+/// </summary>
 public sealed record ClipPreview(
     string Id,
     string Text,
@@ -303,15 +312,7 @@ public sealed class ClipboardHistory(IClipStore store, IDataProtector protector,
                 return false;
             }
 
-            store.Delete(id);
-            _index?.Remove(id);
-            var now = Now;
-            foreach (var old in _trash.Where(t => now - t.Value.At > UndoTime.TotalMilliseconds).Select(t => t.Key).ToList())
-            {
-                _trash.Remove(old);
-            }
-
-            _trash[id] = (record, now);
+            Discard(record);
         }
 
         OnChanged();
@@ -324,27 +325,81 @@ public sealed class ClipboardHistory(IClipStore store, IDataProtector protector,
     /// </summary>
     public string Restore(string id)
     {
+        string restored;
         lock (_gate)
         {
-            if (!_trash.Remove(id, out var t) || Now - t.At > UndoTime.TotalMilliseconds)
+            restored = Undiscard(id) ?? throw new LamhaException(NotFound);
+        }
+
+        OnChanged();
+        return restored;
+    }
+
+    /// <summary>
+    /// The copy's text becomes <paramref name="text"/>, in its place (Replace on Proofread's corrections or "Write it in
+    /// English"): its pin, name, program and times stay, its formatting goes (it was the old text's), and
+    /// <paramref name="cache"/> is what's kept of the tools' results. Another copy of the new text is merged into it,
+    /// its pin and name kept. <see cref="UndoReplace"/> puts it all back.
+    /// </summary>
+    public ClipReplaced Replace(string id, string text, ClipCache cache)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        ArgumentNullException.ThrowIfNull(cache);
+        ClipReplaced replaced;
+        lock (_gate)
+        {
+            var clip = Need(id);
+            var key = TextKey(text);
+            var merged = store.FindByKey(key) is { } other && other.Id != id ? other : null;
+            var label = clip.Label.Length > 0 || merged is null ? clip.Label : Open(merged)?.Label ?? "";
+            if (merged is not null)
             {
-                throw new LamhaException(NotFound);
+                Discard(merged);
             }
 
-            if (store.FindByKey(t.Record.TextKey) is { } again)
+            Save(
+                clip with
+                {
+                    Text = text,
+                    Html = null,
+                    Lang = SearchText.DetectLanguage(text),
+                    Label = label,
+                    Pinned = clip.Pinned || merged?.Pinned == true,
+                    Cache = cache,
+                },
+                key);
+            replaced = new ClipReplaced(clip, text, merged?.Id);
+        }
+
+        OnChanged();
+        return replaced;
+    }
+
+    /// <summary>
+    /// Undoes <see cref="Replace"/>: the copy as it was, and the copy merged into it back. False when that's no longer
+    /// possible: the copy was deleted, or its old text was copied again meanwhile.
+    /// </summary>
+    public bool UndoReplace(ClipReplaced replaced)
+    {
+        ArgumentNullException.ThrowIfNull(replaced);
+        lock (_gate)
+        {
+            var before = replaced.Before;
+            var key = TextKey(before.Text);
+            if (Find(before.Id) is null || (store.FindByKey(key) is { } again && again.Id != before.Id))
             {
-                return again.Id;
+                return false;
             }
 
-            store.Put(t.Record);
-            if (_index is not null && Open(t.Record) is { } clip)
+            Save(before, key);
+            if (replaced.MergedId is { } merged)
             {
-                _index[id] = new Entry(clip);
+                Undiscard(merged);
             }
         }
 
         OnChanged();
-        return id;
+        return true;
     }
 
     /// <summary>Deletes every copy, or every unpinned one. Returns how many are left.</summary>
@@ -488,6 +543,42 @@ public sealed class ClipboardHistory(IClipStore store, IDataProtector protector,
     internal bool IsLoaded => _index is not null;
 
     private long Now => clock.GetUtcNow().ToUnixTimeMilliseconds();
+
+    /// <summary>Deletes a copy, kept a while for <see cref="Undiscard"/>.</summary>
+    private void Discard(ClipRecord record)
+    {
+        store.Delete(record.Id);
+        _index?.Remove(record.Id);
+        var now = Now;
+        foreach (var old in _trash.Where(t => now - t.Value.At > UndoTime.TotalMilliseconds).Select(t => t.Key).ToList())
+        {
+            _trash.Remove(old);
+        }
+
+        _trash[record.Id] = (record, now);
+    }
+
+    /// <summary>A discarded copy back, once; the id of the copy of its text that's there (another, copied again meanwhile), or null when it's too late.</summary>
+    private string? Undiscard(string id)
+    {
+        if (!_trash.Remove(id, out var t) || Now - t.At > UndoTime.TotalMilliseconds)
+        {
+            return null;
+        }
+
+        if (store.FindByKey(t.Record.TextKey) is { } again)
+        {
+            return again.Id;
+        }
+
+        store.Put(t.Record);
+        if (_index is not null && Open(t.Record) is { } clip)
+        {
+            _index[id] = new Entry(clip);
+        }
+
+        return id;
+    }
 
     /// <summary>Unpinned copies beyond the setting go, the least recent first.</summary>
     private int Trim()
@@ -671,7 +762,9 @@ public sealed class ClipboardHistory(IClipStore store, IDataProtector protector,
     private static ClipPreview Preview(Clip c, string targetLang) => new(
         c.Id, c.Text[..Math.Min(c.Text.Length, PreviewChars)], c.Text.Length, c.Html is not null, c.Label, c.Pinned,
         c.SourceApp, c.Lang, c.CreatedAt, c.LastCopiedAt, c.LastUsedAt, c.CopyCount, c.UseCount,
-        c.Lang == "en" && c.Cache.Translation.TryGetValue(targetLang, out var tr) ? tr[..Math.Min(tr.Length, 200)] : "");
+        c.Lang == "en" && c.Cache.Translation.TryGetValue(targetLang, out var tr) ? tr[..Math.Min(tr.Length, 200)]
+        : c.Lang is "ar" or "mixed" && c.Cache.English is { } en ? en[..Math.Min(en.Length, 200)]
+        : "");
 
     /// <summary>
     /// A copy with its normalized text for searching. The label, the text and the program are joined by newlines,

@@ -139,8 +139,8 @@
                                  Visibility="{x:Bind controls:Show.IfText(Label), Mode=OneWay}" />
                       <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" Foreground="{ThemeResource LamhaTextBrush}" MaxLines="2" TextTrimming="CharacterEllipsis"
                                  FlowDirection="{x:Bind TextFlow, Mode=OneWay}" TextAlignment="{x:Bind controls:Show.InterfaceAligned(TextFlow), Mode=OneWay}" Text="{x:Bind Text, Mode=OneWay}" controls:Marked.Query="{x:Bind Query, Mode=OneWay}" />
-                      <!-- An English copy's translation, once it's been translated -->
-                      <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" MaxLines="1" TextTrimming="CharacterEllipsis" FlowDirection="RightToLeft" TextAlignment="{x:Bind controls:Show.ArabicAlignment}"
+                      <!-- An English copy's translation, or an Arabic copy's English, once there's one -->
+                      <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" FontSize="{StaticResource LamhaFontSizeCaption}" MaxLines="1" TextTrimming="CharacterEllipsis" FlowDirection="{x:Bind TranslationFlow, Mode=OneWay}" TextAlignment="{x:Bind controls:Show.InterfaceAligned(TranslationFlow), Mode=OneWay}"
                                  Text="{x:Bind Translation, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Translation), Mode=OneWay}" />
                       <StackPanel Orientation="Horizontal" Spacing="8">
                         <Border Style="{StaticResource PanelKeyStyle}" Padding="4,0" Visibility="{x:Bind controls:Show.IfText(Number), Mode=OneWay}">

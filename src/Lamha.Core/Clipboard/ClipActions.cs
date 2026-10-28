@@ -99,6 +99,33 @@ public sealed partial class ClipActions(ClipboardHistory history, LookupService 
         };
     }
 
+    /// <summary>Replace fits the tool's result: a text that corrects the copy or says it in English.</summary>
+    public static bool CanReplace(ClipAction action) => action is ClipAction.Proofread or ClipAction.English;
+
+    /// <summary>
+    /// Replace on a tool's result: the copy becomes its proofread text or its English, the result kept with it (the
+    /// one just shown). Proofread: its translation and summary still say the same, and there's nothing left to correct.
+    /// English: the Arabic it was is kept as its translation, so it shows under the copy. Errors are
+    /// <see cref="ClipboardHistory.NotFound"/>, and <see cref="EmptyResult"/> when there's no result to put in.
+    /// </summary>
+    public ClipReplaced Replace(string id, ClipAction action)
+    {
+        var clip = history.Get(id) ?? throw new LamhaException(ClipboardHistory.NotFound);
+        var cache = clip.Cache;
+        var (text, kept) = action switch
+        {
+            ClipAction.Proofread when cache.Proofread is { } proof =>
+                (proof.Corrected.Trim(), cache with { Proofread = new ClipProofread(proof.Corrected.Trim(), []) }),
+            ClipAction.English when cache.English is { } english => (english.Trim(), new ClipCache
+            {
+                Translation = clip.Lang == "ar" ? new Dictionary<string, string> { ["ar"] = clip.Text.Trim() } : new Dictionary<string, string>(),
+                Summary = cache.Summary,
+            }),
+            _ => ("", cache),
+        };
+        return text.Length == 0 ? throw new LamhaException(EmptyResult) : history.Replace(id, text, kept);
+    }
+
     private async Task<ClipActionResult> TranslateAsync(Clip clip, bool fresh, CancellationToken cancel)
     {
         var target = settings.Current.TargetLang;

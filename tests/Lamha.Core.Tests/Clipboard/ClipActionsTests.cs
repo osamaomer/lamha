@@ -156,6 +156,82 @@ public sealed class ClipActionsTests
     }
 
     [Fact]
+    public async Task ReplaceTakesTheProofreadTextInTheCopysPlaceAndUndoPutsItBack()
+    {
+        using var t = Env(keys: ClaudeKey);
+        var id = t.Ingest("She dont like apples.");
+        t.Ingest("Something copied later.");
+        t.History.SetPinned(id, true);
+        await t.Run(id, ClipAction.Translate);
+        await t.Run(id, ClipAction.Proofread);
+
+        var replaced = t.Actions.Replace(id, ClipAction.Proofread);
+        Assert.Equal("She doesn't like apples.", replaced.Text);
+        var clip = t.History.Get(id)!;
+        Assert.Equal(("She doesn't like apples.", true, "notepad.exe"), (clip.Text, clip.Pinned, clip.SourceApp));
+        Assert.Equal("حافظ على وعدك.", clip.Cache.Translation["ar"]); // the same meaning: kept
+        Assert.Equal(2, t.History.List().Total);
+
+        var again = await t.Run(id, ClipAction.Proofread);
+        Assert.Empty(again.Issues); // "No mistakes", from the copy: nothing asked
+        Assert.Equal(1, _claude);
+
+        Assert.True(t.History.UndoReplace(replaced));
+        clip = t.History.Get(id)!;
+        Assert.Equal("She dont like apples.", clip.Text);
+        Assert.Single(clip.Cache.Proofread!.Issues);
+    }
+
+    [Fact]
+    public async Task WriteItInEnglishStaysUnderTheArabicCopyAndReplaceKeepsTheArabicUnderTheEnglish()
+    {
+        using var t = Env(keys: ClaudeKey);
+        var id = t.Ingest("سأرسل لك التقرير النهائي اليوم");
+        await t.Run(id, ClipAction.English);
+        Assert.Equal("I will send you the final report today.", t.History.List(targetLang: "ar").Items[0].Translation);
+
+        t.Actions.Replace(id, ClipAction.English);
+        var row = t.History.List(targetLang: "ar").Items[0];
+        Assert.Equal(("I will send you the final report today.", "en", "سأرسل لك التقرير النهائي اليوم"), (row.Text, row.Lang, row.Translation));
+        Assert.Contains(ClipAction.Proofread, ClipActions.Available(row.Text, row.Lang, row.Length, panel: false)); // an English copy's tools now
+    }
+
+    [Fact]
+    public async Task ReplaceMergesACopyOfTheNewTextAndUndoBringsItBack()
+    {
+        using var t = Env(keys: ClaudeKey);
+        var id = t.Ingest("She dont like apples.");
+        await t.Run(id, ClipAction.Proofread);
+        var copied = t.Ingest("She doesn't like apples."); // the result's Copy, recorded as any copy
+        t.History.SetPinned(copied, true);
+        t.History.SetLabel(copied, "apples");
+
+        var replaced = t.Actions.Replace(id, ClipAction.Proofread);
+        var only = Assert.Single(t.History.List().Items);
+        Assert.Equal((id, true, "apples"), (only.Id, only.Pinned, only.Label));
+
+        Assert.True(t.History.UndoReplace(replaced));
+        Assert.Equal(2, t.History.List().Total);
+        Assert.Equal(("She dont like apples.", false), (t.History.Get(id)!.Text, t.History.Get(id)!.Pinned));
+        Assert.True(t.History.Get(copied)!.Pinned);
+    }
+
+    [Fact]
+    public async Task ReplaceNeedsAResultAndUndoIsTooLateOnceTheOldTextIsCopiedAgain()
+    {
+        using var t = Env(keys: ClaudeKey);
+        var id = t.Ingest("She dont like apples.");
+        Assert.Equal(ClipActions.EmptyResult, Assert.Throws<LamhaException>(() => t.Actions.Replace(id, ClipAction.Proofread)).Code);
+        Assert.False(ClipActions.CanReplace(ClipAction.Translate));
+
+        await t.Run(id, ClipAction.Proofread);
+        var replaced = t.Actions.Replace(id, ClipAction.Proofread);
+        t.Ingest("She dont like apples.");
+        Assert.False(t.History.UndoReplace(replaced));
+        Assert.Equal("She doesn't like apples.", t.History.Get(id)!.Text); // the new copy of the old text was overwritten otherwise
+    }
+
+    [Fact]
     public void TheToolsThatFitACopyByItsLanguageAndLength()
     {
         Assert.Equal([ClipAction.Translate, ClipAction.Proofread, ClipAction.Lookup, ClipAction.Review], ClipActions.Available("bank", "en", 4, panel: false));

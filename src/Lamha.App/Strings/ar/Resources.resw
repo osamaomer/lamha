@@ -491,6 +491,8 @@
   <data name="Clipboard_Redo" xml:space="preserve"><value>إعادة</value><comment>d.redo</comment></data>
   <data name="Clipboard_NewResult" xml:space="preserve"><value>نتيجة جديدة</value><comment>d.newResult</comment></data>
   <data name="Clipboard_Cached" xml:space="preserve"><value>نتيجة محفوظة من قبل — «إعادة» تطلب نتيجة جديدة</value><comment>d.cached</comment></data>
+  <data name="Clipboard_ReplaceTitle" xml:space="preserve"><value>ضعه مكان النسخة، وفي الحافظة</value><comment>new in Lamha 3, drafted by Claude for the clipboard’s Replace 2026-10-28 (the user asked for a draft)</comment></data>
+  <data name="Clipboard_Replaced" xml:space="preserve"><value>استُبدل النص، وهو في الحافظة</value><comment>new in Lamha 3, drafted by Claude for the clipboard’s Replace 2026-10-28 (the user asked for a draft)</comment></data>
   <data name="Clipboard_SummaryLangColon" xml:space="preserve"><value>لغة الملخص:</value><comment>d.summaryLangColon</comment></data>
   <data name="Clipboard_SummaryLang" xml:space="preserve"><value>لغة الملخص</value><comment>d.summaryLang</comment></data>
   <data name="Clipboard_ErrNoTranslation" xml:space="preserve"><value>لا توجد ترجمة لهذا النص</value><comment>d.errNoTranslation</comment></data>

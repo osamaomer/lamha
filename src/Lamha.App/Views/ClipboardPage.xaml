@@ -91,8 +91,8 @@
                              FlowDirection="{x:Bind LabelFlow, Mode=OneWay}" TextAlignment="{x:Bind controls:Show.InterfaceAligned(LabelFlow), Mode=OneWay}" Text="{x:Bind Label, Mode=OneWay}" controls:Marked.Query="{x:Bind Query, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Label), Mode=OneWay}" />
                   <TextBlock Style="{StaticResource LamhaBodyTextStyle}" MaxLines="2" TextTrimming="CharacterEllipsis"
                              FlowDirection="{x:Bind TextFlow, Mode=OneWay}" TextAlignment="{x:Bind controls:Show.InterfaceAligned(TextFlow), Mode=OneWay}" Text="{x:Bind Text, Mode=OneWay}" controls:Marked.Query="{x:Bind Query, Mode=OneWay}" />
-                  <!-- An English copy's translation, once it's been translated -->
-                  <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" MaxLines="1" TextTrimming="CharacterEllipsis" FlowDirection="RightToLeft" TextAlignment="{x:Bind controls:Show.ArabicAlignment}"
+                  <!-- An English copy's translation, or an Arabic copy's English, once there's one -->
+                  <TextBlock Style="{StaticResource LamhaSecondaryTextStyle}" MaxLines="1" TextTrimming="CharacterEllipsis" FlowDirection="{x:Bind TranslationFlow, Mode=OneWay}" TextAlignment="{x:Bind controls:Show.InterfaceAligned(TranslationFlow), Mode=OneWay}"
                              Text="{x:Bind Translation, Mode=OneWay}" Visibility="{x:Bind controls:Show.IfText(Translation), Mode=OneWay}" />
                   <StackPanel Orientation="Horizontal" Spacing="4">
                     <controls:FluentIcon Glyph="Pin" Size="Small" VerticalAlignment="Center" Foreground="{ThemeResource LamhaAccentBrush}"
@@ -108,7 +108,7 @@
                       <ColumnDefinition Width="Auto" />
                       <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ItemsControl ItemsSource="{x:Bind Tools}" IsTabStop="False">
+                    <ItemsControl ItemsSource="{x:Bind Tools, Mode=OneWay}" IsTabStop="False">
                       <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                           <controls:WrapPanel HorizontalSpacing="8" VerticalSpacing="8" />
@@ -137,7 +137,8 @@
                     <controls:Skeleton Height="14" Margin="0,0,120,0" CornerRadius="{StaticResource LamhaRadiusControl}" />
                   </StackPanel>
 
-                  <!-- A result: the summary's language, the text (Proofread's corrections struck through), Copy and Redo -->
+                  <!-- A result: the summary's language, the text (Proofread's corrections struck through), Replace (Proofread's
+                       and the English: the card's), Copy and Redo -->
                   <StackPanel Margin="0,8,0,0" Spacing="8" Visibility="{x:Bind IsResult, Mode=OneWay}">
                     <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind IsSummary, Mode=OneWay}" AutomationProperties.Name="{x:Bind SummaryLangName}">
                       <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind SummaryLangColon}" />
@@ -155,7 +156,14 @@
                                          Parts="{x:Bind Diff, Mode=OneWay}" Fallback="{x:Bind Result, Mode=OneWay}" />
                     </Border>
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                      <Button Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind Owner.CopyResultCommand}" AutomationProperties.Name="{x:Bind CopyLabel}" controls:Feedback.Copy="True">
+                      <Button Style="{StaticResource LamhaButtonStyle}" Command="{x:Bind Owner.ReplaceResultCommand}" Visibility="{x:Bind CanReplace, Mode=OneWay}"
+                              ToolTipService.ToolTip="{x:Bind ReplaceTooltip}" AutomationProperties.Name="{x:Bind ReplaceLabel}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                          <controls:FluentIcon Glyph="Check" />
+                          <TextBlock Text="{x:Bind ReplaceLabel}" />
+                        </StackPanel>
+                      </Button>
+                      <Button Style="{x:Bind controls:Show.CopyStyle(CanReplace), Mode=OneWay}" Command="{x:Bind Owner.CopyResultCommand}" AutomationProperties.Name="{x:Bind CopyLabel}" controls:Feedback.Copy="True">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                           <controls:FluentIcon Glyph="Copy" />
                           <TextBlock Text="{x:Bind CopyLabel}" />
