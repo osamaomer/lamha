@@ -22,6 +22,8 @@ public sealed partial class ClipboardPage : UserControl
         InitializeComponent();
         // The chosen copy stays in view when the keys move it.
         ViewModel.PropertyChanged += OnViewModelChanged;
+        ViewModel.ButtonsLeaving += KeepFocus;
+        SearchBox.BringIntoViewRequested += (_, e) => e.Handled |= _quietFocus;
         _ = new ListMotion(List, ViewModel, nameof(ClipboardViewModel.Rows), Key, each: ClipStaggerEach, milliseconds: ClipStaggerMilliseconds);
     }
 
@@ -33,6 +35,9 @@ public sealed partial class ClipboardPage : UserControl
     internal static object Key(object row) => ((ClipRow)row).Id;
 
     public ClipboardViewModel ViewModel { get; }
+
+    /// <summary>The search box takes the focus without the page scrolling up to it (<see cref="KeepFocus"/>).</summary>
+    private bool _quietFocus;
 
     // Its own words (x:Bind reads them once).
     public string OptInTitle { get; } = Localization.Get("Clipboard_OptInTitle");
@@ -132,6 +137,35 @@ public sealed partial class ClipboardPage : UserControl
         {
             grid.Children[0].Opacity = opacity;
         }
+    }
+
+    /// <summary>
+    /// A button in the list that has the focus is about to go: the focus goes to the search box, where the keys work
+    /// (Lamha 2's), and the page stays where it is. Left to WinUI, it went there too, and the page jumped to the top.
+    /// </summary>
+    private void KeepFocus()
+    {
+        if (XamlRoot is null || FocusManager.GetFocusedElement(XamlRoot) is not DependencyObject focused || !IsInside(focused, List))
+        {
+            return;
+        }
+
+        _quietFocus = true;
+        SearchBox.Focus(FocusState.Programmatic);
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => _quietFocus = false);
+    }
+
+    private static bool IsInside(DependencyObject element, DependencyObject parent)
+    {
+        for (var e = element; e is not null; e = VisualTreeHelper.GetParent(e))
+        {
+            if (e == parent)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)

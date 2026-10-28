@@ -310,6 +310,12 @@ public sealed partial class ClipboardViewModel : ObservableObject
     /// <summary>The clipboard panel's Paste as plain text, on this copy.</summary>
     public event Action<ClipRow>? PlainRequested;
 
+    /// <summary>
+    /// A copy's tools or result are about to go (another copy chosen, a result redrawn, the list read again): the page
+    /// takes the keyboard focus off a button that's going, or WinUI moves it to the search box and scrolls up to it.
+    /// </summary>
+    public event Action? ButtonsLeaving;
+
     /// <summary>Clipboard history is on (the setting); off, the page offers to turn it on.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOff))]
@@ -402,6 +408,7 @@ public sealed partial class ClipboardViewModel : ObservableObject
     /// <summary>The copy's tools show again, without a result; a tool still working is let go.</summary>
     public void Dismiss(ClipRow row)
     {
+        ButtonsLeaving?.Invoke();
         _run?.Cancel();
         row.View = ClipResultView.None;
     }
@@ -414,6 +421,7 @@ public sealed partial class ClipboardViewModel : ObservableObject
             return;
         }
 
+        ButtonsLeaving?.Invoke();
         _run?.Cancel();
         if (Selected is { } old)
         {
@@ -686,7 +694,14 @@ public sealed partial class ClipboardViewModel : ObservableObject
             rows[i].Number = _panel && i < 9 ? (i + 1).ToString(CultureInfo.InvariantCulture) : "";
         }
 
-        Rows = rows;
+        // The same copies in the same order (a result kept, a pin, a Replace) keep the list as it is: each row changed in
+        // place. A new list redraws every row, and the focus with them.
+        if (!rows.Select(r => r.Id).SequenceEqual(Rows.Select(r => r.Id), StringComparer.Ordinal))
+        {
+            ButtonsLeaving?.Invoke();
+            Rows = rows;
+        }
+
         HasMore = rows.Count < page.Total;
         Empty = rows.Count > 0 ? "" : Localization.Get(Query.Trim().Length > 0 ? "Clipboard_NoResults" : PinnedOnly ? "Clipboard_NoPinned" : "Clipboard_Empty");
 
@@ -781,6 +796,7 @@ public sealed partial class ClipboardViewModel : ObservableObject
             lang = _brain.State.Get(SummaryLangKey) is "en" or "ar" ? _brain.State.Get(SummaryLangKey) : Localization.Language;
         }
 
+        ButtonsLeaving?.Invoke();
         _run?.Cancel();
         var run = _run = new CancellationTokenSource();
         row.Action = action;
