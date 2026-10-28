@@ -124,7 +124,13 @@ public sealed partial class MainWindow : Window, IPageHost
         // Windows' close hides the window, which opens again as it was made (decision 0021): WinUI never frees a
         // closed window, so making a new one at every open added a few MB each time. It really closes when Lamha ends.
         AppWindow.Closing += OnClosing;
-        Closed += (_, _) => Rest();
+        Closed += (_, _) =>
+        {
+            if (!_ending)
+            {
+                Rest(); // End rested it already
+            }
+        };
     }
 
     /// <summary>Hidden by Windows' close (or the mini translator): the app's IdleMemory is told.</summary>
@@ -250,6 +256,12 @@ public sealed partial class MainWindow : Window, IPageHost
     /// <summary>Lamha is ending (Quit, Delete my data, another interface language): the window really closes.</summary>
     public void End()
     {
+        // Rested now, while Lamha's database is open: Windows says Closed only later, after Quit has closed it.
+        if (AppWindow.IsVisible)
+        {
+            Rest();
+        }
+
         _ending = true;
         Close();
     }

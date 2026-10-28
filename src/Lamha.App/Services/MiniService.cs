@@ -59,14 +59,10 @@ public sealed partial class MiniService(Brain brain, IdleMemory idle) : IDisposa
             window.Closed += (_, _) =>
             {
                 brain.Settings.Changed -= Apply;
-                if (window.Place is { } place)
-                {
-                    brain.State.Set(MiniWindow.PlaceKey, place.ToString());
-                }
-
                 if (_window == window)
                 {
                     _window = null;
+                    SavePlace(window);
                     idle.WindowClosed();
                 }
             };
@@ -89,5 +85,25 @@ public sealed partial class MiniService(Brain brain, IdleMemory idle) : IDisposa
 
     public void Close() => _window?.Close();
 
-    public void Dispose() => Close();
+    /// <summary>
+    /// Lamha is ending: where the window is gets saved now, while the database is open (Windows says Closed only
+    /// later, after Quit has closed it), and then it closes.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_window is { } window)
+        {
+            _window = null;
+            SavePlace(window);
+            window.Close();
+        }
+    }
+
+    private void SavePlace(MiniWindow window)
+    {
+        if (window.Place is { } place)
+        {
+            brain.State.Set(MiniWindow.PlaceKey, place.ToString());
+        }
+    }
 }
