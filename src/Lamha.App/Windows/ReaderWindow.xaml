@@ -5,8 +5,9 @@
     xmlns:controls="using:Lamha.App.Controls"
     xmlns:reader="using:Lamha.App.ViewModels.Reader">
   <!-- The reading page (docs/design/reader.html, signed off; decision 0022): Windows' title bar with the book's title and
-       author; the book on Windows' content layer, its blocks in a column up to 620 wide, 32 from the top and 28 from the
-       sides; and a 40 footer with the chapter and how far through the book. Mica, or Lamha's page colour. -->
+       author, and Aa at its end; the book on its page (Windows' content layer, or Aa's paper or black), its blocks in a
+       column of Aa's width, 32 from the top and 28 from the sides; and a 40 footer with the chapter and how far through
+       the book. Mica, or Lamha's page colour. -->
   <Grid x:Name="Root">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -18,11 +19,120 @@
     <Border x:Name="Solid" Grid.RowSpan="3" Background="{ThemeResource LamhaPageBrush}" Visibility="Collapsed" />
 
     <TitleBar x:Name="AppTitleBar" Title="{x:Bind BookTitle}" Subtitle="{x:Bind BookAuthor}"
-              IsBackButtonVisible="False" IsPaneToggleButtonVisible="False" />
+              IsBackButtonVisible="False" IsPaneToggleButtonVisible="False">
+      <TitleBar.RightHeader>
+        <!-- Aa: the reading settings, as the design's flyout (its rows 16 apart) -->
+        <Button x:Name="AaButton" Style="{StaticResource LamhaTitleBarButtonStyle}" Visibility="Collapsed"
+                ToolTipService.ToolTip="{x:Bind AaLabel}" AutomationProperties.Name="{x:Bind AaLabel}">
+          <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind AaGlyph}" />
+          <Button.Flyout>
+            <Flyout Placement="BottomEdgeAlignedRight">
+              <StackPanel Width="288" Spacing="{StaticResource LamhaSpace4}">
+                <StackPanel Spacing="{StaticResource LamhaSpace2}">
+                  <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind FontLabel}" />
+                  <Border Padding="4" HorizontalAlignment="Left" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
+                    <StackPanel Orientation="Horizontal" AutomationProperties.Name="{x:Bind FontLabel}">
+                      <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind SitkaLabel}" Command="{x:Bind ViewModel.SetFontCommand, Mode=OneWay}" CommandParameter="sitka"
+                                    IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'font', 'sitka'), Mode=OneWay}" />
+                      <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind GeorgiaLabel}" Command="{x:Bind ViewModel.SetFontCommand, Mode=OneWay}" CommandParameter="georgia"
+                                    IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'font', 'georgia'), Mode=OneWay}" />
+                      <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind SegoeLabel}" Command="{x:Bind ViewModel.SetFontCommand, Mode=OneWay}" CommandParameter="segoe"
+                                    IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'font', 'segoe'), Mode=OneWay}" />
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
 
-    <!-- The book's page: Windows' content layer, as the main window's page -->
-    <Border Grid.Row="1" Grid.RowSpan="2" Background="{ThemeResource LayerFillColorDefaultBrush}"
+                <StackPanel Spacing="{StaticResource LamhaSpace2}">
+                  <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind SizeLabel}" />
+                  <Grid ColumnSpacing="{StaticResource LamhaSpace3}">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind SmallerGlyph}" Command="{x:Bind ViewModel.ResizeCommand, Mode=OneWay}" CommandParameter="-1"
+                            IsEnabled="{x:Bind ViewModel.CanBeSmaller, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind SmallerLabel}" AutomationProperties.Name="{x:Bind SmallerLabel}" />
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource BodyStrongTextBlockStyle}"
+                               Text="{x:Bind ViewModel.SizeText, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" />
+                    <Button Grid.Column="2" Style="{StaticResource LamhaQuietButtonStyle}" Content="{x:Bind LargerGlyph}" Command="{x:Bind ViewModel.ResizeCommand, Mode=OneWay}" CommandParameter="1"
+                            IsEnabled="{x:Bind ViewModel.CanBeLarger, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind LargerLabel}" AutomationProperties.Name="{x:Bind LargerLabel}" />
+                  </Grid>
+                </StackPanel>
+
+                <StackPanel Spacing="{StaticResource LamhaSpace2}">
+                  <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind SpacingLabel}" />
+                  <Border Padding="4" HorizontalAlignment="Left" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
+                    <StackPanel Orientation="Horizontal" AutomationProperties.Name="{x:Bind SpacingLabel}">
+                      <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind Spacing15}" Command="{x:Bind ViewModel.SetSpacingCommand, Mode=OneWay}" CommandParameter="1.5"
+                                    IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'spacing', '1.5'), Mode=OneWay}" />
+                      <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind Spacing17}" Command="{x:Bind ViewModel.SetSpacingCommand, Mode=OneWay}" CommandParameter="1.7"
+                                    IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'spacing', '1.7'), Mode=OneWay}" />
+                      <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind Spacing20}" Command="{x:Bind ViewModel.SetSpacingCommand, Mode=OneWay}" CommandParameter="2.0"
+                                    IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'spacing', '2.0'), Mode=OneWay}" />
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel Spacing="{StaticResource LamhaSpace2}">
+                  <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind WidthLabel}" />
+                  <Border Padding="4" HorizontalAlignment="Left" controls:Pill.IsPill="True" Background="{ThemeResource LamhaChipBrush}">
+                    <StackPanel Orientation="Horizontal" AutomationProperties.Name="{x:Bind WidthLabel}">
+                      <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind NarrowLabel}" Command="{x:Bind ViewModel.SetWidthCommand, Mode=OneWay}" CommandParameter="narrow"
+                                    IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'width', 'narrow'), Mode=OneWay}" />
+                      <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind NormalLabel}" Command="{x:Bind ViewModel.SetWidthCommand, Mode=OneWay}" CommandParameter="normal"
+                                    IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'width', 'normal'), Mode=OneWay}" />
+                      <ToggleButton Style="{StaticResource LamhaSwitchSegmentStyle}" Content="{x:Bind WideLabel}" Command="{x:Bind ViewModel.SetWidthCommand, Mode=OneWay}" CommandParameter="wide"
+                                    IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'width', 'wide'), Mode=OneWay}" />
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel Spacing="{StaticResource LamhaSpace2}">
+                  <TextBlock Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind PageLabel}" />
+                  <Grid ColumnSpacing="{StaticResource LamhaSpace2}">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ToggleButton Style="{StaticResource LamhaPageSwatchStyle}" Background="{ThemeResource LayerFillColorDefaultBrush}" Foreground="{ThemeResource LamhaTextBrush}"
+                                  Command="{x:Bind ViewModel.SetPageCommand, Mode=OneWay}" CommandParameter="lamha" AutomationProperties.Name="{x:Bind PageLamhaLabel}"
+                                  IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'page', 'lamha'), Mode=OneWay}">
+                      <StackPanel>
+                        <TextBlock HorizontalAlignment="Center" FontFamily="{StaticResource LamhaBookFontFamily}" Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind AaGlyph}" />
+                        <TextBlock HorizontalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind PageLamhaLabel}" />
+                      </StackPanel>
+                    </ToggleButton>
+                    <ToggleButton Grid.Column="1" Style="{StaticResource LamhaPageSwatchStyle}" Background="{StaticResource LamhaBookPaperBrush}" Foreground="{StaticResource LamhaBookPaperTextBrush}"
+                                  Command="{x:Bind ViewModel.SetPageCommand, Mode=OneWay}" CommandParameter="paper" AutomationProperties.Name="{x:Bind PagePaperLabel}"
+                                  IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'page', 'paper'), Mode=OneWay}">
+                      <StackPanel>
+                        <TextBlock HorizontalAlignment="Center" FontFamily="{StaticResource LamhaBookFontFamily}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{StaticResource LamhaBookPaperTextBrush}" Text="{x:Bind AaGlyph}" />
+                        <TextBlock HorizontalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{StaticResource LamhaBookPaperTextBrush}" Text="{x:Bind PagePaperLabel}" />
+                      </StackPanel>
+                    </ToggleButton>
+                    <ToggleButton Grid.Column="2" Style="{StaticResource LamhaPageSwatchStyle}" Background="{StaticResource LamhaBookBlackBrush}" Foreground="{StaticResource LamhaBookBlackTextBrush}"
+                                  Command="{x:Bind ViewModel.SetPageCommand, Mode=OneWay}" CommandParameter="black" AutomationProperties.Name="{x:Bind PageBlackLabel}"
+                                  IsChecked="{x:Bind reader:ReaderViewModel.Chosen(ViewModel.Look, 'page', 'black'), Mode=OneWay}">
+                      <StackPanel>
+                        <TextBlock HorizontalAlignment="Center" FontFamily="{StaticResource LamhaBookFontFamily}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{StaticResource LamhaBookBlackTextBrush}" Text="{x:Bind AaGlyph}" />
+                        <TextBlock HorizontalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{StaticResource LamhaBookBlackTextBrush}" Text="{x:Bind PageBlackLabel}" />
+                      </StackPanel>
+                    </ToggleButton>
+                  </Grid>
+                </StackPanel>
+              </StackPanel>
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+      </TitleBar.RightHeader>
+    </TitleBar>
+
+    <!-- The book's page: Windows' content layer, as the main window's page, or Aa's paper or black -->
+    <Border x:Name="PageLayer" Grid.Row="1" Grid.RowSpan="2" Background="{ThemeResource LayerFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" />
+    <!-- Aa's paper or black, over it (empty for Lamha's own page) -->
+    <Border x:Name="Paper" Grid.Row="1" Grid.RowSpan="2" />
 
     <ScrollViewer x:Name="Scroller" Grid.Row="1" HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto"
                   VerticalAnchorRatio="0" ViewChanged="OnViewChanged">
@@ -41,9 +151,9 @@
                          Text="{x:Bind MessageText}" />
 
     <Grid x:Name="Footer" Grid.Row="2" Padding="28,0" BorderBrush="{ThemeResource LamhaLineBrush}" BorderThickness="0,1,0,0" Visibility="Collapsed">
-      <TextBlock VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind ViewModel.Chapter, Mode=OneWay}"
+      <TextBlock x:Name="ChapterText" VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}" Text="{x:Bind ViewModel.Chapter, Mode=OneWay}"
                  TextTrimming="CharacterEllipsis" Margin="0,0,120,0" />
-      <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}"
+      <TextBlock x:Name="ProgressText" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource LamhaCaptionTextStyle}"
                  Text="{x:Bind ViewModel.Progress, Mode=OneWay}" />
     </Grid>
   </Grid>

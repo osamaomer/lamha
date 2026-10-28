@@ -70,6 +70,52 @@ public sealed partial class ReaderWindow : Window
 
     public string MessageText { get; private set; } = "";
 
+    public string AaLabel { get; } = Localization.Get("Reader_Aa");
+
+    public string AaGlyph { get; } = Localization.Get("Reader_AaGlyph");
+
+    public string FontLabel { get; } = Localization.Get("Reader_Font");
+
+    public string SitkaLabel { get; } = Localization.Get("Reader_FontSitka");
+
+    public string GeorgiaLabel { get; } = Localization.Get("Reader_FontGeorgia");
+
+    public string SegoeLabel { get; } = Localization.Get("Reader_FontSegoe");
+
+    public string SizeLabel { get; } = Localization.Get("Reader_Size");
+
+    public string SmallerLabel { get; } = Localization.Get("Reader_Smaller");
+
+    public string LargerLabel { get; } = Localization.Get("Reader_Larger");
+
+    public string SmallerGlyph { get; } = Localization.Get("Reader_SmallerGlyph");
+
+    public string LargerGlyph { get; } = Localization.Get("Reader_LargerGlyph");
+
+    public string SpacingLabel { get; } = Localization.Get("Reader_Spacing");
+
+    public string Spacing15 { get; } = Localization.Get("Reader_Spacing15");
+
+    public string Spacing17 { get; } = Localization.Get("Reader_Spacing17");
+
+    public string Spacing20 { get; } = Localization.Get("Reader_Spacing20");
+
+    public string WidthLabel { get; } = Localization.Get("Reader_Width");
+
+    public string NarrowLabel { get; } = Localization.Get("Reader_Narrow");
+
+    public string NormalLabel { get; } = Localization.Get("Reader_Normal");
+
+    public string WideLabel { get; } = Localization.Get("Reader_Wide");
+
+    public string PageLabel { get; } = Localization.Get("Reader_Page");
+
+    public string PageLamhaLabel { get; } = Localization.Get("Reader_PageLamha");
+
+    public string PagePaperLabel { get; } = Localization.Get("Reader_PagePaper");
+
+    public string PageBlackLabel { get; } = Localization.Get("Reader_PageBlack");
+
     /// <summary>A word was clicked: the word, its sentence.</summary>
     public event Action<string, WordContext>? WordClicked;
 
@@ -113,8 +159,22 @@ public sealed partial class ReaderWindow : Window
         Bindings.Update();
         Message.Visibility = Visibility.Collapsed;
         Footer.Visibility = Visibility.Visible;
+        AaButton.Visibility = Visibility.Visible;
+        ApplyLook(redraw: false);
+        viewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ReaderViewModel.Look))
+            {
+                ApplyLook(redraw: true);
+            }
+        };
         ViewModel.ReadingAt(viewModel.StartBlock);
         Page.Loaded += (_, _) => GoToStart();
+
+        // A short part (a title page) leaves nothing to scroll, and so no scrolling to load the next: the page is filled
+        // ahead each time it changes size.
+        Page.SizeChanged += (_, _) => DispatcherQueue.TryEnqueue(FillAhead);
+        DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, FillAhead);
         GoToStart();
     }
 
@@ -125,6 +185,55 @@ public sealed partial class ReaderWindow : Window
         MessageText = text;
         Title = title;
         Bindings.Update();
+    }
+
+    // Aa's look on the page: its colour and controls' theme, the column's width, the footer's ink and line, and the blocks
+    // drawn again (keeping the block at the top where it is).
+    private void ApplyLook(bool redraw)
+    {
+        if (ViewModel is not { } model)
+        {
+            return;
+        }
+
+        var look = model.Look;
+        var top = redraw ? TopBlock() : null;
+        Scroller.RequestedTheme = Footer.RequestedTheme = look.Theme;
+        Page.MaxWidth = look.ColumnWidth;
+        Paper.Background = look.Page;
+        Paper.BorderBrush = look.Line;
+        Paper.BorderThickness = new Thickness(0, look.Page is null ? 0 : 1, 0, 0);
+        Footer.BorderBrush = look.Line ?? ThemeLookup.Get(Footer, "LamhaLineBrush") as Brush;
+        SetOrClear(ChapterText, TextBlock.ForegroundProperty, look.Muted);
+        SetOrClear(ProgressText, TextBlock.ForegroundProperty, look.Muted);
+        if (!redraw)
+        {
+            return;
+        }
+
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(Page); i++)
+        {
+            (VisualTreeHelper.GetChild(Page, i) as BookBlockView)?.Refresh();
+        }
+
+        if (top is not null && model.Blocks.IndexOf(top) is >= 0 and var index)
+        {
+            Page.UpdateLayout();
+            Page.GetOrCreateElement(index).StartBringIntoView(new BringIntoViewOptions { VerticalAlignmentRatio = 0, AnimationDesired = false });
+        }
+    }
+
+    // A brush from Aa, or the style's (the theme's) when Aa has none for this page.
+    private static void SetOrClear(DependencyObject element, DependencyProperty property, Brush? brush)
+    {
+        if (brush is null)
+        {
+            element.ClearValue(property);
+        }
+        else
+        {
+            element.SetValue(property, brush);
+        }
     }
 
     // Once, when the page has room: the block where the reader was at the top.
@@ -143,6 +252,15 @@ public sealed partial class ReaderWindow : Window
         }
     }
 
+    // The next part, while less than three screens are left below what's shown.
+    private void FillAhead()
+    {
+        if (ViewModel is { } model && Scroller.ViewportHeight > 0 && Scroller.VerticalOffset + (Scroller.ViewportHeight * 3) > Scroller.ExtentHeight)
+        {
+            model.LoadNext();
+        }
+    }
+
     /// <summary>Scrolling: the footer follows, a part is loaded before the reader reaches it, and the place is kept soon.</summary>
     private void OnViewChanged(object? sender, ScrollViewerViewChangedEventArgs e)
     {
@@ -151,10 +269,7 @@ public sealed partial class ReaderWindow : Window
             return;
         }
 
-        if (Scroller.VerticalOffset + (Scroller.ViewportHeight * 3) > Scroller.ExtentHeight)
-        {
-            model.LoadNext();
-        }
+        FillAhead();
 
         if (Scroller.VerticalOffset < Scroller.ViewportHeight && _placed)
         {

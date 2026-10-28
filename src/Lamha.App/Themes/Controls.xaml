@@ -729,4 +729,53 @@
     <Setter Property="Margin" Value="0,0,-12,0" />
   </Style>
 
+
+  <!-- Aa's page colours (docs/design/reader.html): a swatch of the page, 56 high, with "Aa" in the page's text and its
+       name; the chosen one ringed in the accent, 2 wide. Its Background and Foreground are the page's own. -->
+  <Style x:Key="LamhaPageSwatchStyle" TargetType="ToggleButton">
+    <Setter Property="Height" Value="56" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="BorderBrush" Value="{ThemeResource LamhaControlEdgeBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource LamhaRadiusControl}" />
+    <Setter Property="FontFamily" Value="{StaticResource LamhaFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource LamhaFontSizeCaption}" />
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Grid Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" Control.IsTemplateFocusTarget="True">
+            <VisualStateManager.VisualStateGroups>
+              <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="PointerOver" />
+                <VisualState x:Name="Pressed" />
+                <VisualState x:Name="Disabled" />
+                <VisualState x:Name="Checked">
+                  <VisualState.Setters>
+                    <Setter Target="Ring.BorderBrush" Value="{ThemeResource LamhaAccentBrush}" />
+                    <Setter Target="Ring.BorderThickness" Value="2" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedPointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Ring.BorderBrush" Value="{ThemeResource LamhaAccentBrush}" />
+                    <Setter Target="Ring.BorderThickness" Value="2" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedPressed">
+                  <VisualState.Setters>
+                    <Setter Target="Ring.BorderBrush" Value="{ThemeResource LamhaAccentBrush}" />
+                    <Setter Target="Ring.BorderThickness" Value="2" />
+                  </VisualState.Setters>
+                </VisualState>
+              </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
+            <Border x:Name="Ring" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
 </ResourceDictionary>

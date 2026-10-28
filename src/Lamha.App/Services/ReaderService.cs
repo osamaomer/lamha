@@ -1,6 +1,7 @@
 using Lamha.App.ViewModels.Reader;
 using Lamha.App.Windows;
 using Lamha.Core;
+using Lamha.Core.Reading;
 
 namespace Lamha.App.Services;
 
@@ -49,7 +50,7 @@ public sealed partial class ReaderService(Brain brain, CardService card, IdleMem
                 return (await library.AddAsync(file, Path.GetFileName(book)).ConfigureAwait(false)).Book;
             }).ConfigureAwait(true);
             var opened = await Task.Run(() => library.Open(record)).ConfigureAwait(true);
-            _viewModel = new ReaderViewModel(library, opened, record);
+            _viewModel = new ReaderViewModel(library, opened, record, new ReaderLookStore(brain.State));
             AppLog.Info($"reader: opened a {record.Format} book, {record.Words} words, {opened.Parts.Count} parts");
             window.Show(_viewModel);
 

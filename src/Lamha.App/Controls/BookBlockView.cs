@@ -65,6 +65,9 @@ public sealed partial class BookBlockView : ContentControl
 
     private static double Space(string key) => (double)Application.Current.Resources[key];
 
+    /// <summary>Draws the block again: Aa changed the look.</summary>
+    public void Refresh() => Show(Block);
+
     private void Show(ReaderBlock? item)
     {
         _starts.Clear();
@@ -75,6 +78,7 @@ public sealed partial class BookBlockView : ContentControl
         }
 
         var block = item.Block;
+        var look = item.Look();
         Margin = new Thickness(0, 0, 0, block.Kind == BlockKind.Heading ? Space("LamhaSpace6") : Space("LamhaSpace4"));
         Content = block.Kind switch
         {
@@ -85,13 +89,13 @@ public sealed partial class BookBlockView : ContentControl
                 Width = Space("LamhaSpace10") * 3,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, Space("LamhaSpace4"), 0, Space("LamhaSpace4")),
-                Background = ThemeLookup.Get(this, "LamhaLineBrush") as Brush,
+                Background = look.Line ?? ThemeLookup.Get(this, "LamhaLineBrush") as Brush,
             },
-            _ => Words(block),
+            _ => Words(block, look),
         };
     }
 
-    private RichTextBlock Words(BookBlock block)
+    private RichTextBlock Words(BookBlock block, BookLook look)
     {
         var text = new RichTextBlock
         {
@@ -155,6 +159,26 @@ public sealed partial class BookBlockView : ContentControl
             {
                 paragraph.Inlines.Add(run);
             }
+        }
+
+        // Aa: the look's face, size, spacing and the page's ink, over the style's.
+        var (size, heading) = block.Kind switch
+        {
+            BlockKind.Heading when block.Level <= 1 => (look.ChapterSize, true),
+            BlockKind.Heading => (look.HeadingSize, true),
+            BlockKind.Preformatted => (look.FixedSize, false),
+            _ => (look.TextSize, false),
+        };
+        if (block.Kind != BlockKind.Preformatted)
+        {
+            text.FontFamily = look.Font;
+        }
+
+        text.FontSize = size;
+        text.LineHeight = look.LineHeight(size, heading);
+        if (look.Ink is { } ink)
+        {
+            text.Foreground = ink;
         }
 
         text.Blocks.Add(paragraph);

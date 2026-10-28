@@ -254,6 +254,19 @@
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="LineHeight" Value="28" />
   </Style>
+  <!-- Aa's other faces, and its page colours (reader.html's paper and black): the first colours outside "colour carries
+       meaning", for the book's page only (decided 2026-10-28), the same in both themes. Paper takes the light theme's
+       controls, black the dark's; "Lamha" is the window's own layer. -->
+  <FontFamily x:Key="LamhaBookSerifFontFamily">Georgia, Times New Roman</FontFamily>
+  <SolidColorBrush x:Key="LamhaBookPaperBrush" Color="#F5EEDC" />
+  <SolidColorBrush x:Key="LamhaBookPaperTextBrush" Color="#3A2E1F" />
+  <SolidColorBrush x:Key="LamhaBookPaperMutedBrush" Color="#B83A2E1F" />
+  <SolidColorBrush x:Key="LamhaBookPaperLineBrush" Color="#243A2E1F" />
+  <SolidColorBrush x:Key="LamhaBookBlackBrush" Color="#000000" />
+  <SolidColorBrush x:Key="LamhaBookBlackTextBrush" Color="#D4D4D4" />
+  <SolidColorBrush x:Key="LamhaBookBlackMutedBrush" Color="#9A9A9A" />
+  <SolidColorBrush x:Key="LamhaBookBlackLineBrush" Color="#1FFFFFFF" />
+
   <!-- A book's preformatted text (verse set line by line, code): Body in Windows' fixed-width face -->
   <Style x:Key="LamhaBookFixedTextStyle" TargetType="RichTextBlock" BasedOn="{StaticResource LamhaBookTextStyle}">
     <Setter Property="FontFamily" Value="Cascadia Mono, Consolas" />

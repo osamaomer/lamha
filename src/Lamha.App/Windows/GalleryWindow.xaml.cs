@@ -6,6 +6,7 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
 
@@ -200,6 +201,21 @@ public sealed partial class GalleryWindow : Window
             book.Blocks.Add(line);
             TypeList.Children.Add(book);
         }
+
+        // The reader's page swatches (Aa), each in its page's colours; the first one chosen.
+        var swatches = new Grid { ColumnSpacing = Number("LamhaSpace2"), MaxWidth = 288, HorizontalAlignment = HorizontalAlignment.Left };
+        foreach (var (page, ink, name) in new[] { ("LayerFillColorDefaultBrush", "LamhaTextBrush", "Lamha"), ("LamhaBookPaperBrush", "LamhaBookPaperTextBrush", "Paper"), ("LamhaBookBlackBrush", "LamhaBookBlackTextBrush", "Black") })
+        {
+            swatches.ColumnDefinitions.Add(new ColumnDefinition());
+            var swatch = (ToggleButton)XamlReader.Load(
+                "<ToggleButton xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' Style='{StaticResource LamhaPageSwatchStyle}'"
+                + $" Background='{{ThemeResource {page}}}' Foreground='{{ThemeResource {ink}}}' Content='Aa · {name}' />");
+            swatch.IsChecked = swatches.Children.Count == 0;
+            Grid.SetColumn(swatch, swatches.Children.Count);
+            swatches.Children.Add(swatch);
+        }
+
+        TypeList.Children.Add(swatches);
 
         // Drawn as XAML so each colour follows the theme switch, as a screen's ThemeResource does.
         foreach (var key in Brushes)

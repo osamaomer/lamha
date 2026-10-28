@@ -96,6 +96,8 @@ WinUI's ramp. The frame, Settings and controls use only these styles:
 
 ## 3. Colour
 
+**The reader's pages** are the one exception to "colour carries meaning" (decided 2026-10-28): Aa's paper (`LamhaBookPaperBrush`, its ink `LamhaBookPaperTextBrush`, muted and line brushes) and black (`LamhaBookBlack…`), the same in both themes, for a book's page only. Paper takes the light theme's controls, black the dark's.
+
 **The frame and controls take Windows' brushes,** so light, dark and high contrast follow by themselves:
 
 | Use | Windows' brush |
@@ -234,6 +236,7 @@ The default is WinUI's own control and style. Lamha's styles only set tokens.
 | **Icon button** | **32 × 32**, a 16 icon, subtle; a tooltip with its name and shortcut, except in the card, which shows no tooltips at all (the user's call: they got in the way; `Controls/NoToolTips`); its name is always there for screen readers |
 | **Hyperlink button** | the accent text, no fill |
 | **Split / drop-down button** | as the button, with a 12 chevron: Write's **Rewrite ▾** |
+| **Page swatch** (`LamhaPageSwatchStyle`) | the reader's Aa: 56 high, radius 4, a 1 px control edge; the page's own colour with "Aa" and its name in the page's ink; chosen: a 2 px accent ring |
 | **Field** | 32 high (multi-line grows), padding 10,5,6,6, radius 4; focused: **a 2 px accent line under it** |
 | **Search box** | `AutoSuggestBox`, 32 high, 🔍 at its end |
 | **Dropdown** | `ComboBox`, 32 high, radius 4 |

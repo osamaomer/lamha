@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Lamha.App.Controls;
 using Lamha.App.Services;
 using Lamha.Core;
 using Lamha.Core.Abstractions;
@@ -12,7 +14,8 @@ namespace Lamha.App.ViewModels.Reader;
 /// <param name="Part">Its part of the book's reading order.</param>
 /// <param name="Index">Its place in that part.</param>
 /// <param name="Pictures">Opens a picture of the book by its path (for an image block).</param>
-public sealed record ReaderBlock(BookBlock Block, int Part, int Index, Func<string, Stream?> Pictures);
+/// <param name="Look">The page's look (Aa) as it is now.</param>
+public sealed record ReaderBlock(BookBlock Block, int Part, int Index, Func<string, Stream?> Pictures, Func<BookLook> Look);
 
 /// <summary>
 /// The reading page (docs/design/reader.html, signed off): the book's blocks as one scroll, a part loaded when the reader
@@ -33,12 +36,19 @@ public sealed partial class ReaderViewModel : ObservableObject, IDisposable
     // Each part's blocks' words (counted after the book opens), for how far through the book the reader is.
     private IReadOnlyList<int[]>? _words;
     private long _allWords;
+    private readonly ReaderLookStore _looks;
 
-    public ReaderViewModel(Library library, IFlowingBook book, BookRecord record)
+    /// <param name="library">The library, which keeps the place.</param>
+    /// <param name="book">The book, opened (the view model disposes it).</param>
+    /// <param name="record">The book in the library.</param>
+    /// <param name="looks">Where Aa is kept, for every book.</param>
+    public ReaderViewModel(Library library, IFlowingBook book, BookRecord record, ReaderLookStore looks)
     {
         _library = library;
         _book = book;
         _record = record;
+        _looks = looks;
+        Look = new BookLook(looks.Get());
         _contents = [.. Flatten(book.Contents)];
         Title = record.Title;
         Author = string.Join(Localization.Get("Reader_AuthorsAnd"), record.Authors);
@@ -73,6 +83,62 @@ public sealed partial class ReaderViewModel : ObservableObject, IDisposable
     /// <summary>The footer's end: how far through the book ("12% of the book").</summary>
     [ObservableProperty]
     public partial string Progress { get; private set; } = "";
+
+    /// <summary>Aa: the page's face, size, spacing, width and colour, the same for every book.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SizeText), nameof(CanBeSmaller), nameof(CanBeLarger))]
+    public partial BookLook Look { get; private set; }
+
+    /// <summary>Aa's text size, in the interface's digits.</summary>
+    public string SizeText => Localization.Number(Look.Look.Size);
+
+    public bool CanBeSmaller => Look.Look.Size > ReaderLook.SmallestSize;
+
+    public bool CanBeLarger => Look.Look.Size < ReaderLook.LargestSize;
+
+    /// <summary>Whether Aa's <paramref name="choice"/> ("font", "spacing", "width", "page") is <paramref name="value"/>, for its buttons.</summary>
+    public static bool Chosen(BookLook look, string choice, string value)
+    {
+        ArgumentNullException.ThrowIfNull(look);
+        return choice switch
+        {
+            "font" => look.Look.Font == value,
+            "spacing" => look.Look.LineSpacing.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) == value,
+            "width" => look.Look.Width == value,
+            "page" => look.Look.Page == value,
+            _ => false,
+        };
+    }
+
+    [RelayCommand]
+    private void SetFont(string font) => Change(Look.Look with { Font = font });
+
+    [RelayCommand]
+    private void SetSpacing(string spacing) =>
+        Change(Look.Look with { LineSpacing = double.Parse(spacing, System.Globalization.CultureInfo.InvariantCulture) });
+
+    [RelayCommand]
+    private void SetWidth(string width) => Change(Look.Look with { Width = width });
+
+    [RelayCommand]
+    private void SetPage(string page) => Change(Look.Look with { Page = page });
+
+    [RelayCommand]
+    private void Resize(string steps) => Change(Look.Look.Resized(int.Parse(steps, System.Globalization.CultureInfo.InvariantCulture)));
+
+    // Kept for every book, and a new look each time, so Aa's buttons all follow even when the same one is pressed again.
+    private void Change(ReaderLook look)
+    {
+        try
+        {
+            Look = new BookLook(_looks.Save(look));
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            AppLog.Error("reader: keeping Aa", ex);
+            Look = new BookLook(look.Checked());
+        }
+    }
 
     /// <summary>The reader is at <paramref name="index"/> of the blocks loaded: the footer follows, and the place is kept.</summary>
     public void ReadingAt(int index)
@@ -196,7 +262,7 @@ public sealed partial class ReaderViewModel : ObservableObject, IDisposable
 
         for (var i = 0; i < blocks.Count; i++)
         {
-            Blocks.Insert(at + i, new ReaderBlock(blocks[i], part, i, _book.OpenResource));
+            Blocks.Insert(at + i, new ReaderBlock(blocks[i], part, i, _book.OpenResource, () => Look));
         }
 
         return blocks.Count;
