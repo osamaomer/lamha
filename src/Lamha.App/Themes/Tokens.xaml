@@ -43,6 +43,11 @@
       <SolidColorBrush x:Key="LamhaDangerSolidTextBrush" Color="#FFFFFF" />
       <!-- What a search matched (Lamha 2's mark): amber behind the text -->
       <SolidColorBrush x:Key="LamhaMarkBrush" Color="#4DF59E0B" />
+      <!-- The reader's highlights (reader.html): see-through, so the text reads through them -->
+      <SolidColorBrush x:Key="LamhaHighlightYellowBrush" Color="#66FACC15" />
+      <SolidColorBrush x:Key="LamhaHighlightGreenBrush" Color="#574ADE80" />
+      <SolidColorBrush x:Key="LamhaHighlightBlueBrush" Color="#5760A5FA" />
+      <SolidColorBrush x:Key="LamhaHighlightPinkBrush" Color="#4DF472B6" />
       <SolidColorBrush x:Key="LamhaMarkTextBrush" Color="#1D1D1F" />
       <!-- The Lamha mark, and milestones -->
       <LinearGradientBrush x:Key="LamhaBrandBrush" StartPoint="0,0" EndPoint="1,1">
@@ -94,6 +99,10 @@
       <SolidColorBrush x:Key="LamhaDangerSolidBrush" Color="#DC2626" />
       <SolidColorBrush x:Key="LamhaDangerSolidTextBrush" Color="#FFFFFF" />
       <SolidColorBrush x:Key="LamhaMarkBrush" Color="#52F59E0B" />
+      <SolidColorBrush x:Key="LamhaHighlightYellowBrush" Color="#4DFACC15" />
+      <SolidColorBrush x:Key="LamhaHighlightGreenBrush" Color="#424ADE80" />
+      <SolidColorBrush x:Key="LamhaHighlightBlueBrush" Color="#4D60A5FA" />
+      <SolidColorBrush x:Key="LamhaHighlightPinkBrush" Color="#47F472B6" />
       <SolidColorBrush x:Key="LamhaMarkTextBrush" Color="#F5F5F7" />
       <LinearGradientBrush x:Key="LamhaBrandBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Offset="0" Color="#6366F1" />
@@ -144,6 +153,10 @@
       <SolidColorBrush x:Key="LamhaDangerSolidBrush" Color="{ThemeResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="LamhaDangerSolidTextBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
       <SolidColorBrush x:Key="LamhaMarkBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="LamhaHighlightYellowBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="LamhaHighlightGreenBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="LamhaHighlightBlueBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="LamhaHighlightPinkBrush" Color="{ThemeResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="LamhaMarkTextBrush" Color="{ThemeResource SystemColorHighlightTextColor}" />
       <SolidColorBrush x:Key="LamhaBrandBrush" Color="{ThemeResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="LamhaBrandBarBrush" Color="{ThemeResource SystemColorHighlightColor}" />
@@ -266,6 +279,14 @@
   <SolidColorBrush x:Key="LamhaBookBlackTextBrush" Color="#D4D4D4" />
   <SolidColorBrush x:Key="LamhaBookBlackMutedBrush" Color="#9A9A9A" />
   <SolidColorBrush x:Key="LamhaBookBlackLineBrush" Color="#1FFFFFFF" />
+  <!-- A box on the book's page (a paragraph's translation): the page's own quiet fill -->
+  <SolidColorBrush x:Key="LamhaBookPaperFillBrush" Color="#14785A28" />
+  <SolidColorBrush x:Key="LamhaBookBlackFillBrush" Color="#14FFFFFF" />
+  <!-- The selection toolbar's colour dots, solid (the highlights themselves are see-through, per theme) -->
+  <SolidColorBrush x:Key="LamhaHighlightYellowDotBrush" Color="#EAB308" />
+  <SolidColorBrush x:Key="LamhaHighlightGreenDotBrush" Color="#22C55E" />
+  <SolidColorBrush x:Key="LamhaHighlightBlueDotBrush" Color="#3B82F6" />
+  <SolidColorBrush x:Key="LamhaHighlightPinkDotBrush" Color="#EC4899" />
 
   <!-- A book's preformatted text (verse set line by line, code): Body in Windows' fixed-width face -->
   <Style x:Key="LamhaBookFixedTextStyle" TargetType="RichTextBlock" BasedOn="{StaticResource LamhaBookTextStyle}">

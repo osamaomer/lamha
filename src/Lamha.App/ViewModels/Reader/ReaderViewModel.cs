@@ -9,13 +9,62 @@ using Lamha.Core.Reading;
 
 namespace Lamha.App.ViewModels.Reader;
 
-/// <summary>A block of the book on the page, and where it is: its part of the reading order and its place in that part.</summary>
-/// <param name="Block">The block.</param>
-/// <param name="Part">Its part of the book's reading order.</param>
-/// <param name="Index">Its place in that part.</param>
-/// <param name="Pictures">Opens a picture of the book by its path (for an image block).</param>
-/// <param name="Look">The page's look (Aa) as it is now.</param>
-public sealed record ReaderBlock(BookBlock Block, int Part, int Index, Func<string, Stream?> Pictures, Func<BookLook> Look);
+/// <summary>What the selection toolbar does with what's selected in a block.</summary>
+public enum SelectionAction
+{
+    Highlight,
+    RemoveHighlight,
+    Note,
+    Translate,
+    Copy,
+}
+
+/// <summary>A selection toolbar's command: what, on which characters of the block's text, and a colour or a note.</summary>
+public sealed record SelectionRequest(SelectionAction Action, int Start, int End, string Text, string Color = "", string Note = "");
+
+/// <summary>A paragraph's translation under it: on its way, shown, or why it couldn't be.</summary>
+public enum TranslationState
+{
+    None,
+    Waiting,
+    Shown,
+    Failed,
+}
+
+/// <summary>
+/// A block of the book on the page, where it is (its part of the reading order and its place in that part), and what the
+/// reader added to it: its highlights and notes, and its translation. Its view draws it again when <see cref="Changed"/>.
+/// </summary>
+public sealed class ReaderBlock(BookBlock block, int part, int index, Func<string, Stream?> pictures, Func<BookLook> look, Action<ReaderBlock, SelectionRequest> act)
+{
+    public BookBlock Block { get; } = block;
+
+    public int Part { get; } = part;
+
+    public int Index { get; } = index;
+
+    /// <summary>Opens a picture of the book by its path (for an image block).</summary>
+    public Func<string, Stream?> Pictures { get; } = pictures;
+
+    /// <summary>The page's look (Aa) as it is now.</summary>
+    public Func<BookLook> Look { get; } = look;
+
+    /// <summary>Its highlights (with their notes), in the block's order.</summary>
+    public List<BookMark> Marks { get; } = [];
+
+    public TranslationState Translation { get; set; }
+
+    /// <summary>The translation, or why it failed.</summary>
+    public string TranslationText { get; set; } = "";
+
+    /// <summary>Its highlights, translation or look changed: its view draws it again.</summary>
+    public event Action? Changed;
+
+    /// <summary>The selection toolbar, or the translation's own buttons, asked for something.</summary>
+    public void Act(SelectionRequest request) => act(this, request);
+
+    public void Redraw() => Changed?.Invoke();
+}
 
 /// <summary>
 /// The reading page (docs/design/reader.html, signed off): the book's blocks as one scroll, a part loaded when the reader
@@ -37,18 +86,39 @@ public sealed partial class ReaderViewModel : ObservableObject, IDisposable
     private IReadOnlyList<int[]>? _words;
     private long _allWords;
     private readonly ReaderLookStore _looks;
+    private readonly Func<string, CancellationToken, Task<string>> _translate;
+    private readonly Action<string> _copy;
+    private readonly CancellationTokenSource _closing = new();
+
+    // The book's highlights by block, as kept: a block's view takes its own when it's loaded.
+    private readonly Dictionary<(int Part, int Block), List<BookMark>> _marks = [];
 
     /// <param name="library">The library, which keeps the place.</param>
     /// <param name="book">The book, opened (the view model disposes it).</param>
     /// <param name="record">The book in the library.</param>
     /// <param name="looks">Where Aa is kept, for every book.</param>
-    public ReaderViewModel(Library library, IFlowingBook book, BookRecord record, ReaderLookStore looks)
+    /// <param name="translate">Translates a paragraph into the user's language (Lamha's translator, as the Translate page's).</param>
+    /// <param name="copy">Puts text on the clipboard (the user's own copy).</param>
+    public ReaderViewModel(Library library, IFlowingBook book, BookRecord record, ReaderLookStore looks, Func<string, CancellationToken, Task<string>> translate, Action<string> copy)
     {
         _library = library;
         _book = book;
         _record = record;
         _looks = looks;
+        _translate = translate;
+        _copy = copy;
         Look = new BookLook(looks.Get());
+        foreach (var mark in library.Marks(record.Id).Where(m => m.Kind == MarkKind.Highlight))
+        {
+            var key = (mark.Place.Part, mark.Place.Block);
+            if (!_marks.TryGetValue(key, out var list))
+            {
+                _marks[key] = list = [];
+            }
+
+            list.Add(mark);
+        }
+
         _contents = [.. Flatten(book.Contents)];
         Title = record.Title;
         Author = string.Join(Localization.Get("Reader_AuthorsAnd"), record.Authors);
@@ -244,7 +314,97 @@ public sealed partial class ReaderViewModel : ObservableObject, IDisposable
         }
     }
 
-    public void Dispose() => _book.Dispose();
+    public void Dispose()
+    {
+        _closing.Cancel();
+        _closing.Dispose();
+        _book.Dispose();
+    }
+
+    // The selection toolbar's command on a block, and the translation's own Copy and Close.
+    private void Act(ReaderBlock block, SelectionRequest request)
+    {
+        try
+        {
+            switch (request.Action)
+            {
+                case SelectionAction.Highlight:
+                    Highlight(block, request, request.Color, "");
+                    break;
+                case SelectionAction.Note:
+                    Highlight(block, request, "yellow", request.Note);
+                    break;
+                case SelectionAction.RemoveHighlight:
+                    Unhighlight(block, request.Start, request.End);
+                    block.Redraw();
+                    break;
+                case SelectionAction.Translate:
+                    _ = TranslateAsync(block);
+                    break;
+                case SelectionAction.Copy:
+                    _copy(request.Text);
+                    break;
+            }
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            AppLog.Error($"reader: {request.Action}", ex);
+        }
+    }
+
+    // A highlight takes whole words (a drag that starts or ends inside one), replaces the ones it overlaps (the design's),
+    // and is kept with the book.
+    private void Highlight(ReaderBlock block, SelectionRequest request, string color, string note)
+    {
+        var text = block.Block.Text;
+        var start = ReaderText.WordAt(text, request.Start) is { } first && first.Start < request.Start ? first.Start : request.Start;
+        var end = ReaderText.WordAt(text, request.End - 1) is { } last && last.Start + last.Length > request.End ? last.Start + last.Length : request.End;
+        Unhighlight(block, start, end);
+        var mark = _library.Highlight(_record.Id, new BookPlace(block.Part, block.Index), start, end, color, text[start..end].Trim(), note);
+        block.Marks.Add(mark);
+        block.Marks.Sort((a, b) => a.Start.CompareTo(b.Start));
+        block.Redraw();
+    }
+
+    private void Unhighlight(ReaderBlock block, int start, int end)
+    {
+        foreach (var mark in block.Marks.Where(m => m.Start < end && m.End > start).ToList())
+        {
+            _library.DeleteMark(mark.Id);
+            block.Marks.Remove(mark);
+        }
+    }
+
+    // The paragraph's translation under it; pressing Translate again on a shown one closes it.
+    private async Task TranslateAsync(ReaderBlock block)
+    {
+        if (block.Translation is TranslationState.Shown or TranslationState.Waiting)
+        {
+            block.Translation = TranslationState.None;
+            block.Redraw();
+            return;
+        }
+
+        block.Translation = TranslationState.Waiting;
+        block.Redraw();
+        try
+        {
+            block.TranslationText = await _translate(block.Block.Text, _closing.Token).ConfigureAwait(true);
+            block.Translation = TranslationState.Shown;
+        }
+        catch (LamhaException ex)
+        {
+            AppLog.Info($"reader: paragraph not translated ({ex.Code})");
+            block.TranslationText = Localization.Get(ex.Code == ErrorCodes.Network ? "Card_ErrOffline" : "Card_ErrFailed");
+            block.Translation = TranslationState.Failed;
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        block.Redraw();
+    }
 
     // A part's blocks put at <paramref name="at"/> in the list; a part that can't be read is left out (and logged).
     private int Add(int part, int at)
@@ -262,7 +422,13 @@ public sealed partial class ReaderViewModel : ObservableObject, IDisposable
 
         for (var i = 0; i < blocks.Count; i++)
         {
-            Blocks.Insert(at + i, new ReaderBlock(blocks[i], part, i, _book.OpenResource, () => Look));
+            var block = new ReaderBlock(blocks[i], part, i, _book.OpenResource, () => Look, Act);
+            if (_marks.TryGetValue((part, i), out var marks))
+            {
+                block.Marks.AddRange(marks);
+            }
+
+            Blocks.Insert(at + i, block);
         }
 
         return blocks.Count;

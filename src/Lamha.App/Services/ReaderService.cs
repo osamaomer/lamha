@@ -50,7 +50,13 @@ public sealed partial class ReaderService(Brain brain, CardService card, IdleMem
                 return (await library.AddAsync(file, Path.GetFileName(book)).ConfigureAwait(false)).Book;
             }).ConfigureAwait(true);
             var opened = await Task.Run(() => library.Open(record)).ConfigureAwait(true);
-            _viewModel = new ReaderViewModel(library, opened, record, new ReaderLookStore(brain.State));
+            _viewModel = new ReaderViewModel(
+                library,
+                opened,
+                record,
+                new ReaderLookStore(brain.State),
+                async (text, cancel) => (await brain.Translation.TranslateAsync([text], brain.Settings.Current.TargetLang, cancel: cancel).ConfigureAwait(true)).Texts[0],
+                text => global::Lamha.Windows.Clipboard.Clipboard.WriteText(window.Handle, text, keepOutOfHistory: false));
             AppLog.Info($"reader: opened a {record.Format} book, {record.Words} words, {opened.Parts.Count} parts");
             window.Show(_viewModel);
 

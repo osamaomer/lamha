@@ -42,6 +42,9 @@ public sealed class BookLook(ReaderLook look)
     /// <summary>Lines on that page (the footer's, a scene break's), or null for the theme's.</summary>
     public Brush? Line => Brush(Look.Page switch { "paper" => "LamhaBookPaperLineBrush", "black" => "LamhaBookBlackLineBrush", _ => null });
 
+    /// <summary>A box's quiet fill on that page (a paragraph's translation), or null for the theme's chip fill.</summary>
+    public Brush? Fill => Brush(Look.Page switch { "paper" => "LamhaBookPaperFillBrush", "black" => "LamhaBookBlackFillBrush", _ => null });
+
     /// <summary>The controls' theme on that page: paper is light, black is dark, Lamha's follows the window.</summary>
     public ElementTheme Theme => Look.Page switch { "paper" => ElementTheme.Light, "black" => ElementTheme.Dark, _ => ElementTheme.Default };
 
