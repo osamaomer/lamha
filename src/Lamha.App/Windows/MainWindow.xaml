@@ -7,7 +7,8 @@
   <!-- The main window, as Windows' Settings (docs/design/system.md, The window; decision 0020): Mica, Windows' title bar
        with Back (and ☰ when narrow), Windows' navigation pane with Lamha's header and coloured icons, and the page on
        Windows' content layer, which NavigationView draws. Two widths only, as Settings: the pane open, or hidden behind ☰. -->
-  <Grid x:Name="Root">
+  <!-- Alt+Left is Back; Hidden, or WinUI shows "Alt+Left" as the whole window's tooltip wherever nothing has its own -->
+  <Grid x:Name="Root" KeyboardAcceleratorPlacementMode="Hidden">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />

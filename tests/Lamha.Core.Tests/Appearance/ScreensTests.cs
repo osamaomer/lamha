@@ -60,6 +60,28 @@ public partial class ScreensTests
         Assert.True(gone.Count == 0, "Named as Windows' measurements but no longer in the screens:\n" + string.Join('\n', gone));
     }
 
+    /// <summary>
+    /// An element with keyboard shortcuts hides them (<c>KeyboardAcceleratorPlacementMode="Hidden"</c>): otherwise WinUI
+    /// shows the keys as its tooltip, and on a window's root that's "Alt+Left" wherever the mouse rests.
+    /// </summary>
+    [Fact]
+    public void AShortcutIsNeverShownAsATooltip()
+    {
+        var found = new List<string>();
+        foreach (var file in XamlFiles())
+        {
+            foreach (var shortcuts in XDocument.Load(file, LoadOptions.SetLineInfo).Descendants().Where(e => e.Name.LocalName.EndsWith(".KeyboardAccelerators", StringComparison.Ordinal)))
+            {
+                if (shortcuts.Parent is { } owner && (string?)owner.Attribute("KeyboardAcceleratorPlacementMode") != "Hidden")
+                {
+                    found.Add($"{Relative(file)}:{((System.Xml.IXmlLineInfo)owner).LineNumber}: {owner.Name.LocalName}");
+                }
+            }
+        }
+
+        Assert.True(found.Count == 0, "Keyboard shortcuts shown as a tooltip (add KeyboardAcceleratorPlacementMode=\"Hidden\"):\n" + string.Join('\n', found));
+    }
+
     [Fact]
     public void TheScreensCodeTypesNoColourSizeRadiusOrGlyph()
     {

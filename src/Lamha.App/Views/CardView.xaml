@@ -267,7 +267,7 @@
               <TextBox x:Name="IntentBox" MinHeight="72" AcceptsReturn="True" TextWrapping="Wrap" TextReadingOrder="DetectFromContent"
                        PlaceholderText="{x:Bind ViewModel.Writing.IntentPlaceholder, Mode=OneWay}"
                        Text="{x:Bind ViewModel.Writing.Intent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                       AutomationProperties.Name="{x:Bind ComposeLabel}">
+                       AutomationProperties.Name="{x:Bind ComposeLabel}" KeyboardAcceleratorPlacementMode="Hidden">
                 <TextBox.KeyboardAccelerators>
                   <KeyboardAccelerator Key="Enter" Modifiers="Control" Invoked="OnWriteKey" />
                 </TextBox.KeyboardAccelerators>
