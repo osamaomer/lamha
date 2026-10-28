@@ -56,6 +56,10 @@ public static class ErrorCodes
     public const string PackDownload = "pack_download";
     public const string PackBad = "pack_bad";
 
+    /// <summary>New in Lamha 3, the reader: a book that isn't an EPUB or is damaged; a book locked by DRM to another app.</summary>
+    public const string BookBad = "book_bad";
+    public const string BookLocked = "book_locked";
+
     /// <summary>Google answered with an error or something that isn't its JSON (shown as "something went wrong").</summary>
     public const string GoogleError = "google_error";
 

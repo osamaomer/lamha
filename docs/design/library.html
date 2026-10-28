@@ -21,6 +21,7 @@
   /* covers made from a book's title: pictures, the same in both themes */
   --cv0: #2f3d34; --cv0-ink: #efe6cf; --cv1: #5b1f1f; --cv1-ink: #f2d9b8; --cv2: #2e3440; --cv2-ink: #d8dee9; --cv3: #134e4a; --cv3-ink: #ccfbf1;
   --cv4: #3730a3; --cv4-ink: #e0e7ff; --cv5: #0f1b33; --cv5-ink: #e7c873; --cv6: #6b1d2f; --cv6-ink: #f8e1c4; --cv7: #7c3a4a; --cv7-ink: #fff1f2;
+  --halftone: rgba(255, 255, 255, 0.14);
   --cv-doc: #f4f5f7; --cv-doc-ink: #2b579a; --cv-doc-2: #6b7280; --cv-txt: #fbfaf5; --cv-txt-ink: #44403c;
   --ui: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", "Noto Sans Arabic", Tahoma, system-ui, sans-serif;
   --ui-display: "Segoe UI Variable Display", "Segoe UI Variable Text", "Segoe UI", "Noto Sans Arabic", Tahoma, system-ui, sans-serif;
@@ -230,6 +231,8 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
 .tile .st .pb { flex: 1; height: 3px; }
 .tile .st .new { padding: 0 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .tile .st .done .fi { color: var(--ok); font-size: 12px; margin-inline-end: 4px; }
+.tile .kn { display: flex; align-items: center; gap: 6px; margin-top: -4px; font-size: 12px; line-height: 16px; color: var(--t2); }
+.tile .kn .fi { font-size: 12px; color: var(--accent); }
 .tile .more { position: absolute; top: 6px; inset-inline-end: 6px; background: var(--acrylic); box-shadow: var(--shadow); opacity: 0; transition: opacity var(--t-faster); }
 .tile:hover .more, .tile .more:focus-visible, .tile .more[aria-expanded="true"] { opacity: 1; }
 .tile .more:hover { background: var(--acrylic); }
@@ -250,6 +253,11 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
 .cover .lines i { display: block; height: 3px; border-radius: 2px; background: var(--cv-doc-2); opacity: 0.25; }
 .cover .lines i:nth-child(3n) { width: 70%; }
 .cover .dn { font: 600 0.72em/1.25 var(--ui); color: var(--cv-doc-2); overflow-wrap: anywhere; }
+/* a comic from a free library: a halftone picture, the same in both themes */
+.cover.comic { background: radial-gradient(var(--halftone) 1px, transparent 1.5px) 0 0 / 7px 7px, var(--c); }
+.cover.comic::before { border-width: 3px; opacity: 0.55; }
+.cover.comic .ct { font: 800 1.1em/1.05 var(--ui-display); text-transform: uppercase; letter-spacing: 0.02em; }
+.cover.comic .ca { font-family: var(--ui); }
 .tile .cover { font-size: 14px; }
 .cont .cover { font-size: 11px; }
 .empty { display: grid; justify-items: center; gap: 12px; padding: 48px 16px 32px; text-align: center; }
@@ -257,14 +265,34 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
 .empty p { margin: 0; color: var(--t2); max-width: 40ch; }
 .empty b { font-weight: 600; font-size: 16px; }
 .nomatch { grid-column: 1 / -1; color: var(--t2); padding: 24px 0; }
-.free { margin-top: 36px; }
-.free .group-h { margin-bottom: 8px; }
-.link-card { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; gap: 20px; min-height: 68px; padding: 13px 16px; border-radius: 4px; background: var(--card); border: 1px solid var(--card-edge); color: var(--t1); text-decoration: none; transition: background var(--t-faster); }
-.link-card + .link-card { margin-top: 4px; }
-.link-card:hover { background: var(--ctl-2); }
-.link-card .fi { font-size: 20px; }
-.link-card .ds { display: block; font-size: 12px; line-height: 16px; color: var(--t2); }
-.link-card .go { font-size: 12px; color: var(--t2); }
+/* Your books / Find books: Windows' SelectorBar */
+.tabs { display: flex; gap: 4px; margin: -5px 0 20px; margin-inline-start: -12px; }
+.tabs button { position: relative; height: 40px; padding: 0 12px; border: 0; border-radius: 4px; background: none; color: var(--t2); font: 14px/20px var(--ui); cursor: pointer; }
+.tabs button:hover { background: var(--subtle-1); color: var(--t1); }
+.tabs button[aria-selected="true"] { color: var(--t1); font-weight: 600; }
+.tabs button[aria-selected="true"]::after { content: ""; position: absolute; bottom: 2px; left: 50%; width: 16px; height: 3px; margin-left: -8px; border-radius: 2px; background: var(--accent); }
+.tabs button:focus-visible { outline: 2px solid var(--t1); outline-offset: 1px; }
+/* the free books' catalogue */
+.find-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 12px; }
+.find-head .field { flex: 1; min-width: 200px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.chips button { height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid var(--ctl-edge); background: var(--ctl); color: var(--t1); font: 14px/20px var(--ui); cursor: pointer; transition: background var(--t-faster); }
+.chips button:hover { background: var(--ctl-2); }
+.chips button[aria-pressed="true"] { background: var(--accent-fill); border-color: transparent; color: var(--on-accent); }
+.chips button:focus-visible { outline: 2px solid var(--t1); outline-offset: 1px; }
+.find-sub { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.find-sub small { font-size: 12px; color: var(--t2); }
+.ctile { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.ctile .cover { font-size: 14px; }
+.ctile .tt { font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ctile .ta { font-size: 12px; line-height: 16px; color: var(--t2); margin-top: -6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ctile .btn { width: 100%; justify-content: center; }
+.ctile .dl { display: grid; gap: 6px; height: 32px; align-content: center; font-size: 12px; line-height: 16px; color: var(--t2); }
+.ctile .dl .pb i { transition: width var(--t-fast); }
+.ctile .have { display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 16px; color: var(--t2); }
+.ctile .have .fi { color: var(--ok); font-size: 12px; }
+.find-foot { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--divider); font-size: 12px; line-height: 18px; color: var(--t2); }
+.find-foot a { color: var(--accent); }
 .drop { position: absolute; inset: 8px; z-index: 5; border-radius: 8px; border: 2px dashed var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--acrylic)); display: none; place-items: center; text-align: center; animation: menu-in var(--t-fast) var(--ease-in); }
 .win.dropping .drop { display: grid; }
 .drop .fi { font-size: 40px; color: var(--accent); }
@@ -291,14 +319,15 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
 <div class="wrap">
   <header class="intro">
     <h1>The library</h1>
-    <p>The second design of Lamha Reader: a new <b>Read</b> page in Lamha's main window, with the book you're reading, your books, and where to find free ones. Click a book to open it, use its ⋯ menu, add a book, or drop an EPUB, Word or text file on the window. All of the wording is a draft for you to rewrite.</p>
-    <div class="meta"><span><b>Status</b> First draft, for your comments</span><span><b>Date</b> 28 October 2026</span><span><b>Before it</b> <a href="https://claude.ai/artifact/WaegiRZC7HKWBpBvZSSoW6" target="_blank" rel="noopener">the reading page</a>, signed off</span><span><b>Icons</b> Segoe Fluent Icons: open this page on Windows 11 to see them</span></div>
+    <p>The second design of Lamha Reader: a new <b>Read</b> page in Lamha's main window, with the book you're reading, your books, and free books to find and download without leaving Lamha. Click a book to open it, use its ⋯ menu, add a book, drop an EPUB, Word or text file on the window, or open <b>Find books</b> and download one. All of the wording is a draft for you to rewrite.</p>
+    <div class="meta"><span><b>Status</b> Second draft, with your answers of 28 October, for sign-off</span><span><b>Date</b> 28 October 2026</span><span><b>Before it</b> <a href="https://claude.ai/artifact/WaegiRZC7HKWBpBvZSSoW6" target="_blank" rel="noopener">the reading page</a>, signed off</span><span><b>Icons</b> Segoe Fluent Icons: open this page on Windows 11 to see them</span></div>
   </header>
 
   <section class="chapter" id="library" style="border-top: 0; margin-top: 0; padding-top: 8px;">
-    <div class="head"><span class="no">01</span><h2>The Read page</h2><p>Lamha's main window as the design system has it, with Read in the pane. The states switch shows the library empty and with a file dragged over it; the width switch shows the narrow window, where the pane hides behind ☰.</p></div>
+    <div class="head"><span class="no">01</span><h2>The Read page</h2><p>Lamha's main window as the design system has it, with Read in the pane. The tab switch (or the tabs under the page's title) shows your books or the free books' catalogue; the states switch shows the library empty and with a file dragged over it; the width switch shows the narrow window, where the pane hides behind ☰.</p></div>
     <div class="stage">
       <div class="stage-tools">
+        <div class="ctl-group"><span class="seg-label">Tab</span><div class="seg" data-ctl="tab"><button data-v="mine" aria-pressed="true">Your books</button><button data-v="find" aria-pressed="false">Find books</button></div></div>
         <div class="ctl-group"><span class="seg-label">State</span><div class="seg" data-ctl="state"><button data-v="books" aria-pressed="true">With books</button><button data-v="empty" aria-pressed="false">Empty</button><button data-v="drop" aria-pressed="false">Dragging a file</button></div></div>
         <div class="ctl-group"><span class="seg-label">Width</span><div class="seg" data-ctl="width"><button data-v="wide" aria-pressed="true">Wide</button><button data-v="narrow" aria-pressed="false">Narrow</button></div></div>
       </div>
@@ -324,27 +353,31 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
     <div class="head"><span class="no">02</span><h2>What's on the page</h2><p>From the top, and what each part is for.</p></div>
     <div class="sheet">
       <ul class="facts">
-        <li><span class="fi">&#xE82D;</span><span><b>Read, a new page in the pane,</b> between Write and Review: reading feeds Review. Its coloured icon is an open book, drawn like the others (drafts in Windows Settings' style).</span></li>
+        <li><span class="fi">&#xE82D;</span><span><b>Read, a new page in the pane</b> (القارئ in Arabic), between Write and Review: reading feeds Review. Its coloured icon is an open book, drawn like the others (drafts in Windows Settings' style).</span></li>
+        <li><span class="fi">&#xE8FD;</span><span><b>Two tabs, Your books and Find books,</b> under the page's title, as Windows' SelectorBar: the books you have, and the free ones you can get.</span></li>
         <li><span class="fi">&#xE768;</span><span><b>Continue reading:</b> the last book you read, where you are, the time left, and Continue, the page's one accent button. "Words from this book" opens Review with them.</span></li>
-        <li><span class="fi">&#xE9D2;</span><span><b>You know 94% of its words:</b> worked out on this PC from the words in your History and Review, so you can tell how hard a book will be before you start. Shown here and in a book's details.</span></li>
-        <li><span class="fi">&#xE8F1;</span><span><b>Your books,</b> as covers: the book's own cover when the EPUB has one, or one made from its title, as drawn. A Word or text file gets a page-like cover with its name. Under each: how far you've read, New, or Finished.</span></li>
+        <li><span class="fi">&#xE9D2;</span><span><b>You know 94% of its words:</b> worked out on this PC from the words in your History and Review, so you can tell how hard a book will be before you start. On Continue reading, in a book's details, and in one short line under every cover.</span></li>
+        <li><span class="fi">&#xE8F1;</span><span><b>Your books,</b> as covers: the book's own cover when the EPUB has one, or one made from its title in colours chosen from the title, so the same book always looks the same. A Word or text file gets a page-like cover with its name. Under each: how far you've read, New, or Finished, and how many of its words you know.</span></li>
         <li><span class="fi">&#xE71C;</span><span><b>Find, filter and sort:</b> search by title or author; All, Reading, New, Finished; sort by recent, title or author.</span></li>
         <li><span class="fi">&#xE712;</span><span><b>Each book's ⋯ menu:</b> Open, Mark as finished, Remove from library (with Undo, as everywhere in Lamha). Removing it from the library deletes Lamha's copy, never your original file.</span></li>
-        <li><span class="fi">&#xE896;</span><span><b>Add a book</b> from a file, or drop one on the window: EPUB, DOCX or TXT. Lamha keeps its own copy in its data folder, so the book stays if the original moves.</span></li>
-        <li><span class="fi">&#xE774;</span><span><b>Free books to read:</b> Project Gutenberg and Standard Ebooks, opened in the browser. Download an EPUB there, then add it here.</span></li>
+        <li><span class="fi">&#xE896;</span><span><b>Add a book</b> from a file, or drop one on the window: EPUB, DOCX or TXT, or a comic as CBZ or CBR. Lamha keeps its own copy in its data folder, so the book still opens, with its highlights and notes, if the original moves or is deleted; the backup in Settings includes it.</span></li>
+        <li><span class="fi">&#xE774;</span><span><b>Find books:</b> free books from Project Gutenberg and Standard Ebooks, and public-domain comics, with their covers. Search by title or author, pick a category, download with one click: the book lands in Your books, ready to read. For people who don't know where to start, the first view is the most-read books.</span></li>
       </ul>
     </div>
   </section>
 
   <section class="chapter" id="questions">
-    <div class="head"><span class="no">03</span><h2>Questions</h2><p>Each with a recommendation.</p></div>
+    <div class="head"><span class="no">03</span><h2>Questions</h2><p>The first draft's six, as you answered them on 28 October, and the catalogue's new ones, each with a recommendation.</p></div>
     <div class="qs">
-      <div class="q"><h4>Where does Read go in the pane?</h4><p><span class="rec">Recommended: between Write and Review,</span> as drawn. Reading leads to Review.</p></div>
-      <div class="q"><h4>"You know 94% of its words": show it?</h4><p><span class="rec">Recommended: yes, on Continue reading and in a book's details,</span> not on every cover, where it would crowd the grid.</p></div>
-      <div class="q"><h4>Covers made from a title, when a book has none?</h4><p><span class="rec">Recommended: yes, as drawn,</span> in a few colours chosen from the title so the same book always looks the same.</p></div>
-      <div class="q"><h4>Does Lamha keep its own copy of each book?</h4><p><span class="rec">Recommended: yes, in Lamha's data folder,</span> so moving or deleting the original doesn't lose the book or its highlights. "A copy of my data" in Settings would then include them.</p></div>
-      <div class="q"><h4>Free books: links, or a catalogue inside Lamha?</h4><p><span class="rec">Recommended: links now.</span> Standard Ebooks and Project Gutenberg both publish catalogues Lamha could browse and download from later (an idea for after the reader works).</p></div>
-      <div class="q"><h4>The pane's name in Arabic?</h4><p>"قراءة" in this draft, as the other pages are nouns (ترجمة، كتابة، مراجعة). Yours to choose.</p></div>
+      <div class="q"><h4>Where does Read go in the pane?</h4><p><span class="rec">Answered: between Write and Review,</span> as drawn.</p></div>
+      <div class="q"><h4>"You know 94% of its words": where?</h4><p><span class="rec">Answered: on Continue reading, in a book's details, and under every cover,</span> in one short line.</p></div>
+      <div class="q"><h4>Covers made from a title, when a book has none?</h4><p><span class="rec">Answered: yes,</span> in colours chosen from the title.</p></div>
+      <div class="q"><h4>Does Lamha keep its own copy of each book?</h4><p><span class="rec">Answered: yes,</span> so the book and its highlights and notes stay together.</p></div>
+      <div class="q"><h4>Free books: links, or a catalogue inside Lamha?</h4><p><span class="rec">Answered: a catalogue,</span> searched, in categories, downloaded inside Lamha, as a Find books tab of the Read page.</p></div>
+      <div class="q"><h4>The pane's name in Arabic?</h4><p><span class="rec">Answered: القارئ.</span></p></div>
+      <div class="q"><h4>"You know __%" in Find books, before downloading?</h4><p><span class="rec">Answered: not at first.</span> Lamha needs the book's words to count them; it shows once the book is downloaded. Later, a small word list per book could come with the catalogue.</p></div>
+      <div class="q"><h4>Which comics?</h4><p><span class="rec">Answered: public-domain comics in Find books,</span> from libraries that allow it, checked one by one before they're built in (as drawn: Little Nemo, The Yellow Kid); <span class="rec">and your own comics,</span> CBZ or CBR files you've downloaded, added like a book or dropped on the window.</p></div>
+      <div class="q"><h4>A download while you leave the page?</h4><p><span class="rec">Answered: it carries on,</span> and Read shows the book when it's ready. Closing Lamha stops it.</p></div>
     </div>
   </section>
 </div>
@@ -361,13 +394,18 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
       sortBy: "Sort", recent: "Recent", byTitle: "Title", byAuthor: "Author", newTag: "New", done: "Finished", more: "More options",
       open: "Open", markFinished: "Mark as finished", remove: "Remove from library", removed: "Removed from your library", undo: "Undo",
       added: "Added to your library", opens: "Opens “{0}” in its own window", reviewOpens: "Opens Review with this book's words",
-      emptyTitle: "Your books appear here", emptyBody: "Add an EPUB, a Word file or a text file, or drop one on this window.",
-      dropHere: "Drop it to add it to your library", dropTypes: "EPUB, DOCX or TXT", noMatch: "No books match “{0}”.",
+      emptyTitle: "Your books appear here", emptyBody: "Add an EPUB, a Word file, a text file or a comic, or drop one on this window.",
+      dropHere: "Drop it to add it to your library", dropTypes: "EPUB, DOCX, TXT, or a comic (CBZ, CBR)", noMatch: "No books match “{0}”.",
       freeBooks: "Free books to read", gutenberg: "More than 75,000 free books whose copyright has ended", standard: "Free classics, carefully edited, with good covers",
-      wordDoc: "Word document", textFile: "Text file", otherPage: "This design shows the Read page", account: "Opens Settings → Lamha"
+      wordDoc: "Word document", textFile: "Text file", otherPage: "This design shows the Read page", account: "Opens Settings → Lamha",
+      knowShort: "Know {0}%", tabMine: "Your books", tabFind: "Find books", findFree: "Find free books",
+      searchFree: "Search free books by title or author", popular: "Most read", results: "{0} books", noFree: "No free books match “{0}”.",
+      catAll: "All", catClassics: "Classics", catAdventure: "Adventure", catMystery: "Mystery", catScifi: "Science fiction", catRomance: "Romance", catChildren: "Children", catPoetry: "Poetry", catComics: "Comics",
+      comic: "Comic", download: "Download", downloading: "Downloading… {0}%", inLibrary: "In your library", openIt: "Open", downloaded: "“{0}” is in your library",
+      freeFoot: "Books and comics whose copyright has ended, from {0} and {1}, and public-domain comics. Lamha downloads them into your library, ready to read."
     },
     ar: {
-      lamha: "لمحة", version: "الإصدار 3.1.0", translate: "ترجمة", write: "كتابة", read: "قراءة", review: "مراجعة", history: "السجل", clipboard: "الحافظة", settings: "الإعدادات",
+      lamha: "لمحة", version: "الإصدار 3.1.0", translate: "ترجمة", write: "كتابة", read: "القارئ", review: "مراجعة", history: "السجل", clipboard: "الحافظة", settings: "الإعدادات",
       search: "ابحث في الإعدادات والكلمات والمنسوخات", back: "رجوع", nav: "التنقل",
       continueReading: "تابع القراءة", cont: "تابع", wordsFrom: "كلمات من هذا الكتاب", chapterOf: "الفصل {0} من {1}", timeLeft: "بقي نحو {0} س و{1} د",
       lastRead: "آخر قراءة اليوم", know: "تعرف {0}٪ من كلماته", knowHint: "حسب الكلمات في سجلك ومراجعتك",
@@ -375,10 +413,15 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
       sortBy: "ترتيب", recent: "الأحدث", byTitle: "العنوان", byAuthor: "المؤلف", newTag: "جديد", done: "انتهيت منه", more: "خيارات أخرى",
       open: "افتح", markFinished: "علّمه منتهيًا", remove: "أزله من المكتبة", removed: "أُزيل من مكتبتك", undo: "تراجع",
       added: "أُضيف إلى مكتبتك", opens: "يفتح «{0}» في نافذته الخاصة", reviewOpens: "تفتح المراجعة بكلمات هذا الكتاب",
-      emptyTitle: "ستظهر كتبك هنا", emptyBody: "أضف ملف EPUB أو ملف Word أو ملفًا نصيًا، أو أفلته على هذه النافذة.",
-      dropHere: "أفلته لإضافته إلى مكتبتك", dropTypes: "EPUB أو DOCX أو TXT", noMatch: "لا كتب تطابق «{0}».",
+      emptyTitle: "ستظهر كتبك هنا", emptyBody: "أضف ملف EPUB أو ملف Word أو ملفًا نصيًا أو قصة مصورة، أو أفلته على هذه النافذة.",
+      dropHere: "أفلته لإضافته إلى مكتبتك", dropTypes: "EPUB أو DOCX أو TXT، أو قصة مصورة (CBZ أو CBR)", noMatch: "لا كتب تطابق «{0}».",
       freeBooks: "كتب مجانية للقراءة", gutenberg: "أكثر من ٧٥ ألف كتاب مجاني انتهت حقوق نشرها", standard: "كتب كلاسيكية مجانية، محرّرة بعناية وبأغلفة جميلة",
-      wordDoc: "مستند Word", textFile: "ملف نصي", otherPage: "يعرض هذا التصميم صفحة القراءة", account: "تفتح الإعدادات ← لمحة"
+      wordDoc: "مستند Word", textFile: "ملف نصي", otherPage: "يعرض هذا التصميم صفحة القارئ", account: "تفتح الإعدادات ← لمحة",
+      knowShort: "تعرف {0}٪", tabMine: "كتبك", tabFind: "ابحث عن كتب", findFree: "ابحث عن كتب مجانية",
+      searchFree: "ابحث في الكتب المجانية بالعنوان أو المؤلف", popular: "الأكثر قراءة", results: "{0} كتاب", noFree: "لا كتب مجانية تطابق «{0}».",
+      catAll: "الكل", catClassics: "كلاسيكيات", catAdventure: "مغامرات", catMystery: "غموض", catScifi: "خيال علمي", catRomance: "رومانسية", catChildren: "للأطفال", catPoetry: "شعر", catComics: "قصص مصورة",
+      comic: "قصة مصورة", download: "نزّل", downloading: "يُنزَّل… {0}٪", inLibrary: "في مكتبتك", openIt: "افتح", downloaded: "«{0}» في مكتبتك الآن",
+      freeFoot: "كتب وقصص مصورة انتهت حقوق نشرها، من {0} و{1}، وقصص مصورة من الملك العام. تنزّلها لمحة إلى مكتبتك جاهزة للقراءة."
     }
   };
   // Lamha's books: public-domain classics, and one of the user's own files. last = days since read, or since added.
@@ -398,8 +441,28 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
     { title: "Dracula", author: "Bram Stoker", year: 1897, cv: 1 },
     { title: "Jane Eyre", author: "Charlotte Brontë", year: 1847, cv: 0 }
   ];
+  // The free libraries' books, most read first (public domain). src: pg = Project Gutenberg, se = Standard Ebooks, pd = public-domain comics.
+  const CATALOGUE = [
+    { title: "The Count of Monte Cristo", author: "Alexandre Dumas", year: 1844, cv: 5, src: "se", cats: ["classics", "adventure"], know: 89 },
+    { title: "Treasure Island", author: "Robert Louis Stevenson", year: 1883, cv: 3, src: "se", cats: ["adventure", "children"], know: 90 },
+    { title: "The Hound of the Baskervilles", author: "Arthur Conan Doyle", year: 1902, cv: 1, src: "pg", cats: ["mystery", "classics"], know: 92 },
+    { title: "Little Nemo in Slumberland", author: "Winsor McCay", year: 1905, cv: 4, src: "pd", fmt: "comic", cats: ["comics", "children"], know: 95 },
+    { title: "The War of the Worlds", author: "H. G. Wells", year: 1898, cv: 2, src: "pg", cats: ["scifi", "classics"], know: 91 },
+    { title: "Emma", author: "Jane Austen", year: 1815, cv: 0, src: "se", cats: ["romance", "classics"], know: 93 },
+    { title: "Peter Pan", author: "J. M. Barrie", year: 1911, cv: 7, src: "pg", cats: ["children", "adventure"], know: 94 },
+    { title: "The Picture of Dorian Gray", author: "Oscar Wilde", year: 1890, cv: 6, src: "se", cats: ["classics"], know: 90 },
+    { title: "Around the World in Eighty Days", author: "Jules Verne", year: 1872, cv: 3, src: "pg", cats: ["adventure", "classics"], know: 92 },
+    { title: "The Yellow Kid", author: "R. F. Outcault", year: 1896, cv: 6, src: "pd", fmt: "comic", cats: ["comics"], know: 93 },
+    { title: "Wuthering Heights", author: "Emily Brontë", year: 1847, cv: 2, src: "pg", cats: ["romance", "classics"], know: 87 },
+    { title: "The Murders in the Rue Morgue", author: "Edgar Allan Poe", year: 1841, cv: 5, src: "pg", cats: ["mystery"], know: 86 },
+    { title: "Leaves of Grass", author: "Walt Whitman", year: 1855, cv: 0, src: "se", cats: ["poetry", "classics"], know: 85 },
+    { title: "The Time Machine", author: "H. G. Wells", year: 1895, cv: 3, src: "pg", cats: ["scifi"], know: 93 }
+  ].map((b, i) => ({ ...b, cid: i + 1 }));
+  const CATS = ["all", "classics", "adventure", "mystery", "scifi", "romance", "children", "poetry", "comics"];
   let books = START.map(b => ({ ...b }));
   let lang = "en", filter = "all", sort = "recent", query = "", state = "books", nextId = 100, added = 0;
+  let tab = "mine", cat = "all", fquery = "";
+  const dl = {}; // cid → percent while downloading
 
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -450,9 +513,10 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
     if (b.fmt === "doc" || b.fmt === "txt") {
       return `<div class="cover ${b.fmt}" aria-hidden="true"><span class="fglyph">${b.fmt === "doc" ? "&#xE8A5;" : "&#xE8D2;"}</span><span class="lines"><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="dn" dir="ltr">${esc(b.file)}</span></div>`;
     }
-    return `<div class="cover" aria-hidden="true" style="--c: var(--cv${b.cv}); --ci: var(--cv${b.cv}-ink)"><span class="ca">${esc(b.author)}</span><span class="ct">${esc(b.title)}</span><span class="cy">${b.year}</span></div>`;
+    return `<div class="cover${b.fmt === "comic" ? " comic" : ""}" aria-hidden="true" style="--c: var(--cv${b.cv}); --ci: var(--cv${b.cv}-ink)"><span class="ca">${esc(b.author)}</span><span class="ct">${esc(b.title)}</span><span class="cy">${b.year}</span></div>`;
   }
-  const authorOf = b => b.fmt === "doc" ? t("wordDoc") : b.fmt === "txt" ? t("textFile") : b.fmt === "epub-file" ? "EPUB" : b.author;
+  const authorOf = b => b.fmt === "doc" ? t("wordDoc") : b.fmt === "txt" ? t("textFile") : b.fmt === "epub-file" ? "EPUB" : b.fmt === "comic-file" ? t("comic") : b.fmt === "comic" ? `${b.author} · ${t("comic")}` : b.author;
+  const pctSign = () => lang === "ar" ? "٪" : "%";
 
   /* ---------- the page ---------- */
   function visible() {
@@ -466,13 +530,16 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
     const st = b.pct === 100 ? `<span class="done"><span class="fi">&#xE73E;</span>${esc(t("done"))}</span>`
       : b.pct === 0 ? `<span class="new">${esc(t("newTag"))}</span>`
       : `<span class="pb"><i style="width:${b.pct}%"></i></span><span>${n(b.pct)}${lang === "ar" ? "٪" : "%"}</span>`;
-    return `<div class="tile${b.adding ? " adding" : ""}" data-id="${b.id}"><button class="cover-btn" data-open="${b.id}" aria-label="${esc(b.title)}">${cover(b)}<span class="tt" dir="ltr">${esc(b.title)}</span><span class="ta" ${b.fmt ? "" : 'dir="ltr"'}>${esc(authorOf(b))}</span><span class="st">${st}</span></button><button class="ib more" data-more="${b.id}" aria-label="${esc(t("more"))}" title="${esc(t("more"))}" aria-haspopup="menu" aria-expanded="false"><span class="fi">&#xE712;</span></button></div>`;
+    return `<div class="tile${b.adding ? " adding" : ""}" data-id="${b.id}"><button class="cover-btn" data-open="${b.id}" aria-label="${esc(b.title)}">${cover(b)}<span class="tt" dir="ltr">${esc(b.title)}</span><span class="ta" ${b.fmt ? "" : 'dir="ltr"'}>${esc(authorOf(b))}</span><span class="st">${st}</span><span class="kn" title="${esc(t("knowHint"))}"><span class="fi">&#xE9D2;</span>${esc(fmt(t("knowShort"), n(b.know)))}</span></button><button class="ib more" data-more="${b.id}" aria-label="${esc(t("more"))}" title="${esc(t("more"))}" aria-haspopup="menu" aria-expanded="false"><span class="fi">&#xE712;</span></button></div>`;
   }
   function renderPage() {
     const top = scroller.scrollTop;
-    let html = `<h1 class="title">${esc(t("read"))}</h1>`;
-    if (state === "empty" || !books.length) {
-      html += `<div class="empty"><span class="fi">&#xE82D;</span><b>${esc(t("emptyTitle"))}</b><p>${esc(t("emptyBody"))}</p><button class="btn accent" data-add><span class="fi">&#xE710;</span>${esc(t("addBook"))}</button></div>`;
+    let html = `<h1 class="title">${esc(t("read"))}</h1>` +
+      `<div class="tabs" role="tablist">${[["mine", "tabMine"], ["find", "tabFind"]].map(([k, s]) => `<button role="tab" aria-selected="${tab === k}" data-tab="${k}">${esc(t(s))}</button>`).join("")}</div>`;
+    if (tab === "find") {
+      html += findHTML();
+    } else if (state === "empty" || !books.length) {
+      html += `<div class="empty"><span class="fi">&#xE82D;</span><b>${esc(t("emptyTitle"))}</b><p>${esc(t("emptyBody"))}</p><div class="acts" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"><button class="btn accent" data-add><span class="fi">&#xE710;</span>${esc(t("addBook"))}</button><button class="btn" data-tab="find"><span class="fi">&#xE774;</span>${esc(t("findFree"))}</button></div></div>`;
     } else {
       const cur = [...books].filter(b => b.pct > 0 && b.pct < 100).sort((x, y) => x.last - y.last)[0];
       if (cur) {
@@ -489,9 +556,6 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
       const list = visible();
       html += `<div class="grid">${list.length ? list.map(tileHTML).join("") : `<p class="nomatch">${esc(fmt(t("noMatch"), query))}</p>`}</div>`;
     }
-    html += `<div class="free"><h2 class="group-h">${esc(t("freeBooks"))}</h2>` +
-      `<a class="link-card" href="https://www.gutenberg.org/" target="_blank" rel="noopener"><span class="fi">&#xE774;</span><span><span dir="ltr">Project Gutenberg</span><span class="ds">${esc(t("gutenberg"))}</span></span><span class="fi go">&#xE8A7;</span></a>` +
-      `<a class="link-card" href="https://standardebooks.org/" target="_blank" rel="noopener"><span class="fi">&#xE774;</span><span><span dir="ltr">Standard Ebooks</span><span class="ds">${esc(t("standard"))}</span></span><span class="fi go">&#xE8A7;</span></a></div>`;
     scroller.innerHTML = html;
     scroller.scrollTop = top;
     books.forEach(b => delete b.adding);
@@ -501,6 +565,55 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
       const grid = $(".grid", scroller), list = visible();
       grid.innerHTML = list.length ? list.map(tileHTML).join("") : `<p class="nomatch">${esc(fmt(t("noMatch"), query))}</p>`;
     });
+    const fq = $("#fq");
+    if (fq) fq.addEventListener("input", e => { fquery = e.target.value; $("#fres", scroller).innerHTML = findResults(); });
+  }
+
+  /* ---------- Find books: the free libraries' catalogue ---------- */
+  const catLabel = c => t("cat" + c[0].toUpperCase() + c.slice(1));
+  function findHTML() {
+    const link = (href, name) => `<a href="${href}" target="_blank" rel="noopener" dir="ltr">${name}</a>`;
+    return `<div class="find-head"><div class="field"><input id="fq" value="${esc(fquery)}" placeholder="${esc(t("searchFree"))}" aria-label="${esc(t("searchFree"))}" autocomplete="off"><span class="glass">&#xE721;</span></div></div>` +
+      `<div class="chips">${CATS.map(c => `<button aria-pressed="${cat === c}" data-cat="${c}">${esc(catLabel(c))}</button>`).join("")}</div>` +
+      `<div id="fres">${findResults()}</div>` +
+      `<p class="find-foot">${fmt(esc(t("freeFoot")), link("https://www.gutenberg.org/", "Project Gutenberg"), link("https://standardebooks.org/", "Standard Ebooks"))}</p>`;
+  }
+  function findResults() {
+    const q = fquery.trim().toLowerCase();
+    const list = CATALOGUE.filter(b => (cat === "all" || b.cats.includes(cat)) && (!q || (b.title + " " + b.author).toLowerCase().includes(q)));
+    const head = q || cat !== "all" ? fmt(t("results"), n(list.length)) : t("popular");
+    return `<div class="find-sub"><h2 class="group-h">${esc(head)}</h2></div>` +
+      `<div class="grid">${list.length ? list.map(ctileHTML).join("") : `<p class="nomatch">${esc(fmt(t("noFree"), fquery))}</p>`}</div>`;
+  }
+  function ctileHTML(b) {
+    const have = books.find(x => x.cid === b.cid);
+    const act = have ? `<button class="btn" data-open="${have.id}" title="${esc(t("inLibrary"))}"><span class="fi">&#xE73E;</span>${esc(t("openIt"))}</button>`
+      : dl[b.cid] !== undefined ? `<div class="dl" role="status"><span>${esc(fmt(t("downloading"), n(dl[b.cid])))}</span><span class="pb"><i style="width:${dl[b.cid]}%"></i></span></div>`
+      : `<button class="btn" data-dl="${b.cid}"><span class="fi">&#xE896;</span>${esc(t("download"))}</button>`;
+    return `<div class="ctile" data-cid="${b.cid}">${cover(b)}<span class="tt" dir="ltr">${esc(b.title)}</span><span class="ta" ${b.fmt === "comic" ? "" : 'dir="ltr"'}>${esc(authorOf(b))}</span>${act}</div>`;
+  }
+  function redrawCtile(cid) {
+    const el = $(`.ctile[data-cid="${cid}"]`, scroller);
+    if (el) el.outerHTML = ctileHTML(CATALOGUE.find(b => b.cid === cid));
+  }
+  function download(cid) {
+    const b = CATALOGUE.find(x => x.cid === cid);
+    dl[cid] = 0;
+    redrawCtile(cid);
+    const timer = setInterval(() => {
+      dl[cid] = Math.min(100, dl[cid] + 9 + Math.round(Math.random() * 10));
+      if (dl[cid] < 100) {
+        const el = $(`.ctile[data-cid="${cid}"] .dl`, scroller);
+        if (el) { el.firstChild.textContent = fmt(t("downloading"), n(dl[cid])); $("i", el).style.width = dl[cid] + "%"; }
+        return;
+      }
+      clearInterval(timer);
+      delete dl[cid];
+      books.push({ ...b, id: nextId++, pct: 0, last: -1, adding: true });
+      if (state === "empty") { state = "books"; setSeg("state", "books"); }
+      redrawCtile(cid);
+      toast(fmt(t("downloaded"), b.title));
+    }, 160);
   }
 
   /* ---------- actions ---------- */
@@ -566,6 +679,12 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
       });
       return;
     }
+    const d = e.target.closest("[data-dl]");
+    if (d) { download(+d.dataset.dl); return; }
+    const tb = e.target.closest("[data-tab]");
+    if (tb) { tab = tb.dataset.tab; setSeg("tab", tab); renderPage(); scroller.scrollTop = 0; return; }
+    const c = e.target.closest("[data-cat]");
+    if (c) { cat = c.dataset.cat; renderPage(); return; }
     if (e.target.closest("[data-add]")) { addBook(); return; }
     if (e.target.closest("[data-words]")) { toast(t("reviewOpens"), "&#xE7C4;"); return; }
     const f = e.target.closest("[data-filter]");
@@ -598,11 +717,13 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
     if (!f) return;
     const ext = (f.name.split(".").pop() || "").toLowerCase();
     if (ext === "epub") addBook(f.name, "epub-file");
+    else if (ext === "cbz" || ext === "cbr") addBook(f.name, "comic-file");
     else addBook(f.name, ext === "docx" || ext === "doc" ? "doc" : "txt");
   });
-  // An EPUB dropped here has no cover in this design: give it one made from its name.
+  // An EPUB or a comic dropped here has no cover in this design: give it one made from its name.
   const _cover = cover;
-  cover = b => b.fmt === "epub-file" ? _cover({ ...b, fmt: undefined, author: "EPUB", year: "", cv: (b.title.length % 8) }) : _cover(b);
+  cover = b => b.fmt === "epub-file" ? _cover({ ...b, fmt: undefined, author: "EPUB", year: "", cv: (b.title.length % 8) })
+    : b.fmt === "comic-file" ? _cover({ ...b, fmt: "comic", author: b.file.split(".").pop().toUpperCase(), year: "", cv: (b.title.length % 8) }) : _cover(b);
 
   /* ---------- language, theme, state, width ---------- */
   function applyLang() {
@@ -621,8 +742,10 @@ section.chapter { padding-block: 56px 8px; border-top: 1px solid var(--rule); ma
     if (ctl === "lang") { lang = v; applyLang(); }
     else if (ctl === "theme") document.documentElement.dataset.theme = v;
     else if (ctl === "width") { closeMenus(); win.classList.remove("pane-open"); win.classList.toggle("forced-narrow", v === "narrow"); }
+    else if (ctl === "tab") { tab = v; renderPage(); scroller.scrollTop = 0; }
     else if (ctl === "state") {
       state = v;
+      if (tab !== "mine") { tab = "mine"; setSeg("tab", "mine"); }
       if (v === "empty") books = [];
       else if (!books.length) books = START.map(x => ({ ...x }));
       win.classList.toggle("dropping", v === "drop");
