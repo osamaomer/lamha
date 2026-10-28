@@ -50,7 +50,7 @@ public sealed class LibraryTests : IDisposable
         Assert.Equal(book.Authors, kept.Authors);
 
         // Lamha's copy opens without the original, and the cover is read from the folder, not the book.
-        using (var epub = _library.OpenEpub(book))
+        using (var epub = _library.Open(book))
         {
             Assert.Equal(3, epub.Parts.Count);
         }

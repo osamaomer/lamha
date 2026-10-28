@@ -9,7 +9,7 @@ namespace Lamha.Core.Reading;
 /// XHTML, and their pictures. Reads EPUB 2 and 3. Books with DRM don't open (<see cref="ErrorCodes.BookLocked"/>); fonts
 /// hidden by the EPUB's own font obfuscation are fine, since the page doesn't use the book's fonts.
 /// </summary>
-public sealed class EpubBook : IDisposable
+public sealed class EpubBook : IFlowingBook
 {
     /// <summary>The most a part or the package file may unpack to: a novel's chapter is well under 1 MB.</summary>
     internal const long MaxTextBytes = 16 * 1024 * 1024;

@@ -1,4 +1,3 @@
-using System.Text;
 using Lamha.Core.Abstractions;
 
 namespace Lamha.Core.Reading;
@@ -18,15 +17,8 @@ public sealed class Library(IBookStore store, IBookFiles files, TimeProvider clo
     /// <summary>The highlight colours, as the reading page names them.</summary>
     public static readonly IReadOnlyList<string> Colors = ["yellow", "green", "blue", "pink"];
 
-    // The formats the reader opens so far; DOCX and the comics come with their stages.
-    private static readonly Dictionary<string, string> Formats = new(StringComparer.OrdinalIgnoreCase)
-    {
-        [".epub"] = "epub",
-        [".txt"] = "txt",
-    };
-
-    /// <summary>Whether a file of this name is one the library takes.</summary>
-    public static bool CanAdd(string fileName) => Formats.ContainsKey(Path.GetExtension(fileName));
+    /// <summary>Whether a file of this name is one the library takes (the comics come with their stage).</summary>
+    public static bool CanAdd(string fileName) => FlowingBook.Extensions.ContainsKey(Path.GetExtension(fileName));
 
     /// <summary>
     /// Adds a book: copies it into the books folder, reads its details and cover, and keeps it. Run it off the UI thread:
@@ -40,7 +32,7 @@ public sealed class Library(IBookStore store, IBookFiles files, TimeProvider clo
     /// <see cref="ErrorCodes.BookBad"/> or <see cref="ErrorCodes.BookLocked"/> from the book itself.</exception>
     public async Task<LibraryAdd> AddAsync(Stream file, string fileName, string source = "file", CancellationToken cancel = default)
     {
-        if (!Formats.TryGetValue(Path.GetExtension(fileName), out var format))
+        if (!FlowingBook.Extensions.TryGetValue(Path.GetExtension(fileName), out var format))
         {
             throw new LamhaException(ErrorCodes.BookUnsupported);
         }
@@ -63,21 +55,13 @@ public sealed class Library(IBookStore store, IBookFiles files, TimeProvider clo
         var cover = "";
         try
         {
-            var title = Path.GetFileNameWithoutExtension(fileName);
             BookInfo info;
             int words;
-            if (format == "epub")
+            using (var book = FlowingBook.Open(format, files.Open(received.TempFile), Path.GetFileNameWithoutExtension(fileName)))
             {
-                using var book = EpubBook.Open(files.Open(received.TempFile), title);
                 info = book.Info;
                 words = book.Parts.Sum(p => book.ReadPart(p).Sum(b => CountWords(b.Text)));
                 cover = SaveCover(book, received.Hash);
-            }
-            else
-            {
-                using var reader = new StreamReader(files.Open(received.TempFile), Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-                info = new BookInfo(title, [], "", null);
-                words = CountWords(await reader.ReadToEndAsync(cancel).ConfigureAwait(false));
             }
 
             files.Keep(received, name);
@@ -103,8 +87,8 @@ public sealed class Library(IBookStore store, IBookFiles files, TimeProvider clo
 
     public BookRecord? Get(string id) => store.Get(id) is { Removed: null } book ? book : null;
 
-    /// <summary>Opens an EPUB of the library to read. Dispose it when the book closes.</summary>
-    public EpubBook OpenEpub(BookRecord book) => EpubBook.Open(files.Open(book.File), book.Title);
+    /// <summary>Opens a book of the library to read. Dispose it when the book closes.</summary>
+    public IFlowingBook Open(BookRecord book) => FlowingBook.Open(book.Format, files.Open(book.File), book.Title);
 
     /// <summary>Opens a book's cover picture, or null when it has none.</summary>
     public Stream? OpenCover(BookRecord book) => book.Cover.Length > 0 ? files.Open(book.Cover) : null;
@@ -199,7 +183,7 @@ public sealed class Library(IBookStore store, IBookFiles files, TimeProvider clo
     private static string CheckColor(string color) =>
         Colors.Contains(color) ? color : throw new ArgumentOutOfRangeException(nameof(color), "Not one of the highlight colours.");
 
-    private string SaveCover(EpubBook book, string hash)
+    private string SaveCover(IFlowingBook book, string hash)
     {
         if (book.Info.CoverPath is not { } path || book.OpenResource(path) is not { } picture)
         {
