@@ -23,6 +23,9 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
     private bool _shown;
     private string? _sample;
 
+    /// <summary>The window is being made (<see cref="Show"/> isn't answered again meanwhile).</summary>
+    private bool _making;
+
     /// <summary><c>--theme</c>: the window's theme for this run instead of the setting.</summary>
     public string? Theme { get; init; }
 
@@ -62,6 +65,11 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
     {
         try
         {
+            if (_making)
+            {
+                return; // asked again while it's being made: making a window lets Windows' messages through (a second click)
+            }
+
             if (_window is { } open && _shown)
             {
                 open.Go(page, section);
@@ -81,60 +89,74 @@ public sealed partial class MainWindowService(Brain brain, IdleMemory idle, Shor
                 return;
             }
 
-            var started = Environment.TickCount64;
-            var window = _window = new MainWindow(new MainViewModel(), brain, shortcuts, clipboard);
-            window.UseTheme(Theme ?? brain.Settings.Current.Theme);
-            window.Startup = Startup;
-            window.Updates = Updates;
-            window.DeleteData = DeleteData;
-            window.Mini = Mini;
-            window.Go(page, section);
-            window.StartBackHere(); // opened on a page, it has nothing behind it (the Translate page it was built on)
-            // Settings → Appearance applies to the open window at once (the card reads it each time it opens).
-            void Apply(object? sender, LamhaSettings settings) => window.DispatcherQueue.TryEnqueue(() =>
+            _making = true;
+            try
             {
-                window.UseTheme(Theme ?? settings.Theme);
-                window.UseMica(settings.WindowMica);
-                Animations.Refresh(settings);
-            });
-            brain.Settings.Changed += Apply;
-            void OutOfSight()
-            {
-                if (_window == window && _shown)
-                {
-                    _shown = false;
-                    idle.WindowClosed();
-                }
+                Make(page, section);
             }
-
-            window.Hidden += OutOfSight;
-            window.Closed += (_, _) =>
+            finally
             {
-                brain.Settings.Changed -= Apply;
-                window.Hidden -= OutOfSight;
-                OutOfSight();
-                if (_window == window)
-                {
-                    _window = null;
-                }
-            };
-            _shown = true;
-            idle.WindowOpened();
-            var cursor = Screens.Cursor;
-            window.ShowCentred(Screens.WorkAreaAt(cursor), Screens.ScaleAt(cursor));
-            if (_sample is { Length: > 0 } sample)
-            {
-                _sample = null;
-                window.TypeSample(sample);
+                _making = false;
             }
-
-            AppLog.Info($"main window shown in {Environment.TickCount64 - started} ms ({page})");
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             // Called from the tray and a second start: an exception there would end Lamha without a word in the log.
             AppLog.Error("main window", ex);
         }
+    }
+
+    /// <summary>The window made, on the page asked for, and shown in the middle of the screen with the mouse.</summary>
+    private void Make(string page, string section)
+    {
+        var started = Environment.TickCount64;
+        var window = _window = new MainWindow(new MainViewModel(), brain, shortcuts, clipboard);
+        window.UseTheme(Theme ?? brain.Settings.Current.Theme);
+        window.Startup = Startup;
+        window.Updates = Updates;
+        window.DeleteData = DeleteData;
+        window.Mini = Mini;
+        window.Go(page, section);
+        window.StartBackHere(); // opened on a page, it has nothing behind it (the Translate page it was built on)
+        // Settings → Appearance applies to the open window at once (the card reads it each time it opens).
+        void Apply(object? sender, LamhaSettings settings) => window.DispatcherQueue.TryEnqueue(() =>
+        {
+            window.UseTheme(Theme ?? settings.Theme);
+            window.UseMica(settings.WindowMica);
+            Animations.Refresh(settings);
+        });
+        brain.Settings.Changed += Apply;
+        void OutOfSight()
+        {
+            if (_window == window && _shown)
+            {
+                _shown = false;
+                idle.WindowClosed();
+            }
+        }
+
+        window.Hidden += OutOfSight;
+        window.Closed += (_, _) =>
+        {
+            brain.Settings.Changed -= Apply;
+            window.Hidden -= OutOfSight;
+            OutOfSight();
+            if (_window == window)
+            {
+                _window = null;
+            }
+        };
+        _shown = true;
+        idle.WindowOpened();
+        var cursor = Screens.Cursor;
+        window.ShowCentred(Screens.WorkAreaAt(cursor), Screens.ScaleAt(cursor));
+        if (_sample is { Length: > 0 } sample)
+        {
+            _sample = null;
+            window.TypeSample(sample);
+        }
+
+        AppLog.Info($"main window shown in {Environment.TickCount64 - started} ms ({page})");
     }
 
     /// <summary>The Translate page with <paramref name="text"/> looked up in its box (the mini translator's Back to Lamha).</summary>

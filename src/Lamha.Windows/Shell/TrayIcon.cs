@@ -218,7 +218,8 @@ public sealed unsafe class TrayIcon : IDisposable
     {
         switch (message)
         {
-            case PInvoke.WM_LBUTTONUP:
+            // Only these: with NOTIFYICON_VERSION_4 a click sends WM_LBUTTONUP and then NIN_SELECT, and answering both
+            // opened the main window twice.
             case NinSelect:
             case NinKeySelect:
                 Invoked?.Invoke();
